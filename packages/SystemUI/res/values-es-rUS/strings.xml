@@ -79,7 +79,7 @@
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Dos barras de batería"</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Tres barras de batería"</string>
     <string name="accessibility_battery_full" msgid="8909122401720158582">"Batería completa"</string>
-    <string name="accessibility_no_phone" msgid="4894708937052611281">"No hay teléfono."</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"Sin teléfono"</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Una barra de teléfono"</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Dos barras de teléfono"</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Tres barras de teléfono"</string>
@@ -89,36 +89,38 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dos barras de datos"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tres barras de datos"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Señal de datos completa"</string>
-    <string name="accessibility_no_wifi" msgid="4017628918351949575">"No hay WiFi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Una barra de WiFi"</string>
-    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Dos barras de WiFi"</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Tres barras de WiFi"</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Señal de WiFi completa"</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"No hay Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Una barra de Wi-Fi"</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Dos barras de Wi-Fi"</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Tres barras de Wi-Fi"</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Señal de Wi-Fi completa"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hay tarjeta SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Anclaje a red Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Batería <xliff:g id="NUMBER">%d</xliff:g> por ciento"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conexión mediante Bluetooth"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo de avión"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Botón de configuración"</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Botón de notificaciones"</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Eliminar notificación"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS habilitado"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Adquisición de GPS"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter habilitado"</string>
-    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Timbre vibrar"</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Timbre silencio"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Se inhabilitaron los datos 2G/3G."</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Se inhabilitaron los datos 4G."</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Se inhabilitaron los datos móviles."</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Se inhabilitaron los datos."</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Se alcanzó el límite de datos que se permiten usar."\n\n"El operador puede cobrarte por el uso adicional de datos."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Volver a habilitar los datos"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Timbre en vibración"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Timbre en silencio"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos de 2G-3G inhabilitados"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos de 4G inhabilitados"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Se inhabilitaron los datos móviles"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Datos inhabilitados"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Se ha alcanzado el límite de uso de datos especificado."\n\n"El uso de datos adicionales puede conllevar cargos para el proveedor."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Volver a habilitar datos"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sin conexión a Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>

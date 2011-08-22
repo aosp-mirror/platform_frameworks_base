@@ -113,8 +113,8 @@
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS activat."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"S\'està adquirint el GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Teletip activat."</string>
-    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibració del so de trucada."</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"So de trucada en silenci."</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Mode vibració."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Mode silenci."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dades 2G-3G desactivades"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dades 4G desactivades"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dades mòbils desactivades"</string>

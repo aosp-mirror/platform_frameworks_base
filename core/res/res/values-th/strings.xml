@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"การตรวจสอบสิทธิ์สำเร็จแล้ว"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"การตรวจสอบสิทธิ์ทางพร็อกซีเซิร์ฟเวอร์ไม่สำเร็จ"</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"เชื่อมต่อไปยังเซิร์ฟเวอร์ไม่สำเร็จ"</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"เซิร์ฟเวอร์สื่อสารล้มเหลว โปรดลองใหม่อีกครั้งในภายหลัง"</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"เซิร์ฟเวอร์สื่อสารล้มเหลว โปรดลองใหม่อีกครั้งในภายหลัง"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"หมดเวลาเชื่อมต่อกับเซิร์ฟเวอร์"</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"หน้าเว็บมีการเปลี่ยนเส้นทางเซิร์ฟเวอร์มากเกินไป"</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"โปรโตคอลไม่ได้รับการสนับสนุน"</string>
@@ -327,19 +327,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"เขียนข้อมูลที่อยู่ติดต่อ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"อนุญาตให้แอปพลิเคชันแก้ไขข้อมูลรายชื่อติดต่อ (ที่อยู่) ที่จัดเก็บอยู่บนแท็บเล็ตของคุณ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้ลบหรือแก้ไขข้อมูลรายชื่อติดต่อของคุณได้"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"อนุญาตให้แอปพลิเคชันแก้ไขข้อมูลที่อยู่ติดต่อ (ที่อยู่) ที่จัดเก็บบนโทรศัพท์ของคุณ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้ลบหรือแก้ไขข้อมูลที่อยู่ติดต่อของคุณได้"</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"อ่านกิจกรรมบนปฏิทิน"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บอยู่บนแท็บเล็ตของคุณ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้ส่งกิจกรรมในปฏิทินของคุณให้แก่ผู้อื่นได้"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บอยู่บนแท็บเล็ตของคุณ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้ส่งกิจกรรมในปฏิทินของคุณให้แก่ผู้อื่นได้"</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"เพิ่มหรือแก้ไขกิจกรรมบนปฏิทินและส่งอีเมลไปที่แขก"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"อนุญาตให้แอปพลิเคชันเพิ่มหรือเปลี่ยนกิจกรรมบนปฏิทิน ซึ่งอาจมีการส่งอีเมลไปหาแขก แอปพลิเคชันที่เป็นอันตรายสามารถใช้วิธีนี้เพื่อลบหรือแก้ไขกิจกรรมบนปฏิทินหรือส่งอีเมลไปหาแขกได้"</string>
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"อ่านข้อมูลโปรไฟล์"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลโปรไฟล์ส่วนบุคคลของคุณทั้งหมด ซึ่งอาจทำให้แอปพลิเคชันที่เป็นอันตรายสามารถระบุตัวคุณและส่งข้อมูลส่วนบุคคลของคุณให้กับบุคคลอื่นได้"</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"เขียนข้อมูลโปรไฟล์"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"อนุญาตให้แอปพลิเคชันแก้ไขข้อมูลโปรไฟล์ส่วนบุคคลของคุณ ซึ่งอาจทำให้แอปพลิเคชันที่เป็นอันตรายสามารถลบหรือแก้ไขข้อมูลโปรไฟล์ของคุณได้"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"อ่านกิจกรรมบนปฏิทินรวมถึงข้อมูลที่เป็นความลับ"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมทั้งหมดบนปฏิทินที่จัดเก็บไว้ในแท็บเล็ตของคุณ รวมถึงกิจกรรมของเพื่อนและเพื่อนร่วมงานของคุณด้วย แอปพลิเคชันที่เป็นอันตรายซึ่งได้รับอนุญาตจะสามารถดึงข้อมูลส่วนบุคคลจากกิจกรรมบนปฏิทินเหล่านี้ได้โดยที่เจ้าของไม่ทราบ"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมทั้งหมดบนปฏิทินที่จัดเก็บไว้ในโทรศัพท์ของคุณ รวมถึงกิจกรรมของเพื่อนและเพื่อนร่วมงานของคุณด้วย แอปพลิเคชันที่เป็นอันตรายซึ่งได้รับอนุญาตจะสามารถดึงข้อมูลส่วนบุคคลจากกิจกรรมบนปฏิทินเหล่านี้ได้โดยที่เจ้าของไม่ทราบ"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"เพิ่มหรือแก้ไขกิจกรรมบนปฏิทินและส่งอีเมลให้ผู้เข้าร่วมโดยที่เจ้าของไม่ทราบ"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"อนุญาตให้แอปพลิเคชันส่งคำเชิญร่วมกิจกรรมในฐานะเจ้าของปฏิทิน และสามารถเพิ่ม ลบ และเปลี่ยนแปลงกิจกรรมที่คุณสามารถแก้ไขบนอุปกรณ์ของคุณได้ รวมถึงของเพื่อนหรือเพื่อนร่วมงานของคุณด้วย แอปพลิเคชันที่เป็นอันตรายซึ่งได้รับอนุญาตจะสามารถส่งอีเมลสแปมที่ดูเหมือนมาจากเจ้าของปฏิทิน แก้ไขกิจกรรมโดยที่เจ้าของไม่ทราบ หรือเพิ่มกิจกรรมที่ไม่มีอยู่จริงได้"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"จำลองที่มาของตำแหน่งเพื่อทดสอบ"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"สร้างที่มาของตำแหน่งจำลองเพื่อทดสอบ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้เขียนทับตำแหน่งและ/หรือสถานะที่ที่ส่งคืนมาจากที่มาของตำแหน่งจริง เช่น GPS หรือผู้ให้บริการเครือข่าย"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้อนุญาตให้ส่งข้อมูลตำแหน่งไปที่เว็บไซต์อื่นได้โดยพลการ"</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"คุณต้องการให้เบราว์เซอร์จำรหัสผ่านนี้หรือไม่"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ยังไม่ใช้งานขณะนี้"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"จำไว้"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ลบ"</string>
     <string name="search_go" msgid="8298016669822141719">"ค้นหา"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 เดือนที่ผ่านมา"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"ก่อน 1 เดือนที่แล้ว"</string>
   <plurals name="num_seconds_ago">
@@ -871,20 +885,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"เลือกแอปพลิเคชันสำหรับอุปกรณ์ USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"ไม่มีแอปพลิเคชันใดทำงานนี้ได้"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"บังคับปิด"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"กิจกรรม <xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> ไม่ตอบสนอง คุณต้องการปิดหรือไม่"</string>
+    <string name="anr_process" msgid="306819947562555821">"แอปพลิเคชัน <xliff:g id="PROCESS">%1$s</xliff:g> ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
+    <string name="force_close" msgid="8346072094521265605">"ตกลง"</string>
     <string name="report" msgid="4060218260984795706">"รายงาน"</string>
     <string name="wait" msgid="7147118217226317732">"รอ"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"เปลี่ยนเส้นทางแอปพลิเคชัน"</string>
@@ -913,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"ระดับเสียงปลุก"</string>
     <string name="volume_notification" msgid="2422265656744276715">"ระดับเสียงของการแจ้งเตือน"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"ระดับเสียง"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ระดับเสียงบลูทูธ แตะเพื่อเปลี่ยนเป็นปิดเสียง"</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"ระดับเสียงเรียกเข้า แตะเพื่อเปลี่ยนเป็นปิดเสียง"</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"ระดับเสียงขณะโทร แตะเพื่อเปลี่ยนเป็นปิดเสียง"</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"ระดับเสียงสื่อ แตะเพื่อเปลี่ยนเป็นปิดเสียง"</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"ระดับเสียงการแจ้งเตือน แตะเพื่อเปลี่ยนเป็นปิดเสียง"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"เสียงเรียกเข้าเริ่มต้น"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"เสียงเรียกเข้าเริ่มต้น (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"ปิดเสียง"</string>
@@ -940,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"มีสัญญาณการเชื่อมต่ออินเทอร์เน็ตที่ไม่ดี"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"เริ่มการทำงาน Wi-Fi Direct ซึ่งจะเป็นการปิดการทำงาน Wi-Fi ไคลเอ็นต์/ฮอตสปอต"</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"ไม่สามารถเริ่ม Wi-Fi Direct ได้"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"ไม่สามารถเริ่ม Wi-Fi Direct ได้"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"คำขอการตั้งค่าการเชื่อมต่อ Wi-Fi Direct จาก <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> คลิก \"ตกลง\" เพื่อยอมรับ"</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"คำขอการตั้งค่าการเชื่อมต่อ Wi-Fi Direct จาก <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> ป้อน PIN เพื่อดำเนินการต่อ"</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"ต้องป้อน PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> บนอุปกรณ์เพียร์ <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> เพื่อให้การตั้งค่าการเชื่อมต่อดำเนินการต่อ"</string>
@@ -981,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"พบปัญหาในการปิดที่เก็บข้อมูล USB ตรวจสอบให้แน่ใจว่าคุณได้ยกเลิกการต่อเชื่อมโฮสต์ USB แล้ว จากนั้นลองใหม่อีกครั้ง"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"เปิดที่เก็บข้อมูล USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"หากคุณเปิดที่จัดเก็บข้อมูล USB แอปพลิเคชันบางอย่างที่คุณใช้อยู่จะหยุดและอาจใช้งานไม่ได้จนกว่าคุณจะปิดที่จัดเก็บข้อมูล USB"</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"การปฏิบัติงานของ USB ล้มเหลว"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"การปฏิบัติงานของ USB ล้มเหลว"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ตกลง"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"เชื่อมต่อเป็นอุปกรณ์สื่อ"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"เชื่อมต่อเป็นกล้องถ่ายรูป"</string>
@@ -1081,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"กำลังยกเลิกการต่อเชื่อมการ์ด SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"กำลังลบที่เก็บข้อมูล USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"กำลังลบการ์ด SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"ลบที่เก็บข้อมูล USB ไม่สำเร็จ"</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"ลบการ์ด SD ไม่สำเร็จ"</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"ลบที่เก็บข้อมูล USB ไม่สำเร็จ"</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"ลบที่เก็บข้อมูล USB ไม่สำเร็จ"</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"การ์ด SD ถูกนำออกก่อนที่จะยกเลิกการต่อเชื่อม"</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"กำลังตรวจสอบที่เก็บข้อมูล USB อยู่ในขณะนี้"</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"กำลังตรวจสอบการ์ด SD อยู่ในขณะนี้"</string>
@@ -1126,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"ปิดใช้งานข้อมูล 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ปิดใช้งานข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ปิดใช้งานข้อมูลมือถือ"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"แตะเพื่อเปิดใช้งาน"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"แตะเพื่อเปิดใช้งาน"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"เกินจำนวนสูงสุดของข้อมูลมือถือ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"ใบรับรองความปลอดภัย"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ใบรับรองนี้ใช้งานได้"</string>
     <string name="issued_to" msgid="454239480274921032">"ออกให้แก่:"</string>
@@ -1149,4 +1158,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"เลือกกิจกรรม"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"แบ่งปันกับ..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"ล็อกอุปกรณ์อยู่"</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

@@ -22,10 +22,10 @@
     <string name="legacy_title" msgid="192936250066580964">"O VPN está conectado"</string>
     <string name="configure" msgid="4905518375574791375">"Configurar"</string>
     <string name="disconnect" msgid="971412338304200056">"Desconectar"</string>
-    <string name="session" msgid="6470628549473641030">"Sessão"</string>
+    <string name="session" msgid="6470628549473641030">"Sessão:"</string>
     <string name="duration" msgid="3584782459928719435">"Duração:"</string>
     <string name="data_transmitted" msgid="8239988320199846094">"Dados transmitidos:"</string>
-    <string name="data_received" msgid="7431729884377019935">"Dados recebidos"</string>
+    <string name="data_received" msgid="7431729884377019935">"Dados recebidos:"</string>
     <string name="blank_value" msgid="6278484582661984635">"-"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bytes/<xliff:g id="NUMBER_1">%2$s</xliff:g> pacotes"</string>
 </resources>

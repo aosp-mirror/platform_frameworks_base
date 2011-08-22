@@ -107,13 +107,13 @@
     <string name="fcComplete" msgid="3118848230966886575">"Kod ciri selesai."</string>
     <string name="fcError" msgid="3327560126588500777">"Masalah sambungan atau kod ciri tidak sah."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Halaman Web mengandungi ralat."</string>
+    <string name="httpError" msgid="6603022914760066338">"Ralat rangkaian berlaku."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL tidak ditemui."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Skema pengesahan tapak tidak disokong."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Pengesahan tidak berjaya."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Pengesahan melalui pelayan proksi tidak berjaya."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Sambungan ke pelayan tidak berjaya."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"Pelayan gagal berkomunikasi. Cuba sebentar lagi."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Pelayan gagal berkomunikasi. Cuba sebentar lagi."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Sambungan ke pelayan tamat masa."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Halaman ini mengandungi terlalu banyak pengubahhalaan pelayan."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokol tidak disokong."</string>
@@ -195,10 +195,8 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Membenarkan aplikasi menerima dan memproses mesej siaran kecemasan. Kebenaran ini hanya tersedia kepada aplikasi sistem."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"hantar mesej SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Membolehkan aplikasi menghantar mesej SMS. Aplikasi berniat jahat boleh merugikan wang anda dengan menghantar mesej tanpa pengesahan anda."</string>
-    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
-    <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
-    <skip />
+    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"hantar mesej SMS tanpa pengesahan"</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"Membolehkan aplikasi menghantar mesej SMS. Aplikasi berniat jahat boleh merugikan wang anda dengan menghantar mesej tanpa pengesahan anda."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"baca SMS atau MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Membenarkan aplikasi membaca mesej SMS yang disimpan pada tablet atau kad SIM anda. Aplikasi berniat jahat boleh membaca mesej sulit anda."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Membenarkan aplikasi membaca mesej SMS yang disimpan pada telefon atau kad SIM anda. Aplikasi berniat jahat boleh membaca mesej sulit anda."</string>
@@ -268,10 +266,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kaedah input itu. Tidak sekali-kali diperlukan untuk aplikasi biasa."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"terikat kepada perkhidmatan teks"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Membenarkan pemegang mengikat kepada antara muka tahap tinggi perkhidmatan teks(mis. PerkhidmatanPenyemakEjaan). Tidak seharusnya diperlukan untuk aplikasi biasa."</string>
-    <!-- no translation found for permlab_bindVpnService (4708596021161473255) -->
-    <skip />
-    <!-- no translation found for permdesc_bindVpnService (6011554199384584151) -->
-    <skip />
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"terikat kepada perkhidmatan VPN"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan Vpn. Tidak sekali-kali diperlukan untuk aplikasi biasa."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"terikat pada kertas dinding"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kertas dinding. Tidak sekali-kali diperlukan untuk aplikasi biasa."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"terikat kepada perkhidmatan widget"</string>
@@ -329,19 +325,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"tulis data kenalan"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Membenarkan aplikasi mengubah suai data (alamat) kenalan yang disimpan pada tablet anda. Aplikasi yang berniat jahat boleh menggunakannya untuk memadamkan atau mengubah suai data kenalan anda."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Membenarkan aplikasi mengubah suai data (alamat) kenalan yang disimpan pada telefon anda. Aplikasi yang berniat jahat boleh menggunakannya untuk memadamkan atau mengubah suai data kenalan anda."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalendar"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Membenarkan aplikasi membaca semua acara kalendar yang disimpan pada tablet anda. Aplikasi berniat jahat boleh menggunakannya untuk menghantar acara kalendar anda kepada orang lain."</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Membenarkan aplikasi membaca semua acara kalendar yang disimpan pada tablet anda. Aplikasi berniat jahat boleh menggunakannya untuk menghantar acara kalendar anda kepada orang lain."</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"tambah atau ubah suai acara kalendar dan hantar e-mel kepada tetamu"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Membenarkan aplikasi untuk menambah atau menukar acara pada kalendar anda, yang mungkin menghantar e-mel kepada tetamu. Aplikasi berniat jahat boleh menggunakannya untuk memadamkan atau mengubah suai acara kalendar anda atau menghantar e-mel kepada tetamu."</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"baca data profil anda"</string>
+    <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Membenarkan aplikasi untuk membaca maklumat profil peribadi yang disimpan pada peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna aplikasi itu boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"tulis ke data profil anda"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Membenarkan aplikasi untuk menukar atau menambah maklumat profil peribadi yang disimpan pada peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna aplikasi lain boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalendar serta maklumat sulit"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Membenarkan aplikasi membaca semua acara kalendar yang disimpan pada tablet anda, termasuk acara rakan atau rakan sekerja. Aplikasi berniat jahat dengan kebenaran ini boleh menyari maklumat peribadi dari kalendar ini tanpa pengetahuan pemiliknya."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Membenarkan aplikasi untuk membaca semua acara kalendar yang disimpan pada telefon anda, termasuk acara rakan atau rakan sekerja. Aplikasi berniat jahat dengan kebenaran ini boleh menyari maklumat peribadi dari kalendar ini tanpa pengetahuan pemiliknya."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"tambah atau ubah suai acara kalendar dan hantar e-mel kepada tetamu tanpa pengetahuan pemilik"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Membenarkan aplikasi menghantar jemputan acara sebagai pemilik kalendar dan menambah, mengalih keluar serta menukar acara yang anda boleh ubah suai pada peranti anda, termasuk acara rakan atau rakan sekerja anda. Aplikasi berniat jahat dengan kebenaran ini boleh menghantar e-mel spam yang kelihatan seperti dihantar oleh pemilik kalendar, mengubah suai acara tanpa pengetahuan pemilik atau menambah acara palsu."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"gunakan sumber lokasi olok-olok untuk pengujian"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Membuat sumber lokasi olok-olok untuk pengujian. Aplikasi berniat jahat boleh menggunakannya untuk menolak lokasi dan/atau status yang dikembalikan oleh sumber lokasi sebenar seperti pembekal GPS atau Rangkaian."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah tambahan pembekal lokasi"</string>
@@ -451,8 +443,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Membenarkan aplikasi melihat keadaan semua rangkaian."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"akses penuh Internet"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Membenarkan aplikasi membuat soket rangkaian."</string>
-    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"tulis tetapan Nama Titik Capaian"</string>
-    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Membenarkan aplikasi mengubah suai tetapan APN, seperti Proksi dan Port mana-mana APN."</string>
+    <string name="permlab_writeApnSettings" msgid="505660159675751896">"mengubah/memintas tetapan dan lalu lintas rangkaian"</string>
+    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Membenarkan sesuatu aplikasi untuk menukar tetapan rangkaian dan untuk memintas dan memeriksa semua trafik rangkaian, contohnya untuk menukar proksi dan port mana-mana APN. Aplikasi berniat jahat boleh mengawasi, mengubah hala, atau mengubah suai paket rangkaian tanpa pengetahuan anda."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"tukar kesambungan rangkaian"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Membenarkan aplikasi menukar keadaan kesambungan rangkaian."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Tukar kesambungan bertambat"</string>
@@ -732,12 +724,14 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Membenarkan aplikasi mengubah suai sejarah atau penanda halaman Penyemak Imbas yang disimpan pada telefon anda. Aplikasi berniat jahat boleh menggunakannya untuk memadamkan atau mengubah data Penyemak Imbas anda."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"menetapkan penggera pada jam penggera"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Membenarkan aplikasi menetapkan penggera dalam aplikasi jam penggera yang dipasang. Sesetengah aplikasi jam penggera mungkin tidak melaksanakan ciri ini."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambah mel suara"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Membenarkan aplikasi untuk menambahkan mesej pada peti masuk mel suara anda."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Membenarkan aplikasi mengubah suai kebenaran geolokasi Penyemak Imbas. Aplikasi berniat jahat boleh menggunakannya untuk membenarkan penghantaran maklumat lokasi ke sembarangan tapak web."</string>
+    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"sahkan pakej"</string>
+    <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Membenarkan aplikasi untuk mengesahkan bahawa pakej boleh dipasang."</string>
+    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ikat kepada pengesah pakej"</string>
+    <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Membenarkan pemegang membuat permintaan pengesah pakej. Tidak akan diperlukan untuk aplikasi normal."</string>
     <string name="save_password_message" msgid="767344687139195790">"Adakah anda mahu penyemak imbas mengingati kata laluan ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Bukan sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
@@ -750,6 +744,11 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"padam"</string>
     <string name="search_go" msgid="8298016669822141719">"Cari"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"Carian"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"Pertanyaan carian"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"Pertanyaan jelas"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"Hantar pertanyaan"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Carian suara"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 bulan yang lalu"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Sebelum 1 bulan yang lalu"</string>
   <plurals name="num_seconds_ago">
@@ -875,20 +874,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Pilih aplikasi untuk peranti USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tiada aplikasi yang boleh menjalankan tindakan ini."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Tutup paksa"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"Tiada sambutan dari <xliff:g id="APPLICATION">%2$s</xliff:g>."\n\n"Adakah anda mahu menutupnya?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"Tiada sambutan dari aktiviti <xliff:g id="ACTIVITY">%1$s</xliff:g>."\n\n"Adakah anda mahu menutupnya?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"Tiada sambutan dari aktiviti <xliff:g id="APPLICATION">%1$s</xliff:g>. Adakah anda mahu menutupnya?"</string>
+    <string name="anr_process" msgid="306819947562555821">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> tiada sambutan."\n\n"Adakah anda mahu menutupnya?"</string>
+    <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Laporkan"</string>
     <string name="wait" msgid="7147118217226317732">"Tunggu"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikasi dihalakan semula"</string>
@@ -917,16 +912,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Kelantangan penggera"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Kelantangan pemberitahuan"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Kelantangan"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Kelantangan Bluetooth"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Kelantangan nada dering"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Kelantangan panggilan"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Kelantangan media"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Kelantangan pemberitahuan"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Nada dering lalai"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nada dering lalai (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Senyap"</string>
@@ -940,13 +930,11 @@
     <item quantity="one" msgid="1634101450343277345">"Rangkaian Wi-Fi terbuka tersedia"</item>
     <item quantity="other" msgid="7915895323644292768">"Rangkaian Wi-Fi terbuka tersedia"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (2517058131278770509) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Tidak boleh menyambung kepada Wi-Fi"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"mempunyai sambungan internet yang kurang baik."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Langsung"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Mulakan pengendalian Wi-Fi Langsung. Hal ini akan mematikan pengendalian klien Wi-Fi/titik panas."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Gagal memulakan Wi-Fi Langsung"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Gagal memulakan Wi-Fi Langsung"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK untuk menerima."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Masukkan pin untuk meneruskan."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pin WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> perlu dimasukkan pada peranti rakan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> untuk penyediaan sambungan untuk meneruskan"</string>
@@ -957,7 +945,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Batal"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kad SIM dikeluarkan"</string>
-    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Rangkaian mudah alih tidak akan tersedia sehingga anda menggantikan kad SIM."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Rangkaian mudah alih tidak akan tersedia sehingga anda mula semula dengan kad SIM yang sah dimasukkan."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Kad SIM ditambah"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Anda mesti memulakan semula peranti anda untuk mengakses rangkaian mudah alih."</string>
@@ -987,7 +975,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Terdapat masalah mematikan storan USB. Semak untuk memastikan anda sudah menyahlekap hos USB, kemudian cuba lagi."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Hidupkan storan USB."</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Jika anda menghidupkan storan USB, sesetengah aplikasi yang anda sedang gunakan akan terhenti dan mungkin tidak akan tersedia sehingga anda memadamkan storan USB."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"Pengendalian USB gagal"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Pengendalian USB gagal"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Disambungkan sebagai peranti media"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Disambungkan sebagai kamera"</string>
@@ -1087,8 +1075,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Menyahlekap kad SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Memadamkan storan USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Memadamkan kad SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Gagal memadamkan storan USB."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"Gagal memadamkan kad SD."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Gagal memadamkan storan USB."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Gagal memadamkan storan USB."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Kad SD telah dikeluarkan sebelum dinyahlekap."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Storan USB sedang disemak buat masa ini."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Kad SD sedang disemak buat masa ini."</string>
@@ -1118,7 +1106,7 @@
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"tidak dipilih"</string>
     <string name="switch_on" msgid="551417728476977311">"hidup"</string>
     <string name="switch_off" msgid="7249798614327155088">"mati"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"ditekan."</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"ditekan"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"tidak ditekan"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi laman utama"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi ke atas"</string>
@@ -1132,11 +1120,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Data 2G-3G dilumpuhkan"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data 4G dilumpuhkan"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data mudah alih dilumpuhkan"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"ketik untuk mendayakan"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"ketik untuk mendayakan"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Melebihi had data 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Melebihi had data 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Melebihi had data mudah alih"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> melebihi had yang ditentukan"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Sijil keselamatan"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sijil ini sah."</string>
     <string name="issued_to" msgid="454239480274921032">"Dikeluarkan kepada:"</string>
@@ -1155,4 +1147,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Pilih aktiviti"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Kongsi dengan..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Peranti dikunci."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

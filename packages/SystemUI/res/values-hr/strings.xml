@@ -113,11 +113,11 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter omogućen."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibracija softvera zvona."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Softver zvona utišan."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G podaci su onemogućeni"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G podaci su onemogućeni"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G podaci onemogućeni"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G podaci onemogućeni"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilni podaci su onemogućeni"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podaci su onemogućeni"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosegnuto je navedeno ograničenje upotrebe podataka."\n\n"Dodatna upotreba podataka može se naplaćivati."</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podaci onemogućeni"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosegnuto je navedeno ograničenje upotrebe podataka."\n\n"Dodatna upotreba podataka može podlijegati naplati."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Ponovo omogući podatke"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internetske veze"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>

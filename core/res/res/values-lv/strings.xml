@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Autentifikācija nebija veiksmīga."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Autentifikācija, izmantojot starpniekserveri, nebija veiksmīga."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Savienojuma izveide ar serveri nebija veiksmīga."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"Serverim neizdevās izveidot savienojumu. Vēlāk mēģiniet vēlreiz."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Serverim neizdevās izveidot savienojumu. Vēlāk mēģiniet vēlreiz."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Savienojumam ar serveri radās noildze."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Lapā ir pārāk daudz servera novirzīšanu."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokols netiek atbalstīts."</string>
@@ -327,14 +327,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"rakstīt kontaktpersonu datus"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Ļauj lietojumprogrammai pārveidot planšetdatorā saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Ļauj lietojumprogrammai pārveidot tālrunī saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"lasīt profila datus"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Ļauj lietojumprogrammai lasīt visu jūsu personas informāciju profilā. Ļaunprātīgas lietojumprogrammas var izmantot šo iespēju, lai identificētu jūs un sūtītu jūsu personas informāciju citām personām."</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"rakstīt profila datus"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Ļauj lietojumprogrammai mainīt jūsu personas informāciju profilā. Ļaunprātīgas lietojumprogrammas var izmantot šo iespēju, lai dzēstu vai mainītu jūsu profila datus."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lasīt kalendāra pasākumus un konfidenciālu informāciju"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Ļauj lietojumprogrammai lasīt visus planšetdatorā saglabātos kalendāra pasākumus, tostarp jūsu draugu un darbabiedru pasākumus. Ļaunprātīga lietojumprogramma, izmantojot šo atļauju, bez īpašnieka ziņas no šiem kalendāriem var iegūt personisku informāciju."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Ļauj lietojumprogrammai lasīt visus tālrunī saglabātos kalendāra pasākumus, tostarp jūsu draugu un darbabiedru pasākumus. Ļaunprātīga lietojumprogramma, izmantojot šo atļauju, bez īpašnieka ziņas no šiem kalendāriem var iegūt personisku informāciju."</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Ļauj lietojumprogrammai pievienot ziņojumus no jūsu balss pasta iesūtnes."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ļauj lietojumprogrammai pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atļautu atrašanās vietas informācijas sūtīšanu uz citām vietnēm."</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Vai vēlaties, lai pārlūkprogrammā tiktu saglabāta šī parole?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne tagad"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Atcerēties"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ievade"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"dzēst"</string>
     <string name="search_go" msgid="8298016669822141719">"Meklēt"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Pirms 1 mēneša"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Vairāk nekā pirms 1 mēneša"</string>
   <plurals name="num_seconds_ago">
@@ -871,8 +885,10 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Atlasīt lietojumprogrammu USB ierīcei"</string>
     <string name="noApplications" msgid="1691104391758345586">"Šo darbību nevar veikt neviena lietojumprogramma."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="7918612738900928051">"Lietojumprogramma <xliff:g id="APPLICATION">%1$s</xliff:g> ir apturēta kļūdas dēļ."</string>
-    <string name="aerr_process" msgid="3473655047134111582">"Process <xliff:g id="PROCESS">%1$s</xliff:g> ir apturēts kļūdas dēļ."</string>
+    <!-- no translation found for aerr_application (932628488013092776) -->
+    <skip />
+    <!-- no translation found for aerr_process (4507058997035697579) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"Lietojumprogramma <xliff:g id="APPLICATION">%2$s</xliff:g> nereaģē."\n\n"Vai vēlaties to aizvērt?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Darbība <xliff:g id="ACTIVITY">%1$s</xliff:g> nereaģē. "\n" "\n" Vai vēlaties to aizvērt?"</string>
@@ -907,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Signāla skaļums"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Paziņojumu skaļums"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Skaļums"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth skaļums. Pieskarieties, lai pārslēgtu uz klusuma režīmu."</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Zvana signāla skaļums. Pieskarieties, lai pārslēgtu uz klusuma režīmu."</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Zvanu skaļums. Pieskarieties, lai pārslēgtu uz klusuma režīmu."</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Multivides skaļums. Pieskarieties, lai pārslēgtu uz klusuma režīmu."</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Paziņojumu skaļums. Pieskarieties, lai pārslēgtu uz klusuma režīmu."</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Noklusējuma zvana signāls"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Noklusējuma zvana signāls (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Klusums"</string>
@@ -934,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"ir slikts interneta savienojums."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Sākt Wi-Fi Direct darbību. Tiks izslēgta Wi-Fi klienta/tīklāja darbība."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Neizdevās palaist Wi-Fi Direct."</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Neizdevās palaist Wi-Fi Direct."</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct savienojuma iestatīšanas pieprasījums no adreses <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Noklikšķiniet uz Labi, lai apstiprinātu."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct savienojuma iestatīšanas pieprasījums no adreses <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Lai turpinātu, ievadiet PIN."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Lai turpinātu savienojuma iestatīšanu, vienādranga ierīcē <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> ir jāievada WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>."</string>
@@ -975,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Izslēdzot USB krātuvi, radās problēma. Pārliecinieties, ka USB saimniekdators ir noņemts, pēc tam mēģiniet vēlreiz."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ieslēgt USB krātuvi"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Ja ieslēgsiet USB krātuvi, dažu joprojām lietoto lietojumprogrammu darbība tiks apturēta un tās, iespējams, nebūs pieejamas līdz brīdim, kad USB krātuve tiks izslēgta."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"USB darbība neizdevās."</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB darbība neizdevās."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Labi"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Pievienots kā multivides ierīce"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Pievienots kā kamera"</string>
@@ -1075,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Notiek SD kartes atvienošana..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Notiek USB krātuves dzēšana..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Notiek SD kartes dzēšana..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Neizdevās dzēst USB krātuvi."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"Neizdevās dzēst SD karti."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Neizdevās dzēst USB krātuvi."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Neizdevās dzēst USB krātuvi."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD karte pirms atvienošanas tika noņemta."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB atmiņa pašlaik tiek pārbaudīta."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD karte pašlaik tiek pārbaudīta."</string>
@@ -1120,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G–3G dati ir atspējoti"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G dati ir atspējoti"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilie dati ir atspējoti"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"pieskarieties, lai iespējotu"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"pieskarieties, lai iespējotu"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G datu ierobež. pārsniegts"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G datu limits pārsniegts"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Pārsniegts mobilo datu ierobežoj."</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> virs norādītā ierobežojuma"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Drošības sertifikāts"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sertifikāts ir derīgs."</string>
     <string name="issued_to" msgid="454239480274921032">"Izdots:"</string>
@@ -1143,4 +1158,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Darbības atlase"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Koplietot ar..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Ierīce ir bloķēta."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

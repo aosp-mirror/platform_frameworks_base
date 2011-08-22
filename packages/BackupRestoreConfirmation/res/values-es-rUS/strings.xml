@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Se ha solicitado una copia de seguridad completa de todos los datos en una computadora de escritorio conectada. ¿Deseas permitir esto?"\n\n"Si tú no has solicitado la copia de seguridad, no permitas que se realice la operación."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Copia de seguridad de mis datos"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"No realizar una copia de seguridad"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Se ha solicitado una restauración completa de todos los datos de una computadora de escritorio conectada. ¿Deseas permitir esto?"\n\n"Si tú no has solicitado la restauración, no permitas que se realice la operación. Esto reemplazaría los datos actuales del dispositivo."</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Restaurar mis datos"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"No restaurar"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Introduce tu contraseña actual de copia de seguridad a continuación:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduce una contraseña para cifrar los datos de la copia de seguridad completa. Si dejas este campo en blanco, se utilizará tu contraseña actual de copia de seguridad:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Si deseas cifrar los datos de la copia de seguridad completa, introduce una contraseña a continuación:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Si los datos de recuperación son cifrados, vuelve a introducir la contraseña a continuación:"</string>
+</resources>

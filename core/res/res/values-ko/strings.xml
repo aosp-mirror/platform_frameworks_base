@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"인증에 실패했습니다."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"프록시 서버를 통한 인증에 실패했습니다."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"서버에 연결하지 못했습니다."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"서버와 통신할 수 없습니다. 잠시 후에 다시 시도해 주세요."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"서버와 통신할 수 없습니다. 잠시 후에 다시 시도해 주세요."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"서버 연결 제한시간이 초과되었습니다."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"페이지에 서버 리디렉션이 너무 많이 포함되어 있습니다."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"지원되지 않는 프로토콜입니다."</string>
@@ -327,19 +327,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"연락처 데이터 작성"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"애플리케이션이 태블릿에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"애플리케이션이 휴대전화에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 읽기"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"애플리케이션이 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"애플리케이션이 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"캘린더 일정 추가/수정 및 참석자에게 이메일 전송"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"애플리케이션이 캘린더에 일정을 추가하거나 변경할 수 있도록 합니다. 이렇게 하면 참석자에게 이메일을 보낼 수 있습니다. 악성 애플리케이션이 이를 사용하여 캘린더 일정을 삭제, 수정하거나 참석자에게 이메일을 보낼 수 있습니다."</string>
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"프로필 데이터 읽기"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"애플리케이션이 개인 프로필 정보를 모두 읽을 수 있도록 합니다. 이렇게 하면 악성 애플리케이션이 이 정보를 사용하여 사용자를 식별하고 개인 정보를 다른 사용자에게 보낼 수 있습니다."</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"프로필 데이터 작성"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"애플리케이션이 개인 프로필 정보를 수정할 수 있도록 허용합니다. 이렇게 하면 악성 애플리케이션이 이 정보를 사용하여 프로필 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 및 기밀정보 읽기"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"애플리케이션이 친구나 동료의 일정을 포함하여 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 권한이 있는 악성 애플리케이션은 소유자 몰래 이러한 캘린더에서 개인정보를 추출할 수 있습니다."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"애플리케이션이 친구나 동료의 일정을 포함하여 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 권한이 있는 악성 애플리케이션은 소유자 몰래 이러한 캘린더에서 개인정보를 추출할 수 있습니다."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"소유자 몰래 캘린더 일정을 추가 또는 수정하고 참석자에게 이메일 전송"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"애플리케이션이 캘린더 소유자로서 일정 초대장을 보내고 친구나 동료의 일정을 포함하여 사용자가 기기에서 수정할 수 있는 일정을 추가, 제거, 변경할 수 있도록 합니다. 이 권한이 있는 악성 애플리케이션은 캘린더 소유자 몰래 소유자 이름으로 스팸메일을 보내고 일정을 수정하거나 가짜 일정을 추가할 수 있습니다."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 정보제공자로 가장"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"테스트용 가짜 위치 정보 제공자를 만듭니다. 단, 악성 애플리케이션이 이 기능을 이용하여 GPS, 네트워크 공급자 같은 실제 위치 정보제공자에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"애플리케이션이 음성사서함 받은편지함에 메시지를 추가하도록 허용합니다."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"브라우저 위치 정보 수정 권한"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"애플리케이션이 브라우저의 위치 정보 권한을 수정할 수 있도록 합니다. 악성 애플리케이션이 이를 사용하여 임의의 웹사이트에 위치 정보를 보낼 수도 있습니다."</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"나중에"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"저장"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"입력"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"삭제"</string>
     <string name="search_go" msgid="8298016669822141719">"검색"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"한 달 전"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"한 달 전"</string>
   <plurals name="num_seconds_ago">
@@ -871,20 +885,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"USB 기기에 대한 애플리케이션 선택"</string>
     <string name="noApplications" msgid="1691104391758345586">"작업을 수행할 수 있는 애플리케이션이 없습니다."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"닫기"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g>이(가) 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동이 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g>이(가) 응답하지 않습니다. 닫으시겠습니까?"</string>
+    <string name="anr_process" msgid="306819947562555821">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
+    <string name="force_close" msgid="8346072094521265605">"확인"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"애플리케이션 리디렉션됨"</string>
@@ -913,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"알람 볼륨"</string>
     <string name="volume_notification" msgid="2422265656744276715">"알림 볼륨"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"볼륨"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"블루투스 볼륨입니다. 무음 모드로 전환하려면 탭하세요."</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"벨소리 볼륨입니다. 무음 모드로 전환하려면 탭하세요."</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"통화 볼륨입니다. 무음 모드로 전환하려면 탭하세요."</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"미디어 볼륨입니다. 무음 모드로 전환하려면 탭하세요."</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"알림 볼륨입니다. 무음 모드로 전환하려면 탭하세요."</string>
     <string name="ringtone_default" msgid="3789758980357696936">"기본 벨소리"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"기본 벨소리(<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"무음"</string>
@@ -940,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"인터넷 연결 상태가 좋지 않습니다."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Direct 작업을 시작합니다. 이 작업을 하면 Wi-Fi 클라이언트/핫스팟 작업이 중지됩니다."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Direct를 시작하지 못했습니다."</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Wi-Fi Direct를 시작하지 못했습니다."</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>에서 Wi-Fi Direct 연결 설정을 요청합니다. 수락하려면 확인을 클릭하세요."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>에서 Wi-Fi Direct 연결 설정을 요청합니다. 계속 진행하려면 PIN을 입력하세요."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"연결 설정을 계속하려면 WPS 핀(<xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>)을 피어 기기(<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>)에 입력해야 합니다."</string>
@@ -981,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB 저장소를 사용하지 않도록 설정하는 동안 문제가 발생했습니다. USB 호스트와 연결을 해제했는지 확인한 다음 다시 시도하세요."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB 저장소 사용"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB 저장소를 사용하면 사용 중인 일부 애플리케이션이 중지되어 USB 저장소를 사용 중지할 때까지 사용할 수 없게 됩니다."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"USB 작업 실패"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB 작업 실패"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"미디어 기기로 연결됨"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"카메라로 연결됨"</string>
@@ -1081,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SD 카드 마운트 해제 중..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USB 저장소 지우는 중..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"SD 카드 지우는 중..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"USB 저장소를 지우지 못했습니다."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"SD 카드를 지우지 못했습니다."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB 저장소를 지우지 못했습니다."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"USB 저장소를 지우지 못했습니다."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD 카드가 마운트 해제되기 전에 제거되었습니다."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"현재 USB 저장소를 확인하는 중입니다."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"현재 SD 카드를 확인하는 중입니다."</string>
@@ -1110,8 +1115,8 @@
     <string name="checkbox_not_checked" msgid="5174639551134444056">"선택 안함"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"선택됨"</string>
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"선택 안함"</string>
-    <string name="switch_on" msgid="551417728476977311">"설정"</string>
-    <string name="switch_off" msgid="7249798614327155088">"해제"</string>
+    <string name="switch_on" msgid="551417728476977311">"사용"</string>
+    <string name="switch_off" msgid="7249798614327155088">"사용 안함"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"누름"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"누르지 않음"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>
@@ -1126,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 데이터 사용중지됨"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 데이터 사용중지됨"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"모바일 데이터 사용중지됨"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"사용하려면 누르세요."</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"사용하려면 누르세요."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G 데이터 제한을 초과했습니다."</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G의 데이터 제한을 초과했습니다."</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"모바일 데이터 제한을 초과했습니다."</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g>가 지정된 한도를 초과했습니다."</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> - 지정된 한도 초과"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"보안 인증서"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"유효한 인증서입니다."</string>
     <string name="issued_to" msgid="454239480274921032">"발급 대상:"</string>
@@ -1149,4 +1158,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"활동 선택"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"공유 대상..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"기기가 잠겼습니다."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

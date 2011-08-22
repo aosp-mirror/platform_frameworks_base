@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"身份验证失败。"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"通过代理服务器进行身份验证失败。"</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"未能连接到服务器。"</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"服务器无法通讯，请稍后重试。"</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"服务器无法通讯，请稍后重试。"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"与服务器的连接超时。"</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"该页面包含太多服务器重定向。"</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"不支持该协议。"</string>
@@ -269,7 +269,7 @@
     <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"允许手机用户绑定至文字服务（如 SpellCheckerService）的顶级界面。普通应用程序从不需要此权限。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到 VPN 服务"</string>
-    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"允许手机用户绑定到 VPN 服务的顶级界面。普通应用程序绝不需要此权限。"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"允许手机用户绑定到 VPN 服务的顶级接口。普通应用程序绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允许手机用户绑定到壁纸的顶级界面。应该从不需要将此权限授予普通应用程序。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到窗口小部件服务"</string>
@@ -327,19 +327,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"写入联系数据"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"允许应用程序修改您平板电脑上存储的联系人（地址）数据。恶意应用程序可借此清除或修改您的联系人数据。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"允许应用程序修改您手机上存储的联系人（地址）数据。恶意应用程序可借此清除或修改您的联系人数据。"</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"读取日历活动"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"允许应用程序读取您平板电脑上存储的所有日历活动。恶意应用程序可借此将您的日历活动发送给其他人。"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"允许应用程序读取您平板电脑上存储的所有日历活动。恶意应用程序可借此将您的日历活动发送给其他人。"</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"添加或修改日历活动以及向邀请对象发送电子邮件"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"允许应用程序添加或更改日历中的活动，这可能会向邀请对象发送电子邮件。恶意应用程序可能会借此清除或修改您的日历活动，或者向邀请对象发送电子邮件。"</string>
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"读取个人资料数据"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"允许应用程序读取您的所有个人资料信息。恶意应用程序可能会利用此权限识别您的身份，并向他人发送您的个人信息。"</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"写入个人资料数据"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"允许应用程序修改您的个人资料信息。恶意应用程序可能会利用此权限清除或修改您的个人资料数据。"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"读取日历活动和机密信息"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"允许应用程序读取您平板电脑上存储的所有日历活动（包括朋友或同事的活动）。拥有此权限的恶意应用程序可在所有者不知情的情况下，从这些日历中提取个人信息。"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"允许应用程序读取您手机上存储的所有日历活动（包括朋友或同事的活动）。拥有此权限的恶意应用程序可在所有者不知情的情况下，从这些日历中提取个人信息。"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"添加或修改日历活动，并在所有者不知情的情况下向邀请对象发送电子邮件"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"允许应用程序以日历所有者的名义发送活动邀请，同时允许其添加、删除和更改您能够在设备上修改的活动（包括朋友或同事的活动）。拥有此权限的恶意应用程序可以假借日历所有者的名义发送垃圾邮件，还可以在所有者不知情的情况下修改活动或添加虚假活动。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"使用模拟地点来源进行测试"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"创建模拟地点来源进行测试。恶意应用程序可能利用此选项覆盖由真实地点来源（如 GPS 或网络提供商）传回的地点和/或状态。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"访问额外的位置信息提供程序命令"</string>
@@ -730,10 +726,18 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"允许应用程序修改存储在手机中的浏览器历史记录或书签。恶意应用程序可借此清除或修改浏览器数据。"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"在闹钟中设置警报"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"允许应用程序在安装的闹钟应用程序中设置警报。某些闹钟应用程序没有实现此功能。"</string>
-    <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音信箱"</string>
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"允许应用程序向您的语音信箱收件箱添加讯息。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改浏览器的地理位置权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允许应用程序修改浏览器的地理位置权限。恶意应用程序会利用这一点将位置信息发送到任意网站。"</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter 键"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"删除"</string>
     <string name="search_go" msgid="8298016669822141719">"搜索"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 个月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 个月前"</string>
   <plurals name="num_seconds_ago">
@@ -871,20 +885,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"选择适用于 USB 设备的应用程序"</string>
     <string name="noApplications" msgid="1691104391758345586">"没有应用程序可执行此操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"强行关闭"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"“<xliff:g id="APPLICATION">%2$s</xliff:g>”无响应。"\n\n"要将它关闭吗？"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"活动“<xliff:g id="ACTIVITY">%1$s</xliff:g>”无响应。"\n\n"要将它关闭吗？"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”无响应。要将它关闭吗？"</string>
+    <string name="anr_process" msgid="306819947562555821">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
+    <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"应用程序已重定向"</string>
@@ -913,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"闹钟音量"</string>
     <string name="volume_notification" msgid="2422265656744276715">"通知音量"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"音量"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"蓝牙音量。点按切换静音模式。"</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"铃声音量。点按切换静音模式。"</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"通话音量。点按切换静音模式。"</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"媒体音量。点按切换静音模式。"</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"通知音量。点按切换静音模式。"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"默认铃声"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"默认铃声（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>）"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"静音"</string>
@@ -940,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"互联网连接状况不佳。"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"启动 Wi-Fi Direct 操作。此操作将会关闭 Wi-Fi 客户端/热点操作。"</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"无法启动 Wi-Fi Direct"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"无法启动 Wi-Fi Direct"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"收到来自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 连接设置请求。点击“确定”即可接受。"</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"收到来自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 连接设置请求。输入 PIN 即可继续操作。"</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"必须在对端设备 <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> 上输入 WPS PIN“<xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>”，才能继续进行连接设置"</string>
@@ -981,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"关闭 USB 存储设备时遇到问题。请检查并确保已卸载了 USB 主设备，然后重试。"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"打开 USB 存储设备"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"如果您打开了 USB 存储设备，则您当前使用的某些应用程序会停止，而且在您关闭 USB 存储设备前可能都无法使用。"</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"USB 操作失败"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"作为媒体设备连接"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"作为相机连接"</string>
@@ -1081,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"正在卸载 SD 卡..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"正在格式化 USB 存储设备"</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"正在格式化 SD 卡..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"USB 存储设备格式化失败。"</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"SD 卡格式化失败。"</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB 存储设备格式化失败。"</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"USB 存储设备格式化失败。"</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD 卡尚未卸载就被移除。"</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"系统正在检查 USB 存储设备。"</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"目前正在检查 SD 卡。"</string>
@@ -1126,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 数据已停用"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据已停用"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"移动数据已停用"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"点按即可启用"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"超出 2G-3G 数据量限制"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据使用上限"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超出手机数据上限"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"点按即可启用"</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"超出 2G-3G 数据流量限制"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据流量上限"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超出移动数据流量上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"超出规定上限 <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"安全证书"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"该证书有效。"</string>
     <string name="issued_to" msgid="454239480274921032">"颁发给："</string>
@@ -1147,6 +1156,8 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 指纹："</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"查看全部..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"选择活动"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"分享活动..."</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"分享途径…"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"设备已锁定。"</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>
