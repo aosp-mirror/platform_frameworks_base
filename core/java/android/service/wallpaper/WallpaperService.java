@@ -46,7 +46,6 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputHandler;
 import android.view.InputQueue;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -54,8 +53,9 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
-import android.view.WindowManagerPolicy;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -459,6 +459,44 @@ public abstract class WallpaperService extends Service {
         public void onSurfaceDestroyed(SurfaceHolder holder) {
         }
         
+        protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
+            out.print(prefix); out.print("mInitializing="); out.print(mInitializing);
+                    out.print(" mDestroyed="); out.println(mDestroyed);
+            out.print(prefix); out.print("mVisible="); out.print(mVisible);
+                    out.print(" mScreenOn="); out.print(mScreenOn);
+                    out.print(" mReportedVisible="); out.println(mReportedVisible);
+            out.print(prefix); out.print("mCreated="); out.print(mCreated);
+                    out.print(" mSurfaceCreated="); out.print(mSurfaceCreated);
+                    out.print(" mIsCreating="); out.print(mIsCreating);
+                    out.print(" mDrawingAllowed="); out.println(mDrawingAllowed);
+            out.print(prefix); out.print("mWidth="); out.print(mWidth);
+                    out.print(" mCurWidth="); out.print(mCurWidth);
+                    out.print(" mHeight="); out.print(mHeight);
+                    out.print(" mCurHeight="); out.println(mCurHeight);
+            out.print(prefix); out.print("mType="); out.print(mType);
+                    out.print(" mWindowFlags="); out.print(mWindowFlags);
+                    out.print(" mCurWindowFlags="); out.println(mCurWindowFlags);
+            out.print(prefix); out.print("mVisibleInsets=");
+                    out.print(mVisibleInsets.toShortString());
+                    out.print(" mWinFrame="); out.print(mWinFrame.toShortString());
+                    out.print(" mContentInsets="); out.println(mContentInsets.toShortString());
+            out.print(prefix); out.print("mConfiguration="); out.println(mConfiguration);
+            out.print(prefix); out.print("mLayout="); out.println(mLayout);
+            synchronized (mLock) {
+                out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
+                        out.print(" mPendingXOffset="); out.println(mPendingXOffset);
+                out.print(prefix); out.print("mPendingXOffsetStep=");
+                        out.print(mPendingXOffsetStep);
+                        out.print(" mPendingXOffsetStep="); out.println(mPendingXOffsetStep);
+                out.print(prefix); out.print("mOffsetMessageEnqueued=");
+                        out.print(mOffsetMessageEnqueued);
+                        out.print(" mPendingSync="); out.println(mPendingSync);
+                if (mPendingMove != null) {
+                    out.print(prefix); out.print("mPendingMove="); out.println(mPendingMove);
+                }
+            }
+        }
+
         private void dispatchPointer(MotionEvent event) {
             if (event.isTouchEvent()) {
                 synchronized (mLock) {
@@ -1012,4 +1050,14 @@ public abstract class WallpaperService extends Service {
      * is in the wallpaper picker viewing a preview of it as well.
      */
     public abstract Engine onCreateEngine();
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {
+        out.print("State of wallpaper "); out.print(this); out.println(":");
+        for (int i=0; i<mActiveEngines.size(); i++) {
+            Engine engine = mActiveEngines.get(i);
+            out.print("  Engine "); out.print(engine); out.println(":");
+            engine.dump("    ", fd, out, args);
+        }
+    }
 }
