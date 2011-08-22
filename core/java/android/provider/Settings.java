@@ -2815,6 +2815,16 @@ public final class Settings {
         public static final String TTS_DEFAULT_VARIANT = "tts_default_variant";
 
         /**
+         * Stores the default tts locales on a per engine basis. Stored as
+         * a comma seperated list of values, each value being of the form
+         * {@code engine_name:locale} for example,
+         * {@code com.foo.ttsengine:eng-USA,com.bar.ttsengine:esp-ESP}.
+         *
+         * @hide
+         */
+        public static final String TTS_DEFAULT_LOCALE = "tts_default_locale";
+
+        /**
          * Space delimited list of plugin packages that are enabled.
          */
         public static final String TTS_ENABLED_PLUGINS = "tts_enabled_plugins";
