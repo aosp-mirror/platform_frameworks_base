@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.ActivityChooserModel.OnChooseActivityListener;
 
 import com.android.internal.R;
 
@@ -73,6 +74,27 @@ import com.android.internal.R;
 public class ShareActionProvider extends ActionProvider {
 
     /**
+     * Listener for the event of selecting a share target.
+     */
+    public interface OnShareTargetSelectedListener {
+
+        /**
+         * Called when a share target has been selected. The client can
+         * decide whether to handle the intent or rely on the default
+         * behavior which is launching it.
+         * <p>
+         * <strong>Note:</strong> Modifying the intent is not permitted and
+         *     any changes to the latter will be ignored.
+         * </p>
+         *
+         * @param source The source of the notification.
+         * @param intent The intent for launching the chosen share target.
+         * @return Whether the client has handled the intent.
+         */
+        public boolean onShareTargetSelected(ShareActionProvider source, Intent intent);
+    }
+
+    /**
      * The default for the maximal number of activities shown in the sub-menu.
      */
     private static final int DEFAULT_INITIAL_ACTIVITY_COUNT = 4;
@@ -103,6 +125,10 @@ public class ShareActionProvider extends ActionProvider {
      */
     private String mShareHistoryFileName = DEFAULT_SHARE_HISTORY_FILE_NAME;
 
+    private OnShareTargetSelectedListener mOnShareTargetSelectedListener;
+
+    private OnChooseActivityListener mOnChooseActivityListener;
+
     /**
      * Creates a new instance.
      *
@@ -111,6 +137,21 @@ public class ShareActionProvider extends ActionProvider {
     public ShareActionProvider(Context context) {
         super(context);
         mContext = context;
+    }
+
+    /**
+     * Sets a listener to be notified when a share target has been selected.
+     * The listener can optionally decide to handle the selection and
+     * not rely on the default behavior which is to launch the activity.
+     * <p>
+     * <strong>Note:</strong> If you choose the backing share history file
+     *     you will still be notified in this callback.
+     * </p>
+     * @param listener The listener.
+     */
+    public void setOnShareTargetSelectedListener(OnShareTargetSelectedListener listener) {
+        mOnShareTargetSelectedListener = listener;
+        setActivityChooserPolicyIfNeeded();
     }
 
     /**
@@ -192,6 +233,7 @@ public class ShareActionProvider extends ActionProvider {
      */
     public void setShareHistoryFileName(String shareHistoryFile) {
         mShareHistoryFileName = shareHistoryFile;
+        setActivityChooserPolicyIfNeeded();
     }
 
     /**
@@ -229,8 +271,39 @@ public class ShareActionProvider extends ActionProvider {
                     mShareHistoryFileName);
             final int itemId = item.getItemId();
             Intent launchIntent = dataModel.chooseActivity(itemId);
-            mContext.startActivity(launchIntent);
+            if (launchIntent != null) {
+                mContext.startActivity(launchIntent);
+            }
             return true;
+        }
+    }
+
+    /**
+     * Set the activity chooser policy of the model backed by the current
+     * share history file if needed which is if there is a registered callback.
+     */
+    private void setActivityChooserPolicyIfNeeded() {
+        if (mOnShareTargetSelectedListener == null) {
+            return;
+        }
+        if (mOnChooseActivityListener == null) {
+            mOnChooseActivityListener = new ShareAcitivityChooserModelPolicy();
+        }
+        ActivityChooserModel dataModel = ActivityChooserModel.get(mContext, mShareHistoryFileName);
+        dataModel.setOnChooseActivityListener(mOnChooseActivityListener);
+    }
+
+    /**
+     * Policy that delegates to the {@link OnShareTargetSelectedListener}, if such.
+     */
+    private class ShareAcitivityChooserModelPolicy implements OnChooseActivityListener {
+        @Override
+        public boolean onChooseActivity(ActivityChooserModel host, Intent intent) {
+            if (mOnShareTargetSelectedListener != null) {
+                return mOnShareTargetSelectedListener.onShareTargetSelected(
+                        ShareActionProvider.this, intent);
+            }
+            return false;
         }
     }
 }
