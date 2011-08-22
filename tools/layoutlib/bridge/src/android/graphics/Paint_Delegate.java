@@ -82,6 +82,7 @@ public class Paint_Delegate {
     private float mTextSize;
     private float mTextScaleX;
     private float mTextSkewX;
+    private int mHintingMode = Paint.HINTING_ON;
 
     private Xfermode_Delegate mXfermode;
     private ColorFilter_Delegate mColorFilter;
@@ -267,6 +268,28 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void setFilterBitmap(Paint thisPaint, boolean filter) {
         setFlag(thisPaint, Paint.FILTER_BITMAP_FLAG, filter);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int getHinting(Paint thisPaint) {
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            return Paint.HINTING_ON;
+        }
+
+        return delegate.mHintingMode;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void setHinting(Paint thisPaint, int mode) {
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            return;
+        }
+
+        delegate.mHintingMode = mode;
     }
 
     @LayoutlibDelegate
@@ -1098,6 +1121,7 @@ public class Paint_Delegate {
         mPathEffect = paint.mPathEffect;
         mMaskFilter = paint.mMaskFilter;
         mRasterizer = paint.mRasterizer;
+        mHintingMode = paint.mHintingMode;
         updateFontObject();
     }
 
@@ -1121,6 +1145,7 @@ public class Paint_Delegate {
         mMaskFilter = null;
         mRasterizer = null;
         updateFontObject();
+        mHintingMode = Paint.HINTING_ON;
     }
 
     /**
