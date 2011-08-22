@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHealth;
 import android.bluetooth.BluetoothHealthAppConfiguration;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetoothHealthCallback;
 import android.content.Context;
 import android.os.Handler;
@@ -567,7 +568,8 @@ final class BluetoothHealthProfileHandler {
     private void updateAndSendIntent(BluetoothDevice device, int prevDeviceState,
             int newDeviceState) {
         mHealthDevices.put(device, newDeviceState);
-        mBluetoothService.sendConnectionStateChange(device, prevDeviceState, newDeviceState);
+        mBluetoothService.sendConnectionStateChange(device, BluetoothProfile.HEALTH,
+                                                    prevDeviceState, newDeviceState);
     }
 
     /**

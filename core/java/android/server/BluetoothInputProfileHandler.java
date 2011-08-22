@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothDeviceProfileState;
 import android.bluetooth.BluetoothInputDevice;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfileState;
 import android.content.Context;
 import android.content.Intent;
@@ -191,7 +192,8 @@ final class BluetoothInputProfileHandler {
         mContext.sendBroadcast(intent, BluetoothService.BLUETOOTH_PERM);
 
         debugLog("InputDevice state : device: " + device + " State:" + prevState + "->" + state);
-        mBluetoothService.sendConnectionStateChange(device, state, prevState);
+        mBluetoothService.sendConnectionStateChange(device, BluetoothProfile.INPUT_DEVICE, state,
+                                                    prevState);
     }
 
     void handleInputDevicePropertyChange(String address, boolean connected) {
