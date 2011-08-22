@@ -54,6 +54,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -2788,7 +2789,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
             // Time to start stealing events! Once we've stolen them, don't let anyone
             // steal from us
-            requestDisallowInterceptTouchEvent(true);
+            final ViewParent parent = getParent();
+            if (parent != null) {
+                parent.requestDisallowInterceptTouchEvent(true);
+            }
             return true;
         }
 
@@ -2848,9 +2852,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         View v;
         int deltaY;
 
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
+        initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
         switch (action & MotionEvent.ACTION_MASK) {
@@ -2955,7 +2957,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // Make sure that we do so in case we're in a parent that can intercept.
                     if ((mGroupFlags & FLAG_DISALLOW_INTERCEPT) == 0 &&
                             Math.abs(deltaY) > mTouchSlop) {
-                        requestDisallowInterceptTouchEvent(true);
+                        final ViewParent parent = getParent();
+                        if (parent != null) {
+                            parent.requestDisallowInterceptTouchEvent(true);
+                        }
                     }
 
                     final int rawDeltaY = deltaY;
@@ -2998,7 +3003,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     0, mOverscrollDistance, true);
                             if (Math.abs(mOverscrollDistance) == Math.abs(mScrollY)) {
                                 // Don't allow overfling if we're at the edge.
-                                mVelocityTracker.clear();
+                                if (mVelocityTracker != null) {
+                                    mVelocityTracker.clear();
+                                }
                             }
 
                             final int overscrollMode = getOverScrollMode();
@@ -3259,10 +3266,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 handler.removeCallbacks(mPendingCheckForLongPress);
             }
 
-            if (mVelocityTracker != null) {
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
-            }
+            recycleVelocityTracker();
 
             mActivePointerId = INVALID_POINTER;
 
@@ -3307,10 +3311,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     handler.removeCallbacks(mPendingCheckForLongPress);
                 }
 
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
-                }
+                recycleVelocityTracker();
             }
 
             if (mEdgeGlowTop != null) {
@@ -3450,6 +3451,35 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mGlowPaddingRight = rightPadding;
     }
 
+    private void initOrResetVelocityTracker() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        } else {
+            mVelocityTracker.clear();
+        }
+    }
+
+    private void initVelocityTrackerIfNotExists() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+    }
+
+    private void recycleVelocityTracker() {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        if (disallowIntercept) {
+            recycleVelocityTracker();
+        }
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
@@ -3487,6 +3517,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 clearScrollingCache();
             }
             mLastY = Integer.MIN_VALUE;
+            initOrResetVelocityTracker();
+            mVelocityTracker.addMovement(ev);
             if (touchMode == TOUCH_MODE_FLING) {
                 return true;
             }
@@ -3502,6 +3534,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mActivePointerId = ev.getPointerId(pointerIndex);
                 }
                 final int y = (int) ev.getY(pointerIndex);
+                initVelocityTrackerIfNotExists();
+                mVelocityTracker.addMovement(ev);
                 if (startScrollIfNeeded(y - mMotionY)) {
                     return true;
                 }
@@ -3510,9 +3544,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             break;
         }
 
+        case MotionEvent.ACTION_CANCEL:
         case MotionEvent.ACTION_UP: {
             mTouchMode = TOUCH_MODE_REST;
             mActivePointerId = INVALID_POINTER;
+            recycleVelocityTracker();
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             break;
         }

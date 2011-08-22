@@ -408,6 +408,36 @@ public class ScrollView extends FrameLayout {
         return false;
     }
 
+    private void initOrResetVelocityTracker() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        } else {
+            mVelocityTracker.clear();
+        }
+    }
+
+    private void initVelocityTrackerIfNotExists() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+    }
+
+    private void recycleVelocityTracker() {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        if (disallowIntercept) {
+            recycleVelocityTracker();
+        }
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
@@ -449,6 +479,8 @@ public class ScrollView extends FrameLayout {
                 if (yDiff > mTouchSlop) {
                     mIsBeingDragged = true;
                     mLastMotionY = y;
+                    initVelocityTrackerIfNotExists();
+                    mVelocityTracker.addMovement(ev);
                     if (mScrollStrictSpan == null) {
                         mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
                     }
@@ -460,6 +492,7 @@ public class ScrollView extends FrameLayout {
                 final float y = ev.getY();
                 if (!inChild((int) ev.getX(), (int) y)) {
                     mIsBeingDragged = false;
+                    recycleVelocityTracker();
                     break;
                 }
 
@@ -470,6 +503,8 @@ public class ScrollView extends FrameLayout {
                 mLastMotionY = y;
                 mActivePointerId = ev.getPointerId(0);
 
+                initOrResetVelocityTracker();
+                mVelocityTracker.addMovement(ev);
                 /*
                 * If being flinged and user touches the screen, initiate drag;
                 * otherwise don't.  mScroller.isFinished should be false when
@@ -487,6 +522,7 @@ public class ScrollView extends FrameLayout {
                 /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
+                recycleVelocityTracker();
                 if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
                     invalidate();
                 }
@@ -505,9 +541,7 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
+        initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
         final int action = ev.getAction();
@@ -1441,10 +1475,7 @@ public class ScrollView extends FrameLayout {
     private void endDrag() {
         mIsBeingDragged = false;
 
-        if (mVelocityTracker != null) {
-            mVelocityTracker.recycle();
-            mVelocityTracker = null;
-        }
+        recycleVelocityTracker();
 
         if (mEdgeGlowTop != null) {
             mEdgeGlowTop.onRelease();
