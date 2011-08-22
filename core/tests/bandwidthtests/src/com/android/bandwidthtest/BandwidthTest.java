@@ -20,6 +20,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
 import android.net.NetworkStats;
+import android.net.NetworkStats.Entry;
 import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ import com.android.bandwidthtest.util.BandwidthTestUtil;
 import com.android.bandwidthtest.util.ConnectionUtil;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test that downloads files from a test server and reports the bandwidth metrics collected.
@@ -97,6 +100,7 @@ public class BandwidthTest extends InstrumentationTestCase {
         File tmpSaveFile = new File(BASE_DIR + File.separator + TMP_FILENAME);
         assertTrue(BandwidthTestUtil.DownloadFromUrl(targetUrl, tmpSaveFile));
         NetworkStats prof_stats = TrafficStats.stopDataProfiling(mContext);
+        Log.d(LOG_TAG, prof_stats.toString());
 
         NetworkStats post_test_stats = fetchDataFromProc(mUid);
         NetworkStats proc_stats = post_test_stats.subtract(pre_test_stats);
@@ -138,7 +142,7 @@ public class BandwidthTest extends InstrumentationTestCase {
         NetworkStats prof_stats = TrafficStats.stopDataProfiling(mContext);
         NetworkStats post_test_stats = fetchDataFromProc(downloadManagerUid);
         NetworkStats proc_stats = post_test_stats.subtract(pre_test_stats);
-
+        Log.d(LOG_TAG, prof_stats.toString());
         // Output measurements to instrumentation out, so that it can be compared to that of
         // the server.
         Bundle results = new Bundle();
@@ -194,11 +198,37 @@ public class BandwidthTest extends InstrumentationTestCase {
             Log.e(LOG_TAG, "Empty bundle provided.");
             return;
         }
+        // Merge stats across all sets.
+        Map<Integer, Entry> totalStats = new HashMap<Integer, Entry>();
         for (int i = 0; i < stats.size(); ++i) {
-            android.net.NetworkStats.Entry entry = stats.getValues(i, null);
+            Entry statsEntry = stats.getValues(i, null);
+            // We are only interested in the all inclusive stats.
+            if (statsEntry.tag != 0) {
+                continue;
+            }
+            Entry mapEntry = null;
+            if (totalStats.containsKey(statsEntry.uid)) {
+                mapEntry = totalStats.get(statsEntry.uid);
+                switch (statsEntry.set) {
+                    case NetworkStats.SET_ALL:
+                        mapEntry.rxBytes = statsEntry.rxBytes;
+                        mapEntry.txBytes = statsEntry.txBytes;
+                        break;
+                    case NetworkStats.SET_DEFAULT:
+                    case NetworkStats.SET_FOREGROUND:
+                        mapEntry.rxBytes += statsEntry.rxBytes;
+                        mapEntry.txBytes += statsEntry.txBytes;
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Invalid state found in NetworkStats.");
+                }
+            } else {
+                totalStats.put(statsEntry.uid, statsEntry);
+            }
+        }
+        // Ouput merged stats to bundle.
+        for (Entry entry : totalStats.values()) {
             results.putInt(label + "uid", entry.uid);
-            results.putString(label + "iface", entry.iface);
-            results.putInt(label + "tag", entry.tag);
             results.putLong(label + "tx", entry.txBytes);
             results.putLong(label + "rx", entry.rxBytes);
         }
