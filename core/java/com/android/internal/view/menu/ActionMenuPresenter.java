@@ -252,7 +252,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
      * @return true if the overflow menu was shown, false otherwise.
      */
     public boolean showOverflowMenu() {
-        if (mReserveOverflow && !isOverflowMenuShowing() && mMenuView != null &&
+        if (mReserveOverflow && !isOverflowMenuShowing() && mMenu != null && mMenuView != null &&
                 mPostedOpenRunnable == null) {
             OverflowPopup popup = new OverflowPopup(mContext, mMenu, mOverflowButton, true);
             mPostedOpenRunnable = new OpenOverflowRunnable(popup);
