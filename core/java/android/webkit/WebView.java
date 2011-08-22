@@ -7415,6 +7415,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    void sendPluginDrawMsg() {
+        mWebViewCore.sendMessage(EventHub.PLUGIN_SURFACE_READY);
+    }
+
     /**
      * Returns plugin bounds if x/y in content coordinates corresponds to a
      * plugin. Otherwise a NULL rectangle is returned.
