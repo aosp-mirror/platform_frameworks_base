@@ -42,6 +42,7 @@ import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -294,22 +295,47 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             public void reportFailedUnlockAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
-                if (DEBUG) Log.d(TAG,
-                    "reportFailedPatternAttempt: #" + failedAttempts +
+                if (DEBUG) Log.d(TAG, "reportFailedPatternAttempt: #" + failedAttempts +
                     " (enableFallback=" + mEnableFallback + ")");
-                final boolean usingLockPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
+
+                final boolean usingPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
                         == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-                if (usingLockPattern && mEnableFallback && failedAttempts ==
-                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
-                                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
-                    showAlmostAtAccountLoginDialog();
-                } else if (usingLockPattern && mEnableFallback
-                        && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
-                    mLockPatternUtils.setPermanentlyLocked(true);
-                    updateScreen(mMode);
-                } else if ((failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)
-                        == 0) {
-                    showTimeoutDialog();
+
+                final int failedAttemptsBeforeWipe = mLockPatternUtils.getDevicePolicyManager()
+                        .getMaximumFailedPasswordsForWipe(null);
+
+                final int failedAttemptWarning = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
+                        - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+
+                final int remainingBeforeWipe = failedAttemptsBeforeWipe > 0 ?
+                        (failedAttemptsBeforeWipe - failedAttempts)
+                        : Integer.MAX_VALUE; // because DPM returns 0 if no restriction
+
+                if (remainingBeforeWipe < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
+                    // If we reach this code, it means the user has installed a DevicePolicyManager
+                    // that requests device wipe after N attempts.  Once we get below the grace
+                    // period, we'll post this dialog every time as a clear warning until the
+                    // bombshell hits and the device is wiped.
+                    if (remainingBeforeWipe > 0) {
+                        showAlmostAtWipeDialog(failedAttempts, remainingBeforeWipe);
+                    } else {
+                        // Too many attempts. The device will be wiped shortly.
+                        Slog.i(TAG, "Too many unlock attempts; device will be wiped!");
+                        showWipeDialog(failedAttempts);
+                    }
+                } else if (usingPattern && mEnableFallback) {
+                    if (failedAttempts == failedAttemptWarning) {
+                        showAlmostAtAccountLoginDialog();
+                    } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
+                        mLockPatternUtils.setPermanentlyLocked(true);
+                        updateScreen(mMode);
+                    }
+                } else {
+                    final boolean showTimeout =
+                        (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
+                    if (showTimeout) {
+                        showTimeoutDialog();
+                    }
                 }
                 mLockPatternUtils.reportFailedPasswordAttempt();
             }
@@ -727,26 +753,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         return currentMode;
     }
 
-    private void showTimeoutDialog() {
-        int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
-        int messageId = R.string.lockscreen_too_many_failed_attempts_dialog_message;
-        if(getUnlockMode() == UnlockMode.Password) {
-            if(mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
-                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC) {
-                messageId = R.string.lockscreen_too_many_failed_pin_attempts_dialog_message;
-            } else {
-                messageId = R.string.lockscreen_too_many_failed_password_attempts_dialog_message;
-            }
-        }
-        String message = mContext.getString(
-                messageId,
-                mUpdateMonitor.getFailedAttempts(),
-                timeoutInSeconds);
+    private void showDialog(String title, String message) {
         final AlertDialog dialog = new AlertDialog.Builder(mContext)
-                .setTitle(null)
-                .setMessage(message)
-                .setNeutralButton(R.string.ok, null)
-                .create();
+            .setTitle(title)
+            .setMessage(message)
+            .setNeutralButton(R.string.ok, null)
+            .create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         if (!mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_slowBlur)) {
@@ -757,27 +769,42 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         dialog.show();
     }
 
+    private void showTimeoutDialog() {
+        int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        int messageId = R.string.lockscreen_too_many_failed_attempts_dialog_message;
+        if (getUnlockMode() == UnlockMode.Password) {
+            if(mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
+                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC) {
+                messageId = R.string.lockscreen_too_many_failed_pin_attempts_dialog_message;
+            } else {
+                messageId = R.string.lockscreen_too_many_failed_password_attempts_dialog_message;
+            }
+        }
+        String message = mContext.getString(messageId, mUpdateMonitor.getFailedAttempts(),
+                timeoutInSeconds);
+        showDialog(null, message);
+    }
+
     private void showAlmostAtAccountLoginDialog() {
+        final int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        final int count = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
+                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+        String message = mContext.getString(R.string.lockscreen_failed_attempts_almost_glogin,
+                count, LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT, timeoutInSeconds);
+        showDialog(null, message);
+    }
+
+    private void showAlmostAtWipeDialog(int attempts, int remaining) {
         int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
         String message = mContext.getString(
-                R.string.lockscreen_failed_attempts_almost_glogin,
-                LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
-                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT,
-                LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT,
-                timeoutInSeconds);
-        final AlertDialog dialog = new AlertDialog.Builder(mContext)
-                .setTitle(null)
-                .setMessage(message)
-                .setNeutralButton(R.string.ok, null)
-                .create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        if (!mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_sf_slowBlur)) {
-            dialog.getWindow().setFlags(
-                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
-        }
-        dialog.show();
+                R.string.lockscreen_failed_attempts_almost_at_wipe, attempts, remaining);
+        showDialog(null, message);
+    }
+
+    private void showWipeDialog(int attempts) {
+        String message = mContext.getString(
+                R.string.lockscreen_failed_attempts_now_wiping, attempts);
+        showDialog(null, message);
     }
 
     /**
