@@ -113,7 +113,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter etkin."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Telefon zili titreşim."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Telefon zili sessiz."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G verileri devre dışı"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G verileri devre dışı bırakıldı"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G verileri devre dışı"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobil veriler devre dışı"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Veriler devre dışı"</string>

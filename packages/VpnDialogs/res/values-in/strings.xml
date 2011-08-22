@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> mencoba membuat sambungan VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Dengan melanjutkan, Anda memberikan izin kepada aplikasi untuk mencegat semua lalu lintas jaringan. "<b>"JANGAN memberi izin kecuali Anda mempercayai aplikasi ini."</b>" Jika tidak, Anda berisiko mengalami peretasan data oleh perangkat lunak jahat."</string>
+    <string name="warning" msgid="5470743576660160079">"Dengan melanjutkan, Anda memberikan izin kepada aplikasi untuk mencegat semua lalu lintas jaringan. "<b>"JANGAN memberi izin kecuali Anda mempercayai aplikasi ini."</b>" Jika tidak, data Anda berisiko disusupi oleh perangkat lunak jahat."</string>
     <string name="accept" msgid="2889226408765810173">"Saya mempercayai aplikasi ini."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN tersambung"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurasi"</string>

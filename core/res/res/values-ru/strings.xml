@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Не удалось провести аутентификацию."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Не удалось выполнить аутентификацию через прокси-сервер."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Не удалось подключиться к серверу."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"Сервер не отвечает. Повторите попытку позднее."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Сервер не отвечает. Повторите попытку позднее."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Время ожидания соединения с сервером истекло."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страница содержит слишком много перенаправлений сервера."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Этот протокол не поддерживается."</string>
@@ -327,14 +327,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"перезаписывать данные контакта"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти планшетного ПК. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"получать данные профиля"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Разрешает приложению читать все личные данные вашего профиля. Вредоносные приложения могут использовать эту возможность, чтобы идентифицировать вас и отправить вашу личную информацию другим людям."</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"записывать данные профиля"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Разрешает приложению изменять личную информацию вашего профиля. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных профиля."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"получать доступ к событиям календаря и конфиденциальной информации"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Разрешает приложению получать доступ ко всем сохраненным в планшетном ПК событиям календаря, включая мероприятия друзей и коллег. Вредоносное ПО с таким уровнем доступа может извлекать личную информацию из календарей без ведома владельцев."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Разрешает приложению получать доступ ко всем сохраненным в телефоне событиям календаря, включая мероприятия друзей и коллег. Вредоносное ПО с таким уровнем доступа может извлекать личную информацию из календарей без ведома владельцев."</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Разрешает приложению добавлять сообщения в почтовый ящик голосовой почты."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Изменить разрешения браузера для доступа к географическому местоположению"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Позволяет программе изменять разрешения браузера для доступа к географическому положению. Вредоносные программы могут пользоваться этим для отправки информации о местоположении на некоторые сайты."</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Вы хотите, чтобы браузер запомнил этот пароль?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сейчас"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомнить"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ввод"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"удалить"</string>
     <string name="search_go" msgid="8298016669822141719">"Поиск"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 месяц назад"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Более месяца назад"</string>
   <plurals name="num_seconds_ago">
@@ -871,8 +885,10 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Выбор приложения для USB-устройства"</string>
     <string name="noApplications" msgid="1691104391758345586">"Это действие не может выполнять ни одно приложение."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="7918612738900928051">"Из-за ошибки завершена работа приложения <xliff:g id="APPLICATION">%1$s</xliff:g>."</string>
-    <string name="aerr_process" msgid="3473655047134111582">"Из-за ошибки завершена работа приложения <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
+    <!-- no translation found for aerr_application (932628488013092776) -->
+    <skip />
+    <!-- no translation found for aerr_process (4507058997035697579) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> не отвечает."\n\n"Закрыть?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"<xliff:g id="ACTIVITY">%1$s</xliff:g> не отвечает."\n\n"Закрыть?"</string>
@@ -907,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Громкость сигнала предупреждения"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Громкость Bluetooth. Нажмите, чтобы перейти в режим без звука."</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Громкость мелодии звонка. Нажмите, чтобы перейти в режим без звука."</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Громкость вызова. Нажмите, чтобы перейти в режим без звука."</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Громкость воспроизведения мультимедиа. Нажмите, чтобы перейти в режим без звука."</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Громкость уведомлений. Нажмите, чтобы перейти в режим без звука."</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Мелодия по умолчанию"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"По умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Без звука"</string>
@@ -934,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">": плохое интернет-соединение."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Начать соединение через Wi-Fi Direct. Клиент Wi-Fi и точка доступа будут отключены."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Не удалось запустить Wi-Fi Direct"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Не удалось запустить Wi-Fi Direct"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Чтобы принять запрос от устройства <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> на соединение Wi-Fi Direct, нажмите кнопку \"ОК\"."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Чтобы продолжить настройку соединения с устройством <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> через Wi-Fi Direct, введите PIN-код."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Чтобы продолжить настройку подключения, введите PIN-код WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> на обнаруженном устройстве <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
@@ -975,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Включение USB-накопителя"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"При включении USB-накопителя некоторые используемые приложения могут прекратить работу и оставаться недоступными до отключения USB-накопителя."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"Сбой операции USB-подключения"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Сбой операции USB-подключения"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Подключен как устройство хранения данных"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Подключен как камера"</string>
@@ -1075,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Отключение SD-карты..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Очистка USB-накопителя..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Очистка SD-карты..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Не удалось очистить USB-накопитель."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"Не удалось очистить SD-карту."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Не удалось очистить USB-накопитель."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Не удалось очистить USB-накопитель."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD-карта была извлечена до отключения."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-накопитель проверяется."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Выполняется проверка SD-карты."</string>
@@ -1120,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Передача данных 2G/3G отключена"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Передача данных 4G отключена"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобильный Интернет отключен"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"Нажмите, чтобы снова включить."</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"Нажмите, чтобы снова включить."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Превышен лимита трафика 2G и 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Превышен лимит на трафик 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Превышен лимит на моб. трафик"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> превышает установленный лимит"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертификат безопасности"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Этот сертификат действителен."</string>
     <string name="issued_to" msgid="454239480274921032">"Кому выдан:"</string>
@@ -1143,4 +1158,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Выбор действия"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Поделиться с..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройство заблокировано."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

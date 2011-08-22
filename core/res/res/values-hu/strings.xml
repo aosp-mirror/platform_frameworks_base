@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Az azonosítás nem sikerült."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"A proxy szerveren keresztüli azonosítás nem sikerült."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Nem sikerült kapcsolatot létesíteni a szerverrel."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"Nem sikerült kommunikálni a szerverrel. Próbálja újra később."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Nem sikerült kommunikálni a szerverrel. Próbálja újra később."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Időtúllépés miatt megszakadt a kapcsolat a szerverrel."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Az oldal túl sok szerverátirányítást tartalmaz."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Nem támogatott protokoll."</string>
@@ -327,19 +327,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"névjegyadatok írása"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Lehetővé teszi az alkalmazások számára, hogy módosítsák a táblagépen tárolt névjegyadatokat (címeket). A rosszindulatú alkalmazások ezt felhasználhatják arra, hogy töröljék vagy módosítsák a névjegyadatokat."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Lehetővé teszi egy alkalmazás számára, hogy módosítsa a telefonon tárolt névjegy- (cím-) adatokat. A rosszindulatú alkalmazások felhasználhatják ezt a névjegyadatok törlésére vagy módosítására."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"naptári események olvasása"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Lehetővé teszi az alkalmazások számára, hogy elolvassák a telefon naptárában lévő összes eseményt. A rosszindulatú alkalmazások ezt felhasználhatják arra, hogy elküldjék az eseményeket másoknak."</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Lehetővé teszi az alkalmazások számára, hogy elolvassák a telefon naptárában lévő összes eseményt. A rosszindulatú alkalmazások ezt felhasználhatják arra, hogy elküldjék az eseményeket másoknak."</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"naptári események hozzáadása vagy módosítása és e-mailek küldése vendégeknek"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Lehetővé teszi egy alkalmazás számára a naptári események hozzáadását és módosítását, valamint e-mailek küldését a vendégeknek. A rosszindulatú alkalmazások felhasználhatják ezt a naptárban levő események törlésére vagy módosítására, illetve e-mailek küldésére."</string>
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"profiladatok beolvasása"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Lehetővé teszi az alkalmazás számára, hogy beolvassa az összes személyes profiladatot. A rosszindulatú alkalmazások felhasználhatják ezt az Ön azonosítására, és személyes adatai elküldésére másoknak."</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"profiladatok írása"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Lehetővé teszi az alkalmazás számára, hogy módosítsa az Ön személyes profiladatait. A rosszindulatú alkalmazások használhatják a profiladatok törlésére vagy módosítására."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"naptári események és bizalmas információk beolvasása"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Lehetővé teszi egy alkalmazás számára a táblagépén található összes naptári esemény beolvasását, beleértve az ismerőseihez vagy munkatársaihoz tartozó eseményeket is. Ha egy rosszindulatú alkalmazás megkapja ezt az engedélyt, akkor vissza tudja fejteni a személyes adatokat ezekből a naptárakból, a tulajdonos tudomása nélkül."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Lehetővé teszi egy alkalmazás részére, hogy beolvassa a telefonján tárolt összes naptáreseményt, beleértve az ismerősök és kollégák eseményeit is. Ha egy rosszindulatú alkalmazás megkapja ezt az engedélyt, akkor vissza tudja fejteni a személyes adatokat ezekből a naptárakból, a tulajdonos tudomása nélkül."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"naptári események hozzáadása vagy módosítása, e-mailek küldése a vendégeknek a tulajdonosok tudomása nélkül"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Lehetővé teszi, hogy egy alkalmazás a naptár tulajdonosaként eseménymeghívásokat küldjön el, illetve eltávolítsa vagy módosítsa az eszközén található eseményeket, beleértve az ismerősei és munkatársai eseményeit is. Ha egy rosszindulatú alkalmazás megkapja ezt az engedélyt, akkor olyan spam e-maileket küldhet, amelyek úgy tűnnek, mintha a naptár tulajdonosa küldené, illetve módosíthat eseményeket a tulajdonos tudomása nélkül, vagy hamis eseményeket is megadhat."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"helyforrások utánzása tesztelés céljából"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Helyforrás-utánzatok létrehozása tesztelés céljából. A rosszindulatú alkalmazások kihasználhatják ezt az olyan valódi helyforrások által megadott hely- és/vagy állapotadatok felülírására, mint a GPS vagy a mobilszolgáltatók."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"további helyszolgáltatói parancsok elérése"</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Lehetővé teszi az alkalmazás számára, hogy üzeneteket adjon hozzá bejövő hangpostájához."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"A böngésző helymeghatározási engedélyeinek módosítása"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Lehetővé teszi egy alkalmazás számára, hogy módosítsa a böngésző helymeghatározási engedélyeit. A rosszindulatú alkalmazások kihasználhatják ezt arra, hogy helyadatokat küldjenek tetszőleges webhelyeknek."</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Szeretné, hogy a böngésző megjegyezze a jelszót?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Most nem"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Megjegyzés"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"törlés"</string>
     <string name="search_go" msgid="8298016669822141719">"Keresés"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 hónapja"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Több mint 1 hónapja"</string>
   <plurals name="num_seconds_ago">
@@ -871,20 +885,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Válasszon egy alkalmazást az USB-eszköz számára"</string>
     <string name="noApplications" msgid="1691104391758345586">"Egyik alkalmazás sem tudja végrehajtani ezt a műveletet."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Bezárás most"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"A(z) <xliff:g id="APPLICATION">%2$s</xliff:g> nem válaszol."\n\n"Be szeretné zárni?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> tevékenység nem válaszol. "\n\n"Be szeretné zárni?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> nem válaszol. Be szeretné zárni?"</string>
+    <string name="anr_process" msgid="306819947562555821">"A(z) <xliff:g id="PROCESS">%1$s</xliff:g> eljárás nem válaszol. "\n\n"Be szeretné zárni?"</string>
+    <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Jelentés"</string>
     <string name="wait" msgid="7147118217226317732">"Várakozás"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Alk. átirányítva"</string>
@@ -913,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Ébresztés hangereje"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Értesítés hangereje"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Hangerő"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-hangerő. Koppintson ide a néma üzemmódra való váltáshoz."</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Csörgés hangereje. Koppintson ide a néma üzemmódra való váltáshoz."</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Hívás hangereje. Koppintson ide a néma üzemmódra való váltáshoz."</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Média hangereje. Koppintson ide a néma üzemmódra való váltáshoz."</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Értesítés hangereje. Érintse meg a néma üzemmódra való váltáshoz."</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Alapértelmezett csengőhang"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Alapértelmezett csengőhang (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Néma"</string>
@@ -940,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"rossz internetkapcsolattal rendelkezik."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Direct elindítása. A Wi-Fi kliens/hotspot működése ettől leáll."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Nem sikerült elindítani a Wi-Fi Direct kapcsolatot"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Nem sikerült elindítani a Wi-Fi Direct kapcsolatot"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct kapcsolódási kérés a következőtől: <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Az elfogadáshoz kattintson az OK gombra."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct csatlakoztatási kérés a következőtől: <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Adja meg a PIN-kódot a folytatáshoz."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"A csatlakoztatás folytatásához be kell írni a(z) <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> WPS PIN-kódot a partnereszközön (<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>)"</string>
@@ -981,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Gond volt az USB-tár kikapcsolásával. Ellenőrizze, hogy leválasztotta-e az USB-gazdagépet, majd próbálja újra."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB-tár bekapcsolása"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Ha bekapcsolja az USB-tárat, egyes jelenleg használt alkalmazások leállnak és lehet, hogy nem lesznek elérhetők a tár újbóli kikapcsolásáig."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"Az USB művelet sikertelen"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Az USB művelet sikertelen"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Csatlakoztatva médiaeszközként"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Csatlakoztatva kameraként"</string>
@@ -1081,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SD-kártya leválasztása..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Az USB-tár törlése..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Az SD-kártya törlése..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Nem sikerült törölni az USB-tárat."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"Nem sikerült törölni az SD-kártyát."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nem sikerült törölni az USB-tárat."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Nem sikerült törölni az USB-tárat."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Az SD-kártya nem lett lecsatolva, mielőtt eltávolították."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Az USB-tár ellenőrzése folyamatban van."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Az SD-kártya ellenőrzése folyamatban van."</string>
@@ -1126,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G adatforgalom letiltva"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G adatforgalom letiltva"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobil adatforgalom letiltva"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"koppintson az engedélyezéshez"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"koppintson az engedélyezéshez"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Elérte a 2G/3G-adatkorlátot"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Elérte a 4G-adatkorlátot"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Elérte a mobil adatkorlátot"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> a meghatároz. korl. felett"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Biztonsági tanúsítvány"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"A tanúsítvány érvényes."</string>
     <string name="issued_to" msgid="454239480274921032">"Kiállítva a következőnek:"</string>
@@ -1149,4 +1158,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Tevékenység kiválasztása"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Megosztás..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Az eszköz le van zárva."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

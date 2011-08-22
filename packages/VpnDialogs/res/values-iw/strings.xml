@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> מנסה ליצור חיבור VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"אם תמשיך, אתה מעניק ליישום הרשאה לעכב את כל תעבורת הרשת. "<b>" אל תקבל אלא אם כן אתה סומך על היישום. "</b>" אחרת, אתה מסתכן בסיכון הנתונים שלך על ידי תוכנה זדונית."</string>
+    <string name="warning" msgid="5470743576660160079">"אם תמשיך, אתה מעניק ליישום הרשאה לעכב את כל התנועה ברשת. "<b>" אל תקבל אלא אם כן אתה סומך על היישום. "</b>" אחרת, אתה חושף את הנתונים שלך לסכנה של פגיעה על-ידי תוכנה זדונית."</string>
     <string name="accept" msgid="2889226408765810173">"אני סומך על יישום זה."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN מחובר"</string>
     <string name="configure" msgid="4905518375574791375">"הגדר"</string>

@@ -68,7 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"戻る"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ホーム"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"メニュー"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"最近使ったアプリケーション"</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"新着のアプリケーション"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"互換ズームボタン。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"小さい画面から大きい画面に拡大。"</string>
@@ -120,7 +120,7 @@
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"モバイルデータが無効になりました"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"データが無効になりました"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"指定したデータ使用上限に達しました。"\n\n"これ以上データを使用すると、携帯通信会社への料金が発生する可能性があります。"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"データ接続を再度有効にする"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"データを再度有効にする"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"インターネット未接続"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi接続済み"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPSで検索中"</string>

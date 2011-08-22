@@ -60,7 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Compatibilidade de zoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Sempre que uma aplicação tiver sido concebida para ecrãs mais pequenos, aparecerá um controlo de zoom junto ao relógio."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de ecrã guardada na Galeria"</string>
-    <!-- outdated translation 655180965533683356 -->     <string name="screenshot_failed_toast" msgid="1990979819772906912">"Não foi possível guardar a captura de ecrã"</string>
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Não foi possível guardar a captura de ecrã. O armazenamento externo poderá estar a ser utilizado."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções de transm. de fich. USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montar como leitor de multimédia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montar como câmara (PTP)"</string>
@@ -74,7 +74,7 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom menor para ecrã maior."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ligado."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth desligado."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Sem bateria"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Sem bateria."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Uma barra de bateria."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Duas barras de bateria."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Três barras de bateria."</string>
@@ -96,7 +96,7 @@
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Sinal Wi-Fi completo."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -104,7 +104,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Sem SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ligação Bluetooth via telemóvel."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo de avião"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria a <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Botão Definições."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Botão de notificações."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Remover notificação."</string>
@@ -119,12 +119,8 @@
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dados desativados"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"O limite de utilização de dados especificado foi atingido."\n\n"A utilização de dados adicionais poderá estar sujeita a tarifas por parte do operador."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Reativar dados"</string>
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem ligação internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ligado"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"A procurar GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Localização definida por GPS"</string>
 </resources>
