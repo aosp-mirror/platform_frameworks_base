@@ -16643,14 +16643,18 @@ package android.provider {
   }
 
   public static final class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
     field public static final android.net.Uri CONTENT_LIMIT_URI;
     field public static final android.net.Uri CONTENT_PHOTO_URI;
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String MAX_ITEMS = "max_items";
   }
 
   public static final class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
     field public static final java.lang.String CONTENT_DIRECTORY = "photo";
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
   }
 
   protected static abstract interface ContactsContract.StreamItemsColumns {
