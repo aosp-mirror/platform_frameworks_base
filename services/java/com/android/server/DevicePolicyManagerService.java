@@ -1556,13 +1556,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return false;
                 }
             }
-
-            LockPatternUtils utils = new LockPatternUtils(mContext);
-            if(utils.checkPasswordHistory(password)) {
-                Slog.w(TAG, "resetPassword: password is the same as one of the last "
-                        + getPasswordHistoryLength(null) + " passwords");
-                return false;
-            }
         }
 
         int callingUid = Binder.getCallingUid();
