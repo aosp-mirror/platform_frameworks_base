@@ -22,7 +22,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -55,8 +54,6 @@ public class ProfileActivity extends Activity {
     }
 
     public static final String TEMP_FILENAME = "profile.tiles";
-    private static final int LOAD_TEST_DELAY = 1000; // nr of millis after load,
-                                                     // before test
 
     Button mInspectButton;
     ToggleButton mCaptureButton;
@@ -136,16 +133,7 @@ public class ProfileActivity extends Activity {
             super.onPageFinished(view, url);
             view.requestFocus();
 
-            new CountDownTimer(LOAD_TEST_DELAY, LOAD_TEST_DELAY) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                }
-
-                @Override
-                public void onFinish() {
-                    startViewProfiling(true);
-                }
-            }.start();
+            startViewProfiling(true);
         }
 
         @Override
