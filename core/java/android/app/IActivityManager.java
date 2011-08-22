@@ -370,6 +370,8 @@ public interface IActivityManager extends IInterface {
 
     public long[] getProcessPss(int[] pids) throws RemoteException;
 
+    public void showBootMessage(CharSequence msg, boolean always) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -599,4 +601,5 @@ public interface IActivityManager extends IInterface {
     int IS_INTENT_SENDER_TARGETED_TO_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+134;
     int UPDATE_PERSISTENT_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+135;
     int GET_PROCESS_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+136;
+    int SHOW_BOOT_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+137;
 }

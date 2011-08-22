@@ -40,6 +40,7 @@ import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
 
@@ -65,6 +66,11 @@ class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
 
     ContentResolver mContentResolver;
+
+    void reportWtf(String msg, Throwable e) {
+        Slog.w(TAG, "***********************************************");
+        Log.wtf(TAG, "BOOT FAILURE " + msg, e);
+    }
 
     @Override
     public void run() {
@@ -116,7 +122,6 @@ class ServerThread extends Thread {
         WindowManagerService wm = null;
         BluetoothService bluetooth = null;
         BluetoothA2dpService bluetoothA2dp = null;
-        WiredAccessoryObserver wiredAccessory = null;
         DockObserver dock = null;
         UsbService usb = null;
         UiModeManagerService uiMode = null;
@@ -222,7 +227,8 @@ class ServerThread extends Thread {
             }
 
         } catch (RuntimeException e) {
-            Slog.e("System", "Failure starting core service", e);
+            Slog.e("System", "******************************************");
+            Slog.e("System", "************ Failure starting core service", e);
         }
 
         DevicePolicyManagerService devicePolicy = null;
@@ -235,13 +241,52 @@ class ServerThread extends Thread {
         CountryDetectorService countryDetector = null;
         TextServicesManagerService tsms = null;
 
+        // Bring up services needed for UI.
+        if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            try {
+                Slog.i(TAG, "Input Method Service");
+                imm = new InputMethodManagerService(context);
+                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
+            } catch (Throwable e) {
+                reportWtf("starting Input Manager Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "Accessibility Manager");
+                ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                        new AccessibilityManagerService(context));
+            } catch (Throwable e) {
+                reportWtf("starting Accessibility Manager", e);
+            }
+        }
+
+        try {
+            wm.displayReady();
+        } catch (Throwable e) {
+            reportWtf("making display ready", e);
+        }
+ 
+        try {
+            pm.performBootDexOpt();
+        } catch (Throwable e) {
+            reportWtf("performing boot dexopt", e);
+        }
+
+        try {
+            ActivityManagerNative.getDefault().showBootMessage(
+                    context.getResources().getText(
+                            com.android.internal.R.string.android_upgrading_starting_apps),
+                            false);
+        } catch (RemoteException e) {
+        }
+
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
                 Slog.i(TAG, "Device Policy");
                 devicePolicy = new DevicePolicyManagerService(context);
                 ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting DevicePolicyService", e);
+                reportWtf("starting DevicePolicyService", e);
             }
 
             try {
@@ -249,7 +294,7 @@ class ServerThread extends Thread {
                 statusBar = new StatusBarManagerService(context, wm);
                 ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting StatusBarManagerService", e);
+                reportWtf("starting StatusBarManagerService", e);
             }
 
             try {
@@ -257,15 +302,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.CLIPBOARD_SERVICE,
                         new ClipboardService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Clipboard Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "Input Method Service");
-                imm = new InputMethodManagerService(context, statusBar);
-                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Input Manager Service", e);
+                reportWtf("starting Clipboard Service", e);
             }
 
             try {
@@ -273,7 +310,7 @@ class ServerThread extends Thread {
                 networkManagement = NetworkManagementService.create(context);
                 ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting NetworkManagement Service", e);
+                reportWtf("starting NetworkManagement Service", e);
             }
 
             try {
@@ -281,7 +318,7 @@ class ServerThread extends Thread {
                 tsms = new TextServicesManagerService(context);
                 ServiceManager.addService(Context.TEXT_SERVICES_MANAGER_SERVICE, tsms);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Text Service Manager Service", e);
+                reportWtf("starting Text Service Manager Service", e);
             }
 
             try {
@@ -289,7 +326,7 @@ class ServerThread extends Thread {
                 networkStats = new NetworkStatsService(context, networkManagement, alarm);
                 ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting NetworkStats Service", e);
+                reportWtf("starting NetworkStats Service", e);
             }
 
             try {
@@ -299,7 +336,7 @@ class ServerThread extends Thread {
                         networkStats, networkManagement);
                 ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting NetworkPolicy Service", e);
+                reportWtf("starting NetworkPolicy Service", e);
             }
 
            try {
@@ -307,7 +344,7 @@ class ServerThread extends Thread {
                 wifiP2p = new WifiP2pService(context);
                 ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Wi-Fi P2pService", e);
+                reportWtf("starting Wi-Fi P2pService", e);
             }
 
            try {
@@ -316,7 +353,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.WIFI_SERVICE, wifi);
                 wifi.checkAndStartWifi();
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Wi-Fi Service", e);
+                reportWtf("starting Wi-Fi Service", e);
             }
 
             try {
@@ -327,7 +364,7 @@ class ServerThread extends Thread {
                 networkPolicy.bindConnectivityManager(connectivity);
                 wifiP2p.connectivityServiceReady();
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Connectivity Service", e);
+                reportWtf("starting Connectivity Service", e);
             }
 
             try {
@@ -336,15 +373,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(
                         Context.THROTTLE_SERVICE, throttle);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting ThrottleService", e);
-            }
-
-            try {
-              Slog.i(TAG, "Accessibility Manager");
-              ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
-                      new AccessibilityManagerService(context));
-            } catch (Throwable e) {
-              Slog.e(TAG, "Failure starting Accessibility Manager", e);
+                reportWtf("starting ThrottleService", e);
             }
 
             try {
@@ -355,7 +384,7 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "Mount Service");
                 ServiceManager.addService("mount", new MountService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Mount Service", e);
+                reportWtf("starting Mount Service", e);
             }
 
             try {
@@ -364,7 +393,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
                 networkPolicy.bindNotificationManager(notification);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Notification Manager", e);
+                reportWtf("starting Notification Manager", e);
             }
 
             try {
@@ -372,7 +401,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
                         new DeviceStorageMonitorService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting DeviceStorageMonitor service", e);
+                reportWtf("starting DeviceStorageMonitor service", e);
             }
 
             try {
@@ -380,7 +409,7 @@ class ServerThread extends Thread {
                 location = new LocationManagerService(context);
                 ServiceManager.addService(Context.LOCATION_SERVICE, location);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Location Manager", e);
+                reportWtf("starting Location Manager", e);
             }
 
             try {
@@ -388,7 +417,7 @@ class ServerThread extends Thread {
                 countryDetector = new CountryDetectorService(context);
                 ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Country Detector", e);
+                reportWtf("starting Country Detector", e);
             }
 
             try {
@@ -396,7 +425,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.SEARCH_SERVICE,
                         new SearchManagerService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Search Service", e);
+                reportWtf("starting Search Service", e);
             }
 
             try {
@@ -404,7 +433,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.DROPBOX_SERVICE,
                         new DropBoxManagerService(context, new File("/data/system/dropbox")));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting DropBoxManagerService", e);
+                reportWtf("starting DropBoxManagerService", e);
             }
 
             try {
@@ -412,14 +441,14 @@ class ServerThread extends Thread {
                 wallpaper = new WallpaperManagerService(context);
                 ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Wallpaper Service", e);
+                reportWtf("starting Wallpaper Service", e);
             }
 
             try {
                 Slog.i(TAG, "Audio Service");
                 ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Audio Service", e);
+                reportWtf("starting Audio Service", e);
             }
 
             try {
@@ -427,15 +456,15 @@ class ServerThread extends Thread {
                 // Listen for dock station changes
                 dock = new DockObserver(context, power);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting DockObserver", e);
+                reportWtf("starting DockObserver", e);
             }
 
             try {
                 Slog.i(TAG, "Wired Accessory Observer");
                 // Listen for wired headset changes
-                wiredAccessory = new WiredAccessoryObserver(context);
+                new WiredAccessoryObserver(context);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting WiredAccessoryObserver", e);
+                reportWtf("starting WiredAccessoryObserver", e);
             }
 
             try {
@@ -444,7 +473,7 @@ class ServerThread extends Thread {
                 usb = new UsbService(context);
                 ServiceManager.addService(Context.USB_SERVICE, usb);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting UsbService", e);
+                reportWtf("starting UsbService", e);
             }
 
             try {
@@ -452,7 +481,7 @@ class ServerThread extends Thread {
                 // Listen for UI mode changes
                 uiMode = new UiModeManagerService(context);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting UiModeManagerService", e);
+                reportWtf("starting UiModeManagerService", e);
             }
 
             try {
@@ -468,21 +497,21 @@ class ServerThread extends Thread {
                 appWidget = new AppWidgetService(context);
                 ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting AppWidget Service", e);
+                reportWtf("starting AppWidget Service", e);
             }
 
             try {
                 Slog.i(TAG, "Recognition Service");
                 recognition = new RecognitionManagerService(context);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Recognition Service", e);
+                reportWtf("starting Recognition Service", e);
             }
 
             try {
                 Slog.i(TAG, "DiskStats Service");
                 ServiceManager.addService("diskstats", new DiskStatsService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting DiskStats Service", e);
+                reportWtf("starting DiskStats Service", e);
             }
 
             try {
@@ -494,14 +523,14 @@ class ServerThread extends Thread {
                 ServiceManager.addService("samplingprofiler",
                             new SamplingProfilerService(context));
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting SamplingProfiler Service", e);
+                reportWtf("starting SamplingProfiler Service", e);
             }
 
             try {
                 Slog.i(TAG, "NetworkTimeUpdateService");
                 networkTimeUpdater = new NetworkTimeUpdateService(context);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting NetworkTimeUpdate service");
+                reportWtf("starting NetworkTimeUpdate service", e);
             }
         }
 
@@ -522,14 +551,26 @@ class ServerThread extends Thread {
         // It is now time to start up the app processes...
 
         if (devicePolicy != null) {
-            devicePolicy.systemReady();
+            try {
+                devicePolicy.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Device Policy Service ready", e);
+            }
         }
 
         if (notification != null) {
-            notification.systemReady();
+            try {
+                notification.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Notification Service ready", e);
+            }
         }
 
-        wm.systemReady();
+        try {
+            wm.systemReady();
+        } catch (Throwable e) {
+            reportWtf("making Window Manager Service ready", e);
+        }
 
         if (safeMode) {
             ActivityManagerService.self().showSafeModeOverlay();
@@ -547,7 +588,8 @@ class ServerThread extends Thread {
         power.systemReady();
         try {
             pm.systemReady();
-        } catch (RemoteException e) {
+        } catch (Throwable e) {
+            reportWtf("making Package Manager Service ready", e);
         }
 
         // These are needed to propagate to the runnable below.
@@ -569,6 +611,7 @@ class ServerThread extends Thread {
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
         final TextServicesManagerService textServiceManagerServiceF = tsms;
+        final StatusBarManagerService statusBarF = statusBar;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -581,28 +624,96 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "Making services ready");
 
                 startSystemUi(contextF);
-                if (batteryF != null) batteryF.systemReady();
-                if (networkManagementF != null) networkManagementF.systemReady();
-                if (networkStatsF != null) networkStatsF.systemReady();
-                if (networkPolicyF != null) networkPolicyF.systemReady();
-                if (connectivityF != null) connectivityF.systemReady();
-                if (dockF != null) dockF.systemReady();
-                if (usbF != null) usbF.systemReady();
-                if (uiModeF != null) uiModeF.systemReady();
-                if (recognitionF != null) recognitionF.systemReady();
+                try {
+                    if (batteryF != null) batteryF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Battery Service ready", e);
+                }
+                try {
+                    if (networkManagementF != null) networkManagementF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Managment Service ready", e);
+                }
+                try {
+                    if (networkStatsF != null) networkStatsF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Stats Service ready", e);
+                }
+                try {
+                    if (networkPolicyF != null) networkPolicyF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Policy Service ready", e);
+                }
+                try {
+                    if (connectivityF != null) connectivityF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Connectivity Service ready", e);
+                }
+                try {
+                    if (dockF != null) dockF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Dock Service ready", e);
+                }
+                try {
+                    if (usbF != null) usbF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making USB Service ready", e);
+                }
+                try {
+                    if (uiModeF != null) uiModeF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making UI Mode Service ready", e);
+                }
+                try {
+                    if (recognitionF != null) recognitionF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Recognition Service ready", e);
+                }
                 Watchdog.getInstance().start();
 
                 // It is now okay to let the various system services start their
                 // third party code...
 
-                if (appWidgetF != null) appWidgetF.systemReady(safeMode);
-                if (wallpaperF != null) wallpaperF.systemReady();
-                if (immF != null) immF.systemReady();
-                if (locationF != null) locationF.systemReady();
-                if (countryDetectorF != null) countryDetectorF.systemReady();
-                if (throttleF != null) throttleF.systemReady();
-                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
-                if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
+                try {
+                    if (appWidgetF != null) appWidgetF.systemReady(safeMode);
+                } catch (Throwable e) {
+                    reportWtf("making App Widget Service ready", e);
+                }
+                try {
+                    if (wallpaperF != null) wallpaperF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Wallpaper Service ready", e);
+                }
+                try {
+                    if (immF != null) immF.systemReady(statusBarF);
+                } catch (Throwable e) {
+                    reportWtf("making Input Method Service ready", e);
+                }
+                try {
+                    if (locationF != null) locationF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Location Service ready", e);
+                }
+                try {
+                    if (countryDetectorF != null) countryDetectorF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Country Detector Service ready", e);
+                }
+                try {
+                    if (throttleF != null) throttleF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Throttle Service ready", e);
+                }
+                try {
+                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Network Time Service ready", e);
+                }
+                try {
+                    if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Text Services Manager Service ready", e);
+                }
             }
         });
 

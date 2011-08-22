@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2006-2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -48,7 +47,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -57,7 +55,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.graphics.BitmapFactory;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Environment;
@@ -98,12 +95,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -147,7 +142,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final Handler mHandler;
     final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
-    final StatusBarManagerService mStatusBar;
     final IWindowManager mIWindowManager;
     final HandlerCaller mCaller;
     private final InputMethodFileManager mFileManager;
@@ -162,10 +156,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
 
     // Ongoing notification
-    private final NotificationManager mNotificationManager;
-    private final KeyguardManager mKeyguardManager;
-    private final Notification mImeSwitcherNotification;
-    private final PendingIntent mImeSwitchPendingIntent;
+    private NotificationManager mNotificationManager;
+    private KeyguardManager mKeyguardManager;
+    private StatusBarManagerService mStatusBar;
+    private Notification mImeSwitcherNotification;
+    private PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
 
@@ -469,8 +464,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
                             mImeWindowVis = 0;
-                            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
-                                    mBackDisposition);
+                            updateImeWindowStatusLocked();
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -511,7 +505,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public InputMethodManagerService(Context context, StatusBarManagerService statusBar) {
+    public InputMethodManagerService(Context context) {
         mContext = context;
         mRes = context.getResources();
         mHandler = new Handler(this);
@@ -524,10 +518,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         });
 
-        mKeyguardManager = (KeyguardManager)
-                mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mNotificationManager = (NotificationManager)
-                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mImeSwitcherNotification = new Notification();
         mImeSwitcherNotification.icon = com.android.internal.R.drawable.ic_notification_ime_default;
         mImeSwitcherNotification.when = 0;
@@ -553,8 +543,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         screenOnOffFilt.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(new ScreenOnOffReceiver(), screenOnOffFilt);
 
-        mStatusBar = statusBar;
-        statusBar.setIconVisibility("ime", false);
         mNotificationShown = false;
 
         // mSettings should be created before buildInputMethodListLocked
@@ -608,10 +596,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public void systemReady() {
+    public void systemReady(StatusBarManagerService statusBar) {
         synchronized (mMethodMap) {
             if (!mSystemReady) {
                 mSystemReady = true;
+                mKeyguardManager = (KeyguardManager)
+                        mContext.getSystemService(Context.KEYGUARD_SERVICE);
+                mNotificationManager = (NotificationManager)
+                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                mStatusBar = statusBar;
+                statusBar.setIconVisibility("ime", false);
+                updateImeWindowStatusLocked();
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 try {
@@ -620,6 +615,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Unexpected exception", e);
                 }
             }
+        }
+    }
+
+    void updateImeWindowStatusLocked() {
+        if (mStatusBar != null) {
+            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
+                    mBackDisposition);
         }
     }
 
@@ -1009,7 +1011,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mEnabledSession = null;
             mCurMethod = null;
         }
-        mStatusBar.setIconVisibility("ime", false);
+        if (mStatusBar != null) {
+            mStatusBar.setIconVisibility("ime", false);
+        }
     }
 
     @Override
@@ -1046,7 +1050,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
-                    mStatusBar.setIconVisibility("ime", false);
+                    if (mStatusBar != null) {
+                        mStatusBar.setIconVisibility("ime", false);
+                    }
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
                     CharSequence contentDescription = null;
@@ -1057,9 +1063,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     } catch (NameNotFoundException nnfe) {
                         /* ignore */
                     }
-                    mStatusBar.setIcon("ime", packageName, iconId, 0,
-                            contentDescription  != null ? contentDescription.toString() : null);
-                    mStatusBar.setIconVisibility("ime", true);
+                    if (mStatusBar != null) {
+                        mStatusBar.setIcon("ime", packageName, iconId, 0,
+                                contentDescription  != null
+                                        ? contentDescription.toString() : null);
+                        mStatusBar.setIconVisibility("ime", true);
+                    }
                 }
             }
         } finally {
@@ -1125,7 +1134,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 mImeWindowVis = vis;
                 mBackDisposition = backDisposition;
-                mStatusBar.setImeWindowStatus(token, vis, backDisposition);
+                if (mStatusBar != null) {
+                    mStatusBar.setImeWindowStatus(token, vis, backDisposition);
+                }
                 final boolean iconVisibility = (vis & InputMethodService.IME_ACTIVE) != 0;
                 final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
                 if (imi != null && iconVisibility && needsToShowImeSwitchOngoingNotification()) {
@@ -1142,12 +1153,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                     mImeSwitcherNotification.setLatestEventInfo(
                             mContext, title, summary, mImeSwitchPendingIntent);
-                    mNotificationManager.notify(
-                            com.android.internal.R.string.select_input_method,
-                            mImeSwitcherNotification);
-                    mNotificationShown = true;
+                    if (mNotificationManager != null) {
+                        mNotificationManager.notify(
+                                com.android.internal.R.string.select_input_method,
+                                mImeSwitcherNotification);
+                        mNotificationShown = true;
+                    }
                 } else {
-                    if (mNotificationShown) {
+                    if (mNotificationShown && mNotificationManager != null) {
                         mNotificationManager.cancel(
                                 com.android.internal.R.string.select_input_method);
                         mNotificationShown = false;
@@ -1252,8 +1265,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mImeWindowVis = (mInputShown || hardKeyShown) ? (
                                     InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE)
                                     : 0;
-                            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
-                                    mBackDisposition);
+                            updateImeWindowStatusLocked();
                             // If subtype is null, try to find the most applicable one from
                             // getCurrentInputMethodSubtype.
                             if (subtype == null) {
@@ -1374,13 +1386,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
                                     + uid + ": " + client);
                             mImeWindowVis = 0;
-                            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
-                                    mBackDisposition);
+                            updateImeWindowStatusLocked();
                             return false;
                         }
                     } catch (RemoteException e) {
                         mImeWindowVis = 0;
-                        mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis, mBackDisposition);
+                        updateImeWindowStatusLocked();
                         return false;
                     }
                 }
@@ -2151,7 +2162,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     });
 
-            if (showSubtypes && !(mKeyguardManager.isKeyguardLocked()
+            if (showSubtypes && mKeyguardManager != null && !(mKeyguardManager.isKeyguardLocked()
                     && mKeyguardManager.isKeyguardSecure())) {
                 mDialogBuilder.setPositiveButton(
                         com.android.internal.R.string.configure_input_methods,

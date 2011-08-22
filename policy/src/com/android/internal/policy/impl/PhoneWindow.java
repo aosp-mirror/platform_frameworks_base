@@ -2540,8 +2540,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if ((getForcedWindowFlags()&WindowManager.LayoutParams.FLAG_DIM_BEHIND) == 0) {
                 params.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
             }
-            params.dimAmount = a.getFloat(
-                    android.R.styleable.Window_backgroundDimAmount, 0.5f);
+            if (!haveDimAmount()) {
+                params.dimAmount = a.getFloat(
+                        android.R.styleable.Window_backgroundDimAmount, 0.5f);
+            }
         }
 
         if (params.windowAnimations == 0) {

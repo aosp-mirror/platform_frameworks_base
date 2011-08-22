@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IUiModeManager;
+import android.app.ProgressDialog;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -3078,7 +3079,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             });
         }
     }
-   
+
+    ProgressDialog mBootMsgDialog = null;
+
+    /** {@inheritDoc} */
+    public void showBootMessage(final CharSequence msg, final boolean always) {
+        mHandler.post(new Runnable() {
+            @Override public void run() {
+                if (mBootMsgDialog == null) {
+                    mBootMsgDialog = new ProgressDialog(mContext);
+                    mBootMsgDialog.setTitle(R.string.android_upgrading_title);
+                    mBootMsgDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    mBootMsgDialog.setIndeterminate(true);
+                    mBootMsgDialog.getWindow().setType(
+                            WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY);
+                    mBootMsgDialog.getWindow().addFlags(
+                            WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+                    mBootMsgDialog.getWindow().setDimAmount(1);
+                    mBootMsgDialog.setCancelable(false);
+                    mBootMsgDialog.show();
+                }
+                mBootMsgDialog.setMessage(msg);
+            }
+        });
+    }
+
+    /** {@inheritDoc} */
+    public void hideBootMessages() {
+        mHandler.post(new Runnable() {
+            @Override public void run() {
+                if (mBootMsgDialog != null) {
+                    mBootMsgDialog.dismiss();
+                    mBootMsgDialog = null;
+                }
+            }
+        });
+    }
+
     /** {@inheritDoc} */
     public void userActivity() {
         synchronized (mScreenLockTimeout) {
