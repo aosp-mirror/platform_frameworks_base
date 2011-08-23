@@ -2512,8 +2512,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         a.getValue(com.android.internal.R.styleable.Window_windowMinWidthMajor, mMinWidthMajor);
         a.getValue(com.android.internal.R.styleable.Window_windowMinWidthMinor, mMinWidthMinor);
 
-        if (getContext().getApplicationInfo().targetSdkVersion
-                < android.os.Build.VERSION_CODES.HONEYCOMB) {
+        final Context context = getContext();
+        final int targetSdk = context.getApplicationInfo().targetSdkVersion;
+        final boolean targetPreHoneycomb = targetSdk < android.os.Build.VERSION_CODES.HONEYCOMB;
+        final boolean targetPreIcs = targetSdk < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+        final boolean targetHcNeedsOptions = context.getResources().getBoolean(
+                com.android.internal.R.bool.target_honeycomb_needs_options_menu);
+        final boolean noActionBar = !hasFeature(FEATURE_ACTION_BAR) || hasFeature(FEATURE_NO_TITLE);
+
+        if (targetPreHoneycomb || (targetPreIcs && targetHcNeedsOptions && noActionBar)) {
             addFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
         }
         
