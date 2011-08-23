@@ -240,109 +240,148 @@ public class RemoteControlClient
      * Class used to modify metadata in a {@link RemoteControlClient} object.
      */
     public class MetadataEditor {
+        protected boolean mMetadataChanged;
+        protected boolean mArtworkChanged;
+        protected Bitmap mEditorArtwork;
+        protected Bundle mEditorMetadata;
+        private boolean mApplied = false;
 
-        private MetadataEditor() { /* only use factory */ }
+        // only use RemoteControlClient.editMetadata() to get a MetadataEditor instance
+        private MetadataEditor() { }
+        /**
+         * @hide
+         */
+        public Object clone() throws CloneNotSupportedException {
+            throw new CloneNotSupportedException();
+        }
 
-        public MetadataEditor putString(int key, String value) {
+        /**
+         * Adds textual information to be displayed.
+         * Note that none of the information added after {@link #apply()} has been called,
+         * will be displayed.
+         * @param key the identifier of a the metadata field to set. Valid values are
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ALBUM},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ALBUMARTIST},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ARTIST},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_AUTHOR},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_CD_TRACK_NUMBER},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_COMPILATION},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_COMPOSER},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DATE},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_GENRE},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_WRITER},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
+         * @param value the text for the given key, or null to signify there is no valid
+         *      information for the field.
+         * @return      FIXME description
+         */
+        public synchronized MetadataEditor putString(int key, String value) {
+            if (mApplied) {
+                Log.e(TAG, "Can't edit a previously applied MetadataEditor");
+                return this;
+            }
+            mEditorMetadata.putString(String.valueOf(key), value);
+            mMetadataChanged = true;
             return this;
         }
 
-        public MetadataEditor putBitmap(int key, Bitmap bitmap) {
-            return this;
-        }
+        /**
+         * The metadata key for the content artwork / album art.
+         */
+        public final int METADATA_KEY_ARTWORK = 100;
 
-        public void clear() {
-
-        }
-
-        public void apply() {
-
-        }
-    }
-
-    public MetadataEditor editMetadata(boolean startEmpty) {
-        return (new MetadataEditor());
-    }
-
-
-    /**
-     * @hide
-     * FIXME migrate this functionality under MetadataEditor
-     * Start collecting information to be displayed.
-     * Use {@link #commitMetadata()} to signal the end of the collection which has been created
-     *  through one or multiple calls to {@link #addMetadataString(int, int, String)}.
-     */
-    public void startMetadata() {
-        synchronized(mCacheLock) {
-            mMetadata.clear();
-        }
-    }
-
-    /**
-     * @hide
-     * FIXME migrate this functionality under MetadataEditor
-     * Adds textual information to be displayed.
-     * Note that none of the information added before {@link #startMetadata()},
-     * and after {@link #commitMetadata()} has been called, will be displayed.
-     * @param key the identifier of a the metadata field to set. Valid values are
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ALBUM},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ALBUMARTIST},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ARTIST},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_AUTHOR},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_CD_TRACK_NUMBER},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_COMPILATION},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_COMPOSER},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DATE},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_GENRE},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_WRITER},
-     *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
-     * @param value the String for the field value, or null to signify there is no valid
-     *      information for the field.
-     */
-    public void addMetadataString(int key, String value) {
-        synchronized(mCacheLock) {
-            // store locally
-            mMetadata.putString(String.valueOf(key), value);
-        }
-    }
-
-    /**
-     * @hide
-     * FIXME migrate this functionality under MetadataEditor
-     * Marks all the metadata previously set with {@link #addMetadataString(int, int, String)} as
-     * eligible to be displayed.
-     */
-    public void commitMetadata() {
-        synchronized(mCacheLock) {
-            // send to remote control display if conditions are met
-            sendMetadata_syncCacheLock();
-        }
-    }
-
-    /**
-     * @hide
-     * FIXME migrate this functionality under MetadataEditor
-     * Sets the album / artwork picture to be displayed on the remote control.
-     * @param artwork the bitmap for the artwork, or null if there isn't any.
-     * @see android.graphics.Bitmap
-     */
-    public void setArtwork(Bitmap artwork) {
-        synchronized(mCacheLock) {
-            // resize and store locally
-            if (mArtworkExpectedWidth > 0) {
-                mArtwork = scaleBitmapIfTooBig(artwork,
+        /**
+         * Sets the album / artwork picture to be displayed on the remote control.
+         * @param key FIXME description
+         * @param bitmap the bitmap for the artwork, or null if there isn't any.
+         * @return FIXME description
+         * @see android.graphics.Bitmap
+         */
+        public synchronized MetadataEditor putBitmap(int key, Bitmap bitmap) {
+            if (mApplied) {
+                Log.e(TAG, "Can't edit a previously applied MetadataEditor");
+                return this;
+            }
+            if (key != METADATA_KEY_ARTWORK) {
+                return this;
+            }
+            if ((mArtworkExpectedWidth > 0) && (mArtworkExpectedHeight > 0)) {
+                mEditorArtwork = scaleBitmapIfTooBig(bitmap,
                         mArtworkExpectedWidth, mArtworkExpectedHeight);
             } else {
                 // no valid resize dimensions, store as is
-                mArtwork = artwork;
+                mEditorArtwork = bitmap;
             }
-            // send to remote control display if conditions are met
-            sendArtwork_syncCacheLock();
+            mArtworkChanged = true;
+            return this;
         }
+
+        /**
+         * FIXME description
+         */
+        public synchronized void clear() {
+            if (mApplied) {
+                Log.e(TAG, "Can't clear a previously applied MetadataEditor");
+                return;
+            }
+            mEditorMetadata.clear();
+            mEditorArtwork = null;
+        }
+
+        /**
+         * FIXME description
+         */
+        public synchronized void apply() {
+            if (mApplied) {
+                Log.e(TAG, "Can't apply a previously applied MetadataEditor");
+                return;
+            }
+            synchronized(mCacheLock) {
+                // assign the edited data
+                mMetadata = new Bundle(mEditorMetadata);
+                mArtwork = mEditorArtwork;
+                if (mMetadataChanged & mArtworkChanged) {
+                    // FIXME the following two send methods need to be combined in a single call
+                    //  that pushes the metadata and artwork in one binder call
+                    // send to remote control display if conditions are met
+                    sendMetadata_syncCacheLock();
+                    // send to remote control display if conditions are met
+                    sendArtwork_syncCacheLock();
+                } else if (mMetadataChanged) {
+                    // send to remote control display if conditions are met
+                    sendMetadata_syncCacheLock();
+                } else if (mArtworkChanged) {
+                    // send to remote control display if conditions are met
+                    sendArtwork_syncCacheLock();
+                }
+                mApplied = true;
+            }
+        }
+    }
+
+    /**
+     * FIXME description
+     * @param startEmpty
+     * @return
+     */
+    public MetadataEditor editMetadata(boolean startEmpty) {
+        MetadataEditor editor = new MetadataEditor();
+        if (startEmpty) {
+            editor.mEditorMetadata = new Bundle();
+            editor.mEditorArtwork = null;
+            editor.mMetadataChanged = true;
+            editor.mArtworkChanged = true;
+        } else {
+            editor.mEditorMetadata = new Bundle(mMetadata);
+            editor.mEditorArtwork = mArtwork;
+            editor.mMetadataChanged = false;
+            editor.mArtworkChanged = false;
+        }
+        return editor;
     }
 
     /**
@@ -402,6 +441,9 @@ public class RemoteControlClient
     /**
      * Cache for the artwork bitmap.
      * Access synchronized on mCacheLock
+     * Artwork and metadata are not kept in one Bundle because the bitmap sometimes needs to be
+     * accessed to be resized, in which case a copy will be made. This would add overhead in
+     * Bundle operations.
      */
     private Bitmap mArtwork;
     private final int ARTWORK_DEFAULT_SIZE = 256;
@@ -417,6 +459,7 @@ public class RemoteControlClient
      * Access synchronized on mCacheLock
      */
     private Bundle mMetadata = new Bundle();
+
     /**
      * The current remote control client generation ID across the system
      */
