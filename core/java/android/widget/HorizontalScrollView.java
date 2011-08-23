@@ -399,6 +399,35 @@ public class HorizontalScrollView extends FrameLayout {
         return false;
     }
 
+    private void initOrResetVelocityTracker() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        } else {
+            mVelocityTracker.clear();
+        }
+    }
+
+    private void initVelocityTrackerIfNotExists() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+    }
+
+    private void recycleVelocityTracker() {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        if (disallowIntercept) {
+            recycleVelocityTracker();
+        }
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
@@ -440,6 +469,8 @@ public class HorizontalScrollView extends FrameLayout {
                 if (xDiff > mTouchSlop) {
                     mIsBeingDragged = true;
                     mLastMotionX = x;
+                    initVelocityTrackerIfNotExists();
+                    mVelocityTracker.addMovement(ev);
                     if (mParent != null) mParent.requestDisallowInterceptTouchEvent(true);
                 }
                 break;
@@ -449,6 +480,7 @@ public class HorizontalScrollView extends FrameLayout {
                 final float x = ev.getX();
                 if (!inChild((int) x, (int) ev.getY())) {
                     mIsBeingDragged = false;
+                    recycleVelocityTracker();
                     break;
                 }
 
@@ -458,6 +490,9 @@ public class HorizontalScrollView extends FrameLayout {
                  */
                 mLastMotionX = x;
                 mActivePointerId = ev.getPointerId(0);
+
+                initOrResetVelocityTracker();
+                mVelocityTracker.addMovement(ev);
 
                 /*
                 * If being flinged and user touches the screen, initiate drag;
@@ -498,9 +533,7 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
+        initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
         final int action = ev.getAction();
@@ -584,11 +617,8 @@ public class HorizontalScrollView extends FrameLayout {
 
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
+                    recycleVelocityTracker();
 
-                    if (mVelocityTracker != null) {
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                    }
                     if (mEdgeGlowLeft != null) {
                         mEdgeGlowLeft.onRelease();
                         mEdgeGlowRight.onRelease();
@@ -602,10 +632,8 @@ public class HorizontalScrollView extends FrameLayout {
                     }
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
-                    if (mVelocityTracker != null) {
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                    }
+                    recycleVelocityTracker();
+
                     if (mEdgeGlowLeft != null) {
                         mEdgeGlowLeft.onRelease();
                         mEdgeGlowRight.onRelease();
