@@ -600,6 +600,11 @@ public class BluetoothService extends IBluetooth.Stub {
      * It inits bond state and profile state before STATE_ON intent is broadcasted.
      */
     /*package*/ void initBluetoothAfterTurningOn() {
+        String discoverable = getProperty("Discoverable", false);
+        String timeout = getProperty("DiscoverableTimeout", false);
+        if (discoverable.equals("true") && Integer.valueOf(timeout) != 0) {
+            setAdapterPropertyBooleanNative("Discoverable", 0);
+        }
         mBondState.initBondState();
         initProfileState();
     }
