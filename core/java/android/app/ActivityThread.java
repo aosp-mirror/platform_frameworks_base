@@ -4091,23 +4091,12 @@ public final class ActivityThread {
     final void removeDeadProvider(String name, IContentProvider provider) {
         synchronized(mProviderMap) {
             ProviderClientRecord pr = mProviderMap.get(name);
-            if (pr.mProvider.asBinder() == provider.asBinder()) {
+            if (pr != null && pr.mProvider.asBinder() == provider.asBinder()) {
                 Slog.i(TAG, "Removing dead content provider: " + name);
                 ProviderClientRecord removed = mProviderMap.remove(name);
                 if (removed != null) {
                     removed.mProvider.asBinder().unlinkToDeath(removed, 0);
                 }
-            }
-        }
-    }
-
-    final void removeDeadProviderLocked(String name, IContentProvider provider) {
-        ProviderClientRecord pr = mProviderMap.get(name);
-        if (pr.mProvider.asBinder() == provider.asBinder()) {
-            Slog.i(TAG, "Removing dead content provider: " + name);
-            ProviderClientRecord removed = mProviderMap.remove(name);
-            if (removed != null) {
-                removed.mProvider.asBinder().unlinkToDeath(removed, 0);
             }
         }
     }
