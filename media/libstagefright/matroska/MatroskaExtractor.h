@@ -68,6 +68,7 @@ private:
     mkvparser::Segment *mSegment;
     bool mExtractedThumbnails;
     bool mIsLiveStreaming;
+    bool mIsWebm;
 
     void addTracks();
     void findThumbnails();
