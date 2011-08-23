@@ -777,23 +777,24 @@ public final class BluetoothAdapter {
      * Get the current connection state of a profile.
      * This function can be used to check whether the local Bluetooth adapter
      * is connected to any remote device for a specific profile.
-     * Profile can be one of {@link BluetoothProfile.HEADSET},
-     * {@link BluetoothProfile.A2DP}.
+     * Profile can be one of {@link BluetoothProfile#HEADSET},
+     * {@link BluetoothProfile#A2DP}.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * <p> Return value can be one of
-     * {@link * BluetoothProfile.STATE_DISCONNECTED},
-     * {@link * BluetoothProfile.STATE_CONNECTING},
-     * {@link * BluetoothProfile.STATE_CONNECTED},
-     * {@link * BluetoothProfile.STATE_DISCONNECTING}
-     * @hide
+     * {@link BluetoothProfile#STATE_DISCONNECTED},
+     * {@link BluetoothProfile#STATE_CONNECTING},
+     * {@link BluetoothProfile#STATE_CONNECTED},
+     * {@link BluetoothProfile#STATE_DISCONNECTING}
      */
     public int getProfileConnectionState(int profile) {
         if (getState() != STATE_ON) return BluetoothProfile.STATE_DISCONNECTED;
         try {
             return mService.getProfileConnectionState(profile);
-        } catch (RemoteException e) {Log.e(TAG, "getProfileConnectionState:", e);}
+        } catch (RemoteException e) {
+            Log.e(TAG, "getProfileConnectionState:", e);
+        }
         return BluetoothProfile.STATE_DISCONNECTED;
     }
 
