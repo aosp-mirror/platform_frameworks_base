@@ -378,23 +378,35 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
             // fall through
         }
 
-        if (mUpsamplingFactor == 2) {
-            if (mConfig->desiredChannels == 1) {
-                memcpy(&mConfig->pOutputBuffer[1024],
-                       &mConfig->pOutputBuffer[2048],
-                       numOutBytes * 2);
+        if (decoderErr == MP4AUDEC_SUCCESS || mNumSamplesOutput > 0) {
+            // We'll only output data if we successfully decoded it or
+            // we've previously decoded valid data, in the latter case
+            // (decode failed) we'll output a silent frame.
+
+            if (mUpsamplingFactor == 2) {
+                if (mConfig->desiredChannels == 1) {
+                    memcpy(&mConfig->pOutputBuffer[1024],
+                           &mConfig->pOutputBuffer[2048],
+                           numOutBytes * 2);
+                }
+                numOutBytes *= 2;
             }
-            numOutBytes *= 2;
+
+            outHeader->nFilledLen = numOutBytes;
+            outHeader->nFlags = 0;
+
+            outHeader->nTimeStamp =
+                mAnchorTimeUs
+                    + (mNumSamplesOutput * 1000000ll) / mConfig->samplingRate;
+
+            mNumSamplesOutput += mConfig->frameLength * mUpsamplingFactor;
+
+            outInfo->mOwnedByUs = false;
+            outQueue.erase(outQueue.begin());
+            outInfo = NULL;
+            notifyFillBufferDone(outHeader);
+            outHeader = NULL;
         }
-
-        outHeader->nFilledLen = numOutBytes;
-        outHeader->nFlags = 0;
-
-        outHeader->nTimeStamp =
-            mAnchorTimeUs
-                + (mNumSamplesOutput * 1000000ll) / mConfig->samplingRate;
-
-        mNumSamplesOutput += mConfig->frameLength * mUpsamplingFactor;
 
         if (inHeader->nFilledLen == 0) {
             inInfo->mOwnedByUs = false;
@@ -403,12 +415,6 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
             notifyEmptyBufferDone(inHeader);
             inHeader = NULL;
         }
-
-        outInfo->mOwnedByUs = false;
-        outQueue.erase(outQueue.begin());
-        outInfo = NULL;
-        notifyFillBufferDone(outHeader);
-        outHeader = NULL;
 
         if (decoderErr == MP4AUDEC_SUCCESS) {
             ++mInputBufferCount;
