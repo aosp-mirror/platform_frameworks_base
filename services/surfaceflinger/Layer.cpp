@@ -244,9 +244,6 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
     }
 }
 
-static inline uint16_t pack565(int r, int g, int b) {
-    return (r<<11)|(g<<5)|b;
-}
 void Layer::onDraw(const Region& clip) const
 {
     if (CC_UNLIKELY(mActiveBuffer == 0)) {
@@ -260,7 +257,8 @@ void Layer::onDraw(const Region& clip) const
 
         // figure out if there is something below us
         Region under;
-        const SurfaceFlinger::LayerVector& drawingLayers(mFlinger->mDrawingState.layersSortedByZ);
+        const SurfaceFlinger::LayerVector& drawingLayers(
+                mFlinger->mDrawingState.layersSortedByZ);
         const size_t count = drawingLayers.size();
         for (size_t i=0 ; i<count ; ++i) {
             const sp<LayerBase>& layer(drawingLayers[i]);
@@ -276,7 +274,7 @@ void Layer::onDraw(const Region& clip) const
         return;
     }
 
-    GLenum target = mSurfaceTexture->getCurrentTextureTarget();
+    const GLenum target = GL_TEXTURE_EXTERNAL_OES;
     glBindTexture(target, mTextureName);
     if (getFiltering() || needsFiltering() || isFixedSize() || isCropped()) {
         // TODO: we could be more subtle with isFixedSize()
@@ -439,9 +437,8 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             recomputeVisibleRegions = true;
         }
 
-        const GLenum target(mSurfaceTexture->getCurrentTextureTarget());
-        glTexParameterx(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterx(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         // update the layer size and release freeze-lock
         const Layer::State& front(drawingState());
