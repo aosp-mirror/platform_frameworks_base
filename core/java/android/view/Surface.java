@@ -163,7 +163,9 @@ public class Surface implements Parcelable {
      * It is an error to lock a Blur surface, since it doesn't have
      * a backing store.
      * @hide
+     * @deprecated
      */
+    @Deprecated
     public static final int FX_SURFACE_BLUR     = 0x00010000;
     
     /** Creates a Dim surface. Everything behind this surface is dimmed
