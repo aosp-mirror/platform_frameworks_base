@@ -41,6 +41,7 @@ import android.service.textservice.SpellCheckerService;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.textservice.SpellCheckerInfo;
+import android.view.textservice.SpellCheckerSubtype;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -174,7 +175,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         synchronized (mSpellCheckerMap) {
             String curSpellCheckerId =
                     Settings.Secure.getString(mContext.getContentResolver(),
-                            Settings.Secure.SPELL_CHECKER_SERVICE);
+                            Settings.Secure.SELECTED_SPELL_CHECKER);
             if (DBG) {
                 Slog.w(TAG, "getCurrentSpellChecker: " + curSpellCheckerId);
             }
@@ -182,6 +183,35 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 return null;
             }
             return mSpellCheckerMap.get(curSpellCheckerId);
+        }
+    }
+
+    // TODO: Save SpellCheckerSubtype by supported languages.
+    @Override
+    public SpellCheckerSubtype getCurrentSpellCheckerSubtype(String locale) {
+        synchronized (mSpellCheckerMap) {
+            final String subtypeHashCodeStr =
+                    Settings.Secure.getString(mContext.getContentResolver(),
+                            Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE);
+            if (DBG) {
+                Slog.w(TAG, "getCurrentSpellChecker: " + subtypeHashCodeStr);
+            }
+            final SpellCheckerInfo sci = getCurrentSpellChecker(null);
+            if (sci.getSubtypeCount() == 0) {
+                return null;
+            }
+            if (TextUtils.isEmpty(subtypeHashCodeStr)) {
+                // Return the first Subtype if there is no settings for the current subtype.
+                return sci.getSubtypeAt(0);
+            }
+            final int hashCode = Integer.valueOf(subtypeHashCodeStr);
+            for (int i = 0; i < sci.getSubtypeCount(); ++i) {
+                final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
+                if (scs.hashCode() == hashCode) {
+                    return scs;
+                }
+            }
+            return sci.getSubtypeAt(0);
         }
     }
 
@@ -301,7 +331,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public void setCurrentSpellChecker(String sciId) {
+    public void setCurrentSpellChecker(String locale, String sciId) {
         synchronized(mSpellCheckerMap) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_SECURE_SETTINGS)
@@ -314,6 +344,20 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
+    @Override
+    public void setCurrentSpellCheckerSubtype(String locale, int hashCode) {
+        synchronized(mSpellCheckerMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Requires permission "
+                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            }
+            setCurrentSpellCheckerLocked(hashCode);
+        }
+    }
+
     private void setCurrentSpellCheckerLocked(String sciId) {
         if (DBG) {
             Slog.w(TAG, "setCurrentSpellChecker: " + sciId);
@@ -322,7 +366,32 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.SPELL_CHECKER_SERVICE, sciId);
+                    Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setCurrentSpellCheckerLocked(int hashCode) {
+        if (DBG) {
+            Slog.w(TAG, "setCurrentSpellCheckerSubtype: " + hashCode);
+        }
+        final SpellCheckerInfo sci = getCurrentSpellChecker(null);
+        if (sci == null) return;
+        boolean found = false;
+        for (int i = 0; i < sci.getSubtypeCount(); ++i) {
+            if(sci.getSubtypeAt(i).hashCode() == hashCode) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return;
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, String.valueOf(hashCode));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
