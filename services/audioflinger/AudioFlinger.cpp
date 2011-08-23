@@ -522,6 +522,11 @@ uint32_t AudioFlinger::latency(int output) const
 
 status_t AudioFlinger::setMasterVolume(float value)
 {
+    status_t ret = initCheck();
+    if (ret != NO_ERROR) {
+        return ret;
+    }
+
     // check calling permissions
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
@@ -547,7 +552,10 @@ status_t AudioFlinger::setMasterVolume(float value)
 
 status_t AudioFlinger::setMode(int mode)
 {
-    status_t ret;
+    status_t ret = initCheck();
+    if (ret != NO_ERROR) {
+        return ret;
+    }
 
     // check calling permissions
     if (!settingsAllowed()) {
@@ -577,6 +585,11 @@ status_t AudioFlinger::setMode(int mode)
 
 status_t AudioFlinger::setMicMute(bool state)
 {
+    status_t ret = initCheck();
+    if (ret != NO_ERROR) {
+        return ret;
+    }
+
     // check calling permissions
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
@@ -584,13 +597,18 @@ status_t AudioFlinger::setMicMute(bool state)
 
     AutoMutex lock(mHardwareLock);
     mHardwareStatus = AUDIO_HW_SET_MIC_MUTE;
-    status_t ret = mPrimaryHardwareDev->set_mic_mute(mPrimaryHardwareDev, state);
+    ret = mPrimaryHardwareDev->set_mic_mute(mPrimaryHardwareDev, state);
     mHardwareStatus = AUDIO_HW_IDLE;
     return ret;
 }
 
 bool AudioFlinger::getMicMute() const
 {
+    status_t ret = initCheck();
+    if (ret != NO_ERROR) {
+        return false;
+    }
+
     bool state = AUDIO_MODE_INVALID;
     mHardwareStatus = AUDIO_HW_GET_MIC_MUTE;
     mPrimaryHardwareDev->get_mic_mute(mPrimaryHardwareDev, &state);
@@ -814,6 +832,11 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
 
 size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
 {
+    status_t ret = initCheck();
+    if (ret != NO_ERROR) {
+        return 0;
+    }
+
     return mPrimaryHardwareDev->get_input_buffer_size(mPrimaryHardwareDev, sampleRate, format, channelCount);
 }
 
@@ -834,6 +857,11 @@ unsigned int AudioFlinger::getInputFramesLost(int ioHandle)
 
 status_t AudioFlinger::setVoiceVolume(float value)
 {
+    status_t ret = initCheck();
+    if (ret != NO_ERROR) {
+        return ret;
+    }
+
     // check calling permissions
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
@@ -841,7 +869,7 @@ status_t AudioFlinger::setVoiceVolume(float value)
 
     AutoMutex lock(mHardwareLock);
     mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
-    status_t ret = mPrimaryHardwareDev->set_voice_volume(mPrimaryHardwareDev, value);
+    ret = mPrimaryHardwareDev->set_voice_volume(mPrimaryHardwareDev, value);
     mHardwareStatus = AUDIO_HW_IDLE;
 
     return ret;
