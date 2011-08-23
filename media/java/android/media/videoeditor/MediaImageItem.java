@@ -626,7 +626,7 @@ public class MediaImageItem extends MediaItem {
         if (getGeneratedImageClip() == null) {
             final Bitmap thumbnail = scaleImage(mFilename, width, height);
             for (int i = 0; i < indices.length; i++) {
-                callback.onThumbnail(thumbnail, i);
+                callback.onThumbnail(thumbnail, indices[i]);
             }
         } else {
             if (startMs > endMs) {
