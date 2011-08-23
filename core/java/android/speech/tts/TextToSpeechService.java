@@ -65,6 +65,7 @@ import java.util.Locale;
  *
  * {@link #onStop} tells the engine that it should stop all ongoing synthesis, if
  * any. Any pending data from the current synthesis will be discarded.
+ *
  */
 // TODO: Add a link to the sample TTS engine once it's done.
 public abstract class TextToSpeechService extends Service {
@@ -80,6 +81,7 @@ public abstract class TextToSpeechService extends Service {
     // associated with this TTS engine. Will handle all requests except synthesis
     // to file requests, which occur on the synthesis thread.
     private AudioPlaybackHandler mAudioPlaybackHandler;
+    private TtsEngines mEngineHelper;
 
     private CallbackMap mCallbacks;
     private String mPackageName;
@@ -96,12 +98,15 @@ public abstract class TextToSpeechService extends Service {
         mAudioPlaybackHandler = new AudioPlaybackHandler();
         mAudioPlaybackHandler.start();
 
+        mEngineHelper = new TtsEngines(this);
+
         mCallbacks = new CallbackMap();
 
         mPackageName = getApplicationInfo().packageName;
 
+        String[] defaultLocale = getSettingsLocale();
         // Load default language
-        onLoadLanguage(getDefaultLanguage(), getDefaultCountry(), getDefaultVariant());
+        onLoadLanguage(defaultLocale[0], defaultLocale[1], defaultLocale[2]);
     }
 
     @Override
@@ -195,28 +200,13 @@ public abstract class TextToSpeechService extends Service {
         return getSecureSettingInt(Settings.Secure.TTS_DEFAULT_RATE, Engine.DEFAULT_RATE);
     }
 
-    private String getDefaultLanguage() {
-        return getSecureSettingString(Settings.Secure.TTS_DEFAULT_LANG,
-                Locale.getDefault().getISO3Language());
-    }
-
-    private String getDefaultCountry() {
-        return getSecureSettingString(Settings.Secure.TTS_DEFAULT_COUNTRY,
-                Locale.getDefault().getISO3Country());
-    }
-
-    private String getDefaultVariant() {
-        return getSecureSettingString(Settings.Secure.TTS_DEFAULT_VARIANT,
-                Locale.getDefault().getVariant());
+    private String[] getSettingsLocale() {
+        final String locale = mEngineHelper.getLocalePrefForEngine(mPackageName);
+        return TtsEngines.parseLocalePref(locale);
     }
 
     private int getSecureSettingInt(String name, int defaultValue) {
         return Settings.Secure.getInt(getContentResolver(), name, defaultValue);
-    }
-
-    private String getSecureSettingString(String name, String defaultValue) {
-        String value = Settings.Secure.getString(getContentResolver(), name);
-        return value != null ? value : defaultValue;
     }
 
     /**
@@ -458,6 +448,7 @@ public abstract class TextToSpeechService extends Service {
     class SynthesisSpeechItem extends SpeechItem {
         private final String mText;
         private final SynthesisRequest mSynthesisRequest;
+        private final String[] mDefaultLocale;
         // Non null after synthesis has started, and all accesses
         // guarded by 'this'.
         private AbstractSynthesisCallback mSynthesisCallback;
@@ -467,6 +458,7 @@ public abstract class TextToSpeechService extends Service {
             super(callingApp, params);
             mText = text;
             mSynthesisRequest = new SynthesisRequest(mText, mParams);
+            mDefaultLocale = getSettingsLocale();
             setRequestParams(mSynthesisRequest);
             mEventLogger = new EventLogger(mSynthesisRequest, getCallingApp(), mPackageName);
         }
@@ -523,7 +515,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         public String getLanguage() {
-            return getStringParam(Engine.KEY_PARAM_LANGUAGE, getDefaultLanguage());
+            return getStringParam(Engine.KEY_PARAM_LANGUAGE, mDefaultLocale[0]);
         }
 
         private boolean hasLanguage() {
@@ -531,12 +523,12 @@ public abstract class TextToSpeechService extends Service {
         }
 
         private String getCountry() {
-            if (!hasLanguage()) return getDefaultCountry();
+            if (!hasLanguage()) return mDefaultLocale[1];
             return getStringParam(Engine.KEY_PARAM_COUNTRY, "");
         }
 
         private String getVariant() {
-            if (!hasLanguage()) return getDefaultVariant();
+            if (!hasLanguage()) return mDefaultLocale[2];
             return getStringParam(Engine.KEY_PARAM_VARIANT, "");
         }
 
