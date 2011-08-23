@@ -550,10 +550,9 @@ public class ActionBarView extends AbsActionBarView {
 
             if (mTitleLayout != null && (flagsChanged &
                     (ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME)) != 0) {
-                final boolean homeAsUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
-                final boolean titleUp = homeAsUp && !showHome;
-                mTitleUpView.setVisibility(titleUp ? VISIBLE : GONE);
-                mTitleLayout.setEnabled(titleUp);
+                final boolean homeAsUp = (mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+                mTitleUpView.setVisibility(!showHome ? (homeAsUp ? VISIBLE : INVISIBLE) : GONE);
+                mTitleLayout.setEnabled(!showHome && homeAsUp);
             }
 
             if ((flagsChanged & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
@@ -730,10 +729,9 @@ public class ActionBarView extends AbsActionBarView {
             }
 
             final boolean homeAsUp = (mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0;
-            final boolean titleUp = homeAsUp &&
-                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) == 0;
-            mTitleUpView.setVisibility(titleUp ? VISIBLE : GONE);
-            mTitleLayout.setEnabled(titleUp);
+            final boolean showHome = (mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) != 0;
+            mTitleUpView.setVisibility(!showHome ? (homeAsUp ? VISIBLE : INVISIBLE) : GONE);
+            mTitleLayout.setEnabled(homeAsUp && !showHome);
         }
 
         addView(mTitleLayout);
@@ -805,7 +803,7 @@ public class ActionBarView extends AbsActionBarView {
         int leftOfCenter = availableWidth / 2;
         int rightOfCenter = leftOfCenter;
 
-        View homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
+        HomeView homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
 
         if (homeLayout.getVisibility() != GONE) {
             final LayoutParams lp = homeLayout.getLayoutParams();
@@ -817,7 +815,7 @@ public class ActionBarView extends AbsActionBarView {
             }
             homeLayout.measure(homeWidthSpec,
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-            final int homeWidth = homeLayout.getMeasuredWidth();
+            final int homeWidth = homeLayout.getMeasuredWidth() + homeLayout.getLeftOffset();
             availableWidth = Math.max(0, availableWidth - homeWidth);
             leftOfCenter = Math.max(0, availableWidth - homeWidth);
         }
@@ -962,9 +960,10 @@ public class ActionBarView extends AbsActionBarView {
             return;
         }
 
-        View homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
+        HomeView homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
         if (homeLayout.getVisibility() != GONE) {
-            x += positionChild(homeLayout, x, y, contentHeight);
+            final int leftOffset = homeLayout.getLeftOffset();
+            x += positionChild(homeLayout, x + leftOffset, y, contentHeight) + leftOffset;
         }
 
         if (mExpandedActionView == null) {
@@ -1171,6 +1170,7 @@ public class ActionBarView extends AbsActionBarView {
     private static class HomeView extends FrameLayout {
         private View mUpView;
         private ImageView mIconView;
+        private int mUpWidth;
 
         public HomeView(Context context) {
             this(context, null);
@@ -1194,15 +1194,16 @@ public class ActionBarView extends AbsActionBarView {
             mIconView = (ImageView) findViewById(com.android.internal.R.id.home);
         }
 
-        public int getVerticalIconPadding() {
-            return mIconView.getPaddingTop() + mIconView.getPaddingBottom();
+        public int getLeftOffset() {
+            return mUpView.getVisibility() == GONE ? mUpWidth : 0;
         }
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             measureChildWithMargins(mUpView, widthMeasureSpec, 0, heightMeasureSpec, 0);
             final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
-            int width = upLp.leftMargin + mUpView.getMeasuredWidth() + upLp.rightMargin;
+            mUpWidth = upLp.leftMargin + mUpView.getMeasuredWidth() + upLp.rightMargin;
+            int width = mUpView.getVisibility() == GONE ? 0 : mUpWidth;
             int height = upLp.topMargin + mUpView.getMeasuredHeight() + upLp.bottomMargin;
             measureChildWithMargins(mIconView, widthMeasureSpec, width, heightMeasureSpec, 0);
             final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
