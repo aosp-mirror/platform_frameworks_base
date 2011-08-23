@@ -569,7 +569,7 @@ final class BluetoothHealthProfileHandler {
             int newDeviceState) {
         mHealthDevices.put(device, newDeviceState);
         mBluetoothService.sendConnectionStateChange(device, BluetoothProfile.HEALTH,
-                                                    prevDeviceState, newDeviceState);
+                                                    newDeviceState, prevDeviceState);
     }
 
     /**
