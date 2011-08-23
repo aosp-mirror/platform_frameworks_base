@@ -4226,6 +4226,7 @@ package android.bluetooth {
     method public java.util.Set<android.bluetooth.BluetoothDevice> getBondedDevices();
     method public static synchronized android.bluetooth.BluetoothAdapter getDefaultAdapter();
     method public java.lang.String getName();
+    method public int getProfileConnectionState(int);
     method public boolean getProfileProxy(android.content.Context, android.bluetooth.BluetoothProfile.ServiceListener, int);
     method public android.bluetooth.BluetoothDevice getRemoteDevice(java.lang.String);
     method public int getScanMode();
