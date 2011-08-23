@@ -1476,10 +1476,10 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     const float width = texture->width;
     const float height = texture->height;
 
-    const float u1 = (srcLeft + 0.5f) / width;
-    const float v1 = (srcTop + 0.5f)  / height;
-    const float u2 = (srcRight - 0.5f) / width;
-    const float v2 = (srcBottom - 0.5f) / height;
+    const float u1 = fmax(0.0f, srcLeft / width);
+    const float v1 = fmax(0.0f, srcTop / height);
+    const float u2 = fmin(1.0f, srcRight / width);
+    const float v2 = fmin(1.0f, srcBottom / height);
 
     mCaches.unbindMeshBuffer();
     resetDrawTextureTexCoords(u1, v1, u2, v2);
