@@ -9365,6 +9365,7 @@ package android.hardware {
     field public static final int FOCUS_DISTANCE_NEAR_INDEX = 0; // 0x0
     field public static final int FOCUS_DISTANCE_OPTIMAL_INDEX = 1; // 0x1
     field public static final java.lang.String FOCUS_MODE_AUTO = "auto";
+    field public static final java.lang.String FOCUS_MODE_CONTINUOUS_PICTURE = "continuous-picture";
     field public static final java.lang.String FOCUS_MODE_CONTINUOUS_VIDEO = "continuous-video";
     field public static final java.lang.String FOCUS_MODE_EDOF = "edof";
     field public static final java.lang.String FOCUS_MODE_FIXED = "fixed";
