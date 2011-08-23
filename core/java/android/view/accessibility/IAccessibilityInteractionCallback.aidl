@@ -21,11 +21,11 @@ import java.util.List;
 
 /**
  * Callback for specifying the result for an asynchronous request made
- * via calling a method on IAccessibilityInteractionConnectionCallback.
+ * via calling a method on IAccessibilityInteractionCallback.
  *
  * @hide
  */
-oneway interface IAccessibilityInteractionConnectionCallback {
+oneway interface IAccessibilityInteractionCallback {
 
     /**
      * Sets the result of an async request that returns an {@link AccessibilityNodeInfo}.

@@ -61,6 +61,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -4359,37 +4360,42 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         public void findAccessibilityNodeInfoByAccessibilityId(int accessibilityId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid) {
             if (mViewAncestor.get() != null) {
                 getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityId,
-                        interactionId, callback);
+                        interactionId, callback, interrogatingPid, interrogatingTid);
             }
         }
 
         public void performAccessibilityAction(int accessibilityId, int action,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interogatingPid, long interrogatingTid) {
             if (mViewAncestor.get() != null) {
                 getAccessibilityInteractionController()
                     .performAccessibilityActionClientThread(accessibilityId, action, interactionId,
-                            callback);
+                            callback, interogatingPid, interrogatingTid);
             }
         }
 
         public void findAccessibilityNodeInfoByViewId(int viewId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid) {
             if (mViewAncestor.get() != null) {
                 getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfoByViewIdClientThread(viewId, interactionId, callback);
+                    .findAccessibilityNodeInfoByViewIdClientThread(viewId, interactionId, callback,
+                            interrogatingPid, interrogatingTid);
             }
         }
 
         public void findAccessibilityNodeInfosByViewText(String text, int accessibilityId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid) {
             if (mViewAncestor.get() != null) {
                 getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByViewTextClientThread(text, accessibilityId,
-                            interactionId, callback);
+                            interactionId, callback, interrogatingPid, interrogatingTid);
             }
         }
     }
@@ -4465,13 +4471,24 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         public void findAccessibilityNodeInfoByAccessibilityIdClientThread(int accessibilityId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid) {
             Message message = Message.obtain();
             message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
             message.arg1 = accessibilityId;
             message.arg2 = interactionId;
             message.obj = callback;
-            sendMessage(message);
+            // If the interrogation is performed by the same thread as the main UI
+            // thread in this process, set the message as a static reference so
+            // after this call completes the same thread but in the interrogating
+            // client can handle the message to generate the result.
+            if (interrogatingPid == Process.myPid()
+                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+                message.setTarget(ViewRootImpl.this);
+                AccessibilityInteractionClient.getInstance().setSameThreadMessage(message);
+            } else {
+                sendMessage(message);
+            }
         }
 
         public void findAccessibilityNodeInfoByAccessibilityIdUiThread(Message message) {
@@ -4499,13 +4516,24 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         public void findAccessibilityNodeInfoByViewIdClientThread(int viewId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback) {
+                IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
+                long interrogatingTid) {
             Message message = Message.obtain();
             message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID;
             message.arg1 = viewId;
             message.arg2 = interactionId;
             message.obj = callback;
-            sendMessage(message);
+            // If the interrogation is performed by the same thread as the main UI
+            // thread in this process, set the message as a static reference so
+            // after this call completes the same thread but in the interrogating
+            // client can handle the message to generate the result.
+            if (interrogatingPid == Process.myPid()
+                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+                message.setTarget(ViewRootImpl.this);
+                AccessibilityInteractionClient.getInstance().setSameThreadMessage(message);
+            } else {
+                sendMessage(message);
+            }
         }
 
         public void findAccessibilityNodeInfoByViewIdUiThread(Message message) {
@@ -4532,7 +4560,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         public void findAccessibilityNodeInfosByViewTextClientThread(String text,
                 int accessibilityViewId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback) {
+                IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
+                long interrogatingTid) {
             Message message = Message.obtain();
             message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_TEXT;
             SomeArgs args = mPool.acquire();
@@ -4541,7 +4570,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             args.argi2 = interactionId;
             args.arg2 = callback;
             message.obj = args;
-            sendMessage(message);
+            // If the interrogation is performed by the same thread as the main UI
+            // thread in this process, set the message as a static reference so
+            // after this call completes the same thread but in the interrogating
+            // client can handle the message to generate the result.
+            if (interrogatingPid == Process.myPid()
+                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+                message.setTarget(ViewRootImpl.this);
+                AccessibilityInteractionClient.getInstance().setSameThreadMessage(message);
+            } else {
+                sendMessage(message);
+            }
         }
 
         public void findAccessibilityNodeInfosByViewTextUiThread(Message message) {
@@ -4594,7 +4633,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         public void performAccessibilityActionClientThread(int accessibilityId, int action,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interogatingPid, long interrogatingTid) {
             Message message = Message.obtain();
             message.what = DO_PERFORM_ACCESSIBILITY_ACTION;
             SomeArgs args = mPool.acquire();
@@ -4603,7 +4643,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             args.argi3 = interactionId;
             args.arg1 = callback;
             message.obj = args;
-            sendMessage(message);
+            // If the interrogation is performed by the same thread as the main UI
+            // thread in this process, set the message as a static reference so
+            // after this call completes the same thread but in the interrogating
+            // client can handle the message to generate the result.
+            if (interogatingPid == Process.myPid()
+                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+                message.setTarget(ViewRootImpl.this);
+                AccessibilityInteractionClient.getInstance().setSameThreadMessage(message);
+            } else {
+                sendMessage(message);
+            }
         }
 
         public void perfromAccessibilityActionUiThread(Message message) {
