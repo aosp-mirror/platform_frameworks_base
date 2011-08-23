@@ -10745,8 +10745,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         TextDirectionHeuristics.FIRSTSTRONG_LTR);
                 break;
             case TEXT_DIRECTION_ANY_RTL:
-                mTextDir = (defaultIsRtl ? TextDirectionHeuristics.ANYRTL_RTL:
-                        TextDirectionHeuristics.ANYRTL_LTR);
+                mTextDir = TextDirectionHeuristics.ANYRTL_LTR;
                 break;
             case TEXT_DIRECTION_CHAR_COUNT:
                 mTextDir = (defaultIsRtl ? TextDirectionHeuristics.CHARCOUNT_RTL:
