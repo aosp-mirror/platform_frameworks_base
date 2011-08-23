@@ -18,7 +18,8 @@ package android.media;
 
 import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
-import android.media.IRemoteControlClientDispatcher;
+import android.media.IRemoteControlClient;
+import android.media.IRemoteControlDisplay;
 
 /**
  * {@hide}
@@ -88,13 +89,14 @@ interface IAudioService {
 
     void unregisterMediaButtonEventReceiver(in ComponentName eventReceiver);
 
-    void registerRemoteControlClient(in ComponentName eventReceiver,
-           in IRemoteControlClientDispatcher rcClient, in String clientName,
-           in String callingPackageName);
+    oneway void registerRemoteControlClient(in ComponentName eventReceiver,
+           in IRemoteControlClient rcClient, in String clientName, in String callingPackageName);
+    oneway void unregisterRemoteControlClient(in ComponentName eventReceiver,
+           in IRemoteControlClient rcClient);
 
-    IRemoteControlClientDispatcher getRemoteControlClientDispatcher(in int rcClientId);
-
-    void notifyRemoteControlInformationChanged(in ComponentName eventReceiver, int infoFlag);
+    oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd);
+    oneway void unregisterRemoteControlDisplay(in IRemoteControlDisplay rcd);
+    oneway void remoteControlDisplayUsesBitmapSize(in IRemoteControlDisplay rcd, int w, int h);
 
     void startBluetoothSco(IBinder cb);
 

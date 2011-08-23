@@ -1715,161 +1715,54 @@ public class AudioManager {
         }
     }
 
-    /**
-     * Acts as a proxy between AudioService and the RemoteControlClient
-     */
-    private IRemoteControlClientDispatcher mRcClientDispatcher =
-            new IRemoteControlClientDispatcher.Stub() {
-
-        public String getMetadataStringForClient(String clientName, int field) {
-            RemoteControlClient realClient;
-            synchronized(mRcClientMap) {
-                realClient = mRcClientMap.get(clientName);
-            }
-            if (realClient != null) {
-                return realClient.getMetadataString(field);
-            } else {
-                return null;
-            }
-        }
-
-        public int getPlaybackStateForClient(String clientName) {
-            RemoteControlClient realClient;
-            synchronized(mRcClientMap) {
-                realClient = mRcClientMap.get(clientName);
-            }
-            if (realClient != null) {
-                return realClient.getPlaybackState();
-            } else {
-                return 0;
-            }
-        }
-
-        public int getTransportControlFlagsForClient(String clientName) {
-            RemoteControlClient realClient;
-            synchronized(mRcClientMap) {
-                realClient = mRcClientMap.get(clientName);
-            }
-            if (realClient != null) {
-                return realClient.getTransportControlFlags();
-            } else {
-                return 0;
-            }
-        }
-
-        public Bitmap getAlbumArtForClient(String clientName, int maxWidth, int maxHeight) {
-            RemoteControlClient realClient;
-            synchronized(mRcClientMap) {
-                realClient = mRcClientMap.get(clientName);
-            }
-            if (realClient != null) {
-                return realClient.getAlbumArt(maxWidth, maxHeight);
-            } else {
-                return null;
-            }
-        }
-    };
-
-    private HashMap<String, RemoteControlClient> mRcClientMap =
-            new HashMap<String, RemoteControlClient>();
-
-    private String getIdForRcClient(RemoteControlClient client) {
-        // client is guaranteed to be non-null
-        return client.toString();
-    }
 
     /**
      * @hide
+     * CANDIDATE FOR SDK
      * Registers the remote control client for providing information to display on the remote
      * controls.
-     * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
-     *      that will receive the media button intent, and associated with the remote control
-     *      client. This method has no effect if
-     *      {@link #registerMediaButtonEventReceiver(ComponentName)} hasn't been called
-     *      with the same eventReceiver, or if
-     *      {@link #unregisterMediaButtonEventReceiver(ComponentName)} has been called.
-     * @param rcClient the remote control client associated with the event receiver, responsible
+     * @param rcClient the remote control client associated responsible
      *      for providing the information to display on the remote control.
      */
-    public void registerRemoteControlClient(ComponentName eventReceiver,
-            RemoteControlClient rcClient) {
-        if ((eventReceiver == null) || (rcClient == null)) {
+    public void registerRemoteControlClient(RemoteControlClient rcClient) {
+        if ((rcClient == null) || (rcClient.getRcEventReceiver() == null)) {
             return;
-        }
-        String clientKey = getIdForRcClient(rcClient);
-        synchronized(mRcClientMap) {
-            if (mRcClientMap.containsKey(clientKey)) {
-                return;
-            }
-            mRcClientMap.put(clientKey, rcClient);
         }
         IAudioService service = getService();
         try {
-            service.registerRemoteControlClient(eventReceiver, mRcClientDispatcher, clientKey,
+            service.registerRemoteControlClient(rcClient.getRcEventReceiver(), /* eventReceiver */
+                    rcClient.getIRemoteControlClient(),                        /* rcClient      */
+                    rcClient.toString(),                                       /* clientName    */
                     // used to match media button event receiver and audio focus
-                    mContext.getPackageName());
+                    mContext.getPackageName());                                /* packageName   */
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlClient"+e);
-            synchronized(mRcClientMap) {
-                mRcClientMap.remove(clientKey);
-            }
         }
     }
 
     /**
      * @hide
+     * CANDIDATE FOR SDK
      * Unregisters the remote control client that was providing information to display on the
      * remotes.
-     * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
-     *      that receives the media button intent, and associated with the remote control
-     *      client.
      * @param rcClient the remote control client to unregister
-     * @see #registerRemoteControlClient(ComponentName, RemoteControlClient)
+     * @see #registerRemoteControlClient(RemoteControlClient)
      */
-    public void unregisterRemoteControlClient(ComponentName eventReceiver,
-            RemoteControlClient rcClient) {
-        if ((eventReceiver == null) || (rcClient == null)) {
+    public void unregisterRemoteControlClient(RemoteControlClient rcClient) {
+        if ((rcClient == null) || (rcClient.getRcEventReceiver() == null)) {
             return;
         }
         IAudioService service = getService();
         try {
-            // remove locally
-            boolean unregister = true;
-            synchronized(mRcClientMap) {
-                if (mRcClientMap.remove(getIdForRcClient(rcClient)) == null) {
-                    unregister = false;
-                }
-            }
-            if (unregister) {
-                // unregistering a RemoteControlClient is equivalent to setting it to null
-                service.registerRemoteControlClient(eventReceiver, null, null,
-                        mContext.getPackageName());
-            }
+            service.unregisterRemoteControlClient(rcClient.getRcEventReceiver(), /* eventReceiver */
+                    rcClient.getIRemoteControlClient());                         /* rcClient      */
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterRemoteControlClient"+e);
         }
     }
 
-    /**
-     * @hide
-     * Returns the current remote control client.
-     * @param rcClientId the generation counter that matches the extra
-     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT_GENERATION} in the
-     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
-     * @return the current RemoteControlClient from which information to display on the remote
-     *     control can be retrieved, or null if rcClientId doesn't match the current generation
-     *     counter.
-     */
-    public IRemoteControlClientDispatcher getRemoteControlClientDispatcher(int rcClientId) {
-        IAudioService service = getService();
-        try {
-            return service.getRemoteControlClientDispatcher(rcClientId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getRemoteControlClient "+e);
-            return null;
-        }
-    }
 
+    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
     /**
      * @hide
      * Broadcast intent action indicating that the displays on the remote controls
@@ -1882,6 +1775,7 @@ public class AudioManager {
     public static final String REMOTE_CONTROL_CLIENT_CHANGED =
             "android.media.REMOTE_CONTROL_CLIENT_CHANGED";
 
+    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
     /**
      * @hide
      * The IRemoteControlClientDispatcher monotonically increasing generation counter.
@@ -1891,6 +1785,7 @@ public class AudioManager {
     public static final String EXTRA_REMOTE_CONTROL_CLIENT_GENERATION =
             "android.media.EXTRA_REMOTE_CONTROL_CLIENT_GENERATION";
 
+    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
     /**
      * @hide
      * The name of the RemoteControlClient.
@@ -1902,6 +1797,7 @@ public class AudioManager {
     public static final String EXTRA_REMOTE_CONTROL_CLIENT_NAME =
             "android.media.EXTRA_REMOTE_CONTROL_CLIENT_NAME";
 
+    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
     /**
      * @hide
      * The media button event receiver associated with the RemoteControlClient.
@@ -1913,6 +1809,7 @@ public class AudioManager {
     public static final String EXTRA_REMOTE_CONTROL_EVENT_RECEIVER =
             "android.media.EXTRA_REMOTE_CONTROL_EVENT_RECEIVER";
 
+    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
     /**
      * @hide
      * The flags describing what information has changed in the current remote control client.
@@ -1921,33 +1818,6 @@ public class AudioManager {
      */
     public static final String EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED =
             "android.media.EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED";
-
-    /**
-     * @hide
-     * Notifies the users of the associated remote control client that the information to display
-     * has changed.
-     @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
-     *      that will receive the media button intent, and associated with the remote control
-     *      client. This method has no effect if
-     *      {@link #registerMediaButtonEventReceiver(ComponentName)} hasn't been called
-     *      with the same eventReceiver, or if
-     *      {@link #unregisterMediaButtonEventReceiver(ComponentName)} has been called.
-     * @param infoFlag the type of information that has changed since this method was last called,
-     *      or the event receiver was registered. Use one or multiple of the following flags to
-     *      describe what changed:
-     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_METADATA},
-     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_KEY_MEDIA},
-     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_PLAYSTATE},
-     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_ALBUM_ART}.
-     */
-    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver, int infoFlag) {
-        IAudioService service = getService();
-        try {
-            service.notifyRemoteControlInformationChanged(eventReceiver, infoFlag);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in refreshRemoteControlDisplay"+e);
-        }
-    }
 
     /**
      *  @hide
