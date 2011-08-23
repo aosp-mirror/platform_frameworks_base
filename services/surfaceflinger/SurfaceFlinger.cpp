@@ -822,7 +822,7 @@ void SurfaceFlinger::handleWorkList()
         hwc_layer_t* const cur(hwc.getLayers());
         for (size_t i=0 ; cur && i<count ; i++) {
             currentLayers[i]->setGeometry(&cur[i]);
-            if (mDebugDisableHWC) {
+            if (mDebugDisableHWC || mDebugRegion) {
                 cur[i].compositionType = HWC_FRAMEBUFFER;
                 cur[i].flags |= HWC_SKIP_LAYER;
             }
@@ -974,6 +974,10 @@ void SurfaceFlinger::debugFlashRegions()
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t flags = hw.getFlags();
+    const int32_t height = hw.getHeight();
+    if (mInvalidRegion.isEmpty()) {
+        return;
+    }
 
     if (!((flags & DisplayHardware::SWAP_RECTANGLE) ||
             (flags & DisplayHardware::BUFFER_PRESERVED))) {
@@ -999,26 +1003,21 @@ void SurfaceFlinger::debugFlashRegions()
     while (it != end) {
         const Rect& r = *it++;
         GLfloat vertices[][2] = {
-                { r.left,  r.top },
-                { r.left,  r.bottom },
-                { r.right, r.bottom },
-                { r.right, r.top }
+                { r.left,  height - r.top },
+                { r.left,  height - r.bottom },
+                { r.right, height - r.bottom },
+                { r.right, height - r.top }
         };
         glVertexPointer(2, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 
-    if (mInvalidRegion.isEmpty()) {
-        mDirtyRegion.dump("mDirtyRegion");
-        mInvalidRegion.dump("mInvalidRegion");
-    }
     hw.flip(mInvalidRegion);
 
     if (mDebugRegion > 1)
         usleep(mDebugRegion * 1000);
 
     glEnable(GL_SCISSOR_TEST);
-    //mDirtyRegion.dump("mDirtyRegion");
 }
 
 void SurfaceFlinger::drawWormhole() const
@@ -1581,7 +1580,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         HWComposer& hwc(hw.getHwComposer());
         snprintf(buffer, SIZE, "  h/w composer %s and %s\n",
                 hwc.initCheck()==NO_ERROR ? "present" : "not present",
-                mDebugDisableHWC ? "disabled" : "enabled");
+                (mDebugDisableHWC || mDebugRegion) ? "disabled" : "enabled");
         result.append(buffer);
         hwc.dump(result, buffer, SIZE);
 
@@ -1660,21 +1659,15 @@ status_t SurfaceFlinger::onTransact(
             case 1002:  // SHOW_UPDATES
                 n = data.readInt32();
                 mDebugRegion = n ? n : (mDebugRegion ? 0 : 1);
+                invalidateHwcGeometry();
+                repaintEverything();
                 return NO_ERROR;
             case 1003:  // SHOW_BACKGROUND
                 n = data.readInt32();
                 mDebugBackground = n ? 1 : 0;
                 return NO_ERROR;
-            case 1008:  // toggle use of hw composer
-                n = data.readInt32();
-                mDebugDisableHWC = n ? 1 : 0;
-                invalidateHwcGeometry();
-                // fall-through...
             case 1004:{ // repaint everything
-                Mutex::Autolock _l(mStateLock);
-                const DisplayHardware& hw(graphicPlane(0).displayHardware());
-                mDirtyRegion.set(hw.bounds()); // careful that's not thread-safe
-                signalEvent();
+                repaintEverything();
                 return NO_ERROR;
             }
             case 1005:{ // force transaction
@@ -1689,6 +1682,12 @@ status_t SurfaceFlinger::onTransact(
             case 1007: // set mFreezeCount
                 mFreezeCount = data.readInt32();
                 mFreezeDisplayTime = 0;
+                return NO_ERROR;
+            case 1008:  // toggle use of hw composer
+                n = data.readInt32();
+                mDebugDisableHWC = n ? 1 : 0;
+                invalidateHwcGeometry();
+                repaintEverything();
                 return NO_ERROR;
             case 1010:  // interrogate.
                 reply->writeInt32(0);
@@ -1705,6 +1704,13 @@ status_t SurfaceFlinger::onTransact(
         }
     }
     return err;
+}
+
+void SurfaceFlinger::repaintEverything() {
+    Mutex::Autolock _l(mStateLock);
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    mDirtyRegion.set(hw.bounds()); // careful that's not thread-safe
+    signalEvent();
 }
 
 // ---------------------------------------------------------------------------
