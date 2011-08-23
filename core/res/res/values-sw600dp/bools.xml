@@ -18,4 +18,5 @@
     <bool name="preferences_prefer_dual_pane">true</bool>
     <bool name="show_ongoing_ime_switcher">false</bool>
     <bool name="action_bar_expanded_action_views_exclusive">false</bool>
+    <bool name="target_honeycomb_needs_options_menu">false</bool>
 </resources>
