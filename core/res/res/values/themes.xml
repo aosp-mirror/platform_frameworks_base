@@ -717,9 +717,9 @@ please see themes_device_defaults.xml.
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.Panel, but sets up IME appropriate animations
          and a few custom attributes. -->
-    <style name="Theme.Holo.InputMethod" parent="Theme.Holo.Panel">
+    <style name="Theme.Holo.InputMethod" parent="Theme.Holo.Light.Panel">
         <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
-        <item name="android:imeFullscreenBackground">@android:drawable/input_method_fullscreen_background_holo</item>
+        <item name="android:imeFullscreenBackground">@android:drawable/screen_background_selector_light</item>
         <item name="android:imeExtractEnterAnimation">@android:anim/input_method_extract_enter</item>
         <item name="android:imeExtractExitAnimation">@android:anim/input_method_extract_exit</item>
     </style>
