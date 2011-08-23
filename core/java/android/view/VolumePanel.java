@@ -259,8 +259,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mStreamControls = new HashMap<Integer,StreamControl>(STREAM_TYPES.length);
         Resources res = mContext.getResources();
         for (int i = 0; i < STREAM_TYPES.length; i++) {
+            final int streamType = STREAM_TYPES[i];
             StreamControl sc = new StreamControl();
-            sc.streamType = STREAM_TYPES[i];
+            sc.streamType = streamType;
             sc.group = (ViewGroup) inflater.inflate(R.layout.volume_adjust_item, null);
             sc.group.setTag(sc);
             sc.icon = (ImageView) sc.group.findViewById(R.id.stream_icon);
@@ -273,10 +274,12 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             sc.iconMuteRes = STREAM_ICONS_MUTED[i];
             sc.icon.setImageResource(sc.iconRes);
             sc.seekbarView = (SeekBar) sc.group.findViewById(R.id.seekbar);
-            sc.seekbarView.setMax(mAudioManager.getStreamMaxVolume(STREAM_TYPES[i]));
+            int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
+                    streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
+            sc.seekbarView.setMax(mAudioManager.getStreamMaxVolume(streamType) + plusOne);
             sc.seekbarView.setOnSeekBarChangeListener(this);
             sc.seekbarView.setTag(sc);
-            mStreamControls.put(STREAM_TYPES[i], sc);
+            mStreamControls.put(streamType, sc);
         }
     }
 
@@ -476,6 +479,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
         StreamControl sc = mStreamControls.get(streamType);
         if (sc != null) {
+            if (sc.seekbarView.getMax() != max) {
+                sc.seekbarView.setMax(max);
+            }
             sc.seekbarView.setProgress(index);
         }
 
@@ -557,28 +563,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         }
     }
 
-//    /**
-//     * Makes the ringer icon visible with an icon that is chosen
-//     * based on the current ringer mode.
-//     */
-//    private void setRingerIcon() {
-//        mSmallStreamIcon.setVisibility(View.GONE);
-//        mLargeStreamIcon.setVisibility(View.VISIBLE);
-//
-//        int ringerMode = mAudioService.getRingerMode();
-//        int icon;
-//
-//        if (LOGD) Log.d(TAG, "setRingerIcon(), ringerMode: " + ringerMode);
-//
-//        if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
-//            icon = com.android.internal.R.drawable.ic_volume_off;
-//        } else if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
-//            icon = com.android.internal.R.drawable.ic_vibrate;
-//        } else {
-//            icon = com.android.internal.R.drawable.ic_volume;
-//        }
-//        mLargeStreamIcon.setImageResource(icon);
-//    }
 
     /**
      * Switch between icons because Bluetooth music is same as music volume, but with
