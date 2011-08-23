@@ -2628,7 +2628,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                     final int left = cl + (int) region.left;
                     final int top = ct + (int) region.top;
-                    invalidate(left, top, left + (int) region.width(), top + (int) region.height());
+                    invalidate(left, top, left + (int) (region.width() + .5f),
+                            top + (int) (region.height() + .5f));
                 }
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
