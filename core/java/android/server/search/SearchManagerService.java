@@ -97,8 +97,18 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Refreshes the "searchables" list when packages are added/removed.
      */
     class MyPackageMonitor extends PackageMonitor {
+
         @Override
         public void onSomePackagesChanged() {
+            updateSearchables();
+        }
+
+        @Override
+        public void onPackageModified(String pkg) {
+            updateSearchables();
+        }
+
+        private void updateSearchables() {
             // Update list of searchable activities
             getSearchables().buildSearchableList();
             // Inform all listeners that the list of searchables has been updated.
