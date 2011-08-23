@@ -19,6 +19,6 @@
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:textAppearance="?android:attr/textAppearanceListItem"
     android:gravity="center_vertical"
 />

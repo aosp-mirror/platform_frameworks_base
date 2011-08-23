@@ -958,6 +958,8 @@ package android {
     field public static final int textAppearanceLarge = 16842816; // 0x1010040
     field public static final int textAppearanceLargeInverse = 16842819; // 0x1010043
     field public static final int textAppearanceLargePopupMenu = 16843521; // 0x1010301
+    field public static final int textAppearanceListItem = 16843688; // 0x10103a8
+    field public static final int textAppearanceListItemSmall = 16843689; // 0x10103a9
     field public static final int textAppearanceMedium = 16842817; // 0x1010041
     field public static final int textAppearanceMediumInverse = 16842820; // 0x1010044
     field public static final int textAppearanceSearchResultSubtitle = 16843424; // 0x10102a0

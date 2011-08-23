@@ -26,8 +26,8 @@
         android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="6dip"
-        android:layout_marginRight="6dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
         android:duplicateParentState="true">
         
         <TextView 
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
             android:singleLine="true"
             android:duplicateParentState="true"
             android:ellipsize="marquee"
