@@ -1057,9 +1057,8 @@ public class MenuBuilder implements Menu {
                     mNonActionItems.add(item);
                 }
             }
-        } else if (mActionItems.size() + mNonActionItems.size() != getVisibleItems().size()) {
-            // Nobody flagged anything, but if something doesn't add up then treat everything
-            // as non-action items.
+        } else {
+            // Nobody flagged anything, everything is a non-action item.
             // (This happens during a first pass with no action-item presenters.)
             mActionItems.clear();
             mNonActionItems.clear();
