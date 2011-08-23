@@ -53,6 +53,7 @@ interface IBluetooth
     byte[] readOutOfBandData();
 
     int getAdapterConnectionState();
+    int getProfileConnectionState(int profile);
     boolean changeApplicationBluetoothState(boolean on,
                                 in IBluetoothStateChangeCallback callback, in
                                 IBinder b);
@@ -121,5 +122,5 @@ interface IBluetooth
     List<BluetoothDevice> getHealthDevicesMatchingConnectionStates(in int[] states);
     int getHealthDeviceConnectionState(in BluetoothDevice device);
 
-    void sendConnectionStateChange(in BluetoothDevice device, int state, int prevState);
+    void sendConnectionStateChange(in BluetoothDevice device, int profile, int state, int prevState);
 }

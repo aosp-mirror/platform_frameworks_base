@@ -19,6 +19,7 @@ package android.server;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -303,7 +304,8 @@ final class BluetoothPanProfileHandler {
         mContext.sendBroadcast(intent, BluetoothService.BLUETOOTH_PERM);
 
         debugLog("Pan Device state : device: " + device + " State:" + prevState + "->" + state);
-        mBluetoothService.sendConnectionStateChange(device, state, prevState);
+        mBluetoothService.sendConnectionStateChange(device, BluetoothProfile.PAN, state,
+                                                    prevState);
     }
 
     private class BluetoothPanDevice {

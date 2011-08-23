@@ -166,6 +166,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private static final String INCOMING_CONNECTION_FILE =
       "/data/misc/bluetooth/incoming_connection.conf";
     private HashMap<String, Pair<Integer, String>> mIncomingConnections;
+    private HashMap<Integer, Pair<Integer, Integer>> mProfileConnectionState;
 
     private static class RemoteService {
         public String address;
@@ -237,6 +238,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mBluetoothPanProfileHandler = BluetoothPanProfileHandler.getInstance(mContext, this);
         mBluetoothHealthProfileHandler = BluetoothHealthProfileHandler.getInstance(mContext, this);
         mIncomingConnections = new HashMap<String, Pair<Integer, String>>();
+        mProfileConnectionState = new HashMap<Integer, Pair<Integer, Integer>>();
     }
 
     public static synchronized String readDockBluetoothAddress() {
@@ -1742,6 +1744,19 @@ public class BluetoothService extends IBluetooth.Stub {
         dumpInputDeviceProfile(pw);
         dumpPanProfile(pw);
         dumpApplicationServiceRecords(pw);
+        dumpProfileState(pw);
+    }
+
+    private void dumpProfileState(PrintWriter pw) {
+        pw.println("\n--Profile State dump--");
+        pw.println("\n Headset profile state:" +
+                mAdapter.getProfileConnectionState(BluetoothProfile.HEADSET));
+        pw.println("\n A2dp profile state:" +
+                mAdapter.getProfileConnectionState(BluetoothProfile.A2DP));
+        pw.println("\n HID profile state:" +
+                mAdapter.getProfileConnectionState(BluetoothProfile.INPUT_DEVICE));
+        pw.println("\n PAN profile state:" +
+                mAdapter.getProfileConnectionState(BluetoothProfile.PAN));
     }
 
     private void dumpHeadsetService(PrintWriter pw) {
@@ -2443,23 +2458,85 @@ public class BluetoothService extends IBluetooth.Stub {
         return mAdapterConnectionState;
     }
 
-    public synchronized void sendConnectionStateChange(BluetoothDevice device, int state,
-                                                        int prevState) {
+    public int getProfileConnectionState(int profile) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+
+        Pair<Integer, Integer> state = mProfileConnectionState.get(profile);
+        if (state == null) return BluetoothProfile.STATE_DISCONNECTED;
+
+        return state.first;
+    }
+
+    private void updateProfileConnectionState(int profile, int newState, int oldState) {
+        // mProfileConnectionState is a hashmap -
+        // <Integer, Pair<Integer, Integer>>
+        // The key is the profile, the value is a pair. first element
+        // is the state and the second element is the number of devices
+        // in that state.
+        int numDev = 1;
+        int newHashState = newState;
+        boolean update = true;
+
+        // The following conditions are considered in this function:
+        // 1. If there is no record of profile and state - update
+        // 2. If a new device's state is current hash state - increment
+        //    number of devices in the state.
+        // 3. If a state change has happened to Connected or Connecting
+        //    (if current state is not connected), update.
+        // 4. If numDevices is 1 and that device state is being updated, update
+        // 5. If numDevices is > 1 and one of the devices is changing state,
+        //    decrement numDevices but maintain oldState if it is Connected or
+        //    Connecting
+        Pair<Integer, Integer> stateNumDev = mProfileConnectionState.get(profile);
+        if (stateNumDev != null) {
+            int currHashState = stateNumDev.first;
+            numDev = stateNumDev.second;
+
+            if (newState == currHashState) {
+                numDev ++;
+            } else if (newState == BluetoothProfile.STATE_CONNECTED ||
+                   (newState == BluetoothProfile.STATE_CONNECTING &&
+                    currHashState != BluetoothProfile.STATE_CONNECTED)) {
+                 numDev = 1;
+            } else if (numDev == 1 && oldState == currHashState) {
+                 update = true;
+            } else if (numDev > 1 && oldState == currHashState) {
+                 numDev --;
+
+                 if (currHashState == BluetoothProfile.STATE_CONNECTED ||
+                     currHashState == BluetoothProfile.STATE_CONNECTING) {
+                    newHashState = currHashState;
+                 }
+            } else {
+                 update = false;
+            }
+        }
+
+        if (update) {
+            mProfileConnectionState.put(profile, new Pair<Integer, Integer>(newHashState,
+                    numDev));
+        }
+    }
+
+    public synchronized void sendConnectionStateChange(BluetoothDevice
+            device, int profile, int state, int prevState) {
         // Since this is a binder call check if Bluetooth is on still
         if (getBluetoothStateInternal() == BluetoothAdapter.STATE_OFF) return;
 
-        if (updateCountersAndCheckForConnectionStateChange(state, prevState)) {
-            if (!validateProfileConnectionState(state) ||
-                    !validateProfileConnectionState(prevState)) {
-                // Previously, an invalid state was broadcast anyway,
-                // with the invalid state converted to -1 in the intent.
-                // Better to log an error and not send an intent with
-                // invalid contents or set mAdapterConnectionState to -1.
-                Log.e(TAG, "Error in sendConnectionStateChange: "
-                        + "prevState " + prevState + " state " + state);
-                return;
-            }
+        if (!validateProfileConnectionState(state) ||
+                !validateProfileConnectionState(prevState)) {
+            // Previously, an invalid state was broadcast anyway,
+            // with the invalid state converted to -1 in the intent.
+            // Better to log an error and not send an intent with
+            // invalid contents or set mAdapterConnectionState to -1.
+            Log.e(TAG, "Error in sendConnectionStateChange: "
+                    + "prevState " + prevState + " state " + state);
+            return;
+        }
 
+        updateProfileConnectionState(profile, state, prevState);
+
+        if (updateCountersAndCheckForConnectionStateChange(state, prevState)) {
             mAdapterConnectionState = state;
 
             if (state == BluetoothProfile.STATE_DISCONNECTED) {
