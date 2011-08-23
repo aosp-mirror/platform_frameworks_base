@@ -278,6 +278,7 @@ private:
             void        handleRepaint();
             void        postFramebuffer();
             void        composeSurfaces(const Region& dirty);
+            void        repaintEverything();
 
 
             ssize_t     addClientLayer(const sp<Client>& client,
