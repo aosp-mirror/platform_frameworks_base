@@ -36,7 +36,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="@dimen/notification_divider_height"
         android:layout_alignParentBottom="true"
         android:background="@android:drawable/divider_horizontal_dark"
         />

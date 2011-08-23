@@ -21,4 +21,12 @@
     <dimen name="recents_thumbnail_bg_padding_top">7px</dimen>
     <dimen name="recents_thumbnail_bg_padding_right">6px</dimen>
     <dimen name="recents_thumbnail_bg_padding_bottom">6px</dimen>
+
+    <!-- thickness (height) of each notification row, including any separators or padding -->
+    <!-- Note: this is 64dip + 1px divider = 97px. -->
+    <dimen name="notification_height">97px</dimen>
+
+    <!-- thickness (height) of dividers between each notification row; see math for
+         notification_height above -->
+    <dimen name="notification_divider_height">1px</dimen>
 </resources>
