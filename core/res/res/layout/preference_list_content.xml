@@ -27,8 +27,6 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_marginTop="@dimen/preference_screen_top_margin"
-        android:layout_marginBottom="@dimen/preference_screen_bottom_margin"
         android:layout_weight="1">
 
         <LinearLayout
@@ -48,6 +46,7 @@
                 android:paddingRight="@dimen/preference_screen_header_padding_side"
                 android:paddingTop="@dimen/preference_screen_header_vertical_padding"
                 android:paddingBottom="@dimen/preference_screen_header_vertical_padding"
+                android:clipToPadding="false"
                 android:scrollbarStyle="@integer/preference_screen_header_scrollbarStyle"
                 android:drawSelectorOnTop="false"
                 android:cacheColorHint="@android:color/transparent"
@@ -63,11 +62,10 @@
 
         <LinearLayout
                 android:id="@+id/prefs_frame"
+                style="?attr/preferencePanelStyle"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="@integer/preferences_right_pane_weight"
-                android:layout_marginLeft="@dimen/preference_screen_side_margin"
-                android:layout_marginRight="@dimen/preference_screen_side_margin"
                 android:orientation="vertical"
                 android:visibility="gone" >
 

@@ -25,4 +25,12 @@
         <item name="android:measureWithLargestChild">true</item>
         <item name="android:tabLayout">@android:layout/tab_indicator_holo</item>
     </style>
+
+    <style name="PreferencePanel">
+        <item name="android:layout_marginLeft">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginRight">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginTop">@dimen/preference_screen_top_margin</item>
+        <item name="android:layout_marginBottom">@dimen/preference_screen_bottom_margin</item>
+        <item name="android:background">?attr/detailsElementBackground</item>
+    </style>
 </resources>

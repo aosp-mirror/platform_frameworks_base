@@ -45,13 +45,7 @@
     <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
 
     <!-- Preference activity, vertical padding for the header list -->
-    <dimen name="preference_screen_header_vertical_padding">16dp</dimen>
-
-    <!-- Reduce the margin when using dual pane -->
-    <!-- Preference activity side margins -->
-    <dimen name="preference_screen_side_margin">0dp</dimen>
-    <!-- Preference activity side margins negative-->
-    <dimen name="preference_screen_side_margin_negative">-4dp</dimen>
+    <dimen name="preference_screen_header_vertical_padding">32dp</dimen>
 
 </resources>
 
