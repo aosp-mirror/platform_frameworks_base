@@ -116,7 +116,8 @@ public abstract class Animation implements Cloneable {
 
     /**
      * Indicates whether the animation transformation should be applied before the
-     * animation starts.
+     * animation starts. The value of this variable is only relevant if mFillEnabled is true;
+     * otherwise it is assumed to be true.
      */
     boolean mFillBefore = true;
 
@@ -127,7 +128,7 @@ public abstract class Animation implements Cloneable {
     boolean mFillAfter = false;
 
     /**
-     * Indicates whether fillAfter should be taken into account.
+     * Indicates whether fillBefore should be taken into account.
      */
     boolean mFillEnabled = false;    
 
@@ -505,9 +506,9 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * If fillEnabled is true, this animation will apply fillBefore and fillAfter.
+     * If fillEnabled is true, this animation will apply the value of fillBefore.
      *
-     * @return true if the animation will take fillBefore and fillAfter into account
+     * @return true if the animation will take fillBefore into account
      * @attr ref android.R.styleable#Animation_fillEnabled
      */
     public boolean isFillEnabled() {
@@ -515,11 +516,11 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * If fillEnabled is true, the animation will apply the value of fillBefore and
-     * fillAfter. Otherwise, fillBefore and fillAfter are ignored and the animation
-     * transformation is always applied.
+     * If fillEnabled is true, the animation will apply the value of fillBefore.
+     * Otherwise, fillBefore is ignored and the animation
+     * transformation is always applied until the animation ends.
      *
-     * @param fillEnabled true if the animation should take fillBefore and fillAfter into account
+     * @param fillEnabled true if the animation should take the value of fillBefore into account
      * @attr ref android.R.styleable#Animation_fillEnabled
      *
      * @see #setFillBefore(boolean)
@@ -531,7 +532,8 @@ public abstract class Animation implements Cloneable {
 
     /**
      * If fillBefore is true, this animation will apply its transformation
-     * before the start time of the animation. Defaults to true if not set.
+     * before the start time of the animation. Defaults to true if
+     * {@link #setFillEnabled(boolean)} is not set to true.
      * Note that this applies when using an {@link
      * android.view.animation.AnimationSet AnimationSet} to chain
      * animations. The transformation is not applied before the AnimationSet
@@ -549,10 +551,9 @@ public abstract class Animation implements Cloneable {
     /**
      * If fillAfter is true, the transformation that this animation performed
      * will persist when it is finished. Defaults to false if not set.
-     * Note that this applies when using an {@link
+     * Note that this applies to individual animations and when using an {@link
      * android.view.animation.AnimationSet AnimationSet} to chain
-     * animations. The transformation is not applied before the AnimationSet
-     * itself starts.
+     * animations.
      *
      * @param fillAfter true if the animation should apply its transformation after it ends
      * @attr ref android.R.styleable#Animation_fillAfter
@@ -674,7 +675,9 @@ public abstract class Animation implements Cloneable {
 
     /**
      * If fillBefore is true, this animation will apply its transformation
-     * before the start time of the animation.
+     * before the start time of the animation. If fillBefore is false and
+     * {@link #isFillEnabled() fillEnabled} is true, the transformation will not be applied until
+     * the start time of the animation.
      *
      * @return true if the animation applies its transformation before it starts
      * @attr ref android.R.styleable#Animation_fillBefore

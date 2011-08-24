@@ -3929,15 +3929,14 @@
     <declare-styleable name="Animation">
         <!-- Defines the interpolator used to smooth the animation movement in time. -->
         <attr name="interpolator" />
-        <!-- When set to true, fillAfter is taken into account. -->
+        <!-- When set to true, the value of fillBefore is taken into account. -->
         <attr name="fillEnabled" format="boolean" />
-        <!-- When set to true, the animation transformation is applied before the animation has
-             started. The default value is true. If fillEnabled is not set to true, fillBefore
-             is assumed to be true. -->
+        <!-- When set to true or when fillEnabled is not set to true, the animation transformation
+             is applied before the animation has started. The default value is true. -->
         <attr name="fillBefore" format="boolean" />
         <!-- When set to true, the animation transformation is applied after the animation is
-             over. The default value is false. If fillEnabled is not set to true and the animation
-             is not set on a View, fillAfter is assumed to be true. -->
+             over. The default value is false. If fillEnabled is not set to true and the
+             animation is not set on a View, fillAfter is assumed to be true.-->
         <attr name="fillAfter" format="boolean" />
         <!-- Amount of time (in milliseconds) for the animation to run. -->
         <attr name="duration" />
@@ -4095,7 +4094,6 @@
     <declare-styleable name="Animator">
         <!-- Defines the interpolator used to smooth the animation movement in time. -->
         <attr name="interpolator" />
-        <!-- When set to true, fillAfter is taken into account. -->
         <!-- Amount of time (in milliseconds) for the animation to run. -->
         <attr name="duration" />
         <!-- Delay in milliseconds before the animation runs, once start time is reached. -->
