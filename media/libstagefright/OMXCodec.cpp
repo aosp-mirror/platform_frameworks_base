@@ -808,7 +808,7 @@ status_t OMXCodec::setVideoPortFormatType(
         }
 
         if (format.eCompressionFormat == compressionFormat
-            && format.eColorFormat == colorFormat) {
+                && format.eColorFormat == colorFormat) {
             found = true;
             break;
         }
@@ -838,6 +838,15 @@ static size_t getFrameSize(
         case OMX_COLOR_FormatYUV420Planar:
         case OMX_COLOR_FormatYUV420SemiPlanar:
         case OMX_TI_COLOR_FormatYUV420PackedSemiPlanar:
+        /*
+        * FIXME: For the Opaque color format, the frame size does not
+        * need to be (w*h*3)/2. It just needs to
+        * be larger than certain minimum buffer size. However,
+        * currently, this opaque foramt has been tested only on
+        * YUV420 formats. If that is changed, then we need to revisit
+        * this part in the future
+        */
+        case OMX_COLOR_FormatAndroidOpaque:
             return (width * height * 3) / 2;
 
         default:
@@ -887,7 +896,7 @@ status_t OMXCodec::isColorFormatSupported(
         // Make sure that omx component does not overwrite
         // the incremented index (bug 2897413).
         CHECK_EQ(index, portFormat.nIndex);
-        if ((portFormat.eColorFormat == colorFormat)) {
+        if (portFormat.eColorFormat == colorFormat) {
             LOGV("Found supported color format: %d", portFormat.eColorFormat);
             return OK;  // colorFormat is supported!
         }
@@ -2923,6 +2932,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
     size_t offset = 0;
     int32_t n = 0;
 
+
     for (;;) {
         MediaBuffer *srcBuffer;
         if (mSeekTimeUs >= 0) {
@@ -3021,6 +3031,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
                 CHECK(info->mMediaBuffer == NULL);
                 info->mMediaBuffer = srcBuffer;
             } else {
+                CHECK(srcBuffer->data() != NULL) ;
                 memcpy((uint8_t *)info->mData + offset,
                         (const uint8_t *)srcBuffer->data()
                             + srcBuffer->range_offset(),
