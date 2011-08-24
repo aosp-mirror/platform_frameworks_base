@@ -3768,12 +3768,21 @@ public final class Settings {
 
 
         /**
-         * The {@link ComponentName} string of the service to be used as the spell checker
+         * The {@link ComponentName} string of the selected spell checker service which is
+         * one of the services managed by the text service manager.
+         *
+         * @hide
+         */
+        public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
+
+        /**
+         * The {@link ComponentName} string of the selected subtype of the selected spell checker
          * service which is one of the services managed by the text service manager.
          *
          * @hide
          */
-        public static final String SPELL_CHECKER_SERVICE = "spell_checker_service";
+        public static final String SELECTED_SPELL_CHECKER_SUBTYPE =
+                "selected_spell_checker_subtype";
 
         /**
          * What happens when the user presses the Power button while in-call
