@@ -80,6 +80,9 @@ static void dumpstate() {
     dump_file("SLAB INFO", "/proc/slabinfo");
     dump_file("ZONEINFO", "/proc/zoneinfo");
     dump_file("PAGETYPEINFO", "/proc/pagetypeinfo");
+    dump_file("BUDDYINFO", "/proc/buddyinfo");
+    dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");
+    run_command("QTAGUID STATS INFO", 10, "su", "root", "cat", "/proc/net/xt_qtaguid/stats", NULL);
 
     if (screenshot_path[0]) {
         LOGI("taking screenshot\n");
@@ -114,8 +117,10 @@ static void dumpstate() {
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("NETWORK ROUTES IPV6", "/proc/net/ipv6_route");
     dump_file("ARP CACHE", "/proc/net/arp");
-    run_command("IPTABLES", 10, "su", "root", "iptables", "-L", "-n", NULL);
+    run_command("IPTABLES", 10, "su", "root", "iptables", "-L", "-nvx", NULL);
+    run_command("IP6TABLES", 10, "su", "root", "ip6tables", "-L", "-nvx", NULL);
     run_command("IPTABLE NAT", 10, "su", "root", "iptables", "-t", "nat", "-L", "-n", NULL);
+    run_command("IPT6ABLE NAT", 10, "su", "root", "ip6tables", "-t", "nat", "-L", "-n", NULL);
 
     run_command("WIFI NETWORKS", 20,
             "su", "root", "wpa_cli", "list_networks", NULL);
