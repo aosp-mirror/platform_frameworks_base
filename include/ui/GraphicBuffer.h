@@ -62,6 +62,7 @@ public:
         USAGE_HW_TEXTURE        = GRALLOC_USAGE_HW_TEXTURE,
         USAGE_HW_RENDER         = GRALLOC_USAGE_HW_RENDER,
         USAGE_HW_2D             = GRALLOC_USAGE_HW_2D,
+        USAGE_HW_COMPOSER       = GRALLOC_USAGE_HW_COMPOSER,
         USAGE_HW_MASK           = GRALLOC_USAGE_HW_MASK
     };
 
