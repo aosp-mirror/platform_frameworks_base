@@ -38,6 +38,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
@@ -1062,7 +1063,7 @@ public final class Settings {
         public static void clearConfiguration(Configuration inoutConfig) {
             inoutConfig.fontScale = 0;
         }
-        
+
         /**
          * Convenience function to write a batch of configuration-related
          * settings from a {@link Configuration} object.
@@ -2781,7 +2782,11 @@ public final class Settings {
          * of the application settings.
          * 1 = override application settings,
          * 0 = use application settings (if specified).
+         *
+         * @deprecated  The value of this setting is no longer respected by
+         * the framework text to speech APIs as of the Ice Cream Sandwich release.
          */
+        @Deprecated
         public static final String TTS_USE_DEFAULTS = "tts_use_defaults";
 
         /**
@@ -2801,24 +2806,46 @@ public final class Settings {
 
         /**
          * Default text-to-speech language.
+         *
+         * @deprecated this setting is no longer in use, as of the Ice Cream
+         * Sandwich release. Apps should never need to read this setting directly,
+         * instead can query the TextToSpeech framework classes for the default
+         * locale. {@link TextToSpeech#getLanguage()}.
          */
+        @Deprecated
         public static final String TTS_DEFAULT_LANG = "tts_default_lang";
 
         /**
          * Default text-to-speech country.
+         *
+         * @deprecated this setting is no longer in use, as of the Ice Cream
+         * Sandwich release. Apps should never need to read this setting directly,
+         * instead can query the TextToSpeech framework classes for the default
+         * locale. {@link TextToSpeech#getLanguage()}.
          */
+        @Deprecated
         public static final String TTS_DEFAULT_COUNTRY = "tts_default_country";
 
         /**
          * Default text-to-speech locale variant.
+         *
+         * @deprecated this setting is no longer in use, as of the Ice Cream
+         * Sandwich release. Apps should never need to read this setting directly,
+         * instead can query the TextToSpeech framework classes for the
+         * locale that is in use {@link TextToSpeech#getLanguage()}.
          */
+        @Deprecated
         public static final String TTS_DEFAULT_VARIANT = "tts_default_variant";
 
         /**
          * Stores the default tts locales on a per engine basis. Stored as
          * a comma seperated list of values, each value being of the form
          * {@code engine_name:locale} for example,
-         * {@code com.foo.ttsengine:eng-USA,com.bar.ttsengine:esp-ESP}.
+         * {@code com.foo.ttsengine:eng-USA,com.bar.ttsengine:esp-ESP}. This
+         * supersedes {@link #TTS_DEFAULT_LANG}, {@link #TTS_DEFAULT_COUNTRY} and
+         * {@link #TTS_DEFAULT_VARIANT}. Apps should never need to read this
+         * setting directly, and can query the TextToSpeech framework classes
+         * for the locale that is in use.
          *
          * @hide
          */
@@ -4007,6 +4034,7 @@ public final class Settings {
             TTS_DEFAULT_LANG,
             TTS_DEFAULT_COUNTRY,
             TTS_ENABLED_PLUGINS,
+            TTS_DEFAULT_LOCALE,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_NUM_OPEN_NETWORKS_KEPT,
