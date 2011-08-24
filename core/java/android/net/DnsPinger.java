@@ -67,7 +67,7 @@ public final class DnsPinger extends Handler {
     private final Context mContext;
     private final int mConnectionType;
     private final Handler mTarget;
-    private final InetAddress mDefaultDns;
+    private final ArrayList<InetAddress> mDefaultDns;
     private String TAG;
 
     private static final int BASE = Protocol.BASE_DNS_PINGER;
@@ -113,7 +113,8 @@ public final class DnsPinger extends Handler {
             throw new IllegalArgumentException("Invalid connectionType in constructor: "
                     + connectionType);
         }
-        mDefaultDns = getDefaultDns();
+        mDefaultDns = new ArrayList<InetAddress>();
+        mDefaultDns.add(getDefaultDns());
         mEventCounter = 0;
     }
 
@@ -213,17 +214,16 @@ public final class DnsPinger extends Handler {
                 for (ActivePing activePing : mActivePings)
                     activePing.socket.close();
                 mActivePings.clear();
-                removeMessages(ACTION_PING_DNS);
                 break;
         }
     }
 
     /**
-     * @return The first DNS in the link properties of the specified connection
-     *         type or the default system DNS if the link properties has null
-     *         dns set. Should not be null.
+     * Returns a list of DNS addresses, coming from either the link properties of the
+     * specified connection or the default system DNS if the link properties has no dnses.
+     * @return a non-empty non-null list
      */
-    public InetAddress getDns() {
+    public List<InetAddress> getDnsList() {
         LinkProperties curLinkProps = getCurrentLinkProperties();
         if (curLinkProps == null) {
             Slog.e(TAG, "getCurLinkProperties:: LP for type" + mConnectionType + " is null!");
@@ -236,7 +236,7 @@ public final class DnsPinger extends Handler {
             return mDefaultDns;
         }
 
-        return dnses.iterator().next();
+        return new ArrayList<InetAddress>(dnses);
     }
 
     /**
