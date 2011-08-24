@@ -125,7 +125,15 @@ void egl_object_t::LocalRef<N,T>::terminate() {
 
 class egl_surface_t: public egl_object_t {
 protected:
-    ~egl_surface_t() {}
+    ~egl_surface_t() {
+        ANativeWindow* const window = win.get();
+        if (window != NULL) {
+            native_window_set_buffers_format(window, 0);
+            if (native_window_api_disconnect(window, NATIVE_WINDOW_API_EGL)) {
+                LOGE("EGLNativeWindowType %p disconnected failed", window);
+            }
+        }
+    }
 public:
     typedef egl_object_t::LocalRef<egl_surface_t, EGLSurface> Ref;
 
@@ -232,4 +240,3 @@ egl_sync_t* get_sync(EGLSyncKHR sync) {
 // ----------------------------------------------------------------------------
 
 #endif // ANDROID_EGL_OBJECT_H
-
