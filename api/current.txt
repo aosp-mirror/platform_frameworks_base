@@ -11296,9 +11296,33 @@ package android.media.effect {
   public class EffectFactory {
     method public android.media.effect.Effect createEffect(java.lang.String);
     method public static boolean isEffectSupported(java.lang.String);
-    field public static final java.lang.String EFFECT_BRIGHTNESS = "BrightnessEffect";
-    field public static final java.lang.String EFFECT_CONTRAST = "ContrastEffect";
-    field public static final java.lang.String EFFECT_FISHEYE = "FisheyeEffect";
+    field public static final java.lang.String EFFECT_AUTOFIX = "android.media.effect.effects.AutoFixEffect";
+    field public static final java.lang.String EFFECT_BACKDROPPER = "android.media.effect.effects.BackDropperEffect";
+    field public static final java.lang.String EFFECT_BLACKWHITE = "android.media.effect.effects.BlackWhiteEffect";
+    field public static final java.lang.String EFFECT_BRIGHTNESS = "android.media.effect.effects.BrightnessEffect";
+    field public static final java.lang.String EFFECT_CONTRAST = "android.media.effect.effects.ContrastEffect";
+    field public static final java.lang.String EFFECT_CROP = "android.media.effect.effects.CropEffect";
+    field public static final java.lang.String EFFECT_CROSSPROCESS = "android.media.effect.effects.CrossProcessEffect";
+    field public static final java.lang.String EFFECT_DOCUMENTARY = "android.media.effect.effects.DocumentaryEffect";
+    field public static final java.lang.String EFFECT_DOODLE = "android.media.effect.effects.DoodleEffect";
+    field public static final java.lang.String EFFECT_DUOTONE = "android.media.effect.effects.DuotoneEffect";
+    field public static final java.lang.String EFFECT_FILLLIGHT = "android.media.effect.effects.FillLightEffect";
+    field public static final java.lang.String EFFECT_FISHEYE = "android.media.effect.effects.FisheyeEffect";
+    field public static final java.lang.String EFFECT_FLIP = "android.media.effect.effects.FlipEffect";
+    field public static final java.lang.String EFFECT_GRAIN = "android.media.effect.effects.GrainEffect";
+    field public static final java.lang.String EFFECT_GRAYSCALE = "android.media.effect.effects.GrayscaleEffect";
+    field public static final java.lang.String EFFECT_LOMOISH = "android.media.effect.effects.LomoishEffect";
+    field public static final java.lang.String EFFECT_NEGATIVE = "android.media.effect.effects.NegativeEffect";
+    field public static final java.lang.String EFFECT_POSTERIZE = "android.media.effect.effects.PosterizeEffect";
+    field public static final java.lang.String EFFECT_REDEYE = "android.media.effect.effects.RedEyeEffect";
+    field public static final java.lang.String EFFECT_ROTATE = "android.media.effect.effects.RotateEffect";
+    field public static final java.lang.String EFFECT_SATURATE = "android.media.effect.effects.SaturateEffect";
+    field public static final java.lang.String EFFECT_SEPIA = "android.media.effect.effects.SepiaEffect";
+    field public static final java.lang.String EFFECT_SHARPEN = "android.media.effect.effects.SharpenEffect";
+    field public static final java.lang.String EFFECT_STRAIGHTEN = "android.media.effect.effects.StraightenEffect";
+    field public static final java.lang.String EFFECT_TEMPERATURE = "android.media.effect.effects.ColorTemperatureEffect";
+    field public static final java.lang.String EFFECT_TINT = "android.media.effect.effects.TintEffect";
+    field public static final java.lang.String EFFECT_VIGNETTE = "android.media.effect.effects.VignetteEffect";
   }
 
   public abstract interface EffectUpdateListener {
