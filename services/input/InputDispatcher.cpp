@@ -1831,8 +1831,8 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
         const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
         bool resumeWithAppendedMotionSample) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ prepareDispatchCycle - flags=%d, "
-            "xOffset=%f, yOffset=%f, scaleFactor=%f"
+    LOGD("channel '%s' ~ prepareDispatchCycle - flags=0x%08x, "
+            "xOffset=%f, yOffset=%f, scaleFactor=%f, "
             "pointerIds=0x%x, "
             "resumeWithAppendedMotionSample=%s",
             connection->getInputChannelName(), inputTarget->flags,
