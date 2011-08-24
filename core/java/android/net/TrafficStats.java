@@ -198,6 +198,18 @@ public class TrafficStats {
     }
 
     /**
+     * Increment count of network operations performed under the accounting tag
+     * currently active on the calling thread. This can be used to derive
+     * bytes-per-operation.
+     *
+     * @param operationCount Number of operations to increment count by.
+     */
+    public static void incrementOperationCount(int operationCount) {
+        final int tag = getThreadStatsTag();
+        incrementOperationCount(tag, operationCount);
+    }
+
+    /**
      * Increment count of network operations performed under the given
      * accounting tag. This can be used to derive bytes-per-operation.
      *
