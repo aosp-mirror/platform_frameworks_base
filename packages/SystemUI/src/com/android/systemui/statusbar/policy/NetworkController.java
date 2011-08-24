@@ -225,7 +225,7 @@ public class NetworkController extends BroadcastReceiver {
     public void addSignalCluster(SignalCluster cluster) {
         mSignalClusters.add(cluster);
         cluster.setWifiIndicators(
-                mWifiEnabled,
+                mWifiConnected, // only show wifi in the cluster if connected
                 mWifiIconId,
                 mWifiActivityIconId);
         cluster.setMobileDataIndicators(
@@ -862,7 +862,7 @@ public class NetworkController extends BroadcastReceiver {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
                 cluster.setWifiIndicators(
-                        mWifiEnabled,
+                        mWifiConnected, // only show wifi in the cluster if connected
                         mWifiIconId,
                         mWifiActivityIconId);
                 cluster.setMobileDataIndicators(
