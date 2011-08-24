@@ -16,4 +16,4 @@
 
 package android.net.wifi.p2p;
 
-parcelable WifiP2pStatus;
+parcelable WifiP2pInfo;

@@ -95,6 +95,12 @@ public class WifiP2pManager {
         "android.net.wifi.CONNECTION_STATE_CHANGE";
 
     /**
+     * The lookup key for a {@link android.net.wifi.p2p.WifiP2pInfo} object
+     * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_WIFI_P2P_INFO = "wifiP2pInfo";
+
+    /**
      * The lookup key for a {@link android.net.NetworkInfo} object associated with the
      * Wi-Fi network. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
@@ -145,57 +151,38 @@ public class WifiP2pManager {
     public static final int ENABLE_P2P_FAILED                       = BASE + 2;
     public static final int ENABLE_P2P_SUCCEEDED                    = BASE + 3;
 
-    /* arg1 on ENABLE_P2P_FAILED indicates a reason for failure */
+    public static final int DISABLE_P2P                             = BASE + 4;
+    public static final int DISABLE_P2P_FAILED                      = BASE + 5;
+    public static final int DISABLE_P2P_SUCCEEDED                   = BASE + 6;
+
+    public static final int DISCOVER_PEERS                          = BASE + 7;
+    public static final int DISCOVER_PEERS_FAILED                   = BASE + 8;
+    public static final int DISCOVER_PEERS_SUCCEEDED                = BASE + 9;
+
+    public static final int CONNECT                                 = BASE + 10;
+    public static final int CONNECT_FAILED                          = BASE + 11;
+    public static final int CONNECT_SUCCEEDED                       = BASE + 12;
+
+    public static final int CREATE_GROUP                            = BASE + 13;
+    public static final int CREATE_GROUP_FAILED                     = BASE + 14;
+    public static final int CREATE_GROUP_SUCCEEDED                  = BASE + 15;
+
+    public static final int REMOVE_GROUP                            = BASE + 16;
+    public static final int REMOVE_GROUP_FAILED                     = BASE + 17;
+    public static final int REMOVE_GROUP_SUCCEEDED                  = BASE + 18;
+
+    public static final int REQUEST_PEERS                           = BASE + 19;
+    public static final int RESPONSE_PEERS                          = BASE + 20;
+
+    public static final int REQUEST_CONNECTION_INFO                 = BASE + 21;
+    public static final int RESPONSE_CONNECTION_INFO                = BASE + 22;
+
+    /* arg1 values on response messages from the framework */
     public static final int P2P_UNSUPPORTED     = 1;
 
-    public static final int DISABLE_P2P                             = BASE + 5;
-    public static final int DISABLE_P2P_FAILED                      = BASE + 6;
-    public static final int DISABLE_P2P_SUCCEEDED                   = BASE + 7;
-
-    public static final int START_LISTEN_MODE                       = BASE + 9;
-    public static final int START_LISTEN_FAILED                     = BASE + 10;
-    public static final int START_LISTEN_SUCCEEDED                  = BASE + 11;
-
-    public static final int DISCOVER_PEERS                          = BASE + 13;
-    public static final int DISCOVER_PEERS_FAILED                   = BASE + 14;
-    public static final int DISCOVER_PEERS_SUCCEDED                 = BASE + 15;
-
-    public static final int CANCEL_DISCOVER_PEERS                   = BASE + 17;
-    public static final int CANCEL_DISCOVER_PEERS_FAILED            = BASE + 18;
-    public static final int CANCEL_DISCOVER_PEERS_SUCCEDED          = BASE + 19;
-
-    public static final int CONNECT                                 = BASE + 21;
-    public static final int CONNECT_FAILED                          = BASE + 22;
-    public static final int CONNECT_SUCCEEDED                       = BASE + 23;
-
-    public static final int CANCEL_CONNECT                          = BASE + 25;
-    public static final int CANCEL_CONNECT_FAILED                   = BASE + 26;
-    public static final int CANCEL_CONNECT_SUCCEDED                 = BASE + 27;
-
-    public static final int REJECT                                  = BASE + 28;
-    public static final int REJECT_FAILED                           = BASE + 29;
-    public static final int REJECT_SUCCEEDED                        = BASE + 30;
-
-    public static final int CREATE_GROUP                            = BASE + 31;
-    public static final int CREATE_GROUP_FAILED                     = BASE + 32;
-    public static final int CREATE_GROUP_SUCCEEDED                  = BASE + 33;
-
-    public static final int REMOVE_GROUP                            = BASE + 34;
-    public static final int REMOVE_GROUP_FAILED                     = BASE + 35;
-    public static final int REMOVE_GROUP_SUCCEEDED                  = BASE + 36;
-
-    public static final int REQUEST_SETTINGS                        = BASE + 37;
-    public static final int RESPONSE_SETTINGS                       = BASE + 38;
-
-    public static final int REQUEST_PEERS                           = BASE + 39;
-    public static final int RESPONSE_PEERS                          = BASE + 40;
-
-    public static final int REQUEST_CONNECTION_STATUS               = BASE + 41;
-    public static final int RESPONSE_CONNECTION_STATUS              = BASE + 42;
-
-    public static final int WPS_PBC                                 = BASE + 43;
-    public static final int WPS_PIN                                 = BASE + 44;
-    public static final int WPS_PIN_AVAILABLE                       = BASE + 45;
+    public static final int WPS_PBC                                 = BASE + 23;
+    public static final int WPS_PIN                                 = BASE + 24;
+    public static final int WPS_PIN_AVAILABLE                       = BASE + 25;
 
     /**
      * Create a new WifiP2pManager instance. Applications use
@@ -269,38 +256,11 @@ public class WifiP2pManager {
     }
 
     /**
-     * Set device in listen mode. This will make the device discoverable by
-     * another peer.
-     * A dialog to the user is thrown to request his permission since it can
-     * have a significant impact on power consumption
-     */
-     public void setListenState(Channel c, int timeout) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(START_LISTEN_MODE, timeout);
-     }
-
-    /**
      * Initiates peer discovery
      */
     public void discoverPeers(Channel c) {
         if (c == null) return;
         c.mAsyncChannel.sendMessage(DISCOVER_PEERS);
-    }
-
-    /**
-     * Initiates peer discovery with a timeout
-     */
-    public void discoverPeers(Channel c, int timeout) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(DISCOVER_PEERS, timeout);
-    }
-
-    /**
-     * Cancel any existing peer discovery operation
-     */
-    public void cancelPeerDiscovery(Channel c) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(CANCEL_DISCOVER_PEERS);
     }
 
     /**
@@ -311,14 +271,6 @@ public class WifiP2pManager {
     public void connect(Channel c, WifiP2pConfig config) {
         if (c == null) return;
         c.mAsyncChannel.sendMessage(CONNECT, config);
-    }
-
-    /**
-     * Cancel any ongoing negotiation or disconnect from an existing group
-     */
-    public void disconnect(Channel c) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(CANCEL_CONNECT);
     }
 
     /**
@@ -340,15 +292,6 @@ public class WifiP2pManager {
     }
 
     /**
-     * Request current p2p settings. This returns a RESPONSE_SETTINGS on the source
-     * handler.
-     */
-    public void requestP2pSettings(Channel c) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(REQUEST_SETTINGS);
-    }
-
-    /**
      * Request the list of peers. This returns a RESPONSE_PEERS on the source
      * handler.
      */
@@ -365,12 +308,19 @@ public class WifiP2pManager {
     }
 
     /**
-     * Request device connection status. This returns a RESPONSE_CONNECTION_STATUS on
+     * Request device connection info. This returns a RESPONSE_CONNECTION_INFO on
      * the source handler.
      */
-    public void requestConnectionStatus(Channel c) {
+    public void requestConnectionInfo(Channel c) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(REQUEST_CONNECTION_STATUS);
+        c.mAsyncChannel.sendMessage(REQUEST_CONNECTION_INFO);
+    }
+
+    /**
+     * Fetch p2p connection status from a RESPONSE_CONNECTION_INFO message
+     */
+    public WifiP2pInfo connectionInfoInResponse(Message msg) {
+        return (WifiP2pInfo) msg.obj;
     }
 
 

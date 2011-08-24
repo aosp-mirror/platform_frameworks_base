@@ -243,7 +243,7 @@ public class WifiNative {
 
     /* p2p_connect <peer device address> <pbc|pin|PIN#> [label|display|keypad]
         [persistent] [join|auth] [go_intent=<0..15>] [freq=<in MHz>] */
-    public static String p2pConnect(WifiP2pConfig config) {
+    public static String p2pConnect(WifiP2pConfig config, boolean joinExistingGroup) {
         if (config == null) return null;
         List<String> args = new ArrayList<String>();
         WpsConfiguration wpsConfig = config.wpsConfig;
@@ -269,15 +269,15 @@ public class WifiNative {
                 break;
         }
 
-        if (config.isPersistent) args.add("persistent");
-        if (config.joinExistingGroup) args.add("join");
+        /* Persist unless there is an explicit request to not do so*/
+        if (config.persist != WifiP2pConfig.Persist.NO) args.add("persistent");
+        if (joinExistingGroup) args.add("join");
 
         int groupOwnerIntent = config.groupOwnerIntent;
         if (groupOwnerIntent < 0 || groupOwnerIntent > 15) {
             groupOwnerIntent = 3; //default value
         }
         args.add("go_intent=" + groupOwnerIntent);
-        if (config.channel > 0) args.add("freq=" + config.channel);
 
         String command = "P2P_CONNECT ";
         for (String s : args) command += s + " ";
@@ -300,10 +300,23 @@ public class WifiNative {
 
     /* Invite a peer to a group */
     public static boolean p2pInvite(WifiP2pGroup group, String deviceAddress) {
-        if (group == null || deviceAddress == null) return false;
-        return doBooleanCommand("P2P_INVITE group=" + group.getInterface()
-                + " peer=" + deviceAddress + " go_dev_addr=" + group.getOwner().deviceAddress);
+        if (deviceAddress == null) return false;
+
+        if (group == null) {
+            return doBooleanCommand("P2P_INVITE peer=" + deviceAddress);
+        } else {
+            return doBooleanCommand("P2P_INVITE group=" + group.getInterface()
+                    + " peer=" + deviceAddress + " go_dev_addr=" + group.getOwner().deviceAddress);
+        }
     }
+
+    /* Reinvoke a persistent connection */
+    public static boolean p2pReinvoke(int netId, String deviceAddress) {
+        if (deviceAddress == null || netId < 0) return false;
+
+        return doBooleanCommand("P2P_INVITE persistent=" + netId + " peer=" + deviceAddress);
+    }
+
 
     public static String p2pGetInterfaceAddress(String deviceAddress) {
         if (deviceAddress == null) return null;

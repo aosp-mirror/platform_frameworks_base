@@ -51,8 +51,10 @@ public class WifiP2pDeviceList implements Parcelable {
         }
     }
 
-    public void clear() {
+    public boolean clear() {
+        if (mDevices.isEmpty()) return false;
         mDevices.clear();
+        return true;
     }
 
     public void add(WifiP2pDevice device) {
