@@ -541,9 +541,9 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
     snprintf(buffer, SIZE,
             "      "
             "format=%2d, activeBuffer=[%4ux%4u:%4u,%3X],"
-            " freezeLock=%p, queued-frames=%d\n",
+            " freezeLock=%p, transform-hint=0x%02x, queued-frames=%d\n",
             mFormat, w0, h0, s0,f0,
-            getFreezeLock().get(), mQueuedFrames);
+            getFreezeLock().get(), getTransformHint(), mQueuedFrames);
 
     result.append(buffer);
 
@@ -560,6 +560,17 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
         usage |= GraphicBuffer::USAGE_PROTECTED;
     }
     return usage;
+}
+
+uint32_t Layer::getTransformHint() const {
+    uint32_t orientation = 0;
+    if (!mFlinger->mDebugDisableTransformHint) {
+        orientation = getOrientation();
+        if (orientation & Transform::ROT_INVALID) {
+            orientation = 0;
+        }
+    }
+    return orientation;
 }
 
 // ---------------------------------------------------------------------------

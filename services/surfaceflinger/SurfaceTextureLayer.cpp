@@ -57,16 +57,10 @@ status_t SurfaceTextureLayer::queueBuffer(int buf, int64_t timestamp,
 
     status_t res = SurfaceTexture::queueBuffer(buf, timestamp,
             outWidth, outHeight, outTransform);
-
     sp<Layer> layer(mLayer.promote());
     if (layer != NULL) {
-        uint32_t orientation = layer->getOrientation();
-        if (orientation & Transform::ROT_INVALID) {
-            orientation = 0;
-        }
-        *outTransform = orientation;
+        *outTransform = layer->getTransformHint();
     }
-
     return res;
 }
 
