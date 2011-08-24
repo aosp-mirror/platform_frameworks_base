@@ -202,6 +202,42 @@ public class CallLog {
         public static final String GEOCODED_LOCATION = "geocoded_location";
 
         /**
+         * The cached URI to look up the contact associated with the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String CACHED_LOOKUP_URI = "lookup_uri";
+
+        /**
+         * The cached phone number of the contact which matches this entry, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String CACHED_MATCHED_NUMBER = "matched_number";
+
+        /**
+         * The cached normalized version of the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String CACHED_NORMALIZED_NUMBER = "normalized_number";
+
+        /**
+         * The cached photo id of the picture associated with the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        public static final String CACHED_PHOTO_ID = "photo_id";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
