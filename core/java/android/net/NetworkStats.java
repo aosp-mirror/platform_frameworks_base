@@ -313,6 +313,22 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Return total bytes represented by this snapshot object, usually used when
+     * checking if a {@link #subtract(NetworkStats)} delta passes a threshold.
+     */
+    public long getTotalBytes() {
+        long totalBytes = 0;
+        for (int i = 0; i < size; i++) {
+            // skip specific tags, since already counted in TAG_NONE
+            if (tag[i] != TAG_NONE) continue;
+
+            totalBytes += rxBytes[i];
+            totalBytes += txBytes[i];
+        }
+        return totalBytes;
+    }
+
+    /**
      * Subtract the given {@link NetworkStats}, effectively leaving the delta
      * between two snapshots in time. Assumes that statistics rows collect over
      * time, and that none of them have disappeared.

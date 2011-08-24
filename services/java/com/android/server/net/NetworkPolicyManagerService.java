@@ -60,6 +60,7 @@ import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeL
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
+import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 
 import android.app.IActivityManager;
 import android.app.INotificationManager;
@@ -454,7 +455,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
             synchronized (mRulesLock) {
-                if (mMeteredIfaces.contains(iface)) {
+                if (mMeteredIfaces.contains(iface) && !LIMIT_GLOBAL_ALERT.equals(limitName)) {
                     try {
                         // force stats update to make sure we have numbers that
                         // caused alert to trigger.
@@ -763,7 +764,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // disable data connection when over limit and not snoozed
             final boolean overLimit = policy.limitBytes != LIMIT_DISABLED
                     && totalBytes > policy.limitBytes && policy.lastSnooze < start;
-            setNetworkTemplateEnabled(policy.template, !overLimit);
+            final boolean enabled = !overLimit;
+
+            if (LOGD) {
+                Slog.d(TAG, "setting template=" + policy.template + " enabled=" + enabled);
+            }
+            setNetworkTemplateEnabled(policy.template, enabled);
         }
     }
 
@@ -772,7 +778,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * for the given {@link NetworkTemplate}.
      */
     private void setNetworkTemplateEnabled(NetworkTemplate template, boolean enabled) {
-        if (LOGD) Slog.d(TAG, "setting template=" + template + " enabled=" + enabled);
         switch (template.getMatchRule()) {
             case MATCH_MOBILE_3G_LOWER:
             case MATCH_MOBILE_4G:

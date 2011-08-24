@@ -43,6 +43,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
 import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
 
@@ -56,6 +57,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.net.IConnectivityManager;
+import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
@@ -121,7 +123,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int VERSION_UID_WITH_TAG = 3;
     private static final int VERSION_UID_WITH_SET = 4;
 
-    private static final int MSG_FORCE_UPDATE = 0x1;
+    private static final int MSG_PERFORM_POLL = 0x1;
+    private static final int MSG_PERFORM_POLL_DETAILED = 0x2;
 
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
@@ -141,7 +144,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private PendingIntent mPollIntent;
 
-    // TODO: listen for kernel push events through netd instead of polling
     // TODO: trim empty history objects entirely
 
     private static final long KB_IN_BYTES = 1024;
@@ -174,17 +176,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Flag if {@link #mUidStats} have been loaded from disk. */
     private boolean mUidStatsLoaded = false;
 
-    private NetworkStats mLastNetworkSnapshot;
-    private NetworkStats mLastPersistNetworkSnapshot;
+    private NetworkStats mLastPollNetworkSnapshot;
+    private NetworkStats mLastPollUidSnapshot;
+    private NetworkStats mLastPollOperationsSnapshot;
 
-    private NetworkStats mLastUidSnapshot;
+    private NetworkStats mLastPersistNetworkSnapshot;
+    private NetworkStats mLastPersistUidSnapshot;
 
     /** Current counter sets for each UID. */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mOperations = new NetworkStats(0L, 10);
-    private NetworkStats mLastOperationsSnapshot;
 
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
@@ -252,13 +255,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.registerReceiver(mShutdownReceiver, shutdownFilter);
 
         try {
-            registerPollAlarmLocked();
+            mNetworkManager.registerObserver(mAlertObserver);
         } catch (RemoteException e) {
-            Slog.w(TAG, "unable to register poll alarm");
+            // ouch, no push updates means we fall back to
+            // ACTION_NETWORK_STATS_POLL intervals.
+            Slog.e(TAG, "unable to register INetworkManagementEventObserver", e);
         }
 
-        // kick off background poll to bootstrap deltas
-        mHandler.obtainMessage(MSG_FORCE_UPDATE).sendToTarget();
+        registerPollAlarmLocked();
+        registerGlobalAlert();
+
+        // bootstrap initial stats to prevent double-counting later
+        bootstrapStats();
     }
 
     private void shutdownLocked() {
@@ -280,17 +288,37 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Clear any existing {@link #ACTION_NETWORK_STATS_POLL} alarms, and
      * reschedule based on current {@link NetworkStatsSettings#getPollInterval()}.
      */
-    private void registerPollAlarmLocked() throws RemoteException {
-        if (mPollIntent != null) {
-            mAlarmManager.remove(mPollIntent);
+    private void registerPollAlarmLocked() {
+        try {
+            if (mPollIntent != null) {
+                mAlarmManager.remove(mPollIntent);
+            }
+
+            mPollIntent = PendingIntent.getBroadcast(
+                    mContext, 0, new Intent(ACTION_NETWORK_STATS_POLL), 0);
+
+            final long currentRealtime = SystemClock.elapsedRealtime();
+            mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
+                    mSettings.getPollInterval(), mPollIntent);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem registering for poll alarm: " + e);
         }
+    }
 
-        mPollIntent = PendingIntent.getBroadcast(
-                mContext, 0, new Intent(ACTION_NETWORK_STATS_POLL), 0);
-
-        final long currentRealtime = SystemClock.elapsedRealtime();
-        mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
-                mSettings.getPollInterval(), mPollIntent);
+    /**
+     * Register for a global alert that is delivered through
+     * {@link INetworkManagementEventObserver} once a threshold amount of data
+     * has been transferred.
+     */
+    private void registerGlobalAlert() {
+        try {
+            final long alertBytes = mSettings.getPersistThreshold();
+            mNetworkManager.setGlobalAlert(alertBytes);
+        } catch (IllegalStateException e) {
+            Slog.w(TAG, "problem registering for global alert: " + e);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem registering for global alert: " + e);
+        }
     }
 
     @Override
@@ -475,10 +503,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public void forceUpdate() {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
-
-        synchronized (mStatsLock) {
-            performPollLocked(true, false);
-        }
+        performPoll(true, false);
     }
 
     /**
@@ -507,14 +532,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified UPDATE_DEVICE_STATS
             // permission above.
-            synchronized (mStatsLock) {
-                mWakeLock.acquire();
-                try {
-                    performPollLocked(true, false);
-                } finally {
-                    mWakeLock.release();
-                }
-            }
+            performPoll(true, false);
+
+            // verify that we're watching global alert
+            registerGlobalAlert();
         }
     };
 
@@ -542,6 +563,26 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // SHUTDOWN is protected broadcast.
             synchronized (mStatsLock) {
                 shutdownLocked();
+            }
+        }
+    };
+
+    /**
+     * Observer that watches for {@link INetworkManagementService} alerts.
+     */
+    private INetworkManagementEventObserver mAlertObserver = new NetworkAlertObserver() {
+        @Override
+        public void limitReached(String limitName, String iface) {
+            // only someone like NMS should be calling us
+            mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+            if (LIMIT_GLOBAL_ALERT.equals(limitName)) {
+                // kick off background poll to collect network stats; UID stats
+                // are handled during normal polling interval.
+                mHandler.obtainMessage(MSG_PERFORM_POLL).sendToTarget();
+
+                // re-arm global alert for next update
+                registerGlobalAlert();
             }
         }
     };
@@ -588,6 +629,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
+     * Bootstrap initial stats snapshot, usually during {@link #systemReady()}
+     * so we have baseline values without double-counting.
+     */
+    private void bootstrapStats() {
+        try {
+            mLastPollNetworkSnapshot = mNetworkManager.getNetworkStatsSummary();
+            mLastPollUidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
+            mLastPollOperationsSnapshot = new NetworkStats(0L, 0);
+        } catch (IllegalStateException e) {
+            Slog.w(TAG, "problem reading network stats: " + e);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem reading network stats: " + e);
+        }
+    }
+
+    private void performPoll(boolean detailedPoll, boolean forcePersist) {
+        synchronized (mStatsLock) {
+            mWakeLock.acquire();
+            try {
+                performPollLocked(detailedPoll, forcePersist);
+            } finally {
+                mWakeLock.release();
+            }
+        }
+    }
+
+    /**
      * Periodic poll operation, reading current statistics and recording into
      * {@link NetworkStatsHistory}.
      *
@@ -596,6 +664,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private void performPollLocked(boolean detailedPoll, boolean forcePersist) {
         if (LOGV) Slog.v(TAG, "performPollLocked()");
+        final long startRealtime = SystemClock.elapsedRealtime();
 
         // try refreshing time source when stale
         if (mTime.getCacheAge() > mSettings.getTimeCacheMaxAge()) {
@@ -605,6 +674,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // TODO: consider marking "untrusted" times in historical stats
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
+        final long persistThreshold = mSettings.getPersistThreshold();
 
         final NetworkStats networkSnapshot;
         final NetworkStats uidSnapshot;
@@ -620,28 +690,30 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         performNetworkPollLocked(networkSnapshot, currentTime);
-        if (detailedPoll) {
-            performUidPollLocked(uidSnapshot, currentTime);
+
+        // persist when enough network data has occurred
+        final NetworkStats persistNetworkDelta = computeStatsDelta(
+                mLastPersistNetworkSnapshot, networkSnapshot, true);
+        if (forcePersist || persistNetworkDelta.getTotalBytes() > persistThreshold) {
+            writeNetworkStatsLocked();
+            mLastPersistNetworkSnapshot = networkSnapshot;
         }
 
-        // decide if enough has changed to trigger persist
-        final NetworkStats persistDelta = computeStatsDelta(
-                mLastPersistNetworkSnapshot, networkSnapshot, true);
-        final long persistThreshold = mSettings.getPersistThreshold();
+        if (detailedPoll) {
+            performUidPollLocked(uidSnapshot, currentTime);
 
-        NetworkStats.Entry entry = null;
-        for (String iface : persistDelta.getUniqueIfaces()) {
-            final int index = persistDelta.findIndex(iface, UID_ALL, SET_DEFAULT, TAG_NONE);
-            entry = persistDelta.getValues(index, entry);
-            if (forcePersist || entry.rxBytes > persistThreshold
-                    || entry.txBytes > persistThreshold) {
-                writeNetworkStatsLocked();
-                if (mUidStatsLoaded) {
-                    writeUidStatsLocked();
-                }
+            // persist when enough network data has occurred
+            final NetworkStats persistUidDelta = computeStatsDelta(
+                    mLastPersistUidSnapshot, uidSnapshot, true);
+            if (forcePersist || persistUidDelta.getTotalBytes() > persistThreshold) {
+                writeUidStatsLocked();
                 mLastPersistNetworkSnapshot = networkSnapshot;
-                break;
             }
+        }
+
+        if (LOGV) {
+            final long duration = SystemClock.elapsedRealtime() - startRealtime;
+            Slog.v(TAG, "performPollLocked() took " + duration + "ms");
         }
 
         // finally, dispatch updated event to any listeners
@@ -656,7 +728,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performNetworkPollLocked(NetworkStats networkSnapshot, long currentTime) {
         final HashSet<String> unknownIface = Sets.newHashSet();
 
-        final NetworkStats delta = computeStatsDelta(mLastNetworkSnapshot, networkSnapshot, false);
+        final NetworkStats delta = computeStatsDelta(mLastPollNetworkSnapshot, networkSnapshot, false);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -678,7 +750,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             history.removeBucketsBefore(currentTime - maxHistory);
         }
 
-        mLastNetworkSnapshot = networkSnapshot;
+        mLastPollNetworkSnapshot = networkSnapshot;
 
         if (LOGD && unknownIface.size() > 0) {
             Slog.w(TAG, "unknown interfaces " + unknownIface.toString() + ", ignoring those stats");
@@ -691,9 +763,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performUidPollLocked(NetworkStats uidSnapshot, long currentTime) {
         ensureUidStatsLoadedLocked();
 
-        final NetworkStats delta = computeStatsDelta(mLastUidSnapshot, uidSnapshot, false);
+        final NetworkStats delta = computeStatsDelta(mLastPollUidSnapshot, uidSnapshot, false);
         final NetworkStats operationsDelta = computeStatsDelta(
-                mLastOperationsSnapshot, mOperations, false);
+                mLastPollOperationsSnapshot, mOperations, false);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -731,8 +803,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
 
-        mLastUidSnapshot = uidSnapshot;
-        mLastOperationsSnapshot = mOperations;
+        mLastPollUidSnapshot = uidSnapshot;
+        mLastPollOperationsSnapshot = mOperations;
         mOperations = new NetworkStats(0L, 10);
     }
 
@@ -1162,8 +1234,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         /** {@inheritDoc} */
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_FORCE_UPDATE: {
-                    forceUpdate();
+                case MSG_PERFORM_POLL: {
+                    performPoll(false, false);
+                    return true;
+                }
+                case MSG_PERFORM_POLL_DETAILED: {
+                    performPoll(true, false);
                     return true;
                 }
                 default: {
@@ -1226,10 +1302,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         public long getPollInterval() {
-            return getSecureLong(NETSTATS_POLL_INTERVAL, 15 * MINUTE_IN_MILLIS);
+            return getSecureLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
         }
         public long getPersistThreshold() {
-            return getSecureLong(NETSTATS_PERSIST_THRESHOLD, 16 * KB_IN_BYTES);
+            return getSecureLong(NETSTATS_PERSIST_THRESHOLD, 512 * KB_IN_BYTES);
         }
         public long getNetworkBucketDuration() {
             return getSecureLong(NETSTATS_NETWORK_BUCKET_DURATION, HOUR_IN_MILLIS);
