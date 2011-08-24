@@ -3059,6 +3059,12 @@ public final class ContactsContract {
      */
     protected interface StreamItemsColumns {
         /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID}
+         * that this stream item belongs to.
+         */
+        public static final String CONTACT_ID = "contact_id";
+
+        /**
          * A reference to the {@link RawContacts#_ID}
          * that this stream item belongs to.
          */

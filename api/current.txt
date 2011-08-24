@@ -16685,6 +16685,7 @@ package android.provider {
     field public static final java.lang.String ACCOUNT_NAME = "account_name";
     field public static final java.lang.String ACCOUNT_TYPE = "account_type";
     field public static final java.lang.String COMMENTS = "comments";
+    field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String RAW_CONTACT_ID = "raw_contact_id";
     field public static final java.lang.String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
