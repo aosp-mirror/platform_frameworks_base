@@ -218,4 +218,9 @@ interface IWindowManager
      * Called by the settings application to temporarily set the pointer speed.
      */
     void setPointerSpeed(int speed);
+
+    /**
+     * Block until all windows the window manager knows about have been drawn.
+     */
+    void waitForAllDrawn();
 }

@@ -451,6 +451,10 @@ public class BridgeWindowManager implements IWindowManager {
         return 0;
     }
 
+    public void waitForAllDrawn() {
+        // TODO Auto-generated method stub
+    }
+    
     public IBinder asBinder() {
         // TODO Auto-generated method stub
         return null;

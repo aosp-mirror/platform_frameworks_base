@@ -25,6 +25,8 @@ import android.util.Log;
 
 public class TargetDrawable {
     private static final String TAG = "TargetDrawable";
+    private static final boolean DEBUG = false;
+
     public static final int[] STATE_ACTIVE =
             { android.R.attr.state_enabled, android.R.attr.state_active };
     public static final int[] STATE_INACTIVE =
@@ -139,11 +141,13 @@ public class TargetDrawable {
                 maxWidth = Math.max(maxWidth, childDrawable.getIntrinsicWidth());
                 maxHeight = Math.max(maxHeight, childDrawable.getIntrinsicHeight());
             }
-            Log.v(TAG, "union of childDrawable rects " + d + " to: " + maxWidth + "x" + maxHeight);
+            if (DEBUG) Log.v(TAG, "union of childDrawable rects " + d + " to: "
+                        + maxWidth + "x" + maxHeight);
             d.setBounds(0, 0, maxWidth, maxHeight);
             for (int i = 0; i < d.getStateCount(); i++) {
                 Drawable childDrawable = d.getStateDrawable(i);
-                Log.v(TAG, "sizing drawable " + childDrawable + " to: " + maxWidth + "x" + maxHeight);
+                if (DEBUG) Log.v(TAG, "sizing drawable " + childDrawable + " to: "
+                            + maxWidth + "x" + maxHeight);
                 childDrawable.setBounds(0, 0, maxWidth, maxHeight);
             }
         } else if (mDrawable != null) {
