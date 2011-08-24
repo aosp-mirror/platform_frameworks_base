@@ -64,8 +64,10 @@ interface IConnectivityManager
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
     boolean getMobileDataEnabled();
-
     void setMobileDataEnabled(boolean enabled);
+
+    /** Policy control over specific {@link NetworkStateTracker}. */
+    void setPolicyDataEnable(int networkType, boolean enabled);
 
     int tether(String iface);
 

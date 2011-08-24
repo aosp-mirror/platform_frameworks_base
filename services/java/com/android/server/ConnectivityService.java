@@ -72,7 +72,6 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -89,7 +88,6 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @hide
@@ -250,6 +248,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_SEND_STICKY_BROADCAST_INTENT =
             MAX_NETWORK_STATE_TRACKER_EVENT + 12;
+
+    /**
+     * Used internally to
+     * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
+     */
+    private static final int EVENT_SET_POLICY_DATA_ENABLE = MAX_NETWORK_STATE_TRACKER_EVENT + 13;
 
     private Handler mHandler;
 
@@ -1282,7 +1286,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (VDBG) {
                 log(mNetTrackers[ConnectivityManager.TYPE_MOBILE].toString() + enabled);
             }
-            mNetTrackers[ConnectivityManager.TYPE_MOBILE].setDataEnable(enabled);
+            mNetTrackers[ConnectivityManager.TYPE_MOBILE].setUserDataEnable(enabled);
+        }
+    }
+
+    @Override
+    public void setPolicyDataEnable(int networkType, boolean enabled) {
+        // only someone like NPMS should only be calling us
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        mHandler.sendMessage(mHandler.obtainMessage(
+                EVENT_SET_POLICY_DATA_ENABLE, networkType, (enabled ? ENABLED : DISABLED)));
+    }
+
+    private void handleSetPolicyDataEnable(int networkType, boolean enabled) {
+        if (isNetworkTypeValid(networkType)) {
+            final NetworkStateTracker tracker = mNetTrackers[networkType];
+            if (tracker != null) {
+                tracker.setPolicyDataEnable(enabled);
+            }
         }
     }
 
@@ -2262,6 +2284,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     log("EVENT_SEND_STICKY_BROADCAST_INTENT: sendStickyBroadcast intent=" + intent);
                     sendStickyBroadcast(intent);
                     break;
+                }
+                case EVENT_SET_POLICY_DATA_ENABLE: {
+                    final int networkType = msg.arg1;
+                    final boolean enabled = msg.arg2 == ENABLED;
+                    handleSetPolicyDataEnable(networkType, enabled);
                 }
             }
         }

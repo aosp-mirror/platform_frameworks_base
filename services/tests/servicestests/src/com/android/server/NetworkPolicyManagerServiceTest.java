@@ -79,6 +79,7 @@ import com.google.common.util.concurrent.AbstractFuture;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
+import org.easymock.IExpectationSetters;
 
 import java.io.File;
 import java.util.LinkedHashSet;
@@ -86,6 +87,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import libcore.io.IoUtils;
 
 /**
  * Tests for {@link NetworkPolicyManagerService}.
@@ -117,6 +120,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private Binder mStubBinder = new Binder();
 
+    private long mStartTime;
+    private long mElapsedRealtime;
+
     private static final int UID_A = android.os.Process.FIRST_APPLICATION_UID + 800;
     private static final int UID_B = android.os.Process.FIRST_APPLICATION_UID + 801;
 
@@ -127,6 +133,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        setCurrentTimeMillis(TEST_START);
 
         // intercept various broadcasts, and pretend that uids have packages
         mServiceContext = new BroadcastInterceptingContext(getContext()) {
@@ -160,8 +168,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         };
 
         mPolicyDir = getContext().getFilesDir();
-        for (File file : mPolicyDir.listFiles()) {
-            file.delete();
+        if (mPolicyDir.exists()) {
+            IoUtils.deleteContents(mPolicyDir);
         }
 
         mActivityManager = createMock(IActivityManager.class);
@@ -173,9 +181,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mConnManager = createMock(IConnectivityManager.class);
         mNotifManager = createMock(INotificationManager.class);
 
-        mService = new NetworkPolicyManagerService(
-                mServiceContext, mActivityManager, mPowerManager, mStatsService,
-                mNetworkManager, mTime, mPolicyDir);
+        mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mPowerManager,
+                mStatsService, mNetworkManager, mTime, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
         mService.bindNotificationManager(mNotifManager);
 
@@ -198,7 +205,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // expect to answer screen status during systemReady()
         expect(mPowerManager.isScreenOn()).andReturn(true).atLeastOnce();
-        expectTime(System.currentTimeMillis());
+        expectCurrentTime();
 
         replay();
         mService.systemReady();
@@ -485,7 +492,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
-        long elapsedRealtime = 0;
         NetworkState[] state = null;
         NetworkStats stats = null;
         Future<Void> future;
@@ -494,11 +500,13 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long TIME_MAR_10 = 1173484800000L;
         final int CYCLE_DAY = 15;
 
+        setCurrentTimeMillis(TIME_MAR_10);
+
         // first, pretend that wifi network comes online. no policy active,
         // which means we shouldn't push limit to interface.
         state = new NetworkState[] { buildWifi() };
         expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-        expectTime(TIME_MAR_10 + elapsedRealtime);
+        expectCurrentTime();
         expectClearNotifications();
         future = expectMeteredIfacesChanged();
 
@@ -510,10 +518,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // now change cycle to be on 15th, and test in early march, to verify we
         // pick cycle day in previous month.
         expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-        expectTime(TIME_MAR_10 + elapsedRealtime);
+        expectCurrentTime();
 
         // pretend that 512 bytes total have happened
-        stats = new NetworkStats(elapsedRealtime, 1)
+        stats = new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 256L, 2L, 256L, 2L);
         expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
                 .andReturn(stats).atLeastOnce();
@@ -521,8 +529,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // TODO: consider making strongly ordered mock
         expectRemoveInterfaceQuota(TEST_IFACE);
         expectSetInterfaceQuota(TEST_IFACE, 1536L);
-        expectRemoveInterfaceAlert(TEST_IFACE);
-        expectSetInterfaceAlert(TEST_IFACE, 512L);
 
         expectClearNotifications();
         future = expectMeteredIfacesChanged(TEST_IFACE);
@@ -558,8 +564,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     public void testOverWarningLimitNotification() throws Exception {
-        long elapsedRealtime = 0;
-        long currentTime = 0;
         NetworkState[] state = null;
         NetworkStats stats = null;
         Future<Void> future;
@@ -569,14 +573,18 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long TIME_MAR_10 = 1173484800000L;
         final int CYCLE_DAY = 15;
 
+        setCurrentTimeMillis(TIME_MAR_10);
+
         // assign wifi policy
-        elapsedRealtime = 0;
-        currentTime = TIME_MAR_10 + elapsedRealtime;
         state = new NetworkState[] {};
+        stats = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
-            expectTime(currentTime);
+            expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
+            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats).atLeastOnce();
 
             expectClearNotifications();
             future = expectMeteredIfacesChanged();
@@ -589,22 +597,19 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
 
         // bring up wifi network
-        elapsedRealtime += MINUTE_IN_MILLIS;
-        currentTime = TIME_MAR_10 + elapsedRealtime;
-        stats = new NetworkStats(elapsedRealtime, 1)
-                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
+        incrementCurrentTime(MINUTE_IN_MILLIS);
         state = new NetworkState[] { buildWifi() };
+        stats = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
-            expectTime(currentTime);
+            expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTime))
+            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
 
             expectRemoveInterfaceQuota(TEST_IFACE);
             expectSetInterfaceQuota(TEST_IFACE, 2048L);
-            expectRemoveInterfaceAlert(TEST_IFACE);
-            expectSetInterfaceAlert(TEST_IFACE, 1024L);
 
             expectClearNotifications();
             future = expectMeteredIfacesChanged(TEST_IFACE);
@@ -616,14 +621,13 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
 
         // go over warning, which should kick notification
-        elapsedRealtime += MINUTE_IN_MILLIS;
-        currentTime = TIME_MAR_10 + elapsedRealtime;
-        stats = new NetworkStats(elapsedRealtime, 1)
+        incrementCurrentTime(MINUTE_IN_MILLIS);
+        stats = new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 1536L, 15L, 0L, 0L);
 
         {
-            expectTime(currentTime);
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTime))
+            expectCurrentTime();
+            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
 
             expectForceUpdate();
@@ -637,15 +641,15 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
 
         // go over limit, which should kick notification and dialog
-        elapsedRealtime += MINUTE_IN_MILLIS;
-        currentTime = TIME_MAR_10 + elapsedRealtime;
-        stats = new NetworkStats(elapsedRealtime, 1)
+        incrementCurrentTime(MINUTE_IN_MILLIS);
+        stats = new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 5120L, 512L, 0L, 0L);
 
         {
-            expectTime(currentTime);
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTime))
+            expectCurrentTime();
+            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, false).atLeastOnce();
 
             expectForceUpdate();
             expectClearNotifications();
@@ -658,21 +662,23 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
 
         // now snooze policy, which should remove quota
-        elapsedRealtime += MINUTE_IN_MILLIS;
-        currentTime = TIME_MAR_10 + elapsedRealtime;
+        incrementCurrentTime(MINUTE_IN_MILLIS);
 
         {
-            expectTime(currentTime);
+            expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTime))
+            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, true).atLeastOnce();
 
+            // snoozed interface still has high quota so background data is
+            // still restricted.
             expectRemoveInterfaceQuota(TEST_IFACE);
-            expectRemoveInterfaceAlert(TEST_IFACE);
+            expectSetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
 
             expectClearNotifications();
             tag = expectEnqueueNotification();
-            future = expectMeteredIfacesChanged();
+            future = expectMeteredIfacesChanged(TEST_IFACE);
 
             replay();
             mService.snoozePolicy(sTemplateWifi);
@@ -700,10 +706,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         return new NetworkState(info, prop, null);
     }
 
-    private void expectTime(long currentTime) throws Exception {
+    private void expectCurrentTime() throws Exception {
         expect(mTime.forceRefresh()).andReturn(false).anyTimes();
         expect(mTime.hasCache()).andReturn(true).anyTimes();
-        expect(mTime.currentTimeMillis()).andReturn(currentTime).anyTimes();
+        expect(mTime.currentTimeMillis()).andReturn(currentTimeMillis()).anyTimes();
         expect(mTime.getCacheAge()).andReturn(0L).anyTimes();
         expect(mTime.getCacheCertainty()).andReturn(0L).anyTimes();
     }
@@ -770,6 +776,12 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         return future;
     }
 
+    private <T> IExpectationSetters<T> expectPolicyDataEnable(int type, boolean enabled)
+            throws Exception {
+        mConnManager.setPolicyDataEnable(type, enabled);
+        return expectLastCall();
+    }
+
     private static class FutureAnswer extends AbstractFuture<Void> implements IAnswer<Void> {
         @Override
         public Void get() throws InterruptedException, ExecutionException {
@@ -816,6 +828,23 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private static void assertNotificationType(int expected, String actualTag) {
         assertEquals(
                 Integer.toString(expected), actualTag.substring(actualTag.lastIndexOf(':') + 1));
+    }
+
+    private long getElapsedRealtime() {
+        return mElapsedRealtime;
+    }
+
+    private void setCurrentTimeMillis(long currentTimeMillis) {
+        mStartTime = currentTimeMillis;
+        mElapsedRealtime = 0L;
+    }
+
+    private long currentTimeMillis() {
+        return mStartTime + mElapsedRealtime;
+    }
+
+    private void incrementCurrentTime(long duration) {
+        mElapsedRealtime += duration;
     }
 
     private void replay() {

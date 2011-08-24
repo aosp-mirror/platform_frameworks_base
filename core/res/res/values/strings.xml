@@ -3163,6 +3163,8 @@
     <string name="data_usage_4g_limit_title">4G data disabled</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_mobile_limit_title">Mobile data disabled</string>
+    <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
+    <string name="data_usage_wifi_limit_title">Wi-Fi data disabled</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_limit_body">Touch to enable</string>
 
@@ -3172,6 +3174,8 @@
     <string name="data_usage_4g_limit_snoozed_title">4G data limit exceeded</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_mobile_limit_snoozed_title">Mobile data limit exceeded</string>
+    <!-- Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
+    <string name="data_usage_wifi_limit_snoozed_title">Wi-Fi data limit exceeded</string>
     <!-- Notification body when data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_limit_snoozed_body"><xliff:g id="size" example="3.8GB">%s</xliff:g> over specified limit</string>
 

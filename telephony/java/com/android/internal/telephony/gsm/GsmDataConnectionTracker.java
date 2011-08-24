@@ -27,14 +27,14 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
+import android.net.LinkCapabilities;
+import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
+import android.net.NetworkConfig;
 import android.net.NetworkUtils;
 import android.net.ProxyProperties;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.net.LinkCapabilities;
-import android.net.LinkProperties;
-import android.net.NetworkConfig;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemClock;
@@ -49,34 +49,27 @@ import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import android.preference.PreferenceManager;
 
-import com.android.internal.R;
 import com.android.internal.telephony.ApnContext;
 import com.android.internal.telephony.ApnSetting;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnection.UpdateLinkPropertyResult;
 import com.android.internal.telephony.DataConnectionAc;
 import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
-import com.android.internal.telephony.RetryManager;
-import com.android.internal.telephony.EventLogTags;
-import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.RetryManager;
 import com.android.internal.util.AsyncChannel;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@hide}
@@ -523,16 +516,18 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * {@code true} otherwise.
      */
     @Override
-    public synchronized boolean getAnyDataEnabled() {
-        if (!(mInternalDataEnabled && mDataEnabled)) return false;
-        for (ApnContext apnContext : mApnContexts.values()) {
-            // Make sure we dont have a context that going down
-            // and is explicitly disabled.
-            if (isDataAllowed(apnContext)) {
-                return true;
+    public boolean getAnyDataEnabled() {
+        synchronized (mDataEnabledLock) {
+            if (!(mInternalDataEnabled && mUserDataEnabled && mPolicyDataEnabled)) return false;
+            for (ApnContext apnContext : mApnContexts.values()) {
+                // Make sure we dont have a context that going down
+                // and is explicitly disabled.
+                if (isDataAllowed(apnContext)) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     private boolean isDataAllowed(ApnContext apnContext) {
@@ -570,6 +565,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected boolean isDataAllowed() {
+        final boolean internalDataEnabled;
+        synchronized (mDataEnabledLock) {
+            internalDataEnabled = mInternalDataEnabled;
+        }
+
         int gprsState = mPhone.getServiceStateTracker().getCurrentDataConnectionState();
         boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
 
@@ -577,7 +577,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     (gprsState == ServiceState.STATE_IN_SERVICE || mAutoAttachOnCreation) &&
                     mPhone.mIccRecords.getRecordsLoaded() &&
                     mPhone.getState() == Phone.State.IDLE &&
-                    mInternalDataEnabled &&
+                    internalDataEnabled &&
                     (!mPhone.getServiceState().getRoaming() || getDataOnRoamingEnabled()) &&
                     !mIsPsRestricted &&
                     desiredPowerState;
@@ -590,7 +590,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (mPhone.getState() != Phone.State.IDLE) {
                 reason += " - PhoneState= " + mPhone.getState();
             }
-            if (!mInternalDataEnabled) reason += " - mInternalDataEnabled= false";
+            if (!internalDataEnabled) reason += " - mInternalDataEnabled= false";
             if (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled()) {
                 reason += " - Roaming and data roaming not enabled";
             }

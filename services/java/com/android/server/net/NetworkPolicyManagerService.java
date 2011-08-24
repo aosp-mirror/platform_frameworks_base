@@ -27,7 +27,10 @@ import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -40,8 +43,11 @@ import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
 import static android.net.NetworkPolicyManager.isUidValidForPolicy;
+import static android.net.NetworkTemplate.MATCH_ETHERNET;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
 import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
+import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
+import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -104,6 +110,7 @@ import android.util.Xml;
 import com.android.internal.R;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -129,8 +136,8 @@ import java.util.List;
 import libcore.io.IoUtils;
 
 /**
- * Service that maintains low-level network policy rules and collects usage
- * statistics to drive those rules.
+ * Service that maintains low-level network policy rules, using
+ * {@link NetworkStatsService} statistics to drive those rules.
  * <p>
  * Derives active rules by combining a given policy with other system status,
  * and delivers to listeners, such as {@link ConnectivityManager}, for
@@ -195,6 +202,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private volatile boolean mScreenOn;
     private volatile boolean mRestrictBackground;
 
+    private final boolean mSuppressDefaultPolicy;
+
     /** Defined network policies. */
     private HashMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = Maps.newHashMap();
     /** Currently active network rules for ifaces. */
@@ -209,6 +218,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private HashSet<String> mMeteredIfaces = Sets.newHashSet();
     /** Set of over-limit templates that have been notified. */
     private HashSet<NetworkTemplate> mOverLimitNotified = Sets.newHashSet();
+
+    /** Set of currently active {@link Notification} tags. */
+    private HashSet<String> mActiveNotifs = Sets.newHashSet();
+    /** Current values from {@link #setPolicyDataEnable(int, boolean)}. */
+    private SparseBooleanArray mActiveNetworkEnabled = new SparseBooleanArray();
 
     /** Foreground at both UID and PID granularity. */
     private SparseBooleanArray mUidForeground = new SparseBooleanArray();
@@ -232,7 +246,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             IPowerManager powerManager, INetworkStatsService networkStats,
             INetworkManagementService networkManagement) {
         this(context, activityManager, powerManager, networkStats, networkManagement,
-                NtpTrustedTime.getInstance(context), getSystemDir());
+                NtpTrustedTime.getInstance(context), getSystemDir(), false);
     }
 
     private static File getSystemDir() {
@@ -241,8 +255,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             IPowerManager powerManager, INetworkStatsService networkStats,
-            INetworkManagementService networkManagement,
-            TrustedTime time, File systemDir) {
+            INetworkManagementService networkManagement, TrustedTime time, File systemDir,
+            boolean suppressDefaultPolicy) {
         mContext = checkNotNull(context, "missing context");
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
         mPowerManager = checkNotNull(powerManager, "missing powerManager");
@@ -253,6 +267,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
+
+        mSuppressDefaultPolicy = suppressDefaultPolicy;
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"));
     }
@@ -408,6 +424,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // READ_NETWORK_USAGE_HISTORY permission above.
 
             synchronized (mRulesLock) {
+                updateNetworkEnabledLocked();
                 updateNotificationsLocked();
             }
         }
@@ -446,6 +463,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         Slog.w(TAG, "problem updating network stats");
                     }
 
+                    updateNetworkEnabledLocked();
                     updateNotificationsLocked();
                 }
             }
@@ -459,74 +477,70 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateNotificationsLocked() {
         if (LOGV) Slog.v(TAG, "updateNotificationsLocked()");
 
-        // try refreshing time source when stale
-        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE) {
-            mTime.forceRefresh();
-        }
-
-        final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
-                : System.currentTimeMillis();
+        // keep track of previously active notifications
+        final HashSet<String> beforeNotifs = Sets.newHashSet();
+        beforeNotifs.addAll(mActiveNotifs);
+        mActiveNotifs.clear();
 
         // TODO: when switching to kernel notifications, compute next future
         // cycle boundary to recompute notifications.
 
         // examine stats for each active policy
-        for (NetworkPolicy policy : mNetworkRules.keySet()) {
+        final long currentTime = currentTimeMillis(true);
+        for (NetworkPolicy policy : mNetworkPolicy.values()) {
+            // ignore policies that aren't relevant to user
+            if (!isTemplateRelevant(policy.template)) continue;
+
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
 
-            final long totalBytes;
-            try {
-                final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
-                        policy.template, start, end);
-                final NetworkStats.Entry entry = stats.getValues(0, null);
-                totalBytes = entry.rxBytes + entry.txBytes;
-            } catch (RemoteException e) {
-                Slog.w(TAG, "problem reading summary for template " + policy.template);
-                continue;
-            }
+            final long totalBytes = getTotalBytes(policy.template, start, end);
+            if (totalBytes == UNKNOWN_BYTES) continue;
 
             if (policy.limitBytes != LIMIT_DISABLED && totalBytes >= policy.limitBytes) {
-                cancelNotification(policy, TYPE_WARNING);
-
                 if (policy.lastSnooze >= start) {
-                    cancelNotification(policy, TYPE_LIMIT);
                     enqueueNotification(policy, TYPE_LIMIT_SNOOZED, totalBytes);
                 } else {
-                    cancelNotification(policy, TYPE_LIMIT_SNOOZED);
                     enqueueNotification(policy, TYPE_LIMIT, totalBytes);
                     notifyOverLimitLocked(policy.template);
                 }
 
             } else {
-                cancelNotification(policy, TYPE_LIMIT);
-                cancelNotification(policy, TYPE_LIMIT_SNOOZED);
                 notifyUnderLimitLocked(policy.template);
 
                 if (policy.warningBytes != WARNING_DISABLED && totalBytes >= policy.warningBytes) {
                     enqueueNotification(policy, TYPE_WARNING, totalBytes);
-                } else {
-                    cancelNotification(policy, TYPE_WARNING);
                 }
-            }
-        }
-
-        // clear notifications for non-active policies
-        for (NetworkPolicy policy : mNetworkPolicy.values()) {
-            if (!mNetworkRules.containsKey(policy)) {
-                cancelNotification(policy, TYPE_WARNING);
-                cancelNotification(policy, TYPE_LIMIT);
-                cancelNotification(policy, TYPE_LIMIT_SNOOZED);
-                notifyUnderLimitLocked(policy.template);
             }
         }
 
         // ongoing notification when restricting background data
         if (mRestrictBackground) {
             enqueueRestrictedNotification(TAG_ALLOW_BACKGROUND);
-        } else {
-            cancelNotification(TAG_ALLOW_BACKGROUND);
         }
+
+        // cancel stale notifications that we didn't renew above
+        for (String tag : beforeNotifs) {
+            if (!mActiveNotifs.contains(tag)) {
+                cancelNotification(tag);
+            }
+        }
+    }
+
+    /**
+     * Test if given {@link NetworkTemplate} is relevant to user based on
+     * current device state, such as when {@link #getActiveSubscriberId()}
+     * matches. This is regardless of data connection status.
+     */
+    private boolean isTemplateRelevant(NetworkTemplate template) {
+        switch (template.getMatchRule()) {
+            case MATCH_MOBILE_3G_LOWER:
+            case MATCH_MOBILE_4G:
+            case MATCH_MOBILE_ALL:
+                // mobile templates are relevant when subscriberid is active
+                return Objects.equal(getActiveSubscriberId(), template.getSubscriberId());
+        }
+        return true;
     }
 
     /**
@@ -590,8 +604,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     case MATCH_MOBILE_4G:
                         title = res.getText(R.string.data_usage_4g_limit_title);
                         break;
-                    default:
+                    case MATCH_MOBILE_ALL:
                         title = res.getText(R.string.data_usage_mobile_limit_title);
+                        break;
+                    case MATCH_WIFI:
+                        title = res.getText(R.string.data_usage_wifi_limit_title);
+                        break;
+                    default:
+                        title = null;
                         break;
                 }
 
@@ -618,8 +638,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     case MATCH_MOBILE_4G:
                         title = res.getText(R.string.data_usage_4g_limit_snoozed_title);
                         break;
-                    default:
+                    case MATCH_MOBILE_ALL:
                         title = res.getText(R.string.data_usage_mobile_limit_snoozed_title);
+                        break;
+                    case MATCH_WIFI:
+                        title = res.getText(R.string.data_usage_wifi_limit_snoozed_title);
+                        break;
+                    default:
+                        title = null;
                         break;
                 }
 
@@ -641,6 +667,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(
                     packageName, tag, 0x0, builder.getNotification(), idReceived);
+            mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             Slog.w(TAG, "problem during enqueueNotification: " + e);
         }
@@ -674,17 +701,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(packageName, tag,
                     0x0, builder.getNotification(), idReceived);
+            mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             Slog.w(TAG, "problem during enqueueNotification: " + e);
         }
-    }
-
-    /**
-     * Cancel any notification for combined {@link NetworkPolicy} and specific
-     * type, like {@link #TYPE_LIMIT}.
-     */
-    private void cancelNotification(NetworkPolicy policy, int type) {
-        cancelNotification(buildNotificationTag(policy, type));
     }
 
     private void cancelNotification(String tag) {
@@ -709,11 +729,71 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // permission above.
             synchronized (mRulesLock) {
                 ensureActiveMobilePolicyLocked();
+                updateNetworkEnabledLocked();
                 updateNetworkRulesLocked();
                 updateNotificationsLocked();
             }
         }
     };
+
+    /**
+     * Proactively control network data connections when they exceed
+     * {@link NetworkPolicy#limitBytes}.
+     */
+    private void updateNetworkEnabledLocked() {
+        if (LOGV) Slog.v(TAG, "updateNetworkEnabledLocked()");
+
+        // TODO: reset any policy-disabled networks when any policy is removed
+        // completely, which is currently rare case.
+
+        final long currentTime = currentTimeMillis(true);
+        for (NetworkPolicy policy : mNetworkPolicy.values()) {
+            // shortcut when policy has no limit
+            if (policy.limitBytes == LIMIT_DISABLED) {
+                setNetworkTemplateEnabled(policy.template, true);
+                continue;
+            }
+
+            final long start = computeLastCycleBoundary(currentTime, policy);
+            final long end = currentTime;
+
+            final long totalBytes = getTotalBytes(policy.template, start, end);
+            if (totalBytes == UNKNOWN_BYTES) continue;
+
+            // disable data connection when over limit and not snoozed
+            final boolean overLimit = policy.limitBytes != LIMIT_DISABLED
+                    && totalBytes > policy.limitBytes && policy.lastSnooze < start;
+            setNetworkTemplateEnabled(policy.template, !overLimit);
+        }
+    }
+
+    /**
+     * Control {@link IConnectivityManager#setPolicyDataEnable(int, boolean)}
+     * for the given {@link NetworkTemplate}.
+     */
+    private void setNetworkTemplateEnabled(NetworkTemplate template, boolean enabled) {
+        if (LOGD) Slog.d(TAG, "setting template=" + template + " enabled=" + enabled);
+        switch (template.getMatchRule()) {
+            case MATCH_MOBILE_3G_LOWER:
+            case MATCH_MOBILE_4G:
+            case MATCH_MOBILE_ALL:
+                // TODO: offer more granular control over radio states once
+                // 4965893 is available.
+                if (Objects.equal(getActiveSubscriberId(), template.getSubscriberId())) {
+                    setPolicyDataEnable(TYPE_MOBILE, enabled);
+                    setPolicyDataEnable(TYPE_WIMAX, enabled);
+                }
+                break;
+            case MATCH_WIFI:
+                setPolicyDataEnable(TYPE_WIFI, enabled);
+                break;
+            case MATCH_ETHERNET:
+                setPolicyDataEnable(TYPE_ETHERNET, enabled);
+                break;
+            default:
+                throw new IllegalArgumentException("unexpected template");
+        }
+    }
 
     /**
      * Examine all connected {@link NetworkState}, looking for
@@ -763,34 +843,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        // try refreshing time source when stale
-        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE) {
-            mTime.forceRefresh();
-        }
-
-        final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
-                : System.currentTimeMillis();
-
         final HashSet<String> newMeteredIfaces = Sets.newHashSet();
 
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
+        final long currentTime = currentTimeMillis(true);
         for (NetworkPolicy policy : mNetworkRules.keySet()) {
             final String[] ifaces = mNetworkRules.get(policy);
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
 
-            final NetworkStats stats;
-            final long total;
-            try {
-                stats = mNetworkStats.getSummaryForNetwork(policy.template, start, end);
-                final NetworkStats.Entry entry = stats.getValues(0, null);
-                total = entry.rxBytes + entry.txBytes;
-            } catch (RemoteException e) {
-                Slog.w(TAG, "problem reading summary for template " + policy.template);
-                continue;
-            }
+            final long totalBytes = getTotalBytes(policy.template, start, end);
+            if (totalBytes == UNKNOWN_BYTES) continue;
 
             if (LOGD) {
                 Slog.d(TAG, "applying policy " + policy.toString() + " to ifaces "
@@ -798,11 +863,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
-            final boolean hasWarning = policy.warningBytes != WARNING_DISABLED;
-
             if (hasLimit) {
-                // remaining "quota" is based on usage in current cycle
-                final long quotaBytes = Math.max(0, policy.limitBytes - total);
+                final long quotaBytes;
+                if (policy.lastSnooze >= start) {
+                    // snoozing past quota, but we still need to restrict apps,
+                    // so push really high quota.
+                    quotaBytes = Long.MAX_VALUE;
+                } else {
+                    // remaining "quota" bytes are based on total usage in
+                    // current cycle. kernel doesn't like 0-byte rules, so we
+                    // set 1-byte quota and disable the radio later.
+                    quotaBytes = Math.max(1, policy.limitBytes - totalBytes);
+                }
 
                 if (ifaces.length > 1) {
                     // TODO: switch to shared quota once NMS supports
@@ -811,10 +883,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 for (String iface : ifaces) {
                     removeInterfaceQuota(iface);
-                    if (quotaBytes > 0) {
-                        setInterfaceQuota(iface, quotaBytes);
-                        newMeteredIfaces.add(iface);
-                    }
+                    setInterfaceQuota(iface, quotaBytes);
+                    newMeteredIfaces.add(iface);
                 }
             }
         }
@@ -837,6 +907,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     private void ensureActiveMobilePolicyLocked() {
         if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyLocked()");
+        if (mSuppressDefaultPolicy) return;
+
         final String subscriberId = getActiveSubscriberId();
         final NetworkIdentity probeIdent = new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, false);
@@ -1073,6 +1145,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mNetworkPolicy.put(policy.template, policy);
             }
 
+            updateNetworkEnabledLocked();
             updateNetworkRulesLocked();
             updateNotificationsLocked();
             writePolicyLocked();
@@ -1093,14 +1166,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void snoozePolicy(NetworkTemplate template) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
-        // try refreshing time source when stale
-        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE) {
-            mTime.forceRefresh();
-        }
-
-        final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
-                : System.currentTimeMillis();
-
+        final long currentTime = currentTimeMillis(true);
         synchronized (mRulesLock) {
             // find and snooze local policy that matches
             final NetworkPolicy policy = mNetworkPolicy.get(template);
@@ -1110,6 +1176,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             policy.lastSnooze = currentTime;
 
+            updateNetworkEnabledLocked();
             updateNetworkRulesLocked();
             updateNotificationsLocked();
             writePolicyLocked();
@@ -1173,22 +1240,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return null;
         }
 
-        final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
-                : System.currentTimeMillis();
+        final long currentTime = currentTimeMillis(false);
 
         final long start = computeLastCycleBoundary(currentTime, policy);
         final long end = currentTime;
 
         // find total bytes used under policy
-        long totalBytes = 0;
-        try {
-            final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
-                    policy.template, start, end);
-            final NetworkStats.Entry entry = stats.getValues(0, null);
-            totalBytes = entry.rxBytes + entry.txBytes;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading summary for template " + policy.template);
-        }
+        final long totalBytes = getTotalBytes(policy.template, start, end);
+        if (totalBytes == UNKNOWN_BYTES) return null;
 
         // report soft and hard limits under policy
         final long softLimitBytes = policy.warningBytes != WARNING_DISABLED ? policy.warningBytes
@@ -1481,10 +1540,52 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    /**
+     * Control {@link IConnectivityManager#setPolicyDataEnable(int, boolean)},
+     * dispatching only when actually changed.
+     */
+    private void setPolicyDataEnable(int networkType, boolean enabled) {
+        synchronized (mActiveNetworkEnabled) {
+            final boolean prevEnabled = mActiveNetworkEnabled.get(networkType, true);
+            if (prevEnabled == enabled) return;
+
+            try {
+                mConnManager.setPolicyDataEnable(networkType, enabled);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "problem setting network enabled", e);
+            }
+
+            mActiveNetworkEnabled.put(networkType, enabled);
+        }
+    }
+
     private String getActiveSubscriberId() {
         final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
         return telephony.getSubscriberId();
+    }
+
+    private static final long UNKNOWN_BYTES = -1;
+
+    private long getTotalBytes(NetworkTemplate template, long start, long end) {
+        try {
+            final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
+                    template, start, end);
+            final NetworkStats.Entry entry = stats.getValues(0, null);
+            return entry.rxBytes + entry.txBytes;
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem reading summary for template " + template);
+            return UNKNOWN_BYTES;
+        }
+    }
+
+    private long currentTimeMillis(boolean allowRefresh) {
+        // try refreshing time source when stale
+        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE && allowRefresh) {
+            mTime.forceRefresh();
+        }
+
+        return mTime.hasCache() ? mTime.currentTimeMillis() : System.currentTimeMillis();
     }
 
     private static Intent buildAllowBackgroundDataIntent() {
