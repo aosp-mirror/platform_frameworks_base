@@ -16,36 +16,25 @@
 
 package android.text.style;
 
+import android.graphics.Color;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
+import android.text.TextPaint;
 import android.text.TextUtils;
 
 /**
- * A SpellCheckSpan is an internal data structure created by the TextView's SpellChecker to
- * annotate portions of the text that are about to or currently being spell checked. They are
- * automatically removed once the spell check is completed.
+ * A SuggestionRangeSpan is used to show which part of an EditText is affected by a suggestion
+ * popup window.
  *
  * @hide
  */
-public class SpellCheckSpan implements ParcelableSpan {
-
-    private boolean mSpellCheckInProgress;
-
-    public SpellCheckSpan() {
-        mSpellCheckInProgress = false;
+public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpan {
+    @Override
+    public void updateDrawState(TextPaint tp) {
+        tp.setColor(Color.GREEN);            
     }
 
-    public SpellCheckSpan(Parcel src) {
-        mSpellCheckInProgress = (src.readInt() != 0);
-    }
-
-    public void setSpellCheckInProgress() {
-        mSpellCheckInProgress = true;
-    }
-
-    public boolean isSpellCheckInProgress() {
-        return mSpellCheckInProgress;
-    }
+    public SuggestionRangeSpan() { /* Nothing to do*/ }
 
     @Override
     public int describeContents() {
@@ -53,12 +42,10 @@ public class SpellCheckSpan implements ParcelableSpan {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mSpellCheckInProgress ? 1 : 0);
-    }
+    public void writeToParcel(Parcel dest, int flags) { /* Nothing to do*/ }
 
     @Override
     public int getSpanTypeId() {
-        return TextUtils.SPELL_CHECK_SPAN;
+        return TextUtils.SUGGESTION_RANGE_SPAN;
     }
 }

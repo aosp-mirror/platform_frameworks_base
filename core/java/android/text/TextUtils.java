@@ -31,9 +31,11 @@ import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.ReplacementSpan;
 import android.text.style.ScaleXSpan;
+import android.text.style.SpellCheckSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
+import android.text.style.SuggestionRangeSpan;
 import android.text.style.SuggestionSpan;
 import android.text.style.SuperscriptSpan;
 import android.text.style.TextAppearanceSpan;
@@ -579,6 +581,10 @@ public class TextUtils {
     public static final int ANNOTATION = 18;
     /** @hide */
     public static final int SUGGESTION_SPAN = 19;
+    /** @hide */
+    public static final int SPELL_CHECK_SPAN = 20;
+    /** @hide */
+    public static final int SUGGESTION_RANGE_SPAN = 21;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -734,6 +740,14 @@ public class TextUtils {
                     readSpan(p, sp, new SuggestionSpan(p));
                     break;
 
+                case SPELL_CHECK_SPAN:
+                    readSpan(p, sp, new SpellCheckSpan(p));
+                    break;
+
+                case SUGGESTION_RANGE_SPAN:
+                    readSpan(p, sp, new SuggestionRangeSpan());
+                    break;
+                    
                 default:
                     throw new RuntimeException("bogus span encoding " + kind);
                 }
