@@ -388,6 +388,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         private final VpnConfig mConfig;
         private final String[] mDaemons;
         private final String[][] mArguments;
+        private final LocalSocket[] mSockets;
         private final String mOuterInterface;
         private final LegacyVpnInfo mInfo;
 
@@ -398,6 +399,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mConfig = config;
             mDaemons = new String[] {"racoon", "mtpd"};
             mArguments = new String[][] {racoon, mtpd};
+            mSockets = new LocalSocket[mDaemons.length];
             mInfo = new LegacyVpnInfo();
 
             // This is the interface which VPN is running on.
@@ -416,10 +418,14 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         public void exit() {
-            // We assume that everything is reset after the daemons die.
+            // We assume that everything is reset after stopping the daemons.
             interrupt();
-            for (String daemon : mDaemons) {
-                SystemProperties.set("ctl.stop", daemon);
+            for (LocalSocket socket : mSockets) {
+                try {
+                    socket.close();
+                } catch (Exception e) {
+                    // ignore
+                }
             }
         }
 
@@ -462,15 +468,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 checkpoint(false);
                 mInfo.state = LegacyVpnInfo.STATE_INITIALIZING;
 
-                // First stop the daemons.
-                for (String daemon : mDaemons) {
-                    SystemProperties.set("ctl.stop", daemon);
-                }
-
                 // Wait for the daemons to stop.
                 for (String daemon : mDaemons) {
                     String key = "init.svc." + daemon;
-                    while (!"stopped".equals(SystemProperties.get(key))) {
+                    while (!"stopped".equals(SystemProperties.get(key, "stopped"))) {
                         checkpoint(true);
                     }
                 }
@@ -511,27 +512,27 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     }
 
                     // Create the control socket.
-                    LocalSocket socket = new LocalSocket();
+                    mSockets[i] = new LocalSocket();
                     LocalSocketAddress address = new LocalSocketAddress(
                             daemon, LocalSocketAddress.Namespace.RESERVED);
 
                     // Wait for the socket to connect.
                     while (true) {
                         try {
-                            socket.connect(address);
+                            mSockets[i].connect(address);
                             break;
                         } catch (Exception e) {
                             // ignore
                         }
                         checkpoint(true);
                     }
-                    socket.setSoTimeout(500);
+                    mSockets[i].setSoTimeout(500);
 
                     // Send over the arguments.
-                    OutputStream out = socket.getOutputStream();
+                    OutputStream out = mSockets[i].getOutputStream();
                     for (String argument : arguments) {
                         byte[] bytes = argument.getBytes(Charsets.UTF_8);
-                        if (bytes.length > 0xFFFF) {
+                        if (bytes.length >= 0xFFFF) {
                             throw new IllegalArgumentException("Argument is too large");
                         }
                         out.write(bytes.length >> 8);
@@ -539,11 +540,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                         out.write(bytes);
                         checkpoint(false);
                     }
+                    out.write(0xFF);
+                    out.write(0xFF);
                     out.flush();
-                    socket.shutdownOutput();
 
                     // Wait for End-of-File.
-                    InputStream in = socket.getInputStream();
+                    InputStream in = mSockets[i].getInputStream();
                     while (true) {
                         try {
                             if (in.read() == -1) {
@@ -554,7 +556,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                         }
                         checkpoint(true);
                     }
-                    socket.close();
                 }
 
                 // Wait for the daemons to create the new state.
@@ -631,6 +632,13 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 Log.i(TAG, "Aborting", e);
                 exit();
             } finally {
+                // Kill the daemons if they fail to stop.
+                if (mInfo.state == LegacyVpnInfo.STATE_INITIALIZING) {
+                    for (String daemon : mDaemons) {
+                        SystemProperties.set("ctl.stop", daemon);
+                    }
+                }
+
                 // Do not leave an unstable state.
                 if (mInfo.state == LegacyVpnInfo.STATE_INITIALIZING ||
                         mInfo.state == LegacyVpnInfo.STATE_CONNECTING) {
