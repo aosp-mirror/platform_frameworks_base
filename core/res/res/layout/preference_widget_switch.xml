@@ -22,5 +22,4 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="16dip"
-    android:focusable="false"
-    android:clickable="false" />
+    android:focusable="false" />
