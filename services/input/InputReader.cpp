@@ -2188,6 +2188,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     }
     nsecs_t downTime = mDownTime;
     bool buttonsChanged = currentButtonState != lastButtonState;
+    bool buttonsPressed = currentButtonState & ~lastButtonState;
 
     float deltaX = mCursorMotionAccumulator.getRelativeX() * mXScale;
     float deltaY = mCursorMotionAccumulator.getRelativeY() * mYScale;
@@ -2249,7 +2250,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     // the device in your pocket.
     // TODO: Use the input device configuration to control this behavior more finely.
     uint32_t policyFlags = 0;
-    if (getDevice()->isExternal()) {
+    if ((buttonsPressed || moved || scrolled) && getDevice()->isExternal()) {
         policyFlags |= POLICY_FLAG_WAKE_DROPPED;
     }
 
@@ -3345,9 +3346,12 @@ void TouchInputMapper::sync(nsecs_t when) {
 
         // Handle policy on initial down or hover events.
         uint32_t policyFlags = 0;
-        if (mLastRawPointerData.pointerCount == 0 && mCurrentRawPointerData.pointerCount != 0) {
+        bool initialDown = mLastRawPointerData.pointerCount == 0
+                && mCurrentRawPointerData.pointerCount != 0;
+        bool buttonsPressed = mCurrentButtonState & ~mLastButtonState;
+        if (initialDown || buttonsPressed) {
+            // If this is a touch screen, hide the pointer on an initial down.
             if (mDeviceMode == DEVICE_MODE_DIRECT) {
-                // If this is a touch screen, hide the pointer on an initial down.
                 getContext()->fadePointer();
             }
 
