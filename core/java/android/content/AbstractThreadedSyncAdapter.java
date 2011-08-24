@@ -34,6 +34,51 @@ import java.util.concurrent.atomic.AtomicInteger;
  * If a cancelSync() is received that matches an existing sync operation then the thread
  * that is running that sync operation will be interrupted, which will indicate to the thread
  * that the sync has been canceled.
+ * <p>
+ * In order to be a sync adapter one must extend this class, provide implementations for the
+ * abstract methods and write a service that returns the result of {@link #getSyncAdapterBinder()}
+ * in the service's {@link android.app.Service#onBind(android.content.Intent)} when invoked
+ * with an intent with action <code>android.content.SyncAdapter</code>. This service
+ * must specify the following intent filter and metadata tags in its AndroidManifest.xml file
+ * <pre>
+ *   &lt;intent-filter&gt;
+ *     &lt;action android:name="android.content.SyncAdapter" /&gt;
+ *   &lt;/intent-filter&gt;
+ *   &lt;meta-data android:name="android.content.SyncAdapter"
+ *             android:resource="@xml/syncadapter" /&gt;
+ * </pre>
+ * The <code>android:resource</code> attribute must point to a resource that looks like:
+ * <pre>
+ * &lt;sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+ *    android:contentAuthority="authority"
+ *    android:accountType="accountType"
+ *    android:userVisible="true|false"
+ *    android:supportsUploading="true|false"
+ *    android:allowParallelSyncs="true|false"
+ *    android:isAlwaysSyncable="true|false"
+ *    android:syncAdapterSettingsAction="ACTION_OF_SETTINGS_ACTIVITY"
+ * /&gt;
+ * </pre>
+ * <ul>
+ * <li>The <code>android:contentAuthority</code> and <code>android:accountType</code> attributes
+ * indicate which content authority and for which account types this sync adapter serves.
+ * <li><code>android:userVisible</code> defaults to true and controls whether or not this sync
+ * adapter shows up in the Sync Settings screen.
+ * <li><code>android:supportsUploading</code> defaults
+ * to true and if true an upload-only sync will be requested for all syncadapters associated
+ * with an authority whenever that authority's content provider does a
+ * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}
+ * with syncToNetwork set to true.
+ * <li><code>android:allowParallelSyncs</code> defaults to false and if true indicates that
+ * the sync adapter can handle syncs for multiple accounts at the same time. Otherwise
+ * the SyncManager will wait until the sync adapter is not in use before requesting that
+ * it sync an account's data.
+ * <li><code>android:isAlwaysSyncable</code> defaults to false and if true tells the SyncManager
+ * to intialize the isSyncable state to 1 for that sync adapter for each account that is added.
+ * <li><code>android:syncAdapterSettingsAction</code> defaults to null and if supplied it
+ * specifies an Intent action of an activity that can be used to adjust the sync adapter's
+ * sync settings. The activity must live in the same package as the sync adapter.
+ * </ul>
  */
 public abstract class AbstractThreadedSyncAdapter {
     /**

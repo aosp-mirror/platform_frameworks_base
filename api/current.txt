@@ -5770,6 +5770,7 @@ package android.content {
     ctor public SyncAdapterType(android.os.Parcel);
     method public boolean allowParallelSyncs();
     method public int describeContents();
+    method public java.lang.String getSettingsActivity();
     method public boolean isAlwaysSyncable();
     method public boolean isUserVisible();
     method public static android.content.SyncAdapterType newKey(java.lang.String, java.lang.String);
