@@ -1493,7 +1493,8 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
 
         GLenum filter = GL_NEAREST;
-        if (u1 > 0.0f || u2 < 1.0f || v1 > 0.0f || v2 < 1.0f) {
+        // Enable linear filtering if the source rectangle is scaled
+        if (srcRight - srcLeft != dstRight - dstLeft || srcBottom - srcTop != dstBottom - dstTop) {
             filter = GL_LINEAR;
         }
         texture->setFilter(filter, filter, true);
