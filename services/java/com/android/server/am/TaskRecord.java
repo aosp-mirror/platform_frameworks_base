@@ -116,6 +116,8 @@ class TaskRecord extends ThumbnailHolder {
         if (!askedCompatMode) {
             pw.print(prefix); pw.print("askedCompatMode="); pw.println(askedCompatMode);
         }
+        pw.print(prefix); pw.print("lastThumbnail="); pw.print(lastThumbnail);
+                pw.print(" lastDescription="); pw.println(lastDescription);
         pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
                 pw.print(" (inactive for ");
                 pw.print((getInactiveDuration()/1000)); pw.println("s)");
