@@ -1943,7 +1943,6 @@ public final class ActivityThread {
         // we are back active so skip it.
         unscheduleGcIdler();
 
-        Slog.i(TAG, "Launch: profileFd=" + r.profileFile + " stop=" + r.autoStopProfiler);
         if (r.profileFd != null) {
             mBoundApplication.setProfiler(r.profileFile, r.profileFd);
             mBoundApplication.startProfiling();

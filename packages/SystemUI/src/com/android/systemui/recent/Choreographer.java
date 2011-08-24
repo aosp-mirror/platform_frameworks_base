@@ -29,6 +29,7 @@ import android.view.View;
     // should group this into a multi-property animation
     private static final int OPEN_DURATION = 136;
     private static final int CLOSE_DURATION = 250;
+    private static final int SCRIM_DURATION = 400;
     private static final String TAG = RecentsPanelView.TAG;
     private static final boolean DEBUG = RecentsPanelView.DEBUG;
 
@@ -71,12 +72,14 @@ import android.view.View;
         posAnim.setInterpolator(appearing
                 ? new android.view.animation.DecelerateInterpolator(2.5f)
                 : new android.view.animation.AccelerateInterpolator(2.5f));
+        posAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
 
         Animator glowAnim = ObjectAnimator.ofFloat(mContentView, "alpha",
                 mContentView.getAlpha(), appearing ? 1.0f : 0.0f);
         glowAnim.setInterpolator(appearing
                 ? new android.view.animation.AccelerateInterpolator(1.0f)
                 : new android.view.animation.DecelerateInterpolator(1.0f));
+        glowAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
 
         mContentAnim = new AnimatorSet();
         final Builder builder = mContentAnim.play(glowAnim).with(posAnim);
@@ -84,9 +87,9 @@ import android.view.View;
         if (background != null) {
             Animator bgAnim = ObjectAnimator.ofInt(background,
                 "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
+            bgAnim.setDuration(appearing ? SCRIM_DURATION : CLOSE_DURATION);
             builder.with(bgAnim);
         }
-        mContentAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
         mContentAnim.addListener(this);
         if (mListener != null) {
             mContentAnim.addListener(mListener);
