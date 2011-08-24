@@ -475,6 +475,10 @@ public class PhoneStatusBar extends StatusBar {
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.OPAQUE);
+        // this will allow the navbar to run in an overlay on devices that support this
+        if (ActivityManager.isHighEndGfx(mDisplay)) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
 
         lp.setTitle("NavigationBar");
         switch (rotation) {

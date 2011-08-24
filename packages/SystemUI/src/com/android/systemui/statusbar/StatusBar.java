@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -117,6 +119,15 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.RGBX_8888);
+        
+        // the status bar should be in an overlay if possible
+        final Display defaultDisplay 
+            = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+        if (ActivityManager.isHighEndGfx(defaultDisplay)) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
+
         lp.gravity = getStatusBarGravity();
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
