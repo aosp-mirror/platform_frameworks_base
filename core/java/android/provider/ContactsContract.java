@@ -2692,6 +2692,7 @@ public final class ContactsContract {
                 ContentValues cv = new ContentValues();
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ACCOUNT_NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ACCOUNT_TYPE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, DATA_SET);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, VERSION);
