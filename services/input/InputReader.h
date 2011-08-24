@@ -596,6 +596,9 @@ private:
     bool mBtnToolAirbrush;
     bool mBtnToolMouse;
     bool mBtnToolLens;
+    bool mBtnToolDoubleTap;
+    bool mBtnToolTripleTap;
+    bool mBtnToolQuadTap;
 
     void clearButtons();
 };
