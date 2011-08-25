@@ -7634,12 +7634,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 getSpellChecker().addSpellCheckSpan((SpellCheckSpan) what);
             }
         }
-
-        if (what instanceof SuggestionSpan) {
-            if (newStart < 0) {
-                Log.d("spellcheck", "REMOVE suggspan " + mText.subSequence(oldStart, oldEnd));
-            }
-        }
     }
 
     /**
