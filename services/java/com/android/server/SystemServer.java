@@ -265,11 +265,7 @@ class ServerThread extends Thread {
         } catch (Throwable e) {
             reportWtf("making display ready", e);
         }
- 
-        try {
-            ActivityManagerNative.getDefault().showBootMessage("DEXOPT!", true);
-        } catch (RemoteException e) {
-        }
+
         try {
             pm.performBootDexOpt();
         } catch (Throwable e) {
