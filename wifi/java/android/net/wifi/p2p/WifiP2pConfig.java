@@ -51,14 +51,16 @@ public class WifiP2pConfig implements Parcelable {
      */
     public int groupOwnerIntent = -1;
 
-    public boolean isPersistent;
-
-    public boolean joinExistingGroup;
-
     /**
-     * Channel frequency in MHz
+     * Indicates whether the configuration is saved
      */
-    public int channel;
+    public enum Persist {
+        SYSTEM_DEFAULT,
+        YES,
+        NO
+    }
+
+    public Persist persist = Persist.SYSTEM_DEFAULT;
 
     public WifiP2pConfig() {
         //set defaults
@@ -112,9 +114,7 @@ public class WifiP2pConfig implements Parcelable {
         sbuf.append("\n address: ").append(deviceAddress);
         sbuf.append("\n wps: ").append(wpsConfig);
         sbuf.append("\n groupOwnerIntent: ").append(groupOwnerIntent);
-        sbuf.append("\n isPersistent: ").append(isPersistent);
-        sbuf.append("\n joinExistingGroup: ").append(joinExistingGroup);
-        sbuf.append("\n channel: ").append(channel);
+        sbuf.append("\n persist: ").append(persist.toString());
         return sbuf.toString();
     }
 
@@ -136,9 +136,7 @@ public class WifiP2pConfig implements Parcelable {
         dest.writeString(deviceAddress);
         dest.writeParcelable(wpsConfig, flags);
         dest.writeInt(groupOwnerIntent);
-        dest.writeInt(isPersistent ? 1 : 0);
-        dest.writeInt(joinExistingGroup ? 1 : 0);
-        dest.writeInt(channel);
+        dest.writeString(persist.name());
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -150,9 +148,7 @@ public class WifiP2pConfig implements Parcelable {
                 config.deviceAddress = in.readString();
                 config.wpsConfig = (WpsConfiguration) in.readParcelable(null);
                 config.groupOwnerIntent = in.readInt();
-                config.isPersistent = (in.readInt() == 1);
-                config.joinExistingGroup = (in.readInt() == 1);
-                config.channel = in.readInt();
+                config.persist = Persist.valueOf(in.readString());
                 return config;
             }
 
