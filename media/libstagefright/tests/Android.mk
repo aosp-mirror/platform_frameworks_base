@@ -19,12 +19,13 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libcutils \
 	libgui \
-	libstlport \
-	libui \
-	libutils \
+	libmedia \
 	libstagefright \
 	libstagefright_omx \
 	libstagefright_foundation \
+	libstlport \
+	libui \
+	libutils \
 
 LOCAL_STATIC_LIBRARIES := \
 	libgtest \
