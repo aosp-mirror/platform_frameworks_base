@@ -3785,6 +3785,13 @@ public final class Settings {
                 "selected_spell_checker_subtype";
 
         /**
+         * The {@link ComponentName} string whether spell checker is enabled or not.
+         *
+         * @hide
+         */
+        public static final String SPELL_CHECKER_ENABLED = "spell_checker_enabled";
+
+        /**
          * What happens when the user presses the Power button while in-call
          * and the screen is on.<br/>
          * <b>Values:</b><br/>
