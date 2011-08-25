@@ -41,14 +41,16 @@ public class SwitchPreference extends TwoStatePreference {
     private CharSequence mSwitchOff;
     private final Listener mListener = new Listener();
 
-    private class Listener implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
-        @Override
-        public void onClick(View v) {
-            SwitchPreference.this.onClick();
-        }
-
+    private class Listener implements CompoundButton.OnCheckedChangeListener {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            if (!callChangeListener(isChecked)) {
+                // Listener didn't like it, change it back.
+                // CompoundButton will make sure we don't recurse.
+                buttonView.setChecked(!isChecked);
+                return;
+            }
+
             SwitchPreference.this.setChecked(isChecked);
         }
     }
@@ -110,12 +112,6 @@ public class SwitchPreference extends TwoStatePreference {
                 switchView.setTextOn(mSwitchOn);
                 switchView.setTextOff(mSwitchOff);
                 switchView.setOnCheckedChangeListener(mListener);
-            }
-
-            if (checkableView.hasFocusable()) {
-                // This is a focusable list item. Attach a click handler to toggle the button
-                // for the rest of the item.
-                view.setOnClickListener(mListener);
             }
         }
 
