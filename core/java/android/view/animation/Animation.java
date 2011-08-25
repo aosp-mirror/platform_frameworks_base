@@ -441,6 +441,7 @@ public abstract class Animation implements Cloneable {
      */
     public void scaleCurrentDuration(float scale) {
         mDuration = (long) (mDuration * scale);
+        mStartOffset = (long) (mStartOffset * scale);
     }
 
     /**
