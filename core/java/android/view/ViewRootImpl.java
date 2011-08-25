@@ -879,6 +879,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             host.dispatchAttachedToWindow(attachInfo, 0);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
 
+            host.fitSystemWindows(mAttachInfo.mContentInsets);
+
         } else {
             desiredWindowWidth = frame.width();
             desiredWindowHeight = frame.height();
@@ -914,85 +916,15 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             final Resources res = mView.getContext().getResources();
 
             if (mFirst) {
-                host.fitSystemWindows(mAttachInfo.mContentInsets);
                 // make sure touch mode code executes by setting cached value
                 // to opposite of the added touch mode.
                 mAttachInfo.mInTouchMode = !mAddedTouchMode;
                 ensureTouchModeLocally(mAddedTouchMode);
             } else {
-                if (!mAttachInfo.mContentInsets.equals(mPendingContentInsets)) {
-                    if (mWidth > 0 && mHeight > 0 &&
-                            mSurface != null && mSurface.isValid() &&
-                            !mAttachInfo.mTurnOffWindowResizeAnim &&
-                            mAttachInfo.mHardwareRenderer != null &&
-                            mAttachInfo.mHardwareRenderer.isEnabled() &&
-                            mAttachInfo.mHardwareRenderer.validate() &&
-                            lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
-
-                        disposeResizeBuffer();
-
-                        boolean completed = false;
-                        HardwareCanvas canvas = null;
-                        try {
-                            if (mResizeBuffer == null) {
-                                mResizeBuffer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
-                                        mWidth, mHeight, false);
-                            } else if (mResizeBuffer.getWidth() != mWidth ||
-                                    mResizeBuffer.getHeight() != mHeight) {
-                                mResizeBuffer.resize(mWidth, mHeight);
-                            }
-                            canvas = mResizeBuffer.start(mAttachInfo.mHardwareCanvas);
-                            canvas.setViewport(mWidth, mHeight);
-                            canvas.onPreDraw(null);
-                            final int restoreCount = canvas.save();
-                            
-                            canvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
-
-                            int yoff;
-                            final boolean scrolling = mScroller != null
-                                    && mScroller.computeScrollOffset();
-                            if (scrolling) {
-                                yoff = mScroller.getCurrY();
-                                mScroller.abortAnimation();
-                            } else {
-                                yoff = mScrollY;
-                            }
-
-                            canvas.translate(0, -yoff);
-                            if (mTranslator != null) {
-                                mTranslator.translateCanvas(canvas);
-                            }
-
-                            mView.draw(canvas);
-
-                            mResizeBufferStartTime = SystemClock.uptimeMillis();
-                            mResizeBufferDuration = mView.getResources().getInteger(
-                                    com.android.internal.R.integer.config_mediumAnimTime);
-                            completed = true;
-
-                            canvas.restoreToCount(restoreCount);
-                        } catch (OutOfMemoryError e) {
-                            Log.w(TAG, "Not enough memory for content change anim buffer", e);
-                        } finally {
-                            if (canvas != null) {
-                                canvas.onPostDraw();
-                            }
-                            if (mResizeBuffer != null) {
-                                mResizeBuffer.end(mAttachInfo.mHardwareCanvas);
-                                if (!completed) {
-                                    mResizeBuffer.destroy();
-                                    mResizeBuffer = null;
-                                }
-                            }
-                        }
-                    }
-                    mAttachInfo.mContentInsets.set(mPendingContentInsets);
-                    host.fitSystemWindows(mAttachInfo.mContentInsets);
+                if (!mPendingContentInsets.equals(mAttachInfo.mContentInsets)) {
                     insetsChanged = true;
-                    if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
-                            + mAttachInfo.mContentInsets);
                 }
-                if (!mAttachInfo.mVisibleInsets.equals(mPendingVisibleInsets)) {
+                if (!mPendingVisibleInsets.equals(mAttachInfo.mVisibleInsets)) {
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Visible insets changing to: "
                             + mAttachInfo.mVisibleInsets);
@@ -1203,6 +1135,71 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 visibleInsetsChanged = !mPendingVisibleInsets.equals(
                         mAttachInfo.mVisibleInsets);
                 if (contentInsetsChanged) {
+                    if (mWidth > 0 && mHeight > 0 &&
+                            mSurface != null && mSurface.isValid() &&
+                            !mAttachInfo.mTurnOffWindowResizeAnim &&
+                            mAttachInfo.mHardwareRenderer != null &&
+                            mAttachInfo.mHardwareRenderer.isEnabled() &&
+                            mAttachInfo.mHardwareRenderer.validate() &&
+                            lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
+
+                        disposeResizeBuffer();
+
+                        boolean completed = false;
+                        HardwareCanvas canvas = null;
+                        try {
+                            if (mResizeBuffer == null) {
+                                mResizeBuffer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
+                                        mWidth, mHeight, false);
+                            } else if (mResizeBuffer.getWidth() != mWidth ||
+                                    mResizeBuffer.getHeight() != mHeight) {
+                                mResizeBuffer.resize(mWidth, mHeight);
+                            }
+                            canvas = mResizeBuffer.start(mAttachInfo.mHardwareCanvas);
+                            canvas.setViewport(mWidth, mHeight);
+                            canvas.onPreDraw(null);
+                            final int restoreCount = canvas.save();
+                            
+                            canvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
+
+                            int yoff;
+                            final boolean scrolling = mScroller != null
+                                    && mScroller.computeScrollOffset();
+                            if (scrolling) {
+                                yoff = mScroller.getCurrY();
+                                mScroller.abortAnimation();
+                            } else {
+                                yoff = mScrollY;
+                            }
+
+                            canvas.translate(0, -yoff);
+                            if (mTranslator != null) {
+                                mTranslator.translateCanvas(canvas);
+                            }
+
+                            mView.draw(canvas);
+
+                            mResizeBufferStartTime = SystemClock.uptimeMillis();
+                            mResizeBufferDuration = mView.getResources().getInteger(
+                                    com.android.internal.R.integer.config_mediumAnimTime);
+                            completed = true;
+
+                            canvas.restoreToCount(restoreCount);
+                        } catch (OutOfMemoryError e) {
+                            Log.w(TAG, "Not enough memory for content change anim buffer", e);
+                        } finally {
+                            if (canvas != null) {
+                                canvas.onPostDraw();
+                            }
+                            if (mResizeBuffer != null) {
+                                mResizeBuffer.end(mAttachInfo.mHardwareCanvas);
+                                if (!completed) {
+                                    mResizeBuffer.destroy();
+                                    mResizeBuffer = null;
+                                }
+                            }
+                        }
+                    }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     host.fitSystemWindows(mAttachInfo.mContentInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
