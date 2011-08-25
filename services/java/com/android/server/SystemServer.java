@@ -182,7 +182,7 @@ class ServerThread extends Thread {
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
-            power.init(context, lights, ActivityManagerService.getDefault(), battery);
+            power.init(context, lights, ActivityManagerService.self(), battery);
 
             Slog.i(TAG, "Alarm Manager");
             alarm = new AlarmManagerService(context);
@@ -197,8 +197,7 @@ class ServerThread extends Thread {
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
 
-            ((ActivityManagerService)ServiceManager.getService("activity"))
-                    .setWindowManager(wm);
+            ActivityManagerService.self().setWindowManager(wm);
 
             // Skip Bluetooth if we have an emulator kernel
             // TODO: Use a more reliable check to see if this product should
@@ -266,6 +265,10 @@ class ServerThread extends Thread {
             reportWtf("making display ready", e);
         }
  
+        try {
+            ActivityManagerNative.getDefault().showBootMessage("DEXOPT!", true);
+        } catch (RemoteException e) {
+        }
         try {
             pm.performBootDexOpt();
         } catch (Throwable e) {
@@ -618,8 +621,7 @@ class ServerThread extends Thread {
         // where third party code can really run (but before it has actually
         // started launching the initial applications), for us to complete our
         // initialization.
-        ((ActivityManagerService)ActivityManagerNative.getDefault())
-                .systemReady(new Runnable() {
+        ActivityManagerService.self().systemReady(new Runnable() {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 

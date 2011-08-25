@@ -163,7 +163,7 @@ class ProcessList {
         int minSize = 320*480;  //  153600
         int maxSize = 1280*800; // 1024000  230400 870400  .264
         float scaleDisp = ((float)(displayWidth*displayHeight)-minSize)/(maxSize-minSize);
-        Slog.i("XXXXXX", "scaleDisp=" + scaleDisp + " dw=" + displayWidth + " dh=" + displayHeight);
+        //Slog.i("XXXXXX", "scaleDisp=" + scaleDisp + " dw=" + displayWidth + " dh=" + displayHeight);
 
         StringBuilder adjString = new StringBuilder();
         StringBuilder memString = new StringBuilder();
