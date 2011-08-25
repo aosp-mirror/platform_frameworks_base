@@ -368,8 +368,10 @@ class FastScroller {
         } else if (mState == STATE_EXIT) {
             if (alpha == 0) { // Done with exit
                 setState(STATE_NONE);
+            } else if (mTrackDrawable != null) {
+                mList.invalidate(viewWidth - mThumbW, 0, viewWidth, mList.getHeight());
             } else {
-                mList.invalidate(viewWidth - mThumbW, y, viewWidth, y + mThumbH);            
+                mList.invalidate(viewWidth - mThumbW, y, viewWidth, y + mThumbH);
             }
         }
     }
@@ -597,7 +599,7 @@ class FastScroller {
 
     private int getThumbPositionForListPosition(int firstVisibleItem, int visibleItemCount,
             int totalItemCount) {
-        if (mSectionIndexer == null) {
+        if (mSectionIndexer == null || mListAdapter == null) {
             getSectionsFromIndexer();
         }
         if (mSectionIndexer == null || !mMatchDragPosition) {
