@@ -6571,7 +6571,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             i--;
                         }
                     }
-                    
+
                     for (int i=0; i<ris.size(); i++) {
                         ActivityInfo ai = ris.get(i).activityInfo;
                         ComponentName comp = new ComponentName(ai.packageName, ai.name);

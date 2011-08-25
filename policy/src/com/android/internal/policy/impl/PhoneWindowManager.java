@@ -120,6 +120,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.FallbackAction;
@@ -197,8 +198,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // things in here CAN NOT take focus, but are shown on top of everything else.
     static final int SYSTEM_OVERLAY_LAYER = 20;
     static final int SECURE_SYSTEM_OVERLAY_LAYER = 21;
+    static final int BOOT_PROGRESS_LAYER = 22;
     // the (mouse) pointer layer
-    static final int POINTER_LAYER = 22;
+    static final int POINTER_LAYER = 23;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -1098,6 +1100,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return POINTER_LAYER;
         case TYPE_NAVIGATION_BAR:
             return NAVIGATION_BAR_LAYER;
+        case TYPE_BOOT_PROGRESS:
+            return BOOT_PROGRESS_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
@@ -2804,14 +2808,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
+
+        synchronized (mLock) {
+            mScreenOn = false;
+        }
         if (mKeyguardMediator != null) {
             mKeyguardMediator.onScreenTurnedOff(why);
         }
         synchronized (mLock) {
-            mScreenOn = false;
             updateOrientationListenerLp();
             updateLockScreenTimeout();
             updateScreenSaverTimeoutLocked();
+        }
+        try {
+            mWindowManager.waitForAllDrawn();
+        } catch (RemoteException e) {
+        }
+        // Wait for one frame to give surface flinger time to do its
+        // compositing.  Yes this is a hack, but I am really not up right now for
+        // implementing some mechanism to block until SF is done. :p
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
         }
     }
 
@@ -3112,7 +3130,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mBootMsgDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     mBootMsgDialog.setIndeterminate(true);
                     mBootMsgDialog.getWindow().setType(
-                            WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY);
+                            WindowManager.LayoutParams.TYPE_BOOT_PROGRESS);
                     mBootMsgDialog.getWindow().addFlags(
                             WindowManager.LayoutParams.FLAG_DIM_BEHIND
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
