@@ -21,10 +21,6 @@
     <dimen name="alert_dialog_button_bar_height">54dip</dimen>
     <!-- Preference fragment padding, bottom -->
     <dimen name="preference_fragment_padding_bottom">16dp</dimen>
-    <!-- Preference activity top margin -->
-    <dimen name="preference_screen_top_margin">16dp</dimen>
-    <!-- Preference activity bottom margin -->
-    <dimen name="preference_screen_bottom_margin">16dp</dimen>
 
     <dimen name="preference_screen_header_padding_side">0dip</dimen>
 
