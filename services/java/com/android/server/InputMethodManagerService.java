@@ -619,10 +619,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void updateImeWindowStatusLocked() {
-        if (mStatusBar != null) {
-            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
-                    mBackDisposition);
-        }
+        setImeWindowStatus(mCurToken, mImeWindowVis, mBackDisposition);
     }
 
     @Override
@@ -995,6 +992,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 sessionState.session.finishSession();
             } catch (RemoteException e) {
                 Slog.w(TAG, "Session failed to close due to remote exception", e);
+                mImeWindowVis = 0;
+                updateImeWindowStatusLocked();
             }
         }
     }
@@ -1121,6 +1120,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         int uid = Binder.getCallingUid();
@@ -2591,6 +2591,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     // TODO: We should change the return type from List to List<Parcelable>
+    @SuppressWarnings("rawtypes")
     @Override
     public List getShortcutInputMethodsAndSubtypes() {
         synchronized (mMethodMap) {
