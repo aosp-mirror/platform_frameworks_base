@@ -117,6 +117,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final int MESSAGE_UUID_INTENT = 1;
     private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 2;
+    private static final int MESSAGE_REMOVE_SERVICE_RECORD = 3;
 
     private static final int RFCOMM_RECORD_REAPER = 10;
     private static final int STATE_CHANGE_REAPER = 11;
@@ -536,6 +537,10 @@ public class BluetoothService extends IBluetooth.Stub {
                     return;
                 }
                 if (attempt > 0) mBondState.clearPinAttempts(address);
+                break;
+            case MESSAGE_REMOVE_SERVICE_RECORD:
+                Pair<Integer, Integer> pair = (Pair<Integer, Integer>) msg.obj;
+                checkAndRemoveRecord(pair.first, pair.second);
                 break;
             }
         }
@@ -1542,7 +1547,9 @@ public class BluetoothService extends IBluetooth.Stub {
     public void removeServiceRecord(int handle) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
                                                 "Need BLUETOOTH permission");
-        checkAndRemoveRecord(handle, Binder.getCallingPid());
+        Message message = mHandler.obtainMessage(MESSAGE_REMOVE_SERVICE_RECORD);
+        message.obj = new Pair<Integer, Integer>(handle, Binder.getCallingPid());
+        mHandler.sendMessage(message);
     }
 
     private synchronized void checkAndRemoveRecord(int handle, int pid) {
