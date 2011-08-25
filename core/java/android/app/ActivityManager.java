@@ -235,6 +235,24 @@ public class ActivityManager {
     }
 
     /**
+     * Use to decide whether the running device can be considered a "large
+     * RAM" device.  Exactly what memory limit large RAM is will vary, but
+     * it essentially means there is plenty of RAM to have lots of background
+     * processes running under decent loads.
+     * @hide
+     */
+    static public boolean isLargeRAM() {
+        MemInfoReader reader = new MemInfoReader();
+        reader.readMemInfo();
+        if (reader.getTotalSize() >= (640*1024*1024)) {
+            // Currently 640MB RAM available to the kernel is the point at
+            // which we have plenty of RAM to spare.
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Information you can retrieve about tasks that the user has most recently
      * started or visited.
      */
