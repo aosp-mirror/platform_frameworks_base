@@ -91,7 +91,7 @@ public final class DateView extends TextView {
         final Context context = getContext();
         Date now = new Date();
         CharSequence dow = DateFormat.format("EEEE", now);
-        CharSequence date = DateFormat.getMediumDateFormat(getContext()).format(now);
+        CharSequence date = DateFormat.getLongDateFormat(context).format(now);
         setText(context.getString(R.string.status_bar_date_formatter, dow, date));
     }
 
