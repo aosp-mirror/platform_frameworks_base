@@ -47,6 +47,7 @@ protected:
     uint8_t * mEnd;
     uint8_t mSize;
     bool mInShutdown;
+    bool mInitialized;
 
     Signal mSignalToWorker;
     Signal mSignalToControl;

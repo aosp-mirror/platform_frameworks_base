@@ -21,11 +21,11 @@
 using namespace android;
 using namespace android::renderscript;
 
-LocklessCommandFifo::LocklessCommandFifo() : mBuffer(0) {
+LocklessCommandFifo::LocklessCommandFifo() : mBuffer(0), mInitialized(false) {
 }
 
 LocklessCommandFifo::~LocklessCommandFifo() {
-    if (!mInShutdown) {
+    if (!mInShutdown && mInitialized) {
         shutdown();
     }
     if (mBuffer) {
@@ -58,6 +58,7 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes) {
     mGet = mBuffer;
     mEnd = mBuffer + (sizeInBytes) - 1;
     //dumpState("init");
+    mInitialized = true;
     return true;
 }
 
