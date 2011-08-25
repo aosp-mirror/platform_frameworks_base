@@ -23,7 +23,6 @@ import dalvik.annotation.TestLevel;
 import dalvik.annotation.TestTargetNew;
 
 import static android.util.LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
-import static android.util.LocaleUtil.TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
 
 public class LocaleUtilTest extends AndroidTestCase {
 
@@ -33,7 +32,7 @@ public class LocaleUtilTest extends AndroidTestCase {
         args = {Locale.class}
     )
     public void testGetLayoutDirectionFromLocale() {
-        assertEquals(TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE,
+        assertEquals(TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE,
                 LocaleUtil.getLayoutDirectionFromLocale(null));
 
         assertEquals(TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE,
@@ -59,7 +58,7 @@ public class LocaleUtilTest extends AndroidTestCase {
         assertEquals(LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE,
             LocaleUtil.getLayoutDirectionFromLocale(Locale.US));
 
-        assertEquals(LocaleUtil.TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE,
+        assertEquals(LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE,
             LocaleUtil.getLayoutDirectionFromLocale(Locale.ROOT));
 
         assertEquals(LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE,

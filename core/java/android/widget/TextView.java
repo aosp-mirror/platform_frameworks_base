@@ -10701,6 +10701,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void resolveTextDirection() {
+        if (hasPasswordTransformationMethod()) {
+            mTextDir = TextDirectionHeuristics.LOCALE;
+            return;
+        }
+
         // Always need to resolve layout direction first
         final boolean defaultIsRtl = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
 

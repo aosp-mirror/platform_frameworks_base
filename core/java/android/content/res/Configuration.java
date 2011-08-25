@@ -345,7 +345,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(" (no locale)");
         }
         switch (textLayoutDirection) {
-            case LocaleUtil.TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE: sb.append(" ?layoutdir"); break;
             case LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE: sb.append(" rtl"); break;
             default: sb.append(" layoutdir="); sb.append(textLayoutDirection); break;
         }
