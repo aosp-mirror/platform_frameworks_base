@@ -222,10 +222,24 @@ static jint android_view_GLES20Canvas_saveLayer(JNIEnv* env, jobject clazz,
     return renderer->saveLayer(left, top, right, bottom, paint, saveFlags);
 }
 
+static jint android_view_GLES20Canvas_saveLayerClip(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, SkPaint* paint, jint saveFlags) {
+    const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+    return renderer->saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
+            paint, saveFlags);
+}
+
 static jint android_view_GLES20Canvas_saveLayerAlpha(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom,
         jint alpha, jint saveFlags) {
     return renderer->saveLayerAlpha(left, top, right, bottom, alpha, saveFlags);
+}
+
+static jint android_view_GLES20Canvas_saveLayerAlphaClip(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jint alpha, jint saveFlags) {
+    const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+    return renderer->saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom,
+            alpha, saveFlags);
 }
 
 // ----------------------------------------------------------------------------
@@ -759,7 +773,9 @@ static JNINativeMethod gMethods[] = {
     { "nGetSaveCount",      "(I)I",            (void*) android_view_GLES20Canvas_getSaveCount },
 
     { "nSaveLayer",         "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayer },
+    { "nSaveLayer",         "(III)I",          (void*) android_view_GLES20Canvas_saveLayerClip },
     { "nSaveLayerAlpha",    "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayerAlpha },
+    { "nSaveLayerAlpha",    "(III)I",          (void*) android_view_GLES20Canvas_saveLayerAlphaClip },
 
     { "nQuickReject",       "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_quickReject },
     { "nClipRect",          "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_clipRectF },
