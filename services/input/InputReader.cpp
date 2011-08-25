@@ -1220,6 +1220,9 @@ void TouchButtonAccumulator::reset(InputDevice* device) {
     mBtnToolAirbrush = device->isKeyPressed(BTN_TOOL_AIRBRUSH);
     mBtnToolMouse = device->isKeyPressed(BTN_TOOL_MOUSE);
     mBtnToolLens = device->isKeyPressed(BTN_TOOL_LENS);
+    mBtnToolDoubleTap = device->isKeyPressed(BTN_TOOL_DOUBLETAP);
+    mBtnToolTripleTap = device->isKeyPressed(BTN_TOOL_TRIPLETAP);
+    mBtnToolQuadTap = device->isKeyPressed(BTN_TOOL_QUADTAP);
 }
 
 void TouchButtonAccumulator::clearButtons() {
@@ -1234,6 +1237,9 @@ void TouchButtonAccumulator::clearButtons() {
     mBtnToolAirbrush = 0;
     mBtnToolMouse = 0;
     mBtnToolLens = 0;
+    mBtnToolDoubleTap = 0;
+    mBtnToolTripleTap = 0;
+    mBtnToolQuadTap = 0;
 }
 
 void TouchButtonAccumulator::process(const RawEvent* rawEvent) {
@@ -1272,6 +1278,15 @@ void TouchButtonAccumulator::process(const RawEvent* rawEvent) {
         case BTN_TOOL_LENS:
             mBtnToolLens = rawEvent->value;
             break;
+        case BTN_TOOL_DOUBLETAP:
+            mBtnToolDoubleTap = rawEvent->value;
+            break;
+        case BTN_TOOL_TRIPLETAP:
+            mBtnToolTripleTap = rawEvent->value;
+            break;
+        case BTN_TOOL_QUADTAP:
+            mBtnToolQuadTap = rawEvent->value;
+            break;
         }
     }
 }
@@ -1297,7 +1312,7 @@ int32_t TouchButtonAccumulator::getToolType() const {
     if (mBtnToolPen || mBtnToolBrush || mBtnToolPencil || mBtnToolAirbrush) {
         return AMOTION_EVENT_TOOL_TYPE_STYLUS;
     }
-    if (mBtnToolFinger) {
+    if (mBtnToolFinger || mBtnToolDoubleTap || mBtnToolTripleTap || mBtnToolQuadTap) {
         return AMOTION_EVENT_TOOL_TYPE_FINGER;
     }
     return AMOTION_EVENT_TOOL_TYPE_UNKNOWN;
@@ -1306,7 +1321,8 @@ int32_t TouchButtonAccumulator::getToolType() const {
 bool TouchButtonAccumulator::isToolActive() const {
     return mBtnTouch || mBtnToolFinger || mBtnToolPen || mBtnToolRubber
             || mBtnToolBrush || mBtnToolPencil || mBtnToolAirbrush
-            || mBtnToolMouse || mBtnToolLens;
+            || mBtnToolMouse || mBtnToolLens
+            || mBtnToolDoubleTap || mBtnToolTripleTap || mBtnToolQuadTap;
 }
 
 bool TouchButtonAccumulator::isHovering() const {
