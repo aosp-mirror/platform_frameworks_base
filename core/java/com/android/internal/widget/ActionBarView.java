@@ -826,15 +826,18 @@ public class ActionBarView extends AbsActionBarView {
             rightOfCenter = Math.max(0, rightOfCenter - mMenuView.getMeasuredWidth());
         }
 
-        if (mExpandedActionView == null) {
-            boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
-                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
-            if (showTitle) {
-                availableWidth = measureChildView(mTitleLayout, availableWidth,
-                        MeasureSpec.makeMeasureSpec(mContentHeight, MeasureSpec.EXACTLY), 0);
-                leftOfCenter = Math.max(0, leftOfCenter - mTitleLayout.getMeasuredWidth());
-            }
+        if (mIndeterminateProgressView != null &&
+                mIndeterminateProgressView.getVisibility() != GONE) {
+            availableWidth = measureChildView(mIndeterminateProgressView, availableWidth,
+                    childSpecHeight, 0);
+            rightOfCenter = Math.max(0,
+                    rightOfCenter - mIndeterminateProgressView.getMeasuredWidth());
+        }
 
+        final boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
+                (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
+
+        if (mExpandedActionView == null) {
             switch (mNavigationMode) {
                 case ActionBar.NAVIGATION_MODE_LIST:
                     if (mListNavLayout != null) {
@@ -863,14 +866,6 @@ public class ActionBarView extends AbsActionBarView {
                     }
                     break;
             }
-        }
-
-        if (mIndeterminateProgressView != null &&
-                mIndeterminateProgressView.getVisibility() != GONE) {
-            availableWidth = measureChildView(mIndeterminateProgressView, availableWidth,
-                    childSpecHeight, 0);
-            rightOfCenter = Math.max(0,
-                    rightOfCenter - mIndeterminateProgressView.getMeasuredWidth());
         }
 
         View customView = null;
@@ -922,6 +917,13 @@ public class ActionBarView extends AbsActionBarView {
             customView.measure(
                     MeasureSpec.makeMeasureSpec(customNavWidth, customNavWidthMode),
                     MeasureSpec.makeMeasureSpec(customNavHeight, customNavHeightMode));
+            availableWidth -= horizontalMargin + customView.getMeasuredWidth();
+        }
+
+        if (mExpandedActionView == null && showTitle) {
+            availableWidth = measureChildView(mTitleLayout, availableWidth,
+                    MeasureSpec.makeMeasureSpec(mContentHeight, MeasureSpec.EXACTLY), 0);
+            leftOfCenter = Math.max(0, leftOfCenter - mTitleLayout.getMeasuredWidth());
         }
 
         if (mContentHeight <= 0) {
