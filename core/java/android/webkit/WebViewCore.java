@@ -1172,6 +1172,7 @@ public final class WebViewCore {
                                     loadParams.mMimeType,
                                     loadParams.mEncoding,
                                     loadParams.mHistoryUrl);
+                            nativeContentInvalidateAll();
                             break;
 
                         case STOP_LOADING:
