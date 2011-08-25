@@ -582,21 +582,6 @@
          If false, Content-disposition fragments are ignored -->
     <bool name="config_mms_content_disposition_support">true</bool>
 
-    <!-- If this value is true, the carrier supports sms delivery reports.
-         If false, sms delivery reports are not supported and the preference
-         option to enable/disable delivery reports is removed in the Messaging app. -->
-    <bool name="config_sms_delivery_reports_support">true</bool>
-
-    <!-- If this value is true, the carrier supports mms delivery reports.
-         If false, mms delivery reports are not supported and the preference
-         option to enable/disable delivery reports is removed in the Messaging app. -->
-    <bool name="config_mms_delivery_reports_support">true</bool>
-
-    <!-- If this value is true, the carrier supports mms read reports.
-         If false, mms read reports are not supported and the preference
-         option to enable/disable read reports is removed in the Messaging app. -->
-    <bool name="config_mms_read_reports_support">true</bool>
-
     <!-- National Language Identifier codes for the following two config items.
          (from 3GPP TS 23.038 V9.1.1 Table 6.2.1.2.4.1):
           0  - reserved
