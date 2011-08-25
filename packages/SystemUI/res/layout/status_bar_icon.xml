@@ -19,7 +19,7 @@
 -->
 
 <!-- The icons are a fixed size so an app can't mess everything up with bogus images -->
-<!-- TODO: the icons are hard coded to 25x25 pixels.  Their size should come froem a theme -->
+<!-- TODO: the icons are hard coded to 25x25 pixels.  Their size should come from a theme -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" 
     android:layout_width="25dp" 
     android:layout_height="25dp"
