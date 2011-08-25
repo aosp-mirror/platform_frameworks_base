@@ -1318,6 +1318,7 @@ void AwesomePlayer::onRTSPSeekDone() {
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     if (mRTSPController != NULL) {
+        mSeekNotificationSent = false;
         mRTSPController->seekAsync(timeUs, OnRTSPSeekDoneWrapper, this);
         return OK;
     }
