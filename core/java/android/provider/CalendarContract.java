@@ -110,6 +110,12 @@ public final class CalendarContract {
     public static final String EXTRA_EVENT_END_TIME = "endTime";
 
     /**
+     * Intent Extras key: When creating an event, set this to true to create an
+     * all-day event by default
+     */
+    public static final String EXTRA_EVENT_ALL_DAY = "allDay";
+
+    /**
      * This authority is used for writing to or querying from the calendar
      * provider. Note: This is set at first run and cannot be changed without
      * breaking apps that access the provider.
