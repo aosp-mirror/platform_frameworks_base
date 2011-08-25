@@ -576,7 +576,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         boolean allowed =
                     (gprsState == ServiceState.STATE_IN_SERVICE || mAutoAttachOnCreation) &&
                     mPhone.mIccRecords.getRecordsLoaded() &&
-                    mPhone.getState() == Phone.State.IDLE &&
+                    (mPhone.getState() == Phone.State.IDLE ||
+                     mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) &&
                     internalDataEnabled &&
                     (!mPhone.getServiceState().getRoaming() || getDataOnRoamingEnabled()) &&
                     !mIsPsRestricted &&
@@ -587,8 +588,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 reason += " - gprs= " + gprsState;
             }
             if (!mPhone.mIccRecords.getRecordsLoaded()) reason += " - SIM not loaded";
-            if (mPhone.getState() != Phone.State.IDLE) {
+            if (mPhone.getState() != Phone.State.IDLE &&
+                    !mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) {
                 reason += " - PhoneState= " + mPhone.getState();
+                reason += " - Concurrent voice and data not allowed";
             }
             if (!internalDataEnabled) reason += " - mInternalDataEnabled= false";
             if (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled()) {
