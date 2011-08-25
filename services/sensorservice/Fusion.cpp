@@ -47,8 +47,45 @@ static const float biasVAR = 1e-8;      // (rad/s)^2 / s (guessed)
 static const float accSTDEV  = 0.05f;   // m/s^2 (measured 0.08 / CDD 0.05)
 static const float magSTDEV  = 0.5f;    // uT    (measured 0.7  / CDD 0.5)
 
-static const float FREE_FALL_THRESHOLD = 0.981f;
 static const float SYMMETRY_TOLERANCE = 1e-10f;
+
+/*
+ * Accelerometer updates will not be performed near free fall to avoid
+ * ill-conditioning and div by zeros.
+ * Threshhold: 10% of g, in m/s^2
+ */
+static const float FREE_FALL_THRESHOLD = 0.981f;
+static const float FREE_FALL_THRESHOLD_SQ =
+        FREE_FALL_THRESHOLD*FREE_FALL_THRESHOLD;
+
+/*
+ * The geomagnetic-field should be between 30uT and 60uT.
+ * Fields strengths greater than this likely indicate a local magnetic
+ * disturbance which we do not want to update into the fused frame.
+ */
+static const float MAX_VALID_MAGNETIC_FIELD = 100; // uT
+static const float MAX_VALID_MAGNETIC_FIELD_SQ =
+        MAX_VALID_MAGNETIC_FIELD*MAX_VALID_MAGNETIC_FIELD;
+
+/*
+ * Values of the field smaller than this should be ignored in fusion to avoid
+ * ill-conditioning. This state can happen with anomalous local magnetic
+ * disturbances canceling the Earth field.
+ */
+static const float MIN_VALID_MAGNETIC_FIELD = 10; // uT
+static const float MIN_VALID_MAGNETIC_FIELD_SQ =
+        MIN_VALID_MAGNETIC_FIELD*MIN_VALID_MAGNETIC_FIELD;
+
+/*
+ * If the cross product of two vectors has magnitude squared less than this,
+ * we reject it as invalid due to alignment of the vectors.
+ * This threshold is used to check for the case where the magnetic field sample
+ * is parallel to the gravity field, which can happen in certain places due
+ * to magnetic field disturbances.
+ */
+static const float MIN_VALID_CROSS_PRODUCT_MAG = 1.0e-3;
+static const float MIN_VALID_CROSS_PRODUCT_MAG_SQ =
+    MIN_VALID_CROSS_PRODUCT_MAG*MIN_VALID_CROSS_PRODUCT_MAG;
 
 // -----------------------------------------------------------------------
 
@@ -240,8 +277,9 @@ void Fusion::handleGyro(const vec3_t& w, float dT) {
 
 status_t Fusion::handleAcc(const vec3_t& a) {
     // ignore acceleration data if we're close to free-fall
-    if (length(a) < FREE_FALL_THRESHOLD)
+    if (length_squared(a) < FREE_FALL_THRESHOLD_SQ) {
         return BAD_VALUE;
+    }
 
     if (!checkInitComplete(ACC, a))
         return BAD_VALUE;
@@ -253,15 +291,34 @@ status_t Fusion::handleAcc(const vec3_t& a) {
 
 status_t Fusion::handleMag(const vec3_t& m) {
     // the geomagnetic-field should be between 30uT and 60uT
-    // reject obviously wrong magnetic-fields
-    if (length(m) > 100)
+    // reject if too large to avoid spurious magnetic sources
+    const float magFieldSq = length_squared(m);
+    if (magFieldSq > MAX_VALID_MAGNETIC_FIELD_SQ) {
         return BAD_VALUE;
+    } else if (magFieldSq < MIN_VALID_MAGNETIC_FIELD_SQ) {
+        // Also reject if too small since we will get ill-defined (zero mag)
+        // cross-products below
+        return BAD_VALUE;
+    }
 
     if (!checkInitComplete(MAG, m))
         return BAD_VALUE;
 
+    // Orthogonalize the magnetic field to the gravity field, mapping it into
+    // tangent to Earth.
     const vec3_t up( getRotationMatrix() * Ba );
     const vec3_t east( cross_product(m, up) );
+
+    // If the m and up vectors align, the cross product magnitude will
+    // approach 0.
+    // Reject this case as well to avoid div by zero problems and
+    // ill-conditioning below.
+    if (length_squared(east) < MIN_VALID_CROSS_PRODUCT_MAG_SQ) {
+        return BAD_VALUE;
+    }
+
+    // If we have created an orthogonal magnetic field successfully,
+    // then pass it in as the update.
     vec3_t north( cross_product(up, east) );
 
     const float l = 1 / length(north);

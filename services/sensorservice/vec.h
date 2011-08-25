@@ -212,6 +212,15 @@ template <
     typename TYPE,
     size_t SIZE
 >
+TYPE PURE length_squared(const V<TYPE, SIZE>& v) {
+    return dot_product(v, v);
+}
+
+template <
+    template<typename T, size_t S> class V,
+    typename TYPE,
+    size_t SIZE
+>
 V<TYPE, SIZE> PURE normalize(const V<TYPE, SIZE>& v) {
     return v * (1/length(v));
 }
