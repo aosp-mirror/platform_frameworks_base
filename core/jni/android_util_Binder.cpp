@@ -39,8 +39,6 @@
 #include <binder/IServiceManager.h>
 #include <utils/threads.h>
 
-#include <ScopedUtfChars.h>
-
 #include <android_runtime/AndroidRuntime.h>
 
 //#undef LOGV
@@ -446,25 +444,6 @@ public:
         return result;
     }
 
-    void warnIfStillLive() {
-        JNIEnv* env = javavm_to_jnienv(mVM);
-        if (mObject != NULL) {
-            // Okay, something is wrong -- we have a hard reference to a live death
-            // recipient on the VM side, but the list is being torn down.
-            jclass clazz = env->GetObjectClass(mObject);
-            jmethodID getnameMethod = env->GetMethodID(clazz, "getName", NULL);
-            jstring nameString = (jstring) env->CallObjectMethod(clazz, getnameMethod);
-            if (nameString) {
-                ScopedUtfChars nameUtf(env, nameString);
-                LOGW("BinderProxy is being destroyed but the application did not call "
-                        "unlinkToDeath to unlink all of its death recipients beforehand.  "
-                        "Releasing leaked death recipient: %s", nameUtf.c_str());
-                env->DeleteLocalRef(nameString);
-            }
-            env->DeleteLocalRef(clazz);
-        }
-    }
-
 protected:
     virtual ~JavaDeathRecipient()
     {
@@ -499,10 +478,7 @@ DeathRecipientList::~DeathRecipientList() {
     // to the list are holding references on the list object.  Only when they are torn
     // down can the list header be destroyed.
     if (mList.size() > 0) {
-        List< sp<JavaDeathRecipient> >::iterator iter;
-        for (iter = mList.begin(); iter != mList.end(); iter++) {
-            (*iter)->warnIfStillLive();
-        }
+        LOGE("Retiring DRL %p with extant death recipients\n", this);
     }
 }
 
