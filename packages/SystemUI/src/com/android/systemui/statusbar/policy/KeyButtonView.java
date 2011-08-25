@@ -60,6 +60,7 @@ public class KeyButtonView extends ImageView {
     Drawable mGlowBG;
     float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
     boolean mSupportsLongpress = true;
+    RectF mRect = new RectF(0f,0f,0f,0f);
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -120,8 +121,9 @@ public class KeyButtonView extends ImageView {
             mGlowBG.setAlpha((int)(mGlowAlpha * 255));
             mGlowBG.draw(canvas);
             canvas.restore();
-
-            canvas.saveLayerAlpha(null, (int)(mDrawingAlpha * 255), Canvas.ALL_SAVE_FLAG);
+            mRect.right = w;
+            mRect.bottom = h;
+            canvas.saveLayerAlpha(mRect, (int)(mDrawingAlpha * 255), Canvas.ALL_SAVE_FLAG);
         }
         super.onDraw(canvas);
         if (mGlowBG != null) {
