@@ -6433,10 +6433,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if ((flags & VISIBILITY_MASK) == VISIBLE) {
             if ((changed & VISIBILITY_MASK) != 0) {
                 /*
-                 * If this view is becoming visible, set the DRAWN flag so that
-                 * the next invalidate() will not be skipped.
+                 * If this view is becoming visible, invalidate it in case it changed while
+                 * it was not visible.
                  */
-                mPrivateFlags |= DRAWN;
+                invalidate(true);
 
                 needGlobalAttributesUpdate(true);
 
