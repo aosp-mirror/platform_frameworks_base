@@ -9033,6 +9033,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final static class MemItem {
         final String label;
         final long pss;
+        ArrayList<MemItem> subitems;
 
         public MemItem(String _label, long _pss) {
             label = _label;
@@ -9058,7 +9059,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
-            pw.print(prefix); pw.printf("%8d Kb: ", mi.pss); pw.println(mi.label);
+            pw.print(prefix); pw.printf("%7d Kb: ", mi.pss); pw.println(mi.label);
+            if (mi.subitems != null) {
+                dumpMemItems(pw, prefix + "           ", mi.subitems, true);
+            }
         }
     }
 
@@ -9126,6 +9130,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "Backup", "Services", "Home", "Background"
         };
         long oomPss[] = new long[oomLabel.length];
+        ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])new ArrayList[oomLabel.length];
 
         long totalPss = 0;
 
@@ -9154,7 +9159,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!isCheckinRequest && mi != null) {
                     long myTotalPss = mi.getTotalPss();
                     totalPss += myTotalPss;
-                    procMems.add(new MemItem(r.processName + " (pid " + r.pid + ")", myTotalPss));
+                    MemItem pssItem = new MemItem(r.processName + " (pid " + r.pid + ")",
+                            myTotalPss);
+                    procMems.add(pssItem);
 
                     nativePss += mi.nativePss;
                     dalvikPss += mi.dalvikPss;
@@ -9168,6 +9175,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     for (int oomIndex=0; oomIndex<oomPss.length; oomIndex++) {
                         if (r.setAdj <= oomAdj[oomIndex] || oomIndex == (oomPss.length-1)) {
                             oomPss[oomIndex] += myTotalPss;
+                            if (oomProcs[oomIndex] == null) {
+                                oomProcs[oomIndex] = new ArrayList<MemItem>();
+                            }
+                            oomProcs[oomIndex].add(pssItem);
                             break;
                         }
                     }
@@ -9188,7 +9199,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             ArrayList<MemItem> oomMems = new ArrayList<MemItem>();
             for (int j=0; j<oomPss.length; j++) {
                 if (oomPss[j] != 0) {
-                    oomMems.add(new MemItem(oomLabel[j], oomPss[j]));
+                    MemItem item = new MemItem(oomLabel[j], oomPss[j]);
+                    item.subitems = oomProcs[j];
+                    oomMems.add(item);
                 }
             }
 
