@@ -69,7 +69,8 @@ import libcore.io.IoUtils;
 /**
  * @hide
  */
-class NetworkManagementService extends INetworkManagementService.Stub implements Watchdog.Monitor {
+public class NetworkManagementService extends INetworkManagementService.Stub
+        implements Watchdog.Monitor {
     private static final String TAG = "NetworkManagementService";
     private static final boolean DBG = false;
     private static final String NETD_TAG = "NetdConnector";
@@ -86,6 +87,12 @@ class NetworkManagementService extends INetworkManagementService.Stub implements
     private final File mStatsXtUid;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat}. */
     private final File mStatsXtIface;
+
+    /**
+     * Name representing {@link #setGlobalAlert(long)} limit when delivered to
+     * {@link INetworkManagementEventObserver#limitReached(String, String)}.
+     */
+    public static final String LIMIT_GLOBAL_ALERT = "globalAlert";
 
     /** {@link #mStatsXtUid} headers. */
     private static final String KEY_IFACE = "iface";
