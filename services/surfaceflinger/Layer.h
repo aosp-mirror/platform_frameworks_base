@@ -89,6 +89,7 @@ private:
     void onFrameQueued();
     virtual sp<ISurface> createSurface();
     uint32_t getEffectiveUsage(uint32_t usage) const;
+    uint32_t getTransformHint() const;
     bool isCropped() const;
     static bool getOpacityForFormat(uint32_t format);
 

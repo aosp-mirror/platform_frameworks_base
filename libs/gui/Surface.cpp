@@ -351,13 +351,13 @@ int Surface::query(int what, int* value) const {
 
 // ----------------------------------------------------------------------------
 
-status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn) {
+status_t Surface::lock(SurfaceInfo* other, Region* inOutDirtyRegion) {
     ANativeWindow_Buffer outBuffer;
 
     ARect temp;
     ARect* inOutDirtyBounds = NULL;
-    if (dirtyIn) {
-        temp = dirtyIn->getBounds();
+    if (inOutDirtyRegion) {
+        temp = inOutDirtyRegion->getBounds();
         inOutDirtyBounds = &temp;
     }
 
@@ -371,6 +371,11 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn) {
         other->format = uint32_t(outBuffer.format);
         other->bits = outBuffer.bits;
     }
+
+    if (inOutDirtyRegion) {
+        inOutDirtyRegion->set( static_cast<Rect const&>(temp) );
+    }
+
     return err;
 }
 

@@ -93,6 +93,7 @@ SurfaceFlinger::SurfaceFlinger()
         mDebugBackground(0),
         mDebugDDMS(0),
         mDebugDisableHWC(0),
+        mDebugDisableTransformHint(0),
         mDebugInSwapBuffers(0),
         mLastSwapBufferTime(0),
         mDebugInTransaction(0),
@@ -1686,6 +1687,12 @@ status_t SurfaceFlinger::onTransact(
             case 1008:  // toggle use of hw composer
                 n = data.readInt32();
                 mDebugDisableHWC = n ? 1 : 0;
+                invalidateHwcGeometry();
+                repaintEverything();
+                return NO_ERROR;
+            case 1009:  // toggle use of transform hint
+                n = data.readInt32();
+                mDebugDisableTransformHint = n ? 1 : 0;
                 invalidateHwcGeometry();
                 repaintEverything();
                 return NO_ERROR;
