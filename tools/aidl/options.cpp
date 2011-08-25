@@ -15,6 +15,7 @@ usage()
             "OPTIONS:\n"
             "   -I<DIR>    search path for import statements.\n"
             "   -d<FILE>   generate dependency file.\n"
+            "   -a         generate dependency file next to the output file with the name based on the input file.\n"
             "   -p<FILE>   file created by --preprocess to import.\n"
             "   -o<FOLDER> base output folder for generated files.\n"
             "   -b         fail when trying to compile a parcelable.\n"
@@ -49,6 +50,7 @@ parse_options(int argc, const char* const* argv, Options *options)
 
     options->task = COMPILE_AIDL;
     options->failOnParcelable = false;
+    options->autoDepFile = false;
 
     // OPTIONS
     while (i < argc) {
@@ -72,6 +74,9 @@ parse_options(int argc, const char* const* argv, Options *options)
                         fprintf(stderr, "-d option (%d) requires a file.\n", i);
                         return usage();
                     }
+                }
+                else if (s[1] == 'a') {
+                    options->autoDepFile = true;
                 }
                 else if (s[1] == 'p') {
                     if (len > 2) {
