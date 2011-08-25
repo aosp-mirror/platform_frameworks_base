@@ -58,7 +58,7 @@ public class ImageWallpaper extends WallpaperService {
     private static final boolean DEBUG = false;
 
     static final boolean FIXED_SIZED_SURFACE = true;
-    static final boolean USE_OPENGL = false;
+    static final boolean USE_OPENGL = true;
 
     WallpaperManager mWallpaperManager;
 
