@@ -40,7 +40,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -72,7 +71,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is instantiated by the system as a system level service and can be
@@ -871,10 +869,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         boolean mIsAutomation;
 
-        final Callback mCallback = new Callback();
-
-        final AtomicInteger mInteractionIdCounter = new AtomicInteger();
-
         final Rect mTempBounds = new Rect();
 
         // the events pending events to be dispatched to this service
@@ -974,14 +968,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId)
+        public float findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                long interrogatingTid)
                 throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted = mSecurityPolicy.canRetrieveWindowContent(this);
                 if (!permissionGranted) {
-                    return null;
+                    return 0;
                 } else {
                     connection = getConnectionToRetrievalAllowingWindowLocked();
                     if (connection == null) {
@@ -989,22 +985,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             Slog.e(LOG_TAG, "No interaction connection to a retrieve "
                                     + "allowing window.");
                         }
-                        return null;
+                        return 0;
                     }
                 }
             }
+            final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                final int interactionId = mInteractionIdCounter.getAndIncrement();
-                connection.findAccessibilityNodeInfoByViewId(viewId, interactionId, mCallback);
-                AccessibilityNodeInfo info = mCallback.getFindAccessibilityNodeInfoResultAndClear(
-                        interactionId);
-                if (info != null) {
-                    applyCompatibilityScaleIfNeeded(info);
-                    info.setConnection(this);
-                    info.setSealed(true);
-                }
-                return info;
+                connection.findAccessibilityNodeInfoByViewId(viewId, interactionId, callback,
+                        interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error finding node.");
@@ -1012,51 +1001,44 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return null;
+            return getCompatibilityScale(mSecurityPolicy.getRetrievalAllowingWindowLocked());
         }
 
-        public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewTextInActiveWindow(
-                String text) throws RemoteException {
+        public float findAccessibilityNodeInfosByViewTextInActiveWindow(
+                String text, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long threadId)
+                throws RemoteException {
             return findAccessibilityNodeInfosByViewText(text,
-                    mSecurityPolicy.mRetrievalAlowingWindowId, View.NO_ID);
+                    mSecurityPolicy.mRetrievalAlowingWindowId, View.NO_ID, interactionId, callback,
+                    threadId);
         }
 
-        public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text,
-                int accessibilityWindowId, int accessibilityViewId) throws RemoteException {
+        public float findAccessibilityNodeInfosByViewText(String text,
+                int accessibilityWindowId, int accessibilityViewId, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
+                throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
                 if (!permissionGranted) {
-                    return null;
+                    return 0;
                 } else {
                     connection = getConnectionToRetrievalAllowingWindowLocked();
                     if (connection == null) {
                         if (DEBUG) {
                             Slog.e(LOG_TAG, "No interaction connection to focused window.");
                         }
-                        return null;
+                        return 0;
                     }
                 }
             }
+            final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                final int interactionId = mInteractionIdCounter.getAndIncrement();
                 connection.findAccessibilityNodeInfosByViewText(text, accessibilityViewId,
-                        interactionId, mCallback);
-                List<AccessibilityNodeInfo> infos =
-                    mCallback.getFindAccessibilityNodeInfosResultAndClear(interactionId);
-                if (infos != null) {
-                    final int infoCount = infos.size();
-                    for (int i = 0; i < infoCount; i++) {
-                        AccessibilityNodeInfo info = infos.get(i);
-                        applyCompatibilityScaleIfNeeded(info);
-                        info.setConnection(this);
-                        info.setSealed(true);
-                    }
-                }
-                return infos;
+                        interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error finding node.");
@@ -1064,18 +1046,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return null;
+            return getCompatibilityScale(accessibilityWindowId);
         }
 
-        public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(
-                int accessibilityWindowId, int accessibilityViewId) throws RemoteException {
+        public float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
+                int accessibilityViewId, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
+                throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
                 if (!permissionGranted) {
-                    return null;
+                    return 0;
                 } else {
                     connection = mWindowIdToInteractionConnectionMap.get(accessibilityWindowId);
                     if (connection == null) {
@@ -1083,23 +1067,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             Slog.e(LOG_TAG, "No interaction connection to window: "
                                     + accessibilityWindowId);
                         }
-                        return null;
+                        return 0;
                     }
                 }
             }
+            final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                final int interactionId = mInteractionIdCounter.getAndIncrement();
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityViewId,
-                        interactionId, mCallback);
-                AccessibilityNodeInfo info =
-                     mCallback.getFindAccessibilityNodeInfoResultAndClear(interactionId);
-                if (info != null) {
-                    applyCompatibilityScaleIfNeeded(info);
-                    info.setConnection(this);
-                    info.setSealed(true);
-                }
-                return info;
+                        interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error requesting node with accessibilityViewId: "
@@ -1108,11 +1084,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return null;
+            return getCompatibilityScale(accessibilityWindowId);
         }
 
         public boolean performAccessibilityAction(int accessibilityWindowId,
-                int accessibilityViewId, int action) {
+                int accessibilityViewId, int action, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid) {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 final boolean permissionGranted = mSecurityPolicy.canPerformActionLocked(this,
@@ -1130,12 +1107,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
+            final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                final int interactionId = mInteractionIdCounter.getAndIncrement();
                 connection.performAccessibilityAction(accessibilityViewId, action, interactionId,
-                        mCallback);
-                return mCallback.getPerformAccessibilityActionResult(interactionId);
+                        callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error requesting node with accessibilityViewId: "
@@ -1144,7 +1120,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return false;
+            return true;
         }
 
         public void onServiceDisconnected(ComponentName componentName) {
@@ -1173,22 +1149,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return mWindowIdToInteractionConnectionMap.get(windowId);
         }
 
-        private void applyCompatibilityScaleIfNeeded(AccessibilityNodeInfo info) {
-            IBinder windowToken = mWindowIdToWindowTokenMap.get(info.getWindowId());
-            final float scale = mWindowManagerService.getWindowCompatibilityScale(windowToken);
-
-            if (scale == 1.0f) {
-                return;
-            }
-
-            Rect bounds = mTempBounds;
-            info.getBoundsInParent(bounds);
-            bounds.scale(scale);
-            info.setBoundsInParent(bounds);
-
-            info.getBoundsInScreen(bounds);
-            bounds.scale(scale);
-            info.setBoundsInScreen(bounds);
+        private float getCompatibilityScale(int windowId) {
+            IBinder windowToken = mWindowIdToWindowTokenMap.get(windowId);
+            return mWindowManagerService.getWindowCompatibilityScale(windowToken);
         }
     }
 
@@ -1272,101 +1235,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("You do not have " + permission
                         + " required to call " + function);
-            }
-        }
-    }
-
-    final class Callback extends IAccessibilityInteractionConnectionCallback.Stub {
-        private static final long TIMEOUT_INTERACTION_MILLIS = 5000;
-
-        private int mInteractionId = -1;
-        private AccessibilityNodeInfo mFindAccessibilityNodeInfoResult;
-        private List<AccessibilityNodeInfo> mFindAccessibilityNodeInfosResult;
-        private boolean mPerformAccessibilityActionResult;
-
-        public void setFindAccessibilityNodeInfoResult(AccessibilityNodeInfo info,
-                int interactionId) {
-            synchronized (mLock) {
-                if (interactionId > mInteractionId) {
-                    mFindAccessibilityNodeInfoResult = info;
-                    mInteractionId = interactionId;
-                }
-                mLock.notifyAll();
-            }
-        }
-
-        public AccessibilityNodeInfo getFindAccessibilityNodeInfoResultAndClear(int interactionId) {
-            synchronized (mLock) {
-                waitForResultTimedLocked(TIMEOUT_INTERACTION_MILLIS, interactionId);
-                AccessibilityNodeInfo result = mFindAccessibilityNodeInfoResult;
-                clearLocked();
-                return result;
-            }
-        }
-
-        public void setFindAccessibilityNodeInfosResult(List<AccessibilityNodeInfo> infos,
-                int interactionId) {
-            synchronized (mLock) {
-                if (interactionId > mInteractionId) {
-                    mFindAccessibilityNodeInfosResult = infos;
-                    mInteractionId = interactionId;
-                }
-                mLock.notifyAll();
-            }
-        }
-
-        public List<AccessibilityNodeInfo> getFindAccessibilityNodeInfosResultAndClear(
-                int interactionId) {
-            synchronized (mLock) {
-                waitForResultTimedLocked(TIMEOUT_INTERACTION_MILLIS, interactionId);
-                List<AccessibilityNodeInfo> result = mFindAccessibilityNodeInfosResult;
-                clearLocked();
-                return result;
-            }
-        }
-
-        public void setPerformAccessibilityActionResult(boolean succeeded, int interactionId) {
-            synchronized (mLock) {
-                if (interactionId > mInteractionId) {
-                    mPerformAccessibilityActionResult = succeeded;
-                    mInteractionId = interactionId;
-                }
-                mLock.notifyAll();
-            }
-        }
-
-        public boolean getPerformAccessibilityActionResult(int interactionId) {
-            synchronized (mLock) {
-                waitForResultTimedLocked(TIMEOUT_INTERACTION_MILLIS, interactionId);
-                final boolean result = mPerformAccessibilityActionResult;
-                clearLocked();
-                return result;
-            }
-        }
-
-        public void clearLocked() {
-            mInteractionId = -1;
-            mFindAccessibilityNodeInfoResult = null;
-            mFindAccessibilityNodeInfosResult = null;
-            mPerformAccessibilityActionResult = false;
-        }
-
-        private void waitForResultTimedLocked(long waitTimeMillis, int interactionId) {
-            final long startTimeMillis = SystemClock.uptimeMillis();
-            while (true) {
-                try {
-                    if (mInteractionId == interactionId) {
-                        return;
-                    }
-                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    waitTimeMillis = TIMEOUT_INTERACTION_MILLIS - elapsedTimeMillis;
-                    if (waitTimeMillis <= 0) {
-                        return;
-                    }
-                    mLock.wait(waitTimeMillis);
-                } catch (InterruptedException ie) {
-                    /* ignore */
-                }
             }
         }
     }

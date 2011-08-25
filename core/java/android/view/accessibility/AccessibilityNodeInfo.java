@@ -20,7 +20,6 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.SparseIntArray;
 import android.view.View;
@@ -181,13 +180,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!canPerformRequestOverConnection(childAccessibilityViewId)) {
             return null;
         }
-        try {
-            return mConnection.findAccessibilityNodeInfoByAccessibilityId(mAccessibilityWindowId,
-                    childAccessibilityViewId);
-        } catch (RemoteException re) {
-             /* ignore*/
-        }
-        return null;
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection,
+                mAccessibilityWindowId, childAccessibilityViewId);
     }
 
     /**
@@ -257,13 +252,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
             return false;
         }
-        try {
-            return mConnection.performAccessibilityAction(mAccessibilityWindowId,
-                    mAccessibilityViewId, action);
-        } catch (RemoteException e) {
-            /* ignore */
-        }
-        return false;
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.performAccessibilityAction(mConnection, mAccessibilityWindowId,
+                mAccessibilityViewId, action);
     }
 
     /**
@@ -284,13 +275,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
             return Collections.emptyList();
         }
-        try {
-            return mConnection.findAccessibilityNodeInfosByViewText(text, mAccessibilityWindowId,
-                    mAccessibilityViewId);
-        } catch (RemoteException e) {
-            /* ignore */
-        }
-        return Collections.emptyList();
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfosByViewText(mConnection, text,
+                mAccessibilityWindowId, mAccessibilityViewId);
     }
 
     /**
@@ -308,13 +295,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
             return null;
         }
-        try {
-            return mConnection.findAccessibilityNodeInfoByAccessibilityId(
-                    mAccessibilityWindowId, mParentAccessibilityViewId);
-        } catch (RemoteException e) {
-            /* ignore */
-        }
-        return null;
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection,
+                mAccessibilityWindowId, mParentAccessibilityViewId);
     }
 
     /**
