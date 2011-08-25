@@ -107,19 +107,22 @@ public class WallpaperManager {
         private final int mHeight;
         private int mDrawLeft;
         private int mDrawTop;
+        private final Paint mPaint;
 
         private FastBitmapDrawable(Bitmap bitmap) {
             mBitmap = bitmap;
             mWidth = bitmap.getWidth();
             mHeight = bitmap.getHeight();
+
             setBounds(0, 0, mWidth, mHeight);
+
+            mPaint = new Paint();
+            mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         }
 
         @Override
         public void draw(Canvas canvas) {
-            Paint paint = new Paint();
-            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
-            canvas.drawBitmap(mBitmap, mDrawLeft, mDrawTop, paint);
+            canvas.drawBitmap(mBitmap, mDrawLeft, mDrawTop, mPaint);
         }
 
         @Override
@@ -134,33 +137,23 @@ public class WallpaperManager {
         }
 
         @Override
-        public void setBounds(Rect bounds) {
-            // TODO Auto-generated method stub
-            super.setBounds(bounds);
-        }
-
-        @Override
         public void setAlpha(int alpha) {
-            throw new UnsupportedOperationException(
-                    "Not supported with this drawable");
+            throw new UnsupportedOperationException("Not supported with this drawable");
         }
 
         @Override
         public void setColorFilter(ColorFilter cf) {
-            throw new UnsupportedOperationException(
-                    "Not supported with this drawable");
+            throw new UnsupportedOperationException("Not supported with this drawable");
         }
 
         @Override
         public void setDither(boolean dither) {
-            throw new UnsupportedOperationException(
-                    "Not supported with this drawable");
+            throw new UnsupportedOperationException("Not supported with this drawable");
         }
 
         @Override
         public void setFilterBitmap(boolean filter) {
-            throw new UnsupportedOperationException(
-                    "Not supported with this drawable");
+            throw new UnsupportedOperationException("Not supported with this drawable");
         }
 
         @Override
@@ -230,7 +223,7 @@ public class WallpaperManager {
                 }
                 mWallpaper = null;
                 try {
-                    mWallpaper = getCurrentWallpaperLocked(context);
+                    mWallpaper = getCurrentWallpaperLocked();
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "No memory load current wallpaper", e);
                 }
@@ -253,7 +246,7 @@ public class WallpaperManager {
             }
         }
 
-        private Bitmap getCurrentWallpaperLocked(Context context) {
+        private Bitmap getCurrentWallpaperLocked() {
             try {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor fd = mService.getWallpaper(this, params);
@@ -265,17 +258,19 @@ public class WallpaperManager {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         Bitmap bm = BitmapFactory.decodeFileDescriptor(
                                 fd.getFileDescriptor(), null, options);
-                        return generateBitmap(context, bm, width, height);
+                        return generateBitmap(bm, width, height);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode file", e);
                     } finally {
                         try {
                             fd.close();
                         } catch (IOException e) {
+                            // Ignore
                         }
                     }
                 }
             } catch (RemoteException e) {
+                // Ignore
             }
             return null;
         }
@@ -291,27 +286,29 @@ public class WallpaperManager {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         Bitmap bm = BitmapFactory.decodeStream(is, null, options);
-                        return generateBitmap(context, bm, width, height);
+                        return generateBitmap(bm, width, height);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode stream", e);
                     } finally {
                         try {
                             is.close();
                         } catch (IOException e) {
+                            // Ignore
                         }
                     }
                 }
             } catch (RemoteException e) {
+                // Ignore
             }
             return null;
         }
     }
     
-    private static Object mSync = new Object();
+    private static final Object sSync = new Object[0];
     private static Globals sGlobals;
 
     static void initGlobals(Looper looper) {
-        synchronized (mSync) {
+        synchronized (sSync) {
             if (sGlobals == null) {
                 sGlobals = new Globals(looper);
             }
@@ -390,8 +387,7 @@ public class WallpaperManager {
     public Drawable getFastDrawable() {
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true);
         if (bm != null) {
-            Drawable dr = new FastBitmapDrawable(bm);
-            return dr;
+            return new FastBitmapDrawable(bm);
         }
         return null;
     }
@@ -406,10 +402,18 @@ public class WallpaperManager {
     public Drawable peekFastDrawable() {
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
         if (bm != null) {
-            Drawable dr = new FastBitmapDrawable(bm);
-            return dr;
+            return new FastBitmapDrawable(bm);
         }
         return null;
+    }
+
+    /**
+     * Like {@link #getDrawable()} but returns a Bitmap.
+     * 
+     * @hide
+     */
+    public Bitmap getBitmap() {
+        return sGlobals.peekWallpaperBitmap(mContext, true);
     }
 
     /**
@@ -464,6 +468,7 @@ public class WallpaperManager {
                 }
             }
         } catch (RemoteException e) {
+            // Ignore
         }
     }
     
@@ -493,6 +498,7 @@ public class WallpaperManager {
                 }
             }
         } catch (RemoteException e) {
+            // Ignore
         }
     }
 
@@ -524,6 +530,7 @@ public class WallpaperManager {
                 }
             }
         } catch (RemoteException e) {
+            // Ignore
         }
     }
 
@@ -594,6 +601,7 @@ public class WallpaperManager {
         try {
             sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight);
         } catch (RemoteException e) {
+            // Ignore
         }
     }
     
@@ -690,7 +698,7 @@ public class WallpaperManager {
         setResource(com.android.internal.R.drawable.default_wallpaper);
     }
     
-    static Bitmap generateBitmap(Context context, Bitmap bm, int width, int height) {
+    static Bitmap generateBitmap(Bitmap bm, int width, int height) {
         if (bm == null) {
             return null;
         }
@@ -717,7 +725,7 @@ public class WallpaperManager {
 
             if (deltaw > 0 || deltah > 0) {
                 // We need to scale up so it covers the entire area.
-                float scale = 1.0f;
+                float scale;
                 if (deltaw > deltah) {
                     scale = width / (float)targetRect.right;
                 } else {

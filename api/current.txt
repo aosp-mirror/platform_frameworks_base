@@ -13974,6 +13974,7 @@ package android.opengl {
   }
 
   public final class GLUtils {
+    method public static java.lang.String getEGLErrorString(int);
     method public static int getInternalFormat(android.graphics.Bitmap);
     method public static int getType(android.graphics.Bitmap);
     method public static void texImage2D(int, int, int, android.graphics.Bitmap, int);

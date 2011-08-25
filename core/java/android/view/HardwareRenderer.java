@@ -21,6 +21,7 @@ import android.content.ComponentCallbacks2;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.opengl.GLUtils;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -402,51 +403,6 @@ public abstract class HardwareRenderer {
         }
 
         /**
-         * Return a string for the EGL error code, or the hex representation
-         * if the error is unknown.
-         * 
-         * @param error The EGL error to convert into a String.
-         * 
-         * @return An error string correponding to the EGL error code.
-         */
-        static String getEGLErrorString(int error) {
-            switch (error) {
-                case EGL_SUCCESS:
-                    return "EGL_SUCCESS";
-                case EGL_NOT_INITIALIZED:
-                    return "EGL_NOT_INITIALIZED";
-                case EGL_BAD_ACCESS:
-                    return "EGL_BAD_ACCESS";
-                case EGL_BAD_ALLOC:
-                    return "EGL_BAD_ALLOC";
-                case EGL_BAD_ATTRIBUTE:
-                    return "EGL_BAD_ATTRIBUTE";
-                case EGL_BAD_CONFIG:
-                    return "EGL_BAD_CONFIG";
-                case EGL_BAD_CONTEXT:
-                    return "EGL_BAD_CONTEXT";
-                case EGL_BAD_CURRENT_SURFACE:
-                    return "EGL_BAD_CURRENT_SURFACE";
-                case EGL_BAD_DISPLAY:
-                    return "EGL_BAD_DISPLAY";
-                case EGL_BAD_MATCH:
-                    return "EGL_BAD_MATCH";
-                case EGL_BAD_NATIVE_PIXMAP:
-                    return "EGL_BAD_NATIVE_PIXMAP";
-                case EGL_BAD_NATIVE_WINDOW:
-                    return "EGL_BAD_NATIVE_WINDOW";
-                case EGL_BAD_PARAMETER:
-                    return "EGL_BAD_PARAMETER";
-                case EGL_BAD_SURFACE:
-                    return "EGL_BAD_SURFACE";
-                case EGL11.EGL_CONTEXT_LOST:
-                    return "EGL_CONTEXT_LOST";
-                default:
-                    return "0x" + Integer.toHexString(error);
-            }
-        }
-
-        /**
          * Checks for OpenGL errors. If an error has occured, {@link #destroy(boolean)}
          * is invoked and the requested flag is turned off. The error code is
          * also logged as a warning.
@@ -458,7 +414,7 @@ public abstract class HardwareRenderer {
                     // something bad has happened revert to
                     // normal rendering.
                     fallback(error != EGL11.EGL_CONTEXT_LOST);
-                    Log.w(LOG_TAG, "EGL error: " + getEGLErrorString(error));
+                    Log.w(LOG_TAG, "EGL error: " + GLUtils.getEGLErrorString(error));
                 }
             }
         }
@@ -523,14 +479,14 @@ public abstract class HardwareRenderer {
                     
                     if (sEglDisplay == EGL_NO_DISPLAY) {
                         throw new RuntimeException("eglGetDisplay failed "
-                                + getEGLErrorString(sEgl.eglGetError()));
+                                + GLUtils.getEGLErrorString(sEgl.eglGetError()));
                     }
                     
                     // We can now initialize EGL for that display
                     int[] version = new int[2];
                     if (!sEgl.eglInitialize(sEglDisplay, version)) {
                         throw new RuntimeException("eglInitialize failed " +
-                                getEGLErrorString(sEgl.eglGetError()));
+                                GLUtils.getEGLErrorString(sEgl.eglGetError()));
                     }
         
                     sEglConfig = chooseEglConfig();
@@ -579,7 +535,7 @@ public abstract class HardwareRenderer {
 
             if (!sEgl.eglChooseConfig(sEglDisplay, configSpec, configs, 1, configsCount)) {
                 throw new IllegalArgumentException("eglChooseConfig failed " +
-                        getEGLErrorString(sEgl.eglGetError()));
+                        GLUtils.getEGLErrorString(sEgl.eglGetError()));
             } else if (configsCount[0] > 0) {
                 if ("choice".equalsIgnoreCase(debug)) {
                     printConfig(configs[0]);
@@ -647,7 +603,7 @@ public abstract class HardwareRenderer {
              */
             if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                 throw new Surface.OutOfResourcesException("eglMakeCurrent failed "
-                        + getEGLErrorString(sEgl.eglGetError()));
+                        + GLUtils.getEGLErrorString(sEgl.eglGetError()));
             }
 
             // If mDirtyRegions is set, this means we have an EGL configuration
@@ -734,7 +690,7 @@ public abstract class HardwareRenderer {
                     return false;
                 }
                 throw new RuntimeException("createWindowSurface failed "
-                        + getEGLErrorString(error));
+                        + GLUtils.getEGLErrorString(error));
             }
             return true;
         }
@@ -856,7 +812,7 @@ public abstract class HardwareRenderer {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                     fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
-                            getEGLErrorString(sEgl.eglGetError()));
+                            GLUtils.getEGLErrorString(sEgl.eglGetError()));
                     return SURFACE_STATE_ERROR;
                 } else {
                     return SURFACE_STATE_UPDATED;

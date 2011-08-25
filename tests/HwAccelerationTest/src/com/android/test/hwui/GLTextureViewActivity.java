@@ -33,7 +33,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGL11;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
@@ -207,7 +206,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             glEnableVertexAttribArray(attribTexCoords);
             checkGlError();
 
-            glUniform1i(texture, 0);
+            glUniform1i(uniformTexture, texture);
             checkGlError();
             
             while (!mFinished) {
@@ -350,7 +349,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
                     !mEglSurface.equals(mEgl.eglGetCurrentSurface(EGL10.EGL_DRAW))) {
                 if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                     throw new RuntimeException("eglMakeCurrent failed "
-                            + getEGLErrorString(mEgl.eglGetError()));
+                            + GLUtils.getEGLErrorString(mEgl.eglGetError()));
                 }
             }
         }
@@ -361,13 +360,13 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             mEglDisplay = mEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
             if (mEglDisplay == EGL10.EGL_NO_DISPLAY) {
                 throw new RuntimeException("eglGetDisplay failed "
-                        + getEGLErrorString(mEgl.eglGetError()));
+                        + GLUtils.getEGLErrorString(mEgl.eglGetError()));
             }
             
             int[] version = new int[2];
             if (!mEgl.eglInitialize(mEglDisplay, version)) {
                 throw new RuntimeException("eglInitialize failed " +
-                        getEGLErrorString(mEgl.eglGetError()));
+                        GLUtils.getEGLErrorString(mEgl.eglGetError()));
             }
 
             mEglConfig = chooseEglConfig();
@@ -386,12 +385,12 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
                     return;
                 }
                 throw new RuntimeException("createWindowSurface failed "
-                        + getEGLErrorString(error));
+                        + GLUtils.getEGLErrorString(error));
             }
 
             if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                 throw new RuntimeException("eglMakeCurrent failed "
-                        + getEGLErrorString(mEgl.eglGetError()));
+                        + GLUtils.getEGLErrorString(mEgl.eglGetError()));
             }
 
             mGL = mEglContext.getGL();
@@ -409,7 +408,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             int[] configSpec = getConfig();
             if (!mEgl.eglChooseConfig(mEglDisplay, configSpec, configs, 1, configsCount)) {
                 throw new IllegalArgumentException("eglChooseConfig failed " +
-                        getEGLErrorString(mEgl.eglGetError()));
+                        GLUtils.getEGLErrorString(mEgl.eglGetError()));
             } else if (configsCount[0] > 0) {
                 return configs[0];
             }
@@ -427,43 +426,6 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
                     EGL10.EGL_STENCIL_SIZE, 0,
                     EGL10.EGL_NONE
             };
-        }
-
-        static String getEGLErrorString(int error) {
-            switch (error) {
-                case EGL10.EGL_SUCCESS:
-                    return "EGL_SUCCESS";
-                case EGL10.EGL_NOT_INITIALIZED:
-                    return "EGL_NOT_INITIALIZED";
-                case EGL10.EGL_BAD_ACCESS:
-                    return "EGL_BAD_ACCESS";
-                case EGL10.EGL_BAD_ALLOC:
-                    return "EGL_BAD_ALLOC";
-                case EGL10.EGL_BAD_ATTRIBUTE:
-                    return "EGL_BAD_ATTRIBUTE";
-                case EGL10.EGL_BAD_CONFIG:
-                    return "EGL_BAD_CONFIG";
-                case EGL10.EGL_BAD_CONTEXT:
-                    return "EGL_BAD_CONTEXT";
-                case EGL10.EGL_BAD_CURRENT_SURFACE:
-                    return "EGL_BAD_CURRENT_SURFACE";
-                case EGL10.EGL_BAD_DISPLAY:
-                    return "EGL_BAD_DISPLAY";
-                case EGL10.EGL_BAD_MATCH:
-                    return "EGL_BAD_MATCH";
-                case EGL10.EGL_BAD_NATIVE_PIXMAP:
-                    return "EGL_BAD_NATIVE_PIXMAP";
-                case EGL10.EGL_BAD_NATIVE_WINDOW:
-                    return "EGL_BAD_NATIVE_WINDOW";
-                case EGL10.EGL_BAD_PARAMETER:
-                    return "EGL_BAD_PARAMETER";
-                case EGL10.EGL_BAD_SURFACE:
-                    return "EGL_BAD_SURFACE";
-                case EGL11.EGL_CONTEXT_LOST:
-                    return "EGL_CONTEXT_LOST";
-                default:
-                    return "0x" + Integer.toHexString(error);
-            }
         }
 
         void finish() {
