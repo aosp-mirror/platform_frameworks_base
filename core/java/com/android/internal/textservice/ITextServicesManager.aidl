@@ -37,5 +37,7 @@ interface ITextServicesManager {
     oneway void finishSpellCheckerService(in ISpellCheckerSessionListener listener);
     oneway void setCurrentSpellChecker(String locale, String sciId);
     oneway void setCurrentSpellCheckerSubtype(String locale, int hashCode);
+    oneway void setSpellCheckerEnabled(boolean enabled);
+    boolean isSpellCheckerEnabled();
     SpellCheckerInfo[] getEnabledSpellCheckers();
 }
