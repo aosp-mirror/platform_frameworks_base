@@ -3072,11 +3072,13 @@ public class AudioService extends IAudioService.Stub {
     /**
      * Update the remote control displays with the new "focused" client generation
      */
-    private void setNewRcClientGenerationOnDisplays_syncRcStack(int newClientGeneration) {
+    private void setNewRcClientOnDisplays_syncRcStack(int newClientGeneration,
+            ComponentName newClientEventReceiver, boolean clearing) {
         // NOTE: Only one IRemoteControlDisplay supported in this implementation
         if (mRcDisplay != null) {
             try {
-                mRcDisplay.setCurrentClientGenerationId(newClientGeneration);
+                mRcDisplay.setCurrentClientId(
+                        newClientGeneration, newClientEventReceiver, clearing);
             } catch (RemoteException e) {
                 Log.e(TAG, "Dead display in onRcDisplayUpdate() "+e);
                 // if we had a display before, stop monitoring its death
@@ -3106,12 +3108,19 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /**
-     * Update the displays and clients with the new "focused" client generation
+     * Update the displays and clients with the new "focused" client generation and name
+     * @param newClientGeneration the new generation value matching a client update
+     * @param newClientEventReceiver the media button event receiver associated with the client.
+     *    May be null, which implies there is no registered media button event receiver.
+     * @param clearing true if the new client generation value maps to a remote control update
+     *    where the display should be cleared.
      */
-    private void setNewRcClientGeneration(int newClientGeneration) {
+    private void setNewRcClient(int newClientGeneration, ComponentName newClientEventReceiver,
+            boolean clearing) {
         synchronized(mRCStack) {
             // send the new valid client generation ID to all displays
-            setNewRcClientGenerationOnDisplays_syncRcStack(newClientGeneration);
+            setNewRcClientOnDisplays_syncRcStack(newClientGeneration, newClientEventReceiver,
+                    clearing);
             // send the new valid client generation ID to all clients
             setNewRcClientGenerationOnClients_syncRcStack(newClientGeneration);
         }
@@ -3128,7 +3137,7 @@ public class AudioService extends IAudioService.Stub {
             mCurrentRcClientGen++;
 
             // synchronously update the displays and clients with the new client generation
-            setNewRcClientGeneration(mCurrentRcClientGen);
+            setNewRcClient(mCurrentRcClientGen, null /*event receiver*/, true /*clearing*/);
         }
     }
 
@@ -3144,7 +3153,9 @@ public class AudioService extends IAudioService.Stub {
                 mCurrentRcClientGen++;
 
                 // synchronously update the displays and clients with the new client generation
-                setNewRcClientGeneration(mCurrentRcClientGen);
+                setNewRcClient(mCurrentRcClientGen,
+                        rcse.mReceiverComponent /*event receiver*/,
+                        false /*clearing*/);
 
                 // ask the current client that it needs to send info
                 try {
@@ -3320,10 +3331,31 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** see AudioManager.unregisterRemoteControlClient(ComponentName eventReceiver, ...) */
+    /**
+     * see AudioManager.unregisterRemoteControlClient(ComponentName eventReceiver, ...)
+     * rcClient is guaranteed non-null
+     */
     public void unregisterRemoteControlClient(ComponentName eventReceiver,
             IRemoteControlClient rcClient) {
-        //FIXME implement
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+                while(stackIterator.hasNext()) {
+                    RemoteControlStackEntry rcse = stackIterator.next();
+                    if ((rcse.mReceiverComponent.equals(eventReceiver))
+                            && rcClient.equals(rcse.mRcClient)) {
+                        // we found the IRemoteControlClient to unregister
+                        // stop monitoring its death
+                        rcse.unlinkToRcClientDeath();
+                        // reset the client-related fields
+                        rcse.mRcClient = null;
+                        rcse.mRcClientName = null;
+                        rcse.mRcClientDeathHandler = null;
+                        rcse.mCallingPackageName = null;
+                    }
+                }
+            }
+        }
     }
 
     /**
