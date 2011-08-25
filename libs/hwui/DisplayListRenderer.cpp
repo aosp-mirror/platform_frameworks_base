@@ -194,6 +194,7 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 
 void DisplayList::init() {
     mSize = 0;
+    mIsRenderable = true;
 }
 
 size_t DisplayList::getSize() {
@@ -892,7 +893,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
 // Base structure
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayListRenderer::DisplayListRenderer(): mWriter(MIN_WRITER_SIZE) {
+DisplayListRenderer::DisplayListRenderer(): mWriter(MIN_WRITER_SIZE), mHasDrawOps(false) {
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
@@ -926,6 +927,8 @@ void DisplayListRenderer::reset() {
     mPathMap.clear();
 
     mMatrices.clear();
+
+    mHasDrawOps = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -938,6 +941,7 @@ DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
     } else {
         displayList->initFromDisplayListRenderer(*this, true);
     }
+    displayList->setRenderable(mHasDrawOps);
     return displayList;
 }
 
@@ -982,7 +986,11 @@ int DisplayListRenderer::save(int flags) {
 }
 
 void DisplayListRenderer::restore() {
-    addOp(DisplayList::Restore);
+    if (mRestoreSaveCount < 0) {
+        addOp(DisplayList::Restore);
+    } else {
+        mRestoreSaveCount--;
+    }
     OpenGLRenderer::restore();
 }
 

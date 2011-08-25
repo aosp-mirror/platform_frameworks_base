@@ -9971,8 +9971,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 // The dirty rect should always be null for a display list
                 canvas.onPreDraw(null);
 
-                final int restoreCount = canvas.save();
-
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
@@ -9984,8 +9982,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 } else {
                     draw(canvas);
                 }
-
-                canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
 

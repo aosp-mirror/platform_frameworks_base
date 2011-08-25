@@ -1278,7 +1278,7 @@ bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, u
 
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
-    if (displayList) {
+    if (displayList && displayList->isRenderable()) {
         return displayList->replay(*this, dirty, level);
     }
 
