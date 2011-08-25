@@ -3451,6 +3451,7 @@ public class WebView extends AbsoluteLayout
                 }
                 abortAnimation();
                 mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
+                nativeSetIsScrolling(false);
                 if (!mBlockWebkitViewMessages) {
                     WebViewCore.resumePriority();
                     if (!mSelectingText) {
@@ -6382,6 +6383,8 @@ public class WebView extends AbsoluteLayout
         WebViewCore.reducePriority();
         // to get better performance, pause updating the picture
         WebViewCore.pauseUpdatePicture(mWebViewCore);
+        nativeSetIsScrolling(true);
+
         if (!mDragFromTextInput) {
             nativeHideCursor();
         }
@@ -6478,6 +6481,7 @@ public class WebView extends AbsoluteLayout
                 || mTouchMode == TOUCH_DRAG_LAYER_MODE) && !mSelectingText) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
+            nativeSetIsScrolling(false);
         }
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -9277,6 +9281,7 @@ public class WebView extends AbsoluteLayout
      * @return True if the layer is successfully scrolled.
      */
     private native boolean  nativeScrollLayer(int layer, int newX, int newY);
+    private native void     nativeSetIsScrolling(boolean isScrolling);
     private native int      nativeGetBackgroundColor();
     native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
