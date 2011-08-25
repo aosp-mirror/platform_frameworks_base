@@ -541,8 +541,18 @@ class GLES20Canvas extends HardwareCanvas {
     
     @Override
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
-        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
+        if (bounds != null) {
+            return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
+        }
+
+        int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        int count = nSaveLayer(mRenderer, nativePaint, saveFlags);
+        if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
+        return count;
     }
+
+    private static native int nSaveLayer(int renderer, int paint, int saveFlags);    
 
     @Override
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
@@ -562,9 +572,14 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
-        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom,
-                alpha, saveFlags);
+        if (bounds != null) {
+            return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                    alpha, saveFlags);
+        }
+        return nSaveLayerAlpha(mRenderer, alpha, saveFlags);
     }
+
+    private static native int nSaveLayerAlpha(int renderer, int alpha, int saveFlags);    
 
     @Override
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
