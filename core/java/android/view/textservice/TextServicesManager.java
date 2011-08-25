@@ -170,5 +170,26 @@ public final class TextServicesManager {
         }
     }
 
+    /**
+     * @hide
+     */
+    public void setSpellCheckerEnabled(boolean enabled) {
+        try {
+            sService.setSpellCheckerEnabled(enabled);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setSpellCheckerSubtype:" + e);
+        }
+    }
 
+    /**
+     * @hide
+     */
+    public boolean isSpellCheckerEnabled() {
+        try {
+            return sService.isSpellCheckerEnabled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setSpellCheckerSubtype:" + e);
+            return false;
+        }
+    }
 }
