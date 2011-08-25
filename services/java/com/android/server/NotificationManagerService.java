@@ -101,13 +101,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     private Vibrator mVibrator = new Vibrator();
 
     // for enabling and disabling notification pulse behavior
-    private boolean mScreenOn = true;
     private boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
-    // This is true if we have received a new notification while the screen is off
-    // (that is, if mLedNotification was set while the screen was off)
-    // This is reset to false when the screen is turned on.
-    private boolean mPendingPulseNotification;
 
     private final ArrayList<NotificationRecord> mNotificationList =
             new ArrayList<NotificationRecord>();
@@ -349,12 +344,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                         cancelAllNotificationsInt(pkgName, 0, 0, !queryRestart);
                     }
                 }
-            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                mScreenOn = true;
-                updateNotificationPulse();
-            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                mScreenOn = false;
-                updateNotificationPulse();
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 mInCall = (intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_OFFHOOK));
                 updateNotificationPulse();
@@ -1059,11 +1048,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     // lock on mNotificationList
     private void updateLightsLocked()
     {
-        // clear pending pulse notification if screen is on
-        if (mScreenOn || mLedNotification == null) {
-            mPendingPulseNotification = false;
-        }
-
         // handle notification lights
         if (mLedNotification == null) {
             // get next notification, if any
@@ -1071,14 +1055,10 @@ public class NotificationManagerService extends INotificationManager.Stub
             if (n > 0) {
                 mLedNotification = mLights.get(n-1);
             }
-            if (mLedNotification != null && !mScreenOn) {
-                mPendingPulseNotification = true;
-            }
         }
 
-        // we only flash if screen is off and persistent pulsing is enabled
-        // and we are not currently in a call
-        if (!mPendingPulseNotification || mScreenOn || mInCall) {
+        // Don't flash while we are in a call
+        if (mLedNotification == null || mInCall) {
             mNotificationLight.turnOff();
         } else {
             int ledARGB = mLedNotification.notification.ledARGB;
