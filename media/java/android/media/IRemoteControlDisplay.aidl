@@ -39,4 +39,9 @@ oneway interface IRemoteControlDisplay
     void setTransportControlFlags(int generationId, int transportControlFlags);
 
     void setArtwork(int generationId, in Bitmap artwork);
+
+    /**
+     * To combine metadata text and artwork in one binder call
+     */
+    void setAllMetadata(int generationId, in Bundle metadata, in Bitmap artwork);
 }

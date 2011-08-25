@@ -345,12 +345,8 @@ public class RemoteControlClient
                 mMetadata = new Bundle(mEditorMetadata);
                 mArtwork = mEditorArtwork;
                 if (mMetadataChanged & mArtworkChanged) {
-                    // FIXME the following two send methods need to be combined in a single call
-                    //  that pushes the metadata and artwork in one binder call
                     // send to remote control display if conditions are met
-                    sendMetadata_syncCacheLock();
-                    // send to remote control display if conditions are met
-                    sendArtwork_syncCacheLock();
+                    sendMetadataWithArtwork_syncCacheLock();
                 } else if (mMetadataChanged) {
                     // send to remote control display if conditions are met
                     sendMetadata_syncCacheLock();
@@ -447,6 +443,7 @@ public class RemoteControlClient
      */
     private Bitmap mArtwork;
     private final int ARTWORK_DEFAULT_SIZE = 256;
+    private final int ARTWORK_INVALID_SIZE = -1;
     private int mArtworkExpectedWidth = ARTWORK_DEFAULT_SIZE;
     private int mArtworkExpectedHeight = ARTWORK_DEFAULT_SIZE;
     /**
@@ -610,15 +607,19 @@ public class RemoteControlClient
         }
     }
 
+    private void detachFromDisplay_syncCacheLock() {
+        mRcDisplay = null;
+        mArtworkExpectedWidth = ARTWORK_INVALID_SIZE;
+        mArtworkExpectedHeight = ARTWORK_INVALID_SIZE;
+    }
+
     private void sendPlaybackState_syncCacheLock() {
         if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
             try {
                 mRcDisplay.setPlaybackState(mInternalClientGenId, mPlaybackState);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in setPlaybackState(), dead display "+e);
-                mRcDisplay = null;
-                mArtworkExpectedWidth = -1;
-                mArtworkExpectedHeight = -1;
+                detachFromDisplay_syncCacheLock();
             }
         }
     }
@@ -629,9 +630,7 @@ public class RemoteControlClient
                 mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in sendPlaybackState(), dead display "+e);
-                mRcDisplay = null;
-                mArtworkExpectedWidth = -1;
-                mArtworkExpectedHeight = -1;
+                detachFromDisplay_syncCacheLock();
             }
         }
     }
@@ -643,9 +642,7 @@ public class RemoteControlClient
                         mTransportControlFlags);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in sendTransportControlFlags(), dead display "+e);
-                mRcDisplay = null;
-                mArtworkExpectedWidth = -1;
-                mArtworkExpectedHeight = -1;
+                detachFromDisplay_syncCacheLock();
             }
         }
     }
@@ -660,9 +657,22 @@ public class RemoteControlClient
                 mRcDisplay.setArtwork(mInternalClientGenId, mArtwork);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in sendArtwork(), dead display "+e);
-                mRcDisplay = null;
-                mArtworkExpectedWidth = -1;
-                mArtworkExpectedHeight = -1;
+                detachFromDisplay_syncCacheLock();
+            }
+        }
+    }
+
+    private void sendMetadataWithArtwork_syncCacheLock() {
+        if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
+            // even though we have already scaled in setArtwork(), when this client needs to
+            // send the bitmap, there might be newer and smaller expected dimensions, so we have
+            // to check again.
+            mArtwork = scaleBitmapIfTooBig(mArtwork, mArtworkExpectedWidth, mArtworkExpectedHeight);
+            try {
+                mRcDisplay.setAllMetadata(mInternalClientGenId, mMetadata, mArtwork);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in setAllMetadata(), dead display "+e);
+                detachFromDisplay_syncCacheLock();
             }
         }
     }

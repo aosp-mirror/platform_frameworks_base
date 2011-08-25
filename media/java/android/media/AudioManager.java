@@ -1761,6 +1761,60 @@ public class AudioManager {
         }
     }
 
+    /**
+     * @hide
+     * Registers a remote control display that will be sent information by remote control clients.
+     * @param rcd
+     */
+    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
+        if (rcd == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.registerRemoteControlDisplay(rcd);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
+        }
+    }
+
+    /**
+     * @hide
+     * Unregisters a remote control display that was sent information by remote control clients.
+     * @param rcd
+     */
+    public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {
+        if (rcd == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.unregisterRemoteControlDisplay(rcd);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterRemoteControlDisplay " + e);
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the artwork size a remote control display expects when receiving bitmaps.
+     * @param rcd
+     * @param w the maximum width of the expected bitmap. Negative values indicate it is
+     *   useless to send artwork.
+     * @param h the maximum height of the expected bitmap. Negative values indicate it is
+     *   useless to send artwork.
+     */
+    public void remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay rcd, int w, int h) {
+        if (rcd == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.remoteControlDisplayUsesBitmapSize(rcd, w, h);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in remoteControlDisplayUsesBitmapSize " + e);
+        }
+    }
 
     // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
     /**
