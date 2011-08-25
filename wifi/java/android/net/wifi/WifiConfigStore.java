@@ -281,7 +281,11 @@ class WifiConfigStore {
         if (WifiNative.removeNetworkCommand(netId)) {
             WifiNative.saveConfigCommand();
             synchronized (sConfiguredNetworks) {
-                sConfiguredNetworks.remove(netId);
+                WifiConfiguration config = sConfiguredNetworks.get(netId);
+                if (config != null) {
+                    sConfiguredNetworks.remove(netId);
+                    sNetworkIds.remove(configKey(config));
+                }
             }
             writeIpAndProxyConfigurations();
             sendConfiguredNetworksChangedBroadcast();
@@ -315,7 +319,13 @@ class WifiConfigStore {
     static boolean removeNetwork(int netId) {
         boolean ret = WifiNative.removeNetworkCommand(netId);
         synchronized (sConfiguredNetworks) {
-            if (ret) sConfiguredNetworks.remove(netId);
+            if (ret) {
+                WifiConfiguration config = sConfiguredNetworks.get(netId);
+                if (config != null) {
+                    sConfiguredNetworks.remove(netId);
+                    sNetworkIds.remove(configKey(config));
+                }
+            }
         }
         sendConfiguredNetworksChangedBroadcast();
         return ret;
@@ -854,17 +864,23 @@ class WifiConfigStore {
          * refer to an existing configuration.
          */
         int netId = config.networkId;
-        boolean updateFailed = true;
+        boolean newNetwork = false;
         // networkId of INVALID_NETWORK_ID means we want to create a new network
-        boolean newNetwork = (netId == INVALID_NETWORK_ID);
-
-        if (newNetwork) {
-            netId = WifiNative.addNetworkCommand();
-            if (netId < 0) {
-                Log.e(TAG, "Failed to add a network!");
-                return new NetworkUpdateResult(INVALID_NETWORK_ID);
-          }
+        if (netId == INVALID_NETWORK_ID) {
+            Integer savedNetId = sNetworkIds.get(configKey(config));
+            if (savedNetId != null) {
+                netId = savedNetId;
+            } else {
+                newNetwork = true;
+                netId = WifiNative.addNetworkCommand();
+                if (netId < 0) {
+                    Log.e(TAG, "Failed to add a network!");
+                    return new NetworkUpdateResult(INVALID_NETWORK_ID);
+                }
+            }
         }
+
+        boolean updateFailed = true;
 
         setVariables: {
 
@@ -1053,11 +1069,14 @@ class WifiConfigStore {
         if (sConfig == null) {
             sConfig = new WifiConfiguration();
             sConfig.networkId = netId;
-            synchronized (sConfiguredNetworks) {
-                sConfiguredNetworks.put(netId, sConfig);
-            }
         }
+
         readNetworkVariables(sConfig);
+
+        synchronized (sConfiguredNetworks) {
+            sConfiguredNetworks.put(netId, sConfig);
+            sNetworkIds.put(configKey(sConfig), netId);
+        }
 
         NetworkUpdateResult result = writeIpAndProxyConfigurationsOnChange(sConfig, config);
         result.setNetworkId(netId);
