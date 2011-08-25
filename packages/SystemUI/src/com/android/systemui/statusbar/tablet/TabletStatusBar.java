@@ -181,7 +181,9 @@ public class TabletStatusBar extends StatusBar implements
     private InputMethodsPanel mInputMethodsPanel;
     private CompatModePanel mCompatModePanel;
 
-    int mSystemUiVisibility = 0;
+    private int mSystemUiVisibility = 0;
+    // used to notify status bar for suppressing notification LED
+    private boolean mPanelSlightlyVisible;
 
     public Context getContext() { return mContext; }
 
@@ -642,6 +644,7 @@ public class TabletStatusBar extends StatusBar implements
                                         editor.putBoolean(Prefs.DO_NOT_DISTURB_PREF, false);
                                         editor.apply();
                                         animateCollapse();
+                                        visibilityChanged(false);
                                     }
                                 });
                             }
@@ -740,6 +743,7 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_HIDE_CHROME:
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
                     animateCollapse();
+                    visibilityChanged(false);
                     mBarContents.setVisibility(View.GONE);
                     mShadow.setVisibility(View.VISIBLE);
                     mSystemUiVisibility |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
@@ -749,15 +753,6 @@ public class TabletStatusBar extends StatusBar implements
                     mTicker.halt();
                     break;
             }
-        }
-    }
-
-    private void notifyLightsChanged(boolean shown) {
-        try {
-            Slog.d(TAG, "lights " + (shown?"on":"out"));
-            mWindowManager.statusBarVisibilityChanged(
-                    shown ? View.STATUS_BAR_VISIBLE : View.STATUS_BAR_HIDDEN);
-        } catch (RemoteException ex) {
         }
     }
 
@@ -934,6 +929,7 @@ public class TabletStatusBar extends StatusBar implements
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.i(TAG, "DISABLE_EXPAND: yes");
                 animateCollapse();
+                visibilityChanged(false);
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
@@ -1033,6 +1029,24 @@ public class TabletStatusBar extends StatusBar implements
         if (NOTIFICATION_PEEK_ENABLED) {
             mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PEEK);
             mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
+        }
+    }
+
+    /**
+     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
+     * This was added last-minute and is inconsistent with the way the rest of the notifications
+     * are handled, because the notification isn't really cancelled.  The lights are just
+     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
+     * this is what he wants. (see bug 1131461)
+     */
+    void visibilityChanged(boolean visible) {
+        if (mPanelSlightlyVisible != visible) {
+            mPanelSlightlyVisible = visible;
+            try {
+                mBarService.onPanelRevealed();
+            } catch (RemoteException ex) {
+                // Won't fail unless the world has ended.
+            }
         }
     }
 
@@ -1305,6 +1319,7 @@ public class TabletStatusBar extends StatusBar implements
 
             // close the shade if it was open
             animateCollapse();
+            visibilityChanged(false);
 
             // If this click was on the intruder alert, hide that instead
 //            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
@@ -1383,6 +1398,7 @@ public class TabletStatusBar extends StatusBar implements
                         // require a little more oomph once we're already in peekaboo mode
                         if (mVT.getYVelocity() < -mNotificationFlingVelocity) {
                             animateExpand();
+                            visibilityChanged(true);
                             hilite(false);
                             mVT.recycle();
                             mVT = null;
@@ -1400,6 +1416,7 @@ public class TabletStatusBar extends StatusBar implements
                          // dragging off the bottom doesn't count
                          && (int)event.getY() < v.getBottom()) {
                             animateExpand();
+                            visibilityChanged(true);
                             v.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                             v.playSoundEffect(SoundEffectConstants.CLICK);
                         }
@@ -1783,6 +1800,7 @@ public class TabletStatusBar extends StatusBar implements
             // system process is dead if we're here.
         }
         animateCollapse();
+        visibilityChanged(false);
     }
 
     public void userActivity() {
