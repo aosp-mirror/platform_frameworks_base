@@ -22,6 +22,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.view.textservice.SpellCheckerInfo;
+import android.view.textservice.SpellCheckerSubtype;
 
 /**
  * Interface to the text service manager.
@@ -29,10 +30,12 @@ import android.view.textservice.SpellCheckerInfo;
  */
 interface ITextServicesManager {
     SpellCheckerInfo getCurrentSpellChecker(String locale);
+    SpellCheckerSubtype getCurrentSpellCheckerSubtype(String locale);
     oneway void getSpellCheckerService(String sciId, in String locale,
             in ITextServicesSessionListener tsListener,
             in ISpellCheckerSessionListener scListener, in Bundle bundle);
     oneway void finishSpellCheckerService(in ISpellCheckerSessionListener listener);
-    oneway void setCurrentSpellChecker(String sciId);
+    oneway void setCurrentSpellChecker(String locale, String sciId);
+    oneway void setCurrentSpellCheckerSubtype(String locale, int hashCode);
     SpellCheckerInfo[] getEnabledSpellCheckers();
 }

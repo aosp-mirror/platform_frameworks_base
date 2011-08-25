@@ -135,11 +135,40 @@ public final class TextServicesManager {
     public void setCurrentSpellChecker(SpellCheckerInfo sci) {
         try {
             if (sci == null) {
-                throw new NullPointerException("SpellCheckerInfo is null");
+                throw new NullPointerException("SpellCheckerInfo is null.");
             }
-            sService.setCurrentSpellChecker(sci.getId());
+            sService.setCurrentSpellChecker(null, sci.getId());
         } catch (RemoteException e) {
             Log.e(TAG, "Error in setCurrentSpellChecker: " + e);
         }
     }
+
+    /**
+     * @hide
+     */
+    public SpellCheckerSubtype getCurrentSpellCheckerSubtype() {
+        try {
+            // Passing null as a locale for ICS
+            return sService.getCurrentSpellCheckerSubtype(null);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in getCurrentSpellCheckerSubtype: " + e);
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void setSpellCheckerSubtype(SpellCheckerSubtype subtype) {
+        try {
+            if (subtype == null) {
+                throw new NullPointerException("SpellCheckerSubtype is null.");
+            }
+            sService.setCurrentSpellCheckerSubtype(null, subtype.hashCode());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setSpellCheckerSubtype:" + e);
+        }
+    }
+
+
 }
