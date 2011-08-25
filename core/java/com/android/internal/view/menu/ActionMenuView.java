@@ -31,6 +31,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private static final String TAG = "ActionMenuView";
     
     static final int MIN_CELL_SIZE = 56; // dips
+    static final int GENERATED_ITEM_PADDING = 4; // dips
 
     private MenuBuilder mMenu;
 
@@ -39,6 +40,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private boolean mFormatItems;
     private int mFormatItemsWidth;
     private int mMinCellSize;
+    private int mGeneratedItemPadding;
     private int mMeasuredExtraWidth;
 
     public ActionMenuView(Context context) {
@@ -48,7 +50,9 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public ActionMenuView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setBaselineAligned(false);
-        mMinCellSize = (int) (MIN_CELL_SIZE * context.getResources().getDisplayMetrics().density);
+        final float density = context.getResources().getDisplayMetrics().density;
+        mMinCellSize = (int) (MIN_CELL_SIZE * density);
+        mGeneratedItemPadding = (int) (GENERATED_ITEM_PADDING * density);
     }
 
     public void setPresenter(ActionMenuPresenter presenter) {
@@ -133,7 +137,14 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             final View child = getChildAt(i);
             if (child.getVisibility() == GONE) continue;
 
+            final boolean isGeneratedItem = child instanceof ActionMenuItemView;
             visibleItemCount++;
+
+            if (isGeneratedItem) {
+                // Reset padding for generated menu item views; it may change below
+                // and views are recycled.
+                child.setPadding(mGeneratedItemPadding, 0, mGeneratedItemPadding, 0);
+            }
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             lp.expanded = false;
@@ -142,6 +153,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             lp.expandable = false;
             lp.leftMargin = 0;
             lp.rightMargin = 0;
+            lp.preventEdgeOffset = isGeneratedItem && ((ActionMenuItemView) child).hasText();
 
             // Overflow always gets 1 cell. No more, no less.
             final int cellsAvailable = lp.isOverflowButton ? 1 : cellsRemaining;
@@ -157,6 +169,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight());
             if (cellsUsed == 1) smallestItemsAt |= (1 << i);
         }
+
+        // When we have overflow and a single expanded (text) item, we want to try centering it
+        // visually in the available space even though overflow consumes some of it.
+        final boolean centerSingleExpandedItem = hasOverflow && visibleItemCount == 2;
 
         // Divide space for remaining cells if we have items that can expand.
         // Try distributing whole leftover cells to smaller items first.
@@ -184,16 +200,27 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 }
             }
 
-            if (minCellsItemCount > cellsRemaining) break; // Couldn't expand anything evenly. Stop.
-
             // Items that get expanded will always be in the set of smallest items when we're done.
             smallestItemsAt |= minCellsAt;
 
-            for (int i = 0; i < childCount; i++) {
-                if ((minCellsAt & (1 << i)) == 0) continue;
+            if (minCellsItemCount > cellsRemaining) break; // Couldn't expand anything evenly. Stop.
 
+            // We have enough cells, all minimum size items will be incremented.
+            minCells++;
+
+            for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                if ((minCellsAt & (1 << i)) == 0) {
+                    // If this item is already at our small item count, mark it for later.
+                    if (lp.cellsUsed == minCells) smallestItemsAt |= 1 << i;
+                    continue;
+                }
+
+                if (centerSingleExpandedItem && lp.preventEdgeOffset && cellsRemaining == 1) {
+                    // Add padding to this item such that it centers.
+                    child.setPadding(mGeneratedItemPadding + cellSize, 0, mGeneratedItemPadding, 0);
+                }
                 lp.cellsUsed++;
                 lp.expanded = true;
                 cellsRemaining--;
@@ -207,16 +234,18 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
         final boolean singleItem = !hasOverflow && visibleItemCount == 1;
         if (cellsRemaining > 0 && smallestItemsAt != 0 &&
-                (cellsRemaining < visibleItemCount - 1 || singleItem)) {
+                (cellsRemaining < visibleItemCount - 1 || singleItem || maxCellsUsed > 1)) {
             float expandCount = Long.bitCount(smallestItemsAt);
 
             if (!singleItem) {
                 // The items at the far edges may only expand by half in order to pin to either side.
                 if ((smallestItemsAt & 1) != 0) {
-                    expandCount -= 0.5f;
+                    LayoutParams lp = (LayoutParams) getChildAt(0).getLayoutParams();
+                    if (!lp.preventEdgeOffset) expandCount -= 0.5f;
                 }
                 if ((smallestItemsAt & (1 << (childCount - 1))) != 0) {
-                    expandCount -= 0.5f;
+                    LayoutParams lp = ((LayoutParams) getChildAt(childCount - 1).getLayoutParams());
+                    if (!lp.preventEdgeOffset) expandCount -= 0.5f;
                 }
             }
 
@@ -232,7 +261,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                     // If this is one of our views, expand and measure at the larger size.
                     lp.extraPixels = extraPixels;
                     lp.expanded = true;
-                    if (i == 0) {
+                    if (i == 0 && !lp.preventEdgeOffset) {
                         // First item gets part of its new padding pushed out of sight.
                         // The last item will get this implicitly from layout.
                         lp.leftMargin = -extraPixels / 2;
@@ -496,6 +525,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         public int extraPixels;
         @ViewDebug.ExportedProperty(category = "layout")
         public boolean expandable;
+        @ViewDebug.ExportedProperty(category = "layout")
+        public boolean preventEdgeOffset;
 
         public boolean expanded;
 
