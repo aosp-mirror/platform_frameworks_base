@@ -129,6 +129,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private NetworkInfo mNetworkInfo;
 
+    /* Is chosen as a unique range to avoid conflict with
+       the range defined in Tethering.java */
+    private static final String[] DHCP_RANGE = {"192.168.49.2", "192.168.49.254"};
+    private static final String SERVER_ADDRESS = "192.168.49.1";
+
     public WifiP2pService(Context context) {
         mContext = context;
 
@@ -739,6 +744,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void enter() {
             if (DBG) logd(getName());
             mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
+
+            //DHCP server has already been started if I am a group owner
+            if (mGroup.isGroupOwner()) {
+                setWifiP2pInfoOnGroupFormation(SERVER_ADDRESS);
+                sendP2pConnectionChangedBroadcast();
+            }
         }
 
         @Override
@@ -895,30 +906,22 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     }
 
     private void startDhcpServer(String intf) {
-        /* Is chosen as a unique range to avoid conflict with
-           the range defined in Tethering.java */
-        String[] dhcp_range = {"192.168.49.2", "192.168.49.254"};
-        String serverAddress = "192.168.49.1";
-
         InterfaceConfiguration ifcg = null;
         try {
             ifcg = mNwService.getInterfaceConfig(intf);
             ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
-                        serverAddress), 24);
+                        SERVER_ADDRESS), 24);
             ifcg.interfaceFlags = "[up]";
             mNwService.setInterfaceConfig(intf, ifcg);
             /* This starts the dnsmasq server */
-            mNwService.startTethering(dhcp_range);
+            mNwService.startTethering(DHCP_RANGE);
         } catch (Exception e) {
             loge("Error configuring interface " + intf + ", :" + e);
             return;
         }
 
         logd("Started Dhcp server on " + intf);
-
-        setWifiP2pInfoOnGroupFormation(serverAddress);
-        sendP2pConnectionChangedBroadcast();
-    }
+   }
 
     private void stopDhcpServer() {
         try {
