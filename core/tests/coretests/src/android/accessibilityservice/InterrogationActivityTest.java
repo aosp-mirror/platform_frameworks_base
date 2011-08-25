@@ -31,6 +31,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityManager;
@@ -81,8 +82,8 @@ public class InterrogationActivityTest
             // bring up the activity
             getActivity();
 
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertNotNull(button);
             assertEquals(0, button.getChildCount());
 
@@ -91,8 +92,8 @@ public class InterrogationActivityTest
             button.getBoundsInParent(bounds);
             assertEquals(0, bounds.left);
             assertEquals(0, bounds.top);
-            assertEquals(73, bounds.right);
-            assertEquals(48, bounds.bottom);
+            assertEquals(160, bounds.right);
+            assertEquals(100, bounds.bottom);
 
             // char sequence attributes
             assertEquals("com.android.frameworks.coretests", button.getPackageName());
@@ -133,8 +134,8 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view by text
-            List<AccessibilityNodeInfo> buttons =
-                getConnection().findAccessibilityNodeInfosByViewTextInActiveWindow("butto");
+            List<AccessibilityNodeInfo> buttons =  AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfosByViewTextInActiveWindow(getConnection(), "butto");
             assertEquals(9, buttons.size());
         } finally {
             afterClassIfNeeded();
@@ -170,8 +171,8 @@ public class InterrogationActivityTest
             classNameAndTextList.add("android.widget.ButtonButton8");
             classNameAndTextList.add("android.widget.ButtonButton9");
 
-            AccessibilityNodeInfo root =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.root);
+            AccessibilityNodeInfo root = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.root);
             assertNotNull("We must find the existing root.", root);
 
             Queue<AccessibilityNodeInfo> fringe = new LinkedList<AccessibilityNodeInfo>();
@@ -214,15 +215,16 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view and make sure it is not focused
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isFocused());
 
             // focus the view
             assertTrue(button.performAction(ACTION_FOCUS));
 
             // find the view again and make sure it is focused
-            button = getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            button =  AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertTrue(button.isFocused());
         } finally {
             afterClassIfNeeded();
@@ -242,22 +244,24 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view and make sure it is not focused
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isFocused());
 
             // focus the view
             assertTrue(button.performAction(ACTION_FOCUS));
 
             // find the view again and make sure it is focused
-            button =  getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertTrue(button.isFocused());
 
             // unfocus the view
             assertTrue(button.performAction(ACTION_CLEAR_FOCUS));
 
             // find the view again and make sure it is not focused
-            button =  getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isFocused());
         } finally {
             afterClassIfNeeded();
@@ -278,15 +282,16 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view and make sure it is not selected
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isSelected());
 
             // select the view
             assertTrue(button.performAction(ACTION_SELECT));
 
             // find the view again and make sure it is selected
-            button = getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertTrue(button.isSelected());
         } finally {
             afterClassIfNeeded();
@@ -306,22 +311,24 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view and make sure it is not selected
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isSelected());
 
             // select the view
             assertTrue(button.performAction(ACTION_SELECT));
 
             // find the view again and make sure it is selected
-            button = getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertTrue(button.isSelected());
 
             // unselect the view
             assertTrue(button.performAction(ACTION_CLEAR_SELECTION));
 
             // find the view again and make sure it is not selected
-            button = getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            button =  AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isSelected());
         } finally {
             afterClassIfNeeded();
@@ -342,8 +349,8 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view and make sure it is not focused
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             assertFalse(button.isSelected());
 
             // focus the view
@@ -406,8 +413,8 @@ public class InterrogationActivityTest
             getActivity();
 
             // find a view and make sure it is not focused
-            AccessibilityNodeInfo button =
-                getConnection().findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.button5);
+            AccessibilityNodeInfo button = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByViewIdInActiveWindow(getConnection(), R.id.button5);
             AccessibilityNodeInfo parent = button.getParent();
             final int childCount = parent.getChildCount();
             for (int i = 0; i < childCount; i++) {

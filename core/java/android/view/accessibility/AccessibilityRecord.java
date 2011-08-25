@@ -18,7 +18,6 @@ package android.view.accessibility;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -127,13 +126,9 @@ public class AccessibilityRecord {
         if (mSourceWindowId == View.NO_ID || mSourceViewId == View.NO_ID || mConnection == null) {
             return null;
         }
-        try {
-            return mConnection.findAccessibilityNodeInfoByAccessibilityId(mSourceWindowId,
-                    mSourceViewId);
-        } catch (RemoteException e) {
-           /* ignore */
-        }
-        return null;
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection, mSourceWindowId,
+                mSourceViewId);
     }
 
     /**
