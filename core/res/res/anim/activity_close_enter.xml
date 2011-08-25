@@ -21,4 +21,11 @@
     <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_shortAnimTime"/>
+    <scale android:fromXScale=".95" android:toXScale="1.0"
+            android:fromYScale=".95" android:toYScale="1.0"
+            android:pivotX="50%p" android:pivotY="50%p"
+            android:interpolator="@interpolator/accelerate_quint"
+            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+            android:duration="@android:integer/config_shortAnimTime"/>
+
 </set>
