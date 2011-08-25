@@ -575,7 +575,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         if (hardwareAccelerated) {
             if (!HardwareRenderer.isAvailable()) {
-                mAttachInfo.mHardwareAccelerationRequested = true;
                 return;
             }
 
@@ -601,6 +600,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
                 mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareAccelerationRequested
                         = mAttachInfo.mHardwareRenderer != null;
+            } else {
+                // We would normally have enabled hardware acceleration, but
+                // haven't because we are in the system process.  We still want
+                // what is drawn on the screen to behave as if it is accelerated,
+                // so that our preview starting windows visually match what will
+                // actually be drawn by the app.
+                mAttachInfo.mHardwareAccelerationRequested = true;
             }
         }
     }
