@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2011, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+-->
+<resources>
+    <!-- thickness (height) of each notification row, including any separators or padding -->
+    <!-- note: this is the same value as in values/dimens.xml; the value is overridden in
+         values-hdpi/dimens.xml and so we need to re-assert the general value here -->
+    <dimen name="notification_height">65dp</dimen>
+
+    <!-- thickness (height) of dividers between each notification row -->
+    <!-- same as in values/dimens.xml; see note at notification_height -->
+    <dimen name="notification_divider_height">1dp</dimen>
+</resources>
