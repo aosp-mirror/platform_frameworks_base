@@ -136,24 +136,28 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
 void AnotherPacketSource::queueDiscontinuity(
         ATSParser::DiscontinuityType type,
         const sp<AMessage> &extra) {
+    Mutex::Autolock autoLock(mLock);
+
+    // Leave only discontinuities in the queue.
+    List<sp<ABuffer> >::iterator it = mBuffers.begin();
+    while (it != mBuffers.end()) {
+        sp<ABuffer> oldBuffer = *it;
+
+        int32_t oldDiscontinuityType;
+        if (!oldBuffer->meta()->findInt32(
+                    "discontinuity", &oldDiscontinuityType)) {
+            it = mBuffers.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
+
+    mEOSResult = OK;
+
     sp<ABuffer> buffer = new ABuffer(0);
     buffer->meta()->setInt32("discontinuity", static_cast<int32_t>(type));
     buffer->meta()->setMessage("extra", extra);
-
-    Mutex::Autolock autoLock(mLock);
-
-#if 0
-    if (type == ATSParser::DISCONTINUITY_SEEK
-            || type == ATSParser::DISCONTINUITY_FORMATCHANGE) {
-        // XXX Fix this: This will also clear any pending discontinuities,
-        // If there's a pending DISCONTINUITY_FORMATCHANGE and the new
-        // discontinuity is "just" a DISCONTINUITY_SEEK, this will effectively
-        // downgrade the type of discontinuity received by the client.
-
-        mBuffers.clear();
-        mEOSResult = OK;
-    }
-#endif
 
     mBuffers.push_back(buffer);
     mCondition.signal();
