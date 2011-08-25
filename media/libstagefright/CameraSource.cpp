@@ -635,6 +635,12 @@ status_t CameraSource::stop() {
     mStarted = false;
     mFrameAvailableCondition.signal();
 
+    int64_t token;
+    bool isTokenValid = false;
+    if (mCamera != 0) {
+        token = IPCThreadState::self()->clearCallingIdentity();
+        isTokenValid = true;
+    }
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
         if (NO_ERROR !=
@@ -645,6 +651,9 @@ status_t CameraSource::stop() {
     }
     stopCameraRecording();
     releaseCamera();
+    if (isTokenValid) {
+        IPCThreadState::self()->restoreCallingIdentity(token);
+    }
 
     if (mCollectStats) {
         LOGI("Frames received/encoded/dropped: %d/%d/%d in %lld us",
