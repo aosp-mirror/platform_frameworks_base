@@ -39,6 +39,9 @@
 #include <binder/IServiceManager.h>
 #include <utils/threads.h>
 
+#include <ScopedUtfChars.h>
+#include <ScopedLocalRef.h>
+
 #include <android_runtime/AndroidRuntime.h>
 
 //#undef LOGV
@@ -444,6 +447,30 @@ public:
         return result;
     }
 
+    void warnIfStillLive() {
+        if (mObject != NULL) {
+            // Okay, something is wrong -- we have a hard reference to a live death
+            // recipient on the VM side, but the list is being torn down.
+            JNIEnv* env = javavm_to_jnienv(mVM);
+            ScopedLocalRef<jclass> classRef(env, env->GetObjectClass(mObject));
+            jmethodID getnameMethod = env->GetMethodID(classRef.get(),
+                    "getName", "()Ljava/lang/String;");
+            if (getnameMethod) {
+                ScopedLocalRef<jstring> nameRef(env,
+                        (jstring) env->CallObjectMethod(classRef.get(), getnameMethod));
+                ScopedUtfChars nameUtf(env, nameRef.get());
+                if (nameUtf.c_str() != NULL) {
+                    LOGW("BinderProxy is being destroyed but the application did not call "
+                            "unlinkToDeath to unlink all of its death recipients beforehand.  "
+                            "Releasing leaked death recipient: %s", nameUtf.c_str());
+                } else {
+                    LOGW("BinderProxy being destroyed; unable to get DR object name");
+                    env->ExceptionClear();
+                }
+            } else LOGW("BinderProxy being destroyed; unable to find DR class getName");
+        }
+    }
+
 protected:
     virtual ~JavaDeathRecipient()
     {
@@ -478,7 +505,10 @@ DeathRecipientList::~DeathRecipientList() {
     // to the list are holding references on the list object.  Only when they are torn
     // down can the list header be destroyed.
     if (mList.size() > 0) {
-        LOGE("Retiring DRL %p with extant death recipients\n", this);
+        List< sp<JavaDeathRecipient> >::iterator iter;
+        for (iter = mList.begin(); iter != mList.end(); iter++) {
+            (*iter)->warnIfStillLive();
+        }
     }
 }
 
