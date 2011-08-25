@@ -112,6 +112,18 @@ public class PhoneStatusBar extends StatusBar {
     // will likely move to a resource or other tunable param at some point
     private static final int INTRUDER_ALERT_DECAY_MS = 10000;
 
+    // fling gesture tuning parameters, scaled to display density
+    private float mSelfExpandVelocityPx; // classic value: 2000px/s
+    private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
+    private float mFlingExpandMinVelocityPx; // classic value: 200px/s
+    private float mFlingCollapseMinVelocityPx; // classic value: 200px/s
+    private float mCollapseMinDisplayFraction; // classic value: 0.08 (25px/min(320px,480px) on G1)
+    private float mExpandMinDisplayFraction; // classic value: 0.5 (drag open halfway to expand)
+    private float mFlingGestureMaxXVelocityPx; // classic value: 150px/s
+
+    private float mExpandAccelPx; // classic value: 2000px/s/s
+    private float mCollapseAccelPx; // classic value: 2000px/s/s (will be negated to collapse "up")
+
     PhoneStatusBarPolicy mIconPolicy;
 
     // These are no longer handled by the policy, because we need custom strategies for them
@@ -1179,7 +1191,7 @@ public class PhoneStatusBar extends StatusBar {
         }
 
         prepareTracking(0, true);
-        performFling(0, 2000.0f, true);
+        performFling(0, mSelfExpandVelocityPx, true);
     }
 
     public void animateCollapse() {
@@ -1215,7 +1227,7 @@ public class PhoneStatusBar extends StatusBar {
         // and doesn't try to re-open the windowshade.
         mExpanded = true;
         prepareTracking(y, false);
-        performFling(y, -2000.0f, true);
+        performFling(y, -mSelfCollapseVelocityPx, true);
     }
 
     void performExpand() {
@@ -1331,8 +1343,8 @@ public class PhoneStatusBar extends StatusBar {
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
         if (opening) {
-            mAnimAccel = 2000.0f;
-            mAnimVel = 200;
+            mAnimAccel = mExpandAccelPx;
+            mAnimVel = mFlingExpandMinVelocityPx;
             mAnimY = mStatusBarView.getHeight();
             updateExpandedViewPos((int)mAnimY);
             mAnimating = true;
@@ -1370,29 +1382,31 @@ public class PhoneStatusBar extends StatusBar {
 
         if (mExpanded) {
             if (!always && (
-                    vel > 200.0f
-                    || (y > (mDisplayMetrics.heightPixels-25) && vel > -200.0f))) {
+                    vel > mFlingCollapseMinVelocityPx
+                    || (y > (mDisplayMetrics.heightPixels*(1f-mCollapseMinDisplayFraction)) &&
+                        vel > -mFlingExpandMinVelocityPx))) {
                 // We are expanded, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the expanded position.
-                mAnimAccel = 2000.0f;
+                mAnimAccel = mExpandAccelPx;
                 if (vel < 0) {
                     mAnimVel = 0;
                 }
             }
             else {
                 // We are expanded and are now going to animate away.
-                mAnimAccel = -2000.0f;
+                mAnimAccel = -mCollapseAccelPx;
                 if (vel > 0) {
                     mAnimVel = 0;
                 }
             }
         } else {
             if (always || (
-                    vel > 200.0f
-                    || (y > (mDisplayMetrics.heightPixels/2) && vel > -200.0f))) {
+                    vel > mFlingExpandMinVelocityPx
+                    || (y > (mDisplayMetrics.heightPixels*(1f-mExpandMinDisplayFraction)) &&
+                        vel > -mFlingCollapseMinVelocityPx))) {
                 // We are collapsed, and they moved enough to allow us to
                 // expand.  Animate in the notifications.
-                mAnimAccel = 2000.0f;
+                mAnimAccel = mExpandAccelPx;
                 if (vel < 0) {
                     mAnimVel = 0;
                 }
@@ -1400,7 +1414,7 @@ public class PhoneStatusBar extends StatusBar {
             else {
                 // We are collapsed, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the collapsed position.
-                mAnimAccel = -2000.0f;
+                mAnimAccel = -mCollapseAccelPx;
                 if (vel > 0) {
                     mAnimVel = 0;
                 }
@@ -1480,13 +1494,21 @@ public class PhoneStatusBar extends StatusBar {
                 if (xVel < 0) {
                     xVel = -xVel;
                 }
-                if (xVel > 150.0f) {
-                    xVel = 150.0f; // limit how much we care about the x axis
+                if (xVel > mFlingGestureMaxXVelocityPx) {
+                    xVel = mFlingGestureMaxXVelocityPx; // limit how much we care about the x axis
                 }
 
                 float vel = (float)Math.hypot(yVel, xVel);
                 if (negative) {
                     vel = -vel;
+                }
+
+                if (CHATTY) {
+                    Slog.d(TAG, String.format("gesture: vraw=(%f,%f) vnorm=(%f,%f) vlinear=%f", 
+                        mVelocityTracker.getXVelocity(), 
+                        mVelocityTracker.getYVelocity(),
+                        xVel, yVel,
+                        vel));
                 }
 
                 performFling((int)event.getRawY(), vel, false);
@@ -2132,6 +2154,19 @@ public class PhoneStatusBar extends StatusBar {
         }
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
+
+        mSelfExpandVelocityPx = res.getDimension(R.dimen.self_expand_velocity);
+        mSelfCollapseVelocityPx = res.getDimension(R.dimen.self_collapse_velocity);
+        mFlingExpandMinVelocityPx = res.getDimension(R.dimen.fling_expand_min_velocity);
+        mFlingCollapseMinVelocityPx = res.getDimension(R.dimen.fling_collapse_min_velocity);
+
+        mCollapseMinDisplayFraction = res.getFraction(R.dimen.collapse_min_display_fraction, 1, 1);
+        mExpandMinDisplayFraction = res.getFraction(R.dimen.expand_min_display_fraction, 1, 1);
+
+        mExpandAccelPx = res.getDimension(R.dimen.expand_accel);
+        mCollapseAccelPx = res.getDimension(R.dimen.collapse_accel);
+
+        mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
 
         if (false) Slog.v(TAG, "updateResources");
     }
