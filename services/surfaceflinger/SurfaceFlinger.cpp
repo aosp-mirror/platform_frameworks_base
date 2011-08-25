@@ -2207,7 +2207,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         return BAD_VALUE;
 
     // make sure none of the layers are protected
-    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+    const LayerVector& layers(mDrawingState.layersSortedByZ);
     const size_t count = layers.size();
     for (size_t i=0 ; i<count ; ++i) {
         const sp<LayerBase>& layer(layers[i]);
