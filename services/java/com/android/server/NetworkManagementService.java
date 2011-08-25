@@ -1063,8 +1063,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
                 }
             }
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
         } catch (IOException e) {
-            Slog.w(TAG, "problem parsing stats: " + e);
+            throw new IllegalStateException("problem parsing stats: " + e);
         } finally {
             IoUtils.closeQuietly(reader);
         }
@@ -1345,8 +1349,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
                 }
             }
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
         } catch (IOException e) {
-            Slog.w(TAG, "problem parsing stats: " + e);
+            throw new IllegalStateException("problem parsing stats: " + e);
         } finally {
             IoUtils.closeQuietly(reader);
         }
