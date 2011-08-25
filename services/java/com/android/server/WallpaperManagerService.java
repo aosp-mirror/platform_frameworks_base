@@ -75,7 +75,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperService";
     static final boolean DEBUG = false;
 
-    Object mLock = new Object();
+    final Object mLock = new Object[0];
 
     /**
      * Minimum time between crashes of a wallpaper service for us to consider
