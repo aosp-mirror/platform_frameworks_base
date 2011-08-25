@@ -19,9 +19,6 @@ package android.net;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkInfo;
-import android.net.LinkProperties;
 import android.util.Slog;
 
 /**
@@ -168,7 +165,14 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         return true;
     }
 
-    public void setDataEnable(boolean enabled) {
+    @Override
+    public void setUserDataEnable(boolean enabled) {
+        // ignored
+    }
+
+    @Override
+    public void setPolicyDataEnable(boolean enabled) {
+        // ignored
     }
 
     @Override

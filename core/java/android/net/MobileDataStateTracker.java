@@ -16,32 +16,32 @@
 
 package android.net;
 
+import static com.android.internal.telephony.DataConnectionTracker.CMD_SET_POLICY_DATA_ENABLE;
+import static com.android.internal.telephony.DataConnectionTracker.CMD_SET_USER_DATA_ENABLE;
+import static com.android.internal.telephony.DataConnectionTracker.DISABLED;
+import static com.android.internal.telephony.DataConnectionTracker.ENABLED;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo.DetailedState;
 import android.os.Bundle;
-import android.os.HandlerThread;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.os.ServiceManager;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
-
-import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkInfo;
-import android.net.LinkProperties;
-import android.telephony.TelephonyManager;
-import android.util.Slog;
-import android.text.TextUtils;
 
 /**
  * Track the state of mobile data connectivity. This is done by
@@ -452,17 +452,22 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         return false;
     }
 
-    /**
-     * @param enabled
-     */
-    public void setDataEnable(boolean enabled) {
-        try {
-            if (DBG) log("setDataEnable: E enabled=" + enabled);
-            mDataConnectionTrackerAc.sendMessage(DataConnectionTracker.CMD_SET_DATA_ENABLE,
-                    enabled ? DataConnectionTracker.ENABLED : DataConnectionTracker.DISABLED);
-            if (VDBG) log("setDataEnable: X enabled=" + enabled);
-        } catch (Exception e) {
-            loge("setDataEnable: X mAc was null" + e);
+    @Override
+    public void setUserDataEnable(boolean enabled) {
+        if (DBG) log("setUserDataEnable: E enabled=" + enabled);
+        final AsyncChannel channel = mDataConnectionTrackerAc;
+        if (channel != null) {
+            channel.sendMessage(CMD_SET_USER_DATA_ENABLE, enabled ? ENABLED : DISABLED);
+        }
+        if (VDBG) log("setUserDataEnable: X enabled=" + enabled);
+    }
+
+    @Override
+    public void setPolicyDataEnable(boolean enabled) {
+        if (DBG) log("setPolicyDataEnable(enabled=" + enabled + ")");
+        final AsyncChannel channel = mDataConnectionTrackerAc;
+        if (channel != null) {
+            channel.sendMessage(CMD_SET_POLICY_DATA_ENABLE, enabled ? ENABLED : DISABLED);
         }
     }
 

@@ -17,15 +17,7 @@
 package android.net;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.DhcpInfoInternal;
-import android.net.LinkAddress;
-import android.net.LinkCapabilities;
-import android.net.LinkProperties;
-import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkStateTracker;
-import android.net.NetworkUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -34,7 +26,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
-import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -302,11 +293,14 @@ public class EthernetDataTracker implements NetworkStateTracker {
         return -1;
     }
 
-    /**
-     * @param enabled
-     */
-    public void setDataEnable(boolean enabled) {
-        Log.d(TAG, "setDataEnabled: IGNORING enabled=" + enabled);
+    @Override
+    public void setUserDataEnable(boolean enabled) {
+        Log.w(TAG, "ignoring setUserDataEnable(" + enabled + ")");
+    }
+
+    @Override
+    public void setPolicyDataEnable(boolean enabled) {
+        Log.w(TAG, "ignoring setPolicyDataEnable(" + enabled + ")");
     }
 
     /**

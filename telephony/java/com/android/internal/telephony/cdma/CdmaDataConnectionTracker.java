@@ -175,6 +175,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected boolean isDataAllowed() {
+        final boolean internalDataEnabled;
+        synchronized (mDataEnabledLock) {
+            internalDataEnabled = mInternalDataEnabled;
+        }
+
         int psState = mCdmaPhone.mSST.getCurrentDataConnectionState();
         boolean roaming = (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled());
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
@@ -187,7 +192,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     (mCdmaPhone.mSST.isConcurrentVoiceAndDataAllowed() ||
                             mPhone.getState() == Phone.State.IDLE) &&
                     !roaming &&
-                    mInternalDataEnabled &&
+                    internalDataEnabled &&
                     desiredPowerState &&
                     !mPendingRestartRadio &&
                     !mCdmaPhone.needsOtaServiceProvisioning();
@@ -205,7 +210,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 reason += " - concurrentVoiceAndData not allowed and state= " + mPhone.getState();
             }
             if (roaming) reason += " - Roaming";
-            if (!mInternalDataEnabled) reason += " - mInternalDataEnabled= false";
+            if (!internalDataEnabled) reason += " - mInternalDataEnabled= false";
             if (!desiredPowerState) reason += " - desiredPowerState= false";
             if (mPendingRestartRadio) reason += " - mPendingRestartRadio= true";
             if (mCdmaPhone.needsOtaServiceProvisioning()) reason += " - needs Provisioning";
