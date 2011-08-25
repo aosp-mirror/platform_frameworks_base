@@ -16,6 +16,8 @@
 
 package android.view.textservice;
 
+import com.android.internal.util.ArrayUtils;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,7 +25,7 @@ import android.os.Parcelable;
  * This class contains a metadata of suggestions from the text service
  */
 public final class SuggestionsInfo implements Parcelable {
-    private static final String[] EMPTY = new String[0];
+    private static final String[] EMPTY = ArrayUtils.emptyArray(String.class);
 
     /**
      * Flag of the attributes of the suggestions that can be obtained by

@@ -61,11 +61,6 @@ import android.text.SpannedString;
 import android.text.StaticLayout;
 import android.text.TextDirectionHeuristic;
 import android.text.TextDirectionHeuristics;
-import android.text.TextDirectionHeuristics.AnyStrong;
-import android.text.TextDirectionHeuristics.CharCount;
-import android.text.TextDirectionHeuristics.FirstStrong;
-import android.text.TextDirectionHeuristics.TextDirectionAlgorithm;
-import android.text.TextDirectionHeuristics.TextDirectionHeuristicImpl;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -88,6 +83,7 @@ import android.text.method.TransformationMethod2;
 import android.text.method.WordIterator;
 import android.text.style.ClickableSpan;
 import android.text.style.ParagraphStyle;
+import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.URLSpan;
@@ -220,7 +216,6 @@ import java.util.HashMap;
  * @attr ref android.R.styleable#TextView_imeActionLabel
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
- * @attr ref android.R.styleable#TextView_suggestionsEnabled
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -334,7 +329,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextEditSuggestionItemLayout;
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
     private SuggestionRangeSpan mSuggestionRangeSpan;
-    private boolean mSuggestionsEnabled = true;
 
     private int mCursorDrawableRes;
     private final Drawable[] mCursorDrawable = new Drawable[2];
@@ -355,6 +349,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mCreatedWithASelection = false;
 
     private WordIterator mWordIterator;
+
+    private SpellChecker mSpellChecker;
 
     // The alignment to pass to Layout, or null if not resolved.
     private Layout.Alignment mLayoutAlignment;
@@ -824,10 +820,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textIsSelectable:
                 mTextIsSelectable = a.getBoolean(attr, false);
-                break;
-
-            case com.android.internal.R.styleable.TextView_suggestionsEnabled:
-                mSuggestionsEnabled = a.getBoolean(attr, true);
                 break;
 
             case com.android.internal.R.styleable.TextView_textAllCaps:
@@ -3100,18 +3092,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         boolean needEditableForNotification = false;
+        boolean startSpellCheck = false;
 
         if (mListeners != null && mListeners.size() != 0) {
             needEditableForNotification = true;
         }
 
-        if (type == BufferType.EDITABLE || mInput != null ||
-            needEditableForNotification) {
+        if (type == BufferType.EDITABLE || mInput != null || needEditableForNotification) {
             Editable t = mEditableFactory.newEditable(text);
             text = t;
             setFilters(t, mFilters);
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) imm.restartInput(this);
+            startSpellCheck = true;
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
         } else if (!(text instanceof CharWrapper)) {
@@ -3199,6 +3192,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
+
+        if (startSpellCheck) {
+            updateSpellCheckSpans(0, textLength);
+        }
 
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
@@ -7113,8 +7110,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * to turn off ellipsizing.
      *
      * If {@link #setMaxLines} has been used to set two or more lines,
-     * {@link TextUtils.TruncateAt#END} and {@link TextUtils.TruncateAt#MARQUEE}
-     * are only supported (other ellipsizing types will not do anything).
+     * {@link android.text.TextUtils.TruncateAt#END} and
+     * {@link android.text.TextUtils.TruncateAt#MARQUEE}* are only supported
+     * (other ellipsizing types will not do anything).
      *
      * @attr ref android.R.styleable#TextView_ellipsize
      */
@@ -7376,7 +7374,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param lengthAfter The length of the replacement modified text
      */
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-        // intentionally empty
+        // intentionally empty, template pattern method can be overridden by subclasses
     }
 
     /**
@@ -7388,6 +7386,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
+        if (mSpellChecker != null) {
+            mSpellChecker.onSelectionChanged();
+        }
     }
 
     /**
@@ -7422,8 +7423,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void sendBeforeTextChanged(CharSequence text, int start, int before,
-                                   int after) {
+    private void sendBeforeTextChanged(CharSequence text, int start, int before, int after) {
         if (mListeners != null) {
             final ArrayList<TextWatcher> list = mListeners;
             final int count = list.size();
@@ -7431,14 +7431,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 list.get(i).beforeTextChanged(text, start, before, after);
             }
         }
+
+        // The spans that are inside or intersect the modified region no longer make sense
+        removeIntersectingSpans(start, start + before, SpellCheckSpan.class);
+        removeIntersectingSpans(start, start + before, SuggestionSpan.class);
+    }
+
+    // Removes all spans that are inside or actually overlap the start..end range
+    private <T> void removeIntersectingSpans(int start, int end, Class<T> type) {
+        if (!(mText instanceof Editable)) return;
+        Editable text = (Editable) mText;
+
+        T[] spans = text.getSpans(start, end, type);
+        final int length = spans.length;
+        for (int i = 0; i < length; i++) {
+            final int s = text.getSpanStart(spans[i]);
+            final int e = text.getSpanEnd(spans[i]);
+            if (e == start || s == end) break;
+            text.removeSpan(spans[i]);
+        }
     }
 
     /**
      * Not private so it can be called from an inner class without going
      * through a thunk.
      */
-    void sendOnTextChanged(CharSequence text, int start, int before,
-                                   int after) {
+    void sendOnTextChanged(CharSequence text, int start, int before, int after) {
         if (mListeners != null) {
             final ArrayList<TextWatcher> list = mListeners;
             final int count = list.size();
@@ -7485,6 +7503,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
+
+        // The WordIterator text change listener may be called after this one.
+        // Make sure this changed text is rescanned before the iterator is used on it.
+        getWordIterator().forceUpdate();
+        updateSpellCheckSpans(start, start + after);
 
         // Hide the controllers if the amount of content changed
         if (before != after) {
@@ -7573,7 +7596,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         }
-        
+
         if (what instanceof ParcelableSpan) {
             // If this is a span that can be sent to a remote process,
             // the current extract editor would be interested in it.
@@ -7603,10 +7626,102 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         }
+
+        if (what instanceof SpellCheckSpan) {
+            if (newStart < 0) {
+                getSpellChecker().removeSpellCheckSpan((SpellCheckSpan) what);
+            } else if (oldStart < 0) {
+                getSpellChecker().addSpellCheckSpan((SpellCheckSpan) what);
+            }
+        }
+
+        if (what instanceof SuggestionSpan) {
+            if (newStart < 0) {
+                Log.d("spellcheck", "REMOVE suggspan " + mText.subSequence(oldStart, oldEnd));
+            }
+        }
     }
 
-    private class ChangeWatcher
-    implements TextWatcher, SpanWatcher {
+    /**
+     * Create new SpellCheckSpans on the modified region.
+     */
+    private void updateSpellCheckSpans(int start, int end) {
+        if (!(mText instanceof Editable) || !isSuggestionsEnabled()) return;
+        Editable text = (Editable) mText;
+
+        WordIterator wordIterator = getWordIterator();
+        wordIterator.setCharSequence(text);
+
+        // Move back to the beginning of the current word, if any
+        int wordStart = wordIterator.preceding(start);
+        int wordEnd;
+        if (wordStart == BreakIterator.DONE) {
+            wordEnd = wordIterator.following(start);
+            if (wordEnd != BreakIterator.DONE) {
+                wordStart = wordIterator.getBeginning(wordEnd);
+            }
+        } else {
+            wordEnd = wordIterator.getEnd(wordStart);
+        }
+        if (wordEnd == BreakIterator.DONE) {
+            return;
+        }
+
+        // Iterate over the newly added text and schedule new SpellCheckSpans
+        while (wordStart <= end) {
+            if (wordEnd >= start) {
+                // A word across the interval boundaries must remove boundary edition spans
+                if (wordStart < start && wordEnd > start) {
+                    removeEditionSpansAt(start, text);
+                }
+
+                if (wordStart < end && wordEnd > end) {
+                    removeEditionSpansAt(end, text);
+                }
+
+                // Do not create new boundary spans if they already exist
+                boolean createSpellCheckSpan = true;
+                if (wordEnd == start) {
+                    SpellCheckSpan[] spellCheckSpans = text.getSpans(start, start,
+                            SpellCheckSpan.class);
+                    if (spellCheckSpans.length > 0) createSpellCheckSpan = false;
+                }
+
+                if (wordStart == end) {
+                    SpellCheckSpan[] spellCheckSpans = text.getSpans(end, end,
+                            SpellCheckSpan.class);
+                    if (spellCheckSpans.length > 0) createSpellCheckSpan = false;
+                }
+
+                if (createSpellCheckSpan) {
+                    text.setSpan(new SpellCheckSpan(), wordStart, wordEnd,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+
+            // iterate word by word
+            wordEnd = wordIterator.following(wordEnd);
+            if (wordEnd == BreakIterator.DONE) return;
+            wordStart = wordIterator.getBeginning(wordEnd);
+            if (wordStart == BreakIterator.DONE) {
+                Log.e(LOG_TAG, "Unable to find word beginning from " + wordEnd + "in " + mText);
+                return;
+            }
+        }
+    }
+
+    private static void removeEditionSpansAt(int offset, Editable text) {
+        SuggestionSpan[] suggestionSpans = text.getSpans(offset, offset, SuggestionSpan.class);
+        for (int i = 0; i < suggestionSpans.length; i++) {
+            text.removeSpan(suggestionSpans[i]);
+        }
+        SpellCheckSpan[] spellCheckSpans = text.getSpans(offset, offset, SpellCheckSpan.class);
+        for (int i = 0; i < spellCheckSpans.length; i++) {
+            text.removeSpan(spellCheckSpans[i]);
+        }
+    }
+
+    private class ChangeWatcher implements TextWatcher, SpanWatcher {
 
         private CharSequence mBeforeText;
 
@@ -7631,8 +7746,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             TextView.this.handleTextChanged(buffer, start, before, after);
 
             if (AccessibilityManager.getInstance(mContext).isEnabled() &&
-                    (isFocused() || isSelected() &&
-                    isShown())) {
+                    (isFocused() || isSelected() && isShown())) {
                 sendAccessibilityEventTypeViewTextChanged(mBeforeText, start, before, after);
                 mBeforeText = null;
             }
@@ -7642,8 +7756,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (DEBUG_EXTRACT) Log.v(LOG_TAG, "afterTextChanged: " + buffer);
             TextView.this.sendAfterTextChanged(buffer);
 
-            if (MetaKeyKeyListener.getMetaState(buffer,
-                                 MetaKeyKeyListener.META_SELECTING) != 0) {
+            if (MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0) {
                 MetaKeyKeyListener.stopSelecting(TextView.this, buffer);
             }
         }
@@ -7841,17 +7954,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mInputContentType != null) {
                 mInputContentType.enterDown = false;
             }
+
             hideControllers();
-            removeAllSuggestionSpans();
+
+            removeSpans(0, mText.length(), SuggestionSpan.class);
+            removeSpans(0, mText.length(), SpellCheckSpan.class);
         }
 
         startStopMarquee(hasWindowFocus);
     }
 
-    private void removeAllSuggestionSpans() {
+    private void removeSpans(int start, int end, Class<?> type) {
         if (mText instanceof Editable) {
             Editable editable = ((Editable) mText);
-            SuggestionSpan[] spans = editable.getSpans(0, mText.length(), SuggestionSpan.class);
+            Object[] spans = editable.getSpans(start, end, type);
             final int length = spans.length;
             for (int i = 0; i < length; i++) {
                 editable.removeSpan(spans[i]);
@@ -7969,6 +8085,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                     }
                 }
+
+                handled = true;
             }
 
             if (handled) {
@@ -7980,11 +8098,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return <code>true</code> if the cursor/current selection overlaps a {@link SuggestionSpan}.
+     */
+    private boolean isCursorInsideSuggestionSpan() {
+        if (!(mText instanceof Spannable)) return false;
+
+        SuggestionSpan[] suggestionSpans = ((Spannable) mText).getSpans(getSelectionStart(),
+                getSelectionEnd(), SuggestionSpan.class);
+        return (suggestionSpans.length > 0);
+    }
+
+    /**
      * @return <code>true</code> if the cursor is inside an {@link SuggestionSpan} with
      * {@link SuggestionSpan#FLAG_EASY_CORRECT} set.
      */
     private boolean isCursorInsideEasyCorrectionSpan() {
-        Spannable spannable = (Spannable) TextView.this.mText;
+        Spannable spannable = (Spannable) mText;
         SuggestionSpan[] suggestionSpans = spannable.getSpans(getSelectionStart(),
                 getSelectionEnd(), SuggestionSpan.class);
         for (int i = 0; i < suggestionSpans.length; i++) {
@@ -8445,21 +8574,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectionStart = ((Spanned) mText).getSpanStart(url);
             selectionEnd = ((Spanned) mText).getSpanEnd(url);
         } else {
-            if (mWordIterator == null) {
-                mWordIterator = new WordIterator();
-            }
-            // WordIerator handles text changes, this is a no-op if text in unchanged.
-            mWordIterator.setCharSequence(mText);
+            WordIterator wordIterator = getWordIterator();
+            // WordIterator handles text changes, this is a no-op if text in unchanged.
+            wordIterator.setCharSequence(mText);
 
-            selectionStart = mWordIterator.getBeginning(minOffset);
+            selectionStart = wordIterator.getBeginning(minOffset);
             if (selectionStart == BreakIterator.DONE) return false;
 
-            selectionEnd = mWordIterator.getEnd(maxOffset);
+            selectionEnd = wordIterator.getEnd(maxOffset);
             if (selectionEnd == BreakIterator.DONE) return false;
         }
 
         Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
         return true;
+    }
+
+    WordIterator getWordIterator() {
+        if (mWordIterator == null) {
+            mWordIterator = new WordIterator();
+        }
+        return mWordIterator;
+    }
+
+    private SpellChecker getSpellChecker() {
+        if (mSpellChecker == null) {
+            mSpellChecker = new SpellChecker(this);
+        }
+        return mSpellChecker;
     }
 
     private long getLastTouchOffsets() {
@@ -8790,7 +8931,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int offset = getOffsetForPosition(mLastDownPositionX, mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable) mText, offset);
-            getInsertionController().showImmediately();
+            getInsertionController().showWithActionPopup();
             handled = true;
         }
 
@@ -9067,10 +9208,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnClickListener {
-        private static final int MAX_NUMBER_SUGGESTIONS = 5;
+        private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
         private static final int NO_SUGGESTIONS = -1;
+        private static final float AVERAGE_HIGHLIGHTS_PER_SUGGESTION = 1.4f;
         private WordIterator mSuggestionWordIterator;
-        private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan[0];
+        private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan
+                [(int) (AVERAGE_HIGHLIGHTS_PER_SUGGESTION * MAX_NUMBER_SUGGESTIONS)];
 
         @Override
         protected void createPopupWindow() {
@@ -9149,9 +9292,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void show() {
             if (!(mText instanceof Editable)) return;
-            updateSuggestions();
 
-            super.show();
+            if (updateSuggestions()) {
+                super.show();
+            }
         }
 
         @Override
@@ -9179,7 +9323,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        private void updateSuggestions() {
+        private boolean updateSuggestions() {
             Spannable spannable = (Spannable)TextView.this.mText;
             SuggestionSpan[] suggestionSpans = getSuggestionSpans();
 
@@ -9217,22 +9361,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
-            if (totalNbSuggestions == 0) {
-                // TODO Replace by final text, use a dedicated layout, add a fade out timer...
-                TextView textView = (TextView) mContentView.getChildAt(0);
-                textView.setText("No suggestions available");
-                SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
-                suggestionInfo.spanStart = NO_SUGGESTIONS;
-                totalNbSuggestions++;
-            } else {
-                if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
-                ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (totalNbSuggestions == 0) return false;
 
-                for (int i = 0; i < totalNbSuggestions; i++) {
-                    final TextView textView = (TextView) mContentView.getChildAt(i);
-                    highlightTextDifferences(textView, spanUnionStart, spanUnionEnd);
-                }
+            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
+            ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            for (int i = 0; i < totalNbSuggestions; i++) {
+                final TextView textView = (TextView) mContentView.getChildAt(i);
+                highlightTextDifferences(textView, spanUnionStart, spanUnionEnd);
             }
 
             for (int i = 0; i < totalNbSuggestions; i++) {
@@ -9241,6 +9378,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             for (int i = totalNbSuggestions; i < MAX_NUMBER_SUGGESTIONS; i++) {
                 mContentView.getChildAt(i).setVisibility(GONE);
             }
+
+            return true;
+        }
+
+        private void onDictionarySuggestionsReceived(String[] suggestions) {
+            if (suggestions.length == 0) {
+                // TODO Actual implementation of this feature
+                suggestions = new String[] {"Add to dictionary"};
+            }
+
+            WordIterator wordIterator = getWordIterator();
+            wordIterator.setCharSequence(mText);
+
+            final int pos = getSelectionStart();
+            int wordStart = wordIterator.getBeginning(pos);
+            int wordEnd = wordIterator.getEnd(pos);
+
+            SuggestionSpan suggestionSpan = new SuggestionSpan(getContext(), suggestions, 0);
+            ((Editable) mText).setSpan(suggestionSpan, wordStart, wordEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            show();
         }
 
         private long[] getWordLimits(CharSequence text) {
@@ -9422,6 +9580,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final String originalText = mText.subSequence(spanStart, spanEnd).toString();
                     ((Editable) mText).replace(spanStart, spanEnd, suggestion);
 
+                    // A replacement on a misspelled text removes the misspelled flag.
+                    // TODO restore the flag if the misspelled word is selected back?
+                    int suggestionSpanFlags = suggestionInfo.suggestionSpan.getFlags();
+                    if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
+                        suggestionSpanFlags &= ~(SuggestionSpan.FLAG_MISSPELLED);
+                        suggestionSpanFlags &= ~(SuggestionSpan.FLAG_EASY_CORRECT);
+                        suggestionInfo.suggestionSpan.setFlags(suggestionSpanFlags);
+                    }
+
                     // Notify source IME of the suggestion pick. Do this before swaping texts.
                     if (!TextUtils.isEmpty(
                             suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
@@ -9471,53 +9638,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     boolean areSuggestionsShown() {
         return mSuggestionsPopupWindow != null && mSuggestionsPopupWindow.isShowing();
-    } 
+    }
+
+    void onDictionarySuggestionsReceived(String[] suggestions) {
+        if (mSuggestionsPopupWindow != null) {
+            mSuggestionsPopupWindow.onDictionarySuggestionsReceived(suggestions);
+        }
+    }
 
     /**
-     * Some parts of the text can have alternate suggestion text attached. This is typically done by
-     * the IME by adding {@link SuggestionSpan}s to the text.
+     * Return whether or not suggestions are enabled on this TextView. The suggestions are generated
+     * by the IME or by the spell checker as the user types. This is done by adding
+     * {@link SuggestionSpan}s to the text.
      *
      * When suggestions are enabled (default), this list of suggestions will be displayed when the
-     * user double taps on these parts of the text. No suggestions are displayed when this value is
-     * false. Use {@link #setSuggestionsEnabled(boolean)} to change this value.
+     * user asks for them on these parts of the text. This value depends on the inputType of this
+     * TextView.
      *
-     * Note that suggestions are only enabled for a subset of input types. In addition to setting
-     * this flag to <code>true</code> using {@link #setSuggestionsEnabled(boolean)} or the
-     * <code>android:suggestionsEnabled</code> xml attribute, this method will return
-     * <code>true</code> only if the class of your input type is {@link InputType#TYPE_CLASS_TEXT}.
-     * In addition, the type variation must also be one of
+     * The class of the input type must be {@link InputType#TYPE_CLASS_TEXT}.
+     *
+     * In addition, the type variation must be one of
      * {@link InputType#TYPE_TEXT_VARIATION_NORMAL},
      * {@link InputType#TYPE_TEXT_VARIATION_EMAIL_SUBJECT},
      * {@link InputType#TYPE_TEXT_VARIATION_LONG_MESSAGE},
      * {@link InputType#TYPE_TEXT_VARIATION_SHORT_MESSAGE} or
      * {@link InputType#TYPE_TEXT_VARIATION_WEB_EDIT_TEXT}.
      *
-     * @return true if the suggestions popup window is enabled.
+     * And finally, the {@link InputType#TYPE_TEXT_FLAG_NO_SUGGESTIONS} flag must <i>not</i> be set.
      *
-     * @attr ref android.R.styleable#TextView_suggestionsEnabled
+     * @return true if the suggestions popup window is enabled, based on the inputType.
      */
     public boolean isSuggestionsEnabled() {
-        if (!mSuggestionsEnabled) return false;
         if ((mInputType & InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT) return false;
+        if ((mInputType & InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS) > 0) return false;
+
         final int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
-        if (variation == EditorInfo.TYPE_TEXT_VARIATION_NORMAL ||
+        return (variation == EditorInfo.TYPE_TEXT_VARIATION_NORMAL ||
                 variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT ||
                 variation == EditorInfo.TYPE_TEXT_VARIATION_LONG_MESSAGE ||
                 variation == EditorInfo.TYPE_TEXT_VARIATION_SHORT_MESSAGE ||
-                variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT) return true;
-
-        return false;
-    }
-
-    /**
-     * Enables or disables the suggestion popup. See {@link #isSuggestionsEnabled()}.
-     *
-     * @param enabled Whether or not suggestions are enabled.
-     *
-     * @attr ref android.R.styleable#TextView_suggestionsEnabled
-     */
-    public void setSuggestionsEnabled(boolean enabled) {
-        mSuggestionsEnabled = enabled;
+                variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
     }
 
     /**
@@ -9787,11 +9947,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void show() {
             boolean canPaste = canPaste();
-            boolean suggestionsEnabled = isSuggestionsEnabled();
+            boolean canSuggest = isSuggestionsEnabled() && isCursorInsideSuggestionSpan();
             mPasteTextView.setVisibility(canPaste ? View.VISIBLE : View.GONE);
-            mReplaceTextView.setVisibility(suggestionsEnabled ? View.VISIBLE : View.GONE);
+            mReplaceTextView.setVisibility(canSuggest ? View.VISIBLE : View.GONE);
 
-            if (!canPaste && !suggestionsEnabled) return;
+            if (!canPaste && !canSuggest) return;
 
             super.show();
         }
@@ -9802,6 +9962,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 onTextContextMenuItem(ID_PASTE);
                 hide();
             } else if (view == mReplaceTextView) {
+                final int middle = (getSelectionStart() + getSelectionEnd()) / 2;
+                stopSelectionActionMode();
+                Selection.setSelection((Spannable) mText, middle);
                 showSuggestions();
             }
         }
@@ -10133,17 +10296,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void show() {
             super.show();
-            hideAfterDelay();
-        }
-
-        public void show(int delayBeforeShowActionPopup) {
-            show();
 
             final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
             if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
-                delayBeforeShowActionPopup = 0;
+                showActionPopupWindow(0);
             }
-            showActionPopupWindow(delayBeforeShowActionPopup);
+
+            hideAfterDelay();
+        }
+
+        public void showWithActionPopup() {
+            show();
+            showActionPopupWindow(0);
         }
 
         private void hideAfterDelay() {
@@ -10194,7 +10358,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 // Tapping on the handle dismisses the displayed action popup
                                 mActionPopupWindow.hide();
                             } else {
-                                show(0);
+                                showWithActionPopup();
                             }
                         }
                     }
@@ -10349,16 +10513,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class InsertionPointCursorController implements CursorController {
-        private static final int DELAY_BEFORE_PASTE_ACTION = 1600;
-
         private InsertionHandleView mHandle;
 
         public void show() {
-            getHandle().show(DELAY_BEFORE_PASTE_ACTION);
+            getHandle().show();
         }
 
-        public void showImmediately() {
-            getHandle().show(0);
+        public void showWithActionPopup() {
+            getHandle().showWithActionPopup();
         }
 
         public void hide() {
@@ -10390,7 +10552,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class SelectionModifierCursorController implements CursorController {
-        private static final int DELAY_BEFORE_REPLACE_ACTION = 1200;
+        private static final int DELAY_BEFORE_REPLACE_ACTION = 200; // milliseconds
         // The cursor controller handles, lazily created when shown.
         private SelectionStartHandleView mStartHandle;
         private SelectionEndHandleView mEndHandle;
@@ -10879,8 +11041,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int                     mAutoLinkMask;
     private boolean                 mLinksClickable = true;
 
-    private float                   mSpacingMult = 1;
-    private float                   mSpacingAdd = 0;
+    private float                   mSpacingMult = 1.0f;
+    private float                   mSpacingAdd = 0.0f;
     private boolean                 mTextIsSelectable = false;
 
     private static final int        LINES = 1;
