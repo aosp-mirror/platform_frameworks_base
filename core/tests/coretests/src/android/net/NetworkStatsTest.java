@@ -17,7 +17,9 @@
 package android.net;
 
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -27,6 +29,7 @@ import junit.framework.TestCase;
 public class NetworkStatsTest extends TestCase {
 
     private static final String TEST_IFACE = "test0";
+    private static final String TEST_IFACE2 = "test2";
     private static final int TEST_UID = 1001;
     private static final long TEST_START = 1194220800000L;
 
@@ -133,6 +136,44 @@ public class NetworkStatsTest extends TestCase {
         assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0);
         assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0);
         assertValues(result, 2, TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 20);
+    }
+
+    public void testSubtractMissingRows() throws Exception {
+        final NetworkStats before = new NetworkStats(TEST_START, 2)
+                .addValues(TEST_IFACE, UID_ALL, SET_DEFAULT, TAG_NONE, 1024L, 0L, 0L, 0L, 0)
+                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 2048L, 0L, 0L, 0L, 0);
+
+        final NetworkStats after = new NetworkStats(TEST_START, 1)
+                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 2049L, 2L, 3L, 4L, 0);
+
+        final NetworkStats result = after.subtract(before);
+
+        // should silently drop omitted rows
+        assertEquals(1, result.size());
+        assertValues(result, 0, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 1L, 2L, 3L, 4L, 0);
+        assertEquals(4L, result.getTotalBytes());
+    }
+
+    public void testTotalBytes() throws Exception {
+        final NetworkStats iface = new NetworkStats(TEST_START, 2)
+                .addValues(TEST_IFACE, UID_ALL, SET_DEFAULT, TAG_NONE, 128L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 256L, 0L, 0L, 0L, 0L);
+        assertEquals(384L, iface.getTotalBytes());
+
+        final NetworkStats uidSet = new NetworkStats(TEST_START, 3)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_FOREGROUND, TAG_NONE, 32L, 0L, 0L, 0L, 0L);
+        assertEquals(96L, uidSet.getTotalBytes());
+
+        final NetworkStats uidTag = new NetworkStats(TEST_START, 3)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 16L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 16L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 8L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 16L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 16L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 8L, 0L, 0L, 0L, 0L);
+        assertEquals(64L, uidTag.getTotalBytes());
     }
 
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,
