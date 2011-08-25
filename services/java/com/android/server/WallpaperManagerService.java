@@ -118,9 +118,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                         File changedFile = new File(WALLPAPER_DIR, path);
                         if (WALLPAPER_FILE.equals(changedFile)) {
                             notifyCallbacksLocked();
-                            if (mWallpaperComponent == null ||
-                                    mWallpaperComponent.equals(mImageWallpaperComponent)) {
-                                bindWallpaperComponentLocked(mWallpaperComponent, true);
+                            if (mWallpaperComponent == null || mImageWallpaperPending) {
+                                mImageWallpaperPending = false;
+                                bindWallpaperComponentLocked(mImageWallpaperComponent, true);
+                                saveSettingsLocked();
                             }
                         }
                     }
@@ -133,7 +134,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     int mWidth = -1;
     int mHeight = -1;
-    
+
+    /**
+     * Client is currently writing a new image wallpaper.
+     */
+    boolean mImageWallpaperPending;
+
     /**
      * Resource name if using a picture from the wallpaper gallery
      */
@@ -343,6 +349,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
         final long ident = Binder.clearCallingIdentity();
         try {
+            mImageWallpaperPending = false;
             bindWallpaperComponentLocked(null, false);
         } catch (IllegalArgumentException e) {
             // This can happen if the default wallpaper component doesn't
@@ -433,9 +440,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             try {
                 ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name);
                 if (pfd != null) {
-                    // Bind the wallpaper to an ImageWallpaper
-                    bindWallpaperComponentLocked(mImageWallpaperComponent, false);
-                    saveSettingsLocked();
+                    mImageWallpaperPending = true;
                 }
                 return pfd;
             } finally {
@@ -463,6 +468,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         synchronized (mLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
+                mImageWallpaperPending = false;
                 bindWallpaperComponentLocked(name, false);
             } finally {
                 Binder.restoreCallingIdentity(ident);
