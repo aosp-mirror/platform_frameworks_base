@@ -22,6 +22,11 @@ adt.zip.checksum=8ad85d0f3da4a2b8dadfddcc2d66dbcb
     </li>
     <li><a href="#updating">Updating the ADT Plugin</a></li>
   </ol>
+  
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools</a></li>
+  </ol>
 
 </div>
 </div>
@@ -49,6 +54,12 @@ href="#installing">Installing the ADT Plugin</a>, below. </p>
 <p>If you are already using ADT, this document also provides instructions on
 how to update ADT to the latest version or how to uninstall it, if necessary.
 </p>
+
+<p>For information about the features provided by the ADT plugin, such as code
+editor features, SDK tool integration, and the graphical layout editor (for drag-and-drop layout
+editing), see the <a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools</a>
+document.</p>
+
 
 <h2 id="notes">Revisions</h2>
 
