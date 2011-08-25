@@ -1854,7 +1854,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_dark</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:background">?android:attr/actionBarItemBackground</item>
         <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
