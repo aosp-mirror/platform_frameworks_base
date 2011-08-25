@@ -4788,8 +4788,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selEnd = getSelectionEnd();
 
             if (selStart >= 0) {
-                if (mHighlightPath == null)
-                    mHighlightPath = new Path();
+                if (mHighlightPath == null) mHighlightPath = new Path();
 
                 if (selStart == selEnd) {
                     if (isCursorVisible() &&
@@ -4995,6 +4994,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 // Selection extends across multiple lines -- the focused
                 // rect covers the entire width.
+                if (mHighlightPath == null) mHighlightPath = new Path();
                 if (mHighlightPathBogus) {
                     mHighlightPath.reset();
                     mLayout.getSelectionPath(selStart, selEnd, mHighlightPath);
