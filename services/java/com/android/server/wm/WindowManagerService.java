@@ -163,6 +163,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
+    static final boolean DEBUG_SCREENSHOT = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean HIDE_STACK_CRAWLS = true;
@@ -5001,6 +5002,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 dw = dh;
                 dh = tmp;
                 rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
+            }
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG, "Screenshot: " + dw + "x" + dh + " from 0 to " + maxLayer);
+                for (int i=0; i<mWindows.size(); i++) {
+                    Slog.i(TAG, mWindows.get(i) + ": " + mWindows.get(i).mLayer
+                            + " animLayer=" + mWindows.get(i).mAnimLayer
+                            + " surfaceLayer=" + mWindows.get(i).mSurfaceLayer);
+                }
             }
             rawss = Surface.screenshot(dw, dh, 0, maxLayer);
         }

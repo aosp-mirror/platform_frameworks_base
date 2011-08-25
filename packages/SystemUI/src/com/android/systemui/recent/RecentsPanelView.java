@@ -39,7 +39,6 @@ import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -497,7 +496,7 @@ public class RecentsPanelView extends RelativeLayout
         synchronized (ad) {
             ad.mLabel = label;
             ad.mIcon = icon;
-            ad.setThumbnail(thumbs.mainThumbnail);
+            ad.setThumbnail(thumbs != null ? thumbs.mainThumbnail : null);
         }
     }
 
@@ -591,7 +590,7 @@ public class RecentsPanelView extends RelativeLayout
                             ActivityDescription ad = descriptions.get(i);
                             loadActivityDescription(ad, i);
                             long now = SystemClock.uptimeMillis();
-                            nextTime += 200;
+                            nextTime += 150;
                             if (nextTime > now) {
                                 try {
                                     Thread.sleep(nextTime-now);
