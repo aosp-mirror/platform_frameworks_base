@@ -63,6 +63,7 @@ public:
     // IMPORTANT: Update the intialization of OP_NAMES in the .cpp file
     //            when modifying this file
     enum Op {
+        // Non-drawing operations
         Save = 0,
         Restore,
         RestoreToCount,
@@ -75,6 +76,7 @@ public:
         SetMatrix,
         ConcatMatrix,
         ClipRect,
+        // Drawing operations
         DrawDisplayList,
         DrawLayer,
         DrawBitmap,
@@ -112,6 +114,14 @@ public:
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
 
     static void outputLogBuffer(int fd);
+
+    void setRenderable(bool renderable) {
+        mIsRenderable = renderable;
+    }
+
+    bool isRenderable() const {
+        return mIsRenderable;
+    }
 
 private:
     void init();
@@ -207,6 +217,8 @@ private:
     mutable SkFlattenableReadBuffer mReader;
 
     size_t mSize;
+
+    bool mIsRenderable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -328,6 +340,7 @@ private:
     inline void addOp(DisplayList::Op drawOp) {
         insertRestoreToCount();
         mWriter.writeInt(drawOp);
+        mHasDrawOps = mHasDrawOps || drawOp >= DisplayList::DrawDisplayList;
     }
 
     inline void addInt(int value) {
@@ -479,6 +492,7 @@ private:
     SkWriter32 mWriter;
 
     int mRestoreSaveCount;
+    bool mHasDrawOps;
 
     friend class DisplayList;
 
