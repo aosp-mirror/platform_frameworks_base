@@ -2328,7 +2328,7 @@ public class Camera {
          * <p>The reference code is as follows.
          *
 	 * <pre>
-         * public void public void onOrientationChanged(int orientation) {
+         * public void onOrientationChanged(int orientation) {
          *     if (orientation == ORIENTATION_UNKNOWN) return;
          *     android.hardware.Camera.CameraInfo info =
          *            new android.hardware.Camera.CameraInfo();
