@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "stream"
+#include "utils/Log.h"
+
 #include <binder/ProcessState.h>
 
 #include <media/IStreamSource.h>
@@ -50,7 +54,7 @@ protected:
 private:
     int mFd;
     off64_t mFileSize;
-    int64_t mNextSeekTimeUs;
+    uint64_t mNumPacketsSent;
 
     sp<IStreamListener> mListener;
     Vector<sp<IMemory> > mBuffers;
@@ -61,7 +65,7 @@ private:
 MyStreamSource::MyStreamSource(int fd)
     : mFd(fd),
       mFileSize(0),
-      mNextSeekTimeUs(-1) {  // ALooper::GetNowUs() + 5000000ll) {
+      mNumPacketsSent(0) {
     CHECK_GE(fd, 0);
 
     mFileSize = lseek64(fd, 0, SEEK_END);
@@ -84,18 +88,24 @@ void MyStreamSource::setBuffers(const Vector<sp<IMemory> > &buffers) {
 void MyStreamSource::onBufferAvailable(size_t index) {
     CHECK_LT(index, mBuffers.size());
 
-    if (mNextSeekTimeUs >= 0 && mNextSeekTimeUs <= ALooper::GetNowUs()) {
-        off64_t offset = (off64_t)(((float)rand() / RAND_MAX) * mFileSize * 0.8);
-        offset = (offset / 188) * 188;
+#if 0
+    if (mNumPacketsSent >= 20000) {
+        LOGI("signalling discontinuity now");
+
+        off64_t offset = 0;
+        CHECK((offset % 188) == 0);
 
         lseek(mFd, offset, SEEK_SET);
 
-        mListener->issueCommand(
-                IStreamListener::DISCONTINUITY, false /* synchronous */);
+        sp<AMessage> extra = new AMessage;
+        extra->setInt32(IStreamListener::kKeyFormatChange, 0);
 
-        mNextSeekTimeUs = -1;
-        mNextSeekTimeUs = ALooper::GetNowUs() + 5000000ll;
+        mListener->issueCommand(
+                IStreamListener::DISCONTINUITY, false /* synchronous */, extra);
+
+        mNumPacketsSent = 0;
     }
+#endif
 
     sp<IMemory> mem = mBuffers.itemAt(index);
 
@@ -104,6 +114,8 @@ void MyStreamSource::onBufferAvailable(size_t index) {
         mListener->issueCommand(IStreamListener::EOS, false /* synchronous */);
     } else {
         mListener->queueBuffer(index, n);
+
+        mNumPacketsSent += n / 188;
     }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,12 +305,17 @@ int main(int argc, char **argv) {
     sp<SurfaceComposerClient> composerClient = new SurfaceComposerClient;
     CHECK_EQ(composerClient->initCheck(), (status_t)OK);
 
+    ssize_t displayWidth = composerClient->getDisplayWidth(0);
+    ssize_t displayHeight = composerClient->getDisplayHeight(0);
+
+    LOGV("display is %d x %d\n", displayWidth, displayHeight);
+
     sp<SurfaceControl> control =
         composerClient->createSurface(
                 String8("A Surface"),
                 0,
-                1280,
-                800,
+                displayWidth,
+                displayHeight,
                 PIXEL_FORMAT_RGB_565,
                 0);
 
