@@ -99,7 +99,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
                 new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
 
         assertEquals(1, stats.size());
-        assertValues(stats, 0, 1024L, 10L, 2048L, 20L, 2L);
+        assertValues(stats, 0, SECOND_IN_MILLIS, 1024L, 10L, 2048L, 20L, 2L);
     }
 
     public void testRecordEqualBuckets() throws Exception {
@@ -112,8 +112,8 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
                 new NetworkStats.Entry(1024L, 10L, 128L, 2L, 2L));
 
         assertEquals(2, stats.size());
-        assertValues(stats, 0, 512L, 5L, 64L, 1L, 1L);
-        assertValues(stats, 1, 512L, 5L, 64L, 1L, 1L);
+        assertValues(stats, 0, HOUR_IN_MILLIS / 2, 512L, 5L, 64L, 1L, 1L);
+        assertValues(stats, 1, HOUR_IN_MILLIS / 2, 512L, 5L, 64L, 1L, 1L);
     }
 
     public void testRecordTouchingBuckets() throws Exception {
@@ -129,11 +129,11 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
         assertEquals(3, stats.size());
         // first bucket should have (1/20 of value)
-        assertValues(stats, 0, 50L, 100L, 250L, 500L, 5L);
+        assertValues(stats, 0, MINUTE_IN_MILLIS, 50L, 100L, 250L, 500L, 5L);
         // second bucket should have (15/20 of value)
-        assertValues(stats, 1, 750L, 1500L, 3750L, 7500L, 75L);
+        assertValues(stats, 1, 15 * MINUTE_IN_MILLIS, 750L, 1500L, 3750L, 7500L, 75L);
         // final bucket should have (4/20 of value)
-        assertValues(stats, 2, 200L, 400L, 1000L, 2000L, 20L);
+        assertValues(stats, 2, 4 * MINUTE_IN_MILLIS, 200L, 400L, 1000L, 2000L, 20L);
     }
 
     public void testRecordGapBuckets() throws Exception {
@@ -150,8 +150,8 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
         // we should have two buckets, far apart from each other
         assertEquals(2, stats.size());
-        assertValues(stats, 0, 128L, 2L, 256L, 4L, 1L);
-        assertValues(stats, 1, 64L, 1L, 512L, 8L, 2L);
+        assertValues(stats, 0, SECOND_IN_MILLIS, 128L, 2L, 256L, 4L, 1L);
+        assertValues(stats, 1, SECOND_IN_MILLIS, 64L, 1L, 512L, 8L, 2L);
 
         // now record something in middle, spread across two buckets
         final long middleStart = TEST_START + DAY_IN_MILLIS;
@@ -161,10 +161,10 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
         // now should have four buckets, with new record in middle two buckets
         assertEquals(4, stats.size());
-        assertValues(stats, 0, 128L, 2L, 256L, 4L, 1L);
-        assertValues(stats, 1, 1024L, 2L, 1024L, 2L, 1L);
-        assertValues(stats, 2, 1024L, 2L, 1024L, 2L, 1L);
-        assertValues(stats, 3, 64L, 1L, 512L, 8L, 2L);
+        assertValues(stats, 0, SECOND_IN_MILLIS, 128L, 2L, 256L, 4L, 1L);
+        assertValues(stats, 1, HOUR_IN_MILLIS, 1024L, 2L, 1024L, 2L, 1L);
+        assertValues(stats, 2, HOUR_IN_MILLIS, 1024L, 2L, 1024L, 2L, 1L);
+        assertValues(stats, 3, SECOND_IN_MILLIS, 64L, 1L, 512L, 8L, 2L);
     }
 
     public void testRecordOverlapBuckets() throws Exception {
@@ -180,8 +180,8 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
         // should have two buckets, with some data mixed together
         assertEquals(2, stats.size());
-        assertValues(stats, 0, 768L, 7L, 768L, 7L, 6L);
-        assertValues(stats, 1, 512L, 5L, 512L, 5L, 5L);
+        assertValues(stats, 0, SECOND_IN_MILLIS + (HOUR_IN_MILLIS / 2), 768L, 7L, 768L, 7L, 6L);
+        assertValues(stats, 1, (HOUR_IN_MILLIS / 2), 512L, 5L, 512L, 5L, 5L);
     }
 
     public void testRecordEntireGapIdentical() throws Exception {
@@ -345,11 +345,10 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
         history.recordData(0, MINUTE_IN_MILLIS,
                 new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
-        history.recordData(0, MINUTE_IN_MILLIS * 2,
+        history.recordData(0, 2 * MINUTE_IN_MILLIS,
                 new NetworkStats.Entry(2L, 2L, 2L, 2L, 2L));
 
-        assertValues(
-                history, Long.MIN_VALUE, Long.MAX_VALUE, 1026L, UNKNOWN, 2050L, UNKNOWN, UNKNOWN);
+        assertFullValues(history, UNKNOWN, 1026L, UNKNOWN, 2050L, UNKNOWN, UNKNOWN);
     }
 
     public void testIgnoreFieldsRecordIn() throws Exception {
@@ -361,7 +360,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
                 new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
         partial.recordEntireHistory(full);
 
-        assertValues(partial, Long.MIN_VALUE, Long.MAX_VALUE, UNKNOWN, 10L, UNKNOWN, UNKNOWN, 4L);
+        assertFullValues(partial, UNKNOWN, UNKNOWN, 10L, UNKNOWN, UNKNOWN, 4L);
     }
 
     public void testIgnoreFieldsRecordOut() throws Exception {
@@ -373,12 +372,12 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
                 new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
         full.recordEntireHistory(partial);
 
-        assertValues(full, Long.MIN_VALUE, Long.MAX_VALUE, 0L, 10L, 0L, 0L, 4L);
+        assertFullValues(full, MINUTE_IN_MILLIS, 0L, 10L, 0L, 0L, 4L);
     }
 
     public void testSerialize() throws Exception {
         final NetworkStatsHistory before = new NetworkStatsHistory(MINUTE_IN_MILLIS, 40, FIELD_ALL);
-        before.recordData(0, MINUTE_IN_MILLIS * 4,
+        before.recordData(0, 4 * MINUTE_IN_MILLIS,
                 new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
         before.recordData(DAY_IN_MILLIS, DAY_IN_MILLIS + MINUTE_IN_MILLIS,
                 new NetworkStats.Entry(10L, 20L, 30L, 40L, 50L));
@@ -391,8 +390,8 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         final NetworkStatsHistory after = new NetworkStatsHistory(new DataInputStream(in));
 
         // must have identical totals before and after
-        assertValues(before, Long.MIN_VALUE, Long.MAX_VALUE, 1034L, 30L, 2078L, 60L, 54L);
-        assertValues(after, Long.MIN_VALUE, Long.MAX_VALUE, 1034L, 30L, 2078L, 60L, 54L);
+        assertFullValues(before, 5 * MINUTE_IN_MILLIS, 1034L, 30L, 2078L, 60L, 54L);
+        assertFullValues(after, 5 * MINUTE_IN_MILLIS, 1034L, 30L, 2078L, 60L, 54L);
     }
 
     public void testVarLong() throws Exception {
@@ -441,9 +440,10 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
     }
 
-    private static void assertValues(NetworkStatsHistory stats, int index, long rxBytes,
-            long rxPackets, long txBytes, long txPackets, long operations) {
+    private static void assertValues(NetworkStatsHistory stats, int index, long activeTime,
+            long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
         final NetworkStatsHistory.Entry entry = stats.getValues(index, null);
+        assertEquals("unexpected activeTime", activeTime, entry.activeTime);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
@@ -451,9 +451,17 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertEquals("unexpected operations", operations, entry.operations);
     }
 
-    private static void assertValues(NetworkStatsHistory stats, long start, long end, long rxBytes,
+    private static void assertFullValues(NetworkStatsHistory stats, long activeTime, long rxBytes,
             long rxPackets, long txBytes, long txPackets, long operations) {
+        assertValues(stats, Long.MIN_VALUE, Long.MAX_VALUE, activeTime, rxBytes, rxPackets, txBytes,
+                txPackets, operations);
+    }
+
+    private static void assertValues(NetworkStatsHistory stats, long start, long end,
+            long activeTime, long rxBytes, long rxPackets, long txBytes, long txPackets,
+            long operations) {
         final NetworkStatsHistory.Entry entry = stats.getValues(start, end, null);
+        assertEquals("unexpected activeTime", activeTime, entry.activeTime);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);

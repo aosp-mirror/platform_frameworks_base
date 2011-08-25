@@ -532,9 +532,12 @@ public class ThrottleService extends IThrottleManager.Stub {
                     mLastRead = 0;
                     mLastWrite = 0;
                 }
+            } catch (IllegalStateException e) {
+                Slog.e(TAG, "problem during onPollAlarm: " + e);
             } catch (RemoteException e) {
-                Slog.e(TAG, "got remoteException in onPollAlarm:" + e);
+                Slog.e(TAG, "problem during onPollAlarm: " + e);
             }
+
             // don't count this data if we're roaming.
             boolean roaming = "true".equals(
                     SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
