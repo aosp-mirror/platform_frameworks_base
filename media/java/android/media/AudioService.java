@@ -3072,7 +3072,7 @@ public class AudioService extends IAudioService.Stub {
     /**
      * Update the remote control displays with the new "focused" client generation
      */
-    private void setNewRcClientOnDisplays_syncRcStack(int newClientGeneration,
+    private void setNewRcClientOnDisplays_syncAfRcsCurrc(int newClientGeneration,
             ComponentName newClientEventReceiver, boolean clearing) {
         // NOTE: Only one IRemoteControlDisplay supported in this implementation
         if (mRcDisplay != null) {
@@ -3091,7 +3091,7 @@ public class AudioService extends IAudioService.Stub {
     /**
      * Update the remote control clients with the new "focused" client generation
      */
-    private void setNewRcClientGenerationOnClients_syncRcStack(int newClientGeneration) {
+    private void setNewRcClientGenerationOnClients_syncAfRcsCurrc(int newClientGeneration) {
         Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
         while(stackIterator.hasNext()) {
             RemoteControlStackEntry se = stackIterator.next();
@@ -3115,15 +3115,13 @@ public class AudioService extends IAudioService.Stub {
      * @param clearing true if the new client generation value maps to a remote control update
      *    where the display should be cleared.
      */
-    private void setNewRcClient(int newClientGeneration, ComponentName newClientEventReceiver,
-            boolean clearing) {
-        synchronized(mRCStack) {
-            // send the new valid client generation ID to all displays
-            setNewRcClientOnDisplays_syncRcStack(newClientGeneration, newClientEventReceiver,
-                    clearing);
-            // send the new valid client generation ID to all clients
-            setNewRcClientGenerationOnClients_syncRcStack(newClientGeneration);
-        }
+    private void setNewRcClient_syncAfRcsCurrc(int newClientGeneration,
+            ComponentName newClientEventReceiver, boolean clearing) {
+        // send the new valid client generation ID to all displays
+        setNewRcClientOnDisplays_syncAfRcsCurrc(newClientGeneration, newClientEventReceiver,
+                clearing);
+        // send the new valid client generation ID to all clients
+        setNewRcClientGenerationOnClients_syncAfRcsCurrc(newClientGeneration);
     }
 
     /**
@@ -3133,11 +3131,13 @@ public class AudioService extends IAudioService.Stub {
         // TODO remove log before release
         Log.i(TAG, "Clear remote control display");
 
-        synchronized(mCurrentRcLock) {
-            mCurrentRcClientGen++;
-
-            // synchronously update the displays and clients with the new client generation
-            setNewRcClient(mCurrentRcClientGen, null /*event receiver*/, true /*clearing*/);
+        synchronized(mRCStack) {
+            synchronized(mCurrentRcLock) {
+                mCurrentRcClientGen++;
+                // synchronously update the displays and clients with the new client generation
+                setNewRcClient_syncAfRcsCurrc(mCurrentRcClientGen,
+                        null /*event receiver*/, true /*clearing*/);
+            }
         }
     }
 
@@ -3145,30 +3145,32 @@ public class AudioService extends IAudioService.Stub {
      * Called when processing MSG_RCDISPLAY_UPDATE event
      */
     private void onRcDisplayUpdate(RemoteControlStackEntry rcse, int flags /* USED ?*/) {
-        synchronized(mCurrentRcLock) {
-            if ((mCurrentRcClient != null) && (mCurrentRcClient.equals(rcse.mRcClient))) {
-                // TODO remove log before release
-                Log.i(TAG, "Display/update remote control ");
+        synchronized(mRCStack) {
+            synchronized(mCurrentRcLock) {
+                if ((mCurrentRcClient != null) && (mCurrentRcClient.equals(rcse.mRcClient))) {
+                    // TODO remove log before release
+                    Log.i(TAG, "Display/update remote control ");
 
-                mCurrentRcClientGen++;
+                    mCurrentRcClientGen++;
+                    // synchronously update the displays and clients with
+                    //      the new client generation
+                    setNewRcClient_syncAfRcsCurrc(mCurrentRcClientGen,
+                            rcse.mReceiverComponent /*event receiver*/,
+                            false /*clearing*/);
 
-                // synchronously update the displays and clients with the new client generation
-                setNewRcClient(mCurrentRcClientGen,
-                        rcse.mReceiverComponent /*event receiver*/,
-                        false /*clearing*/);
-
-                // ask the current client that it needs to send info
-                try {
-                    mCurrentRcClient.onInformationRequested(mCurrentRcClientGen,
-                            flags, mArtworkExpectedWidth, mArtworkExpectedHeight);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Current valid remote client is dead: "+e);
-                    mCurrentRcClient = null;
+                    // ask the current client that it needs to send info
+                    try {
+                        mCurrentRcClient.onInformationRequested(mCurrentRcClientGen,
+                                flags, mArtworkExpectedWidth, mArtworkExpectedHeight);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Current valid remote client is dead: "+e);
+                        mCurrentRcClient = null;
+                    }
+                } else {
+                    // the remote control display owner has changed between the
+                    // the message to update the display was sent, and the time it
+                    // gets to be processed (now)
                 }
-            } else {
-                // the remote control display owner has changed between the
-                // the message to update the display was sent, and the time it
-                // gets to be processed (now)
             }
         }
     }
