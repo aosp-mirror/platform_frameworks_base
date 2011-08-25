@@ -537,6 +537,8 @@ public final class WebViewCore {
 
     private native void nativeSendListBoxChoice(int choice);
 
+    private native void nativeCloseIdleConnections();
+
     /*  Tell webkit what its width and height are, for the purposes
         of layout/line-breaking. These coordinates are in document space,
         which is the same as View coords unless we have zoomed the document
@@ -1252,6 +1254,8 @@ public final class WebViewCore {
                             if (!JniUtil.useChromiumHttpStack()) {
                                 WebViewWorker.getHandler().sendEmptyMessage(
                                         WebViewWorker.MSG_PAUSE_CACHE_TRANSACTION);
+                            } else {
+                                nativeCloseIdleConnections();
                             }
                             break;
 
