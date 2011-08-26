@@ -210,29 +210,40 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 }
                 return null;
             }
-            if (TextUtils.isEmpty(subtypeHashCodeStr)) {
-                if (DBG) {
-                    Slog.w(TAG, "Return first subtype in " + sci.getId());
-                }
+            final int hashCode;
+            if (!TextUtils.isEmpty(subtypeHashCodeStr)) {
+                hashCode = Integer.valueOf(subtypeHashCodeStr);
+            } else {
+                hashCode = 0;
+            }
+            if (hashCode == 0 && !allowImplicitlySelectedSubtype) {
                 return null;
             }
-            final int hashCode = Integer.valueOf(subtypeHashCodeStr);
-            if (hashCode == 0) {
-                return null;
-            }
+            final String systemLocale =
+                    mContext.getResources().getConfiguration().locale.toString();
+            SpellCheckerSubtype candidate = null;
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
-                if (scs.hashCode() == hashCode) {
+                if (hashCode == 0) {
+                    if (systemLocale.equals(locale)) {
+                        return scs;
+                    } else if (candidate == null) {
+                        final String scsLocale = scs.getLocale();
+                        if (systemLocale.length() >= 2
+                                && scsLocale.length() >= 2
+                                && systemLocale.substring(0, 2).equals(
+                                        scsLocale.substring(0, 2))) {
+                            candidate = scs;
+                        }
+                    }
+                } else if (scs.hashCode() == hashCode) {
                     if (DBG) {
                         Slog.w(TAG, "Return subtype " + scs.hashCode());
                     }
                     return scs;
                 }
             }
-            if (DBG) {
-                Slog.w(TAG, "Return first subtype in " + sci.getId());
-            }
-            return null;
+            return candidate;
         }
     }
 

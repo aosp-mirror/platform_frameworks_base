@@ -72,27 +72,48 @@ public final class TextServicesManager {
      * languages in settings will be returned.
      * @return the spell checker session of the spell checker
      */
-    // TODO: Add a method to get enabled spell checkers.
-    // TODO: Handle referToSpellCheckerLanguageSettings
     public SpellCheckerSession newSpellCheckerSession(Bundle bundle, Locale locale,
             SpellCheckerSessionListener listener, boolean referToSpellCheckerLanguageSettings) {
         if (listener == null) {
             throw new NullPointerException();
         }
-        // TODO: set a proper locale instead of the dummy locale
-        final String localeString = locale == null ? "en" : locale.toString();
         final SpellCheckerInfo sci;
         try {
-            sci = sService.getCurrentSpellChecker(localeString);
+            sci = sService.getCurrentSpellChecker(null);
         } catch (RemoteException e) {
             return null;
         }
         if (sci == null) {
             return null;
         }
+        SpellCheckerSubtype subtypeInUse = null;
+        if (referToSpellCheckerLanguageSettings) {
+            subtypeInUse = getCurrentSpellCheckerSubtype(true);
+            if (subtypeInUse == null) {
+                return null;
+            }
+            if (locale != null) {
+                final String subtypeLocale = subtypeInUse.getLocale();
+                final String inputLocale = locale.toString();
+                if (subtypeLocale.length() < 2 || inputLocale.length() < 2
+                        || !subtypeLocale.substring(0, 2).equals(inputLocale.substring(0, 2))) {
+                    return null;
+                }
+            }
+        } else {
+            for (int i = 0; i < sci.getSubtypeCount(); ++i) {
+                final SpellCheckerSubtype subtype = sci.getSubtypeAt(i);
+                if (subtype.getLocale().equals(locale)) {
+                    subtypeInUse = subtype;
+                }
+            }
+        }
+        if (subtypeInUse == null) {
+            return null;
+        }
         final SpellCheckerSession session = new SpellCheckerSession(sci, sService, listener);
         try {
-            sService.getSpellCheckerService(sci.getId(), localeString,
+            sService.getSpellCheckerService(sci.getId(), subtypeInUse.getLocale(),
                     session.getTextServicesSessionListener(),
                     session.getSpellCheckerSessionListener(), bundle);
         } catch (RemoteException e) {
