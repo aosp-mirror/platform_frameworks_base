@@ -413,8 +413,8 @@ public abstract class HardwareRenderer {
                 if (error != EGL_SUCCESS) {
                     // something bad has happened revert to
                     // normal rendering.
-                    fallback(error != EGL11.EGL_CONTEXT_LOST);
                     Log.w(LOG_TAG, "EGL error: " + GLUtils.getEGLErrorString(error));
+                    fallback(error != EGL11.EGL_CONTEXT_LOST);
                 }
             }
         }
@@ -702,8 +702,9 @@ public abstract class HardwareRenderer {
 
         @Override
         void setup(int width, int height) {
-            checkCurrent();
-            mCanvas.setViewport(width, height);
+            if (validate()) {
+                mCanvas.setViewport(width, height);
+            }
         }
 
         boolean canDraw() {
@@ -810,9 +811,9 @@ public abstract class HardwareRenderer {
             if (!mEglContext.equals(sEgl.eglGetCurrentContext()) ||
                     !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW))) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                    fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
                             GLUtils.getEGLErrorString(sEgl.eglGetError()));
+                    fallback(true);
                     return SURFACE_STATE_ERROR;
                 } else {
                     return SURFACE_STATE_UPDATED;
