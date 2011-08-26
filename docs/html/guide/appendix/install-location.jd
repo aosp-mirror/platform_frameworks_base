@@ -195,7 +195,7 @@ been made.</p>
 <p>In simple terms, anything that does not use the features listed in the previous section
 are safe when installed on external storage. Large games are more commonly the types of
 applications that should allow installation on external storage, because games don't typically
-provide additional services when innactive. When external storage becomes unavailable and a game
+provide additional services when inactive. When external storage becomes unavailable and a game
 process is killed, there should be no visible effect when the storage becomes available again and
 the user restarts the game (assuming that the game properly saved its state during the normal
 <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activity lifecycle</a>).</p>
