@@ -43,6 +43,9 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
 
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
+
 /**
  * Track the state of mobile data connectivity. This is done by
  * receiving broadcast intents from the Phone process whenever
@@ -68,6 +71,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
     private boolean mDefaultRouteSet = false;
+
+    // NOTE: these are only kept for debugging output; actual values are
+    // maintained in DataConnectionTracker.
+    protected boolean mUserDataEnabled = true;
+    protected boolean mPolicyDataEnabled = true;
 
     private Handler mHandler;
     private AsyncChannel mDataConnectionTrackerAc;
@@ -458,6 +466,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         final AsyncChannel channel = mDataConnectionTrackerAc;
         if (channel != null) {
             channel.sendMessage(CMD_SET_USER_DATA_ENABLE, enabled ? ENABLED : DISABLED);
+            mUserDataEnabled = enabled;
         }
         if (VDBG) log("setUserDataEnable: X enabled=" + enabled);
     }
@@ -468,6 +477,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         final AsyncChannel channel = mDataConnectionTrackerAc;
         if (channel != null) {
             channel.sendMessage(CMD_SET_POLICY_DATA_ENABLE, enabled ? ENABLED : DISABLED);
+            mPolicyDataEnabled = enabled;
         }
     }
 
@@ -492,10 +502,12 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer("Mobile data state: ");
-
-        sb.append(mMobileDataState);
-        return sb.toString();
+        final CharArrayWriter writer = new CharArrayWriter();
+        final PrintWriter pw = new PrintWriter(writer);
+        pw.print("Mobile data state: "); pw.println(mMobileDataState);
+        pw.print("Data enabled: user="); pw.print(mUserDataEnabled);
+        pw.print(", policy="); pw.println(mPolicyDataEnabled);
+        return writer.toString();
     }
 
    /**

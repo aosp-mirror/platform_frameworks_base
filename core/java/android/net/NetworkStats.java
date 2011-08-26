@@ -19,6 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.util.Objects;
@@ -38,6 +39,8 @@ import java.util.HashSet;
  * @hide
  */
 public class NetworkStats implements Parcelable {
+    private static final String TAG = "NetworkStats";
+
     /** {@link #iface} value when interface details unavailable. */
     public static final String IFACE_ALL = null;
     /** {@link #uid} value when UID details unavailable. */
@@ -397,7 +400,10 @@ public class NetworkStats implements Parcelable {
                 if (enforceMonotonic
                         && (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0
                                 || entry.txPackets < 0 || entry.operations < 0)) {
-                    throw new IllegalArgumentException("found non-monotonic values");
+                    Log.v(TAG, "lhs=" + this);
+                    Log.v(TAG, "rhs=" + value);
+                    throw new IllegalArgumentException(
+                            "found non-monotonic values at lhs[" + i + "] - rhs[" + j + "]");
                 }
                 if (clampNegative) {
                     entry.rxBytes = Math.max(0, entry.rxBytes);
