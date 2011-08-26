@@ -17,13 +17,16 @@
 package android.view.textservice;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class is used to specify meta information of a subtype contained in a spell checker.
@@ -95,6 +98,48 @@ public final class SpellCheckerSubtype implements Parcelable {
                 && (subtype.getExtraValue().equals(getExtraValue()));
         }
         return false;
+    }
+
+    private static Locale constructLocaleFromString(String localeStr) {
+        if (TextUtils.isEmpty(localeStr))
+            return null;
+        String[] localeParams = localeStr.split("_", 3);
+        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
+        // because localeStr is not empty.
+        if (localeParams.length == 1) {
+            return new Locale(localeParams[0]);
+        } else if (localeParams.length == 2) {
+            return new Locale(localeParams[0], localeParams[1]);
+        } else if (localeParams.length == 3) {
+            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
+        }
+        return null;
+    }
+
+    /**
+     * @param context Context will be used for getting Locale and PackageManager.
+     * @param packageName The package name of the spell checker
+     * @param appInfo The application info of the spell checker
+     * @return a display name for this subtype. The string resource of the label (mSubtypeNameResId)
+     * can have only one %s in it. If there is, the %s part will be replaced with the locale's
+     * display name by the formatter. If there is not, this method simply returns the string
+     * specified by mSubtypeNameResId. If mSubtypeNameResId is not specified (== 0), it's up to the
+     * framework to generate an appropriate display name.
+     */
+    public CharSequence getDisplayName(
+            Context context, String packageName, ApplicationInfo appInfo) {
+        final Locale locale = constructLocaleFromString(mSubtypeLocale);
+        final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
+        if (mSubtypeNameResId == 0) {
+            return localeStr;
+        }
+        final CharSequence subtypeName = context.getPackageManager().getText(
+                packageName, mSubtypeNameResId, appInfo);
+        if (!TextUtils.isEmpty(subtypeName)) {
+            return String.format(subtypeName.toString(), localeStr);
+        } else {
+            return localeStr;
+        }
     }
 
     @Override
