@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -71,7 +70,6 @@ public final class SpellCheckerInfo implements Parcelable {
         final PackageManager pm = context.getPackageManager();
         int label = 0;
         String settingsActivityComponent = null;
-        int isDefaultResId = 0;
 
         XmlResourceParser parser = null;
         try {
@@ -219,6 +217,15 @@ public final class SpellCheckerInfo implements Parcelable {
      */
     public Drawable loadIcon(PackageManager pm) {
         return mService.loadIcon(pm);
+    }
+
+
+    /**
+     * Return the raw information about the Service implementing this
+     * spell checker.  Do not modify the returned object.
+     */
+    public ServiceInfo getServiceInfo() {
+        return mService.serviceInfo;
     }
 
     /**
