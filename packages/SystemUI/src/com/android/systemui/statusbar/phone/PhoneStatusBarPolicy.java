@@ -161,7 +161,7 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility("bluetooth", mBluetoothEnabled);
 
         // Alarm clock
-        mService.setIcon("alarm_clock", R.drawable.stat_notify_alarm, 0, null);
+        mService.setIcon("alarm_clock", R.drawable.stat_sys_alarm, 0, null);
         mService.setIconVisibility("alarm_clock", false);
 
         // Sync state
