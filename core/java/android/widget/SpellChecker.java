@@ -142,7 +142,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
             final int end = editable.getSpanEnd(spellCheckSpan);
 
             // Do not check this word if the user is currently editing it
-            if (start >= 0 && end >= 0 && (selectionEnd < start || selectionStart > end)) {
+            if (start >= 0 && end > start && (selectionEnd < start || selectionStart > end)) {
                 final String word = editable.subSequence(start, end).toString();
                 spellCheckSpan.setSpellCheckInProgress();
                 textInfos[textInfosCount++] = new TextInfo(word, mCookie, mIds[i]);
