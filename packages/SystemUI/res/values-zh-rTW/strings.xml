@@ -68,7 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"返回"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"主螢幕"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"選單"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"最近用過的應用程式"</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"最近使用的應用程式"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
@@ -78,21 +78,21 @@
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"電池電量一格。"</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"電池電量兩格。"</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"電池電量三格。"</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"電池已充滿。"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"電池電量已滿。"</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"沒有電話訊號。"</string>
-    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"電話訊號強度為一格。"</string>
-    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"電話訊號強度為兩格。"</string>
-    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"電話訊號強度為三格。"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"電話訊號強度一格。"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"電話訊號強度兩格。"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"電話訊號強度三格。"</string>
     <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"電話訊號滿格。"</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"沒有數據網路。"</string>
-    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"數據網路訊號強度為一格。"</string>
-    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"數據網路訊號強度為兩格。"</string>
-    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"數據網路訊號強度為三格。"</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"數據網路訊號強度一格。"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"數據網路訊號強度兩格。"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"數據網路訊號強度三格。"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"數據網路訊號滿格。"</string>
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"沒有 WiFi 連線。"</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"WiFi 訊號強度為一格。"</string>
-    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"WiFi 訊號強度為兩格。"</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"WiFi 訊號強度為三格。"</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"WiFi 訊號強度一格。"</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"WiFi 訊號強度兩格。"</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"WiFi 訊號強度三格。"</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"WiFi 訊號滿格。"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
@@ -118,8 +118,8 @@
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"已停用 2G-3G 數據"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"已停用 4G 數據"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"已停用行動數據"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"已停用數據"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"已達到指定的資料用量上限。"\n\n"如要使用額外的資料用量，行動通訊業者可能會向您收費。"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"數據已停用"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"已達到指定的資料用量上限。"\n\n"如果使用額外的資料用量，行動通訊業者可能會向您收費。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新啟用數據連線"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"沒有網際網路連線"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>

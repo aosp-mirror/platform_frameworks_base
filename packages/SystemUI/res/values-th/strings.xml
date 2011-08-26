@@ -72,14 +72,14 @@
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"เชื่อมต่อบลูทูธอยู่"</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ไม่ได้เชื่อมต่อบลูทูธ"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"เชื่อมต่อบลูทูธแล้ว"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ตัดการเชื่อมต่อบลูทูธแล้ว"</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"ไม่มีแบตเตอรี่"</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"แบตเตอรี่หนึ่งขีด"</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"แบตเตอรี่สองขีด"</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"แบตเตอรี่สามขีด"</string>
     <string name="accessibility_battery_full" msgid="8909122401720158582">"แบตเตอรี่เต็ม"</string>
-    <string name="accessibility_no_phone" msgid="4894708937052611281">"ไม่มีสัญญาณ"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"ไม่มีสัญญาณโทรศัพท์"</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"สัญญาณโทรศัพท์หนึ่งขีด"</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"สัญญาณโทรศัพท์สองขีด"</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"สัญญาณโทรศัพท์สามขีด"</string>
@@ -89,18 +89,18 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"สัญญาณข้อมูลสองขีด"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"สัญญาณข้อมูลสามขีด"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"สัญญาณข้อมูลเต็ม"</string>
-    <string name="accessibility_no_wifi" msgid="4017628918351949575">"ไม่มี Wi-Fi"</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"สัญญาณ Wi-Fi หนึ่งขีด"</string>
-    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"สัญญาณ Wi-Fi สองขีด"</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"สัญญาณ Wi-Fi สามขีด"</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"สัญญาณ Wi-Fi เต็ม"</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"ไม่มี WiFi"</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"สัญญาณ WiFi หนึ่งขีด"</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"สัญญาณ WiFi สองขีด"</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"สัญญาณ WiFi สามขีด"</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"สัญญาณ WiFi เต็ม"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ไม่มีซิมการ์ด"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
@@ -108,7 +108,7 @@
     <string name="accessibility_settings_button" msgid="7913780116850379698">"ปุ่มการตั้งค่า"</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"ปุ่มแจ้งเตือน"</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"นำการแจ้งเตือนออก"</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"เปิดใช้งาน GPS อยู่"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"เปิดใช้งาน GPS แล้ว"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"การดึงข้อมูล GPS"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"เปิดใช้งาน TeleTypewriter อยู่"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"เสียงเรียกเข้าแบบสั่น"</string>

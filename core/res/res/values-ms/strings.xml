@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Pengesahan tidak berjaya."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Pengesahan melalui pelayan proksi tidak berjaya."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Sambungan ke pelayan tidak berjaya."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Pelayan gagal berkomunikasi. Cuba sebentar lagi."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"Pelayan tidak dapat berkomunikasi. Cuba sebentar lagi."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Sambungan ke pelayan tamat masa."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Halaman ini mengandungi terlalu banyak pengubahhalaan pelayan."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokol tidak disokong."</string>
@@ -671,6 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Anda telah memasukkan PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Sila cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Anda telah melukis corak buka kunci dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Sila cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Anda telah melukis corak buka kunci dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Sila cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Cuba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> saat."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Buka kunci akaun"</string>
@@ -850,7 +854,7 @@
     <string name="cut" msgid="3092569408438626261">"Potong"</string>
     <string name="copy" msgid="2681946229533511987">"Salin"</string>
     <string name="paste" msgid="5629880836805036433">"Tampal"</string>
-    <string name="replace" msgid="8333608224471746584">"Ganti"</string>
+    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Ganti"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
@@ -874,10 +878,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Pilih aplikasi untuk peranti USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tiada aplikasi yang boleh menjalankan tindakan ini."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"Malangnya, <xliff:g id="APPLICATION">%1$s</xliff:g> telah berhenti."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Malangnya, proses <xliff:g id="PROCESS">%1$s</xliff:g> telah berhenti."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"Tiada sambutan dari <xliff:g id="APPLICATION">%2$s</xliff:g>."\n\n"Adakah anda mahu menutupnya?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Tiada sambutan dari aktiviti <xliff:g id="ACTIVITY">%1$s</xliff:g>."\n\n"Adakah anda mahu menutupnya?"</string>
@@ -894,6 +896,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Dayakan semula ini dengan Tetapan &gt; Aplikasi &gt; Urus aplikasi."</string>
     <string name="smv_application" msgid="295583804361236288">"Aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
+    <string name="android_upgrading_title" msgid="378740715658358071">"Android sedang menaik taraf..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Mengoptimumkan aplikasi <xliff:g id="NUMBER_0">%1$d</xliff:g> <xliff:g id="NUMBER_1">%2$d</xliff:g> ."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Memulakan aplikasi"</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"But akhir."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> dijalankan"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Pilih untuk bertukar kepada aplikasi"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Bertukar aplikasi?"</string>
@@ -934,7 +940,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"mempunyai sambungan internet yang kurang baik."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Langsung"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Mulakan pengendalian Wi-Fi Langsung. Hal ini akan mematikan pengendalian klien Wi-Fi/titik panas."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Gagal memulakan Wi-Fi Langsung"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Tidak dapat memulakan Wi-Fi Direct"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK untuk menerima."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Masukkan pin untuk meneruskan."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pin WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> perlu dimasukkan pada peranti rakan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> untuk penyediaan sambungan untuk meneruskan"</string>
@@ -975,7 +981,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Terdapat masalah mematikan storan USB. Semak untuk memastikan anda sudah menyahlekap hos USB, kemudian cuba lagi."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Hidupkan storan USB."</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Jika anda menghidupkan storan USB, sesetengah aplikasi yang anda sedang gunakan akan terhenti dan mungkin tidak akan tersedia sehingga anda memadamkan storan USB."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Pengendalian USB gagal"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Operasi USB tidak berjaya"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Disambungkan sebagai peranti media"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Disambungkan sebagai kamera"</string>
@@ -1075,8 +1081,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Menyahlekap kad SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Memadamkan storan USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Memadamkan kad SD..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Gagal memadamkan storan USB."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Gagal memadamkan storan USB."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Tidak dapat memadam storan USB."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"Tidak dapat memadam kad SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Kad SD telah dikeluarkan sebelum dinyahlekap."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Storan USB sedang disemak buat masa ini."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Kad SD sedang disemak buat masa ini."</string>
@@ -1106,8 +1112,16 @@
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"tidak dipilih"</string>
     <string name="switch_on" msgid="551417728476977311">"hidup"</string>
     <string name="switch_off" msgid="7249798614327155088">"mati"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"ditekan"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"ditekan."</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"tidak ditekan"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Batal"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Padam"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Selesai"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Perubahan mod"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Masuk"</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Kekunci. Set kepala diperlukan untuk mendengar kekunci semasa menaip kata laluan."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi laman utama"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi ke atas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Lagi pilihan"</string>
@@ -1120,15 +1134,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Data 2G-3G dilumpuhkan"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data 4G dilumpuhkan"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data mudah alih dilumpuhkan"</string>
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"ketik untuk mendayakan"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Data Wi-Fi dinyahdayakan"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"Sentuh untuk mendayakan"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Melebihi had data 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Melebihi had data 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Melebihi had data mudah alih"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Melebihi had data Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> melebihi had yang ditentukan"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data latar belakang terhad"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Sentuh untuk membuang sekatan"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Sijil keselamatan"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sijil ini sah."</string>
     <string name="issued_to" msgid="454239480274921032">"Dikeluarkan kepada:"</string>
@@ -1147,6 +1161,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Pilih aktiviti"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Kongsi dengan..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Peranti dikunci."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

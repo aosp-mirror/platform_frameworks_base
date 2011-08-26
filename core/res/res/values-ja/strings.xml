@@ -195,10 +195,8 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"緊急放送メッセージの取得と処理をアプリケーションに許可します。これはシステムアプリケーションのみ利用できる権限です。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
-    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
-    <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
-    <skip />
+    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"確認せずにSMSメッセージを送信する"</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMSの読み取り"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"タブレットやSIMカードに保存されているSMSメッセージの読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、機密メッセージが読み取られる恐れがあります。"</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"携帯電話やSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
@@ -327,10 +325,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"連絡先データの書き込み"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"タブレットに保存されている連絡先（アドレス）データの変更をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、連絡先データが消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"端末に保存した連絡先（アドレス）データの変更をアプリケーションに許可します。悪意のあるアプリケーションが連絡先データを消去/変更する恐れがあります。"</string>
-    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"プロフィールデータの読み取り"</string>
-    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"アプリケーションによる個人の全プロフィール情報の読み取りを許可します。この場合、悪意のあるアプリケーションによって身元が特定されたり個人情報が第三者に転送されたりする危険があります。"</string>
-    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"プロフィールデータの書き込み"</string>
-    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"アプリケーションによる個人のプロフィール情報の変更を許可します。この場合、悪意のあるアプリケーションによってプロフィールデータが消去または変更される危険があります。"</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"プロフィールデータの読み取り"</string>
+    <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"端末に保存されている名前や連絡先情報といった個人のプロフィール情報をアプリケーションが読み取ることを許可します。このアプリケーションは身元を特定したり、プロフィール情報を第三者に転送したりする可能性があります。"</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"プロフィールデータに書き込む"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"端末に保存されている名前や連絡先情報といった個人のプロフィール情報をアプリケーションが変更または追加することを許可します。このアプリケーションは身元を特定したり、プロフィール情報を第三者に転送したりする可能性があります。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"タブレットに保存したすべてのカレンダーの予定（友だちや同僚の予定も含む）を読み取ることをアプリケーションに許可します。悪意のあるアプリケーションにこの許可を与えると、所有者の知らないうちにカレンダーから個人情報が引き出される恐れがあります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"端末に保存したすべてのカレンダーの予定（友だちや同僚の予定も含む）を読み取ることをアプリケーションに許可します。悪意のあるアプリケーションにこの許可を与えると、所有者の知らないうちにカレンダーから個人情報が引き出される恐れがあります。"</string>
@@ -445,8 +443,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"すべてのネットワーク状態の表示をアプリケーションに許可します。"</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"完全なインターネットアクセス"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"ネットワークソケットの作成をアプリケーションに許可します。"</string>
-    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"アクセスポイント名設定の書き込み"</string>
-    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"APNのプロキシやポートなどのAPN設定の変更をアプリケーションに許可します。"</string>
+    <string name="permlab_writeApnSettings" msgid="505660159675751896">"ネットワークの設定の変更とトラフィックの傍受"</string>
+    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"任意のAPNのプロキシとポートを変更するなど、アプリケーションがネットワークの設定を変更して、すべてのネットワークトラフィックを傍受、検査することを許可します。悪意のあるアプリケーションによって通知なしにネットワークパケットが監視、リダイレクト、変更される恐れがあります。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ネットワーク接続の変更"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"ネットワークの接続状態の変更をアプリケーションに許可します。"</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"テザリング接続の変更"</string>
@@ -673,6 +671,14 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"入力したPINは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しくありませんでした。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度入力してください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"指定したパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しくありません。あと<xliff:g id="NUMBER_1">%d</xliff:g>回指定に失敗すると、携帯電話のロックの解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度指定してください。"</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"パターンを忘れた場合"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"アカウントのロック解除"</string>
@@ -730,14 +736,10 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"ボイスメール受信トレイにメッセージを追加することをアプリケーションに許可します｡"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"ブラウザの位置情報へのアクセス権を変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ブラウザの位置情報に対するアクセス権の変更をアプリケーションに許可します。この設定では、悪意のあるアプリケーションが任意のウェブサイトに位置情報を送信する可能性があります。"</string>
-    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
-    <skip />
-    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
-    <skip />
-    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
-    <skip />
+    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"パッケージのベリファイ"</string>
+    <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"パッケージがインストール可能かを確認することをアプリケーションに許可します。"</string>
+    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"パッケージベリファイアにバインド"</string>
+    <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"パッケージベリファイアのリクエストを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="save_password_message" msgid="767344687139195790">"このパスワードをブラウザで保存しますか？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"今は保存しない"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"保存"</string>
@@ -750,16 +752,11 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"Del"</string>
     <string name="search_go" msgid="8298016669822141719">"検索"</string>
-    <!-- no translation found for searchview_description_search (6749826639098512120) -->
-    <skip />
-    <!-- no translation found for searchview_description_query (5911778593125355124) -->
-    <skip />
-    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
-    <skip />
-    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
-    <skip />
-    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
-    <skip />
+    <string name="searchview_description_search" msgid="6749826639098512120">"検索"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"検索キーワード"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"検索キーワードを削除"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"検索キーワードを送信"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"音声検索"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1か月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1か月前"</string>
   <plurals name="num_seconds_ago">
@@ -861,7 +858,7 @@
     <string name="cut" msgid="3092569408438626261">"切り取り"</string>
     <string name="copy" msgid="2681946229533511987">"コピー"</string>
     <string name="paste" msgid="5629880836805036433">"貼り付け"</string>
-    <string name="replace" msgid="8333608224471746584">"置換"</string>
+    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"変更"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URLをコピー"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"テキストを選択..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"テキスト選択"</string>
@@ -905,6 +902,14 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"[設定]&gt;[アプリケーション]&gt;[アプリケーションの管理]で再度有効にできます。"</string>
     <string name="smv_application" msgid="295583804361236288">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g>（プロセス<xliff:g id="PROCESS">%2$s</xliff:g>）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
+    <!-- no translation found for android_upgrading_title (378740715658358071) -->
+    <skip />
+    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
+    <skip />
+    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
+    <skip />
+    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>を実行中"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"アプリケーションを切り替える"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"アプリケーションを切り替えますか？"</string>
@@ -923,11 +928,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"アラームの音量"</string>
     <string name="volume_notification" msgid="2422265656744276715">"通知音量"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"音量"</string>
-    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetoothの音量。タップするとマナーモードに切り替わります。"</string>
-    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"着信音量。タップするとマナーモードに切り替わります。"</string>
-    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"通話の音量。タップするとマナーモードに切り替わります。"</string>
-    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"メディアの音量。タップするとマナーモードに切り替わります。"</string>
-    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"通知の音量。タップするとマナーモードに切り替わります。"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetoothの音量"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"着信音量"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"通話音量"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"メディアの音量"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"通知音量"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"プリセット着信音"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"サイレント"</string>
@@ -956,7 +961,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"キャンセル"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIMカードが取り外されました"</string>
-    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"モバイルネットワークはSIMカードを交換するまで利用できません。"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"有効なSIMカードを挿入して再起動するまでは、モバイルネットワークは利用できません。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完了"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIMカードが追加されました"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"モバイルネットワークにアクセスするには端末を再起動する必要があります。"</string>
@@ -1111,14 +1116,30 @@
     <string name="choose_account_label" msgid="4191313562041125787">"アカウントを選択"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"増やす"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減らす"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"オン"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"オフ"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"オフ"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"オフ"</string>
-    <string name="switch_on" msgid="551417728476977311">"オン"</string>
-    <string name="switch_off" msgid="7249798614327155088">"オフ"</string>
+    <string name="checkbox_checked" msgid="7222044992652711167">"ON"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"OFF"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"ON"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"選択されていません"</string>
+    <string name="switch_on" msgid="551417728476977311">"ON"</string>
+    <string name="switch_off" msgid="7249798614327155088">"OFF"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"ON"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"OFF"</string>
+    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <skip />
+    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"ホームへ移動"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"上へ移動"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"その他のオプション"</string>
@@ -1131,10 +1152,14 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G～3Gデータが無効になりました"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4Gデータが無効になりました"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"モバイルデータが無効になりました"</string>
+    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
+    <skip />
     <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"有効にするにはタップしてください"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G～3Gデータの制限を超えました"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Gデータの制限を超えました"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"モバイルデータの制限を超えました"</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G～3Gデータの上限を超えました"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Gデータの上限を超えました"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"モバイルデータの上限を超えました"</string>
+    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
+    <skip />
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"指定した上限を<xliff:g id="SIZE">%s</xliff:g>超えました"</string>
     <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
     <skip />

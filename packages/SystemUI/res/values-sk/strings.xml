@@ -118,8 +118,8 @@
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dátové prenosy 2G a 3G sú zakázané"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dátové prenosy 4G sú zakázané"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilné dátové prenosy sú zakázané"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dátové prenosy sú zakázané"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosiahli ste stanovené obmedzenie dátových prenosov."\n\n"Za ďalšie používanie dátových prenosov vám operátor môže účtovať poplatky."</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dáta boli zakázané"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosiahli ste zadané obmedzenie dátových prenosov."\n\n"Za ďalšie používanie dátových prenosov vám operátor môže účtovať poplatky."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova povoliť dátové prenosy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>

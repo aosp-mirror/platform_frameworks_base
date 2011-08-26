@@ -109,7 +109,7 @@
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Кнопка сповіщень."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Видалити сповіщення."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS увімкнено."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Отримання GPS."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Встановлення зв’язку з GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Телетайп увімкнено."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Дзвінок на вібросигналі."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Дзвінок беззвучний."</string>

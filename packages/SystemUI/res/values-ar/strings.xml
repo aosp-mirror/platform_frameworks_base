@@ -68,7 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"رجوع"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"الرئيسية"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"القائمة"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"أحدث التطبيقات"</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"التطبيقات الحديثة"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"زر تبديل طريقة الإدخال."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"زر تكبير/تصغير للتوافق."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"استخدام التكبير/التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
@@ -117,7 +117,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"تم تعطيل بيانات شبكة الجيل الرابع"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"تم تعطيل بيانات الجوال"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"تم تعطيل البيانات"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"تم بلوغ الحد المحدد لاستخدام البيانات."\n\n"قد يؤدي استخدام بيانات إضافية إلى تحمل رسوم من مشغل شبكة الجوال."</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"تم بلوغ الحد المحدد لاستخدام البيانات."\n\n"قد يؤدي الاستخدام الإضافي للبيانات إلى تحصيل رسوم من قبل مشغل شبكة الجوال."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"إعادة تمكين البيانات"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"لا يوجد اتصال إنترنت"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi متصل"</string>

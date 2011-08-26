@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_text" msgid="1878021282758896593">"系统请求将所有数据完整备份至已连接的桌面计算机。允许此操作吗？"\n\n"如果您本人未要求备份，请阻止该操作。"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"备份我的数据"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"不备份"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"系统请求从连接的桌面计算机完整还原所有数据。允许此操作吗？"\n\n"如果您本人未要求还原，请阻止该操作。该操作会覆盖设备上当前的所有数据！"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"恢复我的数据"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"不恢复"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"请在下方输入您的当前备份密码："</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"请输入用于加密完整备份数据的密码。如果留空，系统将会使用您当前的备份密码："</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"如果您想为整个备份数据加密，请在下方输入密码："</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"如果恢复数据已加密，请在下方输入密码："</string>
+</resources>

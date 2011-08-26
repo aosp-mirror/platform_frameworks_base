@@ -83,12 +83,12 @@
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Telefoon: één streepje."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefoon: twee streepjes."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Telefoon: drie streepjes."</string>
-    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Telefoonsignaal is op volledige sterkte."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Telefoonsignaal is op volle sterkte."</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Geen gegevens."</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Gegevens: één streepje."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Gegevens: twee streepjes."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Gegevens: drie streepjes."</string>
-    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Gegevenssignaal is op volledige sterkte."</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Gegevenssignaal is op volle sterkte."</string>
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"Geen Wi-Fi."</string>
     <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Wi-Fi: één streepje."</string>
     <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Wi-Fi: twee streepjes."</string>
