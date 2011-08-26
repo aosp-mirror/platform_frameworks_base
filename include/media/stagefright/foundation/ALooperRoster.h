@@ -31,8 +31,13 @@ struct ALooperRoster {
 
     void unregisterHandler(ALooper::handler_id handlerID);
 
-    void postMessage(const sp<AMessage> &msg, int64_t delayUs = 0);
+    status_t postMessage(const sp<AMessage> &msg, int64_t delayUs = 0);
     void deliverMessage(const sp<AMessage> &msg);
+
+    status_t postAndAwaitResponse(
+            const sp<AMessage> &msg, sp<AMessage> *response);
+
+    void postReply(uint32_t replyID, const sp<AMessage> &reply);
 
     sp<ALooper> findLooper(ALooper::handler_id handlerID);
 
@@ -45,6 +50,12 @@ private:
     Mutex mLock;
     KeyedVector<ALooper::handler_id, HandlerInfo> mHandlers;
     ALooper::handler_id mNextHandlerID;
+    uint32_t mNextReplyID;
+    Condition mRepliesCondition;
+
+    KeyedVector<uint32_t, sp<AMessage> > mReplies;
+
+    status_t postMessage_l(const sp<AMessage> &msg, int64_t delayUs);
 
     DISALLOW_EVIL_CONSTRUCTORS(ALooperRoster);
 };

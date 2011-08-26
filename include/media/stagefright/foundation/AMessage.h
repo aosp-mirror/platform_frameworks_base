@@ -72,6 +72,17 @@ struct AMessage : public RefBase {
 
     void post(int64_t delayUs = 0);
 
+    // Posts the message to its target and waits for a response (or error)
+    // before returning.
+    status_t postAndAwaitResponse(sp<AMessage> *response);
+
+    // If this returns true, the sender of this message is synchronously
+    // awaiting a response, the "replyID" can be used to send the response
+    // via "postReply" below.
+    bool senderAwaitsResponse(uint32_t *replyID) const;
+
+    void postReply(uint32_t replyID);
+
     // Performs a deep-copy of "this", contained messages are in turn "dup'ed".
     // Warning: RefBase items, i.e. "objects" are _not_ copied but only have
     // their refcount incremented.

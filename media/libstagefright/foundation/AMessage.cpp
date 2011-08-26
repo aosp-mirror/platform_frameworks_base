@@ -27,6 +27,8 @@
 
 namespace android {
 
+extern ALooperRoster gLooperRoster;
+
 AMessage::AMessage(uint32_t what, ALooper::handler_id target)
     : mWhat(what),
       mTarget(target),
@@ -227,9 +229,28 @@ bool AMessage::findRect(
 }
 
 void AMessage::post(int64_t delayUs) {
-    extern ALooperRoster gLooperRoster;
-
     gLooperRoster.postMessage(this, delayUs);
+}
+
+status_t AMessage::postAndAwaitResponse(sp<AMessage> *response) {
+    return gLooperRoster.postAndAwaitResponse(this, response);
+}
+
+void AMessage::postReply(uint32_t replyID) {
+    gLooperRoster.postReply(replyID, this);
+}
+
+bool AMessage::senderAwaitsResponse(uint32_t *replyID) const {
+    int32_t tmp;
+    bool found = findInt32("replyID", &tmp);
+
+    if (!found) {
+        return false;
+    }
+
+    *replyID = static_cast<uint32_t>(tmp);
+
+    return true;
 }
 
 sp<AMessage> AMessage::dup() const {
