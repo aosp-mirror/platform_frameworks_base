@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
 
@@ -24,6 +25,8 @@ import java.util.LinkedList;
  * Params required to play back a synthesis request.
  */
 final class SynthesisMessageParams extends MessageParams {
+    private static final long MAX_UNCONSUMED_AUDIO_MS = 500;
+
     final int mStreamType;
     final int mSampleRateInHz;
     final int mAudioFormat;
@@ -32,10 +35,16 @@ final class SynthesisMessageParams extends MessageParams {
     final float mPan;
     final EventLogger mLogger;
 
+    final int mBytesPerFrame;
+
     volatile AudioTrack mAudioTrack;
-    // Not volatile, accessed only from the synthesis thread.
-    int mBytesWritten;
+    // Written by the synthesis thread, but read on the audio playback
+    // thread.
+    volatile int mBytesWritten;
+    // Not volatile, accessed only from the audio playback thread.
     int mAudioBufferSize;
+    // Always synchronized on "this".
+    int mUnconsumedBytes;
 
     private final LinkedList<ListEntry> mDataBufferList = new LinkedList<ListEntry>();
 
@@ -53,6 +62,8 @@ final class SynthesisMessageParams extends MessageParams {
         mPan = pan;
         mLogger = logger;
 
+        mBytesPerFrame = getBytesPerFrame(mAudioFormat) * mChannelCount;
+
         // initially null.
         mAudioTrack = null;
         mBytesWritten = 0;
@@ -64,18 +75,36 @@ final class SynthesisMessageParams extends MessageParams {
         return TYPE_SYNTHESIS;
     }
 
-    synchronized void addBuffer(byte[] buffer, int offset, int length) {
-        mDataBufferList.add(new ListEntry(buffer, offset, length));
+    synchronized void addBuffer(byte[] buffer) {
+        long unconsumedAudioMs = 0;
+
+        while ((unconsumedAudioMs = getUnconsumedAudioLengthMs()) > MAX_UNCONSUMED_AUDIO_MS) {
+            try {
+                wait();
+            } catch (InterruptedException ie) {
+                return;
+            }
+        }
+
+        mDataBufferList.add(new ListEntry(buffer));
+        mUnconsumedBytes += buffer.length;
     }
 
-    synchronized void addBuffer(byte[] buffer) {
-        mDataBufferList.add(new ListEntry(buffer, 0, buffer.length));
+    synchronized void clearBuffers() {
+        mDataBufferList.clear();
+        mUnconsumedBytes = 0;
+        notifyAll();
     }
 
     synchronized ListEntry getNextBuffer() {
-        return mDataBufferList.poll();
-    }
+        ListEntry entry = mDataBufferList.poll();
+        if (entry != null) {
+            mUnconsumedBytes -= entry.mBytes.length;
+            notifyAll();
+        }
 
+        return entry;
+    }
 
     void setAudioTrack(AudioTrack audioTrack) {
         mAudioTrack = audioTrack;
@@ -85,15 +114,29 @@ final class SynthesisMessageParams extends MessageParams {
         return mAudioTrack;
     }
 
+    // Must be called synchronized on this.
+    private long getUnconsumedAudioLengthMs() {
+        final int unconsumedFrames = mUnconsumedBytes / mBytesPerFrame;
+        final long estimatedTimeMs = unconsumedFrames * 1000 / mSampleRateInHz;
+
+        return estimatedTimeMs;
+    }
+
+    private static int getBytesPerFrame(int audioFormat) {
+        if (audioFormat == AudioFormat.ENCODING_PCM_8BIT) {
+            return 1;
+        } else if (audioFormat == AudioFormat.ENCODING_PCM_16BIT) {
+            return 2;
+        }
+
+        return -1;
+    }
+
     static final class ListEntry {
         final byte[] mBytes;
-        final int mOffset;
-        final int mLength;
 
-        ListEntry(byte[] bytes, int offset, int length) {
+        ListEntry(byte[] bytes) {
             mBytes = bytes;
-            mOffset = offset;
-            mLength = length;
         }
     }
 }
