@@ -5110,6 +5110,10 @@
              Defaults to false.
              -->
         <attr name="isAlwaysSyncable" format="boolean"/>
+        <!-- If provided, specifies the action of the settings
+             activity for this SyncAdapter.
+             -->
+        <attr name="settingsActivity"/>
     </declare-styleable>
 
     <!-- =============================== -->
