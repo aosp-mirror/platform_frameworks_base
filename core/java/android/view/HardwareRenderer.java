@@ -413,8 +413,8 @@ public abstract class HardwareRenderer {
                 if (error != EGL_SUCCESS) {
                     // something bad has happened revert to
                     // normal rendering.
-                    fallback(error != EGL11.EGL_CONTEXT_LOST);
                     Log.w(LOG_TAG, "EGL error: " + GLUtils.getEGLErrorString(error));
+                    fallback(error != EGL11.EGL_CONTEXT_LOST);
                 }
             }
         }
@@ -702,8 +702,9 @@ public abstract class HardwareRenderer {
 
         @Override
         void setup(int width, int height) {
-            checkCurrent();
-            mCanvas.setViewport(width, height);
+            if (validate()) {
+                mCanvas.setViewport(width, height);
+            }
         }
 
         boolean canDraw() {
