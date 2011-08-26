@@ -416,10 +416,16 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.w(TAG, "setCurrentSpellChecker: " + sciId);
         }
         if (TextUtils.isEmpty(sciId) || !mSpellCheckerMap.containsKey(sciId)) return;
+        final SpellCheckerInfo currentSci = getCurrentSpellChecker(null);
+        if (currentSci != null && currentSci.getId().equals(sciId)) {
+            // Do nothing if the current spell checker is same as new spell checker.
+            return;
+        }
         final long ident = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putString(mContext.getContentResolver(),
                     Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
+            setCurrentSpellCheckerSubtypeLocked(0);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
