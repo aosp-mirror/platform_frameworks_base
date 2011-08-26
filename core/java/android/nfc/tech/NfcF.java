@@ -101,6 +101,9 @@ public final class NfcF extends BasicTagTechnology {
      * <p>Applications must not append the SoD (length) or EoD (CRC) to the payload,
      * it will be automatically calculated.
      *
+     * <p>Use {@link #getMaxTransceiveLength} to retrieve the maximum amount of bytes
+     * that can be sent with {@link #transceive}.
+     *
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
@@ -114,6 +117,14 @@ public final class NfcF extends BasicTagTechnology {
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
+    }
+
+    /**
+     * Return the maximum number of bytes that can be sent with {@link #transceive}.
+     * @return the maximum number of bytes that can be sent with {@link #transceive}.
+     */
+    public int getMaxTransceiveLength() {
+        return getMaxTransceiveLengthInternal();
     }
 
     /**

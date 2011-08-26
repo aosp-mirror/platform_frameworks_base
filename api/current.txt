@@ -12465,6 +12465,7 @@ package android.nfc.tech {
     method public static android.nfc.tech.IsoDep get(android.nfc.Tag);
     method public byte[] getHiLayerResponse();
     method public byte[] getHistoricalBytes();
+    method public int getMaxTransceiveLength();
     method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
@@ -12477,6 +12478,7 @@ package android.nfc.tech {
     method public static android.nfc.tech.MifareClassic get(android.nfc.Tag);
     method public int getBlockCount();
     method public int getBlockCountInSector(int);
+    method public int getMaxTransceiveLength();
     method public int getSectorCount();
     method public int getSize();
     method public int getType();
@@ -12503,6 +12505,7 @@ package android.nfc.tech {
 
   public final class MifareUltralight extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.MifareUltralight get(android.nfc.Tag);
+    method public int getMaxTransceiveLength();
     method public int getType();
     method public byte[] readPages(int) throws java.io.IOException;
     method public byte[] transceive(byte[]) throws java.io.IOException;
@@ -12539,6 +12542,7 @@ package android.nfc.tech {
   public final class NfcA extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.NfcA get(android.nfc.Tag);
     method public byte[] getAtqa();
+    method public int getMaxTransceiveLength();
     method public short getSak();
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
@@ -12546,6 +12550,7 @@ package android.nfc.tech {
   public final class NfcB extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.NfcB get(android.nfc.Tag);
     method public byte[] getApplicationData();
+    method public int getMaxTransceiveLength();
     method public byte[] getProtocolInfo();
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
@@ -12553,6 +12558,7 @@ package android.nfc.tech {
   public final class NfcF extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.NfcF get(android.nfc.Tag);
     method public byte[] getManufacturer();
+    method public int getMaxTransceiveLength();
     method public byte[] getSystemCode();
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
@@ -12560,6 +12566,7 @@ package android.nfc.tech {
   public final class NfcV extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.NfcV get(android.nfc.Tag);
     method public byte getDsfId();
+    method public int getMaxTransceiveLength();
     method public byte getResponseFlags();
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }

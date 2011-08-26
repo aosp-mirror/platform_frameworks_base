@@ -129,6 +129,15 @@ import java.io.IOException;
         }
     }
 
+    /** Internal getMaxTransceiveLength() */
+    int getMaxTransceiveLengthInternal() {
+        try {
+            return mTag.getTagService().getMaxTransceiveLength(mSelectedTechnology);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+            return 0;
+        }
+    }
     /** Internal transceive */
     /*package*/ byte[] transceive(byte[] data, boolean raw) throws IOException {
         checkConnected();
@@ -139,16 +148,7 @@ import java.io.IOException;
             if (result == null) {
                 throw new IOException("transceive failed");
             } else {
-                if (result.isSuccessful()) {
-                    return result.getResponseData();
-                } else {
-                    if (result.isTagLost()) {
-                        throw new TagLostException("Tag was lost.");
-                    }
-                    else {
-                        throw new IOException("transceive failed");
-                    }
-                }
+                return result.getResponseOrThrow();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
