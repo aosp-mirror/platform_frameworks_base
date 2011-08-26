@@ -71,7 +71,7 @@
     <string name="accessibility_recent" msgid="3027675523629738534">"برنامه‌های اخیر"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"کلید تغییر روش ورود متن."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"دکمه بزرگنمایی سازگار."</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"بزرگنمایی از صفحه‌های کوچک تا بزرگ"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"بزرگنمایی از صفحه‌های کوچک تا بزرگ."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"بلوتوث متصل است."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"بلوتوث قطع شده است."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"باتری موجود نیست."</string>

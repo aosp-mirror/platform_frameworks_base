@@ -68,7 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Zpět"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Domů"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"Nedávno použité aplikace"</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"Naposledy použité aplikace"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačítko přepnutí metody vstupu"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tlačítko úpravy velikosti z důvodu kompatibility"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zvětšit menší obrázek na větší obrazovku."</string>
@@ -115,10 +115,10 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Rozhraní TeleTypewriter zapnuto."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibrační vyzvánění."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Tiché vyzvánění."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datové přenosy 2G–3G jsou zakázány."</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datové přenosy 4G jsou zakázány."</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilní datové přenosy jsou zakázány."</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Datové přenosy jsou vypnuty"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datové přenosy 2G a 3G jsou zakázány"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datové přenosy 4G jsou zakázány"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilní data jsou zakázána"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Přenos dat vypnut"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosáhli jste zadaného limitu množství přenesených dat."\n\n"Za další datové přenosy vám operátor může účtovat poplatky."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znovu povolit data"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Žádné přip. k internetu"</string>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_text" msgid="1878021282758896593">"En full sikkerhetskopi av alle dataene til en tilkoblet stasjonær datamaskin er forespurt. Vil du tillate dette?"\n\n"Hvis du ikke har bedt om sikkerhetskopieringen selv, må du ikke tillate at operasjonen fortsetter."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Sikkerhetskopier dataene mine"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Ikke sikkerhetskopiér"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"En full gjenoppretting av alle data fra en tilkoblet stasjonær datamaskin er forespurt. Vil du tillate dette?"\n\n"Hvis du ikke har bedt om gjenopprettingen selv, må du ikke la operasjonen fortsette. Handlingen vil erstatte alle dataene som ligger på enheten!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Gjenopprett dataene mine"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Ikke gjenopprett"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Skriv inn ditt nåværende passord for sikkerhetskopiering nedenfor:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Skriv inn et passord for kryptering av full sikkerhetskopi. Hvis feltet er tomt, brukes det gjeldende passordet ditt for sikkerhetskopiering:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Hvis du vil kryptere alle de sikkerhetskopierte dataene, skriver du inn et passord nedenfor:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Hvis de gjenopprettede dataene er krypterte, må du skrive inn passordet nedenfor:"</string>
+</resources>

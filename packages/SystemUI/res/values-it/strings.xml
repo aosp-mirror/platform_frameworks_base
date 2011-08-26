@@ -84,7 +84,7 @@
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefono: due barre."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Telefono: tre barre."</string>
     <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Massimo segnale telefonico."</string>
-    <string name="accessibility_no_data" msgid="4791966295096867555">"Nessun dato presente."</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"Nessun dato."</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Dati: una barra."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dati: due barre."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Dati: tre barre."</string>
@@ -118,7 +118,7 @@
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dati 2G-3G disattivati"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dati 4G disattivati"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dati mobili disattivati"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dati disabilitati"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dati disabilati"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Il limite di utilizzo dei dati specificato è stato raggiunto."\n\n"Un ulteriore utilizzo di dati può comportare l\'applicazione di costi da parte dell\'operatore."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Riattiva dati"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nessuna connessione"</string>

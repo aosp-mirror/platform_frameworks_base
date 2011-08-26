@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_text" msgid="1878021282758896593">"הוגשה בקשה לגיבוי מלא של כל הנתונים במחשב שולחני מחובר. האם אתה רוצה לאפשר פעולה זו? "\n\n"אם לא ביקשת את הגיבוי בעצמך, אל תאפשר לפעולה להמשיך."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"גבה את הנתונים שלי"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"אל תגבה"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"הוגשה בקשה לשחזור מלא של כל הנתונים ממחשב שולחני מחובר. האם אתה רוצה לאפשר פעולה זו? "\n" "\n" אם לא ביקשת את השחזור בעצמך, אל תאפשר לפעולה להמשיך. פעולה זו תחליף את כל הנתונים שנמצאים כעת במכשיר!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"שחזר את הנתונים שלי"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"אל תשחזר"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"הזן את סיסמת הגיבוי הנוכחית למטה:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"הזן סיסמה שתשמש להצפנה של נתוני הגיבוי המלא. אם תשאיר שדה זה ריק, ייעשה שימוש בסיסמת הגיבוי הנוכחית שלך:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"אם אתה רוצה להצפין את נתוני הגיבוי המלא, הזן סיסמה בהמשך:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"אם נתוני השחזור מוצפנים, הזן את הסיסמה למטה:"</string>
+</resources>

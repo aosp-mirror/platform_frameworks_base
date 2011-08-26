@@ -60,7 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilitetszoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Når en app er udviklet til en mindre skærm, vises der en zoomfunktion ved uret."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Skærmbilledet gemmes i Galleri"</string>
-    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Kunne ikke gemme screenshot. Ekstern lagring kan være i brug."</string>
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Kunne ikke gemme skærmbillede. Ekstern lagring kan være i brug."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Muligheder for USB-filoverførsel"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Isæt som en medieafspiller (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Isæt som et kamera (PTP)"</string>
@@ -112,13 +112,13 @@
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS samler data."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter aktiveret."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Ringervibration."</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Ringeren er lydløs."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G/3G-data er deaktiveret"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Lydløs."</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G-data er deaktiveret"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-data er deaktiveret"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobildata er deaktiveret"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data er deaktiveret"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Den angivne grænse for dataforbrug er nået."\n\n"Yderligere databrug kan koste ekstra hos dit mobilselskab."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Aktiver data igen"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Den angivne grænse for dataforbrug er nået."\n\n"Yderligere dataforbrug kan koste ekstra hos mobilselskabet."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Genaktiver data"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen internetforb."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi er forbundet"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Søger efter GPS"</string>

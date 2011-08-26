@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Échec de l\'authentification."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Échec de l\'authentification par un serveur proxy."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Échec de la connexion au serveur."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Échec de la communication avec le serveur. Veuillez réessayer ultérieurement."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"Impossible de communiquer avec le serveur. Veuillez réessayer ultérieurement."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Délai de connexion au serveur dépassé."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Cette page contient trop de redirections de serveurs."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Ce protocole n\'est pas pris en charge."</string>
@@ -195,10 +195,8 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permet à l\'application de recevoir et de traiter les messages de diffusion d\'urgence. Cette autorisation est uniquement disponible pour les applications système."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Envoi de messages SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permet aux applications d\'envoyer des messages SMS. Des applications malveillantes peuvent entraîner des frais en envoyant des messages sans vous en demander la confirmation."</string>
-    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
-    <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
-    <skip />
+    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"envoyer des SMS sans confirmation"</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"Permet aux applications d\'envoyer des messages SMS. Des applications malveillantes peuvent entraîner des frais en envoyant des messages sans vous en demander la confirmation."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"Lecture des SMS ou MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Permet à l\'application de lire les SMS enregistrés dans la mémoire de votre tablette ou sur votre carte SIM. Des applications malveillantes peuvent lire vos messages confidentiels."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Permet à l\'application de lire les SMS enregistrés dans la mémoire de votre téléphone ou sur votre carte SIM. Des applications malveillantes peuvent lire vos messages confidentiels."</string>
@@ -269,7 +267,7 @@
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associer à un service de texte"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Permet à l\'application de s\'associer à l\'interface de haut niveau d\'un service de texte (par exemple, SpellCheckerService). Ne devrait jamais être nécessaire  pour des applications standards."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"associer à un service VPN"</string>
-    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service VPN. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Permet à l\'application autorisée de s\'associer à l\'interface de niveau supérieur d\'un service VPN. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"Se fixer sur un fond d\'écran"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permet au support de se fixer sur l\'interface de plus haut niveau d\'un fond d\'écran. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associer à un service widget"</string>
@@ -327,10 +325,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"Édition des données d\'un contact"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permet à une application de modifier les données (adresses) associées à vos contacts et stockées sur votre tablette. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier les données de vos contacts."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permet à une application de modifier toutes les données de contact (adresses) enregistrées sur le téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier vos données de contact."</string>
-    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"lire les données de profil"</string>
-    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permet à une application de lire toutes vos informations personnelles de profil. Des applications malveillantes peuvent l\'utiliser pour vous identifier et envoyer vos informations personnelles à d\'autres personnes."</string>
-    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"modifier les données de profil"</string>
-    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permet à une application de modifier vos informations personnelles de profil. Des applications malveillantes peuvent utiliser cette autorisation pour effacer ou modifier les données de votre profil."</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"lire vos données de profil"</string>
+    <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permet à l\'application de lire les informations de profil personnelles stockées sur votre appareil, telles que votre nom et vos coordonnées. Cela signifie que l\'application peut vous identifier et envoyer vos informations de profil à d\'autres."</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"modifier vos données de profil"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permet à l\'application de modifier ou d\'ajouter des informations personnelles stockées sur le profil de votre appareil, telles que votre nom et vos coordonnées. Cela signifie que d\'autres applications peuvent vous identifier et envoyer vos informations de profil à d\'autres."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"consulter les événements d\'agenda ainsi que les informations confidentielles"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permet à une application de lire tous les événements d\'agendas stockés sur votre tablette, y compris ceux de vos amis ou de vos collègues. Une application malveillante disposant de cette autorisation peut extraire des informations personnelles de ces agendas à l\'insu de leur propriétaire."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permet à une application de consulter tous les événements d\'agendas stockés sur votre téléphone, y compris ceux de vos amis ou de vos collègues. Une application malveillante disposant de cette autorisation peut extraire des informations personnelles de ces agendas à l\'insu de leur propriétaire."</string>
@@ -445,8 +443,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Permet à une application d\'afficher l\'état de tous les réseaux."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"Accès Internet complet"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Permet à une application de créer des connecteurs réseau."</string>
-    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"Écriture des paramètres \"Nom des points d\'accès\""</string>
-    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Permet à une application de modifier les paramètres APN (Nom des points d\'accès), comme le proxy ou le port de tout APN."</string>
+    <string name="permlab_writeApnSettings" msgid="505660159675751896">"changer/intercepter les paramètres et le trafic du réseau"</string>
+    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Permet à une application de modifier les paramètres réseau et d\'intercepter et d\'inspecter tout le trafic réseau, par exemple pour changer le proxy et le port de tout APN. Des applications malveillantes pourraient surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"Modification de la connectivité du réseau"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Permet à une application de modifier l\'état de la connectivité réseau."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Changer la connectivité du partage de connexion"</string>
@@ -673,6 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Vous avez saisi un code PIN incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Vous avez saisi un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide de votre identifiant Google."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez déverrouiller votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Vous avez tenté de déverrouiller la tablette de façon incorrecte à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, sa configuration d\'usine sera rétablie, et toutes les données utilisateur seront perdues."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, sa configuration d\'usine sera rétablie, et toutes les données utilisateur seront perdues."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Vous avez tenté de déverrouiller la tablette de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Schéma oublié ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Déverrouillage du compte"</string>
@@ -730,14 +732,10 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Permet à l\'application d\'ajouter des messages à votre messagerie vocale."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifier les autorisations de géolocalisation du navigateur"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permet à une application de modifier les autorisations de géolocalisation du navigateur. Les applications malveillantes peuvent se servir de cette fonctionnalité pour envoyer des informations de lieu à des sites Web arbitraires."</string>
-    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
-    <skip />
-    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
-    <skip />
-    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
-    <skip />
+    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"vérifier les packages"</string>
+    <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Permet à l\'application de vérifier qu\'un package peut être installé."</string>
+    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"associer à un vérificateur de package"</string>
+    <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Permet à l\'application d\'effectuer des requêtes de vérificateur de package. Cette autorisation ne doit jamais être utilisée pour les applications standards."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voulez-vous que le navigateur se souvienne de ce mot de passe ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Pas maintenant"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Mémoriser"</string>
@@ -750,16 +748,11 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"entrée"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"supprimer"</string>
     <string name="search_go" msgid="8298016669822141719">"Rechercher"</string>
-    <!-- no translation found for searchview_description_search (6749826639098512120) -->
-    <skip />
-    <!-- no translation found for searchview_description_query (5911778593125355124) -->
-    <skip />
-    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
-    <skip />
-    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
-    <skip />
-    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
-    <skip />
+    <string name="searchview_description_search" msgid="6749826639098512120">"Rechercher"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"Requête de recherche"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"Effacer la requête"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"Envoyer la requête"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Recherche vocale"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Il y a 1 mois"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Il y a plus d\'un mois"</string>
   <plurals name="num_seconds_ago">
@@ -861,7 +854,7 @@
     <string name="cut" msgid="3092569408438626261">"Couper"</string>
     <string name="copy" msgid="2681946229533511987">"Copier"</string>
     <string name="paste" msgid="5629880836805036433">"Coller"</string>
-    <string name="replace" msgid="8333608224471746584">"Remplacer"</string>
+    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Remplacer"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copier l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Sélect. le texte..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Sélection de texte"</string>
@@ -885,10 +878,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Sélectionnez une application pour le périphérique USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Aucune application ne peut effectuer cette action."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"Malheureusement, l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> s\'est arrêtée."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Malheureusement, le processus <xliff:g id="PROCESS">%1$s</xliff:g> s\'est arrêté."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"L\'application <xliff:g id="APPLICATION">%2$s</xliff:g> ne répond pas."\n\n"Voulez-vous la fermer ?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"L\'activité <xliff:g id="ACTIVITY">%1$s</xliff:g> ne répond pas."\n\n"Voulez-vous la fermer ?"</string>
@@ -905,6 +896,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Réactivez ce mode depuis Paramètres &gt; Applications &gt; Gérer les applications."</string>
     <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
     <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
+    <string name="android_upgrading_title" msgid="378740715658358071">"Mise à jour d\'Android..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Optimisation de l\'application <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Lancement des applications"</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalisation de la mise à jour."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Sélectionner pour changer d\'application"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Passer d\'une application à l\'autre ?"</string>
@@ -923,11 +918,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volume des notifications"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
-    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volume du Bluetooth. Appuyer pour passer en mode silencieux"</string>
-    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volume de la sonnerie. Appuyer pour passer en mode silencieux"</string>
-    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume des appels. Appuyer pour passer en mode silencieux"</string>
-    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volume des fichiers multimédias. Appuyer pour passer en mode silencieux"</string>
-    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume des notifications. Appuyer pour passer en mode silencieux"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volume Bluetooth"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volume de la sonnerie"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume d\'appel"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volume"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Sonnerie par défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silencieux"</string>
@@ -942,10 +937,10 @@
     <item quantity="other" msgid="7915895323644292768">"Réseaux Wi-Fi ouverts disponibles"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossible de se connecter au Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"dispose d\'une faible connexion Internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"dispose d\'une connexion Internet faible."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Lancer le Wi-Fi Direct. Cela désactive le fonctionnement du Wi-Fi client ou via un point d\'accès."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Échec du démarrage du Wi-Fi Direct."</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Impossible d\'activer le Wi-Fi Direct."</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Demande de configuration du Wi-Fi Direct de <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Cliquez sur \"OK\" pour accepter."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Demande de configuration du Wi-Fi Direct de <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Saisissez le code PIN pour continuer."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Afin de poursuivre la configuration de la connexion, vous devez saisir le code WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> sur l\'appareil associé <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>."</string>
@@ -956,7 +951,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Annuler"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Carte SIM retirée"</string>
-    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Le réseau mobile sera indisponible tant que vous n\'aurez pas remplacé la carte SIM."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Le réseau mobile ne sera pas disponible avant le redémarrage avec une carte SIM valide insérée."</string>
     <string name="sim_done_button" msgid="827949989369963775">"OK"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Carte SIM ajoutée."</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Pour accéder au réseau mobile, redémarrez votre appareil."</string>
@@ -986,7 +981,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Un problème est survenu lors de la désactivation de la mémoire de stockage USB. Assurez-vous que l\'hôte USB a bien été désinstallé, puis réessayez."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activer la mémoire de stockage USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si vous activez la mémoire de stockage USB, certaines applications en cours d\'utilisation seront fermées. Elles risquent de rester indisponibles jusqu\'à ce que la mémoire de stockage USB soit désactivée."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Échec du fonctionnement USB"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Échec du fonctionnement de la mémoire de stockage USB."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connecté en tant qu\'appareil multimédia"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Connecté en tant qu\'appareil photo"</string>
@@ -1086,8 +1081,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Désinstallation de la carte SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Effacement de la mémoire de stockage USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Effacement de la carte SD..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Impossible d\'effacer la mémoire de stockage USB"</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Impossible d\'effacer la mémoire de stockage USB"</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Impossible d\'effacer la mémoire de stockage USB."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"Impossible d\'effacer la carte SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"La carte SD a été retirée sans avoir été désinstallée."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Vérification de la mémoire de stockage USB en cours."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Vérification de la carte SD en cours."</string>
@@ -1119,6 +1114,14 @@
     <string name="switch_off" msgid="7249798614327155088">"désactivé"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"sélectionné"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"non sélectionné"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Annuler"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Supprimer"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Terminé"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Changement de mode"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Entrée"</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Touche : casque nécessaire pour entendre le son des touches lorsque vous saisissez un mot de passe."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Retour à l\'accueil"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Parcourir vers le haut"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Plus d\'options"</string>
@@ -1131,15 +1134,17 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Données 2G-3G désactivées"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Données 4G désactivées"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Données mobiles désactivées"</string>
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"appuyer pour activer"</string>
+    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
+    <skip />
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"Appuyez ici pour réactiver."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Quota de données 2G-3G dépassé"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Quota de données 4G dépassé"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Quota util. données mob. dépassé"</string>
+    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
+    <skip />
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> au-delà de la limite spécifiée"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Données en arrière-plan limitées"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Appuyez pour suppr. restriction."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de sécurité"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Ce certificat est valide."</string>
     <string name="issued_to" msgid="454239480274921032">"Délivré à :"</string>
@@ -1158,6 +1163,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Sélectionner une activité"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Partager avec..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Appareil verrouillé"</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

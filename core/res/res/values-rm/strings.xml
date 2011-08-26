@@ -748,6 +748,14 @@
     <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
     <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vus avais dissegnà <xliff:g id="NUMBER_0">%d</xliff:g> giadas in schema da debloccaziun nuncorrect. Suenter  <xliff:g id="NUMBER_1">%d</xliff:g> ulteriuras emprovas senza success As dumonda il sistem da debloccar il telefonin cun agid da Vossas infurmaziuns d\'annunzia da Google."\n\n"Empruvai per plaschair anc ina giada en <xliff:g id="NUMBER_2">%d</xliff:g> secundas."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Empruvar anc ina giada en <xliff:g id="NUMBER">%d</xliff:g> secundas."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Emblidà il schema?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Debloccaziun dal conto"</string>
@@ -959,7 +967,7 @@
     <string name="cut" msgid="3092569408438626261">"Tagliar ora"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Encollar"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
+    <!-- no translation found for replace (5781686059063148930) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiar l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Selecziunar text…"</string>
@@ -1015,6 +1023,14 @@
     <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'applicaziun <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) ha violà sia atgna directiva StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il process <xliff:g id="PROCESS">%1$s</xliff:g> ha violà sia atgna directiva StrictMode."</string>
+    <!-- no translation found for android_upgrading_title (378740715658358071) -->
+    <skip />
+    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
+    <skip />
+    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
+    <skip />
+    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> vegn exequida"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Tscherner per midar a l\'applicaziun"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Midar dad ina applicaziun a l\'autra?"</string>
@@ -1299,6 +1315,22 @@
     <skip />
     <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
     <skip />
+    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <skip />
+    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <skip />
     <!-- no translation found for action_bar_home_description (5293600496601490216) -->
     <skip />
     <!-- no translation found for action_bar_up_description (2237496562952152589) -->
@@ -1323,6 +1355,8 @@
     <skip />
     <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
     <skip />
+    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
+    <skip />
     <!-- no translation found for data_usage_limit_body (4313857592916426843) -->
     <skip />
     <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
@@ -1330,6 +1364,8 @@
     <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
     <skip />
     <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
     <skip />
     <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
     <skip />

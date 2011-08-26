@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Надійшов запит на повне резервне копіювання всіх даних на під’єднаний настільний комп’ютер. Дозволити це?"\n\n"Якщо ви не надсилали запит на резервне копіювання, не дозволяйте виконувати цю операцію."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Резервне копіювання даних"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Не створювати резервну копію"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Надійшов запит на повне відновлення всіх даних із під’єднаного настільного комп’ютера. Дозволити це?"\n\n"Якщо ви не надсилали запит на відновлення, не дозволяйте виконувати цю операцію. Усі розміщені зараз на пристрої дані буде замінено!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Відновити мої дані"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Не відновлювати"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Введіть свій поточний пароль резервного копіювання нижче:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Введіть пароль, який використовується для шифрування повного резервного копіювання даних. Якщо залишити це поле порожнім, буде використано поточний пароль резервного копіювання."</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Якщо ви хочете зашифрувати повне резервне копіювання даних, введіть пароль нижче:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Якщо дані для відновлення зашифровано, введіть пароль нижче:"</string>
+</resources>

@@ -83,7 +83,7 @@
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Телефонът е с една чертичка."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Телефонът е с две чертички."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Телефонът е с три чертички."</string>
-    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Сигналът за телефон е пълен."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Сигналът за телефона е пълен."</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Няма данни."</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Данните са с една чертичка."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Данните са с две чертички."</string>
@@ -112,7 +112,7 @@
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS се придобива."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter бе активиран."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибрира при звънене."</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Звънене в тих режим."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Звънът е заглушен."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G данните са деактивирани"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G данните са деактивирани"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобилните данни са деактивирани"</string>
