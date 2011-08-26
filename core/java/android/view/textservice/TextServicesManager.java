@@ -162,10 +162,13 @@ public final class TextServicesManager {
      */
     public void setSpellCheckerSubtype(SpellCheckerSubtype subtype) {
         try {
+            final int hashCode;
             if (subtype == null) {
-                throw new NullPointerException("SpellCheckerSubtype is null.");
+                hashCode = 0;
+            } else {
+                hashCode = subtype.hashCode();
             }
-            sService.setCurrentSpellCheckerSubtype(null, subtype.hashCode());
+            sService.setCurrentSpellCheckerSubtype(null, hashCode);
         } catch (RemoteException e) {
             Log.e(TAG, "Error in setSpellCheckerSubtype:" + e);
         }
