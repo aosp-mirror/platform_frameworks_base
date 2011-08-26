@@ -17,6 +17,10 @@
 package android.text;
 
 
+import java.util.Locale;
+
+import android.util.LocaleUtil;
+
 /**
  * Some objects that implement TextDirectionHeuristic.
  * @hide
@@ -74,6 +78,11 @@ public class TextDirectionHeuristics {
      */
     public static final TextDirectionHeuristic CHARCOUNT_RTL =
         new TextDirectionHeuristicInternal(CharCount.INSTANCE_DEFAULT, true);
+
+    /**
+     * Force the paragraph direction to the Locale direction. Falls back to left to right.
+     */
+    public static final TextDirectionHeuristic LOCALE = TextDirectionHeuristicLocale.INSTANCE;
 
     private static enum TriState {
         TRUE, FALSE, UNKNOWN;
@@ -299,5 +308,24 @@ public class TextDirectionHeuristics {
 
         public static final float DEFAULT_THRESHOLD = 0.6f;
         public static final CharCount INSTANCE_DEFAULT = new CharCount(DEFAULT_THRESHOLD);
+    }
+
+    /**
+     * Algorithm that uses the Locale direction to force the direction of a paragraph.
+     */
+    public static class TextDirectionHeuristicLocale extends TextDirectionHeuristicImpl {
+
+        public TextDirectionHeuristicLocale() {
+            super(null);
+        }
+
+        @Override
+        protected boolean defaultIsRtl() {
+            final int dir = LocaleUtil.getLayoutDirectionFromLocale(java.util.Locale.getDefault());
+            return (dir == LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE);
+        }
+
+        public static final TextDirectionHeuristicLocale INSTANCE =
+                new TextDirectionHeuristicLocale();
     }
 }
