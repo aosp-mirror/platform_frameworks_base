@@ -180,6 +180,8 @@ void AudioPlayer::pause(bool playPendingSamples) {
         } else {
             mAudioTrack->stop();
         }
+
+        mNumFramesPlayed = 0;
     } else {
         if (mAudioSink.get() != NULL) {
             mAudioSink->pause();
