@@ -2018,8 +2018,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) Slog.v(TAG, "Show switching menu");
 
         final Context context = mContext;
-
         final PackageManager pm = context.getPackageManager();
+        final boolean isScreenLocked = mKeyguardManager != null
+                && mKeyguardManager.isKeyguardLocked() && mKeyguardManager.isKeyguardSecure();
 
         String lastInputMethodId = Settings.Secure.getString(context
                 .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -2075,7 +2076,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         final String subtypeHashCode = String.valueOf(subtype.hashCode());
                         // We show all enabled IMEs and subtypes when an IME is shown.
                         if (enabledSubtypeSet.contains(subtypeHashCode)
-                                && (mInputShown || !subtype.isAuxiliary())) {
+                                && ((mInputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
                             final CharSequence title;
                             final String mode = subtype.getMode();
                             title = TextUtils.concat(subtype.getDisplayName(context,
@@ -2162,8 +2163,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     });
 
-            if (showSubtypes && mKeyguardManager != null && !(mKeyguardManager.isKeyguardLocked()
-                    && mKeyguardManager.isKeyguardSecure())) {
+            if (showSubtypes && !isScreenLocked) {
                 mDialogBuilder.setPositiveButton(
                         com.android.internal.R.string.configure_input_methods,
                         new DialogInterface.OnClickListener() {
