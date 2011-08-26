@@ -324,7 +324,6 @@ android.ddm.DdmHandleProfiling
 android.ddm.DdmHandleThread
 android.ddm.DdmRegister
 android.debug.JNITest
-android.drm.DrmManagerClient
 android.emoji.EmojiFactory
 android.graphics.AvoidXfermode
 android.graphics.Bitmap
