@@ -41,9 +41,15 @@ import com.android.internal.R;
 /**
  * A Switch is a two-state toggle switch widget that can select between two
  * options. The user may drag the "thumb" back and forth to choose the selected option,
- * or simply tap to toggle as if it were a checkbox.
+ * or simply tap to toggle as if it were a checkbox. The {@link #setText(CharSequence) text}
+ * property controls the text displayed in the label for the switch, whereas the
+ * {@link #setTextOff(CharSequence) off} and {@link #setTextOn(CharSequence) on} text
+ * controls the text on the thumb. Similarly, the
+ * {@link #setTextAppearance(android.content.Context, int) textAppearance} and the related
+ * setTypeface() methods control the typeface and style of label text, whereas the
+ * {@link #setSwitchTextAppearance(android.content.Context, int) switchTextAppearance} and
+ * the related seSwitchTypeface() methods control that of the thumb.
  *
- * @hide
  */
 public class Switch extends CompoundButton {
     private static final int TOUCH_MODE_IDLE = 0;
@@ -132,8 +138,8 @@ public class Switch extends CompoundButton {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Switch, defStyle, 0);
 
-        mThumbDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_switchThumb);
-        mTrackDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_switchTrack);
+        mThumbDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_thumb);
+        mTrackDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_track);
         mTextOn = a.getText(com.android.internal.R.styleable.Switch_textOn);
         mTextOff = a.getText(com.android.internal.R.styleable.Switch_textOff);
         mThumbTextPadding = a.getDimensionPixelSize(
@@ -146,7 +152,7 @@ public class Switch extends CompoundButton {
         int appearance = a.getResourceId(
                 com.android.internal.R.styleable.Switch_switchTextAppearance, 0);
         if (appearance != 0) {
-            setSwitchTextAppearance(appearance);
+            setSwitchTextAppearance(context, appearance);
         }
         a.recycle();
 
@@ -162,9 +168,9 @@ public class Switch extends CompoundButton {
      * Sets the switch text color, size, style, hint color, and highlight color
      * from the specified TextAppearance resource.
      */
-    public void setSwitchTextAppearance(int resid) {
+    public void setSwitchTextAppearance(Context context, int resid) {
         TypedArray appearance =
-                getContext().obtainStyledAttributes(resid,
+                context.obtainStyledAttributes(resid,
                         com.android.internal.R.styleable.TextAppearance);
 
         ColorStateList colors;
@@ -174,6 +180,9 @@ public class Switch extends CompoundButton {
                 TextAppearance_textColor);
         if (colors != null) {
             mTextColors = colors;
+        } else {
+            // If no color set in TextAppearance, default to the view's textColor
+            mTextColors = getTextColors();
         }
 
         ts = appearance.getDimensionPixelSize(com.android.internal.R.styleable.
@@ -244,7 +253,7 @@ public class Switch extends CompoundButton {
     }
 
     /**
-     * Sets the typeface and style in which the text should be displayed on the switch.
+     * Sets the typeface in which the text should be displayed on the switch.
      * Note that not all Typeface families actually have bold and italic
      * variants, so you may need to use
      * {@link #setSwitchTypeface(Typeface, int)} to get the appearance
@@ -263,18 +272,14 @@ public class Switch extends CompoundButton {
     }
 
     /**
-     * Returns the text for when the button is in the checked state.
-     *
-     * @return The text.
+     * Returns the text displayed when the button is in the checked state.
      */
     public CharSequence getTextOn() {
         return mTextOn;
     }
 
     /**
-     * Sets the text for when the button is in the checked state.
-     *
-     * @param textOn The text.
+     * Sets the text displayed when the button is in the checked state.
      */
     public void setTextOn(CharSequence textOn) {
         mTextOn = textOn;
@@ -282,18 +287,14 @@ public class Switch extends CompoundButton {
     }
 
     /**
-     * Returns the text for when the button is not in the checked state.
-     *
-     * @return The text.
+     * Returns the text displayed when the button is not in the checked state.
      */
     public CharSequence getTextOff() {
         return mTextOff;
     }
 
     /**
-     * Sets the text for when the button is not in the checked state.
-     *
-     * @param textOff The text.
+     * Sets the text displayed when the button is not in the checked state.
      */
     public void setTextOff(CharSequence textOff) {
         mTextOff = textOff;
@@ -582,8 +583,11 @@ public class Switch extends CompoundButton {
         mThumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
         mThumbDrawable.draw(canvas);
 
-        mTextPaint.setColor(mTextColors.getColorForState(getDrawableState(),
-                mTextColors.getDefaultColor()));
+        // mTextColors should not be null, but just in case
+        if (mTextColors != null) {
+            mTextPaint.setColor(mTextColors.getColorForState(getDrawableState(),
+                    mTextColors.getDefaultColor()));
+        }
         mTextPaint.drawableState = getDrawableState();
 
         Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;

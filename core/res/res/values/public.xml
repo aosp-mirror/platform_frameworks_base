@@ -1713,6 +1713,11 @@
   <public type="attr" name="switchTextOn" />
   <public type="attr" name="switchTextOff" />
   <public type="attr" name="switchPreferenceStyle" />
+  <public type="attr" name="switchTextAppearance" />
+  <public type="attr" name="track" />
+  <public type="attr" name="switchMinWidth" />
+  <public type="attr" name="switchPadding" />
+  <public type="attr" name="thumbTextPadding" />
 
   <public type="attr" name="textSuggestionsWindowStyle" />
   <public type="attr" name="textEditSuggestionItemLayout" />

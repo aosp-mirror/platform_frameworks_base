@@ -725,6 +725,11 @@ please see styles_device_defaults.xml.
         <item name="android:quickContactWindowSize">modeLarge</item>
     </style>
 
+    <style name="Widget.CompoundButton.Switch">
+        <item name="android:textOn">@android:string/capital_on</item>
+        <item name="android:textOff">@android:string/capital_off</item>
+    </style>
+
     <!-- Text Appearances -->
     <eat-comment />
 
@@ -1919,8 +1924,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.CompoundButton.Switch">
-        <item name="android:switchTrack">@android:drawable/switch_track_holo_dark</item>
-        <item name="android:switchThumb">@android:drawable/switch_inner_holo_dark</item>
+        <item name="android:track">@android:drawable/switch_track_holo_dark</item>
+        <item name="android:thumb">@android:drawable/switch_inner_holo_dark</item>
         <item name="android:switchTextAppearance">@android:style/TextAppearance.Holo.Widget.Switch</item>
         <item name="android:textOn">@android:string/capital_on</item>
         <item name="android:textOff">@android:string/capital_off</item>
@@ -2291,6 +2296,17 @@ please see styles_device_defaults.xml.
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
         <item name="android:progressBarPadding">32dip</item>
         <item name="android:itemPadding">8dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.CompoundButton.Switch" parent="Widget.CompoundButton.Switch">
+        <item name="android:track">@android:drawable/switch_track_holo_light</item>
+        <item name="android:thumb">@android:drawable/switch_inner_holo_light</item>
+        <item name="android:switchTextAppearance">@android:style/TextAppearance.Holo.Widget.Switch</item>
+        <item name="android:textOn">@android:string/capital_on</item>
+        <item name="android:textOff">@android:string/capital_off</item>
+        <item name="android:thumbTextPadding">12dip</item>
+        <item name="android:switchMinWidth">96dip</item>
+        <item name="android:switchPadding">16dip</item>
     </style>
 
     <!-- Animation Styles -->
