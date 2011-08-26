@@ -470,19 +470,6 @@ public abstract class IccCard {
         } else if (isIccCardAdded) {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_ADDED, null));
         }
-
-
-
-        /*
-         * TODO: We need to try to remove this, maybe if the RIL sends up a RIL_UNSOL_SIM_REFRESH?
-         */
-        if (oldState != State.READY && newState == State.READY &&
-                mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) {
-            if (mPhone.mIccRecords instanceof SIMRecords) {
-                ((SIMRecords)mPhone.mIccRecords).onSimReady();
-            }
-        }
-
     }
 
     private void onIccSwap(boolean isAdded) {
@@ -720,17 +707,14 @@ public abstract class IccCard {
             currentRadioState == RadioState.SIM_NOT_READY     ||
             currentRadioState == RadioState.RUIM_NOT_READY    ||
             currentRadioState == RadioState.NV_NOT_READY      ||
-            (currentRadioState == RadioState.NV_READY &&
-                    (mPhone.getLteOnCdmaMode() != Phone.LTE_ON_CDMA_TRUE))) {
+            currentRadioState == RadioState.NV_READY) {
             return IccCard.State.NOT_READY;
         }
 
         if( currentRadioState == RadioState.SIM_LOCKED_OR_ABSENT  ||
             currentRadioState == RadioState.SIM_READY             ||
             currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
-            currentRadioState == RadioState.RUIM_READY ||
-            (currentRadioState == RadioState.NV_READY &&
-                    (mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE))) {
+            currentRadioState == RadioState.RUIM_READY) {
 
             State csimState =
                 getAppState(mIccCardStatus.getCdmaSubscriptionAppIndex());
