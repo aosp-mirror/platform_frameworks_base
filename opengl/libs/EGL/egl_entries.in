@@ -62,3 +62,8 @@ EGL_ENTRY(EGLBoolean,   eglGetSyncAttribKHR,    EGLDisplay, EGLSyncKHR, EGLint, 
 
 EGL_ENTRY(EGLBoolean, eglSetSwapRectangleANDROID, EGLDisplay, EGLSurface, EGLint, EGLint, EGLint, EGLint)
 EGL_ENTRY(EGLClientBuffer, eglGetRenderBufferANDROID, EGLDisplay, EGLSurface)
+
+/* NVIDIA extensions */
+
+EGL_ENTRY(EGLuint64NV, eglGetSystemTimeFrequencyNV, void)
+EGL_ENTRY(EGLuint64NV, eglGetSystemTimeNV, void)
