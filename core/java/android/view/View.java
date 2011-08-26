@@ -6434,8 +6434,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             if ((changed & VISIBILITY_MASK) != 0) {
                 /*
                  * If this view is becoming visible, invalidate it in case it changed while
-                 * it was not visible.
+                 * it was not visible. Marking it drawn ensures that the invalidation will
+                 * go through.
                  */
+                mPrivateFlags |= DRAWN;
                 invalidate(true);
 
                 needGlobalAttributesUpdate(true);
@@ -6454,11 +6456,17 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if ((changed & GONE) != 0) {
             needGlobalAttributesUpdate(false);
             requestLayout();
-            invalidate(true);
 
             if (((mViewFlags & VISIBILITY_MASK) == GONE)) {
                 if (hasFocus()) clearFocus();
                 destroyDrawingCache();
+                if (mParent instanceof View) {
+                    // GONE views noop invalidation, so invalidate the parent
+                    ((View) mParent).invalidate(true);
+                }
+                // Mark the view drawn to ensure that it gets invalidated properly the next
+                // time it is visible and gets invalidated
+                mPrivateFlags |= DRAWN;
             }
             if (mAttachInfo != null) {
                 mAttachInfo.mViewVisibilityChanged = true;
@@ -8074,6 +8082,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Do not invalidate views which are not visible and which are not running an animation. They
+     * will not get drawn and they should not set dirty flags as if they will be drawn
+     */
+    private boolean skipInvalidate() {
+        return (mViewFlags & VISIBILITY_MASK) != VISIBLE && mCurrentAnimation == null &&
+                (!(mParent instanceof ViewGroup) ||
+                        !((ViewGroup) mParent).isViewTransitioning(this));
+    }
+    /**
      * Mark the the area defined by dirty as needing to be drawn. If the view is
      * visible, {@link #onDraw(android.graphics.Canvas)} will be called at some point
      * in the future. This must be called from a UI thread. To call from a non-UI
@@ -8087,9 +8104,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE && mCurrentAnimation == null) {
-            // Noop for views which are not visible and which are not running an animation. They
-            // will not get drawn and they should not set dirty flags as if they will be drawn
+        if (skipInvalidate()) {
             return;
         }
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
@@ -8135,9 +8150,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE && mCurrentAnimation == null) {
-            // Noop for views which are not visible and which are not running an animation. They
-            // will not get drawn and they should not set dirty flags as if they will be drawn
+        if (skipInvalidate()) {
             return;
         }
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
@@ -8192,9 +8205,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE && mCurrentAnimation == null) {
-            // Noop for views which are not visible and which are not running an animation. They
-            // will not get drawn and they should not set dirty flags as if they will be drawn
+        if (skipInvalidate()) {
             return;
         }
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
@@ -8232,9 +8243,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @hide
      */
     public void fastInvalidate() {
-        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE && mCurrentAnimation == null) {
-            // Noop for views which are not visible and which are not running an animation. They
-            // will not get drawn and they should not set dirty flags as if they will be drawn
+        if (skipInvalidate()) {
             return;
         }
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
