@@ -24494,6 +24494,7 @@ package android.view.textservice {
     method public android.content.ComponentName getComponent();
     method public java.lang.String getId();
     method public java.lang.String getPackageName();
+    method public android.content.pm.ServiceInfo getServiceInfo();
     method public java.lang.String getSettingsActivity();
     method public android.view.textservice.SpellCheckerSubtype getSubtypeAt(int);
     method public int getSubtypeCount();
