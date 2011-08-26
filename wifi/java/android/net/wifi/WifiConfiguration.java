@@ -530,6 +530,7 @@ public class WifiConfiguration implements Parcelable {
         if (source != null) {
             networkId = source.networkId;
             status = source.status;
+            disableReason = source.disableReason;
             SSID = source.SSID;
             BSSID = source.BSSID;
             preSharedKey = source.preSharedKey;
