@@ -67,4 +67,23 @@ interface IPhoneSubInfo {
      * Retrieves the alpha identifier associated with the voice mail number.
      */
     String getVoiceMailAlphaTag();
+
+    /**
+     * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
+     * @return the IMPI, or null if not present or not loaded
+     */
+    String getIsimImpi();
+
+    /**
+     * Returns the IMS home network domain name that was loaded from the ISIM.
+     * @return the IMS domain name, or null if not present or not loaded
+     */
+    String getIsimDomain();
+
+    /**
+     * Returns the IMS public user identities (IMPU) that were loaded from the ISIM.
+     * @return an array of IMPU strings, with one IMPU per string, or null if
+     *      not present or not loaded
+     */
+    String[] getIsimImpu();
 }

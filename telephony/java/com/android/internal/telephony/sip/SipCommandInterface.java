@@ -186,7 +186,7 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
 
     public void setupDataCall(String radioTechnology, String profile,
             String apn, String user, String password, String authType,
-            String protcol, Message result) {
+            String protocol, Message result) {
     }
 
     public void deactivateDataCall(int cid, int reason, Message result) {
@@ -402,5 +402,8 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     @Override
     public void changeIccPin2ForApp(String oldPin2, String newPin2, String aidPtr,
             Message response) {
+    }
+
+    public void requestIsimAuthentication(String nonce, Message response) {
     }
 }
