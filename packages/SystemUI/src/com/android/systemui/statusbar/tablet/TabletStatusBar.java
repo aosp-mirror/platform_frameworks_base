@@ -879,12 +879,11 @@ public class TabletStatusBar extends StatusBar implements
             removeNotificationViews(key);
             addNotificationViews(key, notification);
         }
-        // fullScreenIntent doesn't happen on updates.  You need to clear & repost a new
-        // notification.
-        final boolean immersive = isImmersive();
-        if (false && immersive) {
-            // TODO: immersive mode
-        } else {
+
+        // Restart the ticker if it's still running
+        if (notification.notification.tickerText != null
+                && !TextUtils.equals(notification.notification.tickerText,
+                    oldEntry.notification.notification.tickerText)) {
             tick(key, notification, false);
         }
 
