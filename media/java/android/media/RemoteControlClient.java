@@ -722,20 +722,22 @@ public class RemoteControlClient
      */
 
     private Bitmap scaleBitmapIfTooBig(Bitmap bitmap, int maxWidth, int maxHeight) {
-        final int width = bitmap.getWidth();
-        final int height = bitmap.getHeight();
-        if (width > maxWidth || height > maxHeight) {
-            float scale = Math.min((float) maxWidth / width, (float) maxHeight / height);
-            int newWidth = Math.round(scale * width);
-            int newHeight = Math.round(scale * height);
-            Bitmap outBitmap = Bitmap.createBitmap(newWidth, newHeight, bitmap.getConfig());
-            Canvas canvas = new Canvas(outBitmap);
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setFilterBitmap(true);
-            canvas.drawBitmap(bitmap, null,
-                    new RectF(0, 0, outBitmap.getWidth(), outBitmap.getHeight()), paint);
-            bitmap = outBitmap;
+        if (bitmap != null) {
+            final int width = bitmap.getWidth();
+            final int height = bitmap.getHeight();
+            if (width > maxWidth || height > maxHeight) {
+                float scale = Math.min((float) maxWidth / width, (float) maxHeight / height);
+                int newWidth = Math.round(scale * width);
+                int newHeight = Math.round(scale * height);
+                Bitmap outBitmap = Bitmap.createBitmap(newWidth, newHeight, bitmap.getConfig());
+                Canvas canvas = new Canvas(outBitmap);
+                Paint paint = new Paint();
+                paint.setAntiAlias(true);
+                paint.setFilterBitmap(true);
+                canvas.drawBitmap(bitmap, null,
+                        new RectF(0, 0, outBitmap.getWidth(), outBitmap.getHeight()), paint);
+                bitmap = outBitmap;
+            }
         }
         return bitmap;
 
