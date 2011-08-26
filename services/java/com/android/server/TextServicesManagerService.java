@@ -131,6 +131,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (DBG) Slog.d(TAG, "Add: " + compName);
             try {
                 final SpellCheckerInfo sci = new SpellCheckerInfo(context, ri);
+                if (sci.getSubtypeCount() <= 0) {
+                    Slog.w(TAG, "Skipping text service " + compName
+                            + ": it does not contain subtypes.");
+                    continue;
+                }
                 list.add(sci);
                 map.put(sci.getId(), sci);
             } catch (XmlPullParserException e) {
@@ -186,9 +191,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
+    // TODO: Respect allowImplicitlySelectedSubtype
     // TODO: Save SpellCheckerSubtype by supported languages.
     @Override
-    public SpellCheckerSubtype getCurrentSpellCheckerSubtype(String locale) {
+    public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
+            String locale, boolean allowImplicitlySelectedSubtype) {
         synchronized (mSpellCheckerMap) {
             final String subtypeHashCodeStr =
                     Settings.Secure.getString(mContext.getContentResolver(),
@@ -207,8 +214,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 if (DBG) {
                     Slog.w(TAG, "Return first subtype in " + sci.getId());
                 }
-                // Return the first Subtype if there is no settings for the current subtype.
-                return sci.getSubtypeAt(0);
+                return null;
             }
             final int hashCode = Integer.valueOf(subtypeHashCodeStr);
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
@@ -223,7 +229,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (DBG) {
                 Slog.w(TAG, "Return first subtype in " + sci.getId());
             }
-            return sci.getSubtypeAt(0);
+            return null;
         }
     }
 
