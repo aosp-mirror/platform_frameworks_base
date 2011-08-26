@@ -39,6 +39,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     CDMALTEPhone mCdmaLtePhone;
 
     private ServiceState  mLteSS;  // The last LTE state from Voice Registration
+    private boolean mNeedToRegForSimLoaded = true;
 
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
@@ -71,7 +72,10 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             isSubscriptionFromRuim = false;
             // Register SIM_RECORDS_LOADED dynamically.
             // This is to avoid confilct with RUIM_READY scenario)
-            phone.mIccRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
+            if (mNeedToRegForSimLoaded) {
+                phone.mIccRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
+                mNeedToRegForSimLoaded = false;
+            }
             pollState();
             // Signal strength polling stops when radio is off.
             queueNextSignalStrengthPoll();
