@@ -54,7 +54,7 @@ public class Watchdog extends Thread {
 
     static final int MONITOR = 2718;
 
-    static final int TIME_TO_RESTART = DB ? 15*1000 : 60*1000;
+    static final int TIME_TO_RESTART = DB ? 15*1000000 : 60*1000000;
     static final int TIME_TO_WAIT = TIME_TO_RESTART / 2;
 
     static final int MEMCHECK_DEFAULT_MIN_SCREEN_OFF = DB ? 1*60 : 5*60;   // 5 minutes
