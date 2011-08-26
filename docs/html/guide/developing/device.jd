@@ -95,8 +95,7 @@ Ubuntu Linux:
           <li>Log in as root and create this file:
             <code>/etc/udev/rules.d/51-android.rules</code></span>.
             <p>Use this format to add each vendor to the file:<br/>
-              <code>SUBSYSTEM==&quot;usb&quot;, ATTR{idVendor}==&quot;0bb4&quot;,
-MODE=&quot;0666&quot;, GROUP=&quot;plugdev&quot;</code>
+              <code>SUBSYSTEM==&quot;usb&quot;, ATTR{idVendor}==&quot;0bb4&quot;, MODE=&quot;0666&quot;, GROUP=&quot;plugdev&quot;</code>
               <br /><br />
               
               In this example, the vendor ID is for HTC. The <code>MODE</code>
@@ -148,11 +147,11 @@ above.</p>
   </tr>
   <tr>
     <td>ASUS</td>
-    <td><code>0b05</code></td>
+    <td><code>0B05</code></td>
   </tr>
   <tr>
     <td>Dell</td>
-    <td><code>413c</code></td>
+    <td><code>413C</code></td>
   </tr>
   <tr>
     <td>Foxconn</td>
@@ -164,19 +163,19 @@ above.</p>
   </tr>
   <tr>
     <td>Google</td>
-    <td><code>18d1</code></td>
+    <td><code>18D1</code></td>
   </tr>
   <tr>
     <td>HTC</td>
-    <td><code>0bb4</code></td>
+    <td><code>0BB4</code></td>
   </tr>
   <tr>
     <td>Huawei</td>
-    <td><code>12d1</code></td>
+    <td><code>12D1</code></td>
   </tr>
   <tr>
     <td>K-Touch</td>
-    <td><code>24e3</code></td>
+    <td><code>24E3</code></td>
   </tr>
   <tr>
     <td>KT Tech</td>
@@ -196,7 +195,7 @@ above.</p>
   </tr>
   <tr>
     <td>Motorola</td>
-    <td><code>22b8</code></td>
+    <td><code>22B8</code></td>
   </tr>
   <tr>
     <td>NEC</td>
@@ -220,7 +219,7 @@ above.</p>
   </tr>
   <tr>
     <td>Pegatron</td>
-    <td><code>0x1D4D</code></td>
+    <td><code>1D4D</code></td>
   </tr>
   <tr>
     <td>Philips</td>
@@ -228,30 +227,27 @@ above.</p>
   </tr>
   <tr>
     <td>PMC-Sierra</td>
-    <td><code>04da</code></td>
+    <td><code>04DA</code></td>
   </tr>
   <tr>
     <td>Qualcomm</td>
-    <td><code>05c6</code></td>
+    <td><code>05C6</code></td>
   </tr>
   <tr>
     <td>SK Telesys</td>
-    <td><code>1f53</code></td>
+    <td><code>1F53</code></td>
   </tr>
   <tr>
-    <td>Pegatron</td>
-    <td><code>0x1D4D</code></td></tr>
-  <tr>
     <td>Samsung</td>
-    <td><code>04e8</code></td>
+    <td><code>04E8</code></td>
   </tr>
   <tr>
     <td>Sharp</td>
-    <td><code>04dd</code></td>
+    <td><code>04DD</code></td>
   </tr>
   <tr>
     <td>Sony Ericsson</td>
-    <td><code>0fce</code></td>
+    <td><code>0FCE</code></td>
   </tr>
   <tr>
     <td>Toshiba</td>
