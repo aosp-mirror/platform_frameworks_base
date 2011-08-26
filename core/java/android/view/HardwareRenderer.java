@@ -810,9 +810,9 @@ public abstract class HardwareRenderer {
             if (!mEglContext.equals(sEgl.eglGetCurrentContext()) ||
                     !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW))) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                    fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
                             GLUtils.getEGLErrorString(sEgl.eglGetError()));
+                    fallback(true);
                     return SURFACE_STATE_ERROR;
                 } else {
                     return SURFACE_STATE_UPDATED;
