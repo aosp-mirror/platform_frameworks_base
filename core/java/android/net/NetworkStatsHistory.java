@@ -482,12 +482,12 @@ public class NetworkStatsHistory implements Parcelable {
         for (int i = start; i < bucketCount; i++) {
             pw.print(prefix);
             pw.print("  bucketStart="); pw.print(bucketStart[i]);
-            if (activeTime != null) pw.print(" activeTime="); pw.print(activeTime[i]);
-            if (rxBytes != null) pw.print(" rxBytes="); pw.print(rxBytes[i]);
-            if (rxPackets != null) pw.print(" rxPackets="); pw.print(rxPackets[i]);
-            if (txBytes != null) pw.print(" txBytes="); pw.print(txBytes[i]);
-            if (txPackets != null) pw.print(" txPackets="); pw.print(txPackets[i]);
-            if (operations != null) pw.print(" operations="); pw.print(operations[i]);
+            if (activeTime != null) { pw.print(" activeTime="); pw.print(activeTime[i]); }
+            if (rxBytes != null) { pw.print(" rxBytes="); pw.print(rxBytes[i]); }
+            if (rxPackets != null) { pw.print(" rxPackets="); pw.print(rxPackets[i]); }
+            if (txBytes != null) { pw.print(" txBytes="); pw.print(txBytes[i]); }
+            if (txPackets != null) { pw.print(" txPackets="); pw.print(txPackets[i]); }
+            if (operations != null) { pw.print(" operations="); pw.print(operations[i]); }
             pw.println();
         }
     }

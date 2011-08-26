@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -51,10 +52,12 @@ import com.google.android.collect.Sets;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -288,7 +291,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         for (INetworkManagementEventObserver obs : mObservers) {
             try {
                 obs.limitReached(limitName, iface);
-                Slog.d(TAG, "Observer notified limit reached for " + limitName + " " + iface);
             } catch (Exception ex) {
                 Slog.w(TAG, "Observer notifier failed", ex);
             }
@@ -1031,7 +1033,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
-        final HashSet<String> activeIfaces = Sets.newHashSet();
         final ArrayList<String> values = Lists.newArrayList();
 
         BufferedReader reader = null;
@@ -1057,7 +1058,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     entry.txBytes = Long.parseLong(values.get(9));
                     entry.txPackets = Long.parseLong(values.get(10));
 
-                    activeIfaces.add(entry.iface);
                     stats.addValues(entry);
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
@@ -1073,14 +1073,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             IoUtils.closeQuietly(reader);
         }
 
-        if (DBG) Slog.d(TAG, "recorded active stats from " + activeIfaces);
-
-        // splice in stats from any disabled ifaces
+        // splice in historical stats not reflected in mStatsIface
         if (mBandwidthControlEnabled) {
-            final HashSet<String> xtIfaces = Sets.newHashSet(fileListWithoutNull(mStatsXtIface));
-            xtIfaces.removeAll(activeIfaces);
-
-            for (String iface : xtIfaces) {
+            for (String iface : fileListWithoutNull(mStatsXtIface)) {
                 final File ifacePath = new File(mStatsXtIface, iface);
 
                 entry.iface = iface;
@@ -1092,10 +1087,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 entry.txBytes = readSingleLongFromFile(new File(ifacePath, "tx_bytes"));
                 entry.txPackets = readSingleLongFromFile(new File(ifacePath, "tx_packets"));
 
-                stats.addValues(entry);
+                stats.combineValues(entry);
             }
-
-            if (DBG) Slog.d(TAG, "recorded stale stats from " + xtIfaces);
         }
 
         return stats;
@@ -1581,6 +1574,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void monitor() {
         if (mConnector != null) {
             mConnector.monitor();
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+
+        pw.print("Bandwidth control enabled: "); pw.println(mBandwidthControlEnabled);
+
+        synchronized (mQuotaLock) {
+            pw.print("Active quota ifaces: "); pw.println(mActiveQuotaIfaces.toString());
+            pw.print("Active alert ifaces: "); pw.println(mActiveAlertIfaces.toString());
+        }
+
+        synchronized (mUidRejectOnQuota) {
+            pw.print("UID reject on quota ifaces: [");
+            final int size = mUidRejectOnQuota.size();
+            for (int i = 0; i < size; i++) {
+                pw.print(mUidRejectOnQuota.keyAt(i));
+                if (i < size - 1) pw.print(",");
+            }
+            pw.println("]");
         }
     }
 }

@@ -117,6 +117,18 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         assertStatsEntry(stats, "wlan0", UID_ALL, SET_DEFAULT, TAG_NONE, 1024L, 2048L);
     }
 
+    public void testNetworkStatsCombined() throws Exception {
+        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
+        stageLong(10L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_bytes"));
+        stageLong(20L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_packets"));
+        stageLong(30L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_bytes"));
+        stageLong(40L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_packets"));
+
+        final NetworkStats stats = mService.getNetworkStatsSummary();
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L + 10L,
+                2205L + 20L, 489339L + 30L, 2237L + 40L);
+    }
+
     public void testKernelTags() throws Exception {
         assertEquals("0", tagToKernel(0x0));
         assertEquals("214748364800", tagToKernel(0x32));
