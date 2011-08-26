@@ -77,6 +77,10 @@ public final class TextServicesManager {
         if (listener == null) {
             throw new NullPointerException();
         }
+        if (!referToSpellCheckerLanguageSettings && locale == null) {
+            throw new IllegalArgumentException("Locale should not be null if you don't refer"
+                    + " settings.");
+        }
         final SpellCheckerInfo sci;
         try {
             sci = sService.getCurrentSpellChecker(null);
@@ -101,9 +105,10 @@ public final class TextServicesManager {
                 }
             }
         } else {
+            final String localeStr = locale.toString();
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype subtype = sci.getSubtypeAt(i);
-                if (subtype.getLocale().equals(locale)) {
+                if (subtype.getLocale().equals(localeStr)) {
                     subtypeInUse = subtype;
                 }
             }
