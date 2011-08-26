@@ -27,7 +27,8 @@
 namespace android {
 
 ALooperRoster::ALooperRoster()
-    : mNextHandlerID(1) {
+    : mNextHandlerID(1),
+      mNextReplyID(1) {
 }
 
 ALooper::handler_id ALooperRoster::registerHandler(
@@ -70,15 +71,19 @@ void ALooperRoster::unregisterHandler(ALooper::handler_id handlerID) {
     mHandlers.removeItemsAt(index);
 }
 
-void ALooperRoster::postMessage(
+status_t ALooperRoster::postMessage(
         const sp<AMessage> &msg, int64_t delayUs) {
     Mutex::Autolock autoLock(mLock);
+    return postMessage_l(msg, delayUs);
+}
 
+status_t ALooperRoster::postMessage_l(
+        const sp<AMessage> &msg, int64_t delayUs) {
     ssize_t index = mHandlers.indexOfKey(msg->target());
 
     if (index < 0) {
         LOGW("failed to post message. Target handler not registered.");
-        return;
+        return -ENOENT;
     }
 
     const HandlerInfo &info = mHandlers.valueAt(index);
@@ -91,10 +96,12 @@ void ALooperRoster::postMessage(
              msg->target());
 
         mHandlers.removeItemsAt(index);
-        return;
+        return -ENOENT;
     }
 
     looper->post(msg, delayUs);
+
+    return OK;
 }
 
 void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
@@ -143,6 +150,40 @@ sp<ALooper> ALooperRoster::findLooper(ALooper::handler_id handlerID) {
     }
 
     return looper;
+}
+
+status_t ALooperRoster::postAndAwaitResponse(
+        const sp<AMessage> &msg, sp<AMessage> *response) {
+    Mutex::Autolock autoLock(mLock);
+
+    uint32_t replyID = mNextReplyID++;
+
+    msg->setInt32("replyID", replyID);
+
+    status_t err = postMessage_l(msg, 0 /* delayUs */);
+
+    if (err != OK) {
+        response->clear();
+        return err;
+    }
+
+    ssize_t index;
+    while ((index = mReplies.indexOfKey(replyID)) < 0) {
+        mRepliesCondition.wait(mLock);
+    }
+
+    *response = mReplies.valueAt(index);
+    mReplies.removeItemsAt(index);
+
+    return OK;
+}
+
+void ALooperRoster::postReply(uint32_t replyID, const sp<AMessage> &reply) {
+    Mutex::Autolock autoLock(mLock);
+
+    CHECK(mReplies.indexOfKey(replyID) < 0);
+    mReplies.add(replyID, reply);
+    mRepliesCondition.broadcast();
 }
 
 }  // namespace android
