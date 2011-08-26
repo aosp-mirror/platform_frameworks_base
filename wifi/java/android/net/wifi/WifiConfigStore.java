@@ -376,7 +376,8 @@ class WifiConfigStore {
         boolean ret = WifiNative.disableNetworkCommand(netId);
         synchronized (sConfiguredNetworks) {
             WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null) {
+            /* Only change the reason if the network was not previously disabled */
+            if (config != null && config.status != Status.DISABLED) {
                 config.status = Status.DISABLED;
                 config.disableReason = reason;
             }
@@ -610,7 +611,10 @@ class WifiConfigStore {
         synchronized (sConfiguredNetworks) {
             for(WifiConfiguration config : sConfiguredNetworks.values()) {
                 if(config != null && config.networkId != netId) {
-                    config.status = Status.DISABLED;
+                    if (config.status != Status.DISABLED) {
+                        config.status = Status.DISABLED;
+                        config.disableReason = WifiConfiguration.DISABLED_UNKNOWN_REASON;
+                    }
                 }
             }
         }
