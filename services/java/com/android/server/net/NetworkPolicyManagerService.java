@@ -133,6 +133,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import libcore.io.IoUtils;
 
@@ -766,9 +767,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     && totalBytes > policy.limitBytes && policy.lastSnooze < start;
             final boolean enabled = !overLimit;
 
-            if (LOGD) {
-                Slog.d(TAG, "setting template=" + policy.template + " enabled=" + enabled);
-            }
             setNetworkTemplateEnabled(policy.template, enabled);
         }
     }
@@ -835,9 +833,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // collect all active ifaces that match this template
             ifaceList.clear();
-            for (NetworkIdentity ident : networks.keySet()) {
+            for (Map.Entry<NetworkIdentity, String> entry : networks.entrySet()) {
+                final NetworkIdentity ident = entry.getKey();
                 if (policy.template.matches(ident)) {
-                    final String iface = networks.get(ident);
+                    final String iface = entry.getValue();
                     ifaceList.add(iface);
                 }
             }

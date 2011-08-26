@@ -707,7 +707,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     mLastPersistUidSnapshot, uidSnapshot, true);
             if (forcePersist || persistUidDelta.getTotalBytes() > persistThreshold) {
                 writeUidStatsLocked();
-                mLastPersistNetworkSnapshot = networkSnapshot;
+                mLastPersistUidSnapshot = networkSnapshot;
             }
         }
 
