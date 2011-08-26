@@ -395,29 +395,40 @@ void NuPlayer::Renderer::onQueueBuffer(const sp<AMessage> &msg) {
         postDrainVideoQueue();
     }
 
-    if (mSyncQueues && !mAudioQueue.empty() && !mVideoQueue.empty()) {
-        int64_t firstAudioTimeUs;
-        int64_t firstVideoTimeUs;
-        CHECK((*mAudioQueue.begin()).mBuffer->meta()
-                ->findInt64("timeUs", &firstAudioTimeUs));
-        CHECK((*mVideoQueue.begin()).mBuffer->meta()
-                ->findInt64("timeUs", &firstVideoTimeUs));
-
-        int64_t diff = firstVideoTimeUs - firstAudioTimeUs;
-
-        LOGV("queueDiff = %.2f secs", diff / 1E6);
-
-        if (diff > 100000ll) {
-            // Audio data starts More than 0.1 secs before video.
-            // Drop some audio.
-
-            (*mAudioQueue.begin()).mNotifyConsumed->post();
-            mAudioQueue.erase(mAudioQueue.begin());
-            return;
-        }
-
-        syncQueuesDone();
+    if (!mSyncQueues || mAudioQueue.empty() || mVideoQueue.empty()) {
+        return;
     }
+
+    sp<ABuffer> firstAudioBuffer = (*mAudioQueue.begin()).mBuffer;
+    sp<ABuffer> firstVideoBuffer = (*mVideoQueue.begin()).mBuffer;
+
+    if (firstAudioBuffer == NULL || firstVideoBuffer == NULL) {
+        // EOS signalled on either queue.
+        syncQueuesDone();
+        return;
+    }
+
+    int64_t firstAudioTimeUs;
+    int64_t firstVideoTimeUs;
+    CHECK(firstAudioBuffer->meta()
+            ->findInt64("timeUs", &firstAudioTimeUs));
+    CHECK(firstVideoBuffer->meta()
+            ->findInt64("timeUs", &firstVideoTimeUs));
+
+    int64_t diff = firstVideoTimeUs - firstAudioTimeUs;
+
+    LOGV("queueDiff = %.2f secs", diff / 1E6);
+
+    if (diff > 100000ll) {
+        // Audio data starts More than 0.1 secs before video.
+        // Drop some audio.
+
+        (*mAudioQueue.begin()).mNotifyConsumed->post();
+        mAudioQueue.erase(mAudioQueue.begin());
+        return;
+    }
+
+    syncQueuesDone();
 }
 
 void NuPlayer::Renderer::syncQueuesDone() {

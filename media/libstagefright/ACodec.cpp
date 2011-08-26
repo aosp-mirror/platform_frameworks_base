@@ -1738,7 +1738,17 @@ ACodec::LoadedToIdleState::LoadedToIdleState(ACodec *codec)
 void ACodec::LoadedToIdleState::stateEntered() {
     LOGV("[%s] Now Loaded->Idle", mCodec->mComponentName.c_str());
 
-    CHECK_EQ(allocateBuffers(), (status_t)OK);
+    status_t err;
+    if ((err = allocateBuffers()) != OK) {
+        LOGE("Failed to allocate buffers after transitioning to IDLE state "
+             "(error 0x%08x)",
+             err);
+
+        sp<AMessage> notify = mCodec->mNotify->dup();
+        notify->setInt32("what", ACodec::kWhatError);
+        notify->setInt32("omx-error", OMX_ErrorUndefined);
+        notify->post();
+    }
 }
 
 status_t ACodec::LoadedToIdleState::allocateBuffers() {
@@ -2046,8 +2056,18 @@ bool ACodec::OutputPortSettingsChangedState::onOMXEvent(
                             mCodec->mNode, OMX_CommandPortEnable, kPortIndexOutput),
                          (status_t)OK);
 
-                CHECK_EQ(mCodec->allocateBuffersOnPort(kPortIndexOutput),
-                         (status_t)OK);
+                status_t err;
+                if ((err = mCodec->allocateBuffersOnPort(
+                                kPortIndexOutput)) != OK) {
+                    LOGE("Failed to allocate output port buffers after "
+                         "port reconfiguration (error 0x%08x)",
+                         err);
+
+                    sp<AMessage> notify = mCodec->mNotify->dup();
+                    notify->setInt32("what", ACodec::kWhatError);
+                    notify->setInt32("omx-error", OMX_ErrorUndefined);
+                    notify->post();
+                }
 
                 return true;
             } else if (data1 == (OMX_U32)OMX_CommandPortEnable) {

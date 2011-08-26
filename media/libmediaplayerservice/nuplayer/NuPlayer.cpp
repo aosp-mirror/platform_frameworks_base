@@ -316,9 +316,11 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                                 &cropLeft, &cropTop, &cropRight, &cropBottom));
 
                     LOGV("Video output format changed to %d x %d "
-                         "(crop: %d, %d, %d, %d)",
+                         "(crop: %d x %d @ (%d, %d))",
                          width, height,
-                         cropLeft, cropTop, cropRight, cropBottom);
+                         (cropRight - cropLeft + 1),
+                         (cropBottom - cropTop + 1),
+                         cropLeft, cropTop);
 
                     notifyListener(
                             MEDIA_SET_VIDEO_SIZE,
