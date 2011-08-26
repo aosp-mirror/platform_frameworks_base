@@ -217,6 +217,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 return null;
             }
             final int hashCode = Integer.valueOf(subtypeHashCodeStr);
+            if (hashCode == 0) {
+                return null;
+            }
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
                 if (scs.hashCode() == hashCode) {
@@ -416,21 +419,17 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.w(TAG, "setCurrentSpellCheckerSubtype: " + hashCode);
         }
         final SpellCheckerInfo sci = getCurrentSpellChecker(null);
-        if (sci == null) return;
-        boolean found = false;
-        for (int i = 0; i < sci.getSubtypeCount(); ++i) {
+        int tempHashCode = 0;
+        for (int i = 0; sci != null && i < sci.getSubtypeCount(); ++i) {
             if(sci.getSubtypeAt(i).hashCode() == hashCode) {
-                found = true;
+                tempHashCode = hashCode;
                 break;
             }
-        }
-        if (!found) {
-            return;
         }
         final long ident = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, String.valueOf(hashCode));
+                    Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, String.valueOf(tempHashCode));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
