@@ -608,6 +608,9 @@ status_t SurfaceTexture::disconnect(int api) {
             if (mConnectedApi == api) {
                 drainQueueAndFreeBuffersLocked();
                 mConnectedApi = NO_CONNECTED_API;
+                mNextCrop.makeInvalid();
+                mNextScalingMode = NATIVE_WINDOW_SCALING_MODE_FREEZE;
+                mNextTransform = 0;
                 mDequeueCondition.signal();
             } else {
                 LOGE("disconnect: connected to another api (cur=%d, req=%d)",
@@ -1022,7 +1025,7 @@ void SurfaceTexture::dump(String8& result, const char* prefix,
             mCurrentCrop.top, mCurrentCrop.right, mCurrentCrop.bottom,
             mCurrentTransform, mCurrentTexture,
             prefix, mNextCrop.left, mNextCrop.top, mNextCrop.right, mNextCrop.bottom,
-            mCurrentTransform, fifoSize, fifo.string()
+            mNextTransform, fifoSize, fifo.string()
     );
     result.append(buffer);
 

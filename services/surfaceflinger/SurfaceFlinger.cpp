@@ -2211,10 +2211,13 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     const size_t count = layers.size();
     for (size_t i=0 ; i<count ; ++i) {
         const sp<LayerBase>& layer(layers[i]);
-        const uint32_t z = layer->drawingState().z;
-        if (z >= minLayerZ && z <= maxLayerZ) {
-            if (layer->isProtected()) {
-                return INVALID_OPERATION;
+        const uint32_t flags = layer->drawingState().flags;
+        if (!(flags & ISurfaceComposer::eLayerHidden)) {
+            const uint32_t z = layer->drawingState().z;
+            if (z >= minLayerZ && z <= maxLayerZ) {
+                if (layer->isProtected()) {
+                    return INVALID_OPERATION;
+                }
             }
         }
     }
@@ -2270,9 +2273,12 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
 
         for (size_t i=0 ; i<count ; ++i) {
             const sp<LayerBase>& layer(layers[i]);
-            const uint32_t z = layer->drawingState().z;
-            if (z >= minLayerZ && z <= maxLayerZ) {
-                layer->drawForSreenShot();
+            const uint32_t flags = layer->drawingState().flags;
+            if (!(flags & ISurfaceComposer::eLayerHidden)) {
+                const uint32_t z = layer->drawingState().z;
+                if (z >= minLayerZ && z <= maxLayerZ) {
+                    layer->drawForSreenShot();
+                }
             }
         }
 
