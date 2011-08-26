@@ -32,11 +32,6 @@ public class LocaleUtil {
     /**
      * @hide Do not use. Implementation not finished.
      */
-    public static final int TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE = -1;
-
-    /**
-     * @hide Do not use. Implementation not finished.
-     */
     public static final int TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE = 0;
 
     /**
@@ -54,7 +49,6 @@ public class LocaleUtil {
      *
      * @param locale the Locale for which we want the layout direction. Can be null.
      * @return the layout direction. This may be one of:
-     * {@link #TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE} or
      * {@link #TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE} or
      * {@link #TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE}.
      *
@@ -63,17 +57,16 @@ public class LocaleUtil {
      * @hide
      */
     public static int getLayoutDirectionFromLocale(Locale locale) {
-        if (locale == null || locale.equals(Locale.ROOT)) {
-            return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
+        if (locale != null && !locale.equals(Locale.ROOT)) {
+            final String scriptSubtag = ICU.getScript(ICU.addLikelySubtags(locale.toString()));
+            if (scriptSubtag == null) return getLayoutDirectionFromFirstChar(locale);
+
+            if (scriptSubtag.equalsIgnoreCase(ARAB_SCRIPT_SUBTAG) ||
+                    scriptSubtag.equalsIgnoreCase(HEBR_SCRIPT_SUBTAG)) {
+                return TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE;
+            }
         }
 
-        final String scriptSubtag = ICU.getScript(ICU.addLikelySubtags(locale.toString()));
-        if (scriptSubtag == null) return getLayoutDirectionFromFirstChar(locale);
-
-        if (scriptSubtag.equalsIgnoreCase(ARAB_SCRIPT_SUBTAG) ||
-                scriptSubtag.equalsIgnoreCase(HEBR_SCRIPT_SUBTAG)) {
-            return TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE;
-        }
         return TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
     }
 
@@ -84,7 +77,6 @@ public class LocaleUtil {
      *
      * @param locale
      * @return the layout direction. This may be one of:
-     * {@link #TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE} or
      * {@link #TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE} or
      * {@link #TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE}.
      *
@@ -94,13 +86,13 @@ public class LocaleUtil {
      */
     private static int getLayoutDirectionFromFirstChar(Locale locale) {
         switch(Character.getDirectionality(locale.getDisplayName(locale).charAt(0))) {
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-                return TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
                 return TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE;
+
+            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
             default:
-                return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
+                return TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
         }
     }
 }

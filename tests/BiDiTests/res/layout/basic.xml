@@ -27,11 +27,18 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content">
 
-            <Button android:id="@+id/button"
+            <TextView android:id="@+id/textview_password_default"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button_text"
                     android:textSize="32dip"
+                    android:text="@string/textview_password_default_text"
+            />
+
+            <EditText android:id="@+id/edittext_password_default"
+                      android:layout_height="wrap_content"
+                      android:layout_width="match_parent"
+                      android:textSize="32dip"
+                      android:password="true"
                     />
 
             <TextView android:id="@+id/textview_default"
