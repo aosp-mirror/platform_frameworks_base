@@ -117,7 +117,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G подаци су онемогућени"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Подаци мобилне мреже су онемогућени"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Подаци су онемогућени"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Достигнуто је наведено ограничење потрошње података."\n\n"Мобилни оператер може додатно да наплати додатну потрошњу података."</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Достигнуто је наведено ограничење потрошње података."\n\n"Мобилни оператер може додатно да наплати даљу потрошњу података."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Поново омогући податке"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет везе"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi је повезан"</string>

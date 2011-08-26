@@ -96,7 +96,7 @@
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"„Wi-Fi“ signalas stiprus."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Kraštas"</string>
@@ -117,7 +117,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G duomenys neleidžiami"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilieji duomenys neleidžiami"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Duomenys neleidžiami"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Pasiektas nurodytas duomenų naudojimo apribojimas."\n\n"Naudojant papildomus duomenis gali būti taikomi operatoriaus mokesčiai."</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Pasiektas nurodytas duomenų naudojimo apribojimas."\n\n"Naudojant papildomų duomenų gali būti taikomi operatoriaus mokesčiai."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Iš naujo įgalinti duomenis"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nėra interneto ryš."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Prisij. prie „Wi-Fi“"</string>

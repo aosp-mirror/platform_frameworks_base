@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Er is een volledige back-up van alle gegevens naar een verbonden desktopcomputer aangevraagd. Wilt u dit toestaan?"\n\n"Als u de back-up zelf niet heeft aangevraagd, moet u niet toestaan dat de bewerking wordt uitgevoerd."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Back-up maken van mijn gegevens"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Geen back-up maken"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Er is volledig herstel van alle gegevens van een verbonden desktopcomputer aangevraagd. Wilt u dit toestaan?"\n\n"Als u het herstel zelf niet heeft aangevraagd, moet u niet toestaan dat de bewerking wordt uitgevoerd. Bij herstel worden alle gegevens op het apparaat vervangen."</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Mijn gegevens herstellen"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Niet herstellen"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Geef hieronder uw huidige back-upwachtwoord op:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Geef een wachtwoord op dat u wilt gebruiken voor het coderen van de gegevens van de volledige back-up. Als u dit leeg laat, wordt uw huidige back-upwachtwoord gebruikt:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Als u de gegevens van de volledige back-up wilt coderen, geeft u daarvoor hieronder een wachtwoord op:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Als deze herstelgegevens zijn gecodeerd, geeft u hieronder het wachtwoord op:"</string>
+</resources>

@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Authentication was unsuccessful."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Authentication via the proxy server was unsuccessful."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"The connection to the server was unsuccessful."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"The server failed to communicate. Try again later."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"The server couldn\'t communicate. Try again later."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"The connection to the server timed out."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"The page contains too many server redirects."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"The protocol is not supported."</string>
@@ -671,6 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"You have entered your PIN incorrectly <xliff:g id="NUMBER_0">%d</xliff:g> times. "\n\n"Please try again in <xliff:g id="NUMBER_1">%d</xliff:g> seconds."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"You have drawn your unlock pattern incorrectly <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your tablet using your Google sign-in."\n\n" Please try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"You have drawn your unlock pattern incorrectly <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using your Google sign-in."\n\n" Please try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, the tablet will be reset to factory default and all user data will be lost."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, the phone will be reset to factory default and all user data will be lost."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER">%d</xliff:g> times. The tablet will now be reset to factory default."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER">%d</xliff:g> times. The phone will now be reset to factory default."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Try again in <xliff:g id="NUMBER">%d</xliff:g> seconds."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Forgotten pattern?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Account unlock"</string>
@@ -850,7 +854,7 @@
     <string name="cut" msgid="3092569408438626261">"Cut"</string>
     <string name="copy" msgid="2681946229533511987">"Copy"</string>
     <string name="paste" msgid="5629880836805036433">"Paste"</string>
-    <string name="replace" msgid="8333608224471746584">"Replace"</string>
+    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Replace"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copy URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Select text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Text selection"</string>
@@ -874,10 +878,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Select an application for the USB device"</string>
     <string name="noApplications" msgid="1691104391758345586">"No applications can perform this action."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"Unfortunately, <xliff:g id="APPLICATION">%1$s</xliff:g> has stopped."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Unfortunately, the process <xliff:g id="PROCESS">%1$s</xliff:g> has stopped."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> is not responding."\n\n"Would you like to close it?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Activity <xliff:g id="ACTIVITY">%1$s</xliff:g> is not responding."\n\n"Would you like to close it?"</string>
@@ -894,6 +896,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Reenable this with Settings &gt; Applications &gt; Manage applications."</string>
     <string name="smv_application" msgid="295583804361236288">"The application <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) has violated its self-enforced StrictMode policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"The process <xliff:g id="PROCESS">%1$s</xliff:g> has violated its self-enforced StrictMode policy."</string>
+    <string name="android_upgrading_title" msgid="378740715658358071">"Android is upgrading..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Optimising application <xliff:g id="NUMBER_0">%1$d</xliff:g> of <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Start applications."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Finishing boot."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> running"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Select to switch to application"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Switch applications?"</string>
@@ -934,7 +940,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"has a poor Internet connection."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Start Wi-Fi Direct operation. This will turn off Wi-Fi client/hot-spot operation."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Failed to start Wi-Fi Direct"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Couldn\'t start Wi-Fi Direct"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct connection setup request from <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Click OK to accept."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct connection setup request from <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Enter PIN to proceed."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS pin <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> needs to be entered on the peer device <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> for connection setup to proceed"</string>
@@ -975,7 +981,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"We\'ve encountered a problem turning off USB storage. Check to ensure that you have unmounted the USB host, then try again."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Turn off USB storage"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"If you turn on USB storage, some applications that you are using will stop and may be unavailable until you turn off USB storage."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB operation failed"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"USB operation unsuccessful"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connected as a media device"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Connected as a camera"</string>
@@ -1075,8 +1081,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Unmounting SD card..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Erasing USB storage..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Erasing SD card..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Failed to erase USB storage."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Failed to erase USB storage."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Couldn\'t erase USB storage."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"Couldn\'t erase SD card."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD card was removed before being unmounted."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB storage is currently being checked."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD card is currently being checked."</string>
@@ -1108,6 +1114,14 @@
     <string name="switch_off" msgid="7249798614327155088">"off"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"pressed"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"not pressed"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Cancel"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Done"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mode change"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Key. Headset required to hear keys while typing a password."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigate home"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigate up"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"More options"</string>
@@ -1120,15 +1134,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G data disabled"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G data disabled"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobile data disabled"</string>
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"Tap to enable"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi data disabled"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"Touch to enable"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G data limit exceeded"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G data limit exceeded"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobile data limit exceeded"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi data limit exceeded"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> over specified limit"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Background data restricted"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Touch to remove restriction"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Security certificate"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"This certificate is valid."</string>
     <string name="issued_to" msgid="454239480274921032">"Issued to:"</string>
@@ -1147,6 +1161,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Select activity"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Share with..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Device locked."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

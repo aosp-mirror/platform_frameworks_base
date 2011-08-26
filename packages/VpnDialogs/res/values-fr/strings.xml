@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"L\'application <xliff:g id="APP">%s</xliff:g> tente de créer une connexion VPN."</string>
+    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> tente de créer une connexion VPN."</string>
     <string name="warning" msgid="5470743576660160079">"En continuant, vous autorisez l\'application à intercepter l\'ensemble du trafic réseau. "<b>"N\'acceptez PAS, sauf si vous avez confiance en l\'application."</b>"Sinon, vos données risquent d\'être piratées par un logiciel malveillant."</string>
     <string name="accept" msgid="2889226408765810173">"J\'ai confiance en cette application."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN connecté"</string>

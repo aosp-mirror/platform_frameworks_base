@@ -195,10 +195,8 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Dovoli programu, da sprejme in obdela sporočila oddaj v sili. To dovoljenje je na voljo samo za sistemske programe."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"pošiljanje sporočil SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Programom dovoljuje pošiljanje sporočil SMS. Zlonamerni programi lahko pošiljajo sporočila brez vaše potrditve, kar vas lahko drago stane."</string>
-    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
-    <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
-    <skip />
+    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"pošiljanje SMS-ov brez potrditve"</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"Programu omogoča pošiljanje SMS-ov. Zlonamerni programi lahko pošiljajo SMS-e brez vaše potrditve, kar vas lahko drago stane."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"branje sporočil SMS ali MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Programu omogoča branje sporočil SMS, shranjenih v tabličnem računalniku ali na kartici SIM. Zlonamerni programi lahko preberejo vaša zaupna sporočila."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Programu dovoljuje branje sporočil SMS, shranjenih v telefonu ali na kartici SIM. Zlonamerni programi lahko berejo vaša zaupna sporočila."</string>
@@ -327,10 +325,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje podatkov stika"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Programu omogoča spreminjanje podatkov (naslovov), shranjenih v tabličnem računalniku. Zlonamerni programi lahko s tem dovoljenjem izbrišejo ali spremenijo podatke o stikih."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Programu dovoljuje spreminjanje podatkov stika (naslov), shranjenih v telefonu. Zlonamerni programi lahko to uporabijo za brisanje ali spreminjanje podatkov stika."</string>
-    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"branje podatkov profila"</string>
-    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Programu omogoča branje podatkov o osebnem profilu. Zlonamerni programi lahko to izkoristijo, da vas prepoznajo in drugim pošiljajo vaše osebne podatke."</string>
-    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje podatkov o profilu"</string>
-    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Programu omogoča spreminjanje podatkov o osebnem profilu. Zlonamerni programi lahko to izkoristijo za brisanje ali spreminjanje podatkov o profilu."</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"branje podatkov v profilu"</string>
+    <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Programu omogoča branje podatkov v osebnem profilu, shranjenih v napravi, na primer imen in podatkov za stik. To pomeni, da lahko program ugotovi, kdo ste, in pošlje podatke v profilu drugim."</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje v podatke v profilu"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Programu omogoča spreminjanje in dodajanje podatkov med podatke v osebnem profilu, shranjene v napravi, na primer imena in podatke za stik. To pomeni, da lahko program ugotovi, kdo ste, in pošlje podatke v profilu drugim."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"branje dogodkov v koledarju in zaupnih podatkov"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Programu dovoli, da bere dogodke v koledarju, shranjene v tabličnem računalniku, vključno z dogodki prijateljev in sodelavcev. Zlonamerni program lahko iz njih dobi osebne podatke brez vednosti lastnika."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Programu dovoli branje vseh dogodkov koledarja, shranjenih v telefonu, vključno z dogodki prijateljev in sodelavcev. Zlonamerni program lahko iz njih pridobi osebne podatke brez vednosti lastnika."</string>
@@ -445,8 +443,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Programu dovoljuje ogled stanja vseh omrežij."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"poln dostop do interneta"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Dovoljuje, da program ustvari vtičnice omrežja."</string>
-    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"pisanje nastavitev imena dostopne točke"</string>
-    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Programu dovoljuje spreminjanje nastavitev APN, kot je strežnik proxy in vrata poljubnega APN."</string>
+    <string name="permlab_writeApnSettings" msgid="505660159675751896">"spreminjanje/prestrezanje omrežnih nastavitev in prometa"</string>
+    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Programu omogoča spreminjanje omrežnih nastavitev ter prestrezanje in pregledovanje vsega omrežnega prometa, na primer spreminjanje proxyja in vrat katerega koli APN-ja. Zlonamerni programi lahko brez vaše vednosti nadzirajo, preusmerjajo ali spreminjajo omrežne pakete."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"spreminjanje povezljivosti omrežja"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Programu dovoljuje spreminjanje stanja povezljivosti omrežja."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Spreminjanje posredniške povezljivosti"</string>
@@ -673,6 +671,14 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"<xliff:g id="NUMBER_0">%d</xliff:g>-krat ste vnesli napačen PIN. "\n\n"Poskusite znova čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"<xliff:g id="NUMBER_0">%d</xliff:g>-krat ste narisali napačen vzorec za odklepanje. Če vam tudi v <xliff:g id="NUMBER_1">%d</xliff:g>. ne uspe, boste tablični računalnik morali odkleniti s podatki za prijavo v Google."\n\n" Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vzorec za odklepanje ste nepravilno vnesli <xliff:g id="NUMBER_0">%d</xliff:g>-krat. Po <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n" Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> sekund."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekund."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Ali ste pozabili vzorec?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Odklepanje računa"</string>
@@ -730,14 +736,10 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Programu dovoljuje dodajanje sporočil prejetim sporočilom odzivnika."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Spreminjanje dovoljenj za geolokacijo brskalnika"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Programu dovoljuje spreminjanje dovoljenja brskalnika za geografske lokacije. Zlonamerni programi lahko s tem dovoljenjem dovolijo pošiljanje podatkov o lokaciji poljubnim spletnim mestom."</string>
-    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
-    <skip />
-    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
-    <skip />
-    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
-    <skip />
+    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"preveri pakete"</string>
+    <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Programu omogoča, da preveri, ali je paket mogoče namestiti."</string>
+    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"poveži s preverjanjem paketov"</string>
+    <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Imetniku omogoča zahtevanje preverjanja paketov. Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ali želite, da si brskalnik zapomni to geslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne zdaj"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapomni si"</string>
@@ -750,16 +752,11 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"vnesi"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"izbriši"</string>
     <string name="search_go" msgid="8298016669822141719">"Iskanje"</string>
-    <!-- no translation found for searchview_description_search (6749826639098512120) -->
-    <skip />
-    <!-- no translation found for searchview_description_query (5911778593125355124) -->
-    <skip />
-    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
-    <skip />
-    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
-    <skip />
-    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
-    <skip />
+    <string name="searchview_description_search" msgid="6749826639098512120">"Iskanje"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"Iskalna poizvedba"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"Izbris poizvedbe"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"Pošlji poizvedbo"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Glasovno iskanje"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Pred 1 mesecem"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Pred več kot 1 mesecem"</string>
   <plurals name="num_seconds_ago">
@@ -861,7 +858,7 @@
     <string name="cut" msgid="3092569408438626261">"Izreži"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiraj"</string>
     <string name="paste" msgid="5629880836805036433">"Prilepi"</string>
-    <string name="replace" msgid="8333608224471746584">"Zamenjaj"</string>
+    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Zamenjaj"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopiraj URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Izbiranje besedila ..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Izbrano besedilo"</string>
@@ -905,6 +902,14 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Znova omogočite pri možnosti Nastavitve &gt; Programi &gt; Upravljanje programov."</string>
     <string name="smv_application" msgid="295583804361236288">"Program <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) krši svoj samoizvedljivi pravilnik o strogem načinu."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> krši svoj samoizvedljivi pravilnik o strogem načinu."</string>
+    <!-- no translation found for android_upgrading_title (378740715658358071) -->
+    <skip />
+    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
+    <skip />
+    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
+    <skip />
+    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> se izvaja"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Izberite za preklop na program"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Ali želite preklopiti program?"</string>
@@ -923,11 +928,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Glasnost alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Glasnost obvestila"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Glasnost"</string>
-    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Glasnost Bluetootha. Tapnite, da preklopite na tihi način."</string>
-    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Glasnost zvonjenja. Tapnite, da preklopite na tihi način."</string>
-    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Glasnost klica. Tapnite, da preklopite na tihi način."</string>
-    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Glasnost medijev. Tapnite, da preklopite na tihi način."</string>
-    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Glasnost obvestil. Tapnite, da preklopite v tihi način."</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Glasnost Bluetootha"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Glasnost zvonjenja"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Glasnost klica"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Glasnost predstavnosti"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Glasnost obvestila"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Privzeta melodija zvonjenja"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Privzeta melodija zvonjenja (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Tiho"</string>
@@ -956,7 +961,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"V redu"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Prekliči"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kartica SIM odstranjena"</string>
-    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Mobilno omrežje ne bo na voljo, dokler ne zamenjate kartice SIM."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Mobilno omrežje ne bo na voljo, dokler naprave vnovič ne zaženete z veljavno kartico SIM."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Dokončano"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Kartica SIM dodana"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Če želite dostopati do mobilnega omrežja, morate znova zagnati napravo."</string>
@@ -1117,8 +1122,24 @@
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"ni izbrano"</string>
     <string name="switch_on" msgid="551417728476977311">"vklopljeno"</string>
     <string name="switch_off" msgid="7249798614327155088">"izklopljeno"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"pritisnjen"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"ni pritisnjen"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"vklopljen"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"izklopljen"</string>
+    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <skip />
+    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Krmarjenje domov"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Krmarjenje navzgor"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
@@ -1131,11 +1152,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Podatki 2G-3G so onemogočeni"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Podatki 4G so onemogočeni"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilni podatki so onemogočeni"</string>
+    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
+    <skip />
     <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"tapnite, če želite omogočiti"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Omejitev podatk. 2G-3G presežena"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Omejitev za podatke 4G je presežena"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Omejitev za podatke v mobilni napravi je presežena"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> nad določeno omejitvijo"</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Omejit. za podat. 2G-3G presež."</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Omejitev za podat. 4G presež."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Omej. za pod. v mob. n. presež."</string>
+    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
+    <skip />
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> nad določeno mejo"</string>
     <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
     <skip />
     <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->

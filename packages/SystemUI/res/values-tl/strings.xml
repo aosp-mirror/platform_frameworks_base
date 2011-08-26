@@ -113,11 +113,11 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Pinapagana ang TeleTypewriter."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Pag-vibrate ng ringer."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Naka-silent ang ringer."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Hindi pinagana ang data na 2G-3G"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Hindi pinagana ang data na 4G"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Hindi pinagana ang data ng mobile"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Hindi pinagana ang data"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Naabot na ang tinukoy na limitasyon sa paggamit ng data."\n\n"Maaaring makatamo ng mga singilin ng carrier ang karagdagang paggamit ng data."</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Di pinapagana ang 2G-3G na data"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Hindi pinapagana ang 4G na data"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Hindi pinapagana ang data ng mobile"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Hindi pinapagana ang data"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Naabot na ang tinukoy na limitasyon sa paggamit ng data."\n\n"Maaaring makaipon ng mga carrier na singilin ang karagdagang paggamit sa data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Muling paganahin ang data"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Walang koneksyon sa Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"nakakonekta ang Wi-Fi"</string>

@@ -71,10 +71,10 @@
     <string name="accessibility_recent" msgid="3027675523629738534">"Najnowsze aplikacje"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Przycisk przełączania metody wprowadzania."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Przycisk powiększenia na potrzeby zgodności."</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Powiększa mniejszy ekran na większy."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth podłączony."</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Powiększa mniejszy ekran do większego."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth połączony."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth rozłączony."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Brak baterii."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Bateria rozładowana."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Bateria: jeden pasek."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Bateria: dwa paski."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Bateria: trzy paski."</string>
@@ -83,17 +83,17 @@
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Telefon: jeden pasek."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefon: dwa paski."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Telefon: trzy paski."</string>
-    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Sygnał telefonu: pełny."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Telefon: pełna moc sygnału."</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Brak danych."</string>
-    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Jeden pasek sygnału danych."</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Dane: jeden pasek."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dane: dwa paski."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Dane: trzy paski."</string>
-    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Pełna moc sygnału danych."</string>
-    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Brak Wi-Fi."</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Dane: pełna moc sygnału."</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Brak sieci Wi-Fi."</string>
     <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Sieć Wi-Fi: jeden pasek."</string>
     <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Sieć Wi-Fi: dwa paski."</string>
     <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Sieć Wi-Fi: trzy paski."</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Pełna moc sygnału Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Sieć Wi-Fi: pełna moc sygnału."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
@@ -104,7 +104,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Brak karty SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Powiązanie Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Tryb samolotowy."</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Przycisk Ustawienia."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Przycisk powiadomień."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Usuń powiadomienie."</string>
@@ -117,7 +117,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Wyłączono transmisję danych 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Wyłączono komórkową transmisję danych"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Wyłączono transmisję danych"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Osiągnięto określony limit transmisji danych."\n\n"Operator może pobierać opłaty za przesyłanie dodatkowych pakietów."</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Osiągnięto określony limit transmisji danych."\n\n"Operator może pobierać opłaty za przesyłanie dodatkowych danych."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Włącz transmisję danych"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Brak internetu"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: połączono"</string>

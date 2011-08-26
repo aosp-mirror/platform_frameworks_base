@@ -109,8 +109,8 @@
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"알림 버튼입니다."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"알림을 삭제합니다."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS가 사용 설정되었습니다."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS 가져오는 중입니다."</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"전신 타자기가 사용 설정되었습니다."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS를 가져오는 중입니다."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"전신 타자기(TTY)가 사용 설정되었습니다."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"벨소리가 진동입니다."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"벨소리가 무음입니다."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 데이터 사용중지됨"</string>

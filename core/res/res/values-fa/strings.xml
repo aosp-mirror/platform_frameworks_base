@@ -195,10 +195,8 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"به برنامه کاربردی امکان می دهد تا پیام های پخش اضطراری را دریافت کرده و پردازش کند. این مجوز فقط برای برنامه های سیستمی قابل استفاده است."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ارسال پیامک ها"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"به برنامه کاربردی اجازه می دهد پیامک ارسال کند. برنامه های مضر ممکن است با ارسال پیام هایی بدون تأیید شما، هزینه هایی را برای شما ایجاد کنند."</string>
-    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
-    <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
-    <skip />
+    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"ارسال پیامک بدون تأیید"</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"به برنامه کاربردی اجازه ارسال پیامک می‌دهد. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برایتان ایجاد نمایند."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"خواندن پیامک یا MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"به برنامه اجازه می دهد پیامک های ذخیره شده در رایانه لوحی شما یا سیم کارت را بخواند. برنامه های مضر می توانند پیام های محرمانه شما را بخوانند."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"به برنامه کاربردی اجازه می دهد پیامک های ذخیره شده در گوشی شما یا سیم کارت را بخواند. برنامه های مضر می توانند پیام های محرمانه شما را بخوانند."</string>
@@ -327,10 +325,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"نوشتن اطلاعات تماس"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"به یک برنامه کاربردی اجازه می دهد اطلاعات تماس (آدرس) ذخیره شده در رایانه لوحی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر اطلاعات تماس شما استفاده کنند."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"به یک برنامه کاربردی اجازه می دهد اطلاعات تماس (آدرس) ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر اطلاعات تماس شما استفاده کنند."</string>
-    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"خواندن داده های نمایه"</string>
-    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"به برنامه امکان می دهد تا تمام اطلاعات نمایه شخصی شما را بخواند. برنامه های مضر می توانند از این حالت برای شناسایی شما و ارسال اطلاعات شخصی شما به سایر افراد استفاده کنند."</string>
-    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"نوشتن داده های نمایه"</string>
-    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"به یک برنامه امکان می دهد تا اطلاعات نمایه شخصی شما را تغییر دهد. برنامه های مضر می توانند از این حالت برای پاک کردن یا تغییر داده های نمایه شما استفاده کنند."</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"خواندن داده‌های نمایه شما"</string>
+    <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"به برنامه کاربردی اجازه می‌دهد اطلاعات مربوط به نمایه شخصی ذخیره شده بر روی دستگاه شما مانند نام و اطلاعات تماس شما را بخواند. این بدان معناست که برنامه می‌تواند شما را شناسایی کند و اطلاعات نمایه‌ شما را به دیگران ارسال نماید."</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"نوشتن در داده‌های نمایه شما"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"به برنامه کاربردی اجازه می‌دهد به تغییر و یا اضافه کردن اطلاعات نمایه شخصی ذخیره شده بر روی دستگاه شما مانند نام و اطلاعات تماس شما، بپردازد. این بدان معناست که برنامه‌های دیگر می‌توانند شما را شناسایی کنند و اطلاعات نمایه شما را به دیگران ارسال نمایند."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"خواندن رویدادهای تقویم به همراه اطلاعات محرمانه"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"به برنامه اجازه خواندن تمام رویدادهای تقویم موجود در رایانه لوحی شما را می‌دهد که این شامل تقویم دوستان و همکاران نیز می‌شود. یک برنامه مخرب با این اجازه می‌تواند بدون اطلاع مالک، اطلاعات شخصی را از این تقویم‌ها استخراج کند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"به یک برنامه کاربردی اجازه خواندن تمام رویدادهای تقویم موجود در گوشی شما را می‌دهد که این شامل تقویم دوستان و همکاران نیز می‌شود. یک برنامه مخرب با این اجازه می‌تواند بدون اطلاع مالک، اطلاعات شخصی را از این تقویم‌ها استخراج کند."</string>
@@ -445,8 +443,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"به یک برنامه کاربردی اجازه می دهد وضعیت مربوط به تمام شبکه ها را مشاهده کند."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"دسترسی کامل به اینترنت"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"به یک برنامه کاربردی اجازه می دهد سوکت های شبکه را ایجاد کند."</string>
-    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"نوشتن تنظیمات نام نقطه دستیابی"</string>
-    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"به یک برنامه کاربردی اجازه می دهد تنظیمات APN، از قبیل پروکسی و درگاه APN، را تغییر دهد."</string>
+    <string name="permlab_writeApnSettings" msgid="505660159675751896">"تغییر/رهگیری تنظیمات شبکه و ترافیک"</string>
+    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"به یک برنامه کاربردی اجازه می‌دهد تنظیمات شبکه و رهگیری و بازرسی تمام ترافیک شبکه را تغییر دهد، به عنوان مثال برای تغییر پروکسی و درگاه از هر APN. برنامه‌های مخرب بدون اطلاع شما می‌توانند به نظارت، تغییر مسیر، یا اصلاح بسته‌های شبکه بپردازند."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"تغییر قابلیت اتصال شبکه"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"به یک برنامه کاربردی اجازه می دهد وضعیت اتصال شبکه را تغییر دهد."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"تغییر قابلیت اتصال داده با سیم"</string>
@@ -673,6 +671,14 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"شما کد پین خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه وارد کرده اید. "\n\n"لطفاً پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می شود که برای بازگشایی قفل رایانه لوحی خود به Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش های ناموفق بیشتر سبب می شود از شما خواسته شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"در <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"الگو را فراموش کرده اید؟"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"بازگشایی قفل حساب"</string>
@@ -730,14 +736,10 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"به برنامه کاربردی اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"اصلاح کردن مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"به یک برنامه کاربردی اجازه می دهد مجوزهای مکان جغرافیایی مرورگر را تغییر دهد. برنامه های مضر می توانند از این گزینه استفاده کرده و اطلاعات مربوط به مکان را به وب سایت های غیر قانونی ارسال کنند."</string>
-    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
-    <skip />
-    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
-    <skip />
-    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
-    <skip />
+    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"تأیید بسته‌ها"</string>
+    <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"به برنامه اجازه می‌دهد قابل نصب بودن بسته را تأیید کند."</string>
+    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"اتصال به یک تأیید کننده بسته"</string>
+    <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"به دارنده اجازه ایجاد درخواست تأییدکنندگان بسته را می‌دهد. برای برنامه‌های عادی مورد نیاز نیست."</string>
     <string name="save_password_message" msgid="767344687139195790">"می خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"اکنون خیر"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
@@ -750,16 +752,11 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ورود"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"حذف"</string>
     <string name="search_go" msgid="8298016669822141719">"جستجو"</string>
-    <!-- no translation found for searchview_description_search (6749826639098512120) -->
-    <skip />
-    <!-- no translation found for searchview_description_query (5911778593125355124) -->
-    <skip />
-    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
-    <skip />
-    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
-    <skip />
-    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
-    <skip />
+    <string name="searchview_description_search" msgid="6749826639098512120">"جستجو"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"درخواست جستجو"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"پاک کردن عبارت جستجو"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"ارسال عبارت جستجو"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"جستجوی صوتی"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ماه قبل"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل از 1 ماه گذشته"</string>
   <plurals name="num_seconds_ago">
@@ -861,7 +858,7 @@
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
     <string name="paste" msgid="5629880836805036433">"جای گذاری"</string>
-    <string name="replace" msgid="8333608224471746584">"جایگزینی"</string>
+    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"جایگزینی"</string>
     <string name="copyUrl" msgid="2538211579596067402">"کپی URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"انتخاب متن..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
@@ -905,6 +902,14 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"این را با تنظیمات &gt; برنامه‌ها &gt; مدیریت برنامه‌های کاربردی دوباره فعال کنید."</string>
     <string name="smv_application" msgid="295583804361236288">"برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> (پردازش <xliff:g id="PROCESS">%2$s</xliff:g>) خط مشی StrictMode اجرای خودکار را نقض کرده است."</string>
     <string name="smv_process" msgid="5120397012047462446">"فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
+    <!-- no translation found for android_upgrading_title (378740715658358071) -->
+    <skip />
+    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
+    <skip />
+    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
+    <skip />
+    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
+    <skip />
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"انتخاب برای رفتن به برنامه"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"جابجایی در برنامه ها؟"</string>
@@ -923,11 +928,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای هشدار"</string>
     <string name="volume_notification" msgid="2422265656744276715">"میزان صدای اعلان"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"میزان صدا"</string>
-    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"میزان صدای بلوتوث. ضربه بزنید تا به حالت بیصدا بروید."</string>
-    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"میزان صدای آهنگ زنگ. ضربه بزنید تا به حالت بیصدا بروید."</string>
-    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"میزان صدای تماس. ضربه بزنید تا به حالت بیصدا بروید."</string>
-    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"میزان صدای رسانه. ضربه بزنید تا به حالت بیصدا بروید."</string>
-    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"میزان صدای اعلان. ضربه بزنید تا به حالت بیصدا بروید."</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"میزان صدای بلوتوث"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"میزان صدای آهنگ زنگ"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"میزان صدای تماس"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"میزان صدای رسانه"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"میزان صدای اعلان"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"آهنگ زنگ پیش فرض"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"آهنگ زنگ پیش فرض (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"ساکت"</string>
@@ -956,11 +961,11 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"تأیید"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"لغو"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
-    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"تا زمانی که سیم کارت را عوض نکنید شبکه تلفن همراه در دسترس نخواهد بود."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
     <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"سیم کارت اضافه شد"</string>
-    <string name="sim_added_message" msgid="1209265974048554242">"برای دسترسی به شبکه تلفن همراه باید دستگاه خود را مجددا راه اندازی کنید."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"راه اندازی مجدد"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"برای دسترسی به شبکه تلفن همراه باید دستگاه خود را مجددا راه‌اندازی کنید."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"راه‌اندازی مجدد"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تنظیم زمان"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
@@ -1111,14 +1116,30 @@
     <string name="choose_account_label" msgid="4191313562041125787">"انتخاب یک حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"علامت‌دار"</string>
+    <string name="checkbox_checked" msgid="7222044992652711167">"علامت زده"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"بدون علامت"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"انتخاب شده"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"انتخاب شد"</string>
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"انتخاب نشده"</string>
     <string name="switch_on" msgid="551417728476977311">"روشن"</string>
     <string name="switch_off" msgid="7249798614327155088">"خاموش"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"فشرده شد"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"فشرده نشد"</string>
+    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <skip />
+    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <skip />
+    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحه اصلی"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه ها"</string>
@@ -1131,11 +1152,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"داده های 2G-3G غیرفعال شد"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"داده 4G غیر فعال شده است"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"داده های تلفن همراه غیرفعال شد"</string>
+    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
+    <skip />
     <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"برای فعال کردن ضربه بزنید"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"داده 2G-3G بیش از حد مجاز"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"داده 4G بیش از حد مجاز است"</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"اطلاعات 2G-3G بیش از حد مجاز است"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"بیش از حد مجاز 4G است"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"داده‌های تلفن همراه از مقدار مجاز بیشتر است"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> از حد تعیین شده بیشتر شد"</string>
+    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
+    <skip />
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> از حد مشخص شده بیشتر شد"</string>
     <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
     <skip />
     <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
@@ -1156,8 +1181,8 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"اثر انگشت SHA-1"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"مشاهده همه..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"انتخاب فعالیت"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک گذاری با..."</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"دستگاه قفل شده است."</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک‌گذاری با..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"دستگاه قفل است."</string>
     <!-- no translation found for list_delimeter (3975117572185494152) -->
     <skip />
 </resources>

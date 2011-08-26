@@ -29,7 +29,7 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"התראות"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"חבר מטען"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"עוצמת הסוללה נחלשת."</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"הסוללה נחלשת."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"נותרו <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"טעינה באמצעות USB אינה נתמכת."\n"השתמש אך ורק במטען שסופק."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"צריכת סוללה"</string>
@@ -44,16 +44,16 @@
     <string name="recent_tasks_empty" msgid="1905484479067697884">"אין יישומים חדשים."</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"Google Apps"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth קשור"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"הגדר שיטות קלט"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"הגדרת שיטות קלט"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"השתמש במקלדת הפיזית"</string>
-    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"האם לאפשר ליישום <xliff:g id="APPLICATION">%1$s</xliff:g> לגשת להתקן ה-USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"האם לאפשר ליישום <xliff:g id="APPLICATION">%1$s</xliff:g> לגשת למכשיר ה-USB?"</string>
     <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"האם לאפשר ליישום <xliff:g id="APPLICATION">%1$s</xliff:g> לגשת לאביזר ה-USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר התקן USB זה מחובר?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר מכשיר USB זה מחובר?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר אביזר USB זה מחובר?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"אין יישומים מותקנים הפועלים עם אביזר ה-USB. למידע נוסף אודות אביזר זה בכתובת <xliff:g id="URL">%1$s</xliff:g>"</string>
-    <string name="title_usb_accessory" msgid="4966265263465181372">"עזרי USB"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"אין יישומים מותקנים הפועלים עם אביזר ה-USB. למידע נוסף על אביזר זה בקר בכתובת <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"אביזר USB"</string>
     <string name="label_view" msgid="6304565553218192990">"הצג"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"השתמש כברירת מחדל עבור התקן USB זה"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"השתמש כברירת מחדל עבור מכשיר USB זה"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"השתמש כברירת מחדל עבור אביזר USB זה"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
@@ -68,7 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"הקודם"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"בית"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"תפריט"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"יישומים חדשים"</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"יישומים אחרונים"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"לחצן מרחק מתצוגה של תאימות."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"שנה מרחק מתצוגה של מסך קטן לגדול יותר."</string>

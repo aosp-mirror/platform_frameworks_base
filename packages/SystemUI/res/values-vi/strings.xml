@@ -96,20 +96,20 @@
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Tín hiệu WiFi đầy đủ."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Cạnh"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Không có SIM nào."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Chia sẻ kết nối Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Dùng làm điểm truy cập Internet qua Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Chế độ trên máy bay."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> phần trăm pin."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Nút cài đặt."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Nút thông báo."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Xóa thông báo."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"Đã bật GPS."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Giành được GPS."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Nhận GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Đã bật TeleTypewriter."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Chuông rung."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Chuông im lặng."</string>
