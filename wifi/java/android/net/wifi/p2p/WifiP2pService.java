@@ -514,7 +514,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         if (DBG) Slog.w(TAG, "Unable to bring down wlan interface: " + e);
                     }
 
-                    if (WifiNative.startSupplicant()) {
+                    if (WifiNative.startP2pSupplicant()) {
                         mWifiMonitor.startMonitoring();
                         transitionTo(mP2pEnablingState);
                     } else {
