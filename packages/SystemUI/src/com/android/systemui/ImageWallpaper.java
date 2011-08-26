@@ -300,7 +300,9 @@ public class ImageWallpaper extends WallpaperService {
             }
 
             if (mIsHwAccelerated) {
-                drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels);
+                if (!drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels)) {
+                    drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
+                }
             } else {
                 drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
             }
@@ -367,8 +369,8 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        private void drawWallpaperWithOpenGL(SurfaceHolder sh, int w, int h, int left, int top) {
-            initGL(sh);
+        private boolean drawWallpaperWithOpenGL(SurfaceHolder sh, int w, int h, int left, int top) {
+            if (!initGL(sh)) return false;
 
             final float right = left + mBackgroundWidth;
             final float bottom = top + mBackgroundHeight;
@@ -423,6 +425,8 @@ public class ImageWallpaper extends WallpaperService {
             checkEglError();
     
             finishGL();
+
+            return true;
         }
 
         private FloatBuffer createMesh(int left, int top, float right, float bottom) {
@@ -533,11 +537,12 @@ public class ImageWallpaper extends WallpaperService {
         }
     
         private void finishGL() {
-            mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+            mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
+            mEgl.eglDestroyContext(mEglDisplay, mEglContext);
         }
         
-        private void initGL(SurfaceHolder surfaceHolder) {
+        private boolean initGL(SurfaceHolder surfaceHolder) {
             mEgl = (EGL10) EGLContext.getEGL();
     
             mEglDisplay = mEgl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -565,7 +570,7 @@ public class ImageWallpaper extends WallpaperService {
                 int error = mEgl.eglGetError();
                 if (error == EGL_BAD_NATIVE_WINDOW) {
                     Log.e(GL_LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
-                    return;
+                    return false;
                 }
                 throw new RuntimeException("createWindowSurface failed " +
                         GLUtils.getEGLErrorString(error));
@@ -577,6 +582,8 @@ public class ImageWallpaper extends WallpaperService {
             }
     
             mGL = mEglContext.getGL();
+
+            return true;
         }
         
     
