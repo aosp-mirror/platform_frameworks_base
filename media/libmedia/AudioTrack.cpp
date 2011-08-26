@@ -259,6 +259,7 @@ status_t AudioTrack::set(
     mMarkerReached = false;
     mNewPosition = 0;
     mUpdatePeriod = 0;
+    mFlushed = false;
     mFlags = flags;
     AudioSystem::acquireAudioSessionId(mSessionId);
 
@@ -337,6 +338,7 @@ void AudioTrack::start()
     audio_track_cblk_t* cblk = mCblk;
 
     if (mActive == 0) {
+        mFlushed = false;
         mActive = 1;
         mNewPosition = cblk->server + mUpdatePeriod;
         cblk->lock.lock();
@@ -437,6 +439,7 @@ void AudioTrack::flush_l()
     mUpdatePeriod = 0;
 
     if (!mActive) {
+        mFlushed = true;
         mAudioTrack->flush();
         // Release AudioTrack callback thread in case it was waiting for new buffers
         // in AudioTrack::obtainBuffer()
@@ -655,7 +658,7 @@ status_t AudioTrack::getPosition(uint32_t *position)
 {
     if (position == 0) return BAD_VALUE;
     AutoMutex lock(mLock);
-    *position = mCblk->server;
+    *position = mFlushed ? 0 : mCblk->server;
 
     return NO_ERROR;
 }
