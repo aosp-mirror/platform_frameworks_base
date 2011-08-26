@@ -4749,6 +4749,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Utility function called by View during invalidation to determine whether a view that
+     * is invisible or gone should still be invalidated because it is being transitioned (and
+     * therefore still needs to be drawn).
+     */
+    boolean isViewTransitioning(View view) {
+        return (mTransitioningViews != null && mTransitioningViews.contains(view));
+    }
+
+    /**
      * This method tells the ViewGroup that the given View object, which should have this
      * ViewGroup as its parent,
      * should be kept around  (re-displayed when the ViewGroup draws its children) even if it
