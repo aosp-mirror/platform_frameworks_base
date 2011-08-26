@@ -407,8 +407,15 @@ int SurfaceTextureClient::disconnect(int api) {
     LOGV("SurfaceTextureClient::disconnect");
     Mutex::Autolock lock(mMutex);
     int err = mSurfaceTexture->disconnect(api);
-    if (!err && api == NATIVE_WINDOW_API_CPU) {
-        mConnectedToCpu = false;
+    if (!err) {
+        freeAllBuffers();
+        mReqFormat = 0;
+        mReqWidth = 0;
+        mReqHeight = 0;
+        mReqUsage = 0;
+        if (api == NATIVE_WINDOW_API_CPU) {
+            mConnectedToCpu = false;
+        }
     }
     return err;
 }
