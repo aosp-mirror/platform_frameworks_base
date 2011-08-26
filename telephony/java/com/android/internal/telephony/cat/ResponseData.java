@@ -19,6 +19,10 @@ package com.android.internal.telephony.cat;
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
 import java.util.Calendar;
+import java.util.TimeZone;
+import android.os.SystemProperties;
+import android.text.TextUtils;
+
 import com.android.internal.telephony.cat.AppInterface.CommandType;
 
 import java.io.ByteArrayOutputStream;
@@ -209,7 +213,6 @@ class DTTZResponseData extends ResponseData {
         buf.write(tag); // tag
 
         byte[] data = new byte[8];
-        byte btmp; // temp variable
 
         data[0] = 0x07; // Write length of DTTZ data
 
@@ -217,41 +220,62 @@ class DTTZResponseData extends ResponseData {
             calendar = Calendar.getInstance();
         }
         // Fill year byte
-        btmp = (byte) (calendar.get(java.util.Calendar.YEAR) % 100);
-        data[1] = (byte) (btmp / 10);
-        data[1] += (byte) ((btmp % 10) << 4);
+        data[1] = byteToBCD(calendar.get(java.util.Calendar.YEAR) % 100);
 
         // Fill month byte
-        btmp = (byte) (calendar.get(java.util.Calendar.MONTH) + 1);
-        data[2] = (byte) (btmp / 10);
-        data[2] += (byte) ((btmp % 10) << 4);
+        data[2] = byteToBCD(calendar.get(java.util.Calendar.MONTH) + 1);
 
         // Fill day byte
-        btmp = (byte) (calendar.get(java.util.Calendar.DATE));
-        data[3] = (byte) (btmp / 10);
-        data[3] += (byte) ((btmp % 10) << 4);
+        data[3] = byteToBCD(calendar.get(java.util.Calendar.DATE));
 
         // Fill hour byte
-        btmp = (byte) (calendar.get(java.util.Calendar.HOUR_OF_DAY));
-        data[4] = (byte) (btmp / 10);
-        data[4] += (byte) ((btmp % 10) << 4);
+        data[4] = byteToBCD(calendar.get(java.util.Calendar.HOUR_OF_DAY));
 
         // Fill minute byte
-        btmp = (byte) (calendar.get(java.util.Calendar.MINUTE));
-        data[5] = (byte) (btmp / 10);
-        data[5] += (byte) ((btmp % 10) << 4);
+        data[5] = byteToBCD(calendar.get(java.util.Calendar.MINUTE));
 
         // Fill second byte
-        btmp = (byte) (calendar.get(java.util.Calendar.SECOND));
-        data[6] = (byte) (btmp / 10);
-        data[6] += (byte) ((btmp % 10) << 4);
+        data[6] = byteToBCD(calendar.get(java.util.Calendar.SECOND));
 
-        // No time zone info
-        data[7] = (byte) 0xFF;
+        String tz = SystemProperties.get("persist.sys.timezone", "");
+        if (TextUtils.isEmpty(tz)) {
+            data[7] = (byte) 0xFF;    // set FF in terminal response
+        } else {
+            TimeZone zone = TimeZone.getTimeZone(tz);
+            int zoneOffset = zone.getRawOffset() + zone.getDSTSavings();
+            data[7] = getTZOffSetByte(zoneOffset);
+        }
 
         for (byte b : data) {
             buf.write(b);
         }
     }
+
+    private byte byteToBCD(int value) {
+        if (value < 0 && value > 99) {
+            CatLog.d(this, "Err: byteToBCD conversion Value is " + value +
+                           " Value has to be between 0 and 99");
+            return 0;
+        }
+
+        return (byte) ((value / 10) | ((value % 10) << 4));
+    }
+
+    private byte getTZOffSetByte(long offSetVal) {
+        boolean isNegative = (offSetVal < 0);
+
+        /*
+         * The 'offSetVal' is in milliseconds. Convert it to hours and compute
+         * offset While sending T.R to UICC, offset is expressed is 'quarters of
+         * hours'
+         */
+
+         long tzOffset = offSetVal / (15 * 60 * 1000);
+         tzOffset = (isNegative ? -1 : 1) * tzOffset;
+         byte bcdVal = byteToBCD((int) tzOffset);
+         // For negative offsets, put '1' in the msb
+         return isNegative ?  (bcdVal |= 0x08) : bcdVal;
+    }
+
 }
 
