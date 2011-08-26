@@ -832,6 +832,55 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
+     * @return the IMPI, or null if not present or not loaded
+     * @hide
+     */
+    public String getIsimImpi() {
+        try {
+            return getSubscriberInfo().getIsimImpi();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
+     * Returns the IMS home network domain name that was loaded from the ISIM.
+     * @return the IMS domain name, or null if not present or not loaded
+     * @hide
+     */
+    public String getIsimDomain() {
+        try {
+            return getSubscriberInfo().getIsimDomain();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
+     * Returns the IMS public user identities (IMPU) that were loaded from the ISIM.
+     * @return an array of IMPU strings, with one IMPU per string, or null if
+     *      not present or not loaded
+     * @hide
+     */
+    public String[] getIsimImpu() {
+        try {
+            return getSubscriberInfo().getIsimImpu();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
     private IPhoneSubInfo getSubscriberInfo() {
         // get it each time because that process crashes a lot
         return IPhoneSubInfo.Stub.asInterface(ServiceManager.getService("iphonesubinfo"));

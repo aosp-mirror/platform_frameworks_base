@@ -443,4 +443,8 @@ public final class RuimRecords extends IccRecords {
         Log.d(LOG_TAG, "[RuimRecords] " + s);
     }
 
+    @Override
+    protected void loge(String s) {
+        Log.e(LOG_TAG, "[RuimRecords] " + s);
+    }
 }

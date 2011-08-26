@@ -28,6 +28,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -1730,4 +1731,20 @@ public interface Phone {
      * false otherwise
      */
     boolean isCspPlmnEnabled();
+
+    /**
+     * Return an interface to retrieve the ISIM records for IMS, if available.
+     * @return the interface to retrieve the ISIM records, or null if not supported
+     */
+    IsimRecords getIsimRecords();
+
+    /**
+     * Request the ISIM application on the UICC to perform the AKA
+     * challenge/response algorithm for IMS authentication. The nonce string
+     * and challenge response are Base64 encoded Strings.
+     *
+     * @param nonce the nonce string to pass with the ISIM authentication request
+     * @param response a callback message with the String response in the obj field
+     */
+    void requestIsimAuthentication(String nonce, Message response);
 }

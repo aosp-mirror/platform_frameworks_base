@@ -1501,4 +1501,8 @@ public final class SimulatedCommands extends BaseCommands
             Message response) {
         unimplemented(response);
     }
+
+    public void requestIsimAuthentication(String nonce, Message response) {
+        unimplemented(response);
+    }
 }

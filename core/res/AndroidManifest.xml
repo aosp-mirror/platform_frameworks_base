@@ -582,6 +582,12 @@
         android:label="@string/permlab_readPhoneState"
         android:description="@string/permdesc_readPhoneState" />
 
+    <!-- Allows read access to privileged phone state.
+         @hide Used internally. -->
+    <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->

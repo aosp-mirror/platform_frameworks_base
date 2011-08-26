@@ -95,6 +95,31 @@ public class PhoneSubInfoProxy extends IPhoneSubInfo.Stub {
         return mPhoneSubInfo.getVoiceMailAlphaTag();
     }
 
+    /**
+     * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
+     * @return the IMPI, or null if not present or not loaded
+     */
+    public String getIsimImpi() {
+        return mPhoneSubInfo.getIsimImpi();
+    }
+
+    /**
+     * Returns the IMS home network domain name that was loaded from the ISIM.
+     * @return the IMS domain name, or null if not present or not loaded
+     */
+    public String getIsimDomain() {
+        return mPhoneSubInfo.getIsimDomain();
+    }
+
+    /**
+     * Returns the IMS public user identities (IMPU) that were loaded from the ISIM.
+     * @return an array of IMPU strings, with one IMPU per string, or null if
+     *      not present or not loaded
+     */
+    public String[] getIsimImpu() {
+        return mPhoneSubInfo.getIsimImpu();
+    }
+
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mPhoneSubInfo.dump(fd, pw, args);
     }
