@@ -3024,6 +3024,16 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "stream_items_limit");
 
         /**
+         * The MIME type of a directory of stream items.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
+
+        /**
+         * The MIME type of a single stream item.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
+
+        /**
          * Queries to {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI} will
          * contain this column, with the value indicating the maximum number of
          * stream items that will be stored under any single raw contact.
@@ -3050,6 +3060,17 @@ public final class ContactsContract {
              * The directory twig for this sub-table
              */
             public static final String CONTENT_DIRECTORY = "photo";
+
+            /**
+             * The MIME type of a directory of stream item photos.
+             */
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
+
+            /**
+             * The MIME type of a single stream item photo.
+             */
+            public static final String CONTENT_ITEM_TYPE
+                    = "vnd.android.cursor.item/stream_item_photo";
         }
     }
 
