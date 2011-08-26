@@ -675,6 +675,9 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             setGLHooksThreadSpecific(&gHooksNoContext);
             egl_tls_t::setContext(EGL_NO_CONTEXT);
         }
+    } else {
+        // this will LOGE the error
+        result = setError(c->cnx->egl.eglGetError(), EGL_FALSE);
     }
     return result;
 }
