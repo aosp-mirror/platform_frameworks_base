@@ -30,7 +30,8 @@ import android.view.textservice.SpellCheckerSubtype;
  */
 interface ITextServicesManager {
     SpellCheckerInfo getCurrentSpellChecker(String locale);
-    SpellCheckerSubtype getCurrentSpellCheckerSubtype(String locale);
+    SpellCheckerSubtype getCurrentSpellCheckerSubtype(
+            String locale, boolean allowImplicitlySelectedSubtype);
     oneway void getSpellCheckerService(String sciId, in String locale,
             in ITextServicesSessionListener tsListener,
             in ISpellCheckerSessionListener scListener, in Bundle bundle);

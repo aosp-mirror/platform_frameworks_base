@@ -146,10 +146,11 @@ public final class TextServicesManager {
     /**
      * @hide
      */
-    public SpellCheckerSubtype getCurrentSpellCheckerSubtype() {
+    public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
+            boolean allowImplicitlySelectedSubtype) {
         try {
             // Passing null as a locale for ICS
-            return sService.getCurrentSpellCheckerSubtype(null);
+            return sService.getCurrentSpellCheckerSubtype(null, allowImplicitlySelectedSubtype);
         } catch (RemoteException e) {
             Log.e(TAG, "Error in getCurrentSpellCheckerSubtype: " + e);
             return null;
