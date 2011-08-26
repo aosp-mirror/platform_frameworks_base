@@ -43,6 +43,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.RegionIterator;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.net.Proxy;
@@ -605,8 +606,9 @@ public class WebView extends AbsoluteLayout
     // know to handle Shift and arrows natively first
     private boolean mAccessibilityScriptInjected;
 
+    static final boolean USE_WEBKIT_RINGS = true;
     // the color used to highlight the touch rectangles
-    private static final int mHightlightColor = 0x33000000;
+    private static final int mHightlightColor = 0x6633b5e5;
     // the round corner for the highlight path
     private static final float TOUCH_HIGHLIGHT_ARC = 5.0f;
     // the region indicating where the user touched on the screen
@@ -619,6 +621,7 @@ public class WebView extends AbsoluteLayout
     private Paint mTouchCrossHairColor;
     private int mTouchHighlightX;
     private int mTouchHighlightY;
+    private long mTouchHighlightRequested;
 
     // Basically this proxy is used to tell the Video to update layer tree at
     // SetBaseLayer time and to pause when WebView paused.
@@ -3992,7 +3995,7 @@ public class WebView extends AbsoluteLayout
         return super.drawChild(canvas, child, drawingTime);
     }
 
-    private void drawContent(Canvas canvas) {
+    private void drawContent(Canvas canvas, boolean drawRings) {
         // Update the buttons in the picture, so when we draw the picture
         // to the screen, they are in the correct state.
         // Tell the native side if user is a) touching the screen,
@@ -4004,7 +4007,8 @@ public class WebView extends AbsoluteLayout
         nativeRecordButtons(hasFocus() && hasWindowFocus(),
                             mTouchMode == TOUCH_SHORTPRESS_START_MODE
                             || mTrackballDown || mGotCenterDown, false);
-        drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
+        drawCoreAndCursorRing(canvas, mBackgroundColor,
+                mDrawCursorRing && drawRings);
     }
 
     /**
@@ -4068,7 +4072,15 @@ public class WebView extends AbsoluteLayout
         if (mTitleBar != null) {
             canvas.translate(0, getTitleHeight());
         }
-        drawContent(canvas);
+        boolean drawJavaRings = !mTouchHighlightRegion.isEmpty()
+                && (mTouchMode == TOUCH_INIT_MODE
+                || mTouchMode == TOUCH_SHORTPRESS_START_MODE
+                || mTouchMode == TOUCH_SHORTPRESS_MODE);
+        boolean drawNativeRings = !drawJavaRings;
+        if (USE_WEBKIT_RINGS) {
+            drawNativeRings = !drawJavaRings && !isInTouchMode();
+        }
+        drawContent(canvas, drawNativeRings);
         canvas.restoreToCount(saveCount);
 
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
@@ -4081,16 +4093,22 @@ public class WebView extends AbsoluteLayout
         }
 
         // paint the highlight in the end
-        if (!mTouchHighlightRegion.isEmpty()) {
-            if (mTouchHightlightPaint == null) {
-                mTouchHightlightPaint = new Paint();
-                mTouchHightlightPaint.setColor(mHightlightColor);
-                mTouchHightlightPaint.setAntiAlias(true);
-                mTouchHightlightPaint.setPathEffect(new CornerPathEffect(
-                        TOUCH_HIGHLIGHT_ARC));
+        if (drawJavaRings) {
+            long delay = System.currentTimeMillis() - mTouchHighlightRequested;
+            if (delay < ViewConfiguration.getTapTimeout()) {
+                Rect r = mTouchHighlightRegion.getBounds();
+                postInvalidateDelayed(delay, r.left, r.top, r.right, r.bottom);
+            } else {
+                if (mTouchHightlightPaint == null) {
+                    mTouchHightlightPaint = new Paint();
+                    mTouchHightlightPaint.setColor(mHightlightColor);
+                }
+                RegionIterator iter = new RegionIterator(mTouchHighlightRegion);
+                Rect r = new Rect();
+                while (iter.next(r)) {
+                    canvas.drawRect(r, mTouchHightlightPaint);
+                }
             }
-            canvas.drawPath(mTouchHighlightRegion.getBoundaryPath(),
-                    mTouchHightlightPaint);
         }
         if (DEBUG_TOUCH_HIGHLIGHT) {
             if (getSettings().getNavDump()) {
@@ -4113,11 +4131,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void removeTouchHighlight(boolean removePendingMessage) {
-        if (removePendingMessage) {
-            mWebViewCore.removeMessages(EventHub.GET_TOUCH_HIGHLIGHT_RECTS);
-        }
-        mWebViewCore.sendMessage(EventHub.REMOVE_TOUCH_HIGHLIGHT_RECTS);
+    private void removeTouchHighlight() {
+        mWebViewCore.removeMessages(EventHub.GET_TOUCH_HIGHLIGHT_RECTS);
+        mPrivateHandler.removeMessages(SET_TOUCH_HIGHLIGHT_RECTS);
+        setTouchHighlightRects(null);
     }
 
     @Override
@@ -5786,8 +5803,8 @@ public class WebView extends AbsoluteLayout
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
-                    if (getSettings().supportTouchOnly()) {
-                        removeTouchHighlight(true);
+                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                        removeTouchHighlight();
                     }
                     if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
                         mTouchMode = TOUCH_DOUBLE_TAP_MODE;
@@ -5810,15 +5827,19 @@ public class WebView extends AbsoluteLayout
                         mWebViewCore.sendMessage(
                                 EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     }
-                    if (getSettings().supportTouchOnly()) {
+                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
                         TouchHighlightData data = new TouchHighlightData();
                         data.mX = contentX;
                         data.mY = contentY;
+                        data.mNativeLayerRect = new Rect();
+                        data.mNativeLayer = nativeScrollableLayer(
+                                contentX, contentY, data.mNativeLayerRect, null);
                         data.mSlop = viewToContentDimension(mNavSlop);
+                        mTouchHighlightRegion.setEmpty();
                         if (!mBlockWebkitViewMessages) {
-                            mWebViewCore.sendMessageDelayed(
-                                    EventHub.GET_TOUCH_HIGHLIGHT_RECTS, data,
-                                    ViewConfiguration.getTapTimeout());
+                            mTouchHighlightRequested = System.currentTimeMillis();
+                            mWebViewCore.sendMessageAtFrontOfQueue(
+                                    EventHub.GET_TOUCH_HIGHLIGHT_RECTS, data);
                         }
                         if (DEBUG_TOUCH_HIGHLIGHT) {
                             if (getSettings().getNavDump()) {
@@ -5905,8 +5926,8 @@ public class WebView extends AbsoluteLayout
                     if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mTouchMode = TOUCH_INIT_MODE;
                     }
-                    if (getSettings().supportTouchOnly()) {
-                        removeTouchHighlight(true);
+                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                        removeTouchHighlight();
                     }
                 }
                 // pass the touch events from UI thread to WebCore thread
@@ -6487,8 +6508,8 @@ public class WebView extends AbsoluteLayout
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
-        if (getSettings().supportTouchOnly()) {
-            removeTouchHighlight(true);
+        if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+            removeTouchHighlight();
         }
         mHeldMotionless = MOTIONLESS_TRUE;
         mTouchMode = TOUCH_DONE_MODE;
@@ -7140,8 +7161,20 @@ public class WebView extends AbsoluteLayout
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
         int slop = viewToContentDimension(mNavSlop);
+        if (USE_WEBKIT_RINGS && !mTouchHighlightRegion.isEmpty()) {
+            // set mTouchHighlightRequested to 0 to cause an immediate
+            // drawing of the touch rings
+            mTouchHighlightRequested = 0;
+            invalidate(mTouchHighlightRegion.getBounds());
+            mPrivateHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    removeTouchHighlight();
+                }
+            }, ViewConfiguration.getPressedStateDuration());
+        }
         if (getSettings().supportTouchOnly()) {
-            removeTouchHighlight(false);
+            removeTouchHighlight();
             WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
             // use "0" as generation id to inform WebKit to use the same x/y as
             // it used when processing GET_TOUCH_HIGHLIGHT_RECTS
@@ -8031,8 +8064,8 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    if (getSettings().supportTouchOnly()) {
-                        removeTouchHighlight(false);
+                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                        removeTouchHighlight();
                     }
                     if (inFullScreenMode() || mDeferTouchProcess) {
                         TouchEventData ted = new TouchEventData();
@@ -8354,26 +8387,9 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case SET_TOUCH_HIGHLIGHT_RECTS:
-                    invalidate(mTouchHighlightRegion.getBounds());
-                    mTouchHighlightRegion.setEmpty();
-                    if (msg.obj != null) {
-                        ArrayList<Rect> rects = (ArrayList<Rect>) msg.obj;
-                        for (Rect rect : rects) {
-                            Rect viewRect = contentToViewRect(rect);
-                            // some sites, like stories in nytimes.com, set
-                            // mouse event handler in the top div. It is not
-                            // user friendly to highlight the div if it covers
-                            // more than half of the screen.
-                            if (viewRect.width() < getWidth() >> 1
-                                    || viewRect.height() < getHeight() >> 1) {
-                                mTouchHighlightRegion.union(viewRect);
-                                invalidate(viewRect);
-                            } else {
-                                Log.w(LOGTAG, "Skip the huge selection rect:"
-                                        + viewRect);
-                            }
-                        }
-                    }
+                    @SuppressWarnings("unchecked")
+                    ArrayList<Rect> rects = (ArrayList<Rect>) msg.obj;
+                    setTouchHighlightRects(rects);
                     break;
 
                 case SAVE_WEBARCHIVE_FINISHED:
@@ -8407,6 +8423,28 @@ public class WebView extends AbsoluteLayout
                     super.handleMessage(msg);
                     break;
             }
+        }
+    }
+
+    private void setTouchHighlightRects(ArrayList<Rect> rects) {
+        invalidate(mTouchHighlightRegion.getBounds());
+        mTouchHighlightRegion.setEmpty();
+        if (rects != null) {
+            for (Rect rect : rects) {
+                Rect viewRect = contentToViewRect(rect);
+                // some sites, like stories in nytimes.com, set
+                // mouse event handler in the top div. It is not
+                // user friendly to highlight the div if it covers
+                // more than half of the screen.
+                if (viewRect.width() < getWidth() >> 1
+                        || viewRect.height() < getHeight() >> 1) {
+                    mTouchHighlightRegion.union(viewRect);
+                } else {
+                    Log.w(LOGTAG, "Skip the huge selection rect:"
+                            + viewRect);
+                }
+            }
+            invalidate(mTouchHighlightRegion.getBounds());
         }
     }
 

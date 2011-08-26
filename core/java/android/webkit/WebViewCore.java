@@ -801,6 +801,8 @@ public final class WebViewCore {
         int mX;
         int mY;
         int mSlop;
+        int mNativeLayer;
+        Rect mNativeLayerRect;
     }
 
     static class AutoFillData {
@@ -1015,7 +1017,6 @@ public final class WebViewCore {
         static final int REMOVE_PACKAGE_NAME = 186;
 
         static final int GET_TOUCH_HIGHLIGHT_RECTS = 187;
-        static final int REMOVE_TOUCH_HIGHLIGHT_RECTS = 188;
 
         // accessibility support
         static final int MODIFY_SELECTION = 190;
@@ -1577,16 +1578,14 @@ public final class WebViewCore {
 
                         case GET_TOUCH_HIGHLIGHT_RECTS:
                             TouchHighlightData d = (TouchHighlightData) msg.obj;
+                            if (d.mNativeLayer != 0) {
+                                nativeScrollLayer(d.mNativeLayer,
+                                        d.mNativeLayerRect);
+                            }
                             ArrayList<Rect> rects = nativeGetTouchHighlightRects
                                     (d.mX, d.mY, d.mSlop);
                             mWebView.mPrivateHandler.obtainMessage(
                                     WebView.SET_TOUCH_HIGHLIGHT_RECTS, rects)
-                                    .sendToTarget();
-                            break;
-
-                        case REMOVE_TOUCH_HIGHLIGHT_RECTS:
-                            mWebView.mPrivateHandler.obtainMessage(
-                                    WebView.SET_TOUCH_HIGHLIGHT_RECTS, null)
                                     .sendToTarget();
                             break;
 
@@ -2225,9 +2224,9 @@ public final class WebViewCore {
         }
 
         // remove the touch highlight when moving to a new page
-        if (getSettings().supportTouchOnly()) {
-            mEventHub.sendMessage(Message.obtain(null,
-                    EventHub.REMOVE_TOUCH_HIGHLIGHT_RECTS));
+        if (WebView.USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+            mWebView.mPrivateHandler.sendEmptyMessage(
+                    WebView.SET_TOUCH_HIGHLIGHT_RECTS);
         }
 
         // reset the scroll position, the restored offset and scales
