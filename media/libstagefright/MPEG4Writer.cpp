@@ -1173,7 +1173,7 @@ void MPEG4Writer::Track::addOneSttsTableEntry(
         size_t sampleCount, int32_t duration) {
 
     if (duration == 0) {
-        LOGW("%d 0-duration samples found: %d", sampleCount);
+        LOGW("0-duration samples found: %d", sampleCount);
     }
     SttsTableEntry sttsEntry(sampleCount, duration);
     mSttsTableEntries.push_back(sttsEntry);
@@ -1304,7 +1304,7 @@ void MPEG4Writer::bufferChunk(const Chunk& chunk) {
 
 void MPEG4Writer::writeChunkToFile(Chunk* chunk) {
     LOGV("writeChunkToFile: %lld from %s track",
-        chunk.mTimestampUs, chunk.mTrack->isAudio()? "audio": "video");
+        chunk->mTimeStampUs, chunk->mTrack->isAudio()? "audio": "video");
 
     int32_t isFirstSample = true;
     while (!chunk->mSamples.empty()) {
