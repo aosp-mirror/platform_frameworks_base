@@ -46,10 +46,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -220,6 +222,8 @@ public class ActionBarView extends AbsActionBarView {
         mExpandedHomeLayout = (HomeView) inflater.inflate(homeResId, this, false);
         mExpandedHomeLayout.setUp(true);
         mExpandedHomeLayout.setOnClickListener(mExpandedActionViewUpListener);
+        mExpandedHomeLayout.setContentDescription(getResources().getText(
+                R.string.action_bar_up_description));
         
         mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
         mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
@@ -1188,6 +1192,27 @@ public class ActionBarView extends AbsActionBarView {
 
         public void setIcon(Drawable icon) {
             mIconView.setImageDrawable(icon);
+        }
+
+        @Override
+        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+            onPopulateAccessibilityEvent(event);
+            return true;
+        }
+
+        @Override
+        public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+            super.onPopulateAccessibilityEvent(event);
+            final CharSequence cdesc = getContentDescription();
+            if (!TextUtils.isEmpty(cdesc)) {
+                event.getText().add(cdesc);
+            }
+        }
+
+        @Override
+        public boolean dispatchHoverEvent(MotionEvent event) {
+            // Don't allow children to hover; we want this to be treated as a single component.
+            return onHoverEvent(event);
         }
 
         @Override
