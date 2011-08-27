@@ -138,6 +138,8 @@ public class ToggleButton extends CompoundButton {
             LayerDrawable layerDrawable = (LayerDrawable) backgroundDrawable;
             mIndicatorDrawable =
                     layerDrawable.findDrawableByLayerId(com.android.internal.R.id.toggle);
+        } else {
+            mIndicatorDrawable = null;
         }
     }
     
