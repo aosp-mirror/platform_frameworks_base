@@ -23,6 +23,6 @@ import android.nfc.NdefMessage;
  */
 interface INdefPushCallback
 {
-    NdefMessage onConnect();
-    void onMessagePushed();
+    NdefMessage createMessage();
+    void onNdefPushComplete();
 }

@@ -40,7 +40,7 @@ public final class NfcManager {
     public NfcManager(Context context) {
         NfcAdapter adapter;
         try {
-            adapter = new NfcAdapter(context);
+            adapter = NfcAdapter.getSingleton();
         } catch (UnsupportedOperationException e) {
             adapter = null;
         }

@@ -12413,13 +12413,15 @@ package android.nfc {
 
   public final class NfcAdapter {
     method public void disableForegroundDispatch(android.app.Activity);
-    method public void disableForegroundNdefPush(android.app.Activity);
+    method public deprecated void disableForegroundNdefPush(android.app.Activity);
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], java.lang.String[][]);
-    method public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
-    method public void enableForegroundNdefPush(android.app.Activity, android.nfc.NfcAdapter.NdefPushCallback);
+    method public deprecated void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method public static deprecated android.nfc.NfcAdapter getDefaultAdapter();
     method public boolean isEnabled();
+    method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity...);
+    method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity...);
+    method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity...);
     field public static final java.lang.String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field public static final java.lang.String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
     field public static final java.lang.String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
@@ -12428,9 +12430,16 @@ package android.nfc {
     field public static final java.lang.String EXTRA_TAG = "android.nfc.extra.TAG";
   }
 
-  public static abstract interface NfcAdapter.NdefPushCallback {
-    method public abstract android.nfc.NdefMessage createMessage();
-    method public abstract void onMessagePushed();
+  public static abstract interface NfcAdapter.CreateNdefMessageCallback {
+    method public abstract android.nfc.NdefMessage createNdefMessage(android.nfc.NfcEvent);
+  }
+
+  public static abstract interface NfcAdapter.OnNdefPushCompleteCallback {
+    method public abstract void onNdefPushComplete(android.nfc.NfcEvent);
+  }
+
+  public final class NfcEvent {
+    field public final android.nfc.NfcAdapter nfcAdapter;
   }
 
   public final class NfcManager {
