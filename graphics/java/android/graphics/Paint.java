@@ -358,22 +358,7 @@ public class Paint {
      */
     public Paint(Paint paint) {
         mNativePaint = native_initWithPaint(paint.mNativePaint);
-        mHasCompatScaling = paint.mHasCompatScaling;
-        mCompatScaling = paint.mCompatScaling;
-        mInvCompatScaling = paint.mInvCompatScaling;
-        mBidiFlags = paint.mBidiFlags;
-        hasShadow = paint.hasShadow;
-        mColorFilter = paint.mColorFilter;
-        mMaskFilter = paint.mMaskFilter;
-        mPathEffect = paint.mPathEffect;
-        mRasterizer = paint.mRasterizer;
-        mShader = paint.mShader;
-        mTypeface = paint.mTypeface;
-        mXfermode = paint.mXfermode;
-        shadowColor = paint.shadowColor;
-        shadowDx = paint.shadowDx;
-        shadowDy = paint.shadowDy;
-        shadowRadius = paint.shadowRadius;
+        setClassVariablesFrom(paint);
     }
 
     /** Restores the paint to its default settings. */
@@ -396,19 +381,34 @@ public class Paint {
         if (this != src) {
             // copy over the native settings
             native_set(mNativePaint, src.mNativePaint);
-            // copy over our java settings
-            mColorFilter    = src.mColorFilter;
-            mMaskFilter     = src.mMaskFilter;
-            mPathEffect     = src.mPathEffect;
-            mRasterizer     = src.mRasterizer;
-            mShader         = src.mShader;
-            mTypeface       = src.mTypeface;
-            mXfermode       = src.mXfermode;
-            mHasCompatScaling = src.mHasCompatScaling;
-            mCompatScaling    = src.mCompatScaling;
-            mInvCompatScaling = src.mInvCompatScaling;
-            mBidiFlags      = src.mBidiFlags;
+            setClassVariablesFrom(src);
         }
+    }
+
+    /**
+     * Set all class variables using current values from the given
+     * {@link Paint}.
+     */
+    private void setClassVariablesFrom(Paint paint) {
+        mColorFilter = paint.mColorFilter;
+        mMaskFilter = paint.mMaskFilter;
+        mPathEffect = paint.mPathEffect;
+        mRasterizer = paint.mRasterizer;
+        mShader = paint.mShader;
+        mTypeface = paint.mTypeface;
+        mXfermode = paint.mXfermode;
+
+        mHasCompatScaling = paint.mHasCompatScaling;
+        mCompatScaling = paint.mCompatScaling;
+        mInvCompatScaling = paint.mInvCompatScaling;
+
+        hasShadow = paint.hasShadow;
+        shadowDx = paint.shadowDx;
+        shadowDy = paint.shadowDy;
+        shadowRadius = paint.shadowRadius;
+        shadowColor = paint.shadowColor;
+
+        mBidiFlags = paint.mBidiFlags;
     }
 
     /** @hide */
