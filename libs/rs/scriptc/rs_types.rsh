@@ -89,7 +89,7 @@ typedef uint16_t ushort;
  */
 typedef uint32_t uint;
 /**
- * Typedef for unsigned char (use for 64-bit unsigned integers)
+ * Typedef for unsigned long (use for 64-bit unsigned integers)
  */
 typedef uint64_t ulong;
 /**
@@ -102,67 +102,67 @@ typedef uint32_t size_t;
 typedef int32_t ssize_t;
 
 /**
- * \brief Opaque handle to a RenderScript element.
+ * \brief Opaque handle to a Renderscript element.
  *
  * See: android.renderscript.Element
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_element;
 /**
- * \brief Opaque handle to a RenderScript type.
+ * \brief Opaque handle to a Renderscript type.
  *
  * See: android.renderscript.Type
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_type;
 /**
- * \brief Opaque handle to a RenderScript allocation.
+ * \brief Opaque handle to a Renderscript allocation.
  *
  * See: android.renderscript.Allocation
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_allocation;
 /**
- * \brief Opaque handle to a RenderScript sampler object.
+ * \brief Opaque handle to a Renderscript sampler object.
  *
  * See: android.renderscript.Sampler
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_sampler;
 /**
- * \brief Opaque handle to a RenderScript script object.
+ * \brief Opaque handle to a Renderscript script object.
  *
  * See: android.renderscript.ScriptC
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_script;
 /**
- * \brief Opaque handle to a RenderScript mesh object.
+ * \brief Opaque handle to a Renderscript mesh object.
  *
  * See: android.renderscript.Mesh
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_mesh;
 /**
- * \brief Opaque handle to a RenderScript ProgramFragment object.
+ * \brief Opaque handle to a Renderscript ProgramFragment object.
  *
  * See: android.renderscript.ProgramFragment
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_fragment;
 /**
- * \brief Opaque handle to a RenderScript ProgramVertex object.
+ * \brief Opaque handle to a Renderscript ProgramVertex object.
  *
  * See: android.renderscript.ProgramVertex
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_vertex;
 /**
- * \brief Opaque handle to a RenderScript sampler object.
+ * \brief Opaque handle to a Renderscript ProgramRaster object.
  *
- * See: android.renderscript.Sampler
+ * See: android.renderscript.ProgramRaster
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_raster;
 /**
- * \brief Opaque handle to a RenderScript ProgramStore object.
+ * \brief Opaque handle to a Renderscript ProgramStore object.
  *
  * See: android.renderscript.ProgramStore
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_store;
 /**
- * \brief Opaque handle to a RenderScript font object.
+ * \brief Opaque handle to a Renderscript font object.
  *
  * See: android.renderscript.Font
  */
@@ -170,163 +170,163 @@ typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_fo
 
 /**
  * Vector version of the basic float type.
- * Provides two float fields packed into a single 64bit field with 64 bit
+ * Provides two float fields packed into a single 64 bit field with 64 bit
  * alignment.
  */
 typedef float float2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic float type. Provides three float fields packed
- * into a single 128bit field with 128 bit alignment.
+ * into a single 128 bit field with 128 bit alignment.
  */
 typedef float float3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic float type.
- * Provides four float fields packed into a single 128bit field with 128bit
+ * Provides four float fields packed into a single 128 bit field with 128 bit
  * alignment.
  */
 typedef float float4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic double type. Provides two double fields packed
- * into a single 128bit field with 128bit alignment.
+ * into a single 128 bit field with 128 bit alignment.
  */
 typedef double double2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic double type. Provides three double fields packed
- * into a single 256bit field with 256bit alignment.
+ * into a single 256 bit field with 256 bit alignment.
  */
 typedef double double3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic double type. Provides four double fields packed
- * into a single 256bit field with 256bit alignment.
+ * into a single 256 bit field with 256 bit alignment.
  */
 typedef double double4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic uchar type. Provides two uchar fields packed
- * into a single 16bit field with 16bit alignment.
+ * into a single 16 bit field with 16 bit alignment.
  */
 typedef uchar uchar2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic uchar type. Provides three uchar fields packed
- * into a single 32bit field with 32bit alignment.
+ * into a single 32 bit field with 32 bit alignment.
  */
 typedef uchar uchar3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic uchar type. Provides four uchar fields packed
- * into a single 32bit field with 32bit alignment.
+ * into a single 32 bit field with 32 bit alignment.
  */
 typedef uchar uchar4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic ushort type. Provides two ushort fields packed
- * into a single 32bit field with 32bit alignment.
+ * into a single 32 bit field with 32 bit alignment.
  */
 typedef ushort ushort2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic ushort type. Provides three ushort fields packed
- * into a single 64bit field with 64bit alignment.
+ * into a single 64 bit field with 64 bit alignment.
  */
 typedef ushort ushort3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic ushort type. Provides four ushort fields packed
- * into a single 64bit field with 64bit alignment.
+ * into a single 64 bit field with 64 bit alignment.
  */
 typedef ushort ushort4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic uint type. Provides two uint fields packed into a
- * single 64bit field with 64bit alignment.
+ * single 64 bit field with 64 bit alignment.
  */
 typedef uint uint2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic uint type. Provides three uint fields packed into
- * a single 128bit field with 128bit alignment.
+ * a single 128 bit field with 128 bit alignment.
  */
 typedef uint uint3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic uint type. Provides four uint fields packed into
- * a single 128bit field with 128bit alignment.
+ * a single 128 bit field with 128 bit alignment.
  */
 typedef uint uint4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic ulong type. Provides two ulong fields packed into
- * a single 128bit field with 128bit alignment.
+ * a single 128 bit field with 128 bit alignment.
  */
 typedef ulong ulong2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic ulong type. Provides three ulong fields packed
- * into a single 256bit field with 256bit alignment.
+ * into a single 256 bit field with 256 bit alignment.
  */
 typedef ulong ulong3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic ulong type. Provides four ulong fields packed
- * into a single 256bit field with 256bit alignment.
+ * into a single 256 bit field with 256 bit alignment.
  */
 typedef ulong ulong4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic char type. Provides two char fields packed into a
- * single 16bit field with 16bit alignment.
+ * single 16 bit field with 16 bit alignment.
  */
 typedef char char2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic char type. Provides three char fields packed into
- * a single 32bit field with 32bit alignment.
+ * a single 32 bit field with 32 bit alignment.
  */
 typedef char char3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic char type. Provides four char fields packed into
- * a single 32bit field with 32bit alignment.
+ * a single 32 bit field with 32 bit alignment.
  */
 typedef char char4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic short type. Provides two short fields packed into
- * a single 32bit field with 32bit alignment.
+ * a single 32 bit field with 32 bit alignment.
  */
 typedef short short2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic short type. Provides three short fields packed
- * into a single 64bit field with 64bit alignment.
+ * into a single 64 bit field with 64 bit alignment.
  */
 typedef short short3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic short type. Provides four short fields packed
- * into a single 64bit field with 64bit alignment.
+ * into a single 64 bit field with 64 bit alignment.
  */
 typedef short short4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic int type. Provides two int fields packed into a
- * single 64bit field with 64bit alignment.
+ * single 64 bit field with 64 bit alignment.
  */
 typedef int int2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic int type. Provides three int fields packed into a
- * single 128bit field with 128bit alignment.
+ * single 128 bit field with 128 bit alignment.
  */
 typedef int int3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic int type. Provides two four fields packed into a
- * single 128bit field with 128bit alignment.
+ * single 128 bit field with 128 bit alignment.
  */
 typedef int int4 __attribute__((ext_vector_type(4)));
 
 /**
  * Vector version of the basic long type. Provides two long fields packed into a
- * single 128bit field with 128bit alignment.
+ * single 128 bit field with 128 bit alignment.
  */
 typedef long long2 __attribute__((ext_vector_type(2)));
 /**
  * Vector version of the basic long type. Provides three long fields packed into
- * a single 256bit field with 256bit alignment.
+ * a single 256 bit field with 256 bit alignment.
  */
 typedef long long3 __attribute__((ext_vector_type(3)));
 /**
  * Vector version of the basic long type. Provides four long fields packed into
- * a single 256bit field with 256bit alignment.
+ * a single 256 bit field with 256 bit alignment.
  */
 typedef long long4 __attribute__((ext_vector_type(4)));
 
@@ -369,8 +369,6 @@ typedef float4 rs_quaternion;
 
 /**
  * \brief Enum for selecting cube map faces
- *
- * Used todo-alexst
  */
 typedef enum {
     RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X = 0,
