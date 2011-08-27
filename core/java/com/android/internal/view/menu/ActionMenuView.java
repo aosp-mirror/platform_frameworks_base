@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.LinearLayout;
 
 /**
@@ -509,6 +510,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             result |= ((ActionMenuChildView) child).needsDividerBefore();
         }
         return result;
+    }
+
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        return false;
     }
 
     public interface ActionMenuChildView {
