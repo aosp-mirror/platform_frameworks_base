@@ -23,8 +23,8 @@ import android.nfc.NdefMessage;
 import android.nfc.Tag;
 import android.nfc.TechListParcel;
 import android.nfc.INdefPushCallback;
-import android.nfc.INfcTag;
 import android.nfc.INfcAdapterExtras;
+import android.nfc.INfcTag;
 
 /**
  * @hide
@@ -34,19 +34,14 @@ interface INfcAdapter
     INfcTag getNfcTagInterface();
     INfcAdapterExtras getNfcAdapterExtrasInterface();
 
-    // NfcAdapter-class related methods
     int getState();
-    void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
-            in IntentFilter[] filters, in TechListParcel techLists);
-    void disableForegroundDispatch(in ComponentName activity);
-    void enableForegroundNdefPush(in ComponentName activity, in NdefMessage msg);
-    void enableForegroundNdefPushWithCallback(in ComponentName activity, in INdefPushCallback callback);
-    void disableForegroundNdefPush(in ComponentName activity);
-
-    // Non-public methods
     boolean disable();
     boolean enable();
-    boolean enableZeroClick();
-    boolean disableZeroClick();
-    boolean isZeroClickEnabled();
+    boolean enableNdefPush();
+    boolean disableNdefPush();
+    boolean isNdefPushEnabled();
+
+    void setForegroundDispatch(in PendingIntent intent,
+            in IntentFilter[] filters, in TechListParcel techLists);
+    void setForegroundNdefPush(in NdefMessage msg, in INdefPushCallback callback);
 }
