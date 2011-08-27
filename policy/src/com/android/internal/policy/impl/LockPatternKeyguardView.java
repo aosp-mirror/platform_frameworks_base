@@ -44,8 +44,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import java.io.IOException;
 
@@ -507,6 +509,18 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     protected void onDetachedFromWindow() {
         removeCallbacks(mRecreateRunnable);
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected boolean dispatchHoverEvent(MotionEvent event) {
+        // Do not let the screen to get locked while the user is disabled and touch
+        // exploring. A blind user will need significantly more time to find and
+        // interact with the lock screen views.
+        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
+        if (accessibilityManager.isEnabled() && accessibilityManager.isTouchExplorationEnabled()) {
+            getCallback().pokeWakelock();
+        }
+        return super.dispatchHoverEvent(event);
     }
 
     @Override
