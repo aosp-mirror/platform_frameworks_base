@@ -2006,4 +2006,8 @@
   <public type="color" name="holo_orange_dark" />
   <public type="color" name="holo_purple" />
   <public type="color" name="holo_blue_bright" />
+
+  <public type="attr" name="targetDescriptions" />
+  <public type="attr" name="directionDescriptions" />
+
 </resources>

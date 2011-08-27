@@ -27,11 +27,39 @@
         <item>@drawable/ic_lockscreen_soundon</item>
     </array>
 
+    <array name="lockscreen_target_descriptions_when_silent">
+        <item>@null</item>
+        <item>@string/description_target_unlock</item>
+        <item>@null</item>
+        <item>@string/description_target_soundon</item>
+    </array>
+
+    <array name="lockscreen_direction_descriptions_when_silent">
+        <item>@null</item>
+        <item>@string/description_direction_up</item>
+        <item>@null</item>
+        <item>@string/description_direction_down</item>
+    </array>
+
     <array name="lockscreen_targets_when_soundon">
-        <item>@null</item>"
+        <item>@null</item>
         <item>@drawable/ic_lockscreen_unlock</item>
         <item>@null</item>
         <item>@drawable/ic_lockscreen_silent</item>
+    </array>
+
+    <array name="lockscreen_target_descriptions_when_soundon">
+        <item>@null</item>
+        <item>@string/description_target_unlock</item>
+        <item>@null</item>
+        <item>@string/description_target_silent</item>
+    </array>
+
+    <array name="lockscreen_direction_descriptions_when_soundon">
+        <item>@null</item>
+        <item>@string/description_direction_up</item>
+        <item>@null</item>
+        <item>@string/description_direction_down</item>
     </array>
 
     <array name="lockscreen_targets_with_camera">
@@ -39,6 +67,20 @@
         <item>@drawable/ic_lockscreen_unlock</item>
         <item>@null</item>
         <item>@drawable/ic_lockscreen_camera</item>
+    </array>
+
+    <array name="lockscreen_target_descriptions_with_camera">
+        <item>@null</item>
+        <item>@string/description_target_unlock</item>
+        <item>@null</item>
+        <item>@string/description_target_camera</item>
+    </array>
+
+    <array name="lockscreen_direction_descriptions_with_camera">
+        <item>@null</item>
+        <item>@string/description_direction_up</item>
+        <item>@null</item>
+        <item>@string/description_direction_down</item>
     </array>
 
 </resources>

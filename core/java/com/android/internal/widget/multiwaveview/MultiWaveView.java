@@ -16,8 +16,6 @@
 
 package com.android.internal.widget.multiwaveview;
 
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
@@ -31,14 +29,19 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.MeasureSpec;
+import android.view.ViewConfiguration;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
+
+import java.util.ArrayList;
 
 /**
  * A special widget containing a center and outer ring. Moving the center ring to the outer ring
@@ -82,6 +85,8 @@ public class MultiWaveView extends View {
     private ArrayList<TargetDrawable> mChevronDrawables = new ArrayList<TargetDrawable>();
     private ArrayList<Tweener> mChevronAnimations = new ArrayList<Tweener>();
     private ArrayList<Tweener> mTargetAnimations = new ArrayList<Tweener>();
+    private ArrayList<String> mTargetDescriptions;
+    private ArrayList<String> mDirectionDescriptions;
     private Tweener mHandleAnimation;
     private OnTriggerListener mOnTriggerListener;
     private TargetDrawable mHandleDrawable;
@@ -102,6 +107,9 @@ public class MultiWaveView extends View {
     private float mSnapMargin = 0.0f;
     private boolean mDragging;
     private int mNewTargetResources;
+
+    private boolean mWaveHovered = false;
+    private long mLastHoverExitTimeMillis = 0;
 
     private AnimatorListener mResetListener = new AnimatorListenerAdapter() {
         public void onAnimationEnd(Animator animator) {
@@ -128,6 +136,8 @@ public class MultiWaveView extends View {
         }
     };
     private int mTargetResourceId;
+    private int mTargetDescriptionsResourceId;
+    private int mDirectionDescriptionsResourceId;
 
     public MultiWaveView(Context context) {
         this(context, null);
@@ -177,6 +187,25 @@ public class MultiWaveView extends View {
             throw new IllegalStateException("Must specify at least one target drawable");
         }
 
+        // Read array of target descriptions
+        if (a.getValue(R.styleable.MultiWaveView_targetDescriptions, outValue)) {
+            final int resourceId = outValue.resourceId;
+            if (resourceId == 0) {
+                throw new IllegalStateException("Must specify target descriptions");
+            }
+            setTargetDescriptionsResourceId(resourceId);
+        }
+
+        // Read array of direction descriptions
+        if (a.getValue(R.styleable.MultiWaveView_directionDescriptions, outValue)) {
+            final int resourceId = outValue.resourceId;
+            if (resourceId == 0) {
+                throw new IllegalStateException("Must specify direction descriptions");
+            }
+            setDirectionDescriptionsResourceId(resourceId);
+        }
+
+        a.recycle();
         setVibrateEnabled(mVibrationDuration > 0);
     }
 
@@ -247,6 +276,9 @@ public class MultiWaveView extends View {
                 showTargets(true);
                 mHandleDrawable.setState(TargetDrawable.STATE_ACTIVE);
                 setGrabbedState(OnTriggerListener.CENTER_HANDLE);
+                if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                    announceTargets();
+                }
                 break;
 
             case STATE_TRACKING:
@@ -344,6 +376,13 @@ public class MultiWaveView extends View {
         vibrate();
         if (mOnTriggerListener != null) {
             mOnTriggerListener.onTrigger(this, whichHandle);
+        }
+    }
+
+    private void dispatchGrabbedEvent(int whichHandler) {
+        vibrate();
+        if (mOnTriggerListener != null) {
+            mOnTriggerListener.onGrabbed(this, whichHandler);
         }
     }
 
@@ -475,6 +514,7 @@ public class MultiWaveView extends View {
             Drawable drawable = array.getDrawable(i);
             targetDrawables.add(new TargetDrawable(res, drawable));
         }
+        array.recycle();
         mTargetResourceId = resourceId;
         mTargetDrawables = targetDrawables;
         updateTargetPositions();
@@ -496,6 +536,48 @@ public class MultiWaveView extends View {
 
     public int getTargetResourceId() {
         return mTargetResourceId;
+    }
+
+    /**
+     * Sets the resource id specifying the target descriptions for accessibility.
+     *
+     * @param resourceId The resource id.
+     */
+    public void setTargetDescriptionsResourceId(int resourceId) {
+        mTargetDescriptionsResourceId = resourceId;
+        if (mTargetDescriptions != null) {
+            mTargetDescriptions.clear();
+        }
+    }
+
+    /**
+     * Gets the resource id specifying the target descriptions for accessibility.
+     *
+     * @return The resource id.
+     */
+    public int getTargetDescriptionsResourceId() {
+        return mTargetDescriptionsResourceId;
+    }
+
+    /**
+     * Sets the resource id specifying the target direction descriptions for accessibility.
+     *
+     * @param resourceId The resource id.
+     */
+    public void setDirectionDescriptionsResourceId(int resourceId) {
+        mDirectionDescriptionsResourceId = resourceId;
+        if (mDirectionDescriptions != null) {
+            mDirectionDescriptions.clear();
+        }
+    }
+
+    /**
+     * Gets the resource id specifying the target direction descriptions.
+     *
+     * @return The resource id.
+     */
+    public int getDirectionDescriptionsResourceId() {
+        return mDirectionDescriptionsResourceId;
     }
 
     /**
@@ -593,6 +675,43 @@ public class MultiWaveView extends View {
         }
     }
 
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (AccessibilityManager.getInstance(mContext).isTouchExplorationEnabled()) {
+            final int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    final float dx = event.getX() - mWaveCenterX;
+                    final float dy = event.getY() - mWaveCenterY;
+                    if (dist2(dx,dy) <= square(mTapRadius)) {
+                        if (!mWaveHovered) {
+                            mWaveHovered = true;
+                            final long timeSinceLastHoverExitMillis =
+                                event.getEventTime() - mLastHoverExitTimeMillis;
+                            final long recurringEventsInterval =
+                                ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
+                            if (timeSinceLastHoverExitMillis > recurringEventsInterval) {
+                                String text =
+                                    mContext.getString(R.string.content_description_sliding_handle);
+                                announceText(text);
+                            }
+                        }
+                    } else {
+                        mWaveHovered = false;
+                    }
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    mLastHoverExitTimeMillis = event.getEventTime();
+                    mWaveHovered = false;
+                    break;
+                default:
+                    mWaveHovered = false;
+            }
+        }
+        return super.onHoverEvent(event);
+    }
+
     private void handleUp(MotionEvent event) {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle RELEASE");
         switchToState(STATE_FINISH, event.getX(), event.getY());
@@ -663,7 +782,11 @@ public class MultiWaveView extends View {
         invalidateGlobalRegion(mHandleDrawable);
 
         if (mActiveTarget != activeTarget && activeTarget != -1) {
-            vibrate();
+            dispatchGrabbedEvent(activeTarget);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                String targetContentDescription = getTargetDescription(activeTarget);
+                announceText(targetContentDescription);
+            }
         }
         mActiveTarget = activeTarget;
     }
@@ -771,4 +894,62 @@ public class MultiWaveView extends View {
         return dx*dx + dy*dy;
     }
 
+    private void announceTargets() {
+        StringBuilder utterance = new StringBuilder();
+        final int targetCount = mTargetDrawables.size();
+        for (int i = 0; i < targetCount; i++) {
+            String targetDescription = getTargetDescription(i);
+            String directionDescription = getDirectionDescription(i);
+            if (!TextUtils.isEmpty(targetDescription)
+                    && !TextUtils.isEmpty(directionDescription)) {
+                utterance.append(targetDescription);
+                utterance.append(" ");
+                utterance.append(directionDescription);
+                utterance.append(".");
+            }
+        }
+        announceText(utterance.toString());
+    }
+
+    private void announceText(String text) {
+        setContentDescription(text);
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+        setContentDescription(null);
+    }
+
+    private String getTargetDescription(int index) {
+        if (mTargetDescriptions == null || mTargetDescriptions.isEmpty()) {
+            mTargetDescriptions = loadDescriptions(mTargetDescriptionsResourceId);
+            if (mTargetDrawables.size() != mTargetDescriptions.size()) {
+                Log.w(TAG, "The number of target drawables must be"
+                        + " euqal to the number of target descriptions.");
+                return null;
+            }
+        }
+        return mTargetDescriptions.get(index);
+    }
+
+    private String getDirectionDescription(int index) {
+        if (mDirectionDescriptions == null || mDirectionDescriptions.isEmpty()) {
+            mDirectionDescriptions = loadDescriptions(mDirectionDescriptionsResourceId);
+            if (mTargetDrawables.size() != mDirectionDescriptions.size()) {
+                Log.w(TAG, "The number of target drawables must be"
+                        + " euqal to the number of direction descriptions.");
+                return null;
+            }
+        }
+        return mDirectionDescriptions.get(index);
+    }
+
+    private ArrayList<String> loadDescriptions(int resourceId) {
+        TypedArray array = getContext().getResources().obtainTypedArray(resourceId);
+        final int count = array.length();
+        ArrayList<String> targetContentDescriptions = new ArrayList<String>(count);
+        for (int i = 0; i < count; i++) {
+            String contentDescription = array.getString(i);
+            targetContentDescriptions.add(contentDescription);
+        }
+        array.recycle();
+        return targetContentDescriptions;
+    }
 }
