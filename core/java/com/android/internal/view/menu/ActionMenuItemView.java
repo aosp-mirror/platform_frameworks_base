@@ -23,7 +23,9 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -157,12 +159,31 @@ public class ActionMenuItemView extends LinearLayout
     public void setTitle(CharSequence title) {
         mTitle = title;
 
-        // populate accessibility description with title
-        setContentDescription(title);
-
         mTextButton.setText(mTitle);
 
+        setContentDescription(mTitle);
         updateTextButtonVisibility();
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        onPopulateAccessibilityEvent(event);
+        return true;
+    }
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+        final CharSequence cdesc = getContentDescription();
+        if (!TextUtils.isEmpty(cdesc)) {
+            event.getText().add(cdesc);
+        }
+    }
+
+    @Override
+    public boolean dispatchHoverEvent(MotionEvent event) {
+        // Don't allow children to hover; we want this to be treated as a single component.
+        return onHoverEvent(event);
     }
 
     public boolean showsIcon() {
