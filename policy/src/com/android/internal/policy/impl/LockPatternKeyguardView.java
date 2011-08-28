@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
+import com.android.internal.policy.impl.LockPatternKeyguardView.UnlockMode;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -31,6 +32,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -83,6 +85,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private boolean mScreenOn = false;
     private boolean mEnableFallback = false; // assume no fallback UI until we know better
+
+    private boolean mShowLockBeforeUnlock = false;
 
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
@@ -148,7 +152,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
      * Keeps track of what mode the current unlock screen is (cached from most recent computation in
      * {@link #getUnlockMode}).
      */
-    private UnlockMode mUnlockScreenMode;
+    private UnlockMode mUnlockScreenMode = UnlockMode.Unknown;
 
     private boolean mForgotPattern;
 
@@ -164,8 +168,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
      */
     private final LockPatternUtils mLockPatternUtils;
 
-    private UnlockMode mCurrentUnlockMode = UnlockMode.Unknown;
-
     /**
      * The current configuration.
      */
@@ -173,7 +175,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private Runnable mRecreateRunnable = new Runnable() {
         public void run() {
-            recreateScreens();
+            updateScreen(mMode, false);
         }
     };
 
@@ -204,15 +206,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         mConfiguration = context.getResources().getConfiguration();
         mEnableFallback = false;
-
-        mRequiresSim =
-                TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
-
+        mRequiresSim = TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
-
-        mMode = getInitialMode();
 
         mKeyguardScreenCallback = new KeyguardScreenCallback() {
 
@@ -224,7 +221,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                     mIsVerifyUnlockOnly = false;
                     getCallback().keyguardDone(false);
                 } else {
-                    updateScreen(Mode.LockScreen);
+                    updateScreen(Mode.LockScreen, false);
                 }
             }
 
@@ -240,14 +237,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 if (!isSecure()) {
                     getCallback().keyguardDone(true);
                 } else {
-                    updateScreen(Mode.UnlockScreen);
+                    updateScreen(Mode.UnlockScreen, false);
                 }
             }
 
             public void forgotPattern(boolean isForgotten) {
                 if (mEnableFallback) {
                     mForgotPattern = isForgotten;
-                    updateScreen(Mode.UnlockScreen);
+                    updateScreen(Mode.UnlockScreen, false);
                 }
             }
 
@@ -260,7 +257,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             }
 
             public void recreateMe(Configuration config) {
-                mConfiguration = config;
                 removeCallbacks(mRecreateRunnable);
                 post(mRecreateRunnable);
             }
@@ -330,7 +326,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                         showAlmostAtAccountLoginDialog();
                     } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
                         mLockPatternUtils.setPermanentlyLocked(true);
-                        updateScreen(mMode);
+                        updateScreen(mMode, false);
                     }
                 } else {
                     final boolean showTimeout =
@@ -358,21 +354,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         setFocusableInTouchMode(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
-        // create both the lock and unlock screen so they are quickly available
-        // when the screen turns on
-        mLockScreen = createLockScreen();
-        addView(mLockScreen);
-        final UnlockMode unlockMode = getUnlockMode();
-        if (DEBUG) Log.d(TAG,
-            "LockPatternKeyguardView ctor: about to createUnlockScreenFor; mEnableFallback="
-            + mEnableFallback);
-        mUnlockScreen = createUnlockScreenFor(unlockMode);
-        mUnlockScreenMode = unlockMode;
-
+        updateScreen(getInitialMode(), false);
         maybeEnableFallback(context);
-
-        addView(mUnlockScreen);
-        updateScreen(mMode);
     }
 
     private class AccountAnalyzer implements AccountManagerCallback<Bundle> {
@@ -449,7 +432,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public void reset() {
         mIsVerifyUnlockOnly = false;
         mForgotPattern = false;
-        updateScreen(getInitialMode());
+        updateScreen(getInitialMode(), false);
     }
 
     @Override
@@ -457,7 +440,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mScreenOn = false;
         mForgotPattern = false;
         if (mMode == Mode.LockScreen) {
-           ((KeyguardScreen) mLockScreen).onPause();
+            ((KeyguardScreen) mLockScreen).onPause();
         } else {
             ((KeyguardScreen) mUnlockScreen).onPause();
         }
@@ -467,42 +450,38 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public void onScreenTurnedOn() {
         mScreenOn = true;
         if (mMode == Mode.LockScreen) {
-           ((KeyguardScreen) mLockScreen).onResume();
+            ((KeyguardScreen) mLockScreen).onResume();
         } else {
             ((KeyguardScreen) mUnlockScreen).onResume();
         }
     }
 
     private void recreateLockScreen() {
-        if (mLockScreen.getVisibility() == View.VISIBLE) {
-            ((KeyguardScreen) mLockScreen).onPause();
+        if (mLockScreen != null) {
+            if (mLockScreen.getVisibility() == View.VISIBLE) {
+                ((KeyguardScreen) mLockScreen).onPause();
+            }
+            ((KeyguardScreen) mLockScreen).cleanUp();
+            removeView(mLockScreen);
         }
-        ((KeyguardScreen) mLockScreen).cleanUp();
-        removeView(mLockScreen);
 
         mLockScreen = createLockScreen();
         mLockScreen.setVisibility(View.INVISIBLE);
         addView(mLockScreen);
     }
 
-    private void recreateUnlockScreen() {
-        if (mUnlockScreen.getVisibility() == View.VISIBLE) {
-            ((KeyguardScreen) mUnlockScreen).onPause();
+    private void recreateUnlockScreen(UnlockMode unlockMode) {
+        if (mUnlockScreen != null) {
+            if (mUnlockScreen.getVisibility() == View.VISIBLE) {
+                ((KeyguardScreen) mUnlockScreen).onPause();
+            }
+            ((KeyguardScreen) mUnlockScreen).cleanUp();
+            removeView(mUnlockScreen);
         }
-        ((KeyguardScreen) mUnlockScreen).cleanUp();
-        removeView(mUnlockScreen);
 
-        final UnlockMode unlockMode = getUnlockMode();
         mUnlockScreen = createUnlockScreenFor(unlockMode);
         mUnlockScreen.setVisibility(View.INVISIBLE);
-        mUnlockScreenMode = unlockMode;
         addView(mUnlockScreen);
-    }
-
-    private void recreateScreens() {
-        recreateLockScreen();
-        recreateUnlockScreen();
-        updateScreen(mMode);
     }
 
     @Override
@@ -523,13 +502,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         return super.dispatchHoverEvent(event);
     }
 
+    protected void onConfigurationChanged(Configuration newConfig) {
+        Resources resources = getResources();
+        mShowLockBeforeUnlock = resources.getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
+        mConfiguration = newConfig;
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
+        updateScreen(mMode, true /* force */);
+    }
+
     @Override
     public void wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "onWakeKey");
         if (keyCode == KeyEvent.KEYCODE_MENU && isSecure() && (mMode == Mode.LockScreen)
                 && (mUpdateMonitor.getSimState() != IccCard.State.PUK_REQUIRED)) {
             if (DEBUG) Log.d(TAG, "switching screens to unlock screen because wake key was MENU");
-            updateScreen(Mode.UnlockScreen);
+            updateScreen(Mode.UnlockScreen, false);
             getCallback().pokeWakelock();
         } else {
             if (DEBUG) Log.d(TAG, "poking wake lock immediately");
@@ -542,24 +529,31 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (!isSecure()) {
             // non-secure keyguard screens are successfull by default
             getCallback().keyguardDone(true);
-        } else if (mUnlockScreenMode != UnlockMode.Pattern) {
-            // can only verify unlock when in pattern mode
+        } else if (mUnlockScreenMode != UnlockMode.Pattern
+                && mUnlockScreenMode != UnlockMode.Password) {
+            // can only verify unlock when in pattern/password mode
             getCallback().keyguardDone(false);
         } else {
             // otherwise, go to the unlock screen, see if they can verify it
             mIsVerifyUnlockOnly = true;
-            updateScreen(Mode.UnlockScreen);
+            updateScreen(Mode.UnlockScreen, false);
         }
     }
 
     @Override
     public void cleanUp() {
-        ((KeyguardScreen) mLockScreen).onPause();
-        ((KeyguardScreen) mLockScreen).cleanUp();
-        this.removeView(mLockScreen);
-        ((KeyguardScreen) mUnlockScreen).onPause();
-        ((KeyguardScreen) mUnlockScreen).cleanUp();
-        this.removeView(mUnlockScreen);
+        if (mLockScreen != null) {
+            ((KeyguardScreen) mLockScreen).onPause();
+            ((KeyguardScreen) mLockScreen).cleanUp();
+            this.removeView(mLockScreen);
+            mLockScreen = null;
+        }
+        if (mUnlockScreen != null) {
+            ((KeyguardScreen) mUnlockScreen).onPause();
+            ((KeyguardScreen) mUnlockScreen).cleanUp();
+            this.removeView(mUnlockScreen);
+            mUnlockScreen = null;
+        }
     }
 
     private boolean isSecure() {
@@ -587,19 +581,30 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         return secure;
     }
 
-    private void updateScreen(final Mode mode) {
+    private void updateScreen(Mode mode, boolean force) {
 
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** UPDATE SCREEN: mode=" + mode
                 + " last mode=" + mMode, new RuntimeException());
 
         mMode = mode;
 
-        // Re-create the unlock screen if necessary. This is primarily required to properly handle
-        // SIM state changes. This typically happens when this method is called by reset()
-        if (mode == Mode.UnlockScreen && mCurrentUnlockMode != getUnlockMode()) {
-            recreateUnlockScreen();
+        // Re-create the lock screen if necessary
+        if (mode == Mode.LockScreen || mShowLockBeforeUnlock) {
+            if (force || mLockScreen == null) {
+                recreateLockScreen();
+            }
         }
 
+        // Re-create the unlock screen if necessary. This is primarily required to properly handle
+        // SIM state changes. This typically happens when this method is called by reset()
+        if (mode == Mode.UnlockScreen) {
+            final UnlockMode unlockMode = getUnlockMode();
+            if (force || mUnlockScreen == null || unlockMode != mUnlockScreenMode) {
+                recreateUnlockScreen(unlockMode);
+            }
+        }
+
+        // visibleScreen should never be null
         final View goneScreen = (mode == Mode.LockScreen) ? mUnlockScreen : mLockScreen;
         final View visibleScreen = (mode == Mode.LockScreen) ? mLockScreen : mUnlockScreen;
 
@@ -613,7 +618,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
 
         if (mScreenOn) {
-            if (goneScreen.getVisibility() == View.VISIBLE) {
+            if (goneScreen != null && goneScreen.getVisibility() == View.VISIBLE) {
                 ((KeyguardScreen) goneScreen).onPause();
             }
             if (visibleScreen.getVisibility() != View.VISIBLE) {
@@ -621,7 +626,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             }
         }
 
-        goneScreen.setVisibility(View.GONE);
+        if (goneScreen != null) {
+            goneScreen.setVisibility(View.GONE);
+        }
         visibleScreen.setVisibility(View.VISIBLE);
         requestLayout();
 
@@ -691,7 +698,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 // regular pattern unlock UI, regardless of the value of
                 // mUnlockScreenMode or whether or not we're in the
                 // "permanently locked" state.)
-                unlockView = createUnlockScreenFor(UnlockMode.Pattern);
+                return createUnlockScreenFor(UnlockMode.Pattern);
             }
         } else if (unlockMode == UnlockMode.Password) {
             unlockView = new PasswordUnlockScreen(
@@ -703,7 +710,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         } else {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
-        mCurrentUnlockMode = unlockMode;
+        mUnlockScreenMode = unlockMode;
         return unlockView;
     }
 
@@ -718,16 +725,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                         !mLockPatternUtils.isPukUnlockScreenEnable())) {
             return Mode.LockScreen;
         } else {
-            // Show LockScreen first for any screen other than Pattern unlock.
-            final boolean usingLockPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
-                    == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-
-            boolean showLockBeforeUnlock = getResources()
-                    .getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
-            if (isSecure() && (usingLockPattern || !showLockBeforeUnlock)) {
-                return Mode.UnlockScreen;
-            } else {
+            if (!isSecure() || mShowLockBeforeUnlock) {
                 return Mode.LockScreen;
+            } else {
+                return Mode.UnlockScreen;
             }
         }
     }
