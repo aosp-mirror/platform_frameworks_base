@@ -179,9 +179,11 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     // TODO: Currently just uses mDefaultWidth/Height. In the future
     // we might declare mHeight and mWidth and check against those here.
     if ((w != 0) || (h != 0)) {
-        LOGE("dequeuebuffer: invalid buffer size! Req: %dx%d, Found: %dx%d",
-                mDefaultWidth, mDefaultHeight, w, h);
-        return BAD_VALUE;
+        if ((w != mDefaultWidth) || (h != mDefaultHeight)) {
+            LOGE("dequeuebuffer: invalid buffer size! Req: %dx%d, Found: %dx%d",
+                    mDefaultWidth, mDefaultHeight, w, h);
+            return BAD_VALUE;
+        }
     }
 
     status_t returnFlags(OK);
