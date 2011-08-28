@@ -165,7 +165,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         View switchImeButton = findViewById(R.id.switch_ime_button);
         final InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
-        if (switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(imm, false)) {
+        if (mIsAlpha && switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(imm, false)) {
             switchImeButton.setVisibility(View.VISIBLE);
             switchImeButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
