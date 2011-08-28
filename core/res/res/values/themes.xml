@@ -980,7 +980,7 @@ please see themes_device_defaults.xml.
         <item name="toastFrameBackground">@android:drawable/toast_frame_holo</item>
         
         <!-- Panel attributes -->
-        <item name="panelBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
+        <item name="panelBackground">@android:drawable/menu_hardkey_panel_holo_dark</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
         <!-- These three attributes do not seems to be used by the framework. Declared public though -->
         <item name="panelColorBackground">#000</item>
@@ -1283,7 +1283,7 @@ please see themes_device_defaults.xml.
         <item name="toastFrameBackground">@android:drawable/toast_frame_holo</item>
         
         <!-- Panel attributes -->
-        <item name="panelBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
+        <item name="panelBackground">@android:drawable/menu_hardkey_panel_holo_light</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
         <!-- These three attributes do not seems to be used by the framework. Declared public though -->
         <item name="panelColorBackground">#000</item>

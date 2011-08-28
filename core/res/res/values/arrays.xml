@@ -163,6 +163,8 @@
        <item>@drawable/list_selector_holo_light</item>
        <item>@drawable/menu_background</item>
        <item>@drawable/menu_background_fill_parent_width</item>
+       <item>@drawable/menu_hardkey_panel_holo_dark</item>
+       <item>@drawable/menu_hardkey_panel_holo_light</item>
        <item>@drawable/menu_submenu_background</item>
        <item>@drawable/menu_selector</item>
        <item>@drawable/overscroll_edge</item>
