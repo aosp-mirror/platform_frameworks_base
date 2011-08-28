@@ -1574,8 +1574,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         ss.inActionMode = mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null;
 
-        ss.checkState = mCheckStates;
-        ss.checkIdState = mCheckedIdStates;
+        if (mCheckStates != null) {
+            ss.checkState = mCheckStates.clone();
+        }
+        if (mCheckedIdStates != null) {
+            final LongSparseArray<Boolean> idState = new LongSparseArray<Boolean>();
+            final int count = mCheckedIdStates.size();
+            for (int i = 0; i < count; i++) {
+                idState.put(mCheckedIdStates.keyAt(i), mCheckedIdStates.valueAt(i));
+            }
+            ss.checkIdState = idState;
+        }
         ss.checkedItemCount = mCheckedItemCount;
 
         return ss;

@@ -401,6 +401,7 @@ public class ActionBarView extends AbsActionBarView {
                 if (oldParent != null && oldParent != mSplitView) {
                     oldParent.removeView(menuView);
                 }
+                menuView.setVisibility(getAnimatedVisibility());
                 mSplitView.addView(menuView, layoutParams);
             } else {
                 // We'll add this later if we missed it this time.
@@ -683,7 +684,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     @Override
-    protected LayoutParams generateDefaultLayoutParams() {
+    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         // Used by custom nav views if they don't supply layout params. Everything else
         // added to an ActionBarView should have them already.
         return new ActionBar.LayoutParams(DEFAULT_CUSTOM_GRAVITY);
@@ -810,7 +811,7 @@ public class ActionBarView extends AbsActionBarView {
         HomeView homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
 
         if (homeLayout.getVisibility() != GONE) {
-            final LayoutParams lp = homeLayout.getLayoutParams();
+            final ViewGroup.LayoutParams lp = homeLayout.getLayoutParams();
             int homeWidthSpec;
             if (lp.width < 0) {
                 homeWidthSpec = MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST);
@@ -881,7 +882,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         if (customView != null) {
-            final LayoutParams lp = generateLayoutParams(customView.getLayoutParams());
+            final ViewGroup.LayoutParams lp = generateLayoutParams(customView.getLayoutParams());
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
 
@@ -1017,7 +1018,7 @@ public class ActionBarView extends AbsActionBarView {
             customView = mCustomNavView;
         }
         if (customView != null) {
-            LayoutParams lp = customView.getLayoutParams();
+            ViewGroup.LayoutParams lp = customView.getLayoutParams();
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
 
@@ -1095,12 +1096,12 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new ActionBar.LayoutParams(getContext(), attrs);
     }
 
     @Override
-    public LayoutParams generateLayoutParams(LayoutParams lp) {
+    public ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams lp) {
         if (lp == null) {
             lp = generateDefaultLayoutParams();
         }
