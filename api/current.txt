@@ -22508,6 +22508,7 @@ package android.view {
   }
 
   public class Surface implements android.os.Parcelable {
+    ctor public Surface(android.graphics.SurfaceTexture);
     method public int describeContents();
     method public boolean isValid();
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect) throws java.lang.IllegalArgumentException, android.view.Surface.OutOfResourcesException;
