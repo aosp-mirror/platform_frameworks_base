@@ -321,8 +321,7 @@ public abstract class DialogPreference extends Preference implements
      */
     private void requestInputMethod(Dialog dialog) {
         Window window = dialog.getWindow();
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE |
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     /**
