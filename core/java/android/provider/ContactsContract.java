@@ -3083,12 +3083,25 @@ public final class ContactsContract {
         /**
          * A reference to the {@link android.provider.ContactsContract.Contacts#_ID}
          * that this stream item belongs to.
+         *
+         * <p>Type: INTEGER</p>
+         * <p>read-only</p>
          */
         public static final String CONTACT_ID = "contact_id";
 
         /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY}
+         * that this stream item belongs to.
+         *
+         * <p>Type: TEXT</p>
+         * <p>read-only</p>
+         */
+        public static final String CONTACT_LOOKUP_KEY = "contact_lookup";
+
+        /**
          * A reference to the {@link RawContacts#_ID}
          * that this stream item belongs to.
+         * <p>Type: INTEGER</p>
          */
         public static final String RAW_CONTACT_ID = "raw_contact_id";
 
@@ -3104,7 +3117,7 @@ public final class ContactsContract {
          * The account type to which the raw_contact of this item is associated. See
          * {@link RawContacts#ACCOUNT_TYPE}
          *
-         * <p>TYPE: text</p>
+         * <p>Type: TEXT</p>
          * <p>read-only</p>
          */
         public static final String ACCOUNT_TYPE = "account_type";
@@ -3113,7 +3126,7 @@ public final class ContactsContract {
          * The account name to which the raw_contact of this item is associated. See
          * {@link RawContacts#ACCOUNT_NAME}
          *
-         * <p>TYPE: text</p>
+         * <p>Type: TEXT</p>
          * <p>read-only</p>
          */
         public static final String ACCOUNT_NAME = "account_name";
