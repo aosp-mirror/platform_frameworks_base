@@ -449,11 +449,11 @@ class HtmlToSpannedConverter implements ContentHandler {
             handleP(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("div")) {
             handleP(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("em")) {
+        } else if (tag.equalsIgnoreCase("strong")) {
             start(mSpannableStringBuilder, new Bold());
         } else if (tag.equalsIgnoreCase("b")) {
             start(mSpannableStringBuilder, new Bold());
-        } else if (tag.equalsIgnoreCase("strong")) {
+        } else if (tag.equalsIgnoreCase("em")) {
             start(mSpannableStringBuilder, new Italic());
         } else if (tag.equalsIgnoreCase("cite")) {
             start(mSpannableStringBuilder, new Italic());
