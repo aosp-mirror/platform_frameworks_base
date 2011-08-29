@@ -1152,22 +1152,26 @@ bool AwesomePlayer::isPlaying() const {
     return (mFlags & PLAYING) || (mFlags & CACHE_UNDERRUN);
 }
 
-void AwesomePlayer::setSurface(const sp<Surface> &surface) {
+status_t AwesomePlayer::setSurface(const sp<Surface> &surface) {
     Mutex::Autolock autoLock(mLock);
 
     mSurface = surface;
-    setNativeWindow_l(surface);
+    return setNativeWindow_l(surface);
 }
 
-void AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
+status_t AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
     Mutex::Autolock autoLock(mLock);
 
     mSurface.clear();
+
+    status_t err;
     if (surfaceTexture != NULL) {
-        setNativeWindow_l(new SurfaceTextureClient(surfaceTexture));
+        err = setNativeWindow_l(new SurfaceTextureClient(surfaceTexture));
     } else {
-        setNativeWindow_l(NULL);
+        err = setNativeWindow_l(NULL);
     }
+
+    return err;
 }
 
 void AwesomePlayer::shutdownVideoDecoder_l() {
@@ -1190,11 +1194,11 @@ void AwesomePlayer::shutdownVideoDecoder_l() {
     LOGI("video decoder shutdown completed");
 }
 
-void AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
+status_t AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
     mNativeWindow = native;
 
     if (mVideoSource == NULL) {
-        return;
+        return OK;
     }
 
     LOGI("attempting to reconfigure to use new surface");
@@ -1206,7 +1210,12 @@ void AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
 
     shutdownVideoDecoder_l();
 
-    CHECK_EQ(initVideoDecoder(), (status_t)OK);
+    status_t err = initVideoDecoder();
+
+    if (err != OK) {
+        LOGE("failed to reinstantiate video decoder after surface change.");
+        return err;
+    }
 
     if (mLastVideoTimeUs >= 0) {
         mSeeking = SEEK;
@@ -1217,6 +1226,8 @@ void AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
     if (wasPlaying) {
         play_l();
     }
+
+    return OK;
 }
 
 void AwesomePlayer::setAudioSink(
