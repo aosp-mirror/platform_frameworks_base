@@ -5318,9 +5318,9 @@
 
     <declare-styleable name="Switch">
         <!-- Drawable to use as the "thumb" that switches back and forth. -->
-        <attr name="switchThumb" format="reference" />
+        <attr name="thumb" />
         <!-- Drawable to use as the "track" that the switch thumb slides within. -->
-        <attr name="switchTrack" format="reference" />
+        <attr name="track" format="reference" />
         <!-- Text to use when the switch is in the checked/"on" state. -->
         <attr name="textOn" />
         <!-- Text to use when the switch is in the unchecked/"off" state. -->
