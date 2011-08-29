@@ -1610,6 +1610,7 @@ package android {
     field public static final int TextAppearance_StatusBar_EventContent_Title = 16973928; // 0x1030068
     field public static final int TextAppearance_StatusBar_Icon = 16973926; // 0x1030066
     field public static final int TextAppearance_StatusBar_Title = 16973925; // 0x1030065
+    field public static final int TextAppearance_SuggestionHighlight = 16974104; // 0x1030118
     field public static final int TextAppearance_Theme = 16973888; // 0x1030040
     field public static final int TextAppearance_Theme_Dialog = 16973896; // 0x1030048
     field public static final int TextAppearance_Widget = 16973897; // 0x1030049
