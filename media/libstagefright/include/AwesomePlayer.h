@@ -84,8 +84,8 @@ struct AwesomePlayer {
 
     bool isPlaying() const;
 
-    void setSurface(const sp<Surface> &surface);
-    void setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
+    status_t setSurface(const sp<Surface> &surface);
+    status_t setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &audioSink);
     status_t setLooping(bool shouldLoop);
 
@@ -298,7 +298,7 @@ private:
     void postAudioSeekComplete_l();
 
     void shutdownVideoDecoder_l();
-    void setNativeWindow_l(const sp<ANativeWindow> &native);
+    status_t setNativeWindow_l(const sp<ANativeWindow> &native);
 
     bool isStreamingHTTP() const;
     void sendCacheStats();
