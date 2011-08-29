@@ -112,6 +112,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private void scheduleSpellCheck() {
         if (mLength == 0) return;
+        if (spellCheckerSession == null) return;
+
         if (mChecker != null) {
             mTextView.removeCallbacks(mChecker);
         }
