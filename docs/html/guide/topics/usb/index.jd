@@ -6,9 +6,9 @@ page.title=USB Host and Accessory
       <h2>Topics</h2>
 
       <ol>
-        <li><a href="{@docRoot}guide/topics/USB/accessory.jd">USB Accessory</a></li>
+        <li><a href="{@docRoot}guide/topics/usb/accessory.html">USB Accessory</a></li>
 
-        <li><a href="{@docRoot}guide/topics/USB/host.jd">USB Host</a></li>
+        <li><a href="{@docRoot}guide/topics/usb/host.html">USB Host</a></li>
       </ol>
     </div>
   </div>
