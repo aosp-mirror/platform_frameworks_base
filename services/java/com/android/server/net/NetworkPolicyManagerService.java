@@ -26,7 +26,7 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
@@ -51,6 +51,7 @@ import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readBooleanAttribute;
 import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readIntAttribute;
 import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readLongAttribute;
@@ -60,7 +61,6 @@ import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeL
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
-import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 
 import android.app.IActivityManager;
 import android.app.INotificationManager;
@@ -321,7 +321,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.registerReceiver(mScreenReceiver, screenFilter, null, mHandler);
 
         // watch for network interfaces to be claimed
-        final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
+        final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION_IMMEDIATE);
         mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
 
         // listen for package/uid changes to update policy

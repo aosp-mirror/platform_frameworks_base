@@ -93,6 +93,9 @@
     <protected-broadcast android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
 
+    <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+    <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
+
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED" />

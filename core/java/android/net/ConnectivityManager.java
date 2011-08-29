@@ -23,6 +23,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.RemoteException;
+import android.provider.Settings;
 
 import java.net.InetAddress;
 
@@ -69,6 +70,15 @@ public class ConnectivityManager {
      * is set to {@code true} if there are no connected networks at all.
      */
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
+
+    /**
+     * Identical to {@link #CONNECTIVITY_ACTION} broadcast, but sent without any
+     * applicable {@link Settings.Secure#CONNECTIVITY_CHANGE_DELAY}.
+     *
+     * @hide
+     */
+    public static final String CONNECTIVITY_ACTION_IMMEDIATE =
+            "android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE";
 
     /**
      * The lookup key for a {@link NetworkInfo} object. Retrieve with
