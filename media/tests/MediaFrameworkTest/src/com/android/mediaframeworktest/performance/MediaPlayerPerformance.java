@@ -181,9 +181,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
     }
 
     // Note: This test is to assume the mediaserver's pid is 34
-    private void stressVideoRecord(int frameRate, int width, int height, int videoFormat,
+    private boolean stressVideoRecord(int frameRate, int width, int height, int videoFormat,
             int outFormat, String outFile, boolean videoOnly) {
         // Video recording
+        boolean doesTestFail = false;
         for (int i = 0; i < NUM_PLAYBACk_IN_EACH_LOOP; i++) {
             MediaRecorder mRecorder = new MediaRecorder();
             try {
@@ -212,8 +213,11 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
             } catch (Exception e) {
                 Log.v("record video failed ", e.toString());
                 mRecorder.release();
+                doesTestFail = true;
+                break;
             }
         }
+        return !doesTestFail;
     }
 
     public void stressAudioRecord(String filePath) {
@@ -366,8 +370,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         Writer output = new BufferedWriter(new FileWriter(videoH263RecordOnlyMemoryOut, true));
         output.write("H263 video record only\n");
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
-                    MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);
+            assertTrue(stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
+                    MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true));
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
@@ -386,8 +390,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         Writer output = new BufferedWriter(new FileWriter(videoMp4RecordOnlyMemoryOut, true));
         output.write("MPEG4 video record only\n");
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.MPEG_4_SP,
-                    MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);
+            assertTrue(stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.MPEG_4_SP,
+                    MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true));
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
@@ -407,8 +411,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         Writer output = new BufferedWriter(new FileWriter(videoRecordAudioMemoryOut, true));
         output.write("Audio and h263 video record\n");
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
-                    MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, false);
+            assertTrue(stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
+                    MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, false));
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
