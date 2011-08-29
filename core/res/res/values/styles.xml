@@ -890,11 +890,9 @@ please see styles_device_defaults.xml.
         <item name="android:textSize">30sp</item>
     </style>
 
-     <!-- @hide -->
      <style name="TextAppearance.SuggestionHighlight">
          <item name="android:textSize">18sp</item>
          <item name="android:textColor">@android:color/suggestion_highlight_text</item>
-         <item name="android:textStyle">bold</item>
      </style>
 
     <!-- Preference Styles -->
