@@ -2524,23 +2524,11 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-               case CMD_START_DRIVER:
-                   mWakeLock.acquire();
-                   WifiNative.startDriverCommand();
-                   mWakeLock.release();
-                   break;
-                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
-                    SupplicantState state = handleSupplicantStateChange(message);
-                    /* A driver start causes supplicant to first report an INTERFACE_DISABLED
-                     * state before transitioning out of it for connection. Stay in
-                     * DriverStoppedState until we get an INTERFACE_DISABLED state and transition
-                     * to DriverStarting upon getting that
-                     * TODO: Fix this when the supplicant can be made to just transition out of
-                     * INTERFACE_DISABLED state when driver gets started
-                     */
-                    if (state == SupplicantState.INTERFACE_DISABLED) {
-                        transitionTo(mDriverStartingState);
-                    }
+                case CMD_START_DRIVER:
+                    mWakeLock.acquire();
+                    WifiNative.startDriverCommand();
+                    mWakeLock.release();
+                    transitionTo(mDriverStartingState);
                     break;
                 default:
                     return NOT_HANDLED;
