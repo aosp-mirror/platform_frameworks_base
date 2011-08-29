@@ -155,7 +155,7 @@ AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
       mPrimaryHardwareDev(0), mMasterVolume(1.0f), mMasterVolumeSW(1.0f),
       mMasterVolumeSupportLvl(MVS_NONE), mMasterMute(false), mNextUniqueId(1),
-      mBtNrec(false)
+      mBtNrecIsOff(false)
 {
 }
 
@@ -821,15 +821,15 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         String8 value;
         if (param.get(String8(AUDIO_PARAMETER_KEY_BT_NREC), value) == NO_ERROR) {
             Mutex::Autolock _l(mLock);
-            bool btNrec = (value == AUDIO_PARAMETER_VALUE_ON);
-            if (mBtNrec != btNrec) {
+            bool btNrecIsOff = (value == AUDIO_PARAMETER_VALUE_OFF);
+            if (mBtNrecIsOff != btNrecIsOff) {
                 for (size_t i = 0; i < mRecordThreads.size(); i++) {
                     sp<RecordThread> thread = mRecordThreads.valueAt(i);
                     RecordThread::RecordTrack *track = thread->track();
                     if (track != NULL) {
                         audio_devices_t device = (audio_devices_t)(
                                 thread->device() & AUDIO_DEVICE_IN_ALL);
-                        bool suspend = audio_is_bluetooth_sco_device(device) && btNrec;
+                        bool suspend = audio_is_bluetooth_sco_device(device) && btNrecIsOff;
                         thread->setEffectSuspended(FX_IID_AEC,
                                                    suspend,
                                                    track->sessionId());
@@ -838,7 +838,7 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
                                                    track->sessionId());
                     }
                 }
-                mBtNrec = btNrec;
+                mBtNrecIsOff = btNrecIsOff;
             }
         }
         return final_result;
@@ -4940,7 +4940,7 @@ sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createR
         mTrack = track.get();
         // disable AEC and NS if the device is a BT SCO headset supporting those pre processings
         bool suspend = audio_is_bluetooth_sco_device(
-                (audio_devices_t)(mDevice & AUDIO_DEVICE_IN_ALL)) && mAudioFlinger->btNrec();
+                (audio_devices_t)(mDevice & AUDIO_DEVICE_IN_ALL)) && mAudioFlinger->btNrecIsOff();
         setEffectSuspended_l(FX_IID_AEC, suspend, sessionId);
         setEffectSuspended_l(FX_IID_NS, suspend, sessionId);
     }
@@ -5165,7 +5165,7 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
                 // disable AEC and NS if the device is a BT SCO headset supporting those pre processings
                 if (mTrack != NULL) {
                     bool suspend = audio_is_bluetooth_sco_device(
-                            (audio_devices_t)value) && mAudioFlinger->btNrec();
+                            (audio_devices_t)value) && mAudioFlinger->btNrecIsOff();
                     setEffectSuspended_l(FX_IID_AEC, suspend, mTrack->sessionId());
                     setEffectSuspended_l(FX_IID_NS, suspend, mTrack->sessionId());
                 }
