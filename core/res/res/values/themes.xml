@@ -1215,6 +1215,7 @@ please see themes_device_defaults.xml.
         <item name="buttonStyleInset">@android:style/Widget.Holo.Light.Button.Inset</item>
 
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Light.Button.Toggle</item>
+        <item name="switchStyle">@android:style/Widget.Holo.Light.CompoundButton.Switch</item>
 
         <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Light.Button.Borderless</item>
