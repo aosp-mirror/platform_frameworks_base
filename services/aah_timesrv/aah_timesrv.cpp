@@ -1091,6 +1091,7 @@ int main(int argc, char *argv[]) {
     using namespace android;
 
     sp<AAHTimeService> service = new AAHTimeService();
+    if (service == NULL)
         return 1;
 
     ProcessState::self()->startThreadPool();
