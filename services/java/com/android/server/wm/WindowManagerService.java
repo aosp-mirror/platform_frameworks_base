@@ -5297,24 +5297,24 @@ public class WindowManagerService extends IWindowManager.Stub
                     case Surface.ROTATION_0:
                         return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                     case Surface.ROTATION_90:
-                        return Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+                        return Gravity.RIGHT | Gravity.BOTTOM;
                     case Surface.ROTATION_180:
-                        return Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                     case Surface.ROTATION_270:
-                        return Gravity.LEFT | Gravity.CENTER_VERTICAL;
+                        return Gravity.LEFT | Gravity.BOTTOM;
                 }
             } else {
                 // On devices with a natural orientation of landscape
                 switch (rotation) {
                     default:
                     case Surface.ROTATION_0:
-                        return Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+                        return Gravity.RIGHT | Gravity.BOTTOM;
                     case Surface.ROTATION_90:
                         return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                     case Surface.ROTATION_180:
-                        return Gravity.LEFT | Gravity.CENTER_VERTICAL;
+                        return Gravity.LEFT | Gravity.BOTTOM;
                     case Surface.ROTATION_270:
-                        return Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                 }
             }
         }
