@@ -143,6 +143,13 @@ extern int androidSetThreadSchedulingGroup(pid_t tid, int grp);
 // in either case errno is set.  Thread ID zero means current thread.
 extern int androidSetThreadPriority(pid_t tid, int prio);
 
+// Get the current scheduling group of a particular thread. Normally returns
+// one of the ANDROID_TGROUP constants other than ANDROID_TGROUP_DEFAULT.
+// Returns ANDROID_TGROUP_DEFAULT if no pthread support (e.g. on host) or if
+// scheduling groups are disabled.  Returns INVALID_OPERATION if unexpected error.
+// Thread ID zero means current thread.
+extern int androidGetThreadSchedulingGroup(pid_t tid);
+
 #ifdef __cplusplus
 }
 #endif
