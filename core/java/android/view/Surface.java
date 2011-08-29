@@ -36,6 +36,20 @@ public class Surface implements Parcelable {
     public static final int ROTATION_270     = 3;
 
     /**
+     * Create Surface from a SurfaceTexture.
+     *
+     * @param surfaceTexture The {@link SurfaceTexture} that is updated by this Surface.
+     * @hide
+     */
+    public Surface(SurfaceTexture surfaceTexture) {
+        if (DEBUG_RELEASE) {
+            mCreationStack = new Exception();
+        }
+        mCanvas = new CompatibleCanvas();
+        initFromSurfaceTexture(surfaceTexture);
+    }
+
+    /**
      * Does this object hold a valid surface?  Returns true if it holds
      * a physical surface, so lockCanvas() will succeed.  Otherwise
      * returns false.
@@ -222,20 +236,6 @@ public class Surface implements Parcelable {
     native private static void nativeClassInit();
     static { nativeClassInit(); }
 
-    /**
-     * Create Surface from a SurfaceTexture.
-     *
-     * @param surfaceTexture The {@link SurfaceTexture} that is updated by this Surface.
-     * @hide
-     */
-    public Surface(SurfaceTexture surfaceTexture) {
-        if (DEBUG_RELEASE) {
-            mCreationStack = new Exception();
-        }
-        mCanvas = new CompatibleCanvas();
-        initFromSurfaceTexture(surfaceTexture);
-    }
-    
     /** create a surface @hide */
     public Surface(SurfaceSession s,
             int pid, int display, int w, int h, int format, int flags)
