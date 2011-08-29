@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -348,6 +349,8 @@ public final class BluetoothAdapter {
 
     private final IBluetooth mService;
 
+    private Handler mServiceRecordHandler;
+
     /**
      * Get a handle to the default local Bluetooth adapter.
      * <p>Currently Android only supports one Bluetooth adapter, but the API
@@ -376,6 +379,7 @@ public final class BluetoothAdapter {
             throw new IllegalArgumentException("service is null");
         }
         mService = service;
+        mServiceRecordHandler = null;
     }
 
     /**
@@ -1011,7 +1015,21 @@ public final class BluetoothAdapter {
             } catch (IOException e) {}
             throw new IOException("Not able to register SDP record for " + name);
         }
-        socket.setCloseHandler(mHandler, handle);
+
+        if (mServiceRecordHandler == null) {
+            mServiceRecordHandler = new Handler(Looper.getMainLooper()) {
+                    public void handleMessage(Message msg) {
+                        /* handle socket closing */
+                        int handle = msg.what;
+                        try {
+                            if (DBG) Log.d(TAG, "Removing service record " +
+                                           Integer.toHexString(handle));
+                            mService.removeServiceRecord(handle);
+                        } catch (RemoteException e) {Log.e(TAG, "", e);}
+                    }
+                };
+        }
+        socket.setCloseHandler(mServiceRecordHandler, handle);
         return socket;
     }
 
@@ -1242,17 +1260,6 @@ public final class BluetoothAdapter {
         }
         return Collections.unmodifiableSet(devices);
     }
-
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            /* handle socket closing */
-            int handle = msg.what;
-            try {
-                if (DBG) Log.d(TAG, "Removing service record " + Integer.toHexString(handle));
-                mService.removeServiceRecord(handle);
-            } catch (RemoteException e) {Log.e(TAG, "", e);}
-        }
-    };
 
     /**
      * Validate a Bluetooth address, such as "00:43:A8:23:10:F0"
