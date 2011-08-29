@@ -703,7 +703,7 @@ public class RemoteControlClient
 
     private void onUnplugDisplay(IRemoteControlDisplay rcd) {
         synchronized(mCacheLock) {
-            if ((mRcDisplay != null) && (mRcDisplay.equals(rcd))) {
+            if ((mRcDisplay != null) && (mRcDisplay.asBinder().equals(rcd.asBinder()))) {
                 mRcDisplay = null;
                 mArtworkExpectedWidth = ARTWORK_DEFAULT_SIZE;
                 mArtworkExpectedHeight = ARTWORK_DEFAULT_SIZE;
