@@ -21,11 +21,8 @@ import static android.view.accessibility.AccessibilityEvent.TYPE_TOUCH_EXPLORATI
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
-import android.view.MotionEvent.PointerProperties;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
@@ -75,11 +72,6 @@ public class TouchExplorer implements Explorer {
     // Invalid pointer ID.
     private static final int INVALID_POINTER_ID = -1;
 
-    // The coefficient by which to multiply
-    // ViewConfiguration.#getScaledTouchExplorationTapSlop()
-    // to compute #mDraggingDistance.
-    private static final int COEFFICIENT_DRAGGING_DISTANCE = 2;
-
     // The time slop in milliseconds for activating an item after it has
     // been touch explored. Tapping on an item within this slop will perform
     // a click and tapping and holding down a long press.
@@ -95,22 +87,13 @@ public class TouchExplorer implements Explorer {
     private static final float MIN_ANGLE_COS = 0.866025404f; // cos(pi/6)
 
     // The delay for sending a hover enter event.
-    private static final long DELAY_SEND_HOVER_MOVE = 200;
+    private static final long DELAY_SEND_HOVER_ENTER = 200;
+
+    // Constant referring to the ids bits of all pointers.
+    private static final int ALL_POINTER_ID_BITS = 0xFFFFFFFF;
 
     // Temporary array for storing pointer IDs.
     private final int[] mTempPointerIds = new int[MAX_POINTER_COUNT];
-
-    // Temporary array for storing PointerProperties
-    private final PointerProperties[] mTempPointerProperties =
-            PointerProperties.createArray(MAX_POINTER_COUNT);
-
-    // Temporary array for storing PointerCoords
-    private final PointerCoords[] mTempPointerCoords =
-            PointerCoords.createArray(MAX_POINTER_COUNT);
-
-    // The maximal distance between two pointers so they are
-    // considered to be performing a drag operation.
-    private final float mDraggingDistance;
 
     // The distance from the last touch explored location tapping within
     // which would perform a click and tapping and holding a long press.
@@ -159,7 +142,6 @@ public class TouchExplorer implements Explorer {
         mInputFilter = inputFilter;
         mTouchExplorationTapSlop =
             ViewConfiguration.get(context).getScaledTouchExplorationTapSlop();
-        mDraggingDistance = mTouchExplorationTapSlop * COEFFICIENT_DRAGGING_DISTANCE;
         mPointerTracker = new PointerTracker(context);
         mHandler = new Handler(context.getMainLooper());
         mSendHoverDelayed = new SendHoverDelayed();
@@ -220,18 +202,21 @@ public class TouchExplorer implements Explorer {
                                 + "touch exploring state!");
                     }
                     case 1: {
-                        // Send hover if pending.
-                        mSendHoverDelayed.forceSendAndRemove();
+                        mSendHoverDelayed.remove();
                         // Send a hover for every finger down so the user gets feedback.
                         final int pointerId = pointerTracker.getPrimaryActivePointerId();
                         final int pointerIdBits = (1 << pointerId);
                         final int lastAction = pointerTracker.getLastInjectedHoverAction();
-                        // If a hover enter for another pointer is delivered we send move.
-                        final int action = (lastAction == MotionEvent.ACTION_HOVER_ENTER)
-                                ? MotionEvent.ACTION_HOVER_MOVE
-                                : MotionEvent.ACTION_HOVER_ENTER;
-                        mSendHoverDelayed.post(event, action, pointerIdBits, policyFlags,
-                                DELAY_SEND_HOVER_MOVE);
+
+                        // Deliver hover enter with a delay to have a change to detect
+                        // whether the user actually starts a scrolling gesture.
+                        if (lastAction == MotionEvent.ACTION_HOVER_EXIT) {
+                            mSendHoverDelayed.post(event, MotionEvent.ACTION_HOVER_ENTER,
+                                    pointerIdBits, policyFlags, DELAY_SEND_HOVER_ENTER);
+                        } else {
+                            sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits,
+                                    policyFlags);
+                        }
 
                         if (mLastTouchExploreEvent == null) {
                             break;
@@ -318,12 +303,11 @@ public class TouchExplorer implements Explorer {
                         }
                     } break;
                     case 2: {
-                        mSendHoverDelayed.forceSendAndRemove();
+                        mSendHoverDelayed.remove();
                         mPerformLongPressDelayed.remove();
                         // We want to no longer hover over the location so subsequent
                         // touch at the same spot will generate a hover enter.
-                        sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT, pointerIdBits,
-                                policyFlags);
+                        ensureHoverExitSent(event, pointerIdBits, policyFlags);
 
                         if (isDraggingGesture(event)) {
                             // Two pointers moving in the same direction within
@@ -340,6 +324,7 @@ public class TouchExplorer implements Explorer {
                         } else {
                             // Two pointers moving arbitrary are delegated to the view hierarchy.
                             mCurrentState = STATE_DELEGATING;
+                            mSendHoverDelayed.remove();
                             if (mTouchExploreGestureInProgress) {
                                 sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
                                 mTouchExploreGestureInProgress = false;
@@ -349,12 +334,11 @@ public class TouchExplorer implements Explorer {
                         }
                     } break;
                     default: {
-                        mSendHoverDelayed.forceSendAndRemove();
+                        mSendHoverDelayed.remove();
                         mPerformLongPressDelayed.remove();
                         // We want to no longer hover over the location so subsequent
                         // touch at the same spot will generate a hover enter.
-                        sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT, pointerIdBits,
-                                policyFlags);
+                        ensureHoverExitSent(event, pointerIdBits, policyFlags);
 
                         // More than two pointers are delegated to the view hierarchy.
                         mCurrentState = STATE_DELEGATING;
@@ -379,8 +363,9 @@ public class TouchExplorer implements Explorer {
                             break;
                         }
 
-                        mSendHoverDelayed.forceSendAndRemove();
                         mPerformLongPressDelayed.remove();
+                        mSendHoverDelayed.forceSendAndRemove();
+                        ensureHoverExitSent(event, pointerIdBits, policyFlags);
 
                         // If touch exploring announce the end of the gesture.
                         // Also do not click on the last explored location.
@@ -388,11 +373,6 @@ public class TouchExplorer implements Explorer {
                             mTouchExploreGestureInProgress = false;
                             mLastTouchExploreEvent = MotionEvent.obtain(event);
                             sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
-                            final int lastAction = mPointerTracker.getLastInjectedHoverAction();
-                            if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
-                                sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT,
-                                        pointerIdBits, policyFlags);
-                            }
                             break;
                         }
 
@@ -404,11 +384,6 @@ public class TouchExplorer implements Explorer {
                             final long exploreTime = mLastTouchExploreEvent.getEventTime();
                             final long deltaTime = eventTime - exploreTime;
                             if (deltaTime > ACTIVATION_TIME_SLOP) {
-                                final int lastAction = mPointerTracker.getLastInjectedHoverAction();
-                                if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
-                                    sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT,
-                                            pointerIdBits, policyFlags);
-                                }
                                 mLastTouchExploreEvent = MotionEvent.obtain(event);
                                 break;
                             }
@@ -421,11 +396,6 @@ public class TouchExplorer implements Explorer {
                                     - event.getY(pointerIndex);
                             final float deltaMove = (float) Math.hypot(deltaX, deltaY);
                             if (deltaMove > mTouchExplorationTapSlop) {
-                                final int lastAction = mPointerTracker.getLastInjectedHoverAction();
-                                if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
-                                    sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT,
-                                            pointerIdBits, policyFlags);
-                                }
                                 mLastTouchExploreEvent = MotionEvent.obtain(event);
                                 break;
                             }
@@ -434,12 +404,6 @@ public class TouchExplorer implements Explorer {
                             sendActionDownAndUp(mLastTouchExploreEvent, policyFlags);
                             mLastTouchExploreEvent = null;
                         } else {
-                            mSendHoverDelayed.forceSendAndRemove();
-                            final int lastAction = mPointerTracker.getLastInjectedHoverAction();
-                            if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
-                                sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT,
-                                        pointerIdBits, policyFlags);
-                            }
                             mLastTouchExploreEvent = MotionEvent.obtain(event);
                         }
                     } break;
@@ -448,13 +412,9 @@ public class TouchExplorer implements Explorer {
             case MotionEvent.ACTION_CANCEL: {
                 mSendHoverDelayed.remove();
                 mPerformLongPressDelayed.remove();
-                final int lastAction = pointerTracker.getLastInjectedHoverAction();
-                if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
-                    final int pointerId = pointerTracker.getPrimaryActivePointerId();
-                    final int pointerIdBits = (1 << pointerId);
-                    sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT, pointerIdBits,
-                            policyFlags);
-                }
+                final int pointerId = pointerTracker.getPrimaryActivePointerId();
+                final int pointerIdBits = (1 << pointerId);                
+                ensureHoverExitSent(event, pointerIdBits, policyFlags);
                 clear();
             } break;
         }
@@ -540,7 +500,8 @@ public class TouchExplorer implements Explorer {
                 // a given distance and if such exist send them to the view hierarchy
                 final int notInjectedCount = mPointerTracker.getNotInjectedActivePointerCount();
                 if (notInjectedCount > 0) {
-                    sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                    MotionEvent prototype = MotionEvent.obtain(event);
+                    sendDownForAllActiveNotInjectedPointers(prototype, policyFlags);
                 }
             } break;
             case MotionEvent.ACTION_POINTER_UP: {
@@ -565,42 +526,47 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendDownForAllActiveNotInjectedPointers(MotionEvent prototype, int policyFlags) {
-        final PointerProperties[] pointerProperties = mTempPointerProperties;
-        final PointerCoords[] pointerCoords = mTempPointerCoords;
         final PointerTracker pointerTracker = mPointerTracker;
-        int pointerDataIndex = 0;
+        int pointerIdBits = 0;
+        final int pointerCount = prototype.getPointerCount();
 
-        final int pinterCount = prototype.getPointerCount();
-        for (int i = 0; i < pinterCount; i++) {
+        // Find which pointers are already injected.
+        for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
+            if (pointerTracker.isInjectedPointerDown(pointerId)) {
+                pointerIdBits |= (1 << pointerId);
+            }
+        }
 
+        // Inject the active and not injected pointers.
+        for (int i = 0; i < pointerCount; i++) {
+            final int pointerId = prototype.getPointerId(i);
             // Skip inactive pointers.
             if (!pointerTracker.isActivePointer(pointerId)) {
                 continue;
             }
-            // Skip already delivered pointers.
+            // Do not send event for already delivered pointers.
             if (pointerTracker.isInjectedPointerDown(pointerId)) {
                 continue;
             }
+            pointerIdBits |= (1 << pointerId);
+            final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
+            sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
+        }
+    }
 
-            // Populate and inject an event for the current pointer.
-            prototype.getPointerProperties(i, pointerProperties[pointerDataIndex]);
-            prototype.getPointerCoords(i, pointerCoords[pointerDataIndex]);
-
-            final long downTime = pointerTracker.getLastInjectedDownEventTime();
-            final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, pointerDataIndex);
-            final int pointerCount = pointerDataIndex + 1;
-            final long eventTime = SystemClock.uptimeMillis();
-
-            MotionEvent event = MotionEvent.obtain(downTime, eventTime,
-                    action, pointerCount, pointerProperties, pointerCoords,
-                    prototype.getMetaState(), prototype.getButtonState(),
-                    prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
-                    prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
-            sendMotionEvent(event, policyFlags);
-            event.recycle();
-
-            pointerDataIndex++;
+    /**
+     * Ensures that hover exit has been sent.
+     *
+     * @param prototype The prototype from which to create the injected events.
+     * @param pointerIdBits The bits of the pointers to send.
+     * @param policyFlags The policy flags associated with the event.
+     */
+    private void ensureHoverExitSent(MotionEvent prototype, int pointerIdBits, int policyFlags) {
+        final int lastAction = mPointerTracker.getLastInjectedHoverAction();
+        if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
+            sendMotionEvent(prototype, MotionEvent.ACTION_HOVER_EXIT, pointerIdBits,
+                    policyFlags);
         }
     }
 
@@ -613,38 +579,17 @@ public class TouchExplorer implements Explorer {
      */
     private void sendUpForInjectedDownPointers(MotionEvent prototype, int policyFlags) {
         final PointerTracker pointerTracker = mPointerTracker;
-        final PointerProperties[] pointerProperties = mTempPointerProperties;
-        final PointerCoords[] pointerCoords = mTempPointerCoords;
-        int pointerDataIndex = 0;
-
-        final int pointerCount = prototype.getPointerCount(); 
+        int pointerIdBits = 0;
+        final int pointerCount = prototype.getPointerCount();
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
-
             // Skip non injected down pointers.
             if (!pointerTracker.isInjectedPointerDown(pointerId)) {
                 continue;
             }
-
-            // Populate and inject event.
-            prototype.getPointerProperties(i, pointerProperties[pointerDataIndex]);
-            prototype.getPointerCoords(i, pointerCoords[pointerDataIndex]);
-
-            final long downTime = pointerTracker.getLastInjectedDownEventTime();
-            final int action = computeInjectionAction(MotionEvent.ACTION_UP, pointerDataIndex);
-            final int newPointerCount = pointerDataIndex + 1;
-            final long eventTime = SystemClock.uptimeMillis();
-
-            MotionEvent event = MotionEvent.obtain(downTime, eventTime, action,
-                    newPointerCount, pointerProperties, pointerCoords,
-                    prototype.getMetaState(), prototype.getButtonState(),
-                    prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
-                    prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
-
-            sendMotionEvent(event, policyFlags);
-            event.recycle();
-
-            pointerDataIndex++;
+            pointerIdBits |= (1 << pointerId);
+            final int action = computeInjectionAction(MotionEvent.ACTION_UP, i);
+            sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
         }
     }
 
@@ -659,7 +604,7 @@ public class TouchExplorer implements Explorer {
 
         // All pointers active therefore we just inject the event as is.
         if (prototype.getPointerCount() == pointerTracker.getActivePointerCount()) {
-            sendMotionEvent(prototype, policyFlags);
+            sendMotionEvent(prototype, prototype.getAction(), ALL_POINTER_ID_BITS, policyFlags);
             return;
         }
 
@@ -670,20 +615,27 @@ public class TouchExplorer implements Explorer {
             return;
         }
 
+        // If the action pointer going up/down is not active we have nothing to do.
+        // However, for moves we keep going to report moves of active pointers.
+        final int actionMasked = prototype.getActionMasked();
+        final int actionPointerId = prototype.getPointerId(prototype.getActionIndex());
+        if (actionMasked != MotionEvent.ACTION_MOVE) {
+            if (!pointerTracker.isActiveOrWasLastActiveUpPointer(actionPointerId)) {
+                return;
+            }
+        }
+
+        // If the pointer is active or the pointer that just went up
+        // was active we keep the pointer data in the event.
         int pointerIdBits = 0;
         final int pointerCount = prototype.getPointerCount();
         for (int pointerIndex = 0; pointerIndex < pointerCount; pointerIndex++) {
             final int pointerId = prototype.getPointerId(pointerIndex);
-            // If the pointer is inactive or the pointer that just went up
-            // was inactive we strip the pointer data from the event.
             if (pointerTracker.isActiveOrWasLastActiveUpPointer(pointerId)) {
                 pointerIdBits |= (1 << pointerId);
             }
         }
-
-        MotionEvent event = prototype.split(pointerIdBits);
-        sendMotionEvent(event, policyFlags);
-        event.recycle();
+        sendMotionEvent(prototype, prototype.getAction(), pointerIdBits, policyFlags);
     }
 
     /**
@@ -693,26 +645,11 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendActionDownAndUp(MotionEvent prototype, int policyFlags) {
-        final PointerProperties[] pointerProperties = mTempPointerProperties;
-        final PointerCoords[] pointerCoords = mTempPointerCoords;
-        final int pointerIndex = prototype.getActionIndex();
-
-        // Send down.
-        prototype.getPointerProperties(pointerIndex, pointerProperties[0]);
-        prototype.getPointerCoords(pointerIndex, pointerCoords[0]);
-
-        final long downTime = SystemClock.uptimeMillis();
-        MotionEvent event = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN,
-                1, pointerProperties, pointerCoords,
-                prototype.getMetaState(), prototype.getButtonState(),
-                prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
-                prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
-        sendMotionEvent(event, policyFlags);
-
-        // Send up.
-        event.setAction(MotionEvent.ACTION_UP);
-        sendMotionEvent(event, policyFlags);
-        event.recycle();
+        // Tap with the pointer that last went up - we may have inactive pointers.
+        final int pointerId = mPointerTracker.getLastReceivedUpPointerId();
+        final int pointerIdBits = (1 << pointerId);
+        sendMotionEvent(prototype, MotionEvent.ACTION_DOWN, pointerIdBits, policyFlags);
+        sendMotionEvent(prototype, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
     }
 
     /**
@@ -725,11 +662,33 @@ public class TouchExplorer implements Explorer {
      */
     private void sendMotionEvent(MotionEvent prototype, int action, int pointerIdBits,
             int policyFlags) {
-        MotionEvent event = prototype.split(pointerIdBits);
-        event.setDownTime(mPointerTracker.getLastInjectedDownEventTime());
-        event.setAction(action);
-        sendMotionEvent(event, policyFlags);
-        event.recycle();
+        prototype.setAction(action);
+
+        MotionEvent event = null;
+        if (pointerIdBits == ALL_POINTER_ID_BITS) {
+            event = prototype;
+        } else {
+            event = prototype.split(pointerIdBits);
+        }
+        if (action == MotionEvent.ACTION_DOWN) {
+            event.setDownTime(event.getEventTime());
+        } else {
+            event.setDownTime(mPointerTracker.getLastInjectedDownEventTime());
+        }
+
+        if (DEBUG) {
+            Slog.d(LOG_TAG_INJECTED, "Injecting event: " + event + ", policyFlags=0x"
+                    + Integer.toHexString(policyFlags));
+        }
+
+        // Make sure that the user will see the event.
+        policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
+        mPointerTracker.onInjectedMotionEvent(event);
+        mInputFilter.sendInputEvent(event, policyFlags);
+
+        if (event != prototype) {
+            event.recycle();
+        }
     }
 
     /**
@@ -787,19 +746,16 @@ public class TouchExplorer implements Explorer {
         final float secondPtrX = event.getX(secondPtrIndex);
         final float secondPtrY = event.getY(secondPtrIndex);
 
-        // Check if the pointers are close enough.
-        final float deltaX = firstPtrX - secondPtrX;
-        final float deltaY = firstPtrY - secondPtrY;
-        final float deltaMove = (float) Math.hypot(deltaX, deltaY);
-        if (deltaMove > mDraggingDistance) {
-            return false;
-        }
-
         // Check if the pointers are moving in the same direction.
         final float firstDeltaX =
             firstPtrX - pointerTracker.getReceivedPointerDownX(firstPtrIndex);
         final float firstDeltaY =
             firstPtrY - pointerTracker.getReceivedPointerDownY(firstPtrIndex);
+
+        if (firstDeltaX == 0 && firstDeltaY == 0) {
+            return true;
+        }
+
         final float firstMagnitude =
             (float) Math.sqrt(firstDeltaX * firstDeltaX + firstDeltaY * firstDeltaY);
         final float firstXNormalized =
@@ -811,6 +767,11 @@ public class TouchExplorer implements Explorer {
             secondPtrX - pointerTracker.getReceivedPointerDownX(secondPtrIndex);
         final float secondDeltaY =
             secondPtrY - pointerTracker.getReceivedPointerDownY(secondPtrIndex);
+
+        if (secondDeltaX == 0 && secondDeltaY == 0) {
+            return true;
+        }
+
         final float secondMagnitude =
             (float) Math.sqrt(secondDeltaX * secondDeltaX + secondDeltaY * secondDeltaY);
         final float secondXNormalized =
@@ -836,23 +797,6 @@ public class TouchExplorer implements Explorer {
     private void sendAccessibilityEvent(int eventType) {
         AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
         mAccessibilityManager.sendAccessibilityEvent(event);
-    }
-
-    /**
-     * Sends a motion event to the input filter for injection.
-     *
-     * @param event The event to send.
-     * @param policyFlags The policy flags associated with the event.
-     */
-    private void sendMotionEvent(MotionEvent event, int policyFlags) {
-        if (DEBUG) {
-            Slog.d(LOG_TAG_INJECTED, "Injecting event: " + event + ", policyFlags=0x"
-                    + Integer.toHexString(policyFlags));
-        }
-        // Make sure that the user will see the event.
-        policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
-        mPointerTracker.onInjectedMotionEvent(event);
-        mInputFilter.sendInputEvent(event, policyFlags);
     }
 
     /**
@@ -1013,6 +957,7 @@ public class TouchExplorer implements Explorer {
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
                     handleInjectedPointerDown(event.getActionIndex(), event);
+                    mLastInjectedDownEventTime = event.getDownTime();
                 } break;
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     handleInjectedPointerDown(event.getActionIndex(), event);
@@ -1270,7 +1215,6 @@ public class TouchExplorer implements Explorer {
             final int pointerId = event.getPointerId(pointerIndex);
             final int pointerFlag = (1 << pointerId);
             mInjectedPointersDown |= pointerFlag;
-            mLastInjectedDownEventTime = event.getEventTime();
         }
 
         /**
@@ -1406,7 +1350,11 @@ public class TouchExplorer implements Explorer {
         public void run() {
             mCurrentState = STATE_DELEGATING;
             // Make sure the scheduled hover exit is delivered.
-            mSendHoverDelayed.forceSendAndRemove();
+            mSendHoverDelayed.remove();
+            final int pointerId = mPointerTracker.getPrimaryActivePointerId();
+            final int pointerIdBits = (1 << pointerId);
+            ensureHoverExitSent(mEvent, pointerIdBits, mPolicyFlags);
+
             sendDownForAllActiveNotInjectedPointers(mEvent, mPolicyFlags);
             mTouchExploreGestureInProgress = false;
             mLastTouchExploreEvent = null;
