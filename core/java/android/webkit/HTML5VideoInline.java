@@ -5,6 +5,7 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.webkit.HTML5VideoView;
 import android.webkit.HTML5VideoViewProxy;
+import android.view.Surface;
 import android.opengl.GLES20;
 
 /**
@@ -38,7 +39,10 @@ public class HTML5VideoInline extends HTML5VideoView{
 
     @Override
     public void decideDisplayMode() {
-        mPlayer.setTexture(getSurfaceTexture(getVideoLayerId()));
+        SurfaceTexture surfaceTexture = getSurfaceTexture(getVideoLayerId());
+        Surface surface = new Surface(surfaceTexture);
+        mPlayer.setSurface(surface);
+        surface.release();
     }
 
     // Normally called immediately after setVideoURI. But for full screen,
