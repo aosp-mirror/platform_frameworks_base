@@ -2008,8 +2008,13 @@ bool AudioFlinger::MixerThread::threadLoop()
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // obtain the presentation timestamp of the next output buffer
             int64_t pts;
-            status_t status = mOutput->stream->get_next_write_timestamp(
-                mOutput->stream, &pts);
+            status_t status = INVALID_OPERATION;
+
+            if (NULL != mOutput->stream->get_next_write_timestamp) {
+                status = mOutput->stream->get_next_write_timestamp(
+                        mOutput->stream, &pts);
+            }
+
             if (status != NO_ERROR) {
                 pts = AudioBufferProvider::kInvalidPTS;
             }
