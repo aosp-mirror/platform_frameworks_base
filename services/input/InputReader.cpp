@@ -2523,17 +2523,17 @@ void TouchInputMapper::configureParameters() {
         }
     }
 
-    if (getEventHub()->hasRelativeAxis(getDeviceId(), REL_X)
+    if (getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_DIRECT)) {
+        // The device is a touch screen.
+        mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
+    } else if (getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_POINTER)) {
+        // The device is a pointing device like a track pad.
+        mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
+    } else if (getEventHub()->hasRelativeAxis(getDeviceId(), REL_X)
             || getEventHub()->hasRelativeAxis(getDeviceId(), REL_Y)) {
         // The device is a cursor device with a touch pad attached.
         // By default don't use the touch pad to move the pointer.
         mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
-    } else if (getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_POINTER)) {
-        // The device is a pointing device like a track pad.
-        mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
-    } else if (getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_DIRECT)) {
-        // The device is a touch screen.
-        mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
     } else {
         // The device is a touch pad of unknown purpose.
         mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
