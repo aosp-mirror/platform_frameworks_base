@@ -10680,8 +10680,8 @@ package android.media {
     method public void setOnSeekCompleteListener(android.media.MediaPlayer.OnSeekCompleteListener);
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setScreenOnWhilePlaying(boolean);
-    method public void setTexture(android.graphics.SurfaceTexture);
     method public void setSurface(android.view.Surface);
+    method public void setTexture(android.graphics.SurfaceTexture);
     method public void setVolume(float, float);
     method public void setWakeMode(android.content.Context, int);
     method public void start() throws java.lang.IllegalStateException;
@@ -20691,7 +20691,6 @@ package android.text.style {
 
   public class EasyEditSpan implements android.text.ParcelableSpan {
     ctor public EasyEditSpan();
-    ctor public EasyEditSpan(android.os.Parcel);
     method public int describeContents();
     method public int getSpanTypeId();
     method public void writeToParcel(android.os.Parcel, int);

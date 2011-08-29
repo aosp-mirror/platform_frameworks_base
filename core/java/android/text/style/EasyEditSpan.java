@@ -33,10 +33,6 @@ public class EasyEditSpan implements ParcelableSpan {
         // Empty
     }
 
-    public EasyEditSpan(Parcel src) {
-        this();
-    }
-
     @Override
     public int describeContents() {
         return 0;

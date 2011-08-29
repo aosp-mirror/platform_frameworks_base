@@ -91,7 +91,6 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceEasyCorrectSuggestion">@android:style/TextAppearance.EasyCorrectSuggestion</item>
         <item name="textAppearanceMisspelledSuggestion">@android:style/TextAppearance.MisspelledSuggestion</item>
-        <item name="textAppearanceSuggestionRange">@android:style/TextAppearance.SuggestionRange</item>
 
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
