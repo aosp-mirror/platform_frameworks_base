@@ -3084,7 +3084,7 @@ public class AudioService extends IAudioService.Stub {
                 mRcDisplay.setCurrentClientId(
                         newClientGeneration, newClientEventReceiver, clearing);
             } catch (RemoteException e) {
-                Log.e(TAG, "Dead display in onRcDisplayUpdate() "+e);
+                Log.e(TAG, "Dead display in setNewRcClientOnDisplays_syncRcsCurrc() "+e);
                 // if we had a display before, stop monitoring its death
                 rcDisplay_stopDeathMonitor_syncRcStack();
                 mRcDisplay = null;
@@ -3103,7 +3103,7 @@ public class AudioService extends IAudioService.Stub {
                 try {
                     se.mRcClient.setCurrentClientGenerationId(newClientGeneration);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Dead client in onRcDisplayUpdate()"+e);
+                    Log.w(TAG, "Dead client in setNewRcClientGenerationOnClients_syncRcsCurrc()"+e);
                     stackIterator.remove();
                     se.unlinkToRcClientDeath();
                 }
@@ -3160,7 +3160,7 @@ public class AudioService extends IAudioService.Stub {
                             rcse.mReceiverComponent /*event receiver*/,
                             false /*clearing*/);
 
-                    // ask the current client that it needs to send info
+                    // tell the current client that it needs to send info
                     try {
                         mCurrentRcClient.onInformationRequested(mCurrentRcClientGen,
                                 flags, mArtworkExpectedWidth, mArtworkExpectedHeight);
@@ -3454,6 +3454,21 @@ public class AudioService extends IAudioService.Stub {
                     } catch (RemoteException e) {
                         Log.e(TAG, "Error connecting remote control display to client: " + e);
                         e.printStackTrace();
+                    }
+                }
+            }
+
+            // we have a new display, tell the current client that it needs to send info
+            // (following lock order: mRCStack then mCurrentRcLock)
+            synchronized(mCurrentRcLock) {
+                if (mCurrentRcClient != null) {
+                    // tell the current client that it needs to send info
+                    try {
+                        mCurrentRcClient.onInformationRequested(mCurrentRcClientGen,
+                                RC_INFO_ALL, mArtworkExpectedWidth, mArtworkExpectedHeight);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Current valid remote client is dead: "+e);
+                        mCurrentRcClient = null;
                     }
                 }
             }
