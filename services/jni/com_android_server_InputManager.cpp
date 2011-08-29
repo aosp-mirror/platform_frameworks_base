@@ -179,6 +179,7 @@ public:
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
+    void setShowTouches(bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -233,6 +234,9 @@ private:
         // True if pointer gestures are enabled.
         bool pointerGesturesEnabled;
 
+        // Show touches feature enable/disable.
+        bool showTouches;
+
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
 
@@ -276,6 +280,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
         mLocked.pointerSpeed = 0;
         mLocked.pointerGesturesEnabled = true;
+        mLocked.showTouches = false;
     }
 
     sp<EventHub> eventHub = new EventHub();
@@ -430,6 +435,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
                 * POINTER_SPEED_EXPONENT);
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
+
+        outConfig->showTouches = mLocked.showTouches;
 
         outConfig->setDisplayInfo(0, false /*external*/,
                 mLocked.displayWidth, mLocked.displayHeight, mLocked.displayOrientation);
@@ -676,6 +683,22 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_POINTER_SPEED);
+}
+
+void NativeInputManager::setShowTouches(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.showTouches == enabled) {
+            return;
+        }
+
+        LOGI("Setting show touches feature to %s.", enabled ? "enabled" : "disabled");
+        mLocked.showTouches = enabled;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
 }
 
 bool NativeInputManager::isScreenOn() {
@@ -1276,6 +1299,15 @@ static void android_server_InputManager_nativeSetPointerSpeed(JNIEnv* env,
     gNativeInputManager->setPointerSpeed(speed);
 }
 
+static void android_server_InputManager_nativeSetShowTouches(JNIEnv* env,
+        jclass clazz, jboolean enabled) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->setShowTouches(enabled);
+}
+
 static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
     if (checkInputManagerUnitialized(env)) {
         return NULL;
@@ -1343,6 +1375,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeTransferTouchFocus },
     { "nativeSetPointerSpeed", "(I)V",
             (void*) android_server_InputManager_nativeSetPointerSpeed },
+    { "nativeSetShowTouches", "(Z)V",
+            (void*) android_server_InputManager_nativeSetShowTouches },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
     { "nativeMonitor", "()V",

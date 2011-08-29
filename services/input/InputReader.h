@@ -56,6 +56,9 @@ struct InputReaderConfiguration {
         // The display size or orientation changed.
         CHANGE_DISPLAY_INFO = 1 << 2,
 
+        // The visible touches option changed.
+        CHANGE_SHOW_TOUCHES = 1 << 3,
+
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
     };
@@ -140,6 +143,9 @@ struct InputReaderConfiguration {
     // will cover this portion of the display diagonal.
     float pointerGestureZoomSpeedRatio;
 
+    // True to show the location of touches on the touch screen as spots.
+    bool showTouches;
+
     InputReaderConfiguration() :
             virtualKeyQuietTime(0),
             pointerVelocityControlParameters(1.0f, 500.0f, 3000.0f, 3.0f),
@@ -155,7 +161,8 @@ struct InputReaderConfiguration {
             pointerGestureSwipeTransitionAngleCosine(0.2588f), // cosine of 75 degrees
             pointerGestureSwipeMaxWidthRatio(0.25f),
             pointerGestureMovementSpeedRatio(0.8f),
-            pointerGestureZoomSpeedRatio(0.3f) { }
+            pointerGestureZoomSpeedRatio(0.3f),
+            showTouches(false) { }
 
     bool getDisplayInfo(int32_t displayId, bool external,
             int32_t* width, int32_t* height, int32_t* orientation) const;

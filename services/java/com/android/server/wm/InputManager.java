@@ -94,6 +94,7 @@ public class InputManager implements Watchdog.Monitor {
     private static native boolean nativeTransferTouchFocus(InputChannel fromChannel,
             InputChannel toChannel);
     private static native void nativeSetPointerSpeed(int speed);
+    private static native void nativeSetShowTouches(boolean enabled);
     private static native String nativeDump();
     private static native void nativeMonitor();
     
@@ -147,7 +148,10 @@ public class InputManager implements Watchdog.Monitor {
         nativeStart();
 
         registerPointerSpeedSettingObserver();
+        registerShowTouchesSettingObserver();
+
         updatePointerSpeedFromSettings();
+        updateShowTouchesFromSettings();
     }
     
     public void setDisplaySize(int displayId, int width, int height,
@@ -452,6 +456,32 @@ public class InputManager implements Watchdog.Monitor {
         } catch (SettingNotFoundException snfe) {
         }
         return speed;
+    }
+
+    public void updateShowTouchesFromSettings() {
+        int setting = getShowTouchesSetting(0);
+        nativeSetShowTouches(setting != 0);
+    }
+
+    private void registerShowTouchesSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.SHOW_TOUCHES), true,
+                new ContentObserver(mWindowManagerService.mH) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateShowTouchesFromSettings();
+                    }
+                });
+    }
+
+    private int getShowTouchesSetting(int defaultValue) {
+        int result = defaultValue;
+        try {
+            result = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_TOUCHES);
+        } catch (SettingNotFoundException snfe) {
+        }
+        return result;
     }
 
     public void dump(PrintWriter pw) {
