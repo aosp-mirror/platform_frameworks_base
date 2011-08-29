@@ -306,7 +306,7 @@ public class TabletStatusBar extends StatusBar implements
         mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
 
         lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                (int) res.getDimension(R.dimen.status_bar_recents_width),
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN

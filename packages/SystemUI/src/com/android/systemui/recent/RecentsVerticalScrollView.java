@@ -142,6 +142,11 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
         // We do this so the underlying ScrollView knows that it won't get
         // the chance to intercept events anymore
         requestDisallowInterceptTouchEvent(true);
+        v.setActivated(true);
+    }
+
+    public void onDragCancelled(View v) {
+        v.setActivated(false);
     }
 
     public View getChildAtPosition(MotionEvent ev) {

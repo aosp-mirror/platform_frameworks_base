@@ -30,16 +30,19 @@
     <dimen name="panel_float">56dp</dimen>
 
     <!-- Recent Applications parameters -->
-    <!-- Width of a recent app view, including all content -->
-    <dimen name="status_bar_recents_thumbnail_view_width">156dp</dimen>
     <!-- How far the thumbnail for a recent app appears from left edge -->
-    <dimen name="status_bar_recents_thumbnail_left_margin">110dp</dimen>
+    <dimen name="status_bar_recents_thumbnail_left_margin">121dp</dimen>
     <!-- Upper width limit for application icon -->
-    <dimen name="status_bar_recents_thumbnail_max_width">64dp</dimen>
+    <dimen name="status_bar_recents_app_icon_max_width">64dp</dimen>
     <!-- Upper height limit for application icon -->
-    <dimen name="status_bar_recents_thumbnail_max_height">64dp</dimen>
-    <!-- Width of scrollable area in recents -->
-    <dimen name="status_bar_recents_width">356dp</dimen>
+    <dimen name="status_bar_recents_app_icon_max_height">64dp</dimen>
+
+    <!-- Size of application icon -->
+    <dimen name="status_bar_recents_thumbnail_width">245dp</dimen>
+    <dimen name="status_bar_recents_thumbnail_height">144dp</dimen>
+
+    <!-- Width of recents panel -->
+    <dimen name="status_bar_recents_width">600dp</dimen>
     <!-- Padding for text descriptions -->
     <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
     <!-- Size of application label text -->
@@ -54,12 +57,6 @@
     <dimen name="status_bar_recents_fading_edge_length">20dip</dimen>
     <!-- Margin between recents container and glow on the right -->
     <dimen name="status_bar_recents_right_glow_margin">100dip</dimen>
-
-    <!-- Offsets for rendering thumbnails over drawable recents_thumbnail_bg -->
-    <dimen name="recents_thumbnail_bg_padding_left">15px</dimen>
-    <dimen name="recents_thumbnail_bg_padding_top">8px</dimen>
-    <dimen name="recents_thumbnail_bg_padding_right">12px</dimen>
-    <dimen name="recents_thumbnail_bg_padding_bottom">8px</dimen>
 
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">13dp</dimen>

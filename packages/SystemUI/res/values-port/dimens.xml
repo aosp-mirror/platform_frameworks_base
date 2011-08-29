@@ -19,14 +19,12 @@
     <!-- Recent Applications parameters -->
     <!-- How far the thumbnail for a recent app appears from left edge -->
     <dimen name="status_bar_recents_thumbnail_left_margin">110dp</dimen>
-    <!-- Width of scrollable area in recents -->
-    <dimen name="status_bar_recents_width">356dp</dimen>
     <!-- Padding for text descriptions -->
     <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
     <!-- Width of application label text -->
     <dimen name="status_bar_recents_app_label_width">97dip</dimen>
     <!-- Left margin of application label text -->
-    <dimen name="status_bar_recents_app_label_left_margin">16dip</dimen>
+    <dimen name="status_bar_recents_app_label_left_margin">8dip</dimen>
     <!-- Margin between recents container and glow on the right -->
     <dimen name="status_bar_recents_right_glow_margin">100dip</dimen>
 </resources>

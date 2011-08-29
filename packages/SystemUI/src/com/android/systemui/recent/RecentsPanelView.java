@@ -84,12 +84,8 @@ public class RecentsPanelView extends RelativeLayout
     private View mRecentsScrim;
     private View mRecentsGlowView;
     private ViewGroup mRecentsContainer;
-    private Bitmap mGlowBitmap;
-    // TODO: add these widgets attributes to the layout file
-    private int mGlowBitmapPaddingLeftPx;
-    private int mGlowBitmapPaddingTopPx;
-    private int mGlowBitmapPaddingRightPx;
-    private int mGlowBitmapPaddingBottomPx;
+    private Bitmap mAppThumbnailBackground;
+
     private boolean mShowing;
     private Choreographer mChoreo;
     private View mRecentsDismissButton;
@@ -129,7 +125,7 @@ public class RecentsPanelView extends RelativeLayout
         }
 
         public void setThumbnail(Bitmap thumbnail) {
-            mThumbnail = compositeBitmap(mGlowBitmap, thumbnail);
+            mThumbnail = compositeBitmap(mAppThumbnailBackground, thumbnail);
         }
 
         public Bitmap getThumbnail() {
@@ -327,15 +323,12 @@ public class RecentsPanelView extends RelativeLayout
 
         mIconDpi = xlarge ? DisplayMetrics.DENSITY_HIGH : res.getDisplayMetrics().densityDpi;
 
-        mGlowBitmap = BitmapFactory.decodeResource(res, R.drawable.recents_thumbnail_bg);
-        mGlowBitmapPaddingLeftPx =
-                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_left);
-        mGlowBitmapPaddingTopPx =
-                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_top);
-        mGlowBitmapPaddingRightPx =
-                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_right);
-        mGlowBitmapPaddingBottomPx =
-                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_bottom);
+        int width = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_width);
+        int height = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_height);
+        int color = res.getColor(R.drawable.status_bar_recents_app_thumbnail_background);
+        mAppThumbnailBackground = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(mAppThumbnailBackground);
+        c.drawColor(color);
     }
 
     @Override
@@ -570,6 +563,9 @@ public class RecentsPanelView extends RelativeLayout
             mThumbnailLoader = null;
         }
         mActivityDescriptions = getRecentTasks();
+        for (ActivityDescription ad : mActivityDescriptions) {
+            ad.setThumbnail(mAppThumbnailBackground);
+        }
         mListAdapter.notifyDataSetInvalidated();
         if (mActivityDescriptions.size() > 0) {
             if (DEBUG) Log.v(TAG, "Showing " + mActivityDescriptions.size() + " apps");
@@ -644,14 +640,8 @@ public class RecentsPanelView extends RelativeLayout
             paint.setAntiAlias(true);
             paint.setFilterBitmap(true);
             paint.setAlpha(255);
-            final int srcWidth = thumbnail.getWidth();
-            final int srcHeight = thumbnail.getHeight();
-            if (DEBUG) Log.v(TAG, "Source thumb: " + srcWidth + "x" + srcHeight);
-            canvas.drawBitmap(thumbnail,
-                    new Rect(0, 0, srcWidth-1, srcHeight-1),
-                    new RectF(mGlowBitmapPaddingLeftPx, mGlowBitmapPaddingTopPx,
-                            outBitmap.getWidth() - mGlowBitmapPaddingRightPx,
-                            outBitmap.getHeight() - mGlowBitmapPaddingBottomPx), paint);
+            canvas.drawBitmap(thumbnail, null,
+                    new RectF(0, 0, outBitmap.getWidth(), outBitmap.getHeight()), paint);
             canvas.setBitmap(null);
         }
         return outBitmap;
