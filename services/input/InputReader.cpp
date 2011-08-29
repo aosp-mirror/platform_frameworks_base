@@ -2491,7 +2491,8 @@ void TouchInputMapper::configure(nsecs_t when,
 
     bool resetNeeded = false;
     if (!changes || (changes & (InputReaderConfiguration::CHANGE_DISPLAY_INFO
-            | InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT))) {
+            | InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT
+            | InputReaderConfiguration::CHANGE_SHOW_TOUCHES))) {
         // Configure device sources, surface dimensions, orientation and
         // scaling factors.
         configureSurface(when, &resetNeeded);
@@ -2681,16 +2682,17 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
     bool deviceModeChanged;
     if (mDeviceMode != oldDeviceMode) {
         deviceModeChanged = true;
-
-        if (mDeviceMode == DEVICE_MODE_POINTER) {
-            if (mPointerController == NULL) {
-                mPointerController = getPolicy()->obtainPointerController(getDeviceId());
-            }
-        } else {
-            mPointerController.clear();
-        }
-
         mOrientedRanges.clear();
+    }
+
+    // Create pointer controller if needed.
+    if (mDeviceMode == DEVICE_MODE_POINTER ||
+            (mDeviceMode == DEVICE_MODE_DIRECT && mConfig.showTouches)) {
+        if (mPointerController == NULL) {
+            mPointerController = getPolicy()->obtainPointerController(getDeviceId());
+        }
+    } else {
+        mPointerController.clear();
     }
 
     bool orientationChanged = mSurfaceOrientation != orientation;
@@ -3380,7 +3382,7 @@ void TouchInputMapper::sync(nsecs_t when) {
         cookPointerData();
 
         // Dispatch the touches either directly or by translation through a pointer on screen.
-        if (mPointerController != NULL) {
+        if (mDeviceMode == DEVICE_MODE_POINTER) {
             for (BitSet32 idBits(mCurrentRawPointerData.touchingIdBits); !idBits.isEmpty(); ) {
                 uint32_t id = idBits.clearFirstMarkedBit();
                 const RawPointerData::Pointer& pointer = mCurrentRawPointerData.pointerForId(id);
@@ -3418,6 +3420,17 @@ void TouchInputMapper::sync(nsecs_t when) {
 
             dispatchPointerUsage(when, policyFlags, pointerUsage);
         } else {
+            if (mDeviceMode == DEVICE_MODE_DIRECT
+                    && mConfig.showTouches && mPointerController != NULL) {
+                mPointerController->setPresentation(PointerControllerInterface::PRESENTATION_SPOT);
+                mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
+
+                mPointerController->setButtonState(mCurrentButtonState);
+                mPointerController->setSpots(mCurrentCookedPointerData.pointerCoords,
+                        mCurrentCookedPointerData.idToIndex,
+                        mCurrentCookedPointerData.touchingIdBits);
+            }
+
             dispatchHoverExit(when, policyFlags);
             dispatchTouches(when, policyFlags);
             dispatchHoverEnterAndMove(when, policyFlags);
@@ -3442,7 +3455,7 @@ void TouchInputMapper::sync(nsecs_t when) {
 }
 
 void TouchInputMapper::timeoutExpired(nsecs_t when) {
-    if (mPointerController != NULL) {
+    if (mDeviceMode == DEVICE_MODE_POINTER) {
         if (mPointerUsage == POINTER_USAGE_GESTURES) {
             dispatchPointerGestures(when, 0 /*policyFlags*/, true /*isTimeout*/);
         }

@@ -1738,6 +1738,14 @@ public final class Settings {
         public static final String POINTER_LOCATION = "pointer_location";
 
         /**
+         * Show touch positions on screen?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String SHOW_TOUCHES = "show_touches";
+
+        /**
          * Log raw orientation data from {@link WindowOrientationListener} for use with the
          * orientationplot.py tool.
          * 0 = no
