@@ -888,7 +888,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // Mark as handled
             st.isHandled = true;
 
-            if ((flags & Menu.FLAG_PERFORM_NO_CLOSE) == 0) {
+            // Only close down the menu if we don't have an action bar keeping it open.
+            if ((flags & Menu.FLAG_PERFORM_NO_CLOSE) == 0 && mActionBar == null) {
                 closePanel(st, true);
             }
         }
@@ -909,7 +910,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         boolean res = st.menu.performIdentifierAction(id, flags);
 
-        closePanel(st, true);
+        // Only close down the menu if we don't have an action bar keeping it open.
+        if (mActionBar == null) {
+            closePanel(st, true);
+        }
 
         return res;
     }
