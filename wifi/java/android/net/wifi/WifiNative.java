@@ -217,6 +217,19 @@ public class WifiNative {
         return doBooleanCommand("WPS_PIN any " + pin);
     }
 
+    public static boolean setPersistentReconnect(boolean enabled) {
+        int value = (enabled == true) ? 1 : 0;
+        return WifiNative.doBooleanCommand("SET persistent_reconnect " + value);
+    }
+
+    public static boolean setDeviceName(String name) {
+        return WifiNative.doBooleanCommand("SET device_name " + name);
+    }
+
+    public static boolean setDeviceType(String type) {
+        return WifiNative.doBooleanCommand("SET device_type " + type);
+    }
+
     public static boolean p2pFind() {
         return doBooleanCommand("P2P_FIND");
     }
