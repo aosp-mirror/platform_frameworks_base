@@ -24,12 +24,21 @@
 #include <hardware/hardware.h>
 #include <hardware/local_time_hal.h>
 #include <utils/Errors.h>
+#include <utils/threads.h>
 
 namespace android {
+
+Mutex LocalClock::dev_lock_;
+local_time_hw_device_t* LocalClock::dev_ = NULL;
 
 LocalClock::LocalClock() {
     int res;
     const hw_module_t* mod;
+
+    AutoMutex lock(&dev_lock_);
+
+    if (dev_ != NULL)
+        return;
 
     res = hw_get_module_by_class(LOCAL_TIME_HARDWARE_MODULE_ID, NULL, &mod);
     if (res) {
@@ -41,11 +50,6 @@ LocalClock::LocalClock() {
             dev_ = NULL;
         }
     }
-}
-
-LocalClock::~LocalClock() {
-    if (NULL != dev_)
-        local_time_hw_device_close(dev_);
 }
 
 bool LocalClock::initCheck() {

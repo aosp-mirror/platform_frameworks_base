@@ -22,13 +22,13 @@
 
 #include <hardware/local_time_hal.h>
 #include <utils/Errors.h>
+#include <utils/threads.h>
 
 namespace android {
 
 class LocalClock {
   public:
      LocalClock();
-    ~LocalClock();
 
     bool initCheck();
 
@@ -39,7 +39,8 @@ class LocalClock {
                          int max_records);
 
   private:
-    local_time_hw_device_t* dev_;
+    static Mutex dev_lock_;
+    static local_time_hw_device_t* dev_;
 };
 
 }  // namespace android
