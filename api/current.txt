@@ -3271,6 +3271,7 @@ package android.app {
     method public void setArguments(android.os.Bundle);
     method public void setHasOptionsMenu(boolean);
     method public void setInitialSavedState(android.app.Fragment.SavedState);
+    method public void setMenuVisibility(boolean);
     method public void setRetainInstance(boolean);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void startActivity(android.content.Intent);
@@ -3336,6 +3337,7 @@ package android.app {
     method public abstract java.lang.CharSequence getBreadCrumbTitle();
     method public abstract int getBreadCrumbTitleRes();
     method public abstract int getId();
+    method public abstract java.lang.String getName();
   }
 
   public static abstract interface FragmentManager.OnBackStackChangedListener {
