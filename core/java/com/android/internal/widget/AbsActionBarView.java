@@ -56,6 +56,16 @@ public abstract class AbsActionBarView extends ViewGroup {
         mSplitView = splitView;
     }
 
+    /**
+     * @return Current visibility or if animating, the visibility being animated to.
+     */
+    public int getAnimatedVisibility() {
+        if (mVisibilityAnim != null) {
+            return mVisAnimListener.mFinalVisibility;
+        }
+        return getVisibility();
+    }
+
     public void animateToVisibility(int visibility) {
         if (mVisibilityAnim != null) {
             mVisibilityAnim.cancel();
@@ -179,7 +189,7 @@ public abstract class AbsActionBarView extends ViewGroup {
 
     protected class VisibilityAnimListener implements Animator.AnimatorListener {
         private boolean mCanceled = false;
-        private int mFinalVisibility;
+        int mFinalVisibility;
 
         public VisibilityAnimListener withFinalVisibility(int visibility) {
             mFinalVisibility = visibility;
@@ -199,6 +209,9 @@ public abstract class AbsActionBarView extends ViewGroup {
 
             mVisibilityAnim = null;
             setVisibility(mFinalVisibility);
+            if (mSplitView != null && mMenuView != null) {
+                mMenuView.setVisibility(mFinalVisibility);
+            }
         }
 
         @Override
