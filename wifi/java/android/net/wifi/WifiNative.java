@@ -60,7 +60,9 @@ public class WifiNative {
 
     public native static boolean startSupplicant();
 
-    /* Does a graceful shutdown of supplicant.
+    public native static boolean startP2pSupplicant();
+
+    /* Does a graceful shutdown of supplicant. Is a common stop function for both p2p and sta.
      *
      * Note that underneath we use a harsh-sounding "terminate" supplicant command
      * for a graceful stop and a mild-sounding "stop" interface
