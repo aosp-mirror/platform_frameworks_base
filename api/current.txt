@@ -10683,7 +10683,6 @@ package android.media {
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setScreenOnWhilePlaying(boolean);
     method public void setSurface(android.view.Surface);
-    method public void setTexture(android.graphics.SurfaceTexture);
     method public void setVolume(float, float);
     method public void setWakeMode(android.content.Context, int);
     method public void start() throws java.lang.IllegalStateException;
