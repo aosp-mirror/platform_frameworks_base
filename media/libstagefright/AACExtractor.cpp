@@ -33,8 +33,6 @@
 
 namespace android {
 
-#define ADTS_HEADER_LENGTH 7
-
 class AACSource : public MediaSource {
 public:
     AACSource(const sp<DataSource> &source,
@@ -88,7 +86,16 @@ uint32_t get_sample_rate(const uint8_t sf_index)
     return 0;
 }
 
-static size_t getFrameSize(const sp<DataSource> &source, off64_t offset) {
+// Returns the frame length in bytes as described in an ADTS header starting at the given offset,
+//     or 0 if the size can't be read due to an error in the header or a read failure.
+// The returned value is the AAC frame size with the ADTS header length (regardless of
+//     the presence of the CRC).
+// If headerSize is non-NULL, it will be used to return the size of the header of this ADTS frame.
+static size_t getAdtsFrameLength(const sp<DataSource> &source, off64_t offset, size_t* headerSize) {
+
+    const size_t kAdtsHeaderLengthNoCrc = 7;
+    const size_t kAdtsHeaderLengthWithCrc = 9;
+
     size_t frameSize = 0;
 
     uint8_t syncword[2];
@@ -111,7 +118,15 @@ static size_t getFrameSize(const sp<DataSource> &source, off64_t offset) {
     }
 
     frameSize = (header[0] & 0x3) << 11 | header[1] << 3 | header[2] >> 5;
-    frameSize += ADTS_HEADER_LENGTH + protectionAbsent ? 0 : 2;
+
+    // protectionAbsent is 0 if there is CRC
+    size_t headSize = protectionAbsent ? kAdtsHeaderLengthNoCrc : kAdtsHeaderLengthWithCrc;
+    if (headSize > frameSize) {
+        return 0;
+    }
+    if (headerSize != NULL) {
+        *headerSize = headSize;
+    }
 
     return frameSize;
 }
@@ -148,7 +163,7 @@ AACExtractor::AACExtractor(const sp<DataSource> &source)
 
     if (mDataSource->getSize(&streamSize) == OK) {
          while (offset < streamSize) {
-            if ((frameSize = getFrameSize(source, offset)) == 0) {
+            if ((frameSize = getAdtsFrameLength(source, offset, NULL)) == 0) {
                 return;
             }
 
@@ -268,8 +283,8 @@ status_t AACSource::read(
         }
     }
 
-    size_t frameSize, frameSizeWithoutHeader;
-    if ((frameSize = getFrameSize(mDataSource, mOffset)) == 0) {
+    size_t frameSize, frameSizeWithoutHeader, headerSize;
+    if ((frameSize = getAdtsFrameLength(mDataSource, mOffset, &headerSize)) == 0) {
         return ERROR_END_OF_STREAM;
     }
 
@@ -279,8 +294,8 @@ status_t AACSource::read(
         return err;
     }
 
-    frameSizeWithoutHeader = frameSize - ADTS_HEADER_LENGTH;
-    if (mDataSource->readAt(mOffset + ADTS_HEADER_LENGTH, buffer->data(),
+    frameSizeWithoutHeader = frameSize - headerSize;
+    if (mDataSource->readAt(mOffset + headerSize, buffer->data(),
                 frameSizeWithoutHeader) != (ssize_t)frameSizeWithoutHeader) {
         buffer->release();
         buffer = NULL;
