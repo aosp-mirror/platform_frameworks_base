@@ -729,12 +729,22 @@ public class StaticLayout extends Layout {
                     start - widthStart, end - start);
         }
 
-        // If ellipsize is in marquee mode, do not apply ellipsis on the first line
-        if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
+        if (ellipsize != null) {
+            // If there is only one line, then do any type of ellipsis except when it is MARQUEE
+            // if there are multiple lines, just allow END ellipsis on the last line
+            boolean firstLine = (j == 0);
+            boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
             boolean forceEllipsis = moreChars && (mLineCount + 1 == mMaximumVisibleLineCount);
-            calculateEllipsis(start, end, widths, widthStart,
-                    ellipsisWidth, ellipsize, j,
-                    textWidth, paint, forceEllipsis);
+
+            boolean doEllipsis = (firstLine && !moreChars &&
+                                ellipsize != TextUtils.TruncateAt.MARQUEE) ||
+                        (!firstLine && (currentLineIsTheLastVisibleOne || !moreChars) &&
+                                ellipsize == TextUtils.TruncateAt.END);
+            if (doEllipsis) {
+                calculateEllipsis(start, end, widths, widthStart,
+                        ellipsisWidth, ellipsize, j,
+                        textWidth, paint, forceEllipsis);
+            }
         }
 
         mLineCount++;
@@ -797,8 +807,8 @@ public class StaticLayout extends Layout {
 
             ellipsisStart = i;
             ellipsisCount = len - i;
-            if (forceEllipsis && ellipsisCount == 0 && i > 0) {
-                ellipsisStart = i - 1;
+            if (forceEllipsis && ellipsisCount == 0 && len > 0) {
+                ellipsisStart = len - 1;
                 ellipsisCount = 1;
             }
         } else {
