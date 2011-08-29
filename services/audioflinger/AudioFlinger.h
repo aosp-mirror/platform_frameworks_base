@@ -210,7 +210,7 @@ public:
 
                 uint32_t    getMode() { return mMode; }
 
-                bool        btNrec() { return mBtNrec; }
+                bool        btNrecIsOff() { return mBtNrecIsOff; }
 
 private:
                             AudioFlinger();
@@ -1389,7 +1389,7 @@ private:
                 DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 volatile int32_t                    mNextUniqueId;
                 uint32_t                            mMode;
-                bool                                mBtNrec;
+                bool                                mBtNrecIsOff;
 
                 Vector<AudioSessionRef*> mAudioSessionRefs;
 };
