@@ -208,7 +208,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
 
             // Wait until the download finishes; don't wait for a notification b/c
             // the download may well have been completed before the last reboot.
-            waitForDownloadOrTimeout(dlRequest);
+            waitForDownloadOrTimeout_skipNotification(dlRequest);
 
             Log.i(LOG_TAG, "Verifying download information...");
             // Verify specific info about the file (size, name, etc)...

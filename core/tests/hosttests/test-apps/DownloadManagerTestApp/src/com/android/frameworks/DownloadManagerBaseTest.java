@@ -491,9 +491,10 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      *
      * @param id The download id to query on (wait for)
      */
-    private void waitForDownloadOrTimeout_skipNotification(long id) throws TimeoutException,
+    protected void waitForDownloadOrTimeout_skipNotification(long id) throws TimeoutException,
             InterruptedException {
-        waitForDownloadOrTimeout(id, WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
+        doWaitForDownloadsOrTimeout(new Query().setFilterById(id),
+                WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
     }
 
     /**
@@ -505,8 +506,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      */
     protected void waitForDownloadOrTimeout(long id) throws TimeoutException,
             InterruptedException {
-        waitForDownloadOrTimeout_skipNotification(id);
-        waitForReceiverNotifications(1);
+        waitForDownloadOrTimeout(id, WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
     }
 
     /**
