@@ -2228,6 +2228,11 @@
     <string name="permdesc_bindPackageVerifier">Allows the holder to make requests of
         package verifiers. Should never be needed for normal applications.</string>
 
+    <!-- Title of an application permission which allows the application to access serial ports via the SerialManager. [CHAR LIMIT=40] -->
+    <string name="permlab_serialPort">access serial ports</string>
+    <!-- Description of an application permission which allows the application access serial ports via the SerialManager. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_serialPort">Allows the holder to access serial ports using the SerialManager API.</string>
+
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
     <string name="save_password_message">Do you want the browser to remember this password?</string>
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password. -->

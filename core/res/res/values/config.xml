@@ -301,6 +301,12 @@
     <string-array name="config_usbHostBlacklist">
     </string-array>
 
+    <!-- List of paths to serial ports that are available to the serial manager.
+         for example, /dev/ttyUSB0
+    -->
+    <string-array translatable="false" name="config_serialPorts">
+    </string-array>
+
     <!-- Vibrator pattern for feedback about a long screen/key press -->
     <integer-array name="config_longPressVibePattern">
         <item>0</item>

@@ -1780,6 +1780,17 @@ public abstract class Context {
     public static final String USB_SERVICE = "usb";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.hardware.SerialManager} for access to serial ports.
+     *
+     * @see #getSystemService
+     * @see android.harware.SerialManager
+     *
+     * @hide
+     */
+    public static final String SERIAL_SERVICE = "serial";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

@@ -125,6 +125,7 @@ class ServerThread extends Thread {
         BluetoothA2dpService bluetoothA2dp = null;
         DockObserver dock = null;
         UsbService usb = null;
+        SerialService serial = null;
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
@@ -480,6 +481,15 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.USB_SERVICE, usb);
             } catch (Throwable e) {
                 reportWtf("starting UsbService", e);
+            }
+
+            try {
+                Slog.i(TAG, "Serial Service");
+                // Serial port support
+                serial = new SerialService(context);
+                ServiceManager.addService(Context.SERIAL_SERVICE, serial);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting SerialService", e);
             }
 
             try {
