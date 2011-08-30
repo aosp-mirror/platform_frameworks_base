@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccCard.State;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.TransportControlView;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
 
 import java.util.ArrayList;
@@ -52,8 +53,6 @@ class KeyguardStatusViewManager implements OnClickListener {
     public static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
     private static final long INSTRUCTION_RESET_DELAY = 2000; // time until instruction text resets
 
-    private static final int SHOW_WIDGET = 8;
-    private static final int HIDE_WIDGET = 9;
     private static final int INSTRUCTION_TEXT = 10;
     private static final int CARRIER_TEXT = 11;
     private static final int CARRIER_HELP_TEXT = 12;
@@ -71,7 +70,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private TextView mStatus1View;
     private TextView mOwnerInfoView;
     private TextView mAlarmStatusView;
-    private View mTransportView;
+    private TransportControlView mTransportView;
 
     // Top-level container view for above views
     private View mContainer;
@@ -162,7 +161,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         mStatus1View = (TextView) findViewById(R.id.status1);
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mOwnerInfoView = (TextView) findViewById(R.id.propertyOf);
-        mTransportView = findViewById(R.id.transport);
+        mTransportView = (TransportControlView) findViewById(R.id.transport);
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         if (mEmergencyCallButton != null) {
             mEmergencyCallButton.setText(R.string.lockscreen_emergency_call);
@@ -190,20 +189,6 @@ class KeyguardStatusViewManager implements OnClickListener {
         // until we get an update...
         setCarrierText(LockPatternUtils.getCarrierString(
                 mUpdateMonitor.getTelephonyPlmn(), mUpdateMonitor.getTelephonySpn()));
-    }
-
-    public void enterWidgetMode() {
-        if (mTransportView != null) {
-            mTransportView.setVisibility(View.VISIBLE);
-            update(SHOW_WIDGET, null);
-        }
-    }
-
-    public void leaveWidgetMode() {
-        if (mTransportView != null) {
-            mTransportView.setVisibility(View.GONE);
-            update(HIDE_WIDGET, null);
-        }
     }
 
     private boolean inWidgetMode() {
@@ -248,7 +233,8 @@ class KeyguardStatusViewManager implements OnClickListener {
      * @param lockIcon
      */
     public void setHelpMessage(int textResId, int lockIcon) {
-        mHelpMessageText = getText(textResId).toString();
+        final CharSequence tmp = getText(textResId);
+        mHelpMessageText = tmp == null ? null : tmp.toString();
         update(HELP_MESSAGE_TEXT, mHelpMessageText);
     }
 
@@ -602,15 +588,6 @@ class KeyguardStatusViewManager implements OnClickListener {
 
         public void onPhoneStateChanged(String newState) {
             updateEmergencyCallButtonState();
-        }
-
-        public void onTransportControlStateChanged(int state) {
-            // TODO: define what state means
-            if (state == 0) {
-                leaveWidgetMode();
-            } else {
-                enterWidgetMode();
-            }
         }
     };
 
