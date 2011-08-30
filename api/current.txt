@@ -370,6 +370,7 @@ package android {
     field public static final int dialogTitle = 16843250; // 0x10101f2
     field public static final int digits = 16843110; // 0x1010166
     field public static final int direction = 16843217; // 0x10101d1
+    field public static final int directionDescriptions = 16843695; // 0x10103af
     field public static final int directionPriority = 16843218; // 0x10101d2
     field public static final int disableDependentsState = 16843249; // 0x10101f1
     field public static final int disabledAlpha = 16842803; // 0x1010033
@@ -938,6 +939,7 @@ package android {
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
     field public static final int targetClass = 16842799; // 0x101002f
+    field public static final int targetDescriptions = 16843694; // 0x10103ae
     field public static final int targetDrawables = 16843654; // 0x1010386
     field public static final int targetPackage = 16842785; // 0x1010021
     field public static final int targetSdkVersion = 16843376; // 0x1010270
