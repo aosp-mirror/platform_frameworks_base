@@ -64,6 +64,7 @@ import android.text.TextDirectionHeuristics;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.TextUtils.TruncateAt;
 import android.text.method.AllCapsTransformationMethod;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
@@ -365,6 +366,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean mResolvedDrawables = false;
+
+    /**
+     * On some devices the fading edges add a performance penalty if used
+     * extensively in the same layout. This mode indicates how the marquee
+     * is currently being shown, if applicable. (mEllipsize will == MARQUEE)
+     */
+    private int mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
+
+    /**
+     * When mMarqueeFadeMode is not MARQUEE_FADE_NORMAL, this stores
+     * the layout that should be used when the mode switches.
+     */
+    private Layout mSavedMarqueeModeLayout;
+
+    /**
+     * Draw marquee text with fading edges as usual
+     */
+    private static final int MARQUEE_FADE_NORMAL = 0;
+
+    /**
+     * Draw marquee text as ellipsize end while inactive instead of with the fade.
+     * (Useful for devices where the fade can be expensive if overdone)
+     */
+    private static final int MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS = 1;
+
+    /**
+     * Draw marquee text with fading edges because it is currently active/animating.
+     */
+    private static final int MARQUEE_FADE_SWITCH_SHOW_FADE = 2;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -997,8 +1027,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 setEllipsize(TextUtils.TruncateAt.END);
                 break;
             case 4:
-                setHorizontalFadingEdgeEnabled(
-                        ViewConfiguration.get(context).isFadingMarqueeEnabled());
+                if (ViewConfiguration.get(context).isFadingMarqueeEnabled()) {
+                    setHorizontalFadingEdgeEnabled(true);
+                    mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
+                } else {
+                    setHorizontalFadingEdgeEnabled(false);
+                    mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
+                }
                 setEllipsize(TextUtils.TruncateAt.MARQUEE);
                 break;
         }
@@ -3069,8 +3104,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (text instanceof Spanned &&
             ((Spanned) text).getSpanStart(TextUtils.TruncateAt.MARQUEE) >= 0) {
-            setHorizontalFadingEdgeEnabled(
-                    ViewConfiguration.get(mContext).isFadingMarqueeEnabled());
+            if (ViewConfiguration.get(mContext).isFadingMarqueeEnabled()) {
+                setHorizontalFadingEdgeEnabled(true);
+                mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
+            } else {
+                setHorizontalFadingEdgeEnabled(false);
+                mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
+            }
             setEllipsize(TextUtils.TruncateAt.MARQUEE);
         }
 
@@ -4763,7 +4803,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int layoutDirection = getResolvedLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-        if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
+        if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
+                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (!mSingleLine && getLineCount() == 1 && canMarquee() &&
                     (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
                 canvas.translate(mLayout.getLineRight(0) - (mRight - mLeft -
@@ -5947,7 +5988,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mSavedHintLayout = (BoringLayout) mHintLayout;
         }
 
-        mLayout = mHintLayout = null;
+        mSavedMarqueeModeLayout = mLayout = mHintLayout = null;
 
         // Since it depends on the value of mLayout
         prepareCursorControllers();
@@ -6067,73 +6108,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Layout.Alignment alignment = getLayoutAlignment();
         boolean shouldEllipsize = mEllipsize != null && mInput == null;
+        final boolean switchEllipsize = mEllipsize == TruncateAt.MARQUEE &&
+                mMarqueeFadeMode != MARQUEE_FADE_NORMAL;
+        TruncateAt effectiveEllipsize = mEllipsize;
+        if (mEllipsize == TruncateAt.MARQUEE &&
+                mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
+            effectiveEllipsize = TruncateAt.END;
+        }
 
         if (mTextDir == null) {
             resolveTextDirection();
         }
-        if (mText instanceof Spannable) {
-            mLayout = new DynamicLayout(mText, mTransformed, mTextPaint, w,
-                    alignment, mTextDir, mSpacingMult,
-                    mSpacingAdd, mIncludePad, mInput == null ? mEllipsize : null,
-                    ellipsisWidth);
-        } else {
-            if (boring == UNKNOWN_BORING) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
-                if (boring != null) {
-                    mBoring = boring;
-                }
-            }
 
-            if (boring != null) {
-                if (boring.width <= w &&
-                    (mEllipsize == null || boring.width <= ellipsisWidth)) {
-                    if (mSavedLayout != null) {
-                        mLayout = mSavedLayout.
-                                replaceOrMake(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad);
-                    } else {
-                        mLayout = BoringLayout.make(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad);
-                    }
-
-                    mSavedLayout = (BoringLayout) mLayout;
-                } else if (shouldEllipsize && boring.width <= w) {
-                    if (mSavedLayout != null) {
-                        mLayout = mSavedLayout.
-                                replaceOrMake(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad, mEllipsize,
-                                ellipsisWidth);
-                    } else {
-                        mLayout = BoringLayout.make(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad, mEllipsize,
-                                ellipsisWidth);
-                    }
-                } else if (shouldEllipsize) {
-                    mLayout = new StaticLayout(mTransformed,
-                                0, mTransformed.length(),
-                                mTextPaint, w, alignment, mTextDir, mSpacingMult,
-                                mSpacingAdd, mIncludePad, mEllipsize,
-                                ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
-                } else {
-                    mLayout = new StaticLayout(mTransformed, mTextPaint,
-                            w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                            mIncludePad);
-                }
-            } else if (shouldEllipsize) {
-                mLayout = new StaticLayout(mTransformed,
-                            0, mTransformed.length(),
-                            mTextPaint, w, alignment, mTextDir, mSpacingMult,
-                            mSpacingAdd, mIncludePad, mEllipsize,
-                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
-            } else {
-                mLayout = new StaticLayout(mTransformed, mTextPaint,
-                        w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                        mIncludePad);
-            }
+        mLayout = makeSingleLayout(w, boring, ellipsisWidth, alignment, shouldEllipsize,
+                effectiveEllipsize, effectiveEllipsize == mEllipsize);
+        if (switchEllipsize) {
+            TruncateAt oppositeEllipsize = effectiveEllipsize == TruncateAt.MARQUEE ?
+                    TruncateAt.END : TruncateAt.MARQUEE;
+            mSavedMarqueeModeLayout = makeSingleLayout(w, boring, ellipsisWidth, alignment,
+                    shouldEllipsize, oppositeEllipsize, effectiveEllipsize != mEllipsize);
         }
 
         shouldEllipsize = mEllipsize != null;
@@ -6222,6 +6215,77 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // CursorControllers need a non-null mLayout
         prepareCursorControllers();
+    }
+
+    private Layout makeSingleLayout(int w, BoringLayout.Metrics boring, int ellipsisWidth,
+            Layout.Alignment alignment, boolean shouldEllipsize, TruncateAt effectiveEllipsize,
+            boolean useSaved) {
+        Layout result = null;
+        if (mText instanceof Spannable) {
+            result = new DynamicLayout(mText, mTransformed, mTextPaint, w,
+                    alignment, mTextDir, mSpacingMult,
+                    mSpacingAdd, mIncludePad, mInput == null ? effectiveEllipsize : null,
+                            ellipsisWidth);
+        } else {
+            if (boring == UNKNOWN_BORING) {
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
+                if (boring != null) {
+                    mBoring = boring;
+                }
+            }
+
+            if (boring != null) {
+                if (boring.width <= w &&
+                        (effectiveEllipsize == null || boring.width <= ellipsisWidth)) {
+                    if (useSaved && mSavedLayout != null) {
+                        result = mSavedLayout.replaceOrMake(mTransformed, mTextPaint,
+                                w, alignment, mSpacingMult, mSpacingAdd,
+                                boring, mIncludePad);
+                    } else {
+                        result = BoringLayout.make(mTransformed, mTextPaint,
+                                w, alignment, mSpacingMult, mSpacingAdd,
+                                boring, mIncludePad);
+                    }
+
+                    if (useSaved) {
+                        mSavedLayout = (BoringLayout) result;
+                    }
+                } else if (shouldEllipsize && boring.width <= w) {
+                    if (useSaved && mSavedLayout != null) {
+                        result = mSavedLayout.replaceOrMake(mTransformed, mTextPaint,
+                                w, alignment, mSpacingMult, mSpacingAdd,
+                                boring, mIncludePad, effectiveEllipsize,
+                                ellipsisWidth);
+                    } else {
+                        result = BoringLayout.make(mTransformed, mTextPaint,
+                                w, alignment, mSpacingMult, mSpacingAdd,
+                                boring, mIncludePad, effectiveEllipsize,
+                                ellipsisWidth);
+                    }
+                } else if (shouldEllipsize) {
+                    result = new StaticLayout(mTransformed,
+                            0, mTransformed.length(),
+                            mTextPaint, w, alignment, mTextDir, mSpacingMult,
+                            mSpacingAdd, mIncludePad, effectiveEllipsize,
+                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                } else {
+                    result = new StaticLayout(mTransformed, mTextPaint,
+                            w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
+                            mIncludePad);
+                }
+            } else if (shouldEllipsize) {
+                result = new StaticLayout(mTransformed,
+                        0, mTransformed.length(),
+                        mTextPaint, w, alignment, mTextDir, mSpacingMult,
+                        mSpacingAdd, mIncludePad, effectiveEllipsize,
+                        ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+            } else {
+                result = new StaticLayout(mTransformed, mTextPaint,
+                        w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
+                        mIncludePad);
+            }
+        }
+        return result;
     }
 
     private boolean compressText(float width) {
@@ -7179,7 +7243,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean canMarquee() {
         int width = (mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight());
-        return width > 0 && mLayout.getLineWidth(0) > width;
+        return width > 0 && (mLayout.getLineWidth(0) > width ||
+                (mMarqueeFadeMode != MARQUEE_FADE_NORMAL && mSavedMarqueeModeLayout != null &&
+                        mSavedMarqueeModeLayout.getLineWidth(0) > width));
     }
 
     private void startMarquee() {
@@ -7193,6 +7259,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if ((mMarquee == null || mMarquee.isStopped()) && (isFocused() || isSelected()) &&
                 getLineCount() == 1 && canMarquee()) {
 
+            if (mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
+                mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_FADE;
+                final Layout tmp = mLayout;
+                mLayout = mSavedMarqueeModeLayout;
+                mSavedMarqueeModeLayout = tmp;
+                setHorizontalFadingEdgeEnabled(true);
+                requestLayout();
+                invalidate();
+            }
+
             if (mMarquee == null) mMarquee = new Marquee(this);
             mMarquee.start(mMarqueeRepeatLimit);
         }
@@ -7201,6 +7277,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void stopMarquee() {
         if (mMarquee != null && !mMarquee.isStopped()) {
             mMarquee.stop();
+        }
+
+        if (mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_FADE) {
+            mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
+            final Layout tmp = mSavedMarqueeModeLayout;
+            mSavedMarqueeModeLayout = mLayout;
+            mLayout = tmp;
+            setHorizontalFadingEdgeEnabled(false);
+            requestLayout();
+            invalidate();
         }
     }
 
@@ -8407,7 +8493,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected float getLeftFadingEdgeStrength() {
         if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
-        if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
+        if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
+                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
                 if (marquee.shouldDrawLeftFade()) {
@@ -8436,7 +8523,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected float getRightFadingEdgeStrength() {
         if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
-        if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
+        if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
+                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
                 return (marquee.mMaxFadeScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
