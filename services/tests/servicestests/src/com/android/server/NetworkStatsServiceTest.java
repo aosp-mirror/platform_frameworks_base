@@ -18,7 +18,7 @@ package com.android.server;
 
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
@@ -180,7 +180,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -232,7 +232,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -322,7 +322,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         verifyAndReset();
 
         // modify some number on wifi, and trigger poll event
@@ -372,7 +372,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         verifyAndReset();
 
         // create some traffic on first network
@@ -410,7 +410,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         verifyAndReset();
 
@@ -452,7 +452,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         verifyAndReset();
 
         // create some traffic
@@ -509,7 +509,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         verifyAndReset();
 
         // create some traffic
@@ -541,7 +541,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         verifyAndReset();
 
@@ -575,7 +575,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         verifyAndReset();
 
         // create some traffic for two apps
@@ -637,7 +637,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         verifyAndReset();
 
         // create some initial traffic

@@ -17,6 +17,8 @@
 package com.android.server;
 
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
@@ -1418,6 +1420,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // do this before we broadcast the change
         handleConnectivityChange(prevNetType, doReset);
 
+        final Intent immediateIntent = new Intent(intent);
+        immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
+        sendStickyBroadcast(immediateIntent);
         sendStickyBroadcastDelayed(intent, getConnectivityChangeDelay());
         /*
          * If the failover network is already connected, then immediately send
@@ -1476,11 +1481,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void sendConnectedBroadcast(NetworkInfo info) {
-        sendGeneralBroadcast(info, ConnectivityManager.CONNECTIVITY_ACTION);
+        sendGeneralBroadcast(info, CONNECTIVITY_ACTION_IMMEDIATE);
+        sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
 
     private void sendConnectedBroadcastDelayed(NetworkInfo info, int delayMs) {
-        sendGeneralBroadcastDelayed(info, ConnectivityManager.CONNECTIVITY_ACTION, delayMs);
+        sendGeneralBroadcast(info, CONNECTIVITY_ACTION_IMMEDIATE);
+        sendGeneralBroadcastDelayed(info, CONNECTIVITY_ACTION, delayMs);
     }
 
     private void sendInetConditionBroadcast(NetworkInfo info) {
@@ -1559,6 +1566,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
+
+        final Intent immediateIntent = new Intent(intent);
+        immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
+        sendStickyBroadcast(immediateIntent);
         sendStickyBroadcast(intent);
         /*
          * If the failover network is already connected, then immediately send
@@ -1576,8 +1587,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             if (DBG) {
-                log("sendStickyBroadcast: NetworkInfo=" +
-                    intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO));
+                log("sendStickyBroadcast: action=" + intent.getAction());
             }
 
             mContext.sendStickyBroadcast(intent);
@@ -1588,7 +1598,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (delayMs <= 0) {
             sendStickyBroadcast(intent);
         } else {
-            if (DBG) log("sendStickyBroadcastDelayed: delayMs=" + delayMs + " intent=" + intent);
+            if (DBG) {
+                log("sendStickyBroadcastDelayed: delayMs=" + delayMs + ", action="
+                        + intent.getAction());
+            }
             mHandler.sendMessageDelayed(mHandler.obtainMessage(
                     EVENT_SEND_STICKY_BROADCAST_INTENT, intent), delayMs);
         }
@@ -2281,7 +2294,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case EVENT_SEND_STICKY_BROADCAST_INTENT:
                 {
                     Intent intent = (Intent)msg.obj;
-                    log("EVENT_SEND_STICKY_BROADCAST_INTENT: sendStickyBroadcast intent=" + intent);
                     sendStickyBroadcast(intent);
                     break;
                 }
