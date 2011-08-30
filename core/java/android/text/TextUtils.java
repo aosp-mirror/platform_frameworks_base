@@ -25,6 +25,7 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.EasyEditSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.QuoteSpan;
@@ -585,6 +586,8 @@ public class TextUtils {
     public static final int SPELL_CHECK_SPAN = 20;
     /** @hide */
     public static final int SUGGESTION_RANGE_SPAN = 21;
+    /** @hide */
+    public static final int EASY_EDIT_SPAN = 22;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -748,6 +751,10 @@ public class TextUtils {
                     readSpan(p, sp, new SuggestionRangeSpan());
                     break;
                     
+                case EASY_EDIT_SPAN:
+                    readSpan(p, sp, new EasyEditSpan(p));
+                    break;
+
                 default:
                     throw new RuntimeException("bogus span encoding " + kind);
                 }

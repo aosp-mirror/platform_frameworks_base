@@ -20689,6 +20689,14 @@ package android.text.style {
     field protected final int mVerticalAlignment;
   }
 
+  public class EasyEditSpan implements android.text.ParcelableSpan {
+    ctor public EasyEditSpan();
+    ctor public EasyEditSpan(android.os.Parcel);
+    method public int describeContents();
+    method public int getSpanTypeId();
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public class ForegroundColorSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan android.text.style.UpdateAppearance {
     ctor public ForegroundColorSpan(int);
     ctor public ForegroundColorSpan(android.os.Parcel);
