@@ -723,7 +723,7 @@ class TextLine {
         float ret = 0;
 
         int contextLen = contextEnd - contextStart;
-        if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor !=0 || runIsRtl))) {
+        if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineCount != 0 || runIsRtl))) {
             int flags = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
             if (mCharsValid) {
                 ret = wp.getTextRunAdvances(mChars, start, runLen,
@@ -753,21 +753,26 @@ class TextLine {
                 wp.setColor(previousColor);
             }
 
-            if (wp.underlineColor != 0) {
+            if (wp.underlineCount != 0) {
                 // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
-                float middle = y + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
-                // kStdUnderline_Thickness = 1/18, defined in SkTextFormatParams.h
-                float halfHeight = wp.underlineThickness * (1.0f / 18.0f / 2.0f) * wp.getTextSize();
+                float underlineTop = y + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
 
                 int previousColor = wp.getColor();
                 Paint.Style previousStyle = wp.getStyle();
+                boolean previousAntiAlias = wp.isAntiAlias();
 
-                wp.setColor(wp.underlineColor);
                 wp.setStyle(Paint.Style.FILL);
-                c.drawRect(x, middle - halfHeight, x + ret, middle + halfHeight, wp);
+                wp.setAntiAlias(true);
+
+                for (int i = 0; i < wp.underlineCount; i++) {
+                    wp.setColor(wp.underlineColors[i]);
+                    c.drawRect(x, underlineTop, x + ret, underlineTop + wp.underlineThicknesses[i],
+                            wp);
+                }
 
                 wp.setStyle(previousStyle);
                 wp.setColor(previousColor);
+                wp.setAntiAlias(previousAntiAlias);
             }
 
             drawTextRun(c, wp, start, end, contextStart, contextEnd, runIsRtl,

@@ -81,7 +81,9 @@ import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.method.TransformationMethod2;
 import android.text.method.WordIterator;
+import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
+import android.text.style.EasyEditSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionRangeSpan;
@@ -7705,9 +7707,147 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * Controls the {@link EasyEditSpan} monitoring when it is added, and when the related
+     * pop-up should be displayed.
+     */
+    private class EditTextShortcutController {
+
+        private EditTextShortcutPopupWindow mPopupWindow;
+
+        private EasyEditSpan mEditTextShortcutSpan;
+
+        private void hide() {
+            if (mEditTextShortcutSpan != null) {
+                mPopupWindow.hide();
+                if (mText instanceof Spannable) {
+                    ((Spannable) mText).removeSpan(mEditTextShortcutSpan);
+                }
+                mEditTextShortcutSpan = null;
+            }
+        }
+
+        /**
+         * Monitors the changes in the text.
+         *
+         * <p>{@link ChangeWatcher#onSpanAdded(Spannable, Object, int, int)} cannot be used,
+         * as the notifications are not sent when a spannable (with spans) is inserted.
+         */
+        public void onTextChange(CharSequence buffer) {
+            if (mEditTextShortcutSpan != null) {
+                hide();
+            }
+
+            if (buffer instanceof Spanned) {
+                mEditTextShortcutSpan = getSpan((Spanned) buffer);
+                if (mEditTextShortcutSpan != null) {
+                    if (mPopupWindow == null) {
+                        mPopupWindow = new EditTextShortcutPopupWindow();
+                    }
+                    mPopupWindow.show(mEditTextShortcutSpan);
+                }
+            }
+        }
+
+        private EasyEditSpan getSpan(Spanned spanned) {
+            EasyEditSpan[] inputMethodSpans = spanned.getSpans(0, spanned.length(),
+                    EasyEditSpan.class);
+
+            if (inputMethodSpans.length == 0) {
+                return null;
+            } else {
+                return inputMethodSpans[0];
+            }
+        }
+    }
+
+    /**
+     * Displays the actions associated to an {@link EasyEditSpan}. The pop-up is controlled
+     * by {@link EditTextShortcutController}.
+     */
+    private class EditTextShortcutPopupWindow extends PinnedPopupWindow
+            implements OnClickListener {
+        private static final int POPUP_TEXT_LAYOUT =
+                com.android.internal.R.layout.text_edit_action_popup_text;
+        private TextView mDeleteTextView;
+        private EasyEditSpan mEditTextShortcutSpan;
+
+        @Override
+        protected void createPopupWindow() {
+            mPopupWindow = new PopupWindow(TextView.this.mContext, null,
+                    com.android.internal.R.attr.textSelectHandleWindowStyle);
+            mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+            mPopupWindow.setClippingEnabled(true);
+        }
+
+        @Override
+        protected void initContentView() {
+            mContentView.setOrientation(LinearLayout.HORIZONTAL);
+            mContentView.setBackgroundResource(
+                    com.android.internal.R.drawable.text_edit_side_paste_window);
+
+            LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            LayoutParams wrapContent = new LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            mDeleteTextView = (TextView) inflater.inflate(POPUP_TEXT_LAYOUT, null);
+            mDeleteTextView.setLayoutParams(wrapContent);
+            mDeleteTextView.setText(com.android.internal.R.string.delete);
+            mDeleteTextView.setOnClickListener(this);
+            mContentView.addView(mDeleteTextView);
+        }
+
+        public void show(EasyEditSpan inputMethodSpan) {
+            mEditTextShortcutSpan = inputMethodSpan;
+            super.show();
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (view == mDeleteTextView) {
+                deleteText();
+            }
+        }
+
+        private void deleteText() {
+            Editable editable = (Editable) mText;
+            int start = editable.getSpanStart(mEditTextShortcutSpan);
+            int end = editable.getSpanEnd(mEditTextShortcutSpan);
+            if (start >= 0 && end >= 0) {
+                editable.delete(start, end);
+            }
+        }
+
+        @Override
+        protected int getTextOffset() {
+            // Place the pop-up at the end of the span
+            Editable editable = (Editable) mText;
+            return editable.getSpanEnd(mEditTextShortcutSpan);
+        }
+
+        @Override
+        protected int getVerticalLocalPosition(int line) {
+            return mLayout.getLineBottom(line);
+        }
+
+        @Override
+        protected int clipVertically(int positionY) {
+            // As we display the pop-up below the span, no vertical clipping is required.
+            return positionY;
+        }
+    }
+
     private class ChangeWatcher implements TextWatcher, SpanWatcher {
 
         private CharSequence mBeforeText;
+
+        private EditTextShortcutController mEditTextShortcutController;
+
+        private ChangeWatcher() {
+            mEditTextShortcutController = new EditTextShortcutController();
+        }
 
         public void beforeTextChanged(CharSequence buffer, int start,
                                       int before, int after) {
@@ -7728,6 +7868,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (DEBUG_EXTRACT) Log.v(LOG_TAG, "onTextChanged start=" + start
                     + " before=" + before + " after=" + after + ": " + buffer);
             TextView.this.handleTextChanged(buffer, start, before, after);
+
+            mEditTextShortcutController.onTextChange(buffer);
 
             if (AccessibilityManager.getInstance(mContext).isEnabled() &&
                     (isFocused() || isSelected() && isShown())) {
@@ -7762,6 +7904,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (DEBUG_EXTRACT) Log.v(LOG_TAG, "onSpanRemoved s=" + s + " e=" + e
                     + " what=" + what + ": " + buf);
             TextView.this.spanChange(buf, what, s, -1, e, -1);
+        }
+
+        private void hideControllers() {
+            mEditTextShortcutController.hide();
         }
     }
 
@@ -9183,6 +9329,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    private static class SuggestionRangeSpan extends CharacterStyle {
+
+        private final int mTextColor;
+        private final int mBackgroundColor;
+
+        public SuggestionRangeSpan(Context context) {
+            TypedArray typedArray = context.obtainStyledAttributes(null,
+                    com.android.internal.R.styleable.SuggestionRangeSpan,
+                    com.android.internal.R.attr.textAppearanceSuggestionRange, 0);
+
+            mTextColor = typedArray.getColor(
+                    com.android.internal.R.styleable.SuggestionRangeSpan_textColor, 0);
+            mBackgroundColor = typedArray.getColor(
+                    com.android.internal.R.styleable.SuggestionRangeSpan_colorBackground, 0);
+        }
+
+        @Override
+        public void updateDrawState(TextPaint tp) {
+            if (mTextColor != 0) {
+                tp.setColor(mTextColor);
+            }
+
+            if (mBackgroundColor != 0) {
+                tp.bgColor = mBackgroundColor;
+            }
+        }
+    }
+
     private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
         private static final int NO_SUGGESTIONS = -1;
@@ -9367,7 +9541,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (totalNbSuggestions == 0) return false;
 
-            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
+            if (mSuggestionRangeSpan == null) {
+                mSuggestionRangeSpan = new SuggestionRangeSpan(getContext());
+            }
+            
+            ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = 
+                    new SuggestionRangeSpan(getContext());
             ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
@@ -10694,6 +10876,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void hideControllers() {
         hideInsertionPointCursorController();
         stopSelectionActionMode();
+
+        if (mChangeWatcher != null) {
+            mChangeWatcher.hideControllers();
+        }
     }
 
     /**

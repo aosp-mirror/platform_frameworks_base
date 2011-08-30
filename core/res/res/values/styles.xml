@@ -244,7 +244,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Suggestion">
-        <item name="android:textUnderlineThicknessPercentage">200</item>
+        <item name="android:textUnderlineThickness">2dip</item>
     </style>
 
     <style name="TextAppearance.EasyCorrectSuggestion" parent="TextAppearance.Suggestion">
@@ -253,6 +253,11 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.MisspelledSuggestion" parent="TextAppearance.Suggestion">
         <item name="android:textUnderlineColor">@color/holo_red_light</item>
+    </style>
+
+    <style name="TextAppearance.SuggestionRange">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:colorBackground">@color/holo_blue_dark</item>
     </style>
 
     <!-- Widget Styles -->
