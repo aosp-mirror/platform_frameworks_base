@@ -72,6 +72,7 @@ import javax.sip.TransactionUnavailableException;
 import javax.sip.address.Address;
 import javax.sip.address.SipURI;
 import javax.sip.header.CSeqHeader;
+import javax.sip.header.ContactHeader;
 import javax.sip.header.ExpiresHeader;
 import javax.sip.header.FromHeader;
 import javax.sip.header.HeaderAddress;
@@ -873,16 +874,21 @@ class SipSessionGroup implements SipListener {
         }
 
         private int getExpiryTime(Response response) {
-            int expires = EXPIRY_TIME;
-            ExpiresHeader expiresHeader = (ExpiresHeader)
-                    response.getHeader(ExpiresHeader.NAME);
-            if (expiresHeader != null) expires = expiresHeader.getExpires();
-            expiresHeader = (ExpiresHeader)
-                    response.getHeader(MinExpiresHeader.NAME);
-            if (expiresHeader != null) {
-                expires = Math.max(expires, expiresHeader.getExpires());
+            int time = -1;
+            ContactHeader contact = (ContactHeader) response.getHeader(ContactHeader.NAME);
+            if (contact != null) {
+                time = contact.getExpires();
             }
-            return expires;
+            ExpiresHeader expires = (ExpiresHeader) response.getHeader(ExpiresHeader.NAME);
+            if (expires != null && (time < 0 || time > expires.getExpires())) {
+                time = expires.getExpires();
+            }
+            expires = (ExpiresHeader) response.getHeader(MinExpiresHeader.NAME);
+            if (expires != null && time < expires.getExpires()) {
+                time = expires.getExpires();
+            }
+            Log.v(TAG, "Expiry time = " + time);
+            return (time > 0) ? time : EXPIRY_TIME;
         }
 
         private boolean registeringToReady(EventObject evt)
