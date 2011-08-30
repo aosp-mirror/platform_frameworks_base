@@ -1457,6 +1457,13 @@
         android:description="@string/permdesc_bindPackageVerifier"
         android:protectionLevel="signature" />
 
+    <!-- Allows applications to access serial ports via the SerialManager.
+         @hide -->
+    <permission android:name="android.permission.SERIAL_PORT"
+        android:label="@string/permlab_serialPort"
+        android:description="@string/permdesc_serialPort"
+        android:protectionLevel="normal" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
