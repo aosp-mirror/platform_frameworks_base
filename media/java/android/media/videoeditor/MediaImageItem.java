@@ -638,7 +638,7 @@ public class MediaImageItem extends MediaItem {
             }
 
             mMANativeHelper.getPixelsList(getGeneratedImageClip(), width,
-                height, startMs, endMs, thumbnailCount, indices, callback);
+                height, startMs, endMs, thumbnailCount, indices, callback, 0);
         }
     }
 

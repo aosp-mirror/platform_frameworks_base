@@ -185,6 +185,7 @@ static int videoEditor_getPixelsList(
                                      M4OSA_UInt32             width,
                                      M4OSA_UInt32             height,
                                      M4OSA_UInt32             noOfThumbnails,
+                                     M4OSA_UInt32             videoRotation,
                                      jlong                    startTime,
                                      jlong                    endTime,
                                      jintArray                indexArray,
@@ -291,7 +292,7 @@ static JNINativeMethod gManualEditMethods[] = {
                                 (void *)videoEditor_release            },
     {"nativeGetPixels",         "(Ljava/lang/String;[IIIJ)I",
                                 (void*)videoEditor_getPixels               },
-    {"nativeGetPixelsList",     "(Ljava/lang/String;[IIIIJJ[ILandroid/media/videoeditor/MediaArtistNativeHelper$NativeGetPixelsListCallback;)I",
+    {"nativeGetPixelsList",     "(Ljava/lang/String;[IIIIIJJ[ILandroid/media/videoeditor/MediaArtistNativeHelper$NativeGetPixelsListCallback;)I",
                                 (void*)videoEditor_getPixelsList           },
     {"getMediaProperties",
     "(Ljava/lang/String;)Landroid/media/videoeditor/MediaArtistNativeHelper$Properties;",
@@ -375,6 +376,12 @@ getClipSetting(
                     pEnv->GetIntField(object,fid);
    M4OSA_TRACE1_1("audioVolumeValue = %d",
                     pSettings->ClipProperties.uiClipAudioVolumePercentage);
+
+   fid = pEnv->GetFieldID(clazz,"videoRotation","I");
+   pSettings->ClipProperties.videoRotationDegrees =
+                    pEnv->GetIntField(object,fid);
+   M4OSA_TRACE1_1("videoRotation = %d",
+                    pSettings->ClipProperties.videoRotationDegrees);
 }
 
 static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
@@ -789,6 +796,8 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
             pContext->pEditSettings->pClipList[iCurrentClipIndex]->ClipProperties.uiVideoWidth,
             (M4OSA_Void **)&frameStr.pBuffer);
             tnTimeMs = (M4OSA_UInt32)timeMs;
+
+          frameStr.videoRotationDegree = 0;
     } else {
         /* Handle 3gp/mp4 Clips here */
         /* get thumbnail*/
@@ -913,6 +922,9 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
 
         /* Fill up the render structure*/
         frameStr.pBuffer = (M4OSA_Void*)yuvPlane[0].pac_data;
+
+        frameStr.videoRotationDegree = pContext->pEditSettings->\
+            pClipList[iCurrentClipIndex]->ClipProperties.videoRotationDegrees;
     }
 
     frameStr.timeMs = timeMs;    /* timestamp on storyboard*/
@@ -976,13 +988,12 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
             (M4NO_ERROR != result), result);
 
-    if (pContext->pEditSettings->pClipList[iCurrentClipIndex]->FileType ==\
-         /*M4VIDEOEDITING_kFileType_JPG */ M4VIDEOEDITING_kFileType_ARGB8888) {
-            free(frameStr.pBuffer);
-    } else {
-        free(yuvPlane[0].pac_data);
+    free(frameStr.pBuffer);
+    if (pContext->pEditSettings->pClipList[iCurrentClipIndex]->FileType !=
+            M4VIDEOEDITING_kFileType_ARGB8888) {
         free(yuvPlane);
     }
+
     return tnTimeMs;
 }
 
@@ -2275,6 +2286,7 @@ static int videoEditor_getPixelsList(
                 M4OSA_UInt32            width,
                 M4OSA_UInt32            height,
                 M4OSA_UInt32            noOfThumbnails,
+                M4OSA_UInt32            videoRotation,
                 jlong                   startTime,
                 jlong                   endTime,
                 jintArray               indexArray,

@@ -29,6 +29,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Matrix;
 import android.media.videoeditor.VideoEditor.ExportProgressListener;
 import android.media.videoeditor.VideoEditor.PreviewProgressListener;
 import android.media.videoeditor.VideoEditor.MediaProcessingProgressListener;
@@ -1050,6 +1051,10 @@ class MediaArtistNativeHelper {
          */
          public int rgbWidth;
          public int rgbHeight;
+         /**
+         * Video rotation degree.
+         */
+         public int rotationDegree;
     }
 
     /**
@@ -1700,6 +1705,11 @@ class MediaArtistNativeHelper {
          */
         public int audioVolumeValue;
 
+        /**
+         * Video rotation degree.
+         */
+        public int videoRotation;
+
         public String Id;
     }
 
@@ -2254,6 +2264,7 @@ class MediaArtistNativeHelper {
         lclipSettings.panZoomTopLeftXEnd = 0;
         lclipSettings.panZoomTopLeftYEnd = 0;
         lclipSettings.mediaRendering = 0;
+        lclipSettings.rotationDegree = 0;
     }
 
 
@@ -3784,7 +3795,8 @@ class MediaArtistNativeHelper {
      **/
     void getPixelsList(String filename, final int width, final int height,
             long startMs, long endMs, int thumbnailCount, int[] indices,
-            final MediaItem.GetThumbnailListCallback callback) {
+            final MediaItem.GetThumbnailListCallback callback,
+            final int videoRotation) {
         /* Make width and height as even */
         final int newWidth = (width + 1) & 0xFFFFFFFE;
         final int newHeight = (height + 1) & 0xFFFFFFFE;
@@ -3799,7 +3811,7 @@ class MediaArtistNativeHelper {
         final int[] rgb888 = new int[thumbnailSize];
         final IntBuffer tmpBuffer = IntBuffer.allocate(thumbnailSize);
         nativeGetPixelsList(filename, rgb888, newWidth, newHeight,
-                thumbnailCount, startMs, endMs, indices,
+                thumbnailCount, videoRotation, startMs, endMs, indices,
                 new NativeGetPixelsListCallback() {
             public void onThumbnail(int index) {
                 Bitmap bitmap = Bitmap.createBitmap(
@@ -3821,7 +3833,21 @@ class MediaArtistNativeHelper {
 
                     canvas.setBitmap(null);
                 }
-                callback.onThumbnail(bitmap, index);
+
+                if (videoRotation == 0) {
+                    callback.onThumbnail(bitmap, index);
+                } else {
+                    Matrix mtx = new Matrix();
+                    mtx.postRotate(videoRotation);
+                    Bitmap rotatedBmp =
+                        Bitmap.createBitmap(bitmap, 0, 0, width, height, mtx, false);
+                    callback.onThumbnail(rotatedBmp, index);
+
+                    if (bitmap != null) {
+                        bitmap.recycle();
+                    }
+                }
+
             }
         });
 
@@ -3943,8 +3969,8 @@ class MediaArtistNativeHelper {
             long timeMS);
 
     private native int nativeGetPixelsList(String fileName, int[] pixelArray,
-            int width, int height, int nosofTN, long startTimeMs, long endTimeMs,
-            int[] indices, NativeGetPixelsListCallback callback);
+            int width, int height, int nosofTN, int videoRotation, long startTimeMs,
+            long endTimeMs, int[] indices, NativeGetPixelsListCallback callback);
 
     /**
      * Releases the JNI and cleans up the core native module.. Should be called

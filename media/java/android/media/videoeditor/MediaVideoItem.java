@@ -57,6 +57,7 @@ public class MediaVideoItem extends MediaItem {
     private String mAudioWaveformFilename;
     private MediaArtistNativeHelper mMANativeHelper;
     private VideoEditorImpl mVideoEditor;
+    private final int mVideoRotationDegree;
     /**
      *  The audio waveform data
      */
@@ -190,6 +191,7 @@ public class MediaVideoItem extends MediaItem {
         } else {
             mWaveformData = null;
         }
+        mVideoRotationDegree = properties.videoRotation;
     }
 
     /**
@@ -317,7 +319,8 @@ public class MediaVideoItem extends MediaItem {
         }
 
         mMANativeHelper.getPixelsList(super.getFilename(), width,
-                height, startMs, endMs, thumbnailCount, indices, callback);
+                height, startMs, endMs, thumbnailCount, indices, callback,
+                mVideoRotationDegree);
     }
 
     /*
@@ -425,7 +428,12 @@ public class MediaVideoItem extends MediaItem {
      */
     @Override
     public int getWidth() {
-        return mWidth;
+        if (mVideoRotationDegree == 90 ||
+             mVideoRotationDegree == 270) {
+            return mHeight;
+        } else {
+            return mWidth;
+        }
     }
 
     /*
@@ -433,7 +441,12 @@ public class MediaVideoItem extends MediaItem {
      */
     @Override
     public int getHeight() {
-        return mHeight;
+        if (mVideoRotationDegree == 90 ||
+             mVideoRotationDegree == 270) {
+            return mWidth;
+        } else {
+            return mHeight;
+        }
     }
 
     /*
@@ -725,6 +738,7 @@ public class MediaVideoItem extends MediaItem {
         clipSettings.beginCutTime = (int)getBoundaryBeginTime();
         clipSettings.endCutTime = (int)getBoundaryEndTime();
         clipSettings.mediaRendering = mMANativeHelper.getMediaItemRenderingMode(getRenderingMode());
+        clipSettings.rotationDegree = mVideoRotationDegree;
 
         return clipSettings;
     }
