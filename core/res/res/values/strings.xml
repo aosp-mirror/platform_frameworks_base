@@ -1763,7 +1763,7 @@
                                           --> <skip />
 
     <!-- On the keyguard screen, it shows the carrier the phone is connected to.  This is displayed if the phone is not connected to a carrier.-->
-    <string name="lockscreen_carrier_default">(No service)</string>
+    <string name="lockscreen_carrier_default">No service.</string>
 
     <!-- Shown in the lock screen to tell the user that the screen is locked. -->
     <string name="lockscreen_screen_locked">Screen locked.</string>
