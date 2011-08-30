@@ -36,6 +36,7 @@ import com.android.internal.util.BitwiseOutputStream;
 
 import android.content.res.Resources;
 
+import java.util.TimeZone;
 
 
 /**
@@ -231,7 +232,7 @@ public final class BearerData {
     public static class TimeStamp extends Time {
 
         public TimeStamp() {
-            super(Time.TIMEZONE_UTC);
+            super(TimeZone.getDefault().getID());   // 3GPP2 timestamps use the local timezone
         }
 
         public static TimeStamp fromByteArray(byte[] data) {
