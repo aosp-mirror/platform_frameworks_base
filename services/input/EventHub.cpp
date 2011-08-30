@@ -1094,9 +1094,8 @@ void EventHub::clearKeyboardPropertiesLocked(Device* device, bool builtInKeyboar
 bool EventHub::isExternalDeviceLocked(Device* device) {
     if (device->configuration) {
         bool value;
-        if (device->configuration->tryGetProperty(String8("device.internal"), value)
-                && value) {
-            return false;
+        if (device->configuration->tryGetProperty(String8("device.internal"), value)) {
+            return !value;
         }
     }
     return device->identifier.bus == BUS_USB || device->identifier.bus == BUS_BLUETOOTH;
