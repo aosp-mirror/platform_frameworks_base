@@ -394,14 +394,14 @@ void FontRenderer::flushAllAndInvalidate() {
 
 bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
     // If the glyph is too tall, don't cache it
-    if (glyph.fHeight > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+    if (glyph.fHeight + 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
         if (mCacheHeight < MAX_TEXT_CACHE_HEIGHT) {
             // Default cache not large enough for large glyphs - resize cache to
             // max size and try again
             flushAllAndInvalidate();
             initTextTexture(true);
         }
-        if (glyph.fHeight > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+        if (glyph.fHeight + 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
             LOGE("Font size to large to fit in cache. width, height = %i, %i",
                     (int) glyph.fWidth, (int) glyph.fHeight);
             return false;
