@@ -20,6 +20,8 @@ import com.android.internal.R;
 import com.android.internal.policy.impl.LockPatternKeyguardView.UnlockMode;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockScreenWidgetCallback;
+import com.android.internal.widget.TransportControlView;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -65,6 +67,8 @@ import java.io.IOException;
  * via its {@link com.android.internal.policy.impl.KeyguardViewCallback}, as appropriate.
  */
 public class LockPatternKeyguardView extends KeyguardViewBase {
+
+    private static final int TRANSPORT_USERACTIVITY_TIMEOUT = 10000;
 
     static final boolean DEBUG_CONFIGURATION = false;
 
@@ -176,6 +180,22 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private Runnable mRecreateRunnable = new Runnable() {
         public void run() {
             updateScreen(mMode, false);
+        }
+    };
+
+    private LockScreenWidgetCallback mWidgetCallback = new LockScreenWidgetCallback() {
+        public void userActivity(View self) {
+            mKeyguardScreenCallback.pokeWakelock(TRANSPORT_USERACTIVITY_TIMEOUT);
+        }
+
+        public void requestShow(View view) {
+            if (DEBUG) Log.v(TAG, "View " + view + " requested show transports");
+            view.setVisibility(View.VISIBLE);
+        }
+
+        public void requestHide(View view) {
+            if (DEBUG) Log.v(TAG, "View " + view + " requested hide transports");
+            view.setVisibility(View.GONE);
         }
     };
 
@@ -490,6 +510,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         super.onDetachedFromWindow();
     }
 
+    protected void onConfigurationChanged(Configuration newConfig) {
+        Resources resources = getResources();
+        mShowLockBeforeUnlock = resources.getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
+        mConfiguration = newConfig;
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
+        updateScreen(mMode, true /* force */);
+    }
+
     @Override
     protected boolean dispatchHoverEvent(MotionEvent event) {
         // Do not let the screen to get locked while the user is disabled and touch
@@ -500,14 +528,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             getCallback().pokeWakelock();
         }
         return super.dispatchHoverEvent(event);
-    }
-
-    protected void onConfigurationChanged(Configuration newConfig) {
-        Resources resources = getResources();
-        mShowLockBeforeUnlock = resources.getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
-        mConfiguration = newConfig;
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
-        updateScreen(mMode, true /* force */);
     }
 
     @Override
@@ -639,12 +659,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     }
 
     View createLockScreen() {
-        return new LockScreen(
+        View lockView = new LockScreen(
                 mContext,
                 mConfiguration,
                 mLockPatternUtils,
                 mUpdateMonitor,
                 mKeyguardScreenCallback);
+        initializeTransportControlView(lockView);
+        return lockView;
     }
 
     View createUnlockScreenFor(UnlockMode unlockMode) {
@@ -710,8 +732,20 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         } else {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
+        initializeTransportControlView(unlockView);
         mUnlockScreenMode = unlockMode;
         return unlockView;
+    }
+
+    private void initializeTransportControlView(View view) {
+        com.android.internal.widget.TransportControlView tcv =
+                (TransportControlView) view.findViewById(R.id.transport);
+        if (tcv == null) {
+            if (DEBUG) Log.w(TAG, "Couldn't find transport control widget");
+        } else {
+            tcv.setVisibility(View.GONE); // hide tcv until we get the callback below to show it.
+            tcv.setCallback(mWidgetCallback);
+        }
     }
 
     /**
