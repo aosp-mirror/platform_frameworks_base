@@ -12396,6 +12396,7 @@ package android.nfc {
   public final class NdefRecord implements android.os.Parcelable {
     ctor public NdefRecord(short, byte[], byte[], byte[]);
     ctor public NdefRecord(byte[]) throws android.nfc.FormatException;
+    method public static android.nfc.NdefRecord createApplicationRecord(java.lang.String);
     method public static android.nfc.NdefRecord createUri(android.net.Uri);
     method public static android.nfc.NdefRecord createUri(java.lang.String);
     method public int describeContents();
@@ -12430,9 +12431,9 @@ package android.nfc {
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method public static deprecated android.nfc.NfcAdapter getDefaultAdapter();
     method public boolean isEnabled();
-    method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity...);
-    method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity...);
-    method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity...);
+    method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
+    method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
+    method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
     field public static final java.lang.String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field public static final java.lang.String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
     field public static final java.lang.String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
@@ -12486,6 +12487,7 @@ package android.nfc.tech {
     method public byte[] getHiLayerResponse();
     method public byte[] getHistoricalBytes();
     method public int getMaxTransceiveLength();
+    method public int getTimeout();
     method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
@@ -12501,11 +12503,13 @@ package android.nfc.tech {
     method public int getMaxTransceiveLength();
     method public int getSectorCount();
     method public int getSize();
+    method public int getTimeout();
     method public int getType();
     method public void increment(int, int) throws java.io.IOException;
     method public byte[] readBlock(int) throws java.io.IOException;
     method public void restore(int) throws java.io.IOException;
     method public int sectorToBlock(int);
+    method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
     method public void transfer(int) throws java.io.IOException;
     method public void writeBlock(int, byte[]) throws java.io.IOException;
@@ -12526,8 +12530,10 @@ package android.nfc.tech {
   public final class MifareUltralight extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.MifareUltralight get(android.nfc.Tag);
     method public int getMaxTransceiveLength();
+    method public int getTimeout();
     method public int getType();
     method public byte[] readPages(int) throws java.io.IOException;
+    method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
     method public void writePage(int, byte[]) throws java.io.IOException;
     field public static final int PAGE_SIZE = 4; // 0x4
@@ -12564,6 +12570,8 @@ package android.nfc.tech {
     method public byte[] getAtqa();
     method public int getMaxTransceiveLength();
     method public short getSak();
+    method public int getTimeout();
+    method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
 
@@ -12580,6 +12588,8 @@ package android.nfc.tech {
     method public byte[] getManufacturer();
     method public int getMaxTransceiveLength();
     method public byte[] getSystemCode();
+    method public int getTimeout();
+    method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
 

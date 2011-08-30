@@ -152,8 +152,6 @@ public final class NdefRecord implements Parcelable {
      * RTD_ANDROID_APP records.
      * @hide
      */
-    // TODO unhide for ICS
-    // TODO recheck docs
     public static final byte[] RTD_ANDROID_APP = "android.com:pkg".getBytes();
 
     private static final byte FLAG_MB = (byte) 0x80;
@@ -352,21 +350,29 @@ public final class NdefRecord implements Parcelable {
     /**
      * Creates an Android application NDEF record.
      * <p>
+     * This record indicates to other Android devices the package
+     * that should be used to handle the rest of the NDEF message.
+     * You can embed this record anywhere into your NDEF message
+     * to ensure that the intended package receives the message.
+     * <p>
      * When an Android device dispatches an {@link NdefMessage}
      * containing one or more Android application records,
      * the applications contained in those records will be the
      * preferred target for the NDEF_DISCOVERED intent, in
      * the order in which they appear in the {@link NdefMessage}.
+     * This dispatch behavior was first added to Android in
+     * Ice Cream Sandwich.
      * <p>
      * If none of the applications are installed on the device,
      * a Market link will be opened to the first application.
      * <p>
      * Note that Android application records do not overrule
-     * applications that have called {@link NfcAdapter#enableForegroundDispatch}.
-     * @hide
+     * applications that have called
+     * {@link NfcAdapter#enableForegroundDispatch}.
+     *
+     * @param packageName Android package name
+     * @return Android application NDEF record
      */
-    // TODO unhide for ICS
-    // TODO recheck javadoc - should mention this works from ICS only
     public static NdefRecord createApplicationRecord(String packageName) {
         return new NdefRecord(TNF_EXTERNAL_TYPE, RTD_ANDROID_APP, new byte[] {},
                 packageName.getBytes(Charsets.US_ASCII));
