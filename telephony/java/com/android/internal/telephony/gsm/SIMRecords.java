@@ -181,11 +181,7 @@ public class SIMRecords extends IccRecords {
         // recordsToLoad is set to 0 because no requests are made yet
         recordsToLoad = 0;
 
-        // SIMRecord is used by CDMA+LTE mode, and SIM_READY event
-        // will be subscribed by CdmaLteServiceStateTracker.
-        if (phone.getLteOnCdmaMode() != Phone.LTE_ON_CDMA_TRUE) {
-            p.mCM.registerForSIMReady(this, EVENT_SIM_READY, null);
-        }
+        p.mCM.registerForSIMReady(this, EVENT_SIM_READY, null);
         p.mCM.registerForOffOrNotAvailable(
                         this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         p.mCM.setOnSmsOnSim(this, EVENT_SMS_ON_SIM, null);
@@ -199,9 +195,7 @@ public class SIMRecords extends IccRecords {
     @Override
     public void dispose() {
         //Unregister for all events
-        if (phone.getLteOnCdmaMode() != Phone.LTE_ON_CDMA_TRUE) {
-            phone.mCM.unregisterForSIMReady(this);
-        }
+        phone.mCM.unregisterForSIMReady(this);
         phone.mCM.unregisterForOffOrNotAvailable( this);
         phone.mCM.unregisterForIccRefresh(this);
     }
