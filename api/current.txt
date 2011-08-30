@@ -4040,6 +4040,7 @@ package android.app.backup {
 
   public abstract class BackupAgent extends android.content.ContextWrapper {
     ctor public BackupAgent();
+    method public final void fullBackupFile(java.io.File, android.app.backup.FullBackupDataOutput);
     method public abstract void onBackup(android.os.ParcelFileDescriptor, android.app.backup.BackupDataOutput, android.os.ParcelFileDescriptor) throws java.io.IOException;
     method public void onCreate();
     method public void onDestroy();
