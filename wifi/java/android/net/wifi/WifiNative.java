@@ -271,8 +271,11 @@ public class WifiNative {
                 break;
         }
 
+        //TODO: Add persist behavior once the supplicant interaction is fixed for both
+        // group and client scenarios
         /* Persist unless there is an explicit request to not do so*/
-        if (config.persist != WifiP2pConfig.Persist.NO) args.add("persistent");
+        //if (config.persist != WifiP2pConfig.Persist.NO) args.add("persistent");
+
         if (joinExistingGroup) args.add("join");
 
         int groupOwnerIntent = config.groupOwnerIntent;
