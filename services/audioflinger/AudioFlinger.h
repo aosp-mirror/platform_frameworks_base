@@ -751,14 +751,18 @@ private:
                     virtual uint32_t hasAudioSession(int sessionId);
                     virtual uint32_t getStrategyForSession_l(int sessionId);
 
+                            void setStreamValid(int streamType, bool valid);
+
         struct  stream_type_t {
             stream_type_t()
                 :   volume(1.0f),
-                    mute(false)
+                    mute(false),
+                    valid(true)
             {
             }
             float       volume;
             bool        mute;
+            bool        valid;
         };
 
     protected:

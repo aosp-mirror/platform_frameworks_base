@@ -185,6 +185,10 @@ public:
     static status_t unregisterEffect(int id);
     static status_t setEffectEnabled(int id, bool enabled);
 
+    // clear stream to output mapping cache (gStreamOutputMap)
+    // and output configuration cache (gOutputs)
+    static void clearAudioConfigCache();
+
     static const sp<IAudioPolicyService>& get_audio_policy_service();
 
     // ----------------------------------------------------------------------------
@@ -236,7 +240,8 @@ private:
 
     // mapping between stream types and outputs
     static DefaultKeyedVector<int, audio_io_handle_t> gStreamOutputMap;
-    // list of output descritor containing cached parameters (sampling rate, framecount, channel count...)
+    // list of output descriptors containing cached parameters
+    // (sampling rate, framecount, channel count...)
     static DefaultKeyedVector<audio_io_handle_t, OutputDescriptor *> gOutputs;
 };
 
