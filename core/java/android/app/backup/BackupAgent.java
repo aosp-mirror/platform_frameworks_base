@@ -255,10 +255,7 @@ public abstract class BackupAgent extends ContextWrapper {
      * will be delivered to the backup destination along with the metadata necessary
      * to place it with the proper location and permissions on the device where the
      * data is restored.
-     * @hide
      *
-     * @param context The BackupAgent that is calling this method.  It is an error to
-     *     call it from something other than a running BackupAgent instance.
      * @param file The file to be backed up.  The file must exist and be readable by
      *     the caller.
      * @param output The destination to which the backed-up file data will be sent.
