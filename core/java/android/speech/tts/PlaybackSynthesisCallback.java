@@ -85,6 +85,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         // Note that mLogger.mError might be true too at this point.
         mLogger.onStopped();
 
+        SynthesisMessageParams token = null;
         synchronized (mStateLock) {
             if (mStopped) {
                 Log.w(TAG, "stop() called twice");
@@ -97,8 +98,18 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 // In all other cases, mAudioTrackHandler.stop() will
                 // result in onComplete being called.
                 mLogger.onWriteData();
+            } else {
+                token = mToken;
             }
             mStopped = true;
+        }
+
+        if (token != null) {
+            // This might result in the synthesis thread being woken up, at which
+            // point it will write an additional buffer to the token - but we
+            // won't worry about that because the audio playback queue will be cleared
+            // soon after (see SynthHandler#stop(String).
+            token.clearBuffers();
         }
     }
 
@@ -155,17 +166,21 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                     + length + " bytes)");
         }
 
+        SynthesisMessageParams token = null;
         synchronized (mStateLock) {
             if (mToken == null || mStopped) {
                 return TextToSpeech.ERROR;
             }
-
-            // Sigh, another copy.
-            final byte[] bufferCopy = new byte[length];
-            System.arraycopy(buffer, offset, bufferCopy, 0, length);
-            mToken.addBuffer(bufferCopy);
-            mAudioTrackHandler.enqueueSynthesisDataAvailable(mToken);
+            token = mToken;
         }
+
+        // Sigh, another copy.
+        final byte[] bufferCopy = new byte[length];
+        System.arraycopy(buffer, offset, bufferCopy, 0, length);
+        // Might block on mToken.this, if there are too many buffers waiting to
+        // be consumed.
+        token.addBuffer(bufferCopy);
+        mAudioTrackHandler.enqueueSynthesisDataAvailable(token);
 
         mLogger.onEngineDataReceived();
 
@@ -176,6 +191,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
     public int done() {
         if (DBG) Log.d(TAG, "done()");
 
+        SynthesisMessageParams token = null;
         synchronized (mStateLock) {
             if (mDone) {
                 Log.w(TAG, "Duplicate call to done()");
@@ -188,9 +204,12 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 return TextToSpeech.ERROR;
             }
 
-            mAudioTrackHandler.enqueueSynthesisDone(mToken);
-            mLogger.onEngineComplete();
+            token = mToken;
         }
+
+        mAudioTrackHandler.enqueueSynthesisDone(token);
+        mLogger.onEngineComplete();
+
         return TextToSpeech.SUCCESS;
     }
 

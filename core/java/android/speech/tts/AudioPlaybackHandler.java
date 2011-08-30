@@ -390,10 +390,10 @@ class AudioPlaybackHandler {
             audioTrack.play();
         }
         int count = 0;
-        while (count < bufferCopy.mLength) {
+        while (count < bufferCopy.mBytes.length) {
             // Note that we don't take bufferCopy.mOffset into account because
             // it is guaranteed to be 0.
-            int written = audioTrack.write(bufferCopy.mBytes, count, bufferCopy.mLength);
+            int written = audioTrack.write(bufferCopy.mBytes, count, bufferCopy.mBytes.length);
             if (written <= 0) {
                 break;
             }
@@ -453,7 +453,7 @@ class AudioPlaybackHandler {
         }
 
         final AudioTrack audioTrack = params.mAudioTrack;
-        final int bytesPerFrame = getBytesPerFrame(params.mAudioFormat);
+        final int bytesPerFrame = params.mBytesPerFrame;
         final int lengthInBytes = params.mBytesWritten;
         final int lengthInFrames = lengthInBytes / bytesPerFrame;
 
@@ -509,16 +509,6 @@ class AudioPlaybackHandler {
         }
 
         return 0;
-    }
-
-    static int getBytesPerFrame(int audioFormat) {
-        if (audioFormat == AudioFormat.ENCODING_PCM_8BIT) {
-            return 1;
-        } else if (audioFormat == AudioFormat.ENCODING_PCM_16BIT) {
-            return 2;
-        }
-
-        return -1;
     }
 
     private static void setupVolume(AudioTrack audioTrack, float volume, float pan) {
