@@ -727,6 +727,14 @@ status_t AudioSystem::isStreamActive(int stream, bool* state, uint32_t inPastMs)
 }
 
 
+void AudioSystem::clearAudioConfigCache()
+{
+    Mutex::Autolock _l(gLock);
+    LOGV("clearAudioConfigCache()");
+    gStreamOutputMap.clear();
+    gOutputs.clear();
+}
+
 // ---------------------------------------------------------------------------
 
 void AudioSystem::AudioPolicyServiceClient::binderDied(const wp<IBinder>& who) {

@@ -1213,6 +1213,10 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
         cblk->cv.broadcast();
         cblk->lock.unlock();
 
+        // refresh the audio configuration cache in this process to make sure we get new
+        // output parameters in getOutput_l() and createTrack_l()
+        AudioSystem::clearAudioConfigCache();
+
         // if the new IAudioTrack is created, createTrack_l() will modify the
         // following member variables: mAudioTrack, mCblkMemory and mCblk.
         // It will also delete the strong references on previous IAudioTrack and IMemory

@@ -1433,6 +1433,7 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
     for (int stream = 0; stream < AUDIO_STREAM_CNT; stream++) {
         mStreamTypes[stream].volume = mAudioFlinger->streamVolumeInternal(stream);
         mStreamTypes[stream].mute = mAudioFlinger->streamMute(stream);
+        mStreamTypes[stream].valid = true;
     }
 }
 
@@ -1606,6 +1607,14 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
             track->setMainBuffer(chain->inBuffer());
             chain->setStrategy(AudioSystem::getStrategyForStream((audio_stream_type_t)track->type()));
             chain->incTrackCnt();
+        }
+
+        // invalidate track immediately if the stream type was moved to another thread since
+        // createTrack() was called by the client process.
+        if (!mStreamTypes[streamType].valid) {
+            LOGW("createTrack_l() on thread %p: invalidating track on stream %d",
+                 this, streamType);
+            android_atomic_or(CBLK_INVALID_ON, &track->mCblk->flags);
         }
     }
     lStatus = NO_ERROR;
@@ -2313,6 +2322,14 @@ void AudioFlinger::MixerThread::invalidateTracks(int streamType)
     }
 }
 
+void AudioFlinger::PlaybackThread::setStreamValid(int streamType, bool valid)
+{
+    LOGV ("PlaybackThread::setStreamValid() thread %p, streamType %d, valid %d",
+            this,  streamType, valid);
+    Mutex::Autolock _l(mLock);
+
+    mStreamTypes[streamType].valid = valid;
+}
 
 // getTrackName_l() must be called with ThreadBase::mLock held
 int AudioFlinger::MixerThread::getTrackName_l()
@@ -5620,11 +5637,14 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
     LOGV("setStreamOutput() stream %d to output %d", stream, output);
     audioConfigChanged_l(AudioSystem::STREAM_CONFIG_CHANGED, output, &stream);
 
+    dstThread->setStreamValid(stream, true);
+
     for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
         PlaybackThread *thread = mPlaybackThreads.valueAt(i).get();
         if (thread != dstThread &&
             thread->type() != ThreadBase::DIRECT) {
             MixerThread *srcThread = (MixerThread *)thread;
+            srcThread->setStreamValid(stream, false);
             srcThread->invalidateTracks(stream);
         }
     }
