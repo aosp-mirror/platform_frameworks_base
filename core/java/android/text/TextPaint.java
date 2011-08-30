@@ -23,6 +23,9 @@ import android.graphics.Paint;
  * data used during text measuring and drawing.
  */
 public class TextPaint extends Paint {
+
+    private static final int DEFAULT_UNDERLINE_SIZE = 3;
+
     // Special value 0 means no background paint
     public int bgColor;
     public int baselineShift;
@@ -33,12 +36,17 @@ public class TextPaint extends Paint {
      * Special value 0 means no custom underline
      * @hide
      */
-    public int underlineColor;
+    public int[] underlineColors;
     /**
      * Defined as a multiplier of the default underline thickness. Use 1.0f for default thickness.
      * @hide
      */
-    public float underlineThickness;
+    public float[] underlineThicknesses;
+    /**
+     * The number of underlines currently stored in the array. If 0, no underline is drawn.
+     * @hide
+     */
+    public int underlineCount;
 
     public TextPaint() {
         super();
@@ -64,24 +72,43 @@ public class TextPaint extends Paint {
         linkColor = tp.linkColor;
         drawableState = tp.drawableState;
         density = tp.density;
-        underlineColor = tp.underlineColor;
-        underlineThickness = tp.underlineThickness;
+        underlineColors = tp.underlineColors;
+        underlineThicknesses = tp.underlineThicknesses;
+        underlineCount = tp.underlineCount;
     }
 
     /**
      * Defines a custom underline for this Paint.
      * @param color underline solid color
-     * @param thickness underline thickness, defined as a multiplier of the default underline
-     * thickness.
+     * @param thickness underline thickness
      * @hide
      */
-    public void setUnderlineText(boolean isUnderlined, int color, float thickness) {
-        setUnderlineText(false);
-        if (isUnderlined) {
-            underlineColor = color;
-            underlineThickness = thickness;
+    public void setUnderlineText(int color, float thickness) {
+        if (color == 0) {
+            // No underline
+            return;
+        }
+
+        if (underlineCount == 0) {
+            underlineColors = new int[DEFAULT_UNDERLINE_SIZE];
+            underlineThicknesses = new float[DEFAULT_UNDERLINE_SIZE];
+            underlineColors[underlineCount] = color;
+            underlineThicknesses[underlineCount] = thickness;
+            underlineCount++;
         } else {
-            underlineColor = 0;
+            if (underlineCount == underlineColors.length) {
+                int[] newColors = new int[underlineColors.length + DEFAULT_UNDERLINE_SIZE];
+                float[] newThickness = new float[underlineThicknesses.length
+                        + DEFAULT_UNDERLINE_SIZE];
+                System.arraycopy(underlineColors, 0, newColors, 0, underlineColors.length);
+                System.arraycopy(
+                        underlineThicknesses, 0, newThickness, 0, underlineThicknesses.length);
+                underlineColors = newColors;
+                underlineThicknesses = newThickness;
+            }
+            underlineColors[underlineCount] = color;
+            underlineThicknesses[underlineCount] = thickness;
+            underlineCount++;
         }
     }
 }

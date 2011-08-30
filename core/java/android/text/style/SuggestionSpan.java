@@ -61,12 +61,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     public static final String SUGGESTION_SPAN_PICKED_BEFORE = "before";
     public static final String SUGGESTION_SPAN_PICKED_HASHCODE = "hashcode";
 
-    /**
-     * The default underline thickness as a percentage of the system's default underline thickness
-     * (i.e., 100 means the default thickness, and 200 is a double thickness).
-     */
-    private static final int DEFAULT_UNDERLINE_PERCENTAGE = 100;
-
     public static final int SUGGESTIONS_MAX_SIZE = 5;
 
     /*
@@ -82,10 +76,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private final String mNotificationTargetClassName;
     private final int mHashCode;
 
-    private float mMisspelledUnderlineThickness;
-    private int mMisspelledUnderlineColor;
-    private float mEasyCorrectUnderlineThickness;
-    private int mEasyCorrectUnderlineColor;
+    private float mUnderlineThickness;
+    private int mUnderlineColor;
 
     /*
      * TODO: If switching IME is required, needs to add parameters for ids of InputMethodInfo
@@ -140,31 +132,26 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     private void initStyle(Context context) {
-        // Read the colors. We need to store the color and the underline thickness, as the span
-        // does not have access to the context when it is read from a parcel.
-        TypedArray typedArray;
+        int defStyle = 0;
+        if ((getFlags() & FLAG_MISSPELLED) != 0) {
+            defStyle = com.android.internal.R.attr.textAppearanceMisspelledSuggestion;
+        } else if ((getFlags() & FLAG_EASY_CORRECT) != 0) {
+            defStyle = com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion;
+        } else {
+            // No style is applied.
+            mUnderlineThickness = 0;
+            mUnderlineColor = 0;
+            return;
+        }
 
-        typedArray = context.obtainStyledAttributes(null,
+        TypedArray typedArray = context.obtainStyledAttributes(null,
                 com.android.internal.R.styleable.SuggestionSpan,
-                com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion, 0);
+                defStyle, 0);
 
-        mEasyCorrectUnderlineThickness = getThicknessPercentage(typedArray,
-                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThicknessPercentage);
-        mEasyCorrectUnderlineColor = typedArray.getColor(
+        mUnderlineThickness = typedArray.getDimension(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
+        mUnderlineColor = typedArray.getColor(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
-
-        typedArray = context.obtainStyledAttributes(null,
-                com.android.internal.R.styleable.SuggestionSpan,
-                com.android.internal.R.attr.textAppearanceMisspelledSuggestion, 0);
-        mMisspelledUnderlineThickness = getThicknessPercentage(typedArray,
-                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThicknessPercentage);
-        mMisspelledUnderlineColor = typedArray.getColor(
-                com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
-    }
-
-    private static float getThicknessPercentage(TypedArray typedArray, int index) {
-        int value  = typedArray.getInteger(index, DEFAULT_UNDERLINE_PERCENTAGE);
-        return value / 100.0f;
     }
 
     public SuggestionSpan(Parcel src) {
@@ -173,10 +160,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         mLocaleString = src.readString();
         mNotificationTargetClassName = src.readString();
         mHashCode = src.readInt();
-        mEasyCorrectUnderlineColor = src.readInt();
-        mEasyCorrectUnderlineThickness = src.readFloat();
-        mMisspelledUnderlineColor = src.readInt();
-        mMisspelledUnderlineThickness = src.readFloat();
+        mUnderlineColor = src.readInt();
+        mUnderlineThickness = src.readFloat();
     }
 
     /**
@@ -226,10 +211,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         dest.writeString(mLocaleString);
         dest.writeString(mNotificationTargetClassName);
         dest.writeInt(mHashCode);
-        dest.writeInt(mEasyCorrectUnderlineColor);
-        dest.writeFloat(mEasyCorrectUnderlineThickness);
-        dest.writeInt(mMisspelledUnderlineColor);
-        dest.writeFloat(mMisspelledUnderlineThickness);
+        dest.writeInt(mUnderlineColor);
+        dest.writeFloat(mUnderlineThickness);
     }
 
     @Override
@@ -271,10 +254,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
 
     @Override
     public void updateDrawState(TextPaint tp) {
-        if ((getFlags() & FLAG_MISSPELLED) != 0) {
-            tp.setUnderlineText(true, mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
-        } else if ((getFlags() & FLAG_EASY_CORRECT) != 0) {
-            tp.setUnderlineText(true, mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
-        }
+        tp.setUnderlineText(mUnderlineColor, mUnderlineThickness);
     }
 }
