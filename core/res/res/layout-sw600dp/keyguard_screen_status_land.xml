@@ -42,11 +42,8 @@
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginTop="8dip"
         android:layout_marginBottom="8dip"
-        android:layout_marginLeft="-10dip"
         >
 
         <!-- Because we can't have multi-tone fonts, we render two TextViews, one on

@@ -45,8 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dip"
-        android:layout_marginBottom="8dip"
-        android_layout_marginLeft="-10dip">
+        android:layout_marginBottom="8dip">
 
         <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
         top of the other. Hence the redundant layout... -->
