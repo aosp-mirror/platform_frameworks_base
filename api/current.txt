@@ -16057,7 +16057,7 @@ package android.provider {
 
   public final class ContactsContract {
     ctor public ContactsContract();
-    field public static final java.lang.String ALLOW_PROFILE = "allow_profile";
+    method public static boolean isProfileId(long);
     field public static final java.lang.String AUTHORITY = "com.android.contacts";
     field public static final android.net.Uri AUTHORITY_URI;
     field public static final java.lang.String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
@@ -16584,6 +16584,16 @@ package android.provider {
     field public static final android.net.Uri CONTENT_RAW_CONTACTS_URI;
     field public static final android.net.Uri CONTENT_URI;
     field public static final android.net.Uri CONTENT_VCARD_URI;
+    field public static final long MIN_ID = 9223372034707292160L; // 0x7fffffff80000000L
+  }
+
+  public static final class ContactsContract.ProfileSyncState implements android.provider.SyncStateContract.Columns {
+    method public static byte[] get(android.content.ContentProviderClient, android.accounts.Account) throws android.os.RemoteException;
+    method public static android.util.Pair<android.net.Uri, byte[]> getWithUri(android.content.ContentProviderClient, android.accounts.Account) throws android.os.RemoteException;
+    method public static android.content.ContentProviderOperation newSetOperation(android.accounts.Account, byte[]);
+    method public static void set(android.content.ContentProviderClient, android.accounts.Account, byte[]) throws android.os.RemoteException;
+    field public static final java.lang.String CONTENT_DIRECTORY = "syncstate";
+    field public static final android.net.Uri CONTENT_URI;
   }
 
   public static final class ContactsContract.QuickContact {
@@ -16682,6 +16692,7 @@ package android.provider {
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/status-update";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/status-update";
     field public static final android.net.Uri CONTENT_URI;
+    field public static final android.net.Uri PROFILE_CONTENT_URI;
   }
 
   public static final class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {

@@ -125,19 +125,6 @@ public final class ContactsContract {
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
     /**
-     * An optional URI parameter for selection queries that instructs the
-     * provider to allow the user's personal profile contact entry (if any)
-     * to appear in a list of contact results.  It is only useful when issuing
-     * a query that may retrieve more than one contact.  If present, the user's
-     * profile will always be the first entry returned.  The default value is
-     * false.
-     *
-     * Specifying this parameter will result in a security error if the calling
-     * application does not have android.permission.READ_PROFILE permission.
-     */
-    public static final String ALLOW_PROFILE = "allow_profile";
-
-    /**
      * Query parameter that should be used by the client to access a specific
      * {@link Directory}. The parameter value should be the _ID of the corresponding
      * directory, e.g.
@@ -557,7 +544,7 @@ public final class ContactsContract {
     }
 
     /**
-     * A table provided for sync adapters to use for storing private sync state data.
+     * A table provided for sync adapters to use for storing private sync state data for contacts.
      *
      * @see SyncStateContract
      */
@@ -575,6 +562,60 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, CONTENT_DIRECTORY);
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#get
+         */
+        public static byte[] get(ContentProviderClient provider, Account account)
+                throws RemoteException {
+            return SyncStateContract.Helpers.get(provider, CONTENT_URI, account);
+        }
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#get
+         */
+        public static Pair<Uri, byte[]> getWithUri(ContentProviderClient provider, Account account)
+                throws RemoteException {
+            return SyncStateContract.Helpers.getWithUri(provider, CONTENT_URI, account);
+        }
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#set
+         */
+        public static void set(ContentProviderClient provider, Account account, byte[] data)
+                throws RemoteException {
+            SyncStateContract.Helpers.set(provider, CONTENT_URI, account, data);
+        }
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#newSetOperation
+         */
+        public static ContentProviderOperation newSetOperation(Account account, byte[] data) {
+            return SyncStateContract.Helpers.newSetOperation(CONTENT_URI, account, data);
+        }
+    }
+
+
+    /**
+     * A table provided for sync adapters to use for storing private sync state data for the
+     * user's personal profile.
+     *
+     * @see SyncStateContract
+     */
+    public static final class ProfileSyncState implements SyncStateContract.Columns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private ProfileSyncState() {}
+
+        public static final String CONTENT_DIRECTORY =
+                SyncStateContract.Constants.CONTENT_DIRECTORY;
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(Profile.CONTENT_URI, CONTENT_DIRECTORY);
 
         /**
          * @see android.provider.SyncStateContract.Helpers#get
@@ -1875,8 +1916,8 @@ public final class ContactsContract {
      * Constants for the user's profile data, which is represented as a single contact on
      * the device that represents the user.  The profile contact is not aggregated
      * together automatically in the same way that normal contacts are; instead, each
-     * account on the device may contribute a single raw contact representing the user's
-     * personal profile data from that source.
+     * account (including data set, if applicable) on the device may contribute a single
+     * raw contact representing the user's personal profile data from that source.
      * </p>
      * <p>
      * Access to the profile entry through these URIs (or incidental access to parts of
@@ -1950,6 +1991,31 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_RAW_CONTACTS_URI = Uri.withAppendedPath(CONTENT_URI,
                 "raw_contacts");
+
+        /**
+         * The minimum ID for any entity that belongs to the profile.  This essentially
+         * defines an ID-space in which profile data is stored, and is used by the provider
+         * to determine whether a request via a non-profile-specific URI should be directed
+         * to the profile data rather than general contacts data, along with all the special
+         * permission checks that entails.
+         *
+         * Callers may use {@link #isProfileId} to check whether a specific ID falls into
+         * the set of data intended for the profile.
+         */
+        public static final long MIN_ID = Long.MAX_VALUE - (long) Integer.MAX_VALUE;
+    }
+
+    /**
+     * This method can be used to identify whether the given ID is associated with profile
+     * data.  It does not necessarily indicate that the ID is tied to valid data, merely
+     * that accessing data using this ID will result in profile access checks and will only
+     * return data from the profile.
+     *
+     * @param id The ID to check.
+     * @return Whether the ID is associated with profile data.
+     */
+    public static boolean isProfileId(long id) {
+        return id >= Profile.MIN_ID;
     }
 
     protected interface RawContactsColumns {
@@ -4542,6 +4608,12 @@ public final class ContactsContract {
      * either.
      * </p>
      * <p>
+     * Inserting or updating a status update for the user's profile requires either using
+     * the {@link #DATA_ID} to identify the data row to attach the update to, or
+     * {@link StatusUpdates#PROFILE_CONTENT_URI} to ensure that the change is scoped to the
+     * profile.
+     * </p>
+     * <p>
      * You cannot use {@link ContentResolver#update} to change a status, but
      * {@link ContentResolver#insert} will replace the latests status if it already
      * exists.
@@ -4685,6 +4757,12 @@ public final class ContactsContract {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "status_updates");
+
+        /**
+         * The content:// style URI for this table, specific to the user's profile.
+         */
+        public static final Uri PROFILE_CONTENT_URI =
+                Uri.withAppendedPath(Profile.CONTENT_URI, "status_updates");
 
         /**
          * Gets the resource ID for the proper presence icon.
