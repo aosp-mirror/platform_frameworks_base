@@ -41,7 +41,13 @@ final class SynthesisMessageParams extends MessageParams {
     // Written by the synthesis thread, but read on the audio playback
     // thread.
     volatile int mBytesWritten;
+    // A "short utterance" is one that uses less bytes than the audio
+    // track buffer size (mAudioBufferSize). In this case, we need to call
+    // AudioTrack#stop() to send pending buffers to the mixer, and slightly
+    // different logic is required to wait for the track to finish.
+    //
     // Not volatile, accessed only from the audio playback thread.
+    boolean mIsShortUtterance;
     int mAudioBufferSize;
     // Always synchronized on "this".
     int mUnconsumedBytes;
