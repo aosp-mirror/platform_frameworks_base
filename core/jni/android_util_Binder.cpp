@@ -119,6 +119,11 @@ static struct binderproxy_offsets_t
 
 } gBinderProxyOffsets;
 
+static struct class_offsets_t
+{
+    jmethodID mGetName;
+} gClassOffsets;
+
 // ----------------------------------------------------------------------------
 
 static struct parcel_offsets_t
@@ -452,22 +457,18 @@ public:
             // Okay, something is wrong -- we have a hard reference to a live death
             // recipient on the VM side, but the list is being torn down.
             JNIEnv* env = javavm_to_jnienv(mVM);
-            ScopedLocalRef<jclass> classRef(env, env->GetObjectClass(mObject));
-            jmethodID getnameMethod = env->GetMethodID(classRef.get(),
-                    "getName", "()Ljava/lang/String;");
-            if (getnameMethod) {
-                ScopedLocalRef<jstring> nameRef(env,
-                        (jstring) env->CallObjectMethod(classRef.get(), getnameMethod));
-                ScopedUtfChars nameUtf(env, nameRef.get());
-                if (nameUtf.c_str() != NULL) {
-                    LOGW("BinderProxy is being destroyed but the application did not call "
-                            "unlinkToDeath to unlink all of its death recipients beforehand.  "
-                            "Releasing leaked death recipient: %s", nameUtf.c_str());
-                } else {
-                    LOGW("BinderProxy being destroyed; unable to get DR object name");
-                    env->ExceptionClear();
-                }
-            } else LOGW("BinderProxy being destroyed; unable to find DR class getName");
+            ScopedLocalRef<jclass> objClassRef(env, env->GetObjectClass(mObject));
+            ScopedLocalRef<jstring> nameRef(env,
+                    (jstring) env->CallObjectMethod(objClassRef.get(), gClassOffsets.mGetName));
+            ScopedUtfChars nameUtf(env, nameRef.get());
+            if (nameUtf.c_str() != NULL) {
+                LOGW("BinderProxy is being destroyed but the application did not call "
+                        "unlinkToDeath to unlink all of its death recipients beforehand.  "
+                        "Releasing leaked death recipient: %s", nameUtf.c_str());
+            } else {
+                LOGW("BinderProxy being destroyed; unable to get DR object name");
+                env->ExceptionClear();
+            }
         }
     }
 
@@ -1229,6 +1230,11 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     gBinderProxyOffsets.mOrgue
         = env->GetFieldID(clazz, "mOrgue", "I");
     assert(gBinderProxyOffsets.mOrgue);
+
+    clazz = env->FindClass("java/lang/Class");
+    LOG_FATAL_IF(clazz == NULL, "Unable to find java.lang.Class");
+    gClassOffsets.mGetName = env->GetMethodID(clazz, "getName", "()Ljava/lang/String;");
+    assert(gClassOffsets.mGetName);
 
     return AndroidRuntime::registerNativeMethods(
         env, kBinderProxyPathName,
