@@ -4206,7 +4206,6 @@ public class Activity extends ContextThemeWrapper
             fragment.mContainerId = containerId;
             fragment.mTag = tag;
             fragment.mInLayout = true;
-            fragment.mImmediateActivity = this;
             fragment.mFragmentManager = mFragments;
             fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
             mFragments.addFragment(fragment, true);
@@ -4222,7 +4221,6 @@ public class Activity extends ContextThemeWrapper
             // This fragment was retained from a previous instance; get it
             // going now.
             fragment.mInLayout = true;
-            fragment.mImmediateActivity = this;
             // If this fragment is newly instantiated (either right now, or
             // from last saved state), then give it the attributes to
             // initialize itself.
