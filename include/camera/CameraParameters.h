@@ -495,6 +495,25 @@ public:
     // Example value: "true" or "false". Read/write.
     static const char KEY_RECORDING_HINT[];
 
+    // Returns true if video snapshot is supported. That is, applications
+    // can call Camera.takePicture during recording. Applications do not need to
+    // call Camera.startPreview after taking a picture. The preview will be
+    // still active. Other than that, taking a picture during recording is
+    // identical to taking a picture normally. All settings and methods related
+    // to takePicture work identically. Ex: KEY_PICTURE_SIZE,
+    // KEY_SUPPORTED_PICTURE_SIZES, KEY_JPEG_QUALITY, KEY_ROTATION, and etc.
+    // The picture will have an EXIF header. FLASH_MODE_AUTO and FLASH_MODE_ON
+    // also still work, but the video will record the flash.
+    //
+    // Applications can set shutter callback as null to avoid the shutter
+    // sound. It is also recommended to set raw picture and post view callbacks
+    // to null to avoid the interrupt of preview display.
+    //
+    // Field-of-view of the recorded video may be different from that of the
+    // captured pictures.
+    // Example value: "true" or "false". Read only.
+    static const char KEY_VIDEO_SNAPSHOT_SUPPORTED[];
+
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
     static const char FALSE[];
