@@ -18,7 +18,7 @@ package com.android.server;
 
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
@@ -511,7 +511,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         future = expectMeteredIfacesChanged();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
         future.get();
         verifyAndReset();
 
@@ -615,7 +615,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged(TEST_IFACE);
 
             replay();
-            mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+            mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
             future.get();
             verifyAndReset();
         }
