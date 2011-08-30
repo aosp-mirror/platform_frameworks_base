@@ -459,6 +459,9 @@ import java.lang.ref.WeakReference;
  * android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
  * element.
  *
+ * <p>This class requires the {@link android.Manifest.permission#INTERNET} permission
+ * when used with network-based content.
+ *
  * <a name="Callbacks"></a>
  * <h3>Callbacks</h3>
  * <p>Applications may want to register for informational and error
@@ -828,6 +831,7 @@ public class MediaPlayer
                 fd.close();
             }
         }
+
         Log.d(TAG, "Couldn't open file on client side, trying server side");
         setDataSource(uri.toString(), headers);
         return;
@@ -839,7 +843,8 @@ public class MediaPlayer
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public native void setDataSource(String path) throws IOException, IllegalArgumentException, IllegalStateException;
+    public native void setDataSource(String path)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     /**
      * Sets the data source (file-path or http/rtsp URL) to use.
@@ -850,7 +855,7 @@ public class MediaPlayer
      * @hide pending API council
      */
     public void setDataSource(String path, Map<String, String> headers)
-            throws IOException, IllegalArgumentException, IllegalStateException
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException
     {
         String[] keys = null;
         String[] values = null;
@@ -871,7 +876,7 @@ public class MediaPlayer
 
     private native void _setDataSource(
         String path, String[] keys, String[] values)
-        throws IOException, IllegalArgumentException, IllegalStateException;
+        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's responsibility

@@ -21,6 +21,7 @@
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
 #include <media/IMediaDeathNotifier.h>
+#include <media/IStreamSource.h>
 
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
@@ -168,6 +169,7 @@ public:
                     const KeyedVector<String8, String8> *headers);
 
             status_t        setDataSource(int fd, int64_t offset, int64_t length);
+            status_t        setDataSource(const sp<IStreamSource> &source);
             status_t        setVideoSurface(const sp<Surface>& surface);
             status_t        setVideoSurfaceTexture(
                                     const sp<ISurfaceTexture>& surfaceTexture);
@@ -206,7 +208,7 @@ private:
             status_t        seekTo_l(int msec);
             status_t        prepareAsync_l();
             status_t        getDuration_l(int *msec);
-            status_t        setDataSource(const sp<IMediaPlayer>& player);
+            status_t        attachNewPlayer(const sp<IMediaPlayer>& player);
             void            disconnectNativeWindow();
             status_t        reset_l();
 
