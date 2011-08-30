@@ -139,6 +139,7 @@ public abstract class WallpaperService extends Service {
         boolean mSurfaceCreated;
         boolean mIsCreating;
         boolean mDrawingAllowed;
+        boolean mOffsetsChanged;
         int mWidth;
         int mHeight;
         int mFormat;
@@ -604,12 +605,15 @@ public abstract class WallpaperService extends Service {
                         if (DEBUG) Log.v(TAG, "Layout: Surface destroyed");
                         return;
                     }
-                    
+
+                    boolean didSurface = false;
+
                     try {
                         mSurfaceHolder.ungetCallbacks();
 
                         if (surfaceCreating) {
                             mIsCreating = true;
+                            didSurface = true;
                             if (DEBUG) Log.v(TAG, "onSurfaceCreated("
                                     + mSurfaceHolder + "): " + this);
                             onSurfaceCreated(mSurfaceHolder);
@@ -637,6 +641,7 @@ public abstract class WallpaperService extends Service {
                                     + mSurfaceHolder + ", " + mFormat
                                     + ", " + mCurWidth + ", " + mCurHeight
                                     + "): " + this);
+                            didSurface = true;
                             onSurfaceChanged(mSurfaceHolder, mFormat,
                                     mCurWidth, mCurHeight);
                             SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
@@ -659,6 +664,26 @@ public abstract class WallpaperService extends Service {
                                     }
                                 }
                             }
+                        }
+
+                        if (didSurface && !mReportedVisible) {
+                            // This wallpaper is currently invisible, but its
+                            // surface has changed.  At this point let's tell it
+                            // again that it is invisible in case the report about
+                            // the surface caused it to start running.  We really
+                            // don't want wallpapers running when not visible.
+                            if (mIsCreating) {
+                                // Some wallpapers will ignore this call if they
+                                // had previously been told they were invisble,
+                                // so if we are creating a new surface then toggle
+                                // the state to get them to notice.
+                                if (DEBUG) Log.v(TAG, "onVisibilityChanged(true) at surface: "
+                                        + this);
+                                onVisibilityChanged(true);
+                            }
+                            if (DEBUG) Log.v(TAG, "onVisibilityChanged(false) at surface: "
+                                        + this);
+                            onVisibilityChanged(false);
                         }
 
                     } finally {
@@ -701,6 +726,7 @@ public abstract class WallpaperService extends Service {
             onCreate(mSurfaceHolder);
             
             mInitializing = false;
+            mReportedVisible = false;
             updateSurface(false, false, false);
         }
         
@@ -711,7 +737,7 @@ public abstract class WallpaperService extends Service {
                 mIWallpaperEngine.mReqWidth = desiredWidth;
                 mIWallpaperEngine.mReqHeight = desiredHeight;
                 onDesiredSizeChanged(desiredWidth, desiredHeight);
-                doOffsetsChanged();
+                doOffsetsChanged(true);
             }
         }
         
@@ -733,6 +759,7 @@ public abstract class WallpaperService extends Service {
                         // If becoming visible, in preview mode the surface
                         // may have been destroyed so now we need to make
                         // sure it is re-created.
+                        doOffsetsChanged(false);
                         updateSurface(false, false, false);
                     }
                     onVisibilityChanged(visible);
@@ -740,11 +767,15 @@ public abstract class WallpaperService extends Service {
             }
         }
         
-        void doOffsetsChanged() {
+        void doOffsetsChanged(boolean always) {
             if (mDestroyed) {
                 return;
             }
-            
+
+            if (!always && !mOffsetsChanged) {
+                return;
+            }
+
             float xOffset;
             float yOffset;
             float xOffsetStep;
@@ -759,15 +790,19 @@ public abstract class WallpaperService extends Service {
                 mPendingSync = false;
                 mOffsetMessageEnqueued = false;
             }
-            
+
             if (mSurfaceCreated) {
-                if (DEBUG) Log.v(TAG, "Offsets change in " + this
-                        + ": " + xOffset + "," + yOffset);
-                final int availw = mIWallpaperEngine.mReqWidth-mCurWidth;
-                final int xPixels = availw > 0 ? -(int)(availw*xOffset+.5f) : 0;
-                final int availh = mIWallpaperEngine.mReqHeight-mCurHeight;
-                final int yPixels = availh > 0 ? -(int)(availh*yOffset+.5f) : 0;
-                onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixels, yPixels);
+                if (mReportedVisible) {
+                    if (DEBUG) Log.v(TAG, "Offsets change in " + this
+                            + ": " + xOffset + "," + yOffset);
+                    final int availw = mIWallpaperEngine.mReqWidth-mCurWidth;
+                    final int xPixels = availw > 0 ? -(int)(availw*xOffset+.5f) : 0;
+                    final int availh = mIWallpaperEngine.mReqHeight-mCurHeight;
+                    final int yPixels = availh > 0 ? -(int)(availh*yOffset+.5f) : 0;
+                    onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixels, yPixels);
+                } else {
+                    mOffsetsChanged = true;
+                }
             }
             
             if (sync) {
@@ -953,7 +988,7 @@ public abstract class WallpaperService extends Service {
                     mEngine.doVisibilityChanged(message.arg1 != 0);
                     break;
                 case MSG_WALLPAPER_OFFSETS: {
-                    mEngine.doOffsetsChanged();
+                    mEngine.doOffsetsChanged(true);
                 } break;
                 case MSG_WALLPAPER_COMMAND: {
                     WallpaperCommand cmd = (WallpaperCommand)message.obj;
@@ -962,7 +997,7 @@ public abstract class WallpaperService extends Service {
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
                     mEngine.updateSurface(true, false, reportDraw);
-                    mEngine.doOffsetsChanged();
+                    mEngine.doOffsetsChanged(true);
                 } break;
                 case MSG_TOUCH_EVENT: {
                     boolean skip = false;
