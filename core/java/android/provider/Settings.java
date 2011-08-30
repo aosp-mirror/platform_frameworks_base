@@ -42,6 +42,7 @@ import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
+import android.view.WindowOrientationListener;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public final class Settings {
      * <p>
      * Input: Nothing.
      * <p>
-     * Output: nothing.
+     * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SETTINGS = "android.settings.SETTINGS";
@@ -69,7 +70,7 @@ public final class Settings {
      * <p>
      * Input: Nothing.
      * <p>
-     * Output: nothing.
+     * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APN_SETTINGS = "android.settings.APN_SETTINGS";
@@ -326,6 +327,23 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_USER_DICTIONARY_SETTINGS =
             "android.settings.USER_DICTIONARY_SETTINGS";
+
+    /**
+     * Activity Action: Adds a word to the user dictionary.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: An extra with key <code>word</code> that contains the word
+     * that should be added to the dictionary.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_USER_DICTIONARY_INSERT =
+            "com.android.settings.USER_DICTIONARY_INSERT";
 
     /**
      * Activity Action: Show settings to allow configuration of application-related settings.
@@ -1462,6 +1480,7 @@ public final class Settings {
          * @hide
          * @deprecated
          */
+        @Deprecated
         public static final String NOTIFICATIONS_USE_RING_VOLUME =
             "notifications_use_ring_volume";
 
