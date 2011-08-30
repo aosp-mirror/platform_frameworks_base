@@ -2537,6 +2537,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
                     && (win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+            wallpaperMayMove |= (flagChanges & FLAG_SHOW_WALLPAPER) != 0;
 
             win.mRelayoutCalled = true;
             final int oldVisibility = win.mViewVisibility;
@@ -7931,11 +7932,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 if (windowAnimationBackgroundColor != 0) {
+                    // If this window that wants black is the current wallpaper
+                    // target, then the black goes *below* the wallpaper so we
+                    // don't cause the wallpaper to suddenly disappear.
+                    WindowState target = windowAnimationBackground;
+                    if (mWallpaperTarget == windowAnimationBackground
+                            || mLowerWallpaperTarget == windowAnimationBackground
+                            || mUpperWallpaperTarget == windowAnimationBackground) {
+                        for (i=0; i<mWindows.size(); i++) {
+                            WindowState w = mWindows.get(i);
+                            if (w.mIsWallpaper) {
+                                target = w;
+                                break;
+                            }
+                        }
+                    }
                     if (mWindowAnimationBackgroundSurface == null) {
                         mWindowAnimationBackgroundSurface = new DimSurface(mFxSession);
                     }
                     mWindowAnimationBackgroundSurface.show(dw, dh,
-                            windowAnimationBackground.mAnimLayer - LAYER_OFFSET_DIM,
+                            target.mAnimLayer - LAYER_OFFSET_DIM,
                             windowAnimationBackgroundColor);
                 } else if (mWindowAnimationBackgroundSurface != null) {
                     mWindowAnimationBackgroundSurface.hide();
