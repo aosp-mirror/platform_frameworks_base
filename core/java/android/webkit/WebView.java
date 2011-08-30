@@ -9124,7 +9124,9 @@ public class WebView extends AbsoluteLayout
 
     /** @hide send content invalidate */
     protected void contentInvalidateAll() {
-        mWebViewCore.sendMessage(EventHub.CONTENT_INVALIDATE_ALL);
+        if (mWebViewCore != null && !mBlockWebkitViewMessages) {
+            mWebViewCore.sendMessage(EventHub.CONTENT_INVALIDATE_ALL);
+        }
     }
 
     /** @hide call pageSwapCallback upon next page swap */
