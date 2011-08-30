@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:= \
     com_android_server_InputWindowHandle.cpp \
     com_android_server_LightsService.cpp \
     com_android_server_PowerManagerService.cpp \
+    com_android_server_SerialService.cpp \
     com_android_server_SystemServer.cpp \
     com_android_server_UsbDeviceManager.cpp \
     com_android_server_UsbHostManager.cpp \

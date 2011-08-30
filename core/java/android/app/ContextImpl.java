@@ -42,7 +42,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
+import android.hardware.SerialManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
 import android.location.CountryDetector;
@@ -425,6 +427,12 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(USB_SERVICE);
                     return new UsbManager(ctx, IUsbManager.Stub.asInterface(b));
+                }});
+
+        registerService(SERIAL_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(SERIAL_SERVICE);
+                    return new SerialManager(ctx, ISerialManager.Stub.asInterface(b));
                 }});
 
         registerService(VIBRATOR_SERVICE, new ServiceFetcher() {
