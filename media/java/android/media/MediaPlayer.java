@@ -381,7 +381,7 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setTexture </p></td>
+ * <tr><td>setSurface </p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
@@ -608,7 +608,7 @@ public class MediaPlayer
      * portion of the media.
      *
      * Either a surface holder or surface must be set if a display or video sink
-     * is needed.  Not calling this method or {@link #setTexture(SurfaceTexture)}
+     * is needed.  Not calling this method or {@link #setSurface(Surface)}
      * when playing back a video will result in only the audio track being played.
      * A null surface holder or surface will result in only the audio track being
      * played.
@@ -629,14 +629,21 @@ public class MediaPlayer
 
     /**
      * Sets the {@link Surface} to be used as the sink for the video portion of
-     * the media. This is similar to {@link #setDisplay(SurfaceHolder)}, but does not
-     * support {@link #setScreenOnWhilePlaying(boolean)} or {@link #updateSurfaceScreenOn()}.
-     * Setting a Surface will un-set any Surface or SurfaceHolder that was previously set.
+     * the media. This is similar to {@link #setDisplay(SurfaceHolder)}, but
+     * does not support {@link #setScreenOnWhilePlaying(boolean)}.  Setting a
+     * Surface will un-set any Surface or SurfaceHolder that was previously set.
      * A null surface will result in only the audio track being played.
      *
-     * @param surface The {@link Surface} to be used for the video portion of the media.
+     * If the Surface sends frames to a {@link SurfaceTexture}, the timestamps
+     * returned from {@link SurfaceTexture#getTimestamp()} will have an
+     * unspecified zero point.  These timestamps cannot be directly compared
+     * between different media sources, different instances of the same media
+     * source, or multiple runs of the same program.  The timestamp is normally
+     * monotonically increasing and is unaffected by time-of-day adjustments,
+     * but it is reset when the position is set.
      *
-     * @hide Pending review by API council.
+     * @param surface The {@link Surface} to be used for the video portion of
+     * the media.
      */
     public void setSurface(Surface surface) {
         if (mScreenOnWhilePlaying && surface != null) {
