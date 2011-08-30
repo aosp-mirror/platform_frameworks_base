@@ -2637,7 +2637,7 @@ public class AudioService extends IAudioService.Stub {
                 notifyTopOfAudioFocusStack();
                 // there's a new top of the stack, let the remote control know
                 synchronized(mRCStack) {
-                    checkUpdateRemoteControlDisplay(RC_INFO_ALL);
+                    checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
                 }
             }
         } else {
@@ -2680,7 +2680,7 @@ public class AudioService extends IAudioService.Stub {
             notifyTopOfAudioFocusStack();
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
             }
         }
     }
@@ -2784,7 +2784,7 @@ public class AudioService extends IAudioService.Stub {
 
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
             }
         }//synchronized(mAudioFocusLock)
 
@@ -3182,7 +3182,7 @@ public class AudioService extends IAudioService.Stub {
      * Helper function:
      * Called synchronized on mRCStack
      */
-    private void clearRemoteControlDisplay() {
+    private void clearRemoteControlDisplay_syncRcs() {
         synchronized(mCurrentRcLock) {
             mCurrentRcClient = null;
         }
@@ -3195,14 +3195,14 @@ public class AudioService extends IAudioService.Stub {
      * Called synchronized on mRCStack
      * mRCStack.empty() is false
      */
-    private void updateRemoteControlDisplay(int infoChangedFlags) {
+    private void updateRemoteControlDisplay_syncRcs(int infoChangedFlags) {
         RemoteControlStackEntry rcse = mRCStack.peek();
         int infoFlagsAboutToBeUsed = infoChangedFlags;
         // this is where we enforce opt-in for information display on the remote controls
         //   with the new AudioManager.registerRemoteControlClient() API
         if (rcse.mRcClient == null) {
             //Log.w(TAG, "Can't update remote control display with null remote control client");
-            clearRemoteControlDisplay();
+            clearRemoteControlDisplay_syncRcs();
             return;
         }
         synchronized(mCurrentRcLock) {
@@ -3225,11 +3225,11 @@ public class AudioService extends IAudioService.Stub {
      *     that has changed, if applicable (checking for the update conditions might trigger a
      *     clear, rather than an update event).
      */
-    private void checkUpdateRemoteControlDisplay(int infoChangedFlags) {
+    private void checkUpdateRemoteControlDisplay_syncRcs(int infoChangedFlags) {
         // determine whether the remote control display should be refreshed
         // if either stack is empty, there is a mismatch, so clear the RC display
         if (mRCStack.isEmpty() || mFocusStack.isEmpty()) {
-            clearRemoteControlDisplay();
+            clearRemoteControlDisplay_syncRcs();
             return;
         }
         // if the top of the two stacks belong to different packages, there is a mismatch, clear
@@ -3237,17 +3237,17 @@ public class AudioService extends IAudioService.Stub {
                 && (mFocusStack.peek().mPackageName != null)
                 && !(mRCStack.peek().mCallingPackageName.compareTo(
                         mFocusStack.peek().mPackageName) == 0)) {
-            clearRemoteControlDisplay();
+            clearRemoteControlDisplay_syncRcs();
             return;
         }
         // if the audio focus didn't originate from the same Uid as the one in which the remote
         //   control information will be retrieved, clear
         if (mRCStack.peek().mCallingUid != mFocusStack.peek().mCallingUid) {
-            clearRemoteControlDisplay();
+            clearRemoteControlDisplay_syncRcs();
             return;
         }
         // refresh conditions were verified: update the remote controls
-        updateRemoteControlDisplay(infoChangedFlags);
+        updateRemoteControlDisplay_syncRcs(infoChangedFlags);
     }
 
     /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
@@ -3258,7 +3258,7 @@ public class AudioService extends IAudioService.Stub {
             synchronized(mRCStack) {
                 pushMediaButtonReceiver(eventReceiver);
                 // new RC client, assume every type of information shall be queried
-                checkUpdateRemoteControlDisplay(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
             }
         }
     }
@@ -3273,7 +3273,7 @@ public class AudioService extends IAudioService.Stub {
                 removeMediaButtonReceiver(eventReceiver);
                 if (topOfStackWillChange) {
                     // current RC client will change, assume every type of info needs to be queried
-                    checkUpdateRemoteControlDisplay(RC_INFO_ALL);
+                    checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
                 }
             }
         }
@@ -3329,7 +3329,7 @@ public class AudioService extends IAudioService.Stub {
                 // if the eventReceiver is at the top of the stack
                 // then check for potential refresh of the remote controls
                 if (isCurrentRcController(eventReceiver)) {
-                    checkUpdateRemoteControlDisplay(RC_INFO_ALL);
+                    checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
                 }
             }
         }
@@ -3426,7 +3426,9 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /**
-     * Register an IRemoteControlDisplay and notify all IRemoteControlClient of the new display.
+     * Register an IRemoteControlDisplay.
+     * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
+     * at the top of the stack to update the new display with its information.
      * Since only one IRemoteControlDisplay is supported, this will unregister the previous display.
      * @param rcd the IRemoteControlDisplay to register. No effect if null.
      */
@@ -3458,20 +3460,8 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
 
-            // we have a new display, tell the current client that it needs to send info
-            // (following lock order: mRCStack then mCurrentRcLock)
-            synchronized(mCurrentRcLock) {
-                if (mCurrentRcClient != null) {
-                    // tell the current client that it needs to send info
-                    try {
-                        mCurrentRcClient.onInformationRequested(mCurrentRcClientGen,
-                                RC_INFO_ALL, mArtworkExpectedWidth, mArtworkExpectedHeight);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Current valid remote client is dead: "+e);
-                        mCurrentRcClient = null;
-                    }
-                }
-            }
+            // we have a new display, of which all the clients are now aware: have it be updated
+            updateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
         }
     }
 
