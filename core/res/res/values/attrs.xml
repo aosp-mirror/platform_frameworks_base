@@ -5169,6 +5169,12 @@
         <!-- Reference to an array resource that be shown as targets around a circle. -->
         <attr name="targetDrawables" format="reference"/>
 
+        <!-- Reference to an array resource that be used as description for the targets around the circle. -->
+        <attr name="targetDescriptions" format="reference"/>
+
+        <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
+        <attr name="directionDescriptions" format="reference"/>
+
         <!-- Sets a drawable as the drag center. -->
         <attr name="handleDrawable" format="reference" />
 

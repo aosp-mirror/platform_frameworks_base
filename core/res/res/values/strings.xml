@@ -3129,6 +3129,29 @@
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
 
+    <!-- Slide lock screen -->
+
+    <!-- Description of the sliding handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="content_description_sliding_handle">"Sliding handle. Tap and hold."</string>
+
+    <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_up">"Up</string>
+    <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_down">Down</string>
+    <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_left">"Left</string>
+    <!-- Description of the right direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_right">Right</string>
+
+    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_unlock">Unlock</string>
+    <!-- Description of the camera target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_camera">Camera</string>
+    <!-- Description of the silent target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_silent">Silent</string>
+    <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_soundon">Sound on</string>
+
     <!-- Announce that a headset is required to hear keyboard keys while typing a password. [CHAR LIMIT=NONE] -->
     <string name="keyboard_headset_required_to_hear_password">Key. Headset required to hear
     keys while typing a password.</string>
