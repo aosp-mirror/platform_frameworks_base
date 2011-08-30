@@ -58,10 +58,42 @@ padding: .25em 1em;
 }
 </style>
 
-
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
+  Android NDK, Revision 6b</a> <em>(August 2011)</em>
+
+   <div class="toggleme">
+      <p>This release of the NDK does not include any new features compared to r6. The r6b release
+      addresses the following issues in the r6 release:</p>
+      <dl>
+        <dt>Important bug fixes</dt>
+        <dd>
+          <ul>
+            <li>Fixed the build when <code>APP_ABI="armeabi x86"</code> is used for
+            multi-architecture builds.</li>
+            <li>Fixed the location of prebuilt STLport binaries in the NDK release package.
+            A bug in the packaging script placed them in the wrong location.</li>
+            <li>Fixed <code>atexit()</code> usage in shared libraries with the x86standalone
+            toolchain.</li>
+            <li>Fixed <code>make-standalone-toolchain.sh --arch=x86</code>. It used to fail
+            to copy the proper GNU libstdc++ binaries to the right location.</li>
+            <li>Fixed the standalone toolchain linker warnings about missing the definition and
+            size for the <code>__dso_handle</code> symbol (ARM only).</li>
+            <li>Fixed the inclusion order of <code>$(SYSROOT)/usr/include</code> for x86 builds.
+            See the <a href="http://code.google.com/p/android/issues/detail?id=18540">bug</a> for
+            more information.</li>
+            <li>Fixed the definitions of <code>ptrdiff_t</code> and <code>size_t</code> in
+            x86-specific systems when they are used with the x86 standalone toolchain.</li>
+          </ul>
+        </dd>
+      </dl>
+  </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)"><img src=
+  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
   Android NDK, Revision 6</a> <em>(July 2011)</em>
 
    <div class="toggleme">

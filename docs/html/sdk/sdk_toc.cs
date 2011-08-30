@@ -183,7 +183,7 @@ r3</a> <span class="new">new!</span></li>
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r6</a> 
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r6b</a> 
         <span class="new">new!</span>
         </li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
