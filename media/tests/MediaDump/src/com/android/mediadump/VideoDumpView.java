@@ -49,6 +49,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.widget.MediaController;
@@ -569,7 +570,9 @@ class VideoDumpView extends GLSurfaceView implements MediaPlayerControl {
             mSurface = new SurfaceTexture(mTextureID);
             mSurface.setOnFrameAvailableListener(this);
 
-            mMediaPlayer.setTexture(mSurface);
+            Surface surface = new Surface(mSurface);
+            mMediaPlayer.setSurface(surface);
+            surface.release();
 
             try {
                 mMediaPlayer.prepare();

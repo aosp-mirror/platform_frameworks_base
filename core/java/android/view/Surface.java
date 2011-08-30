@@ -36,10 +36,14 @@ public class Surface implements Parcelable {
     public static final int ROTATION_270     = 3;
 
     /**
-     * Create Surface from a SurfaceTexture.
+     * Create Surface from a {@link SurfaceTexture}.
      *
-     * @param surfaceTexture The {@link SurfaceTexture} that is updated by this Surface.
-     * @hide
+     * Images drawn to the Surface will be made available to the {@link
+     * SurfaceTexture}, which can attach them an OpenGL ES texture via {@link
+     * SurfaceTexture#updateTexImage}.
+     *
+     * @param surfaceTexture The {@link SurfaceTexture} that is updated by this
+     * Surface.
      */
     public Surface(SurfaceTexture surfaceTexture) {
         if (DEBUG_RELEASE) {

@@ -10681,6 +10681,7 @@ package android.media {
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setScreenOnWhilePlaying(boolean);
     method public void setTexture(android.graphics.SurfaceTexture);
+    method public void setSurface(android.view.Surface);
     method public void setVolume(float, float);
     method public void setWakeMode(android.content.Context, int);
     method public void start() throws java.lang.IllegalStateException;
@@ -22525,6 +22526,7 @@ package android.view {
   }
 
   public class Surface implements android.os.Parcelable {
+    ctor public Surface(android.graphics.SurfaceTexture);
     method public int describeContents();
     method public boolean isValid();
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect) throws java.lang.IllegalArgumentException, android.view.Surface.OutOfResourcesException;
