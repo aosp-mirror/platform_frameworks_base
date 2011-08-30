@@ -344,10 +344,6 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private void doAddOp(int containerViewId, Fragment fragment, String tag, int opcmd) {
-        if (fragment.mImmediateActivity != null) {
-            throw new IllegalStateException("Fragment already added: " + fragment);
-        }
-        fragment.mImmediateActivity = mManager.mActivity;
         fragment.mFragmentManager = mManager;
 
         if (tag != null) {
@@ -388,11 +384,6 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public FragmentTransaction remove(Fragment fragment) {
-        if (fragment.mImmediateActivity == null) {
-            throw new IllegalStateException("Fragment not added: " + fragment);
-        }
-        fragment.mImmediateActivity = null;
-
         Op op = new Op();
         op.cmd = OP_REMOVE;
         op.fragment = fragment;
@@ -402,10 +393,6 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public FragmentTransaction hide(Fragment fragment) {
-        if (fragment.mImmediateActivity == null) {
-            throw new IllegalStateException("Fragment not added: " + fragment);
-        }
-
         Op op = new Op();
         op.cmd = OP_HIDE;
         op.fragment = fragment;
@@ -415,10 +402,6 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public FragmentTransaction show(Fragment fragment) {
-        if (fragment.mImmediateActivity == null) {
-            throw new IllegalStateException("Fragment not added: " + fragment);
-        }
-
         Op op = new Op();
         op.cmd = OP_SHOW;
         op.fragment = fragment;
@@ -428,10 +411,6 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public FragmentTransaction detach(Fragment fragment) {
-        //if (fragment.mImmediateActivity == null) {
-        //    throw new IllegalStateException("Fragment not added: " + fragment);
-        //}
-
         Op op = new Op();
         op.cmd = OP_DETACH;
         op.fragment = fragment;
@@ -441,10 +420,6 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public FragmentTransaction attach(Fragment fragment) {
-        //if (fragment.mImmediateActivity == null) {
-        //    throw new IllegalStateException("Fragment not added: " + fragment);
-        //}
-
         Op op = new Op();
         op.cmd = OP_ATTACH;
         op.fragment = fragment;
@@ -663,7 +638,6 @@ final class BackStackRecord extends FragmentTransaction implements
                 case OP_ADD: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popExitAnim;
-                    f.mImmediateActivity = null;
                     mManager.removeFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition),
                             mTransitionStyle);
@@ -671,7 +645,6 @@ final class BackStackRecord extends FragmentTransaction implements
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popExitAnim;
-                    f.mImmediateActivity = null;
                     mManager.removeFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition),
                             mTransitionStyle);
@@ -679,7 +652,6 @@ final class BackStackRecord extends FragmentTransaction implements
                         for (int i=0; i<op.removed.size(); i++) {
                             Fragment old = op.removed.get(i);
                             old.mNextAnim = op.popEnterAnim;
-                            f.mImmediateActivity = mManager.mActivity;
                             mManager.addFragment(old, false);
                         }
                     }
@@ -687,7 +659,6 @@ final class BackStackRecord extends FragmentTransaction implements
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popEnterAnim;
-                    f.mImmediateActivity = mManager.mActivity;
                     mManager.addFragment(f, false);
                 } break;
                 case OP_HIDE: {
