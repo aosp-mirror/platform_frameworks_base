@@ -1785,8 +1785,6 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.harware.SerialManager
-     *
-     * @hide
      */
     public static final String SERIAL_SERVICE = "serial";
 

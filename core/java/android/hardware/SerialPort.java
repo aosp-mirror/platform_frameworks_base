@@ -29,7 +29,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * @hide
+ * This class provides support for reading and writing data to serial ports
  */
 public class SerialPort {
 

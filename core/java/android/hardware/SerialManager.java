@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * @hide
+ * This class provides access to serial ports
  */
 public class SerialManager {
     private static final String TAG = "SerialManager";

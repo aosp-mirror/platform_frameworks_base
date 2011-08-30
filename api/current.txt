@@ -94,6 +94,7 @@ package android {
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
+    field public static final java.lang.String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final java.lang.String SET_ALARM = "com.android.alarm.permission.SET_ALARM";
     field public static final java.lang.String SET_ALWAYS_FINISH = "android.permission.SET_ALWAYS_FINISH";
@@ -5075,6 +5076,7 @@ package android.content {
     field public static final java.lang.String POWER_SERVICE = "power";
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
+    field public static final java.lang.String SERIAL_SERVICE = "serial";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
@@ -9558,6 +9560,18 @@ package android.hardware {
     field public static final deprecated int SENSOR_TEMPERATURE = 4; // 0x4
     field public static final deprecated int SENSOR_TRICORDER = 64; // 0x40
     field public static final float STANDARD_GRAVITY = 9.80665f;
+  }
+
+  public class SerialManager {
+    method public java.lang.String[] getSerialPorts();
+    method public android.hardware.SerialPort openSerialPort(java.lang.String, int) throws java.io.IOException;
+  }
+
+  public class SerialPort {
+    method public void close() throws java.io.IOException;
+    method public java.lang.String getName();
+    method public int read(java.nio.ByteBuffer) throws java.io.IOException;
+    method public void write(java.nio.ByteBuffer, int) throws java.io.IOException;
   }
 
 }

@@ -1457,8 +1457,7 @@
         android:description="@string/permdesc_bindPackageVerifier"
         android:protectionLevel="signature" />
 
-    <!-- Allows applications to access serial ports via the SerialManager.
-         @hide -->
+    <!-- Allows applications to access serial ports via the SerialManager. -->
     <permission android:name="android.permission.SERIAL_PORT"
         android:label="@string/permlab_serialPort"
         android:description="@string/permdesc_serialPort"
