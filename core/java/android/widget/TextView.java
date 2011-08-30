@@ -8928,6 +8928,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 stopSelectionActionMode();
             } else {
                 selectCurrentWord();
+                getSelectionController().show();
             }
             handled = true;
         }
