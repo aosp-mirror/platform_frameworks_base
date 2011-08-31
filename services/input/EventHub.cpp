@@ -78,6 +78,40 @@ static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
+// --- Global Functions ---
+
+uint32_t getAbsAxisUsage(int32_t axis, uint32_t deviceClasses) {
+    // Touch devices get dibs on touch-related axes.
+    if (deviceClasses & INPUT_DEVICE_CLASS_TOUCH) {
+        switch (axis) {
+        case ABS_X:
+        case ABS_Y:
+        case ABS_PRESSURE:
+        case ABS_TOOL_WIDTH:
+        case ABS_DISTANCE:
+        case ABS_TILT_X:
+        case ABS_TILT_Y:
+        case ABS_MT_SLOT:
+        case ABS_MT_TOUCH_MAJOR:
+        case ABS_MT_TOUCH_MINOR:
+        case ABS_MT_WIDTH_MAJOR:
+        case ABS_MT_WIDTH_MINOR:
+        case ABS_MT_ORIENTATION:
+        case ABS_MT_POSITION_X:
+        case ABS_MT_POSITION_Y:
+        case ABS_MT_TOOL_TYPE:
+        case ABS_MT_BLOB_ID:
+        case ABS_MT_TRACKING_ID:
+        case ABS_MT_PRESSURE:
+        case ABS_MT_DISTANCE:
+            return INPUT_DEVICE_CLASS_TOUCH;
+        }
+    }
+
+    // Joystick devices get the rest.
+    return deviceClasses & INPUT_DEVICE_CLASS_JOYSTICK;
+}
+
 // --- EventHub::Device ---
 
 EventHub::Device::Device(int fd, int32_t id, const String8& path,
@@ -936,13 +970,17 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     }
 
     // See if this device is a joystick.
-    // Ignore touchscreens because they use the same absolute axes for other purposes.
     // Assumes that joysticks always have gamepad buttons in order to distinguish them
     // from other devices such as accelerometers that also have absolute axes.
-    if (haveGamepadButtons
-            && !(device->classes & INPUT_DEVICE_CLASS_TOUCH)
-            && containsNonZeroByte(device->absBitmask, 0, sizeof_bit_array(ABS_MAX + 1))) {
-        device->classes |= INPUT_DEVICE_CLASS_JOYSTICK;
+    if (haveGamepadButtons) {
+        uint32_t assumedClasses = device->classes | INPUT_DEVICE_CLASS_JOYSTICK;
+        for (int i = 0; i <= ABS_MAX; i++) {
+            if (test_bit(i, device->absBitmask)
+                    && (getAbsAxisUsage(i, assumedClasses) & INPUT_DEVICE_CLASS_JOYSTICK)) {
+                device->classes = assumedClasses;
+                break;
+            }
+        }
     }
 
     // Check whether this device has switches.

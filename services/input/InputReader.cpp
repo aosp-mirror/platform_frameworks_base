@@ -390,7 +390,7 @@ void InputReader::removeDeviceLocked(nsecs_t when, int32_t deviceId) {
 
 InputDevice* InputReader::createDeviceLocked(int32_t deviceId,
         const String8& name, uint32_t classes) {
-    InputDevice* device = new InputDevice(&mContext, deviceId, name);
+    InputDevice* device = new InputDevice(&mContext, deviceId, name, classes);
 
     // External devices.
     if (classes & INPUT_DEVICE_CLASS_EXTERNAL) {
@@ -842,9 +842,10 @@ bool InputReaderThread::threadLoop() {
 
 // --- InputDevice ---
 
-InputDevice::InputDevice(InputReaderContext* context, int32_t id, const String8& name) :
-        mContext(context), mId(id), mName(name), mSources(0),
-        mIsExternal(false), mDropUntilNextSync(false) {
+InputDevice::InputDevice(InputReaderContext* context, int32_t id, const String8& name,
+        uint32_t classes) :
+        mContext(context), mId(id), mName(name), mClasses(classes),
+        mSources(0), mIsExternal(false), mDropUntilNextSync(false) {
 }
 
 InputDevice::~InputDevice() {
@@ -5759,6 +5760,11 @@ void JoystickInputMapper::configure(nsecs_t when,
     if (!changes) { // first time only
         // Collect all axes.
         for (int32_t abs = 0; abs <= ABS_MAX; abs++) {
+            if (!(getAbsAxisUsage(abs, getDevice()->getClasses())
+                    & INPUT_DEVICE_CLASS_JOYSTICK)) {
+                continue; // axis must be claimed by a different device
+            }
+
             RawAbsoluteAxisInfo rawAxisInfo;
             getAbsoluteAxisInfo(abs, &rawAxisInfo);
             if (rawAxisInfo.valid) {

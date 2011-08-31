@@ -852,8 +852,8 @@ public:
         mNextDevice = device;
     }
 
-    InputDevice* newDevice(int32_t deviceId, const String8& name) {
-        return new InputDevice(&mContext, deviceId, name);
+    InputDevice* newDevice(int32_t deviceId, const String8& name, uint32_t classes) {
+        return new InputDevice(&mContext, deviceId, name, classes);
     }
 
 protected:
@@ -912,7 +912,7 @@ protected:
     FakeInputMapper* addDeviceWithFakeInputMapper(int32_t deviceId,
             const String8& name, uint32_t classes, uint32_t sources,
             const PropertyMap* configuration) {
-        InputDevice* device = mReader->newDevice(deviceId, name);
+        InputDevice* device = mReader->newDevice(deviceId, name, classes);
         FakeInputMapper* mapper = new FakeInputMapper(device, sources);
         device->addMapper(mapper);
         mReader->setNextDevice(device);
@@ -1211,6 +1211,7 @@ class InputDeviceTest : public testing::Test {
 protected:
     static const char* DEVICE_NAME;
     static const int32_t DEVICE_ID;
+    static const uint32_t DEVICE_CLASSES;
 
     sp<FakeEventHub> mFakeEventHub;
     sp<FakeInputReaderPolicy> mFakePolicy;
@@ -1226,7 +1227,7 @@ protected:
         mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
-        mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME));
+        mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME), DEVICE_CLASSES);
     }
 
     virtual void TearDown() {
@@ -1241,10 +1242,13 @@ protected:
 
 const char* InputDeviceTest::DEVICE_NAME = "device";
 const int32_t InputDeviceTest::DEVICE_ID = 1;
+const uint32_t InputDeviceTest::DEVICE_CLASSES = INPUT_DEVICE_CLASS_KEYBOARD
+        | INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_JOYSTICK;
 
 TEST_F(InputDeviceTest, ImmutableProperties) {
     ASSERT_EQ(DEVICE_ID, mDevice->getId());
     ASSERT_STREQ(DEVICE_NAME, mDevice->getName());
+    ASSERT_EQ(DEVICE_CLASSES, mDevice->getClasses());
 }
 
 TEST_F(InputDeviceTest, WhenNoMappersAreRegistered_DeviceIsIgnored) {
@@ -1390,6 +1394,7 @@ class InputMapperTest : public testing::Test {
 protected:
     static const char* DEVICE_NAME;
     static const int32_t DEVICE_ID;
+    static const uint32_t DEVICE_CLASSES;
 
     sp<FakeEventHub> mFakeEventHub;
     sp<FakeInputReaderPolicy> mFakePolicy;
@@ -1402,7 +1407,7 @@ protected:
         mFakePolicy = new FakeInputReaderPolicy();
         mFakeListener = new FakeInputListener();
         mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
-        mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME));
+        mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME), DEVICE_CLASSES);
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
     }
@@ -1483,6 +1488,7 @@ protected:
 
 const char* InputMapperTest::DEVICE_NAME = "device";
 const int32_t InputMapperTest::DEVICE_ID = 1;
+const uint32_t InputMapperTest::DEVICE_CLASSES = 0; // not needed for current tests
 
 
 // --- SwitchInputMapperTest ---
