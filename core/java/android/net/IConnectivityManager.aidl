@@ -43,6 +43,8 @@ interface IConnectivityManager
     NetworkInfo getNetworkInfo(int networkType);
     NetworkInfo[] getAllNetworkInfo();
 
+    boolean isNetworkSupported(int networkType);
+
     LinkProperties getActiveLinkProperties();
     LinkProperties getLinkProperties(int networkType);
 

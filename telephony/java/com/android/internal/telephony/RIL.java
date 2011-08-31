@@ -29,6 +29,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.AsyncResult;
@@ -229,8 +230,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     ArrayList<RILRequest> mRequestsList = new ArrayList<RILRequest>();
 
     Object     mLastNITZTimeInfo;
-
-    private static final String WIFI_ONLY_CARRIER = "wifi-only";
 
     //***** Events
 
@@ -626,10 +625,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         Looper looper = mSenderThread.getLooper();
         mSender = new RILSender(looper);
 
-        // TODO: Provide a common API for determining if a
-        // device is wifi-only. bug: 3480713
-        String carrier = SystemProperties.get("ro.carrier");
-        if (WIFI_ONLY_CARRIER.equals(carrier)) {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        if (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false) {
             riljLog("Not starting RILReceiver: wifi-only");
         } else {
             riljLog("Starting RILReceiver");
