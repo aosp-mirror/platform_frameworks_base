@@ -352,7 +352,6 @@ LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
             char buf[32];
             int len;
             snprintf(buf, sizeof(buf), "%lld", value);
-            jchar* dst = env->GetCharArrayElements(buffer, NULL);
             sizeCopied = charToJchar(buf, dst, bufferSize);
          }
     } else if (type == FIELD_TYPE_FLOAT) {
@@ -360,7 +359,6 @@ LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
         if (window->getDouble(row, column, &value)) {
             char tempbuf[32];
             snprintf(tempbuf, sizeof(tempbuf), "%g", value);
-            jchar* dst = env->GetCharArrayElements(buffer, NULL);
             sizeCopied = charToJchar(tempbuf, dst, bufferSize);
         }
     } else if (type == FIELD_TYPE_NULL) {
