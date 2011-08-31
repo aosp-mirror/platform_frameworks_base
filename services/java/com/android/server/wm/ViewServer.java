@@ -319,7 +319,7 @@ class ViewServer implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                Slog.w(LOG_TAG, "Connection error: ", e);
+                // Ignore
             } finally {
                 if (out != null) {
                     try {
