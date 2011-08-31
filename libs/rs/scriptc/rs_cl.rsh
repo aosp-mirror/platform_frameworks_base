@@ -660,7 +660,6 @@ FN_FUNC_FN(tgamma)
 extern float __attribute__((overloadable)) trunc(float);
 FN_FUNC_FN(trunc)
 
-// Int ops (partial), 6.11.3
 
 #define XN_FUNC_YN(typeout, fnc, typein)                                \
 extern typeout __attribute__((overloadable)) fnc(typein);               \
@@ -704,14 +703,29 @@ XN_FUNC_XN_XN_BODY(float, fnc, body)
 UIN_FUNC_IN(abs)
 IN_FUNC_IN(clz)
 
+/**
+ * Return the minimum of two values.
+ *
+ * Supports 1,2,3,4 components of uchar, char, ushort, short, uint, int, float.
+ */
 IN_FUNC_IN_IN_BODY(min, (v1 < v2 ? v1 : v2))
 FN_FUNC_FN_F(min)
 
+/**
+ * Return the maximum of two values.
+ *
+ * Supports 1,2,3,4 components of uchar, char, ushort, short, uint, int, float.
+ */
 IN_FUNC_IN_IN_BODY(max, (v1 > v2 ? v1 : v2))
 FN_FUNC_FN_F(max)
 
-// 6.11.4
-
+/**
+ *  Clamp a value to a specified high and low bound.
+ *
+ * @param amount value to be clamped.  Supports 1,2,3,4 components
+ * @param low Lower bound, must be scalar or matching vector.
+ * @param high High bound, must match type of low
+ */
 _RS_RUNTIME float __attribute__((overloadable)) clamp(float amount, float low, float high);
 _RS_RUNTIME float2 __attribute__((overloadable)) clamp(float2 amount, float2 low, float2 high);
 _RS_RUNTIME float3 __attribute__((overloadable)) clamp(float3 amount, float3 low, float3 high);
@@ -720,9 +734,19 @@ _RS_RUNTIME float2 __attribute__((overloadable)) clamp(float2 amount, float low,
 _RS_RUNTIME float3 __attribute__((overloadable)) clamp(float3 amount, float low, float high);
 _RS_RUNTIME float4 __attribute__((overloadable)) clamp(float4 amount, float low, float high);
 
+/**
+ * Convert from radians to degrees.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) degrees(float radians);
 FN_FUNC_FN(degrees)
 
+/**
+ * return start + ((stop - start) * amount);
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) mix(float start, float stop, float amount);
 _RS_RUNTIME float2 __attribute__((overloadable)) mix(float2 start, float2 stop, float2 amount);
 _RS_RUNTIME float3 __attribute__((overloadable)) mix(float3 start, float3 stop, float3 amount);
@@ -731,9 +755,22 @@ _RS_RUNTIME float2 __attribute__((overloadable)) mix(float2 start, float2 stop, 
 _RS_RUNTIME float3 __attribute__((overloadable)) mix(float3 start, float3 stop, float amount);
 _RS_RUNTIME float4 __attribute__((overloadable)) mix(float4 start, float4 stop, float amount);
 
+/**
+ * Convert from degrees to radians.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) radians(float degrees);
 FN_FUNC_FN(radians)
 
+/**
+ * if (v < edge)
+ *     return 0.f;
+ * else
+ *     return 1.f;
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) step(float edge, float v);
 _RS_RUNTIME float2 __attribute__((overloadable)) step(float2 edge, float2 v);
 _RS_RUNTIME float3 __attribute__((overloadable)) step(float3 edge, float3 v);
@@ -742,6 +779,7 @@ _RS_RUNTIME float2 __attribute__((overloadable)) step(float2 edge, float v);
 _RS_RUNTIME float3 __attribute__((overloadable)) step(float3 edge, float v);
 _RS_RUNTIME float4 __attribute__((overloadable)) step(float4 edge, float v);
 
+// not implemented
 extern float __attribute__((overloadable)) smoothstep(float, float, float);
 extern float2 __attribute__((overloadable)) smoothstep(float2, float2, float2);
 extern float3 __attribute__((overloadable)) smoothstep(float3, float3, float3);
@@ -750,29 +788,59 @@ extern float2 __attribute__((overloadable)) smoothstep(float, float, float2);
 extern float3 __attribute__((overloadable)) smoothstep(float, float, float3);
 extern float4 __attribute__((overloadable)) smoothstep(float, float, float4);
 
+/**
+ * if (v < 0) return -1.f;
+ * else if (v > 0) return 1.f;
+ * else return 0.f;
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) sign(float v);
 FN_FUNC_FN(sign)
 
-// 6.11.5
+/**
+ * Compute the cross product of two vectors.
+ *
+ * Supports 3,4 components
+ */
 _RS_RUNTIME float3 __attribute__((overloadable)) cross(float3 lhs, float3 rhs);
-
 _RS_RUNTIME float4 __attribute__((overloadable)) cross(float4 lhs, float4 rhs);
 
+/**
+ * Compute the dot product of two vectors.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) dot(float lhs, float rhs);
 _RS_RUNTIME float __attribute__((overloadable)) dot(float2 lhs, float2 rhs);
 _RS_RUNTIME float __attribute__((overloadable)) dot(float3 lhs, float3 rhs);
 _RS_RUNTIME float __attribute__((overloadable)) dot(float4 lhs, float4 rhs);
 
+/**
+ * Compute the length of a vector.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) length(float v);
 _RS_RUNTIME float __attribute__((overloadable)) length(float2 v);
 _RS_RUNTIME float __attribute__((overloadable)) length(float3 v);
 _RS_RUNTIME float __attribute__((overloadable)) length(float4 v);
 
+/**
+ * Compute the distance between two points.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) distance(float lhs, float rhs);
 _RS_RUNTIME float __attribute__((overloadable)) distance(float2 lhs, float2 rhs);
 _RS_RUNTIME float __attribute__((overloadable)) distance(float3 lhs, float3 rhs);
 _RS_RUNTIME float __attribute__((overloadable)) distance(float4 lhs, float4 rhs);
 
+/**
+ * Normalize a vector.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) normalize(float v);
 _RS_RUNTIME float2 __attribute__((overloadable)) normalize(float2 v);
 _RS_RUNTIME float3 __attribute__((overloadable)) normalize(float3 v);
