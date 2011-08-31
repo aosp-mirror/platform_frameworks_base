@@ -210,13 +210,10 @@ status_t MPEG2TSExtractor::feedMore() {
 
     if (n < (ssize_t)kTSPacketSize) {
         return (n < 0) ? (status_t)n : ERROR_END_OF_STREAM;
-    } else {
-        mParser->feedTSPacket(packet, kTSPacketSize);
     }
 
     mOffset += n;
-
-    return OK;
+    return mParser->feedTSPacket(packet, kTSPacketSize);
 }
 
 void MPEG2TSExtractor::setLiveSession(const sp<LiveSession> &liveSession) {
