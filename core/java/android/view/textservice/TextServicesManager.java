@@ -66,7 +66,13 @@ public final class TextServicesManager {
 
     /**
      * Get a spell checker session for the specified spell checker
-     * @param locale the locale for the spell checker
+     * @param locale the locale for the spell checker. If {@param locale} is null and
+     * referToSpellCheckerLanguageSettings is true, the locale specified in Settings will be
+     * returned. If {@param locale} is not null and referToSpellCheckerLanguageSettings is true,
+     * the locale specified in Settings will be returned only when it is same as {@param locale}.
+     * Exceptionally, when referToSpellCheckerLanguageSettings is true and {@param locale} is
+     * only language (e.g. "en"), the specified locale in Settings (e.g. "en_US") will be
+     * selected.
      * @param listener a spell checker session lister for getting results from a spell checker.
      * @param referToSpellCheckerLanguageSettings if true, the session for one of enabled
      * languages in settings will be returned.
@@ -108,7 +114,12 @@ public final class TextServicesManager {
             final String localeStr = locale.toString();
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype subtype = sci.getSubtypeAt(i);
-                if (subtype.getLocale().equals(localeStr)) {
+                final String tempSubtypeLocale = subtype.getLocale();
+                if (tempSubtypeLocale.equals(localeStr)) {
+                    subtypeInUse = subtype;
+                    break;
+                } else if (localeStr.length() >= 2 && tempSubtypeLocale.length() >= 2
+                        && localeStr.startsWith(tempSubtypeLocale)) {
                     subtypeInUse = subtype;
                 }
             }
