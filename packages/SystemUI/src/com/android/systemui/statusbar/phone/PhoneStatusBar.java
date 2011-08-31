@@ -1060,6 +1060,12 @@ public class PhoneStatusBar extends StatusBar {
         */
     }
 
+    public void showClock(boolean show) {
+        View clock = mStatusBarView.findViewById(R.id.clock);
+        if (clock != null) {
+            clock.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
 
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
@@ -1074,6 +1080,10 @@ public class PhoneStatusBar extends StatusBar {
                 old, state, diff));
         }
 
+        if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
+            boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
+            showClock(show);
+        }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.d(TAG, "DISABLE_EXPAND: yes");
