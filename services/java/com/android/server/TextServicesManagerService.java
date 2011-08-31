@@ -201,7 +201,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     Settings.Secure.getString(mContext.getContentResolver(),
                             Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE);
             if (DBG) {
-                Slog.w(TAG, "getCurrentSpellChecker: " + subtypeHashCodeStr);
+                Slog.w(TAG, "getCurrentSpellCheckerSubtype: " + subtypeHashCodeStr);
             }
             final SpellCheckerInfo sci = getCurrentSpellChecker(null);
             if (sci == null || sci.getSubtypeCount() == 0) {
@@ -509,7 +509,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                                 listener.mScLocale, listener.mScListener, listener.mBundle);
                         listener.mTsListener.onServiceConnected(session);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "Exception in getting the spell checker session: " + e);
+                        Slog.e(TAG, "Exception in getting the spell checker session."
+                                + "Reconnect to the spellchecker. ", e);
                         removeAll();
                         return;
                     }
@@ -579,8 +580,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 Slog.d(TAG, "cleanLocked");
             }
             if (mListeners.isEmpty()) {
-                if (mSpellCheckerBindGroups.containsKey(this)) {
-                    mSpellCheckerBindGroups.remove(this);
+                final String sciId = mInternalConnection.mSciId;
+                if (mSpellCheckerBindGroups.containsKey(sciId)) {
+                    if (DBG) {
+                        Slog.d(TAG, "Remove bind group.");
+                    }
+                    mSpellCheckerBindGroups.remove(sciId);
                 }
                 // Unbind service when there is no active clients.
                 mContext.unbindService(mInternalConnection);
