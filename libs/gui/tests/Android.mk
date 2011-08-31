@@ -1,4 +1,4 @@
-# Build the unit tests.
+# Build the unit tests,
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -22,17 +22,15 @@ LOCAL_SHARED_LIBRARIES := \
 	libui \
 	libutils \
 
-LOCAL_STATIC_LIBRARIES := \
-	libgtest \
-	libgtest_main \
-
 LOCAL_C_INCLUDES := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
     external/stlport/stlport \
 
-include $(BUILD_EXECUTABLE)
+# Build the binary to $(TARGET_OUT_DATA_NATIVE_TESTS)/$(LOCAL_MODULE)
+# to integrate with auto-test framework.
+include $(BUILD_NATIVE_TEST)
 
 # Include subdirectory makefiles
 # ============================================================
