@@ -9152,6 +9152,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 startDrag(data, getTextThumbnailBuilder(selectedText), localState, 0);
                 stopSelectionActionMode();
             } else {
+                getSelectionController().hide();
                 selectCurrentWord();
                 getSelectionController().show();
             }
@@ -9199,7 +9200,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private interface TextViewPositionListener {
-        public void updatePosition(int parentPositionX, int parentPositionY, boolean modified);
+        public void updatePosition(int parentPositionX, int parentPositionY,
+                boolean parentPositionChanged, boolean parentScrolled);
     }
 
     private class PositionListener implements ViewTreeObserver.OnPreDrawListener {
@@ -9212,6 +9214,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Absolute position of the TextView with respect to its parent window
         private int mPositionX, mPositionY;
         private int mNumberOfListeners;
+        private boolean mScrollHasChanged;
 
         public void addSubscriber(TextViewPositionListener positionListener, boolean canMove) {
             if (mNumberOfListeners == 0) {
@@ -9263,15 +9266,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updatePosition();
 
             for (int i = 0; i < MAXIMUM_NUMBER_OF_LISTENERS; i++) {
-                if (mPositionHasChanged || mCanMove[i]) {
+                if (mPositionHasChanged || mScrollHasChanged || mCanMove[i]) {
                     TextViewPositionListener positionListener = mPositionListeners[i];
                     if (positionListener != null) {
                         positionListener.updatePosition(mPositionX, mPositionY,
-                                mPositionHasChanged);
+                                mPositionHasChanged, mScrollHasChanged);
                     }
                 }
             }
 
+            mScrollHasChanged = false;
             return true;
         }
 
@@ -9313,6 +9317,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int primaryHorizontal = (int) mLayout.getPrimaryHorizontal(offset);
             return isVisible(primaryHorizontal, lineBottom);
         }
+
+        public void onScrollChanged() {
+            mScrollHasChanged = true;
+        }
+    }
+
+    @Override
+    protected void onScrollChanged(int horiz, int vert, int oldHoriz, int oldVert) {
+        super.onScrollChanged(horiz, vert, oldHoriz, oldVert);
+        if (mPositionListener != null) {
+            mPositionListener.onScrollChanged();
+        }
     }
 
     private abstract class PinnedPopupWindow implements TextViewPositionListener {
@@ -9343,7 +9359,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void show() {
-            TextView.this.getPositionListener().addSubscriber(this, false);
+            TextView.this.getPositionListener().addSubscriber(this, false /* offset is fixed */);
 
             computeLocalPosition();
 
@@ -9402,8 +9418,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updatePosition(int parentPositionX, int parentPositionY, boolean modified) {
+        public void updatePosition(int parentPositionX, int parentPositionY,
+                boolean parentPositionChanged, boolean parentScrolled) {
+            // Either parentPositionChanged or parentScrolled is true, check if still visible
             if (isShowing() && getPositionListener().isOffsetVisible(getTextOffset())) {
+                if (parentScrolled) computeLocalPosition();
                 updatePosition(parentPositionX, parentPositionY);
             } else {
                 hide();
@@ -10349,7 +10368,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (i > 0 && i < iMax &&
                     (now - mPreviousOffsetsTimes[index]) > TOUCH_UP_FILTER_DELAY_BEFORE) {
-                positionAtCursorOffset(mPreviousOffsets[index]);
+                positionAtCursorOffset(mPreviousOffsets[index], false);
             }
         }
 
@@ -10365,11 +10384,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void show() {
             if (isShowing()) return;
 
-            getPositionListener().addSubscriber(this, true);
+            getPositionListener().addSubscriber(this, true /* local position may change */);
 
             // Make sure the offset is always considered new, even when focusing at same position
             mPreviousOffset = -1;
-            positionAtCursorOffset(getCurrentCursorOffset());
+            positionAtCursorOffset(getCurrentCursorOffset(), false);
 
             hideActionPopupWindow();
         }
@@ -10434,7 +10453,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public abstract void updatePosition(float x, float y);
 
-        protected void positionAtCursorOffset(int offset) {
+        protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
             // A HandleView relies on the layout, which may be nulled by external methods
             if (mLayout == null) {
                 // Will update controllers' state, hiding them and stopping selection mode if needed
@@ -10442,7 +10461,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            if (offset != mPreviousOffset) {
+            if (offset != mPreviousOffset || parentScrolled) {
                 updateSelection(offset);
                 addPositionToTouchUpFilter(offset);
                 final int line = mLayout.getLineForOffset(offset);
@@ -10459,9 +10478,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        public void updatePosition(int parentPositionX, int parentPositionY, boolean modified) {
-            positionAtCursorOffset(getCurrentCursorOffset());
-            if (modified || mPositionHasChanged) {
+        public void updatePosition(int parentPositionX, int parentPositionY,
+                boolean parentPositionChanged, boolean parentScrolled) {
+            positionAtCursorOffset(getCurrentCursorOffset(), parentScrolled);
+            if (parentPositionChanged || mPositionHasChanged) {
                 if (mIsDragging) {
                     // Update touchToWindow offset in case of parent scrolling while dragging
                     if (parentPositionX != mLastParentX || parentPositionY != mLastParentY) {
@@ -10666,7 +10686,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updatePosition(float x, float y) {
-            positionAtCursorOffset(getOffsetForPosition(x, y));
+            positionAtCursorOffset(getOffsetForPosition(x, y), false);
         }
 
         @Override
@@ -10705,17 +10725,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updatePosition(float x, float y) {
-            final int selectionStart = getSelectionStart();
-            final int selectionEnd = getSelectionEnd();
-
             int offset = getOffsetForPosition(x, y);
 
-            // No need to redraw when the offset is unchanged
-            if (offset == selectionStart) return;
             // Handles can not cross and selection is at least one character
+            final int selectionEnd = getSelectionEnd();
             if (offset >= selectionEnd) offset = selectionEnd - 1;
 
-            positionAtCursorOffset(offset);
+            positionAtCursorOffset(offset, false);
         }
 
         public ActionPopupWindow getActionPopupWindow() {
@@ -10746,17 +10762,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updatePosition(float x, float y) {
-            final int selectionStart = getSelectionStart();
-            final int selectionEnd = getSelectionEnd();
-
             int offset = getOffsetForPosition(x, y);
 
-            // No need to redraw when the offset is unchanged
-            if (offset == selectionEnd) return;
             // Handles can not cross and selection is at least one character
+            final int selectionStart = getSelectionStart();
             if (offset <= selectionStart) offset = selectionStart + 1;
 
-            positionAtCursorOffset(offset);
+            positionAtCursorOffset(offset, false);
         }
 
         public void setActionPopupWindow(ActionPopupWindow actionPopupWindow) {
