@@ -42,7 +42,7 @@ NuPlayer::StreamingSource::~StreamingSource() {
 
 void NuPlayer::StreamingSource::start() {
     mStreamListener = new NuPlayerStreamListener(mSource, 0);
-    mTSParser = new ATSParser;
+    mTSParser = new ATSParser(ATSParser::TS_TIMESTAMPS_ARE_ABSOLUTE);
 
     mStreamListener->start();
 }

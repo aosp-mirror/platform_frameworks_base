@@ -38,7 +38,16 @@ struct ATSParser : public RefBase {
         DISCONTINUITY_FORMATCHANGE
     };
 
-    ATSParser();
+    enum Flags {
+        // The 90kHz clock (PTS/DTS) is absolute, i.e. PTS=0 corresponds to
+        // a media time of 0.
+        // If this flag is _not_ specified, the first PTS encountered in a
+        // program of this stream will be assumed to correspond to media time 0
+        // instead.
+        TS_TIMESTAMPS_ARE_ABSOLUTE = 1
+    };
+
+    ATSParser(uint32_t flags = 0);
 
     void feedTSPacket(const void *data, size_t size);
 
@@ -73,6 +82,7 @@ private:
     struct Program;
     struct Stream;
 
+    uint32_t mFlags;
     Vector<sp<Program> > mPrograms;
 
     void parseProgramAssociationTable(ABitReader *br);

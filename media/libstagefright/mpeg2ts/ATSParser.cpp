@@ -325,14 +325,16 @@ sp<MediaSource> ATSParser::Program::getSource(SourceType type) {
 }
 
 int64_t ATSParser::Program::convertPTSToTimestamp(uint64_t PTS) {
-    if (!mFirstPTSValid) {
-        mFirstPTSValid = true;
-        mFirstPTS = PTS;
-        PTS = 0;
-    } else if (PTS < mFirstPTS) {
-        PTS = 0;
-    } else {
-        PTS -= mFirstPTS;
+    if (!(mParser->mFlags & TS_TIMESTAMPS_ARE_ABSOLUTE)) {
+        if (!mFirstPTSValid) {
+            mFirstPTSValid = true;
+            mFirstPTS = PTS;
+            PTS = 0;
+        } else if (PTS < mFirstPTS) {
+            PTS = 0;
+        } else {
+            PTS -= mFirstPTS;
+        }
     }
 
     return (PTS * 100) / 9;
@@ -734,7 +736,8 @@ sp<MediaSource> ATSParser::Stream::getSource(SourceType type) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ATSParser::ATSParser() {
+ATSParser::ATSParser(uint32_t flags)
+    : mFlags(flags) {
 }
 
 ATSParser::~ATSParser() {
