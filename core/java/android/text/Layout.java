@@ -1296,7 +1296,10 @@ public abstract class Layout {
                     float h1 = getHorizontal(st, false, line);
                     float h2 = getHorizontal(en, true, line);
 
-                    dest.addRect(h1, top, h2, bottom, Path.Direction.CW);
+                    float left = Math.min(h1, h2);
+                    float right = Math.max(h1, h2);
+
+                    dest.addRect(left, top, right, bottom, Path.Direction.CW);
                 }
             }
         }
