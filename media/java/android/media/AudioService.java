@@ -1558,21 +1558,29 @@ public class AudioService extends IAudioService.Stub {
     private boolean checkForRingerModeChange(int oldIndex, int direction) {
         boolean adjustVolumeIndex = true;
         int newRingerMode = mRingerMode;
+        int uiIndex = (oldIndex + 5) / 10;
 
         if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
-            // audible mode, at the bottom of the scale
-            if ((direction == AudioManager.ADJUST_LOWER &&
-                 mPrevVolDirection != AudioManager.ADJUST_LOWER) &&
-                ((oldIndex + 5) / 10 == 0)) {
-                // "silent mode", but which one?
-                newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
-                    ? AudioManager.RINGER_MODE_VIBRATE
-                    : AudioManager.RINGER_MODE_SILENT;
+            if ((direction == AudioManager.ADJUST_LOWER) && (uiIndex <= 1)) {
+                // enter silent mode if current index is the last audible one and not repeating a
+                // volume key down
+                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                    // "silent mode", but which one?
+                    newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
+                        ? AudioManager.RINGER_MODE_VIBRATE
+                        : AudioManager.RINGER_MODE_SILENT;
+                }
+                if (uiIndex == 0) {
+                    adjustVolumeIndex = false;
+                }
             }
         } else {
             if (direction == AudioManager.ADJUST_RAISE) {
                 // exiting silent mode
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+                if (uiIndex != 0) {
+                    adjustVolumeIndex = false;
+                }
             } else {
                 // prevent last audible index to reach 0
                 adjustVolumeIndex = false;
@@ -1581,13 +1589,6 @@ public class AudioService extends IAudioService.Stub {
 
         if (newRingerMode != mRingerMode) {
             setRingerMode(newRingerMode);
-
-            /*
-             * If we are changing ringer modes, do not increment/decrement the
-             * volume index. Instead, the handler for the message above will
-             * take care of changing the index.
-             */
-            adjustVolumeIndex = false;
         }
 
         mPrevVolDirection = direction;
