@@ -415,6 +415,9 @@ class AudioPlaybackHandler {
         }
 
         if (params.mBytesWritten < params.mAudioBufferSize) {
+            if (DBG) Log.d(TAG, "Stopping audio track to flush audio, state was : " +
+                    audioTrack.getPlayState());
+            params.mIsShortUtterance = true;
             audioTrack.stop();
         }
 
@@ -452,10 +455,40 @@ class AudioPlaybackHandler {
             return;
         }
 
+        if (params.mIsShortUtterance) {
+            // In this case we would have called AudioTrack#stop() to flush
+            // buffers to the mixer. This makes the playback head position
+            // unobservable and notification markers do not work reliably. We
+            // have no option but to wait until we think the track would finish
+            // playing and release it after.
+            //
+            // This isn't as bad as it looks because (a) We won't end up waiting
+            // for much longer than we should because even at 4khz mono, a short
+            // utterance weighs in at about 2 seconds, and (b) such short utterances
+            // are expected to be relatively infrequent and in a stream of utterances
+            // this shows up as a slightly longer pause.
+            blockUntilEstimatedCompletion(params);
+        } else {
+            blockUntilCompletion(params);
+        }
+    }
+
+    private static void blockUntilEstimatedCompletion(SynthesisMessageParams params) {
+        final int lengthInFrames = params.mBytesWritten / params.mBytesPerFrame;
+        final long estimatedTimeMs = (lengthInFrames * 1000 / params.mSampleRateInHz);
+
+        if (DBG) Log.d(TAG, "About to sleep for: " + estimatedTimeMs + "ms for a short utterance");
+
+        try {
+            Thread.sleep(estimatedTimeMs);
+        } catch (InterruptedException ie) {
+            // Do nothing.
+        }
+    }
+
+    private static void blockUntilCompletion(SynthesisMessageParams params) {
         final AudioTrack audioTrack = params.mAudioTrack;
-        final int bytesPerFrame = params.mBytesPerFrame;
-        final int lengthInBytes = params.mBytesWritten;
-        final int lengthInFrames = lengthInBytes / bytesPerFrame;
+        final int lengthInFrames = params.mBytesWritten / params.mBytesPerFrame;
 
         int currentPosition = 0;
         while ((currentPosition = audioTrack.getPlaybackHeadPosition()) < lengthInFrames) {
