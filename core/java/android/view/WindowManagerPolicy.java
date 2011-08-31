@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
 import android.view.animation.Animation;
@@ -165,7 +166,7 @@ public interface WindowManagerPolicy {
          * 
          * @return Rect The rectangle holding the shown window frame.
          */
-        public Rect getShownFrameLw();
+        public RectF getShownFrameLw();
 
         /**
          * Retrieve the frame of the display that this window was last

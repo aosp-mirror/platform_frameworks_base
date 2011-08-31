@@ -8461,8 +8461,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + Integer.toHexString(diff));
                     }
                     win.mConfiguration = mCurConfiguration;
-                    win.mClient.resized(win.mSurfaceW, win.mSurfaceH, win.mLastContentInsets,
-                            win.mLastVisibleInsets, win.mDrawPending,
+                    win.mClient.resized((int)win.mSurfaceW, (int)win.mSurfaceH,
+                            win.mLastContentInsets, win.mLastVisibleInsets, win.mDrawPending,
                             configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;

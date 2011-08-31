@@ -38,6 +38,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2266,7 +2267,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // incorrectly think it does cover it when it doesn't.  We'll revisit
             // this later when we re-do the phone status bar.
             if (mStatusBar != null && mStatusBar.isVisibleLw()) {
-                Rect rect = new Rect(mStatusBar.getShownFrameLw());
+                RectF rect = new RectF(mStatusBar.getShownFrameLw());
                 for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
                     WindowState w = mStatusBarPanels.get(i);
                     if (w.isVisibleLw()) {
