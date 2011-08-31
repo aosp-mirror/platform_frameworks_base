@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,6 +30,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.lang.IllegalArgumentException;
 import java.util.HashMap;
 
 /**
@@ -236,6 +238,23 @@ public class RemoteControlClient
         mEventHandler = new EventHandler(this, looper);
     }
 
+    private static final int[] METADATA_KEYS_TYPE_STRING = {
+        MediaMetadataRetriever.METADATA_KEY_ALBUM,
+        MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
+        MediaMetadataRetriever.METADATA_KEY_TITLE,
+        MediaMetadataRetriever.METADATA_KEY_ARTIST,
+        MediaMetadataRetriever.METADATA_KEY_AUTHOR,
+        MediaMetadataRetriever.METADATA_KEY_COMPILATION,
+        MediaMetadataRetriever.METADATA_KEY_COMPOSER,
+        MediaMetadataRetriever.METADATA_KEY_DATE,
+        MediaMetadataRetriever.METADATA_KEY_GENRE,
+        MediaMetadataRetriever.METADATA_KEY_TITLE,
+        MediaMetadataRetriever.METADATA_KEY_WRITER };
+    private static final int[] METADATA_KEYS_TYPE_LONG = {
+        MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
+        MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER,
+        MediaMetadataRetriever.METADATA_KEY_DURATION };
+
     /**
      * Class used to modify metadata in a {@link RemoteControlClient} object.
      */
@@ -256,6 +275,11 @@ public class RemoteControlClient
         }
 
         /**
+         * The metadata key for the content artwork / album art.
+         */
+        public final static int METADATA_KEY_ARTWORK = 100;
+
+        /**
          * Adds textual information to be displayed.
          * Note that none of the information added after {@link #apply()} has been called,
          * will be displayed.
@@ -265,24 +289,25 @@ public class RemoteControlClient
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ARTIST},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_AUTHOR},
-         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_CD_TRACK_NUMBER},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_COMPILATION},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_COMPOSER},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DATE},
-         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER},
-         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_GENRE},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_WRITER},
-         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
-         * @param value the text for the given key, or null to signify there is no valid
+         *      .
+         * @param value the text for the given key, or {@code null} to signify there is no valid
          *      information for the field.
          * @return      FIXME description
          */
-        public synchronized MetadataEditor putString(int key, String value) {
+        public synchronized MetadataEditor putString(int key, String value)
+                throws IllegalArgumentException {
             if (mApplied) {
                 Log.e(TAG, "Can't edit a previously applied MetadataEditor");
                 return this;
+            }
+            if (!validTypeForKey(key, METADATA_KEYS_TYPE_STRING)) {
+                throw(new IllegalArgumentException("Invalid type 'String' for key "+ key));
             }
             mEditorMetadata.putString(String.valueOf(key), value);
             mMetadataChanged = true;
@@ -290,24 +315,47 @@ public class RemoteControlClient
         }
 
         /**
-         * The metadata key for the content artwork / album art.
+         * FIXME javadoc
+         * @param key the identifier of a the metadata field to set. Valid values are
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_CD_TRACK_NUMBER},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER},
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION} (with a value
+         *      expressed in milliseconds),
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
+         * @param value FIXME javadoc
+         * @return FIXME javadoc
+         * @throws IllegalArgumentException
          */
-        public final int METADATA_KEY_ARTWORK = 100;
+        public synchronized MetadataEditor putLong(int key, long value)
+                throws IllegalArgumentException {
+            if (mApplied) {
+                Log.e(TAG, "Can't edit a previously applied MetadataEditor");
+                return this;
+            }
+            if (!validTypeForKey(key, METADATA_KEYS_TYPE_LONG)) {
+                throw(new IllegalArgumentException("Invalid type 'long' for key "+ key));
+            }
+            mEditorMetadata.putLong(String.valueOf(key), value);
+            mMetadataChanged = true;
+            return this;
+        }
 
         /**
          * Sets the album / artwork picture to be displayed on the remote control.
          * @param key FIXME description
          * @param bitmap the bitmap for the artwork, or null if there isn't any.
          * @return FIXME description
+         * @throws IllegalArgumentException
          * @see android.graphics.Bitmap
          */
-        public synchronized MetadataEditor putBitmap(int key, Bitmap bitmap) {
+        public synchronized MetadataEditor putBitmap(int key, Bitmap bitmap)
+                throws IllegalArgumentException {
             if (mApplied) {
                 Log.e(TAG, "Can't edit a previously applied MetadataEditor");
                 return this;
             }
             if (key != METADATA_KEY_ARTWORK) {
-                return this;
+                throw(new IllegalArgumentException("Invalid type 'Bitmap' for key "+ key));
             }
             if ((mArtworkExpectedWidth > 0) && (mArtworkExpectedHeight > 0)) {
                 mEditorArtwork = scaleBitmapIfTooBig(bitmap,
@@ -740,6 +788,24 @@ public class RemoteControlClient
             }
         }
         return bitmap;
+    }
 
+    /**
+     *  Fast routine to go through an array of allowed keys and return whether the key is part
+     *  of that array
+     * @param key the key value
+     * @param validKeys the array of valid keys for a given type
+     * @return true if the key is part of the array, false otherwise
+     */
+    private static boolean validTypeForKey(int key, int[] validKeys) {
+        try {
+            for (int i = 0 ; ; i++) {
+                if (key == validKeys[i]) {
+                    return true;
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
     }
 }
