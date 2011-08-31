@@ -75,8 +75,8 @@ public class HorizontalScrollView extends FrameLayout {
 
     private final Rect mTempRect = new Rect();
     private OverScroller mScroller;
-    private EdgeGlow mEdgeGlowLeft;
-    private EdgeGlow mEdgeGlowRight;
+    private EdgeEffect mEdgeGlowLeft;
+    private EdgeEffect mEdgeGlowRight;
 
     /**
      * Position of the last motion event.
@@ -1477,11 +1477,8 @@ public class HorizontalScrollView extends FrameLayout {
         if (mode != OVER_SCROLL_NEVER) {
             if (mEdgeGlowLeft == null) {
                 Context context = getContext();
-                final Resources res = context.getResources();
-                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
-                final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
-                mEdgeGlowLeft = new EdgeGlow(context, edge, glow);
-                mEdgeGlowRight = new EdgeGlow(context, edge, glow);
+                mEdgeGlowLeft = new EdgeEffect(context);
+                mEdgeGlowRight = new EdgeEffect(context);
             }
         } else {
             mEdgeGlowLeft = null;

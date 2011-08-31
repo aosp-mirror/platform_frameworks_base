@@ -16,7 +16,10 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.view.animation.AnimationUtils;
@@ -24,19 +27,33 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 /**
- * This class performs the glow effect used at the edges of scrollable widgets.
- * @hide
+ * This class performs the graphical effect used at the edges of scrollable widgets
+ * when the user scrolls beyond the content bounds in 2D space.
+ *
+ * <p>EdgeEffect is stateful. Custom widgets using EdgeEffect should create an
+ * instance for each edge that should show the effect, feed it input data using
+ * the methods {@link #onAbsorb(int)}, {@link #onPull(float)}, and {@link #onRelease()},
+ * and draw the effect using {@link #draw(Canvas)} in the widget's overridden
+ * {@link android.view.View#draw(Canvas)} method. If {@link #isFinished()} returns
+ * false after drawing, the edge effect's animation is not yet complete and the widget
+ * should schedule another drawing pass to continue the animation.</p>
+ *
+ * <p>When drawing, widgets should draw their main content and child views first,
+ * usually by invoking <code>super.draw(canvas)</code> from an overridden <code>draw</code>
+ * method. (This will invoke onDraw and dispatch drawing to child views as needed.)
+ * The edge effect may then be drawn on top of the view's content using the
+ * {@link #draw(Canvas)} method.</p>
  */
-public class EdgeGlow {
-    private static final String TAG = "EdgeGlow";
+public class EdgeEffect {
+    private static final String TAG = "EdgeEffect";
 
     // Time it will take the effect to fully recede in ms
     private static final int RECEDE_TIME = 1000;
 
-    // Time it will take before a pulled glow begins receding
+    // Time it will take before a pulled glow begins receding in ms
     private static final int PULL_TIME = 167;
 
-    // Time it will take for a pulled glow to decay to partial strength before release
+    // Time it will take in ms for a pulled glow to decay to partial strength before release
     private static final int PULL_DECAY_TIME = 1000;
 
     private static final float MAX_ALPHA = 0.8f;
@@ -103,31 +120,58 @@ public class EdgeGlow {
 
     private float mPullDistance;
 
-    public EdgeGlow(Context context, Drawable edge, Drawable glow) {
-        mEdge = edge;
-        mGlow = glow;
+    /**
+     * Construct a new EdgeEffect with a theme appropriate for the provided context.
+     * @param context Context used to provide theming and resource information for the EdgeEffect
+     */
+    public EdgeEffect(Context context) {
+        final Resources res = context.getResources();
+        mEdge = res.getDrawable(R.drawable.overscroll_edge);
+        mGlow = res.getDrawable(R.drawable.overscroll_glow);
 
         mMinWidth = (int) (context.getResources().getDisplayMetrics().density * MIN_WIDTH + 0.5f);
         mInterpolator = new DecelerateInterpolator();
     }
 
+    /**
+     * Set the size of this edge effect in pixels.
+     *
+     * @param width Effect width in pixels
+     * @param height Effect height in pixels
+     */
     public void setSize(int width, int height) {
         mWidth = width;
         mHeight = height;
     }
 
+    /**
+     * Reports if this EdgeEffect's animation is finished. If this method returns false
+     * after a call to {@link #draw(Canvas)} the host widget should schedule another
+     * drawing pass to continue the animation.
+     *
+     * @return true if animation is finished, false if drawing should continue on the next frame.
+     */
     public boolean isFinished() {
         return mState == STATE_IDLE;
     }
 
+    /**
+     * Immediately finish the current animation.
+     * After this call {@link #isFinished()} will return true.
+     */
     public void finish() {
         mState = STATE_IDLE;
     }
 
     /**
-     * Call when the object is pulled by the user.
+     * A view should call this when content is pulled away from an edge by the user.
+     * This will update the state of the current visual effect and its associated animation.
+     * The host view should always {@link android.view.View#invalidate()} after this
+     * and draw the results accordingly.
      *
-     * @param deltaDistance Change in distance since the last call
+     * @param deltaDistance Change in distance since the last call. Values may be 0 (no change) to
+     *                      1.f (full length of the view) or negative values to express change
+     *                      back toward the edge reached to initiate the effect.
      */
     public void onPull(float deltaDistance) {
         final long now = AnimationUtils.currentAnimationTimeMillis();
@@ -173,6 +217,9 @@ public class EdgeGlow {
 
     /**
      * Call when the object is released after being pulled.
+     * This will begin the "decay" phase of the effect. After calling this method
+     * the host view should {@link android.view.View#invalidate()} and thereby
+     * draw the results accordingly.
      */
     public void onRelease() {
         mPullDistance = 0;
@@ -198,6 +245,11 @@ public class EdgeGlow {
 
     /**
      * Call when the effect absorbs an impact at the given velocity.
+     * Used when a fling reaches the scroll boundary.
+     *
+     * <p>When using a {@link android.widget.Scroller} or {@link android.widget.OverScroller},
+     * the method <code>getCurrVelocity</code> will provide a reasonable approximation
+     * to use here.</p>
      *
      * @param velocity Velocity at impact in pixels per second.
      */
@@ -238,7 +290,7 @@ public class EdgeGlow {
     /**
      * Draw into the provided canvas. Assumes that the canvas has been rotated
      * accordingly and the size has been set. The effect will be drawn the full
-     * width of X=0 to X=width, emitting from Y=0 and extending to some factor <
+     * width of X=0 to X=width, beginning from Y=0 and extending to some factor <
      * 1.f of height.
      *
      * @param canvas Canvas to draw into

@@ -25787,6 +25787,17 @@ package android.widget {
     ctor public DigitalClock(android.content.Context, android.util.AttributeSet);
   }
 
+  public class EdgeEffect {
+    ctor public EdgeEffect(android.content.Context);
+    method public boolean draw(android.graphics.Canvas);
+    method public void finish();
+    method public boolean isFinished();
+    method public void onAbsorb(int);
+    method public void onPull(float);
+    method public void onRelease();
+    method public void setSize(int, int);
+  }
+
   public class EditText extends android.widget.TextView {
     ctor public EditText(android.content.Context);
     ctor public EditText(android.content.Context, android.util.AttributeSet);
@@ -26372,6 +26383,7 @@ package android.widget {
     method public void fling(int, int, int, int, int, int, int, int);
     method public void fling(int, int, int, int, int, int, int, int, int, int);
     method public final void forceFinished(boolean);
+    method public float getCurrVelocity();
     method public final int getCurrX();
     method public final int getCurrY();
     method public final int getFinalX();
@@ -26714,6 +26726,7 @@ package android.widget {
     method public void extendDuration(int);
     method public void fling(int, int, int, int, int, int, int, int);
     method public final void forceFinished(boolean);
+    method public float getCurrVelocity();
     method public final int getCurrX();
     method public final int getCurrY();
     method public final int getDuration();
