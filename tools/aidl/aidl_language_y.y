@@ -19,6 +19,7 @@ static int count_brackets(const char*);
 %token ARRAY
 %token PARCELABLE
 %token INTERFACE
+%token RPC
 %token IN
 %token OUT
 %token INOUT
@@ -102,6 +103,8 @@ parcelable_decl:
 interface_header:
         INTERFACE                                  {
                                                         interface_type* c = (interface_type*)malloc(sizeof(interface_type));
+                                                        c->document_item.item_type = INTERFACE_TYPE_BINDER;
+                                                        c->document_item.next = NULL;
                                                         c->interface_token = $1.buffer;
                                                         c->oneway = false;
                                                         memset(&c->oneway_token, 0, sizeof(buffer_type));
@@ -110,19 +113,34 @@ interface_header:
                                                    }
     |   ONEWAY INTERFACE                           {
                                                         interface_type* c = (interface_type*)malloc(sizeof(interface_type));
+                                                        c->document_item.item_type = INTERFACE_TYPE_BINDER;
+                                                        c->document_item.next = NULL;
                                                         c->interface_token = $2.buffer;
                                                         c->oneway = true;
                                                         c->oneway_token = $1.buffer;
                                                         c->comments_token = &c->oneway_token;
                                                         $$.interface_obj = c;
                                                    }
+    |   RPC                                        {
+                                                        interface_type* c = (interface_type*)malloc(sizeof(interface_type));
+                                                        c->document_item.item_type = INTERFACE_TYPE_RPC;
+                                                        c->document_item.next = NULL;
+                                                        c->interface_token = $1.buffer;
+                                                        c->oneway = false;
+                                                        memset(&c->oneway_token, 0, sizeof(buffer_type));
+                                                        c->comments_token = &c->interface_token;
+                                                        $$.interface_obj = c;
+                                                   }
+    ;
+
+interface_keywords:
+        INTERFACE
+    |   RPC
     ;
 
 interface_decl:
         interface_header IDENTIFIER '{' interface_items '}' { 
                                                         interface_type* c = $1.interface_obj;
-                                                        c->document_item.item_type = INTERFACE_TYPE;
-                                                        c->document_item.next = NULL;
                                                         c->name = $2.buffer;
                                                         c->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
                                                         c->open_brace_token = $3.buffer;
@@ -130,12 +148,12 @@ interface_decl:
                                                         c->close_brace_token = $5.buffer;
                                                         $$.interface_obj = c;
                                                     }
-    |   INTERFACE error '{' interface_items '}'     {
+    |   interface_keywords error '{' interface_items '}'     {
                                                         fprintf(stderr, "%s:%d: syntax error in interface declaration.  Expected type name, saw \"%s\"\n",
                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
                                                         $$.document_item = NULL;
                                                     }
-    |   INTERFACE error '}'                             {
+    |   interface_keywords error '}'                {
                                                         fprintf(stderr, "%s:%d: syntax error in interface declaration.  Expected type name, saw \"%s\"\n",
                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
                                                         $$.document_item = NULL;

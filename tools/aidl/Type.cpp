@@ -11,6 +11,7 @@ Type* LONG_TYPE;
 Type* FLOAT_TYPE;
 Type* DOUBLE_TYPE;
 Type* STRING_TYPE;
+Type* OBJECT_TYPE;
 Type* CHAR_SEQUENCE_TYPE;
 Type* TEXT_UTILS_TYPE;
 Type* REMOTE_EXCEPTION_TYPE;
@@ -21,9 +22,17 @@ Type* BINDER_NATIVE_TYPE;
 Type* BINDER_PROXY_TYPE;
 Type* PARCEL_TYPE;
 Type* PARCELABLE_INTERFACE_TYPE;
+Type* CONTEXT_TYPE;
 Type* MAP_TYPE;
 Type* LIST_TYPE;
 Type* CLASSLOADER_TYPE;
+Type* RPC_SERVICE_BASE_TYPE;
+Type* RPC_DATA_TYPE;
+Type* RPC_BROKER_TYPE;
+Type* RPC_ENDPOINT_INFO_TYPE;
+Type* RPC_RESULT_HANDLER_TYPE;
+Type* RPC_ERROR_TYPE;
+Type* RPC_ERROR_LISTENER_TYPE;
 
 Expression* NULL_VALUE;
 Expression* THIS_VALUE;
@@ -66,6 +75,10 @@ register_base_types()
     STRING_TYPE = new StringType();
     NAMES.Add(STRING_TYPE);
 
+    OBJECT_TYPE = new Type("java.lang", "Object",
+            Type::BUILT_IN, false, false);
+    NAMES.Add(OBJECT_TYPE);
+
     CHAR_SEQUENCE_TYPE = new CharSequenceType();
     NAMES.Add(CHAR_SEQUENCE_TYPE);
 
@@ -102,6 +115,38 @@ register_base_types()
 
     PARCELABLE_INTERFACE_TYPE = new ParcelableInterfaceType();
     NAMES.Add(PARCELABLE_INTERFACE_TYPE);
+
+    CONTEXT_TYPE = new Type("android.content", "Context",
+                                    Type::BUILT_IN, false, false);
+    NAMES.Add(CONTEXT_TYPE);
+
+    RPC_SERVICE_BASE_TYPE = new Type("com.android.athome.service", "AndroidAtHomeService",
+                                    Type::BUILT_IN, false, false);
+    NAMES.Add(RPC_SERVICE_BASE_TYPE);
+
+    RPC_DATA_TYPE = new Type("com.android.athome.rpc", "RpcData",
+                                    Type::BUILT_IN, false, false);
+    NAMES.Add(RPC_DATA_TYPE);
+
+    RPC_BROKER_TYPE = new Type("com.android.athome.utils", "AndroidAtHomeBroker",
+                                    Type::BUILT_IN, false, false);
+    NAMES.Add(RPC_BROKER_TYPE);
+
+    RPC_ENDPOINT_INFO_TYPE = new ParcelableType("com.android.athome.rpc", "EndpointInfo",
+                                    true, __FILE__, __LINE__);
+    NAMES.Add(RPC_ENDPOINT_INFO_TYPE);
+
+    RPC_RESULT_HANDLER_TYPE = new ParcelableType("com.android.athome.rpc", "RpcResultHandler",
+                                    true, __FILE__, __LINE__);
+    NAMES.Add(RPC_RESULT_HANDLER_TYPE);
+
+    RPC_ERROR_TYPE = new ParcelableType("com.android.athome.rpc", "RpcError",
+                                    true, __FILE__, __LINE__);
+    NAMES.Add(RPC_ERROR_TYPE);
+
+    RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
+                                    Type::BUILT_IN, false, false);
+    NAMES.Add(RPC_ERROR_LISTENER_TYPE);
 
     CLASSLOADER_TYPE = new ClassLoaderType();
     NAMES.Add(CLASSLOADER_TYPE);
@@ -240,6 +285,36 @@ Type::ReadArrayFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, 
     fprintf(stderr, "aidl:internal error %s:%d qualifiedName=%s\n",
             __FILE__, __LINE__, m_qualifiedName.c_str());
     addTo->Add(new LiteralExpression("/* ReadArrayFromParcel error "
+                + m_qualifiedName + " */"));
+}
+
+void
+Type::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+        Variable* data, int flags)
+{
+    fprintf(stderr, "aidl:internal error %s:%d qualifiedName=%sn",
+            __FILE__, __LINE__, m_qualifiedName.c_str());
+    addTo->Add(new LiteralExpression("/* WriteToRpcData error "
+                + m_qualifiedName + " */"));
+}
+
+void
+Type::ReadFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, Variable* data,
+        Variable** cl)
+{
+    fprintf(stderr, "aidl:internal error %s:%d qualifiedName=%sn",
+            __FILE__, __LINE__, m_qualifiedName.c_str());
+    addTo->Add(new LiteralExpression("/* ReadFromRpcData error "
+                + m_qualifiedName + " */"));
+}
+
+void
+Type::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, Variable* data,
+        Variable** cl)
+{
+    fprintf(stderr, "aidl:internal error %s:%d qualifiedName=%sn",
+            __FILE__, __LINE__, m_qualifiedName.c_str());
+    addTo->Add(new LiteralExpression("/* ReadFromRpcData error "
                 + m_qualifiedName + " */"));
 }
 
@@ -456,6 +531,20 @@ void
 StringType::ReadArrayFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, Variable**)
 {
     addTo->Add(new MethodCall(parcel, "readStringArray", 1, v));
+}
+
+void
+StringType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+        Variable* data, int flags)
+{
+    addTo->Add(new MethodCall(data, "putString", 2, k, v));
+}
+
+void
+StringType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+        Variable* data, Variable**)
+{
+    addTo->Add(new Assignment(v, new MethodCall(data, "getString", 1, k)));
 }
 
 // ================================================================
