@@ -513,7 +513,8 @@ void AwesomePlayer::reset_l() {
     // If we did this later, audio would continue playing while we
     // shutdown the video-related resources and the player appear to
     // not be as responsive to a reset request.
-    if (mAudioPlayer == NULL && mAudioSource != NULL) {
+    if ((mAudioPlayer == NULL || !(mFlags & AUDIOPLAYER_STARTED))
+            && mAudioSource != NULL) {
         // If we had an audio player, it would have effectively
         // taken possession of the audio source and stopped it when
         // _it_ is stopped. Otherwise this is still our responsibility.
