@@ -87,6 +87,11 @@ public final class TextServicesManager {
             throw new IllegalArgumentException("Locale should not be null if you don't refer"
                     + " settings.");
         }
+
+        if (referToSpellCheckerLanguageSettings && !isSpellCheckerEnabled()) {
+            return null;
+        }
+
         final SpellCheckerInfo sci;
         try {
             sci = sService.getCurrentSpellChecker(null);
