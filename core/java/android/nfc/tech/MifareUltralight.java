@@ -224,9 +224,11 @@ public final class MifareUltralight extends BasicTagTechnology {
     }
 
     /**
-     * Set the timeout of {@link #transceive} in milliseconds.
-     * <p>The timeout only applies to MifareUltralight {@link #transceive},
+     * Set the {@link #transceive} timeout in milliseconds.
+     *
+     * <p>The timeout only applies to {@link #transceive} on this object,
      * and is reset to a default value when {@link #close} is called.
+     *
      * <p>Setting a longer timeout may be useful when performing
      * transactions that require a long processing time on the tag
      * such as key generation.
@@ -234,9 +236,7 @@ public final class MifareUltralight extends BasicTagTechnology {
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param timeout timeout value in milliseconds
-     * @hide
      */
-    // TODO Unhide for ICS
     public void setTimeout(int timeout) {
         try {
             int err = mTag.getTagService().setTimeout(
@@ -250,14 +250,12 @@ public final class MifareUltralight extends BasicTagTechnology {
     }
 
     /**
-     * Gets the currently set timeout of {@link #transceive} in milliseconds.
+     * Get the current {@link #transceive} timeout in milliseconds.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @return timeout value in milliseconds
-     * @hide
      */
-    // TODO Unhide for ICS
     public int getTimeout() {
         try {
             return mTag.getTagService().getTimeout(TagTechnology.MIFARE_ULTRALIGHT);

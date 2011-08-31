@@ -507,16 +507,24 @@ public final class NfcAdapter {
      * <p>Pass a null NDEF message to disable foreground NDEF push in the
      * specified activities.
      *
+     * <p>One or more activities must be specified.
+     *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param message NDEF message to push over NFC, or null to disable
-     * @param activities one or more {@link Activity} to enable for NDEF push
+     * @param activity an activity to enable for NDEF push (at least one is required)
+     * @param activities zero or more additional activities to enable for NDEF Push
      */
-    public void setNdefPushMessage(NdefMessage message, Activity ... activities) {
-        if (activities.length == 0) {
-            throw new NullPointerException("Must specificy one or more activities");
+    public void setNdefPushMessage(NdefMessage message, Activity activity,
+            Activity ... activities) {
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
         }
+        mNfcActivityManager.setNdefPushMessage(activity, message);
         for (Activity a : activities) {
+            if (a == null) {
+                throw new NullPointerException("activities cannot contain null");
+            }
             mNfcActivityManager.setNdefPushMessage(a, message);
         }
     }
@@ -536,17 +544,24 @@ public final class NfcAdapter {
      * <p>Pass a null callback to disable the callback in the
      * specified activities.
      *
+     * <p>One or more activities must be specified.
+     *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param callback callback, or null to disable
-     * @param activities one or more {@link Activity} to enable for NDEF push
+     * @param activity an activity to enable for NDEF push (at least one is required)
+     * @param activities zero or more additional activities to enable for NDEF Push
      */
-    public void setNdefPushMessageCallback(CreateNdefMessageCallback callback,
+    public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
             Activity ... activities) {
-        if (activities.length == 0) {
-            throw new NullPointerException("Must specificy one or more activities");
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
         }
+        mNfcActivityManager.setNdefPushMessageCallback(activity, callback);
         for (Activity a : activities) {
+            if (a == null) {
+                throw new NullPointerException("activities cannot contain null");
+            }
             mNfcActivityManager.setNdefPushMessageCallback(a, callback);
         }
     }
@@ -558,17 +573,24 @@ public final class NfcAdapter {
      * can only occur when one of the specified activities is in resumed
      * (foreground) state.
      *
+     * <p>One or more activities must be specified.
+     *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param callback callback, or null to disable
-     * @param activities one or more {@link Activity} to enable the callback
+     * @param activity an activity to enable the callback (at least one is required)
+     * @param activities zero or more additional activities to enable to callback
      */
     public void setOnNdefPushCompleteCallback(OnNdefPushCompleteCallback callback,
-            Activity ... activities) {
-        if (activities.length == 0) {
-            throw new NullPointerException("Must specificy one or more activities");
+            Activity activity, Activity ... activities) {
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
         }
+        mNfcActivityManager.setOnNdefPushCompleteCallback(activity, callback);
         for (Activity a : activities) {
+            if (a == null) {
+                throw new NullPointerException("activities cannot contain null");
+            }
             mNfcActivityManager.setOnNdefPushCompleteCallback(a, callback);
         }
     }
