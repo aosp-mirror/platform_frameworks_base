@@ -32,10 +32,25 @@ import java.util.List;
  * <p>BluetoothHealth is a proxy object for controlling the Bluetooth
  * Service via IPC.
  *
- * <p> Use {@link BluetoothAdapter#getProfileProxy} to get
- * the BluetoothHealth proxy object. Use
- * {@link BluetoothAdapter#closeProfileProxy} to close the service connection.
- * @hide
+ * <p> How to connect to a health device which is acting in the source role.
+ *  <li> Use {@link BluetoothAdapter#getProfileProxy} to get
+ *  the BluetoothHealth proxy object. </li>
+ *  <li> Create an {@link BluetoothHealth} callback and call
+ *  {@link #registerSinkAppConfiguration} to register an application
+ *  configuration </li>
+ *  <li> Pair with the remote device. This currently needs to be done manually
+ *  from Bluetooth Settings </li>
+ *  <li> Connect to a health device using {@link #connectChannelToSource}. Some
+ *  devices will connect the channel automatically. The {@link BluetoothHealth}
+ *  callback will inform the application of channel state change. </li>
+ *  <li> Use the file descriptor provided with a connected channel to read and
+ *  write data to the health channel. </li>
+ *  <li> The received data needs to be interpreted using a health manager which
+ *  implements the IEEE 11073-xxxxx specifications.
+ *  <li> When done, close the health channel by calling {@link #disconnectChannel}
+ *  and unregister the application configuration calling
+ *  {@link #unregisterAppConfiguration}
+ *
  */
 public final class BluetoothHealth implements BluetoothProfile {
     private static final String TAG = "BluetoothHealth";
@@ -137,7 +152,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      *
      * @param config  The health app configuration
      * @return Success or failure.
-     * @hide
      */
     public boolean unregisterAppConfiguration(BluetoothHealthAppConfiguration config) {
         boolean result = false;
@@ -222,16 +236,15 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @param device The remote Bluetooth device.
      * @param config The application configuration which has been registered using
      *        {@link #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
-     * @param fd The file descriptor that was associated with the channel.
+     * @param channelId The channel id associated with the channel
      * @return If true, the callback associated with the application config will be called.
-     * @hide
      */
     public boolean disconnectChannel(BluetoothDevice device,
-            BluetoothHealthAppConfiguration config, ParcelFileDescriptor fd) {
+            BluetoothHealthAppConfiguration config, int channelId) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
                 config != null) {
             try {
-                return mService.disconnectChannel(device, config, fd);
+                return mService.disconnectChannel(device, config, channelId);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -248,11 +261,13 @@ public final class BluetoothHealth implements BluetoothProfile {
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
+     * <p> Its the responsibility of the caller to close the ParcelFileDescriptor
+     * when done.
+     *
      * @param device The remote Bluetooth health device
      * @param config The application configuration
      * @return null on failure, ParcelFileDescriptor on success.
      */
-
     public ParcelFileDescriptor getMainChannelFd(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
@@ -300,7 +315,7 @@ public final class BluetoothHealth implements BluetoothProfile {
     }
 
     /**
-     * Get connected devices for this specific profile.
+     * Get connected devices for the health profile.
      *
      * <p> Return the set of devices which are in state {@link #STATE_CONNECTED}
      *
@@ -368,14 +383,15 @@ public final class BluetoothHealth implements BluetoothProfile {
         @Override
         public void onHealthAppConfigurationStatusChange(BluetoothHealthAppConfiguration config,
                                                          int status) {
-            mCallback.onHealthAppConfigurationStatusChange(config, status);
+           mCallback.onHealthAppConfigurationStatusChange(config, status);
         }
 
         @Override
         public void onHealthChannelStateChange(BluetoothHealthAppConfiguration config,
                                        BluetoothDevice device, int prevState, int newState,
-                                       ParcelFileDescriptor fd) {
-            mCallback.onHealthChannelStateChange(config, device, prevState, newState, fd);
+                                       ParcelFileDescriptor fd, int channelId) {
+            mCallback.onHealthChannelStateChange(config, device, prevState, newState, fd,
+                                                 channelId);
         }
     }
 
@@ -389,13 +405,13 @@ public final class BluetoothHealth implements BluetoothProfile {
     public static final int STATE_CHANNEL_DISCONNECTING = 3;
 
     /** Health App Configuration registration success */
-    public static final int APPLICATION_REGISTRATION_SUCCESS = 0;
+    public static final int APP_CONFIG_REGISTRATION_SUCCESS = 0;
     /** Health App Configuration registration failure */
-    public static final int APPLICATION_REGISTRATION_FAILURE = 1;
+    public static final int APP_CONFIG_REGISTRATION_FAILURE = 1;
     /** Health App Configuration un-registration success */
-    public static final int APPLICATION_UNREGISTRATION_SUCCESS = 2;
+    public static final int APP_CONFIG_UNREGISTRATION_SUCCESS = 2;
     /** Health App Configuration un-registration failure */
-    public static final int APPLICATION_UNREGISTRATION_FAILURE = 3;
+    public static final int APP_CONFIG_UNREGISTRATION_FAILURE = 3;
 
     private ServiceListener mServiceListener;
     private IBluetooth mService;

@@ -2243,11 +2243,11 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public boolean disconnectChannel(BluetoothDevice device,
-            BluetoothHealthAppConfiguration config, ParcelFileDescriptor fd) {
+            BluetoothHealthAppConfiguration config, int id) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
                 "Need BLUETOOTH permission");
         synchronized (mBluetoothHealthProfileHandler) {
-            return mBluetoothHealthProfileHandler.disconnectChannel(device, config, fd);
+            return mBluetoothHealthProfileHandler.disconnectChannel(device, config, id);
         }
     }
 

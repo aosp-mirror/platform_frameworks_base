@@ -116,7 +116,7 @@ interface IBluetooth
     boolean connectChannelToSource(in BluetoothDevice device, in BluetoothHealthAppConfiguration config);
     boolean connectChannelToSink(in BluetoothDevice device, in BluetoothHealthAppConfiguration config,
         int channelType);
-    boolean disconnectChannel(in BluetoothDevice device, in BluetoothHealthAppConfiguration config, in ParcelFileDescriptor fd);
+    boolean disconnectChannel(in BluetoothDevice device, in BluetoothHealthAppConfiguration config, int id);
     ParcelFileDescriptor getMainChannelFd(in BluetoothDevice device, in BluetoothHealthAppConfiguration config);
     List<BluetoothDevice> getConnectedHealthDevices();
     List<BluetoothDevice> getHealthDevicesMatchingConnectionStates(in int[] states);
