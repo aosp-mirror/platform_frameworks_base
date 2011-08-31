@@ -145,10 +145,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int KEYGUARD_DONE_DRAWING_TIMEOUT_MS = 2000;
 
     /**
-     * Allow the user to operate the status bar when the keyguard is engaged (without a pattern or
-     * password).
+     * Allow the user to expand the status bar when the keyguard is engaged
+     * (without a pattern or password).
      */
-    private static final boolean ENABLE_STATUS_BAR_IN_KEYGUARD = true;
+    private static final boolean ENABLE_INSECURE_STATUS_BAR_EXPAND = true;
 
     private Context mContext;
     private AlarmManager mAlarmManager;
@@ -1184,19 +1184,25 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 }
             }
 
-            // if the keyguard is shown, allow the status bar to open only if the keyguard is
-            // insecure and (is covered by another window OR this feature is enabled in general)
-            boolean enable = !mShowing
-                || ((ENABLE_STATUS_BAR_IN_KEYGUARD || mHidden) && !isSecure());
-            if (DEBUG) {
-                Log.d(TAG, "adjustStatusBarLocked: mShowing=" + mShowing + " mHidden=" + mHidden
-                    + " isSecure=" + isSecure() + " --> enable=" + enable);
+            int flags = StatusBarManager.DISABLE_NONE;
+            if (mShowing && !mHidden) {
+                // showing lockscreen exclusively; disable various extra
+                // statusbar components.
+                flags |= StatusBarManager.DISABLE_NAVIGATION;
+                flags |= StatusBarManager.DISABLE_CLOCK;
             }
-            mStatusBarManager.disable(enable ?
-                         StatusBarManager.DISABLE_NONE :
-                         ( StatusBarManager.DISABLE_EXPAND
-                         | StatusBarManager.DISABLE_NAVIGATION
-                         | StatusBarManager.DISABLE_CLOCK));
+            if (mShowing && (isSecure() || !ENABLE_INSECURE_STATUS_BAR_EXPAND)) {
+                // showing secure lockscreen; disable expanding.
+                flags |= StatusBarManager.DISABLE_EXPAND;
+            }
+
+            if (DEBUG) {
+                Log.d(TAG,
+                        "adjustStatusBarLocked: mShowing=" + mShowing + " mHidden=" + mHidden
+                                + " isSecure=" + isSecure() + " --> flags=" + flags);
+            }
+
+            mStatusBarManager.disable(flags);
         }
     }
 
