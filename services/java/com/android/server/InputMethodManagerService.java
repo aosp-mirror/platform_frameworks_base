@@ -3065,17 +3065,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void addInputMethodSubtypes(
                 InputMethodInfo imi, InputMethodSubtype[] additionalSubtypes) {
             synchronized (mMethodMap) {
-                final HashSet<InputMethodSubtype> existingSubtypes =
-                        new HashSet<InputMethodSubtype>();
-                for (int i = 0; i < imi.getSubtypeCount(); ++i) {
-                    existingSubtypes.add(imi.getSubtypeAt(i));
-                }
-
                 final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
                 final int N = additionalSubtypes.length;
                 for (int i = 0; i < N; ++i) {
                     final InputMethodSubtype subtype = additionalSubtypes[i];
-                    if (!subtypes.contains(subtype) && !existingSubtypes.contains(subtype)) {
+                    if (!subtypes.contains(subtype)) {
                         subtypes.add(subtype);
                     }
                 }
