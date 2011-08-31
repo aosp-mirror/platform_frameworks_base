@@ -15,10 +15,10 @@
 # Warning: this is actually a product definition, to be inherited from
 
 PRODUCT_COPY_FILES := \
-	frameworks/base/data/fonts/Roboto-Regular.ttf:system/fonts/Roboto-Regular.ttf \
-	frameworks/base/data/fonts/Roboto-Bold.ttf:system/fonts/Roboto-Bold.ttf \
-	frameworks/base/data/fonts/Roboto-Italic.ttf:system/fonts/Roboto-Italic.ttf \
-	frameworks/base/data/fonts/Roboto-BoldItalic.ttf:system/fonts/Roboto-BoldItalic.ttf \
+    frameworks/base/data/fonts/Roboto-Regular.ttf:system/fonts/Roboto-Regular.ttf \
+    frameworks/base/data/fonts/Roboto-Bold.ttf:system/fonts/Roboto-Bold.ttf \
+    frameworks/base/data/fonts/Roboto-Italic.ttf:system/fonts/Roboto-Italic.ttf \
+    frameworks/base/data/fonts/Roboto-BoldItalic.ttf:system/fonts/Roboto-BoldItalic.ttf \
     frameworks/base/data/fonts/DroidSans.ttf:system/fonts/DroidSans.ttf \
     frameworks/base/data/fonts/DroidSans-Bold.ttf:system/fonts/DroidSans-Bold.ttf \
     frameworks/base/data/fonts/DroidNaskh-Regular.ttf:system/fonts/DroidNaskh-Regular.ttf \
