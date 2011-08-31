@@ -430,12 +430,13 @@ private:
 /* Represents the state of a single input device. */
 class InputDevice {
 public:
-    InputDevice(InputReaderContext* context, int32_t id, const String8& name);
+    InputDevice(InputReaderContext* context, int32_t id, const String8& name, uint32_t classes);
     ~InputDevice();
 
     inline InputReaderContext* getContext() { return mContext; }
     inline int32_t getId() { return mId; }
     inline const String8& getName() { return mName; }
+    inline uint32_t getClasses() { return mClasses; }
     inline uint32_t getSources() { return mSources; }
 
     inline bool isExternal() { return mIsExternal; }
@@ -483,10 +484,11 @@ public:
 private:
     InputReaderContext* mContext;
     int32_t mId;
+    String8 mName;
+    uint32_t mClasses;
 
     Vector<InputMapper*> mMappers;
 
-    String8 mName;
     uint32_t mSources;
     bool mIsExternal;
     bool mDropUntilNextSync;
