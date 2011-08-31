@@ -1349,7 +1349,7 @@ public class Paint {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
-        if ((index | count) < 0 || index + count > text.length) {
+        if (index < 0 || text.length - index < Math.abs(count)) {
             throw new ArrayIndexOutOfBoundsException();
         }
 
