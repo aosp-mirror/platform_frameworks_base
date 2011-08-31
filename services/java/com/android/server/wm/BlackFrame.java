@@ -51,8 +51,8 @@ public class BlackFrame {
             mTmpMatrix.setTranslate(left, top);
             mTmpMatrix.postConcat(matrix);
             mTmpMatrix.getValues(mTmpFloats);
-            surface.setPosition((int)mTmpFloats[Matrix.MTRANS_X],
-                    (int)mTmpFloats[Matrix.MTRANS_Y]);
+            surface.setPosition(mTmpFloats[Matrix.MTRANS_X],
+                    mTmpFloats[Matrix.MTRANS_Y]);
             surface.setMatrix(
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);

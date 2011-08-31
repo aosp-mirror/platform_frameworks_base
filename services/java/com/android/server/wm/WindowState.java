@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -110,7 +111,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * are in the screen's coordinate space (WITH the compatibility scale
      * applied).
      */
-    final Rect mShownFrame = new Rect();
+    final RectF mShownFrame = new RectF();
 
     /**
      * Set when we have changed the size of the surface, to know that
@@ -267,7 +268,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     // For debugging, this is the last information given to the surface flinger.
     boolean mSurfaceShown;
-    int mSurfaceX, mSurfaceY, mSurfaceW, mSurfaceH;
+    float mSurfaceX, mSurfaceY, mSurfaceW, mSurfaceH;
     int mSurfaceLayer;
     float mSurfaceAlpha;
     
@@ -518,7 +519,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mFrame;
     }
 
-    public Rect getShownFrameLw() {
+    public RectF getShownFrameLw() {
         return mShownFrame;
     }
 
@@ -1128,8 +1129,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mDtDx = tmpFloats[Matrix.MSKEW_Y];
             mDsDy = tmpFloats[Matrix.MSKEW_X];
             mDtDy = tmpFloats[Matrix.MSCALE_Y];
-            int x = (int)tmpFloats[Matrix.MTRANS_X];
-            int y = (int)tmpFloats[Matrix.MTRANS_Y];
+            float x = tmpFloats[Matrix.MTRANS_X];
+            float y = tmpFloats[Matrix.MTRANS_Y];
             int w = frame.width();
             int h = frame.height();
             mShownFrame.set(x, y, x+w, y+h);

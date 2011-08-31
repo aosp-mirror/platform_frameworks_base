@@ -281,8 +281,8 @@ final class Session extends IWindowSession.Stub
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION performDrag");
             Surface.openTransaction();
             try {
-                surface.setPosition((int)(touchX - thumbCenterX),
-                        (int)(touchY - thumbCenterY));
+                surface.setPosition(touchX - thumbCenterX,
+                        touchY - thumbCenterY);
                 surface.setAlpha(.7071f);
                 surface.setLayer(mService.mDragState.getDragLayerLw());
                 surface.show();
