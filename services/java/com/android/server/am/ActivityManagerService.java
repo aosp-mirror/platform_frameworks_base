@@ -2870,6 +2870,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     boolean startHomeActivityLocked(int userId) {
+        if (mHeadless) {
+            // Added because none of the other calls to ensureBootCompleted seem to fire
+            // when running headless.
+            ensureBootCompleted();
+            return false;
+        }
+
         if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
                 && mTopAction == null) {
             // We are running in factory test mode, but unable to find
@@ -4918,7 +4925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             booting = mBooting;
             mBooting = false;
-            enableScreen = !mBooted;
+            enableScreen = !mBooted && !mHeadless;
             mBooted = true;
         }
         
