@@ -112,6 +112,12 @@ enum {
 };
 
 /*
+ * Gets the class that owns an axis, in cases where multiple classes might claim
+ * the same axis for different purposes.
+ */
+extern uint32_t getAbsAxisUsage(int32_t axis, uint32_t deviceClasses);
+
+/*
  * Grand Central Station for events.
  *
  * The event hub aggregates input events received across all known input
