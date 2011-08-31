@@ -663,6 +663,19 @@ void NuPlayer::renderBuffer(bool audio, const sp<AMessage> &msg) {
     sp<AMessage> reply;
     CHECK(msg->findMessage("reply", &reply));
 
+    if (IsFlushingState(audio ? mFlushingAudio : mFlushingVideo)) {
+        // We're currently attempting to flush the decoder, in order
+        // to complete this, the decoder wants all its buffers back,
+        // so we don't want any output buffers it sent us (from before
+        // we initiated the flush) to be stuck in the renderer's queue.
+
+        LOGV("we're still flushing the %s decoder, sending its output buffer"
+             " right back.", audio ? "audio" : "video");
+
+        reply->post();
+        return;
+    }
+
     sp<RefBase> obj;
     CHECK(msg->findObject("buffer", &obj));
 

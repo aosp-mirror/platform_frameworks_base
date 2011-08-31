@@ -111,8 +111,6 @@ private:
     sp<ABuffer> mBuffer;
     sp<AnotherPacketSource> mSource;
     bool mPayloadStarted;
-    DiscontinuityType mPendingDiscontinuity;
-    sp<AMessage> mPendingDiscontinuityExtra;
 
     ElementaryStreamQueue *mQueue;
 
@@ -124,9 +122,6 @@ private:
             const uint8_t *data, size_t size);
 
     void extractAACFrames(const sp<ABuffer> &buffer);
-
-    void deferDiscontinuity(
-            DiscontinuityType type, const sp<AMessage> &extra);
 
     DISALLOW_EVIL_CONSTRUCTORS(Stream);
 };
@@ -347,12 +342,8 @@ ATSParser::Stream::Stream(
     : mProgram(program),
       mElementaryPID(elementaryPID),
       mStreamType(streamType),
-      mBuffer(new ABuffer(192 * 1024)),
       mPayloadStarted(false),
-      mPendingDiscontinuity(DISCONTINUITY_NONE),
       mQueue(NULL) {
-    mBuffer->setRange(0, 0);
-
     switch (mStreamType) {
         case STREAMTYPE_H264:
             mQueue = new ElementaryStreamQueue(ElementaryStreamQueue::H264);
@@ -382,6 +373,11 @@ ATSParser::Stream::Stream(
     }
 
     LOGV("new stream PID 0x%02x, type 0x%02x", elementaryPID, streamType);
+
+    if (mQueue != NULL) {
+        mBuffer = new ABuffer(192 * 1024);
+        mBuffer->setRange(0, 0);
+    }
 }
 
 ATSParser::Stream::~Stream() {
@@ -391,6 +387,10 @@ ATSParser::Stream::~Stream() {
 
 void ATSParser::Stream::parse(
         unsigned payload_unit_start_indicator, ABitReader *br) {
+    if (mQueue == NULL) {
+        return;
+    }
+
     if (payload_unit_start_indicator) {
         if (mPayloadStarted) {
             // Otherwise we run the danger of receiving the trailing bytes
@@ -429,6 +429,10 @@ void ATSParser::Stream::parse(
 
 void ATSParser::Stream::signalDiscontinuity(
         DiscontinuityType type, const sp<AMessage> &extra) {
+    if (mQueue == NULL) {
+        return;
+    }
+
     mPayloadStarted = false;
     mBuffer->setRange(0, 0);
 
@@ -453,8 +457,6 @@ void ATSParser::Stream::signalDiscontinuity(
 
             if (mSource != NULL) {
                 mSource->queueDiscontinuity(type, extra);
-            } else {
-                deferDiscontinuity(type, extra);
             }
             break;
         }
@@ -462,15 +464,6 @@ void ATSParser::Stream::signalDiscontinuity(
         default:
             TRESPASS();
             break;
-    }
-}
-
-void ATSParser::Stream::deferDiscontinuity(
-        DiscontinuityType type, const sp<AMessage> &extra) {
-    if (type > mPendingDiscontinuity) {
-        // Only upgrade discontinuities.
-        mPendingDiscontinuity = type;
-        mPendingDiscontinuityExtra = extra;
     }
 }
 
@@ -658,10 +651,6 @@ void ATSParser::Stream::onPayloadData(
         const uint8_t *data, size_t size) {
     LOGV("onPayloadData mStreamType=0x%02x", mStreamType);
 
-    if (mQueue == NULL) {
-        return;
-    }
-
     CHECK(PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
     int64_t timeUs = mProgram->convertPTSToTimestamp(PTS);
 
@@ -681,14 +670,6 @@ void ATSParser::Stream::onPayloadData(
                      mElementaryPID, mStreamType);
 
                 mSource = new AnotherPacketSource(meta);
-
-                if (mPendingDiscontinuity != DISCONTINUITY_NONE) {
-                    mSource->queueDiscontinuity(
-                            mPendingDiscontinuity, mPendingDiscontinuityExtra);
-                    mPendingDiscontinuity = DISCONTINUITY_NONE;
-                    mPendingDiscontinuityExtra.clear();
-                }
-
                 mSource->queueAccessUnit(accessUnit);
             }
         } else if (mQueue->getFormat() != NULL) {
