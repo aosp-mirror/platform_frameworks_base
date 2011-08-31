@@ -91,12 +91,12 @@ bool Transform::transformed() const {
     return type() > TRANSLATE;
 }
 
-int Transform::tx() const {
-    return floorf(mMatrix[2][0] + 0.5f);
+float Transform::tx() const {
+    return mMatrix[2][0];
 }
 
-int Transform::ty() const {
-    return floorf(mMatrix[2][1] + 0.5f);
+float Transform::ty() const {
+    return mMatrix[2][1];
 }
 
 void Transform::reset() {
@@ -239,7 +239,9 @@ Region Transform::transform(const Region& reg) const
             out.set(transform(reg.bounds()));
         }
     } else {
-        out = reg.translate(tx(), ty());
+        int xpos = floorf(tx() + 0.5f);
+        int ypos = floorf(ty() + 0.5f);
+        out = reg.translate(xpos, ypos);
     }
     return out;
 }

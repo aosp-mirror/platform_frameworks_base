@@ -54,8 +54,8 @@ struct layer_state_t {
             };
             SurfaceID       surface;
             uint32_t        what;
-            int32_t         x;
-            int32_t         y;
+            float           x;
+            float           y;
             uint32_t        z;
             uint32_t        w;
             uint32_t        h;

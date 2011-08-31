@@ -102,7 +102,7 @@ class Composer : public Singleton<Composer>
 public:
 
     status_t setPosition(const sp<SurfaceComposerClient>& client, SurfaceID id,
-            int32_t x, int32_t y);
+            float x, float y);
     status_t setSize(const sp<SurfaceComposerClient>& client, SurfaceID id,
             uint32_t w, uint32_t h);
     status_t setLayer(const sp<SurfaceComposerClient>& client, SurfaceID id,
@@ -161,7 +161,7 @@ layer_state_t* Composer::getLayerStateLocked(
 }
 
 status_t Composer::setPosition(const sp<SurfaceComposerClient>& client,
-        SurfaceID id, int32_t x, int32_t y) {
+        SurfaceID id, float x, float y) {
     Mutex::Autolock _l(mLock);
     layer_state_t* s = getLayerStateLocked(client, id);
     if (!s)
@@ -372,7 +372,7 @@ status_t SurfaceComposerClient::setFreezeTint(SurfaceID id, uint32_t tint) {
     return getComposer().setFreezeTint(this, id, tint);
 }
 
-status_t SurfaceComposerClient::setPosition(SurfaceID id, int32_t x, int32_t y) {
+status_t SurfaceComposerClient::setPosition(SurfaceID id, float x, float y) {
     return getComposer().setPosition(this, id, x, y);
 }
 
