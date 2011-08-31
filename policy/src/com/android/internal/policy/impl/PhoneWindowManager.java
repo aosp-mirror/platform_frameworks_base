@@ -900,6 +900,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             lp.setTitle("PointerLocation");
             WindowManager wm = (WindowManager)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
+            lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
             wm.addView(addView, lp);
             
             if (mPointerLocationInputChannel == null) {

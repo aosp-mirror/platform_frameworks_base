@@ -98,7 +98,10 @@ public final class InputWindowHandle {
 
     @Override
     protected void finalize() throws Throwable {
-        nativeDispose();
-        super.finalize();
+        try {
+            nativeDispose();
+        } finally {
+            super.finalize();
+        }
     }
 }

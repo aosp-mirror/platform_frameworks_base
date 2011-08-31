@@ -454,7 +454,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 // manager, to make sure we do the relayout before receiving
                 // any other events from the system.
                 requestLayout();
-                mInputChannel = new InputChannel();
+                if ((mWindowAttributes.inputFeatures
+                        & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
+                    mInputChannel = new InputChannel();
+                }
                 try {
                     res = sWindowSession.add(mWindow, mWindowAttributes,
                             getHostVisibility(), mAttachInfo.mContentInsets,
@@ -524,12 +527,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     mInputQueueCallback =
                         ((RootViewSurfaceTaker)view).willYouTakeTheInputQueue();
                 }
-                if (mInputQueueCallback != null) {
-                    mInputQueue = new InputQueue(mInputChannel);
-                    mInputQueueCallback.onInputQueueCreated(mInputQueue);
-                } else {
-                    InputQueue.registerInputChannel(mInputChannel, mInputHandler,
-                            Looper.myQueue());
+                if (mInputChannel != null) {
+                    if (mInputQueueCallback != null) {
+                        mInputQueue = new InputQueue(mInputChannel);
+                        mInputQueueCallback.onInputQueueCreated(mInputQueue);
+                    } else {
+                        InputQueue.registerInputChannel(mInputChannel, mInputHandler,
+                                Looper.myQueue());
+                    }
                 }
 
                 view.assignParent(this);
@@ -2152,13 +2157,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         mSurface.release();
 
-        if (mInputChannel != null) {
-            if (mInputQueueCallback != null) {
-                mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
-                mInputQueueCallback = null;
-            } else {
-                InputQueue.unregisterInputChannel(mInputChannel);
-            }
+        if (mInputQueueCallback != null && mInputQueue != null) {
+            mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
+            mInputQueueCallback = null;
+            mInputQueue = null;
+        } else if (mInputChannel != null) {
+            InputQueue.unregisterInputChannel(mInputChannel);
         }
         try {
             sWindowSession.remove(mWindow);

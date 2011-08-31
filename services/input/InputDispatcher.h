@@ -814,6 +814,7 @@ private:
         Status status;
         sp<InputChannel> inputChannel; // never null
         sp<InputWindowHandle> inputWindowHandle; // may be null
+        bool monitor;
         InputPublisher inputPublisher;
         InputState inputState;
         Queue<DispatchEntry> outboundQueue;
@@ -822,7 +823,7 @@ private:
         nsecs_t lastDispatchTime; // the time when the last event was dispatched
 
         explicit Connection(const sp<InputChannel>& inputChannel,
-                const sp<InputWindowHandle>& inputWindowHandle);
+                const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
 
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
@@ -868,6 +869,7 @@ private:
     Vector<EventEntry*> mTempCancelationEvents;
 
     void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
+    void dispatchIdleLocked();
 
     // Batches a new sample onto a motion entry.
     // Assumes that the we have already checked that we can append samples.
@@ -1073,7 +1075,8 @@ private:
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool handled);
     void startNextDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
-    void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
+            bool notify);
     void drainOutboundQueueLocked(Connection* connection);
     static int handleReceiveCallback(int receiveFd, int events, void* data);
 
@@ -1093,6 +1096,10 @@ private:
     // Dump state.
     void dumpDispatchStateLocked(String8& dump);
     void logDispatchStateLocked();
+
+    // Registration.
+    void removeMonitorChannelLocked(const sp<InputChannel>& inputChannel);
+    status_t unregisterInputChannelLocked(const sp<InputChannel>& inputChannel, bool notify);
 
     // Add or remove a connection to the mActiveConnections vector.
     void activateConnectionLocked(Connection* connection);

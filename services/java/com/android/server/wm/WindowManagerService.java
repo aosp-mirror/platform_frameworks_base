@@ -2051,10 +2051,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return res;
             }
             
-            if (outInputChannel != null) {
+            if (outInputChannel != null && (attrs.inputFeatures
+                    & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
                 String name = win.makeInputChannelName();
                 InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
-                win.mInputChannel = inputChannels[0];
+                win.setInputChannel(inputChannels[0]);
                 inputChannels[1].transferTo(outInputChannel);
                 
                 mInputManager.registerInputChannel(win.mInputChannel, win.mInputWindowHandle);

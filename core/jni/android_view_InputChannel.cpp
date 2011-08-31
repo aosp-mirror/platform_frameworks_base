@@ -111,7 +111,9 @@ static jobject android_view_InputChannel_createInputChannel(JNIEnv* env,
         NativeInputChannel* nativeInputChannel) {
     jobject inputChannelObj = env->NewObject(gInputChannelClassInfo.clazz,
             gInputChannelClassInfo.ctor);
-    android_view_InputChannel_setNativeInputChannel(env, inputChannelObj, nativeInputChannel);
+    if (inputChannelObj) {
+        android_view_InputChannel_setNativeInputChannel(env, inputChannelObj, nativeInputChannel);
+    }
     return inputChannelObj;
 }
 
@@ -126,18 +128,29 @@ static jobjectArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv*
     status_t result = InputChannel::openInputChannelPair(name, serverChannel, clientChannel);
 
     if (result) {
-        LOGE("Could not open input channel pair.  status=%d", result);
-        jniThrowRuntimeException(env, "Could not open input channel pair.");
+        String8 message;
+        message.appendFormat("Could not open input channel pair.  status=%d", result);
+        jniThrowRuntimeException(env, message.string());
         return NULL;
     }
 
-    // TODO more robust error checking
+    jobjectArray channelPair = env->NewObjectArray(2, gInputChannelClassInfo.clazz, NULL);
+    if (env->ExceptionCheck()) {
+        return NULL;
+    }
+
     jobject serverChannelObj = android_view_InputChannel_createInputChannel(env,
             new NativeInputChannel(serverChannel));
+    if (env->ExceptionCheck()) {
+        return NULL;
+    }
+
     jobject clientChannelObj = android_view_InputChannel_createInputChannel(env,
             new NativeInputChannel(clientChannel));
+    if (env->ExceptionCheck()) {
+        return NULL;
+    }
 
-    jobjectArray channelPair = env->NewObjectArray(2, gInputChannelClassInfo.clazz, NULL);
     env->SetObjectArrayElement(channelPair, 0, serverChannelObj);
     env->SetObjectArrayElement(channelPair, 1, clientChannelObj);
     return channelPair;
@@ -161,7 +174,7 @@ static void android_view_InputChannel_nativeDispose(JNIEnv* env, jobject obj, jb
 
 static void android_view_InputChannel_nativeTransferTo(JNIEnv* env, jobject obj,
         jobject otherObj) {
-    if (android_view_InputChannel_getInputChannel(env, otherObj) != NULL) {
+    if (android_view_InputChannel_getNativeInputChannel(env, otherObj) != NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Other object already has a native input channel.");
         return;
@@ -175,7 +188,7 @@ static void android_view_InputChannel_nativeTransferTo(JNIEnv* env, jobject obj,
 
 static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject obj,
         jobject parcelObj) {
-    if (android_view_InputChannel_getInputChannel(env, obj) != NULL) {
+    if (android_view_InputChannel_getNativeInputChannel(env, obj) != NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "This object already has a native input channel.");
         return;

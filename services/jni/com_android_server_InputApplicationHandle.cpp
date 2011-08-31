@@ -49,25 +49,30 @@ jobject NativeInputApplicationHandle::getInputApplicationHandleObjLocalRef(JNIEn
     return env->NewLocalRef(mObjWeak);
 }
 
-bool NativeInputApplicationHandle::update() {
+bool NativeInputApplicationHandle::updateInfo() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject obj = env->NewLocalRef(mObjWeak);
     if (!obj) {
+        releaseInfo();
         return false;
+    }
+
+    if (!mInfo) {
+        mInfo = new InputApplicationInfo();
     }
 
     jstring nameObj = jstring(env->GetObjectField(obj,
             gInputApplicationHandleClassInfo.name));
     if (nameObj) {
         const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        name.setTo(nameStr);
+        mInfo->name.setTo(nameStr);
         env->ReleaseStringUTFChars(nameObj, nameStr);
         env->DeleteLocalRef(nameObj);
     } else {
-        name.setTo("<null>");
+        mInfo->name.setTo("<null>");
     }
 
-    dispatchingTimeout = env->GetLongField(obj,
+    mInfo->dispatchingTimeout = env->GetLongField(obj,
             gInputApplicationHandleClassInfo.dispatchingTimeoutNanos);
 
     env->DeleteLocalRef(obj);

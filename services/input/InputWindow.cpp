@@ -22,25 +22,43 @@
 
 namespace android {
 
-// --- InputWindowHandle ---
+// --- InputWindowInfo ---
 
-bool InputWindowHandle::touchableRegionContainsPoint(int32_t x, int32_t y) const {
+bool InputWindowInfo::touchableRegionContainsPoint(int32_t x, int32_t y) const {
     return touchableRegion.contains(x, y);
 }
 
-bool InputWindowHandle::frameContainsPoint(int32_t x, int32_t y) const {
+bool InputWindowInfo::frameContainsPoint(int32_t x, int32_t y) const {
     return x >= frameLeft && x <= frameRight
             && y >= frameTop && y <= frameBottom;
 }
 
-bool InputWindowHandle::isTrustedOverlay() const {
+bool InputWindowInfo::isTrustedOverlay() const {
     return layoutParamsType == TYPE_INPUT_METHOD
             || layoutParamsType == TYPE_INPUT_METHOD_DIALOG
             || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY;
 }
 
-bool InputWindowHandle::supportsSplitTouch() const {
+bool InputWindowInfo::supportsSplitTouch() const {
     return layoutParamsFlags & FLAG_SPLIT_TOUCH;
+}
+
+
+// --- InputWindowHandle ---
+
+InputWindowHandle::InputWindowHandle(const sp<InputApplicationHandle>& inputApplicationHandle) :
+    inputApplicationHandle(inputApplicationHandle), mInfo(NULL) {
+}
+
+InputWindowHandle::~InputWindowHandle() {
+    delete mInfo;
+}
+
+void InputWindowHandle::releaseInfo() {
+    if (mInfo) {
+        delete mInfo;
+        mInfo = NULL;
+    }
 }
 
 } // namespace android
