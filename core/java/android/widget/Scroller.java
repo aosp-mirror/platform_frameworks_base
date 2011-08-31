@@ -196,7 +196,6 @@ public class Scroller  {
     }
     
     /**
-     * @hide
      * Returns the current velocity.
      *
      * @return The original velocity less the deceleration. Result may be

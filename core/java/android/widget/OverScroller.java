@@ -166,7 +166,6 @@ public class OverScroller {
     }
 
     /**
-     * @hide
      * Returns the absolute value of the current velocity.
      *
      * @return The original velocity less the deceleration, norm of the X and Y velocity vector.

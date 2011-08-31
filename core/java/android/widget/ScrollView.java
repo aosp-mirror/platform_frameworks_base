@@ -69,8 +69,8 @@ public class ScrollView extends FrameLayout {
 
     private final Rect mTempRect = new Rect();
     private OverScroller mScroller;
-    private EdgeGlow mEdgeGlowTop;
-    private EdgeGlow mEdgeGlowBottom;
+    private EdgeEffect mEdgeGlowTop;
+    private EdgeEffect mEdgeGlowBottom;
 
     /**
      * Position of the last motion event.
@@ -1511,11 +1511,8 @@ public class ScrollView extends FrameLayout {
         if (mode != OVER_SCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
                 Context context = getContext();
-                final Resources res = context.getResources();
-                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
-                final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
-                mEdgeGlowTop = new EdgeGlow(context, edge, glow);
-                mEdgeGlowBottom = new EdgeGlow(context, edge, glow);
+                mEdgeGlowTop = new EdgeEffect(context);
+                mEdgeGlowBottom = new EdgeEffect(context);
             }
         } else {
             mEdgeGlowTop = null;

@@ -594,12 +594,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Tracks the state of the top edge glow.
      */
-    private EdgeGlow mEdgeGlowTop;
+    private EdgeEffect mEdgeGlowTop;
 
     /**
      * Tracks the state of the bottom edge glow.
      */
-    private EdgeGlow mEdgeGlowBottom;
+    private EdgeEffect mEdgeGlowBottom;
 
     /**
      * An estimate of how many pixels are between the top of the list and
@@ -788,11 +788,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mode != OVER_SCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
                 Context context = getContext();
-                final Resources res = context.getResources();
-                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
-                final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
-                mEdgeGlowTop = new EdgeGlow(context, edge, glow);
-                mEdgeGlowBottom = new EdgeGlow(context, edge, glow);
+                mEdgeGlowTop = new EdgeEffect(context);
+                mEdgeGlowBottom = new EdgeEffect(context);
             }
         } else {
             mEdgeGlowTop = null;
