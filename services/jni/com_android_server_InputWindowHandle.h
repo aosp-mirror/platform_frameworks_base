@@ -32,7 +32,7 @@ public:
 
     jobject getInputWindowHandleObjLocalRef(JNIEnv* env);
 
-    virtual bool update();
+    virtual bool updateInfo();
 
 private:
     jweak mObjWeak;

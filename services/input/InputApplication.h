@@ -27,14 +27,32 @@ namespace android {
 
 /*
  * Describes the properties of an application that can receive input.
+ */
+struct InputApplicationInfo {
+    String8 name;
+    nsecs_t dispatchingTimeout;
+};
+
+
+/*
+ * Handle for an application that can receive input.
  *
  * Used by the native input dispatcher as a handle for the window manager objects
  * that describe an application.
  */
 class InputApplicationHandle : public RefBase {
 public:
-    String8 name;
-    nsecs_t dispatchingTimeout;
+    inline const InputApplicationInfo* getInfo() const {
+        return mInfo;
+    }
+
+    inline String8 getName() const {
+        return mInfo ? mInfo->name : String8("<invalid>");
+    }
+
+    inline nsecs_t getDispatchingTimeout(nsecs_t defaultValue) const {
+        return mInfo ? mInfo->dispatchingTimeout : defaultValue;
+    }
 
     /**
      * Requests that the state of this object be updated to reflect
@@ -45,11 +63,19 @@ public:
      *
      * Returns true on success, or false if the handle is no longer valid.
      */
-    virtual bool update() = 0;
+    virtual bool updateInfo() = 0;
+
+    /**
+     * Releases the storage used by the associated information when it is
+     * no longer needed.
+     */
+    void releaseInfo();
 
 protected:
-    InputApplicationHandle() { }
-    virtual ~InputApplicationHandle() { }
+    InputApplicationHandle();
+    virtual ~InputApplicationHandle();
+
+    InputApplicationInfo* mInfo;
 };
 
 } // namespace android

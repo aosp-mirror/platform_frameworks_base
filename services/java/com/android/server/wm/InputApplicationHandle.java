@@ -46,7 +46,10 @@ public final class InputApplicationHandle {
 
     @Override
     protected void finalize() throws Throwable {
-        nativeDispose();
-        super.finalize();
+        try {
+            nativeDispose();
+        } finally {
+            super.finalize();
+        }
     }
 }

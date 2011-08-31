@@ -306,7 +306,12 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
                     }
                 }
             }
+
+            // Nothing to do if there is no pending event.
             if (! mPendingEvent) {
+                if (mActiveConnections.isEmpty()) {
+                    dispatchIdleLocked();
+                }
                 return;
             }
         } else {
@@ -462,6 +467,16 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
     }
 }
 
+void InputDispatcher::dispatchIdleLocked() {
+#if DEBUG_FOCUS
+    LOGD("Dispatcher idle.  There are no pending events or active connections.");
+#endif
+
+    // Reset targets when idle, to release input channels and other resources
+    // they are holding onto.
+    resetTargetsLocked();
+}
+
 bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
     bool needWake = mInboundQueue.isEmpty();
     mInboundQueue.enqueueAtTail(entry);
@@ -525,20 +540,21 @@ sp<InputWindowHandle> InputDispatcher::findTouchedWindowAtLocked(int32_t x, int3
     size_t numWindows = mWindowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
         sp<InputWindowHandle> windowHandle = mWindowHandles.itemAt(i);
-        int32_t flags = windowHandle->layoutParamsFlags;
+        const InputWindowInfo* windowInfo = windowHandle->getInfo();
+        int32_t flags = windowInfo->layoutParamsFlags;
 
-        if (windowHandle->visible) {
-            if (!(flags & InputWindowHandle::FLAG_NOT_TOUCHABLE)) {
-                bool isTouchModal = (flags & (InputWindowHandle::FLAG_NOT_FOCUSABLE
-                        | InputWindowHandle::FLAG_NOT_TOUCH_MODAL)) == 0;
-                if (isTouchModal || windowHandle->touchableRegionContainsPoint(x, y)) {
+        if (windowInfo->visible) {
+            if (!(flags & InputWindowInfo::FLAG_NOT_TOUCHABLE)) {
+                bool isTouchModal = (flags & (InputWindowInfo::FLAG_NOT_FOCUSABLE
+                        | InputWindowInfo::FLAG_NOT_TOUCH_MODAL)) == 0;
+                if (isTouchModal || windowInfo->touchableRegionContainsPoint(x, y)) {
                     // Found window.
                     return windowHandle;
                 }
             }
         }
 
-        if (flags & InputWindowHandle::FLAG_SYSTEM_ERROR) {
+        if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
             // Error window is on top but not visible, so touch is dropped.
             return NULL;
         }
@@ -1051,9 +1067,15 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
             LOGD("Waiting for application to become ready for input: %s",
                     getApplicationWindowLabelLocked(applicationHandle, windowHandle).string());
 #endif
-            nsecs_t timeout = windowHandle != NULL ? windowHandle->dispatchingTimeout :
-                applicationHandle != NULL ?
-                        applicationHandle->dispatchingTimeout : DEFAULT_INPUT_DISPATCHING_TIMEOUT;
+            nsecs_t timeout;
+            if (windowHandle != NULL) {
+                timeout = windowHandle->getDispatchingTimeout(DEFAULT_INPUT_DISPATCHING_TIMEOUT);
+            } else if (applicationHandle != NULL) {
+                timeout = applicationHandle->getDispatchingTimeout(
+                        DEFAULT_INPUT_DISPATCHING_TIMEOUT);
+            } else {
+                timeout = DEFAULT_INPUT_DISPATCHING_TIMEOUT;
+            }
 
             mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY;
             mInputTargetWaitStartTime = currentTime;
@@ -1168,7 +1190,7 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
     }
 
     // If the currently focused window is paused then keep waiting.
-    if (mFocusedWindowHandle->paused) {
+    if (mFocusedWindowHandle->getInfo()->paused) {
 #if DEBUG_FOCUS
         LOGD("Waiting because focused window is paused.");
 #endif
@@ -1302,21 +1324,22 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         size_t numWindows = mWindowHandles.size();
         for (size_t i = 0; i < numWindows; i++) {
             sp<InputWindowHandle> windowHandle = mWindowHandles.itemAt(i);
-            int32_t flags = windowHandle->layoutParamsFlags;
+            const InputWindowInfo* windowInfo = windowHandle->getInfo();
+            int32_t flags = windowInfo->layoutParamsFlags;
 
-            if (flags & InputWindowHandle::FLAG_SYSTEM_ERROR) {
+            if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
                 if (topErrorWindowHandle == NULL) {
                     topErrorWindowHandle = windowHandle;
                 }
             }
 
-            if (windowHandle->visible) {
-                if (! (flags & InputWindowHandle::FLAG_NOT_TOUCHABLE)) {
-                    isTouchModal = (flags & (InputWindowHandle::FLAG_NOT_FOCUSABLE
-                            | InputWindowHandle::FLAG_NOT_TOUCH_MODAL)) == 0;
-                    if (isTouchModal || windowHandle->touchableRegionContainsPoint(x, y)) {
+            if (windowInfo->visible) {
+                if (! (flags & InputWindowInfo::FLAG_NOT_TOUCHABLE)) {
+                    isTouchModal = (flags & (InputWindowInfo::FLAG_NOT_FOCUSABLE
+                            | InputWindowInfo::FLAG_NOT_TOUCH_MODAL)) == 0;
+                    if (isTouchModal || windowInfo->touchableRegionContainsPoint(x, y)) {
                         if (! screenWasOff
-                                || (flags & InputWindowHandle::FLAG_TOUCHABLE_WHEN_WAKING)) {
+                                || (flags & InputWindowInfo::FLAG_TOUCHABLE_WHEN_WAKING)) {
                             newTouchedWindowHandle = windowHandle;
                         }
                         break; // found touched window, exit window loop
@@ -1324,7 +1347,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                 }
 
                 if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-                        && (flags & InputWindowHandle::FLAG_WATCH_OUTSIDE_TOUCH)) {
+                        && (flags & InputWindowInfo::FLAG_WATCH_OUTSIDE_TOUCH)) {
                     int32_t outsideTargetFlags = InputTarget::FLAG_DISPATCH_AS_OUTSIDE;
                     if (isWindowObscuredAtPointLocked(windowHandle, x, y)) {
                         outsideTargetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
@@ -1350,7 +1373,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         }
 
         // Figure out whether splitting will be allowed for this window.
-        if (newTouchedWindowHandle != NULL && newTouchedWindowHandle->supportsSplitTouch()) {
+        if (newTouchedWindowHandle != NULL
+                && newTouchedWindowHandle->getInfo()->supportsSplitTouch()) {
             // New window supports splitting.
             isSplit = true;
         } else if (isSplit) {
@@ -1396,7 +1420,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             // within the touched window.
             if (!isTouchModal) {
                 while (sample->next) {
-                    if (!newHoverWindowHandle->touchableRegionContainsPoint(
+                    if (!newHoverWindowHandle->getInfo()->touchableRegionContainsPoint(
                             sample->next->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
                             sample->next->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y))) {
                         *outSplitBatchAfterSample = sample;
@@ -1444,15 +1468,15 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                     && newTouchedWindowHandle != NULL) {
 #if DEBUG_FOCUS
                 LOGD("Touch is slipping out of window %s into window %s.",
-                        oldTouchedWindowHandle->name.string(),
-                        newTouchedWindowHandle->name.string());
+                        oldTouchedWindowHandle->getName().string(),
+                        newTouchedWindowHandle->getName().string());
 #endif
                 // Make a slippery exit from the old window.
                 mTempTouchState.addOrUpdateWindow(oldTouchedWindowHandle,
                         InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT, BitSet32(0));
 
                 // Make a slippery entrance into the new window.
-                if (newTouchedWindowHandle->supportsSplitTouch()) {
+                if (newTouchedWindowHandle->getInfo()->supportsSplitTouch()) {
                     isSplit = true;
                 }
 
@@ -1484,7 +1508,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         // Let the previous window know that the hover sequence is over.
         if (mLastHoverWindowHandle != NULL) {
 #if DEBUG_HOVER
-            LOGD("Sending hover exit event to window %s.", mLastHoverWindowHandle->name.string());
+            LOGD("Sending hover exit event to window %s.",
+                    mLastHoverWindowHandle->getName().string());
 #endif
             mTempTouchState.addOrUpdateWindow(mLastHoverWindowHandle,
                     InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT, BitSet32(0));
@@ -1493,7 +1518,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         // Let the new window know that the hover sequence is starting.
         if (newHoverWindowHandle != NULL) {
 #if DEBUG_HOVER
-            LOGD("Sending hover enter event to window %s.", newHoverWindowHandle->name.string());
+            LOGD("Sending hover enter event to window %s.",
+                    newHoverWindowHandle->getName().string());
 #endif
             mTempTouchState.addOrUpdateWindow(newHoverWindowHandle,
                     InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER, BitSet32(0));
@@ -1533,12 +1559,12 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
         sp<InputWindowHandle> foregroundWindowHandle =
                 mTempTouchState.getFirstForegroundWindowHandle();
-        const int32_t foregroundWindowUid = foregroundWindowHandle->ownerUid;
+        const int32_t foregroundWindowUid = foregroundWindowHandle->getInfo()->ownerUid;
         for (size_t i = 0; i < mTempTouchState.windows.size(); i++) {
             const TouchedWindow& touchedWindow = mTempTouchState.windows[i];
             if (touchedWindow.targetFlags & InputTarget::FLAG_DISPATCH_AS_OUTSIDE) {
                 sp<InputWindowHandle> inputWindowHandle = touchedWindow.windowHandle;
-                if (inputWindowHandle->ownerUid != foregroundWindowUid) {
+                if (inputWindowHandle->getInfo()->ownerUid != foregroundWindowUid) {
                     mTempTouchState.addOrUpdateWindow(inputWindowHandle,
                             InputTarget::FLAG_ZERO_COORDS, BitSet32(0));
                 }
@@ -1551,7 +1577,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         const TouchedWindow& touchedWindow = mTempTouchState.windows[i];
         if (touchedWindow.targetFlags & InputTarget::FLAG_FOREGROUND) {
             // If the touched window is paused then keep waiting.
-            if (touchedWindow.windowHandle->paused) {
+            if (touchedWindow.windowHandle->getInfo()->paused) {
 #if DEBUG_FOCUS
                 LOGD("Waiting because touched window is paused.");
 #endif
@@ -1581,10 +1607,11 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
         sp<InputWindowHandle> foregroundWindowHandle =
                 mTempTouchState.getFirstForegroundWindowHandle();
-        if (foregroundWindowHandle->hasWallpaper) {
+        if (foregroundWindowHandle->getInfo()->hasWallpaper) {
             for (size_t i = 0; i < mWindowHandles.size(); i++) {
                 sp<InputWindowHandle> windowHandle = mWindowHandles.itemAt(i);
-                if (windowHandle->layoutParamsType == InputWindowHandle::TYPE_WALLPAPER) {
+                if (windowHandle->getInfo()->layoutParamsType
+                        == InputWindowInfo::TYPE_WALLPAPER) {
                     mTempTouchState.addOrUpdateWindow(windowHandle,
                             InputTarget::FLAG_WINDOW_IS_OBSCURED
                                     | InputTarget::FLAG_DISPATCH_AS_IS,
@@ -1708,12 +1735,13 @@ void InputDispatcher::addWindowTargetLocked(const sp<InputWindowHandle>& windowH
         int32_t targetFlags, BitSet32 pointerIds) {
     mCurrentInputTargets.push();
 
+    const InputWindowInfo* windowInfo = windowHandle->getInfo();
     InputTarget& target = mCurrentInputTargets.editTop();
-    target.inputChannel = windowHandle->inputChannel;
+    target.inputChannel = windowInfo->inputChannel;
     target.flags = targetFlags;
-    target.xOffset = - windowHandle->frameLeft;
-    target.yOffset = - windowHandle->frameTop;
-    target.scaleFactor = windowHandle->scaleFactor;
+    target.xOffset = - windowInfo->frameLeft;
+    target.yOffset = - windowInfo->frameTop;
+    target.scaleFactor = windowInfo->scaleFactor;
     target.pointerIds = pointerIds;
 }
 
@@ -1734,14 +1762,15 @@ void InputDispatcher::addMonitoringTargetsLocked() {
 bool InputDispatcher::checkInjectionPermission(const sp<InputWindowHandle>& windowHandle,
         const InjectionState* injectionState) {
     if (injectionState
-            && (windowHandle == NULL || windowHandle->ownerUid != injectionState->injectorUid)
+            && (windowHandle == NULL
+                    || windowHandle->getInfo()->ownerUid != injectionState->injectorUid)
             && !hasInjectionPermission(injectionState->injectorPid, injectionState->injectorUid)) {
         if (windowHandle != NULL) {
             LOGW("Permission denied: injecting event from pid %d uid %d to window %s "
                     "owned by uid %d",
                     injectionState->injectorPid, injectionState->injectorUid,
-                    windowHandle->name.string(),
-                    windowHandle->ownerUid);
+                    windowHandle->getName().string(),
+                    windowHandle->getInfo()->ownerUid);
         } else {
             LOGW("Permission denied: injecting event from pid %d uid %d",
                     injectionState->injectorPid, injectionState->injectorUid);
@@ -1759,8 +1788,10 @@ bool InputDispatcher::isWindowObscuredAtPointLocked(
         if (otherHandle == windowHandle) {
             break;
         }
-        if (otherHandle->visible && ! otherHandle->isTrustedOverlay()
-                && otherHandle->frameContainsPoint(x, y)) {
+
+        const InputWindowInfo* otherInfo = otherHandle->getInfo();
+        if (otherInfo->visible && ! otherInfo->isTrustedOverlay()
+                && otherInfo->frameContainsPoint(x, y)) {
             return true;
         }
     }
@@ -1769,7 +1800,7 @@ bool InputDispatcher::isWindowObscuredAtPointLocked(
 
 bool InputDispatcher::isWindowFinishedWithPreviousInputLocked(
         const sp<InputWindowHandle>& windowHandle) {
-    ssize_t connectionIndex = getConnectionIndexLocked(windowHandle->inputChannel);
+    ssize_t connectionIndex = getConnectionIndexLocked(windowHandle->getInputChannel());
     if (connectionIndex >= 0) {
         sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
         return connection->outboundQueue.isEmpty();
@@ -1783,15 +1814,15 @@ String8 InputDispatcher::getApplicationWindowLabelLocked(
         const sp<InputWindowHandle>& windowHandle) {
     if (applicationHandle != NULL) {
         if (windowHandle != NULL) {
-            String8 label(applicationHandle->name);
+            String8 label(applicationHandle->getName());
             label.append(" - ");
-            label.append(windowHandle->name);
+            label.append(windowHandle->getName());
             return label;
         } else {
-            return applicationHandle->name;
+            return applicationHandle->getName();
         }
     } else if (windowHandle != NULL) {
-        return windowHandle->name;
+        return windowHandle->getName();
     } else {
         return String8("<unknown application or window>");
     }
@@ -2127,7 +2158,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         if (status) {
             LOGE("channel '%s' ~ Could not publish key event, "
                     "status=%d", connection->getInputChannelName(), status);
-            abortBrokenDispatchCycleLocked(currentTime, connection);
+            abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
             return;
         }
         break;
@@ -2190,7 +2221,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         if (status) {
             LOGE("channel '%s' ~ Could not publish motion event, "
                     "status=%d", connection->getInputChannelName(), status);
-            abortBrokenDispatchCycleLocked(currentTime, connection);
+            abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
             return;
         }
 
@@ -2223,7 +2254,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
                     LOGE("channel '%s' ~ Could not append motion sample "
                             "for a reason other than out of memory, status=%d",
                             connection->getInputChannelName(), status);
-                    abortBrokenDispatchCycleLocked(currentTime, connection);
+                    abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
                     return;
                 }
             }
@@ -2245,7 +2276,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     if (status) {
         LOGE("channel '%s' ~ Could not send dispatch signal, status=%d",
                 connection->getInputChannelName(), status);
-        abortBrokenDispatchCycleLocked(currentTime, connection);
+        abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
         return;
     }
 
@@ -2280,7 +2311,7 @@ void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
     if (status) {
         LOGE("channel '%s' ~ Could not reset publisher, status=%d",
                 connection->getInputChannelName(), status);
-        abortBrokenDispatchCycleLocked(currentTime, connection);
+        abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
         return;
     }
 
@@ -2324,10 +2355,10 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
 }
 
 void InputDispatcher::abortBrokenDispatchCycleLocked(nsecs_t currentTime,
-        const sp<Connection>& connection) {
+        const sp<Connection>& connection, bool notify) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ abortBrokenDispatchCycle",
-            connection->getInputChannelName());
+    LOGD("channel '%s' ~ abortBrokenDispatchCycle - notify=%s",
+            connection->getInputChannelName(), toString(notify));
 #endif
 
     // Clear the outbound queue.
@@ -2338,8 +2369,10 @@ void InputDispatcher::abortBrokenDispatchCycleLocked(nsecs_t currentTime,
     if (connection->status == Connection::STATUS_NORMAL) {
         connection->status = Connection::STATUS_BROKEN;
 
-        // Notify other system components.
-        onDispatchCycleBrokenLocked(currentTime, connection);
+        if (notify) {
+            // Notify other system components.
+            onDispatchCycleBrokenLocked(currentTime, connection);
+        }
     }
 }
 
@@ -2368,36 +2401,41 @@ int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data
             return 0; // remove the callback
         }
 
-        nsecs_t currentTime = now();
-
+        bool notify;
         sp<Connection> connection = d->mConnectionsByReceiveFd.valueAt(connectionIndex);
-        if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-            LOGE("channel '%s' ~ Consumer closed input channel or an error occurred.  "
-                    "events=0x%x", connection->getInputChannelName(), events);
-            d->abortBrokenDispatchCycleLocked(currentTime, connection);
-            d->runCommandsLockedInterruptible();
-            return 0; // remove the callback
-        }
+        if (!(events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP))) {
+            if (!(events & ALOOPER_EVENT_INPUT)) {
+                LOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
+                        "events=0x%x", connection->getInputChannelName(), events);
+                return 1;
+            }
 
-        if (! (events & ALOOPER_EVENT_INPUT)) {
-            LOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
-                    "events=0x%x", connection->getInputChannelName(), events);
-            return 1;
-        }
+            bool handled = false;
+            status_t status = connection->inputPublisher.receiveFinishedSignal(&handled);
+            if (!status) {
+                nsecs_t currentTime = now();
+                d->finishDispatchCycleLocked(currentTime, connection, handled);
+                d->runCommandsLockedInterruptible();
+                return 1;
+            }
 
-        bool handled = false;
-        status_t status = connection->inputPublisher.receiveFinishedSignal(&handled);
-        if (status) {
             LOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
                     connection->getInputChannelName(), status);
-            d->abortBrokenDispatchCycleLocked(currentTime, connection);
-            d->runCommandsLockedInterruptible();
-            return 0; // remove the callback
+            notify = true;
+        } else {
+            // Monitor channels are never explicitly unregistered.
+            // We do it automatically when the remote endpoint is closed so don't warn
+            // about them.
+            notify = !connection->monitor;
+            if (notify) {
+                LOGW("channel '%s' ~ Consumer closed input channel or an error occurred.  "
+                        "events=0x%x", connection->getInputChannelName(), events);
+            }
         }
 
-        d->finishDispatchCycleLocked(currentTime, connection, handled);
-        d->runCommandsLockedInterruptible();
-        return 1;
+        // Unregister the channel.
+        d->unregisterInputChannelLocked(connection->inputChannel, notify);
+        return 0; // remove the callback
     } // release lock
 }
 
@@ -2450,9 +2488,10 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
             InputTarget target;
             sp<InputWindowHandle> windowHandle = getWindowHandleLocked(connection->inputChannel);
             if (windowHandle != NULL) {
-                target.xOffset = -windowHandle->frameLeft;
-                target.yOffset = -windowHandle->frameTop;
-                target.scaleFactor = windowHandle->scaleFactor;
+                const InputWindowInfo* windowInfo = windowHandle->getInfo();
+                target.xOffset = -windowInfo->frameLeft;
+                target.yOffset = -windowInfo->frameTop;
+                target.scaleFactor = windowInfo->scaleFactor;
             } else {
                 target.xOffset = 0;
                 target.yOffset = 0;
@@ -2854,9 +2893,9 @@ void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
 #if DEBUG_BATCHING
                             LOGD("Not streaming hover move because the last hovered window "
                                     "is '%s' but the currently hovered window is '%s'.",
-                                    mLastHoverWindowHandle->name.string(),
+                                    mLastHoverWindowHandle->getName().string(),
                                     hoverWindowHandle != NULL
-                                            ? hoverWindowHandle->name.string() : "<null>");
+                                            ? hoverWindowHandle->getName().string() : "<null>");
 #endif
                             goto NoBatchingOrStreaming;
                         }
@@ -3183,7 +3222,7 @@ sp<InputWindowHandle> InputDispatcher::getWindowHandleLocked(
     size_t numWindows = mWindowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
         const sp<InputWindowHandle>& windowHandle = mWindowHandles.itemAt(i);
-        if (windowHandle->inputChannel == inputChannel) {
+        if (windowHandle->getInputChannel() == inputChannel) {
             return windowHandle;
         }
     }
@@ -3208,17 +3247,18 @@ void InputDispatcher::setInputWindows(const Vector<sp<InputWindowHandle> >& inpu
     { // acquire lock
         AutoMutex _l(mLock);
 
+        Vector<sp<InputWindowHandle> > oldWindowHandles = mWindowHandles;
         mWindowHandles = inputWindowHandles;
 
         sp<InputWindowHandle> newFocusedWindowHandle;
         bool foundHoveredWindow = false;
         for (size_t i = 0; i < mWindowHandles.size(); i++) {
             const sp<InputWindowHandle>& windowHandle = mWindowHandles.itemAt(i);
-            if (!windowHandle->update() || windowHandle->inputChannel == NULL) {
+            if (!windowHandle->updateInfo() || windowHandle->getInputChannel() == NULL) {
                 mWindowHandles.removeAt(i--);
                 continue;
             }
-            if (windowHandle->hasFocus) {
+            if (windowHandle->getInfo()->hasFocus) {
                 newFocusedWindowHandle = windowHandle;
             }
             if (windowHandle == mLastHoverWindowHandle) {
@@ -3234,19 +3274,20 @@ void InputDispatcher::setInputWindows(const Vector<sp<InputWindowHandle> >& inpu
             if (mFocusedWindowHandle != NULL) {
 #if DEBUG_FOCUS
                 LOGD("Focus left window: %s",
-                        mFocusedWindowHandle->name.string());
+                        mFocusedWindowHandle->getName().string());
 #endif
-                if (mFocusedWindowHandle->inputChannel != NULL) {
+                sp<InputChannel> focusedInputChannel = mFocusedWindowHandle->getInputChannel();
+                if (focusedInputChannel != NULL) {
                     CancelationOptions options(CancelationOptions::CANCEL_NON_POINTER_EVENTS,
                             "focus left window");
                     synthesizeCancelationEventsForInputChannelLocked(
-                            mFocusedWindowHandle->inputChannel, options);
+                            focusedInputChannel, options);
                 }
             }
             if (newFocusedWindowHandle != NULL) {
 #if DEBUG_FOCUS
                 LOGD("Focus entered window: %s",
-                        newFocusedWindowHandle->name.string());
+                        newFocusedWindowHandle->getName().string());
 #endif
             }
             mFocusedWindowHandle = newFocusedWindowHandle;
@@ -3256,15 +3297,32 @@ void InputDispatcher::setInputWindows(const Vector<sp<InputWindowHandle> >& inpu
             TouchedWindow& touchedWindow = mTouchState.windows.editItemAt(i);
             if (!hasWindowHandleLocked(touchedWindow.windowHandle)) {
 #if DEBUG_FOCUS
-                LOGD("Touched window was removed: %s", touchedWindow.windowHandle->name.string());
+                LOGD("Touched window was removed: %s",
+                        touchedWindow.windowHandle->getName().string());
 #endif
-                if (touchedWindow.windowHandle->inputChannel != NULL) {
+                sp<InputChannel> touchedInputChannel =
+                        touchedWindow.windowHandle->getInputChannel();
+                if (touchedInputChannel != NULL) {
                     CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
                             "touched window was removed");
                     synthesizeCancelationEventsForInputChannelLocked(
-                            touchedWindow.windowHandle->inputChannel, options);
+                            touchedInputChannel, options);
                 }
                 mTouchState.windows.removeAt(i--);
+            }
+        }
+
+        // Release information for windows that are no longer present.
+        // This ensures that unused input channels are released promptly.
+        // Otherwise, they might stick around until the window handle is destroyed
+        // which might not happen until the next GC.
+        for (size_t i = 0; i < oldWindowHandles.size(); i++) {
+            const sp<InputWindowHandle>& oldWindowHandle = oldWindowHandles.itemAt(i);
+            if (!hasWindowHandleLocked(oldWindowHandle)) {
+#if DEBUG_FOCUS
+                LOGD("Window went away: %s", oldWindowHandle->getName().string());
+#endif
+                oldWindowHandle->releaseInfo();
             }
         }
     } // release lock
@@ -3281,15 +3339,17 @@ void InputDispatcher::setFocusedApplication(
     { // acquire lock
         AutoMutex _l(mLock);
 
-        if (inputApplicationHandle != NULL && inputApplicationHandle->update()) {
+        if (inputApplicationHandle != NULL && inputApplicationHandle->updateInfo()) {
             if (mFocusedApplicationHandle != inputApplicationHandle) {
                 if (mFocusedApplicationHandle != NULL) {
                     resetTargetsLocked();
+                    mFocusedApplicationHandle->releaseInfo();
                 }
                 mFocusedApplicationHandle = inputApplicationHandle;
             }
         } else if (mFocusedApplicationHandle != NULL) {
             resetTargetsLocked();
+            mFocusedApplicationHandle->releaseInfo();
             mFocusedApplicationHandle.clear();
         }
 
@@ -3469,13 +3529,14 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
 
     if (mFocusedApplicationHandle != NULL) {
         dump.appendFormat(INDENT "FocusedApplication: name='%s', dispatchingTimeout=%0.3fms\n",
-                mFocusedApplicationHandle->name.string(),
-                mFocusedApplicationHandle->dispatchingTimeout / 1000000.0);
+                mFocusedApplicationHandle->getName().string(),
+                mFocusedApplicationHandle->getDispatchingTimeout(
+                        DEFAULT_INPUT_DISPATCHING_TIMEOUT) / 1000000.0);
     } else {
         dump.append(INDENT "FocusedApplication: <null>\n");
     }
     dump.appendFormat(INDENT "FocusedWindow: name='%s'\n",
-            mFocusedWindowHandle != NULL ? mFocusedWindowHandle->name.string() : "<null>");
+            mFocusedWindowHandle != NULL ? mFocusedWindowHandle->getName().string() : "<null>");
 
     dump.appendFormat(INDENT "TouchDown: %s\n", toString(mTouchState.down));
     dump.appendFormat(INDENT "TouchSplit: %s\n", toString(mTouchState.split));
@@ -3486,7 +3547,8 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         for (size_t i = 0; i < mTouchState.windows.size(); i++) {
             const TouchedWindow& touchedWindow = mTouchState.windows[i];
             dump.appendFormat(INDENT2 "%d: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
-                    i, touchedWindow.windowHandle->name.string(), touchedWindow.pointerIds.value,
+                    i, touchedWindow.windowHandle->getName().string(),
+                    touchedWindow.pointerIds.value,
                     touchedWindow.targetFlags);
         }
     } else {
@@ -3497,26 +3559,28 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         dump.append(INDENT "Windows:\n");
         for (size_t i = 0; i < mWindowHandles.size(); i++) {
             const sp<InputWindowHandle>& windowHandle = mWindowHandles.itemAt(i);
+            const InputWindowInfo* windowInfo = windowHandle->getInfo();
+
             dump.appendFormat(INDENT2 "%d: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
                     "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
                     "frame=[%d,%d][%d,%d], scale=%f, "
                     "touchableRegion=",
-                    i, windowHandle->name.string(),
-                    toString(windowHandle->paused),
-                    toString(windowHandle->hasFocus),
-                    toString(windowHandle->hasWallpaper),
-                    toString(windowHandle->visible),
-                    toString(windowHandle->canReceiveKeys),
-                    windowHandle->layoutParamsFlags, windowHandle->layoutParamsType,
-                    windowHandle->layer,
-                    windowHandle->frameLeft, windowHandle->frameTop,
-                    windowHandle->frameRight, windowHandle->frameBottom,
-                    windowHandle->scaleFactor);
-            dumpRegion(dump, windowHandle->touchableRegion);
-            dump.appendFormat(", inputFeatures=0x%08x", windowHandle->inputFeatures);
+                    i, windowInfo->name.string(),
+                    toString(windowInfo->paused),
+                    toString(windowInfo->hasFocus),
+                    toString(windowInfo->hasWallpaper),
+                    toString(windowInfo->visible),
+                    toString(windowInfo->canReceiveKeys),
+                    windowInfo->layoutParamsFlags, windowInfo->layoutParamsType,
+                    windowInfo->layer,
+                    windowInfo->frameLeft, windowInfo->frameTop,
+                    windowInfo->frameRight, windowInfo->frameBottom,
+                    windowInfo->scaleFactor);
+            dumpRegion(dump, windowInfo->touchableRegion);
+            dump.appendFormat(", inputFeatures=0x%08x", windowInfo->inputFeatures);
             dump.appendFormat(", ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
-                    windowHandle->ownerPid, windowHandle->ownerUid,
-                    windowHandle->dispatchingTimeout / 1000000.0);
+                    windowInfo->ownerPid, windowInfo->ownerUid,
+                    windowInfo->dispatchingTimeout / 1000000.0);
         }
     } else {
         dump.append(INDENT "Windows: <none>\n");
@@ -3572,7 +3636,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
             return BAD_VALUE;
         }
 
-        sp<Connection> connection = new Connection(inputChannel, inputWindowHandle);
+        sp<Connection> connection = new Connection(inputChannel, inputWindowHandle, monitor);
         status_t status = connection->initialize();
         if (status) {
             LOGE("Failed to initialize input publisher for input channel '%s', status=%d",
@@ -3602,37 +3666,52 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
     { // acquire lock
         AutoMutex _l(mLock);
 
-        ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
-        if (connectionIndex < 0) {
-            LOGW("Attempted to unregister already unregistered input channel '%s'",
-                    inputChannel->getName().string());
-            return BAD_VALUE;
+        status_t status = unregisterInputChannelLocked(inputChannel, false /*notify*/);
+        if (status) {
+            return status;
         }
-
-        sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
-        mConnectionsByReceiveFd.removeItemsAt(connectionIndex);
-
-        connection->status = Connection::STATUS_ZOMBIE;
-
-        for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
-            if (mMonitoringChannels[i] == inputChannel) {
-                mMonitoringChannels.removeAt(i);
-                break;
-            }
-        }
-
-        mLooper->removeFd(inputChannel->getReceivePipeFd());
-
-        nsecs_t currentTime = now();
-        abortBrokenDispatchCycleLocked(currentTime, connection);
-
-        runCommandsLockedInterruptible();
     } // release lock
 
     // Wake the poll loop because removing the connection may have changed the current
     // synchronization state.
     mLooper->wake();
     return OK;
+}
+
+status_t InputDispatcher::unregisterInputChannelLocked(const sp<InputChannel>& inputChannel,
+        bool notify) {
+    ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
+    if (connectionIndex < 0) {
+        LOGW("Attempted to unregister already unregistered input channel '%s'",
+                inputChannel->getName().string());
+        return BAD_VALUE;
+    }
+
+    sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+    mConnectionsByReceiveFd.removeItemsAt(connectionIndex);
+
+    if (connection->monitor) {
+        removeMonitorChannelLocked(inputChannel);
+    }
+
+    mLooper->removeFd(inputChannel->getReceivePipeFd());
+
+    nsecs_t currentTime = now();
+    abortBrokenDispatchCycleLocked(currentTime, connection, notify);
+
+    runCommandsLockedInterruptible();
+
+    connection->status = Connection::STATUS_ZOMBIE;
+    return OK;
+}
+
+void InputDispatcher::removeMonitorChannelLocked(const sp<InputChannel>& inputChannel) {
+    for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
+         if (mMonitoringChannels[i] == inputChannel) {
+             mMonitoringChannels.removeAt(i);
+             break;
+         }
+    }
 }
 
 ssize_t InputDispatcher::getConnectionIndexLocked(const sp<InputChannel>& inputChannel) {
@@ -3736,7 +3815,7 @@ void InputDispatcher::doNotifyANRLockedInterruptible(
 
     resumeAfterTargetsNotReadyTimeoutLocked(newTimeout,
             commandEntry->inputWindowHandle != NULL
-                    ? commandEntry->inputWindowHandle->inputChannel : NULL);
+                    ? commandEntry->inputWindowHandle->getInputChannel() : NULL);
 }
 
 void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
@@ -4495,8 +4574,9 @@ bool InputDispatcher::InputState::shouldCancelMotion(const MotionMemento& mement
 // --- InputDispatcher::Connection ---
 
 InputDispatcher::Connection::Connection(const sp<InputChannel>& inputChannel,
-        const sp<InputWindowHandle>& inputWindowHandle) :
+        const sp<InputWindowHandle>& inputWindowHandle, bool monitor) :
         status(STATUS_NORMAL), inputChannel(inputChannel), inputWindowHandle(inputWindowHandle),
+        monitor(monitor),
         inputPublisher(inputChannel),
         lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX) {
 }
@@ -4627,8 +4707,9 @@ bool InputDispatcher::TouchState::isSlippery() const {
     for (size_t i = 0; i < windows.size(); i++) {
         const TouchedWindow& window = windows.itemAt(i);
         if (window.targetFlags & InputTarget::FLAG_FOREGROUND) {
-            if (haveSlipperyForegroundWindow || !(window.windowHandle->layoutParamsFlags
-                    & InputWindowHandle::FLAG_SLIPPERY)) {
+            if (haveSlipperyForegroundWindow
+                    || !(window.windowHandle->getInfo()->layoutParamsFlags
+                            & InputWindowInfo::FLAG_SLIPPERY)) {
                 return false;
             }
             haveSlipperyForegroundWindow = true;

@@ -17,10 +17,10 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
+import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
@@ -160,13 +160,21 @@ final class InputMonitor {
             if (WindowManagerService.DEBUG_DRAG) {
                 Log.d(WindowManagerService.TAG, "Inserting drag window");
             }
-            addInputWindowHandleLw(mService.mDragState.mDragWindowHandle);
+            final InputWindowHandle dragWindowHandle = mService.mDragState.mDragWindowHandle;
+            if (dragWindowHandle != null) {
+                addInputWindowHandleLw(dragWindowHandle);
+            } else {
+                Slog.w(WindowManagerService.TAG, "Drag is in progress but there is no "
+                        + "drag window handle.");
+            }
         }
 
         final int N = windows.size();
         for (int i = N - 1; i >= 0; i--) {
             final WindowState child = windows.get(i);
-            if (child.mInputChannel == null || child.mRemoved) {
+            final InputChannel inputChannel = child.mInputChannel;
+            final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
+            if (inputChannel == null || inputWindowHandle == null || child.mRemoved) {
                 // Skip this window because it cannot possibly receive input.
                 continue;
             }
@@ -186,8 +194,6 @@ final class InputMonitor {
             }
 
             // Add a window to our list of input windows.
-            final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
-            inputWindowHandle.inputChannel = child.mInputChannel;
             inputWindowHandle.name = child.toString();
             inputWindowHandle.layoutParamsFlags = flags;
             inputWindowHandle.layoutParamsType = type;
