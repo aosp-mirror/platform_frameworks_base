@@ -446,7 +446,9 @@ public class Surface implements Parcelable {
     /** @hide */
     public native   void setLayer(int zorder);
     /** @hide */
-    public native   void setPosition(int x, int y);
+    public void setPosition(int x, int y) { setPosition((float)x, (float)y); }
+    /** @hide */
+    public native   void setPosition(float x, float y);
     /** @hide */
     public native   void setSize(int w, int h);
     /** @hide */

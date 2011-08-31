@@ -589,7 +589,7 @@ static void Surface_setLayer(
 }
 
 static void Surface_setPosition(
-        JNIEnv* env, jobject clazz, jint x, jint y)
+        JNIEnv* env, jobject clazz, jfloat x, jfloat y)
 {
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
@@ -832,7 +832,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"screenshot",          "(II)Landroid/graphics/Bitmap;", (void*)Surface_screenshotAll },
     {"screenshot",          "(IIII)Landroid/graphics/Bitmap;", (void*)Surface_screenshot },
     {"setLayer",            "(I)V", (void*)Surface_setLayer },
-    {"setPosition",         "(II)V",(void*)Surface_setPosition },
+    {"setPosition",         "(FF)V",(void*)Surface_setPosition },
     {"setSize",             "(II)V",(void*)Surface_setSize },
     {"hide",                "()V",  (void*)Surface_hide },
     {"show",                "()V",  (void*)Surface_show },
