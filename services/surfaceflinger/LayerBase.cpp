@@ -335,15 +335,16 @@ void LayerBase::setGeometry(hwc_layer_t* hwcl)
             reinterpret_cast<hwc_rect_t const *>(
                     visibleRegionScreen.getArray(
                             &hwcl->visibleRegionScreen.numRects));
+
+    hwcl->sourceCrop.left   = 0;
+    hwcl->sourceCrop.top    = 0;
+    hwcl->sourceCrop.right  = mTransformedBounds.width();
+    hwcl->sourceCrop.bottom = mTransformedBounds.height();
 }
 
 void LayerBase::setPerFrameData(hwc_layer_t* hwcl) {
     hwcl->compositionType = HWC_FRAMEBUFFER;
     hwcl->handle = NULL;
-    hwcl->sourceCrop.left   = 0;
-    hwcl->sourceCrop.top    = 0;
-    hwcl->sourceCrop.right  = mTransformedBounds.width();
-    hwcl->sourceCrop.bottom = mTransformedBounds.height();
 }
 
 void LayerBase::setFiltering(bool filtering)

@@ -212,6 +212,24 @@ void Layer::setGeometry(hwc_layer_t* hwcl)
     } else {
         hwcl->transform = finalTransform;
     }
+
+    if (isCropped()) {
+        hwcl->sourceCrop.left   = mCurrentCrop.left;
+        hwcl->sourceCrop.top    = mCurrentCrop.top;
+        hwcl->sourceCrop.right  = mCurrentCrop.right;
+        hwcl->sourceCrop.bottom = mCurrentCrop.bottom;
+    } else {
+        const sp<GraphicBuffer>& buffer(mActiveBuffer);
+        hwcl->sourceCrop.left   = 0;
+        hwcl->sourceCrop.top    = 0;
+        if (buffer != NULL) {
+            hwcl->sourceCrop.right  = buffer->width;
+            hwcl->sourceCrop.bottom = buffer->height;
+        } else {
+            hwcl->sourceCrop.right  = mTransformedBounds.width();
+            hwcl->sourceCrop.bottom = mTransformedBounds.height();
+        }
+    }
 }
 
 void Layer::setPerFrameData(hwc_layer_t* hwcl) {
@@ -224,23 +242,6 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
         hwcl->handle = NULL;
     } else {
         hwcl->handle = buffer->handle;
-    }
-
-    if (isCropped()) {
-        hwcl->sourceCrop.left   = mCurrentCrop.left;
-        hwcl->sourceCrop.top    = mCurrentCrop.top;
-        hwcl->sourceCrop.right  = mCurrentCrop.right;
-        hwcl->sourceCrop.bottom = mCurrentCrop.bottom;
-    } else {
-        hwcl->sourceCrop.left   = 0;
-        hwcl->sourceCrop.top    = 0;
-        if (buffer != NULL) {
-            hwcl->sourceCrop.right  = buffer->width;
-            hwcl->sourceCrop.bottom = buffer->height;
-        } else {
-            hwcl->sourceCrop.right  = mTransformedBounds.width();
-            hwcl->sourceCrop.bottom = mTransformedBounds.height();
-        }
     }
 }
 
@@ -416,8 +417,7 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             return;
         }
 
-        mActiveBuffer = mSurfaceTexture->getCurrentBuffer();
-        mSurfaceTexture->getTransformMatrix(mTextureMatrix);
+        sp<GraphicBuffer> newFrontBuffer(mSurfaceTexture->getCurrentBuffer());
 
         const Rect crop(mSurfaceTexture->getCurrentCrop());
         const uint32_t transform(mSurfaceTexture->getCurrentTransform());
@@ -432,7 +432,23 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             mFlinger->invalidateHwcGeometry();
         }
 
-        mCurrentOpacity = getOpacityForFormat(mActiveBuffer->format);
+        GLfloat textureMatrix[16];
+        mSurfaceTexture->getTransformMatrix(textureMatrix);
+        if (memcmp(textureMatrix, mTextureMatrix, sizeof(textureMatrix))) {
+            memcpy(mTextureMatrix, textureMatrix, sizeof(textureMatrix));
+            mFlinger->invalidateHwcGeometry();
+        }
+
+        uint32_t bufWidth  = newFrontBuffer->getWidth();
+        uint32_t bufHeight = newFrontBuffer->getHeight();
+        if (mActiveBuffer != NULL) {
+            if (bufWidth != uint32_t(mActiveBuffer->width) ||
+                bufHeight != uint32_t(mActiveBuffer->height)) {
+                mFlinger->invalidateHwcGeometry();
+            }
+        }
+
+        mCurrentOpacity = getOpacityForFormat(newFrontBuffer->format);
         if (oldOpacity != isOpaque()) {
             recomputeVisibleRegions = true;
         }
@@ -446,15 +462,14 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         // FIXME: mPostedDirtyRegion = dirty & bounds
         mPostedDirtyRegion.set(front.w, front.h);
 
+        // update active buffer
+        mActiveBuffer = newFrontBuffer;
 
         if ((front.w != front.requested_w) ||
             (front.h != front.requested_h))
         {
             // check that we received a buffer of the right size
             // (Take the buffer's orientation into account)
-            sp<GraphicBuffer> newFrontBuffer(mActiveBuffer);
-            uint32_t bufWidth  = newFrontBuffer->getWidth();
-            uint32_t bufHeight = newFrontBuffer->getHeight();
             if (mCurrentTransform & Transform::ROT_90) {
                 swap(bufWidth, bufHeight);
             }
