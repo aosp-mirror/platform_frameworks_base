@@ -1583,6 +1583,14 @@ public final class InputMethodManager {
     /**
      * Set additional input method subtypes. Only a process which shares the same uid with the IME
      * can add additional input method subtypes to the IME.
+     * Please note that a subtype's status is stored in the system.
+     * For example, enabled subtypes are remembered by the framework even after they are removed
+     * by using this method. If you re-add the same subtypes again,
+     * they will just get enabled. If you want to avoid such conflicts, for instance, you may
+     * want to create a "different" new subtype even with the same locale and mode,
+     * by changing its extra value. The different subtype won't get affected by the stored past
+     * status. (You may want to take a look at {@link InputMethodSubtype#hashCode()} to refer
+     * to the current implementation.)
      * @param imiId Id of InputMethodInfo which additional input method subtypes will be added to.
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
      * @return true if the additional input method subtypes are successfully added.
