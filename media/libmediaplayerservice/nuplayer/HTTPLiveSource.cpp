@@ -124,7 +124,14 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
                             : ATSParser::DISCONTINUITY_FORMATCHANGE,
                         extra);
             } else {
-                mTSParser->feedTSPacket(buffer, sizeof(buffer));
+                status_t err = mTSParser->feedTSPacket(buffer, sizeof(buffer));
+
+                if (err != OK) {
+                    LOGE("TS Parser returned error %d", err);
+                    mTSParser->signalEOS(err);
+                    mEOS = true;
+                    break;
+                }
             }
 
             mOffset += n;

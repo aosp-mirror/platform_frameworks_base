@@ -49,7 +49,7 @@ struct ATSParser : public RefBase {
 
     ATSParser(uint32_t flags = 0);
 
-    void feedTSPacket(const void *data, size_t size);
+    status_t feedTSPacket(const void *data, size_t size);
 
     void signalDiscontinuity(
             DiscontinuityType type, const sp<AMessage> &extra);
@@ -89,12 +89,12 @@ private:
     void parseProgramMap(ABitReader *br);
     void parsePES(ABitReader *br);
 
-    void parsePID(
+    status_t parsePID(
         ABitReader *br, unsigned PID,
         unsigned payload_unit_start_indicator);
 
     void parseAdaptationField(ABitReader *br);
-    void parseTS(ABitReader *br);
+    status_t parseTS(ABitReader *br);
 
     DISALLOW_EVIL_CONSTRUCTORS(ATSParser);
 };
