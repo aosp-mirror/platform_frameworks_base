@@ -15,7 +15,7 @@
  */
 
 /** @file rs_cl.rsh
- *  \brief Additional compute routines
+ *  \brief Basic math functions
  *
  *
  */
@@ -111,221 +111,552 @@ _RS_RUNTIME float4 __attribute__((overloadable)) \
         fnc(float4 v1, float4 v2, int4 *v3);
 
 
+/**
+ * Return the inverse cosine.
+ *
+ * Supports float, float2, float3, float4
+ */
 extern float __attribute__((overloadable)) acos(float);
 FN_FUNC_FN(acos)
 
+/**
+ * Return the inverse hyperbolic cosine.
+ *
+ * Supports float, float2, float3, float4
+ */
 extern float __attribute__((overloadable)) acosh(float);
 FN_FUNC_FN(acosh)
 
+/**
+ * Return the inverse cosine divided by PI.
+ *
+ * Supports float, float2, float3, float4
+ */
 _RS_RUNTIME float __attribute__((overloadable)) acospi(float v);
-
-
 FN_FUNC_FN(acospi)
 
+/**
+ * Return the inverse sine.
+ *
+ * Supports float, float2, float3, float4
+ */
 extern float __attribute__((overloadable)) asin(float);
 FN_FUNC_FN(asin)
 
+/**
+ * Return the inverse hyperbolic sine.
+ *
+ * Supports float, float2, float3, float4
+ */
 extern float __attribute__((overloadable)) asinh(float);
 FN_FUNC_FN(asinh)
 
 
+/**
+ * Return the inverse sine divided by PI.
+ *
+ * Supports float, float2, float3, float4
+ */
 _RS_RUNTIME float __attribute__((overloadable)) asinpi(float v);
 FN_FUNC_FN(asinpi)
 
+/**
+ * Return the inverse tangent.
+ *
+ * Supports float, float2, float3, float4
+ */
 extern float __attribute__((overloadable)) atan(float);
 FN_FUNC_FN(atan)
 
-extern float __attribute__((overloadable)) atan2(float, float);
+/**
+ * Return the inverse tangent of y / x.
+ *
+ * Supports float, float2, float3, float4.  Both arguments must be of the same
+ * type.
+ *
+ * @param y
+ * @param x
+ */
+extern float __attribute__((overloadable)) atan2(float y, float x);
 FN_FUNC_FN_FN(atan2)
 
+/**
+ * Return the inverse hyperbolic tangent.
+ *
+ * Supports float, float2, float3, float4
+ */
 extern float __attribute__((overloadable)) atanh(float);
 FN_FUNC_FN(atanh)
 
-
+/**
+ * Return the inverse tangent divided by PI.
+ *
+ * Supports float, float2, float3, float4
+ */
 _RS_RUNTIME float __attribute__((overloadable)) atanpi(float v);
 FN_FUNC_FN(atanpi)
 
-
+/**
+ * Return the inverse tangent of y / x, divided by PI.
+ *
+ * Supports float, float2, float3, float4.  Both arguments must be of the same
+ * type.
+ *
+ * @param y
+ * @param x
+ */
 _RS_RUNTIME float __attribute__((overloadable)) atan2pi(float y, float x);
 FN_FUNC_FN_FN(atan2pi)
 
+
+/**
+ * Return the cube root.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) cbrt(float);
 FN_FUNC_FN(cbrt)
 
+/**
+ * Return the smallest integer not less than a value.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) ceil(float);
 FN_FUNC_FN(ceil)
 
-extern float __attribute__((overloadable)) copysign(float, float);
+/**
+ * Copy the sign bit from y to x.
+ *
+ * Supports float, float2, float3, float4.  Both arguments must be of the same
+ * type.
+ *
+ * @param x
+ * @param y
+ */
+extern float __attribute__((overloadable)) copysign(float x, float y);
 FN_FUNC_FN_FN(copysign)
 
+/**
+ * Return the cosine.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) cos(float);
 FN_FUNC_FN(cos)
 
+/**
+ * Return the hypebolic cosine.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) cosh(float);
 FN_FUNC_FN(cosh)
 
-
+/**
+ * Return the cosine of the value * PI.
+ *
+ * Supports float, float2, float3, float4.
+ */
 _RS_RUNTIME float __attribute__((overloadable)) cospi(float v);
 FN_FUNC_FN(cospi)
 
+/**
+ * Return the complementary error function.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) erfc(float);
 FN_FUNC_FN(erfc)
 
+/**
+ * Return the error function.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) erf(float);
 FN_FUNC_FN(erf)
 
+/**
+ * Return e ^ value.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) exp(float);
 FN_FUNC_FN(exp)
 
+/**
+ * Return 2 ^ value.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) exp2(float);
 FN_FUNC_FN(exp2)
 
-extern float __attribute__((overloadable)) pow(float, float);
+/**
+ * Return x ^ y.
+ *
+ * Supports float, float2, float3, float4. Both arguments must be of the same
+ * type.
+ */
+extern float __attribute__((overloadable)) pow(float x, float y);
+FN_FUNC_FN_FN(pow)
 
+/**
+ * Return 10 ^ value.
+ *
+ * Supports float, float2, float3, float4.
+ */
 _RS_RUNTIME float __attribute__((overloadable)) exp10(float v);
 FN_FUNC_FN(exp10)
 
+/**
+ * Return (e ^ value) - 1.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) expm1(float);
 FN_FUNC_FN(expm1)
 
+/**
+ * Return the absolute value of a value.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) fabs(float);
 FN_FUNC_FN(fabs)
 
+/**
+ * Return the positive difference between two values.
+ *
+ * Supports float, float2, float3, float4.  Both arguments must be of the same
+ * type.
+ */
 extern float __attribute__((overloadable)) fdim(float, float);
 FN_FUNC_FN_FN(fdim)
 
+/**
+ * Return the smallest integer not greater than a value.
+ *
+ * Supports float, float2, float3, float4.
+ */
 extern float __attribute__((overloadable)) floor(float);
 FN_FUNC_FN(floor)
 
-extern float __attribute__((overloadable)) fma(float, float, float);
+/**
+ * Return a*b + c.
+ *
+ * Supports float, float2, float3, float4.
+ */
+extern float __attribute__((overloadable)) fma(float a, float b, float c);
 FN_FUNC_FN_FN_FN(fma)
 
-extern float __attribute__((overloadable)) fmax(float, float);
+/**
+ * Return (x < y ? y : x)
+ *
+ * Supports float, float2, float3, float4.
+ * @param x: may be float, float2, float3, float4
+ * @param y: may be float or vector.  If vector must match type of x.
+ */
+extern float __attribute__((overloadable)) fmax(float x, float y);
 FN_FUNC_FN_FN(fmax);
 FN_FUNC_FN_F(fmax);
 
-extern float __attribute__((overloadable)) fmin(float, float);
+/**
+ * Return (x > y ? y : x)
+ *
+ * @param x: may be float, float2, float3, float4
+ * @param y: may be float or vector.  If vector must match type of x.
+ */
+extern float __attribute__((overloadable)) fmin(float x, float y);
 FN_FUNC_FN_FN(fmin);
 FN_FUNC_FN_F(fmin);
 
-extern float __attribute__((overloadable)) fmod(float, float);
+/**
+ * Return the remainder from x / y
+ *
+ * Supports float, float2, float3, float4.
+ */
+extern float __attribute__((overloadable)) fmod(float x, float y);
 FN_FUNC_FN_FN(fmod)
 
 
+/**
+ * Return fractional part of v
+ *
+ * @param iptr  iptr[0] will be set to the floor of the input value.
+ * Supports float, float2, float3, float4.
+ */
 _RS_RUNTIME float __attribute__((overloadable)) fract(float v, float *iptr);
 FN_FUNC_FN_PFN(fract)
 
-extern float __attribute__((overloadable)) frexp(float, int *);
+/**
+ * Return the mantissa and place the exponent into iptr[0]
+ *
+ * @param v Supports float, float2, float3, float4.
+ * @param iptr  Must have the same vector size as v.
+ */
+extern float __attribute__((overloadable)) frexp(float v, int *iptr);
 FN_FUNC_FN_PIN(frexp)
 
-extern float __attribute__((overloadable)) hypot(float, float);
+/**
+ * Return sqrt(x*x + y*y)
+ *
+ * Supports float, float2, float3, float4.
+ */
+extern float __attribute__((overloadable)) hypot(float x, float y);
 FN_FUNC_FN_FN(hypot)
 
+/**
+ * Return the integer exponent of a value
+ *
+ * Supports 1,2,3,4 components
+ */
 extern int __attribute__((overloadable)) ilogb(float);
 IN_FUNC_FN(ilogb)
 
-extern float __attribute__((overloadable)) ldexp(float, int);
+/**
+ * Return (x * 2^y)
+ *
+ * @param x Supports 1,2,3,4 components
+ * @param y Supports single component or matching vector.
+ */
+extern float __attribute__((overloadable)) ldexp(float x, int y);
 FN_FUNC_FN_IN(ldexp)
 FN_FUNC_FN_I(ldexp)
 
+/**
+ * Return the log gamma
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) lgamma(float);
 FN_FUNC_FN(lgamma)
-extern float __attribute__((overloadable)) lgamma(float, int*);
+
+/**
+ * Return the log gamma and sign
+ *
+ * @param x Supports 1,2,3,4 components
+ * @param y Supports matching vector.
+ */
+extern float __attribute__((overloadable)) lgamma(float x, int* y);
 FN_FUNC_FN_PIN(lgamma)
 
+/**
+ * Return the natural logarithm
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) log(float);
 FN_FUNC_FN(log)
 
-
+/**
+ * Return the base 10 logarithm
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) log10(float);
 FN_FUNC_FN(log10)
 
-
+/**
+ * Return the base 2 logarithm
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) log2(float v);
 FN_FUNC_FN(log2)
 
-extern float __attribute__((overloadable)) log1p(float);
+/**
+ * Return the natural logarithm of (v + 1.0f)
+ *
+ * Supports 1,2,3,4 components
+ */
+extern float __attribute__((overloadable)) log1p(float v);
 FN_FUNC_FN(log1p)
 
+/**
+ * Compute the exponent of the value.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) logb(float);
 FN_FUNC_FN(logb)
 
-extern float __attribute__((overloadable)) mad(float, float, float);
+/**
+ * Compute (a * b) + c
+ *
+ * Supports 1,2,3,4 components
+ */
+extern float __attribute__((overloadable)) mad(float a, float b, float c);
 FN_FUNC_FN_FN_FN(mad)
 
-extern float __attribute__((overloadable)) modf(float, float *);
+/**
+ * Return the integral and fractional components of a number
+ * Supports 1,2,3,4 components
+ *
+ * @param x Source value
+ * @param iret iret[0] will be set to the integral portion of the number.
+ * @return The floating point portion of the value.
+ */
+extern float __attribute__((overloadable)) modf(float x, float *iret);
 FN_FUNC_FN_PFN(modf);
 
 //extern float __attribute__((overloadable)) nan(uint);
 
-extern float __attribute__((overloadable)) nextafter(float, float);
+/**
+ * Return the next floating point number from x towards y.
+ *
+ * Supports 1,2,3,4 components
+ */
+extern float __attribute__((overloadable)) nextafter(float x, float y);
 FN_FUNC_FN_FN(nextafter)
 
-FN_FUNC_FN_FN(pow)
-
+/**
+ * Return (v ^ p).
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) pown(float v, int p);
-_RS_RUNTIME float2 __attribute__((overloadable)) pown(float2 v, int2 p);
-_RS_RUNTIME float3 __attribute__((overloadable)) pown(float3 v, int3 p);
-_RS_RUNTIME float4 __attribute__((overloadable)) pown(float4 v, int4 p);
+FN_FUNC_FN_IN(pown)
 
+/**
+ * Return (v ^ p).
+ * @param v must be greater than 0.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) powr(float v, float p);
-_RS_RUNTIME float2 __attribute__((overloadable)) powr(float2 v, float2 p);
-_RS_RUNTIME float3 __attribute__((overloadable)) powr(float3 v, float3 p);
-_RS_RUNTIME float4 __attribute__((overloadable)) powr(float4 v, float4 p);
+FN_FUNC_FN_FN(powr)
 
-extern float __attribute__((overloadable)) remainder(float, float);
+/**
+ * Return round x/y to the nearest integer then compute the remander.
+ *
+ * Supports 1,2,3,4 components
+ */
+extern float __attribute__((overloadable)) remainder(float x, float y);
 FN_FUNC_FN_FN(remainder)
 
+// document once we know the precision of bionic
 extern float __attribute__((overloadable)) remquo(float, float, int *);
 FN_FUNC_FN_FN_PIN(remquo)
 
+/**
+ * Round to the nearest integral value.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) rint(float);
 FN_FUNC_FN(rint)
 
+/**
+ * Compute the Nth root of a value.
+ *
+ * Supports 1,2,3,4 components
+ */
+_RS_RUNTIME float __attribute__((overloadable)) rootn(float v, int n);
+FN_FUNC_FN_IN(rootn)
 
-_RS_RUNTIME float __attribute__((overloadable)) rootn(float v, int r);
-_RS_RUNTIME float2 __attribute__((overloadable)) rootn(float2 v, int2 r);
-_RS_RUNTIME float3 __attribute__((overloadable)) rootn(float3 v, int3 r);
-_RS_RUNTIME float4 __attribute__((overloadable)) rootn(float4 v, int4 r);
-
-
+/**
+ * Round to the nearest integral value.  Half values are rounded away from zero.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) round(float);
 FN_FUNC_FN(round)
 
-
+/**
+ * Return the square root of a value.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) sqrt(float);
+FN_FUNC_FN(sqrt)
+
+/**
+ * Return (1 / sqrt(value)).
+ *
+ * @param v The incoming value in radians
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) rsqrt(float v);
 FN_FUNC_FN(rsqrt)
 
-extern float __attribute__((overloadable)) sin(float);
+/**
+ * Return the sine of a value specified in radians.
+ *
+ * @param v The incoming value in radians
+ * Supports 1,2,3,4 components
+ */
+extern float __attribute__((overloadable)) sin(float v);
 FN_FUNC_FN(sin)
 
+/**
+ * Return the sine and cosine of a value.
+ *
+ * @return sine
+ * @param v The incoming value in radians
+ * @param *cosptr cosptr[0] will be set to the cosine value.
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) sincos(float v, float *cosptr);
-_RS_RUNTIME float2 __attribute__((overloadable)) sincos(float2 v, float2 *cosptr);
-_RS_RUNTIME float3 __attribute__((overloadable)) sincos(float3 v, float3 *cosptr);
-_RS_RUNTIME float4 __attribute__((overloadable)) sincos(float4 v, float4 *cosptr);
+FN_FUNC_FN_PFN(sincos);
 
+/**
+ * Return the hyperbolic sine of a value specified in radians.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) sinh(float);
 FN_FUNC_FN(sinh)
 
+/**
+ * Return the sin(v * PI).
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) sinpi(float v);
 FN_FUNC_FN(sinpi)
 
-FN_FUNC_FN(sqrt)
-
-extern float __attribute__((overloadable)) tan(float);
+/**
+ * Return the tangent of a value.
+ *
+ * Supports 1,2,3,4 components
+ * @param v The incoming value in radians
+ */
+extern float __attribute__((overloadable)) tan(float v);
 FN_FUNC_FN(tan)
 
+/**
+ * Return the hyperbolic tangent of a value.
+ *
+ * Supports 1,2,3,4 components
+ * @param v The incoming value in radians
+ */
 extern float __attribute__((overloadable)) tanh(float);
 FN_FUNC_FN(tanh)
 
+/**
+ * Return tan(v * PI)
+ *
+ * Supports 1,2,3,4 components
+ */
 _RS_RUNTIME float __attribute__((overloadable)) tanpi(float v);
 FN_FUNC_FN(tanpi)
 
-
+/**
+ * Compute the gamma function of a value.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) tgamma(float);
 FN_FUNC_FN(tgamma)
 
+/**
+ * Round to integral using truncation.
+ *
+ * Supports 1,2,3,4 components
+ */
 extern float __attribute__((overloadable)) trunc(float);
 FN_FUNC_FN(trunc)
 
