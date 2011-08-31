@@ -1682,7 +1682,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 for (int i = 0; i < packageNum; ++i) {
                     if (packageInfos[i].equals(imi.getPackageName())) {
                         mFileManager.addInputMethodSubtypes(imi, subtypes);
-                        buildInputMethodListLocked(mMethodList, mMethodMap);
+                        final long ident = Binder.clearCallingIdentity();
+                        try {
+                            buildInputMethodListLocked(mMethodList, mMethodMap);
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
                         return true;
                     }
                 }
@@ -1707,7 +1712,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 setInputMethodLocked(id, subtypeId);
             } finally {
