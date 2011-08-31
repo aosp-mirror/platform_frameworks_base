@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import java.io.PrintWriter;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.FloatMath;
@@ -81,7 +83,36 @@ public class RectF implements Parcelable {
         return "RectF(" + left + ", " + top + ", "
                       + right + ", " + bottom + ")";
     }
+
+    /**
+     * Return a string representation of the rectangle in a compact form.
+     */
+    public String toShortString() {
+        return toShortString(new StringBuilder(32));
+    }
     
+    /**
+     * Return a string representation of the rectangle in a compact form.
+     * @hide
+     */
+    public String toShortString(StringBuilder sb) {
+        sb.setLength(0);
+        sb.append('['); sb.append(left); sb.append(',');
+        sb.append(top); sb.append("]["); sb.append(right);
+        sb.append(','); sb.append(bottom); sb.append(']');
+        return sb.toString();
+    }
+    
+    /**
+     * Print short representation to given writer.
+     * @hide
+     */
+    public void printShortString(PrintWriter pw) {
+        pw.print('['); pw.print(left); pw.print(',');
+        pw.print(top); pw.print("]["); pw.print(right);
+        pw.print(','); pw.print(bottom); pw.print(']');
+    }
+
     /**
      * Returns true if the rectangle is empty (left >= right or top >= bottom)
      */

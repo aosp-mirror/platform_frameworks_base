@@ -148,8 +148,8 @@ class ScreenRotationAnimation {
     void setSnapshotTransform(Matrix matrix, float alpha) {
         if (mSurface != null) {
             matrix.getValues(mTmpFloats);
-            mSurface.setPosition((int)mTmpFloats[Matrix.MTRANS_X],
-                    (int)mTmpFloats[Matrix.MTRANS_Y]);
+            mSurface.setPosition(mTmpFloats[Matrix.MTRANS_X],
+                    mTmpFloats[Matrix.MTRANS_Y]);
             mSurface.setMatrix(
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);

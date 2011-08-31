@@ -273,7 +273,7 @@ class DragState {
         if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION notifyMoveLw");
         Surface.openTransaction();
         try {
-            mSurface.setPosition((int)(x - mThumbOffsetX), (int)(y - mThumbOffsetY));
+            mSurface.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DRAG "
                     + mSurface + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
