@@ -1990,7 +1990,7 @@ int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
     CHECK(mIsEncoder);
 
     if (mDecodingTimeList.empty()) {
-        CHECK(mNoMoreOutputData);
+        CHECK(mSignalledEOS || mNoMoreOutputData);
         // No corresponding input frame available.
         // This could happen when EOS is reached.
         return 0;
