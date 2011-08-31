@@ -101,14 +101,12 @@ public final class IsoDep extends BasicTagTechnology {
     }
 
     /**
-     * Gets the currently set timeout of {@link #transceive} in milliseconds.
+     * Get the current timeout for {@link #transceive} in milliseconds.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @return timeout value in milliseconds
-     * @hide
      */
-    // TODO Unhide for ICS
     public int getTimeout() {
         try {
             return mTag.getTagService().getTimeout(TagTechnology.ISO_DEP);
