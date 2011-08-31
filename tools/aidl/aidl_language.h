@@ -64,7 +64,8 @@ typedef struct method_type {
 
 enum {
     PARCELABLE_TYPE = 12,
-    INTERFACE_TYPE
+    INTERFACE_TYPE_BINDER,
+    INTERFACE_TYPE_RPC
 };
 
 typedef struct document_item_type {

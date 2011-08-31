@@ -111,6 +111,21 @@ LiteralExpression::Write(FILE* to)
     fprintf(to, "%s", this->value.c_str());
 }
 
+StringLiteralExpression::StringLiteralExpression(const string& v)
+    :value(v)
+{
+}
+
+StringLiteralExpression::~StringLiteralExpression()
+{
+}
+
+void
+StringLiteralExpression::Write(FILE* to)
+{
+    fprintf(to, "\"%s\"", this->value.c_str());
+}
+
 Variable::Variable()
     :type(NULL),
      name(),
@@ -277,6 +292,17 @@ MethodCall::MethodCall(const string& n)
 {
 }
 
+MethodCall::MethodCall(const string& n, int argc = 0, ...)
+    :obj(NULL),
+     clazz(NULL),
+     name(n)
+{
+  va_list args;
+  va_start(args, argc);
+  init(argc, args);
+  va_end(args);
+}
+
 MethodCall::MethodCall(Expression* o, const string& n)
     :obj(o),
      clazz(NULL),
@@ -367,8 +393,26 @@ NewExpression::NewExpression(Type* t)
 {
 }
 
+NewExpression::NewExpression(Type* t, int argc = 0, ...)
+    :type(t)
+{
+  va_list args;
+  va_start(args, argc);
+  init(argc, args);
+  va_end(args);
+}
+
 NewExpression::~NewExpression()
 {
+}
+
+void
+NewExpression::init(int n, va_list args)
+{
+    for (int i=0; i<n; i++) {
+        Expression* expression = (Expression*)va_arg(args, void*);
+        this->arguments.push_back(expression);
+    }
 }
 
 void
@@ -678,7 +722,7 @@ Method::Write(FILE* to)
         fprintf(to, "%s\n", this->comment.c_str());
     }
 
-    WriteModifiers(to, this->modifiers, SCOPE_MASK | STATIC | FINAL | OVERRIDE);
+    WriteModifiers(to, this->modifiers, SCOPE_MASK | STATIC | ABSTRACT | FINAL | OVERRIDE);
 
     if (this->returnType != NULL) {
         string dim;

@@ -29,7 +29,7 @@ static void
 test_document(document_item_type* d)
 {
     while (d) {
-        if (d->item_type == INTERFACE_TYPE) {
+        if (d->item_type == INTERFACE_TYPE_BINDER) {
             interface_type* c = (interface_type*)d;
             printf("interface %s %s {\n", c->package, c->name.data);
             interface_item_type *q = (interface_item_type*)c->interface_items;
@@ -242,7 +242,8 @@ check_filenames(const char* filename, document_item_type* items)
             parcelable_type* p = (parcelable_type*)items;
             err |= check_filename(filename, p->package, &p->name);
         }
-        else if (items->item_type == INTERFACE_TYPE) {
+        else if (items->item_type == INTERFACE_TYPE_BINDER
+                || items->item_type == INTERFACE_TYPE_RPC) {
             interface_type* c = (interface_type*)items;
             err |= check_filename(filename, c->package, &c->name);
         }
@@ -295,7 +296,8 @@ gather_types(const char* filename, document_item_type* items)
             type = new ParcelableType(p->package ? p->package : "",
                             p->name.data, false, filename, p->name.lineno);
         }
-        else if (items->item_type == INTERFACE_TYPE) {
+        else if (items->item_type == INTERFACE_TYPE_BINDER
+                || items->item_type == INTERFACE_TYPE_RPC) {
             interface_type* c = (interface_type*)items;
             type = new InterfaceType(c->package ? c->package : "",
                             c->name.data, false, c->oneway,
@@ -310,7 +312,7 @@ gather_types(const char* filename, document_item_type* items)
         if (old == NULL) {
             NAMES.Add(type);
 
-            if (items->item_type == INTERFACE_TYPE) {
+            if (items->item_type == INTERFACE_TYPE_BINDER) {
                 // for interfaces, also add the stub and proxy types, we don't
                 // bother checking these for duplicates, because the parser
                 // won't let us do it.
@@ -329,6 +331,19 @@ gather_types(const char* filename, document_item_type* items)
                                         name, Type::GENERATED, false, false,
                                         filename, c->name.lineno);
                 NAMES.Add(proxy);
+            }
+            else if (items->item_type == INTERFACE_TYPE_RPC) {
+                // for interfaces, also add the service base type, we don't
+                // bother checking these for duplicates, because the parser
+                // won't let us do it.
+                interface_type* c = (interface_type*)items;
+
+                string name = c->name.data;
+                name += ".ServiceBase";
+                Type* base = new Type(c->package ? c->package : "",
+                                        name, Type::GENERATED, false, false,
+                                        filename, c->name.lineno);
+                NAMES.Add(base);
             }
         } else {
             if (old->Kind() == Type::BUILT_IN) {
@@ -498,7 +513,7 @@ check_types(const char* filename, document_item_type* items)
     int err = 0;
     while (items) {
         // (nothing to check for PARCELABLE_TYPE)
-        if (items->item_type == INTERFACE_TYPE) {
+        if (items->item_type == INTERFACE_TYPE_BINDER) {
             map<string,method_type*> methodNames;
             interface_type* c = (interface_type*)items;
 
@@ -544,7 +559,10 @@ exactly_one_interface(const char* filename, const document_item_type* items, con
     const document_item_type* next = items->next;
     if (items->next != NULL) {
         int lineno = -1;
-        if (next->item_type == INTERFACE_TYPE) {
+        if (next->item_type == INTERFACE_TYPE_BINDER) {
+            lineno = ((interface_type*)next)->interface_token.lineno;
+        }
+        else if (next->item_type == INTERFACE_TYPE_RPC) {
             lineno = ((interface_type*)next)->interface_token.lineno;
         }
         else if (next->item_type == PARCELABLE_TYPE) {
@@ -616,7 +634,7 @@ generate_outputFileName(const Options& options, const document_item_type* items)
     string result;
 
     // items has already been checked to have only one interface.
-    if (items->item_type == INTERFACE_TYPE) {
+    if (items->item_type == INTERFACE_TYPE_BINDER || items->item_type == INTERFACE_TYPE_RPC) {
         interface_type* type = (interface_type*)items;
 
         // create the path to the destination folder based on the
@@ -723,7 +741,7 @@ parse_preprocessed_file(const string& filename)
             interface_type* iface = (interface_type*)malloc(
                     sizeof(interface_type));
             memset(iface, 0, sizeof(interface_type));
-            iface->document_item.item_type = INTERFACE_TYPE;
+            iface->document_item.item_type = INTERFACE_TYPE_BINDER;
             iface->interface_token.lineno = lineno;
             iface->interface_token.data = strdup(type);
             iface->package = packagename ? strdup(packagename) : NULL;

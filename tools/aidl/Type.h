@@ -59,6 +59,14 @@ public:
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
 
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+    virtual void    ReadFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+
+
 protected:
     void SetQualifiedName(const string& qualified);
     Expression* BuildWriteToParcelFlags(int flags);
@@ -169,6 +177,11 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
 };
 
 class CharSequenceType : public Type
@@ -438,11 +451,13 @@ extern Namespace NAMES;
 
 extern Type* VOID_TYPE;
 extern Type* BOOLEAN_TYPE;
+extern Type* BYTE_TYPE;
 extern Type* CHAR_TYPE;
 extern Type* INT_TYPE;
 extern Type* LONG_TYPE;
 extern Type* FLOAT_TYPE;
 extern Type* DOUBLE_TYPE;
+extern Type* OBJECT_TYPE;
 extern Type* STRING_TYPE;
 extern Type* CHAR_SEQUENCE_TYPE;
 extern Type* TEXT_UTILS_TYPE;
@@ -454,6 +469,16 @@ extern Type* BINDER_NATIVE_TYPE;
 extern Type* BINDER_PROXY_TYPE;
 extern Type* PARCEL_TYPE;
 extern Type* PARCELABLE_INTERFACE_TYPE;
+
+extern Type* CONTEXT_TYPE;
+
+extern Type* RPC_SERVICE_BASE_TYPE;
+extern Type* RPC_DATA_TYPE;
+extern Type* RPC_BROKER_TYPE;
+extern Type* RPC_ENDPOINT_INFO_TYPE;
+extern Type* RPC_RESULT_HANDLER_TYPE;
+extern Type* RPC_ERROR_TYPE;
+extern Type* RPC_ERROR_LISTENER_TYPE;
 
 extern Expression* NULL_VALUE;
 extern Expression* THIS_VALUE;
