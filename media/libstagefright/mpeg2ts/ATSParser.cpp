@@ -48,7 +48,7 @@ struct ATSParser::Program : public RefBase {
 
     bool parsePID(
             unsigned pid, unsigned payload_unit_start_indicator,
-            ABitReader *br);
+            ABitReader *br, status_t *err);
 
     void signalDiscontinuity(
             DiscontinuityType type, const sp<AMessage> &extra);
@@ -77,7 +77,7 @@ private:
     bool mFirstPTSValid;
     uint64_t mFirstPTS;
 
-    void parseProgramMap(ABitReader *br);
+    status_t parseProgramMap(ABitReader *br);
 
     DISALLOW_EVIL_CONSTRUCTORS(Program);
 };
@@ -140,14 +140,17 @@ ATSParser::Program::Program(
 
 bool ATSParser::Program::parsePID(
         unsigned pid, unsigned payload_unit_start_indicator,
-        ABitReader *br) {
+        ABitReader *br, status_t *err) {
+    *err = OK;
+
     if (pid == mProgramMapPID) {
         if (payload_unit_start_indicator) {
             unsigned skip = br->getBits(8);
             br->skipBits(skip * 8);
         }
 
-        parseProgramMap(br);
+        *err = parseProgramMap(br);
+
         return true;
     }
 
@@ -180,7 +183,7 @@ struct StreamInfo {
     unsigned mPID;
 };
 
-void ATSParser::Program::parseProgramMap(ABitReader *br) {
+status_t ATSParser::Program::parseProgramMap(ABitReader *br) {
     unsigned table_id = br->getBits(8);
     LOGV("  table_id = %u", table_id);
     CHECK_EQ(table_id, 0x02u);
@@ -283,7 +286,60 @@ void ATSParser::Program::parseProgramMap(ABitReader *br) {
     }
 
     if (PIDsChanged) {
-        mStreams.clear();
+#if 0
+        LOGI("before:");
+        for (size_t i = 0; i < mStreams.size(); ++i) {
+            sp<Stream> stream = mStreams.editValueAt(i);
+
+            LOGI("PID 0x%08x => type 0x%02x", stream->pid(), stream->type());
+        }
+
+        LOGI("after:");
+        for (size_t i = 0; i < infos.size(); ++i) {
+            StreamInfo &info = infos.editItemAt(i);
+
+            LOGI("PID 0x%08x => type 0x%02x", info.mPID, info.mType);
+        }
+#endif
+
+        // The only case we can recover from is if we have two streams
+        // and they switched PIDs.
+
+        bool success = false;
+
+        if (mStreams.size() == 2 && infos.size() == 2) {
+            const StreamInfo &info1 = infos.itemAt(0);
+            const StreamInfo &info2 = infos.itemAt(1);
+
+            sp<Stream> s1 = mStreams.editValueAt(0);
+            sp<Stream> s2 = mStreams.editValueAt(1);
+
+            bool caseA =
+                info1.mPID == s1->pid() && info1.mType == s2->type()
+                    && info2.mPID == s2->pid() && info2.mType == s1->type();
+
+            bool caseB =
+                info1.mPID == s2->pid() && info1.mType == s1->type()
+                    && info2.mPID == s1->pid() && info2.mType == s2->type();
+
+            if (caseA || caseB) {
+                unsigned pid1 = s1->pid();
+                unsigned pid2 = s2->pid();
+                s1->setPID(pid2);
+                s2->setPID(pid1);
+
+                mStreams.clear();
+                mStreams.add(s1->pid(), s1);
+                mStreams.add(s2->pid(), s2);
+
+                success = true;
+            }
+        }
+
+        if (!success) {
+            LOGI("Stream PIDs changed and we cannot recover.");
+            return ERROR_MALFORMED;
+        }
     }
 
     for (size_t i = 0; i < infos.size(); ++i) {
@@ -294,13 +350,10 @@ void ATSParser::Program::parseProgramMap(ABitReader *br) {
         if (index < 0) {
             sp<Stream> stream = new Stream(this, info.mPID, info.mType);
             mStreams.add(info.mPID, stream);
-
-            if (PIDsChanged) {
-                sp<AMessage> extra;
-                stream->signalDiscontinuity(DISCONTINUITY_FORMATCHANGE, extra);
-            }
         }
     }
+
+    return OK;
 }
 
 sp<MediaSource> ATSParser::Program::getSource(SourceType type) {
@@ -724,11 +777,11 @@ ATSParser::ATSParser(uint32_t flags)
 ATSParser::~ATSParser() {
 }
 
-void ATSParser::feedTSPacket(const void *data, size_t size) {
+status_t ATSParser::feedTSPacket(const void *data, size_t size) {
     CHECK_EQ(size, kTSPacketSize);
 
     ABitReader br((const uint8_t *)data, kTSPacketSize);
-    parseTS(&br);
+    return parseTS(&br);
 }
 
 void ATSParser::signalDiscontinuity(
@@ -806,7 +859,7 @@ void ATSParser::parseProgramAssociationTable(ABitReader *br) {
     MY_LOGV("  CRC = 0x%08x", br->getBits(32));
 }
 
-void ATSParser::parsePID(
+status_t ATSParser::parsePID(
         ABitReader *br, unsigned PID,
         unsigned payload_unit_start_indicator) {
     if (PID == 0) {
@@ -815,13 +868,18 @@ void ATSParser::parsePID(
             br->skipBits(skip * 8);
         }
         parseProgramAssociationTable(br);
-        return;
+        return OK;
     }
 
     bool handled = false;
     for (size_t i = 0; i < mPrograms.size(); ++i) {
+        status_t err;
         if (mPrograms.editItemAt(i)->parsePID(
-                    PID, payload_unit_start_indicator, br)) {
+                    PID, payload_unit_start_indicator, br, &err)) {
+            if (err != OK) {
+                return err;
+            }
+
             handled = true;
             break;
         }
@@ -830,6 +888,8 @@ void ATSParser::parsePID(
     if (!handled) {
         LOGV("PID 0x%04x not handled.", PID);
     }
+
+    return OK;
 }
 
 void ATSParser::parseAdaptationField(ABitReader *br) {
@@ -839,7 +899,7 @@ void ATSParser::parseAdaptationField(ABitReader *br) {
     }
 }
 
-void ATSParser::parseTS(ABitReader *br) {
+status_t ATSParser::parseTS(ABitReader *br) {
     LOGV("---");
 
     unsigned sync_byte = br->getBits(8);
@@ -870,8 +930,10 @@ void ATSParser::parseTS(ABitReader *br) {
     }
 
     if (adaptation_field_control == 1 || adaptation_field_control == 3) {
-        parsePID(br, PID, payload_unit_start_indicator);
+        return parsePID(br, PID, payload_unit_start_indicator);
     }
+
+    return OK;
 }
 
 sp<MediaSource> ATSParser::getSource(SourceType type) {
