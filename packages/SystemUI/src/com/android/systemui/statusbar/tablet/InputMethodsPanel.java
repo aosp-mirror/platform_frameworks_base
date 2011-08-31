@@ -428,7 +428,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
 
     private CharSequence getIMIName(InputMethodInfo imi) {
         if (imi == null) return null;
-        return mPackageManager.getApplicationLabel(imi.getServiceInfo().applicationInfo);
+        return imi.loadLabel(mPackageManager);
     }
 
     private CharSequence getSubtypeName(InputMethodInfo imi, InputMethodSubtype subtype) {
