@@ -3193,7 +3193,7 @@ public class AudioService extends IAudioService.Stub {
     /**
      * Helper function:
      * Called synchronized on mRCStack
-     * mRCStack.empty() is false
+     * mRCStack.isEmpty() is false
      */
     private void updateRemoteControlDisplay_syncRcs(int infoChangedFlags) {
         RemoteControlStackEntry rcse = mRCStack.peek();
@@ -3247,6 +3247,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
         // refresh conditions were verified: update the remote controls
+        // ok to call, mRCStack is not empty
         updateRemoteControlDisplay_syncRcs(infoChangedFlags);
     }
 
@@ -3460,8 +3461,10 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
 
-            // we have a new display, of which all the clients are now aware: have it be updated
-            updateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+            if (!mRCStack.isEmpty()) {
+                // we have a new display, of which all the clients are now aware: have it be updated
+                updateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+            }
         }
     }
 
