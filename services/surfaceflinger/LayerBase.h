@@ -84,7 +84,7 @@ public:
             String8 getName() const;
 
             // modify current state
-            bool setPosition(int32_t x, int32_t y);
+            bool setPosition(float x, float y);
             bool setLayer(uint32_t z);
             bool setSize(uint32_t w, uint32_t h);
             bool setAlpha(uint8_t alpha);
@@ -217,8 +217,6 @@ public:
     inline  State&          currentState()          { return mCurrentState; }
 
     int32_t  getOrientation() const { return mOrientation; }
-    int  tx() const             { return mLeft; }
-    int  ty() const             { return mTop; }
     
 protected:
     const GraphicPlane& graphicPlane(int dpy) const;
@@ -250,8 +248,6 @@ protected:
                 Transform       mTransform;
                 GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;
-                int             mLeft;
-                int             mTop;
             
                 // these are protected by an external lock
                 State           mCurrentState;

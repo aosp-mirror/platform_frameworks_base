@@ -45,7 +45,6 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mFlinger(flinger), mFiltering(false),
       mNeedsFiltering(false),
       mOrientation(0),
-      mLeft(0), mTop(0),
       mTransactionFlags(0),
       mPremultipliedAlpha(true), mName("unnamed"), mDebug(false),
       mInvalidate(0)
@@ -119,7 +118,7 @@ uint32_t LayerBase::setTransactionFlags(uint32_t flags) {
     return android_atomic_or(flags, &mTransactionFlags);
 }
 
-bool LayerBase::setPosition(int32_t x, int32_t y) {
+bool LayerBase::setPosition(float x, float y) {
     if (mCurrentState.transform.tx() == x && mCurrentState.transform.ty() == y)
         return false;
     mCurrentState.sequence++;
@@ -259,8 +258,6 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     mOrientation = tr.getOrientation();
     mTransform = tr;
     mTransformedBounds = tr.makeBounds(w, h);
-    mLeft = tr.tx();
-    mTop  = tr.ty();
 }
 
 void LayerBase::lockPageFlip(bool& recomputeVisibleRegions)
@@ -477,10 +474,10 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
     snprintf(buffer, SIZE,
             "+ %s %p\n"
             "      "
-            "z=%9d, pos=(%4d,%4d), size=(%4d,%4d), "
+            "z=%9d, pos=(%g,%g), size=(%4d,%4d), "
             "isOpaque=%1d, needsDithering=%1d, invalidate=%1d, "
             "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
-            getTypeId(), this, s.z, tx(), ty(), s.w, s.h,
+            getTypeId(), this, s.z, s.transform.tx(), s.transform.ty(), s.w, s.h,
             isOpaque(), needsDithering(), contentDirty,
             s.alpha, s.flags,
             s.transform[0][0], s.transform[0][1],

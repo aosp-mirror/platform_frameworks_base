@@ -145,7 +145,7 @@ public:
     status_t    setAlpha(SurfaceID id, float alpha=1.0f);
     status_t    setFreezeTint(SurfaceID id, uint32_t tint);
     status_t    setMatrix(SurfaceID id, float dsdx, float dtdx, float dsdy, float dtdy);
-    status_t    setPosition(SurfaceID id, int32_t x, int32_t y);
+    status_t    setPosition(SurfaceID id, float x, float y);
     status_t    setSize(SurfaceID id, uint32_t w, uint32_t h);
     status_t    destroySurface(SurfaceID sid);
 
