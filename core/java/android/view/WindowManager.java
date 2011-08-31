@@ -1029,9 +1029,18 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_DISABLE_POINTER_GESTURES = 0x00000001;
 
         /**
+         * Does not construct an input channel for this window.  The channel will therefore
+         * be incapable of receiving input.
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 0x00000002;
+
+        /**
          * Control special features of the input subsystem.
          *
          * @see #INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES
+         * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
          * @hide
          */
         public int inputFeatures;

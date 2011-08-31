@@ -618,8 +618,9 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
     size_t numWindows = windowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
         const sp<InputWindowHandle>& windowHandle = windowHandles.itemAt(i);
-        if (windowHandle->hasFocus && (windowHandle->inputFeatures
-                & InputWindowHandle::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
+        const InputWindowInfo* windowInfo = windowHandle->getInfo();
+        if (windowInfo && windowInfo->hasFocus && (windowInfo->inputFeatures
+                & InputWindowInfo::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
             newPointerGesturesEnabled = false;
         }
     }
@@ -1086,8 +1087,9 @@ static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, 
     status_t status = gNativeInputManager->registerInputChannel(
             env, inputChannel, inputWindowHandle, monitor);
     if (status) {
-        jniThrowRuntimeException(env, "Failed to register input channel.  "
-                "Check logs for details.");
+        String8 message;
+        message.appendFormat("Failed to register input channel.  status=%d", status);
+        jniThrowRuntimeException(env, message.string());
         return;
     }
 
@@ -1113,9 +1115,10 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj, NULL, NULL);
 
     status_t status = gNativeInputManager->unregisterInputChannel(env, inputChannel);
-    if (status) {
-        jniThrowRuntimeException(env, "Failed to unregister input channel.  "
-                "Check logs for details.");
+    if (status && status != BAD_VALUE) { // ignore already unregistered channel
+        String8 message;
+        message.appendFormat("Failed to unregister input channel.  status=%d", status);
+        jniThrowRuntimeException(env, message.string());
     }
 }
 

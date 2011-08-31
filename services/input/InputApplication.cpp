@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
-#define _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
+#define LOG_TAG "InputApplication"
 
-#include <input/InputApplication.h>
+#include "InputApplication.h"
 
-#include "JNIHelp.h"
-#include "jni.h"
+#include <cutils/log.h>
 
 namespace android {
 
-class NativeInputApplicationHandle : public InputApplicationHandle {
-public:
-    NativeInputApplicationHandle(jweak objWeak);
-    virtual ~NativeInputApplicationHandle();
+// --- InputApplicationHandle ---
 
-    jobject getInputApplicationHandleObjLocalRef(JNIEnv* env);
+InputApplicationHandle::InputApplicationHandle() :
+    mInfo(NULL) {
+}
 
-    virtual bool updateInfo();
+InputApplicationHandle::~InputApplicationHandle() {
+    delete mInfo;
+}
 
-private:
-    jweak mObjWeak;
-};
-
-
-extern sp<InputApplicationHandle> android_server_InputApplicationHandle_getHandle(
-        JNIEnv* env, jobject inputApplicationHandleObj);
+void InputApplicationHandle::releaseInfo() {
+    if (mInfo) {
+        delete mInfo;
+        mInfo = NULL;
+    }
+}
 
 } // namespace android
-
-#endif // _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H

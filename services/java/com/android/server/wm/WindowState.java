@@ -1236,7 +1236,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * Input Manager uses when discarding windows from input consideration.
      */
     boolean isPotentialDragTarget() {
-        return isVisibleNow() && (mInputChannel != null) && !mRemoved;
+        return isVisibleNow() && !mRemoved
+                && mInputChannel != null && mInputWindowHandle != null;
     }
 
     /**
@@ -1372,7 +1373,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // we are doing this as part of processing a death note.)
         }
     }
-    
+
+    void setInputChannel(InputChannel inputChannel) {
+        if (mInputChannel != null) {
+            throw new IllegalStateException("Window already has an input channel.");
+        }
+
+        mInputChannel = inputChannel;
+        mInputWindowHandle.inputChannel = inputChannel;
+    }
+
     void disposeInputChannel() {
         if (mInputChannel != null) {
             mService.mInputManager.unregisterInputChannel(mInputChannel);
@@ -1380,6 +1390,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mInputChannel.dispose();
             mInputChannel = null;
         }
+
+        mInputWindowHandle.inputChannel = null;
     }
 
     private class DeathRecipient implements IBinder.DeathRecipient {

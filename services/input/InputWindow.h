@@ -30,15 +30,9 @@
 namespace android {
 
 /*
- * A handle to a window that can receive input.
- *
- * Used by the native input dispatcher to indirectly refer to the window manager objects
- * that describe a window.
+ * Describes the properties of a window that can receive input.
  */
-class InputWindowHandle : public RefBase {
-public:
-    const sp<InputApplicationHandle> inputApplicationHandle;
-
+struct InputWindowInfo {
     // Window flags from WindowManager.LayoutParams
     enum {
         FLAG_ALLOW_LOCK_WHILE_SCREEN_ON     = 0x00000001,
@@ -116,7 +110,6 @@ public:
         INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES = 0x00000001,
     };
 
-    sp<InputWindowHandle> inputWindowHandle;
     sp<InputChannel> inputChannel;
     String8 name;
     int32_t layoutParamsFlags;
@@ -149,6 +142,34 @@ public:
     bool isTrustedOverlay() const;
 
     bool supportsSplitTouch() const;
+};
+
+
+/*
+ * Handle for a window that can receive input.
+ *
+ * Used by the native input dispatcher to indirectly refer to the window manager objects
+ * that describe a window.
+ */
+class InputWindowHandle : public RefBase {
+public:
+    const sp<InputApplicationHandle> inputApplicationHandle;
+
+    inline const InputWindowInfo* getInfo() const {
+        return mInfo;
+    }
+
+    inline sp<InputChannel> getInputChannel() const {
+        return mInfo ? mInfo->inputChannel : NULL;
+    }
+
+    inline String8 getName() const {
+        return mInfo ? mInfo->name : String8("<invalid>");
+    }
+
+    inline nsecs_t getDispatchingTimeout(nsecs_t defaultValue) const {
+        return mInfo ? mInfo->dispatchingTimeout : defaultValue;
+    }
 
     /**
      * Requests that the state of this object be updated to reflect
@@ -159,12 +180,19 @@ public:
      *
      * Returns true on success, or false if the handle is no longer valid.
      */
-    virtual bool update() = 0;
+    virtual bool updateInfo() = 0;
+
+    /**
+     * Releases the storage used by the associated information when it is
+     * no longer needed.
+     */
+    void releaseInfo();
 
 protected:
-    InputWindowHandle(const sp<InputApplicationHandle>& inputApplicationHandle) :
-            inputApplicationHandle(inputApplicationHandle) { }
-    virtual ~InputWindowHandle() { }
+    InputWindowHandle(const sp<InputApplicationHandle>& inputApplicationHandle);
+    virtual ~InputWindowHandle();
+
+    InputWindowInfo* mInfo;
 };
 
 } // namespace android

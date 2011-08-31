@@ -139,6 +139,9 @@ class DragState {
             mServerChannel.dispose();
             mClientChannel = null;
             mServerChannel = null;
+
+            mDragWindowHandle = null;
+            mDragApplicationHandle = null;
         }
     }
 
