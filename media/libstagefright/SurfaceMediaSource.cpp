@@ -46,9 +46,10 @@ SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
                 mSynchronousMode(true),
                 mConnectedApi(NO_CONNECTED_API),
                 mFrameRate(30),
+                mStopped(false),
                 mNumFramesReceived(0),
                 mNumFramesEncoded(0),
-                mStopped(false) {
+                mFirstFrameTimestamp(0) {
     LOGV("SurfaceMediaSource::SurfaceMediaSource");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
@@ -471,10 +472,25 @@ status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
         return -EINVAL;
     }
 
+    if (mNumFramesReceived == 0) {
+        mFirstFrameTimestamp = timestamp;
+        // Initial delay
+        if (mStartTimeNs > 0) {
+            if (timestamp < mStartTimeNs) {
+                // This frame predates start of record, discard
+                mSlots[bufIndex].mBufferState = BufferSlot::FREE;
+                mDequeueCondition.signal();
+                return OK;
+            }
+            mStartTimeNs = timestamp - mStartTimeNs;
+        }
+    }
+    timestamp = mStartTimeNs + (timestamp - mFirstFrameTimestamp);
+
+    mNumFramesReceived++;
     if (mSynchronousMode) {
         // in synchronous mode we queue all buffers in a FIFO
         mQueue.push_back(bufIndex);
-        mNumFramesReceived++;
         LOGV("Client queued buf# %d @slot: %d, Q size = %d, handle = %p, timestamp = %lld",
             mNumFramesReceived, bufIndex, mQueue.size(),
             mSlots[bufIndex].mGraphicBuffer->handle, timestamp);
@@ -684,6 +700,13 @@ int32_t SurfaceMediaSource::getFrameRate( ) const {
 status_t SurfaceMediaSource::start(MetaData *params)
 {
     LOGV("started!");
+
+    mStartTimeNs = 0;
+    int64_t startTimeUs;
+    if (params && params->findInt64(kKeyTime, &startTimeUs)) {
+        mStartTimeNs = startTimeUs * 1000;
+    }
+
     return OK;
 }
 
@@ -753,6 +776,7 @@ status_t SurfaceMediaSource::read( MediaBuffer **buffer,
     mCurrentBuf = mSlots[mCurrentSlot].mGraphicBuffer;
     int64_t prevTimeStamp = mCurrentTimestamp;
     mCurrentTimestamp = mSlots[mCurrentSlot].mTimestamp;
+
     mNumFramesEncoded++;
     // Pass the data to the MediaBuffer. Pass in only the metadata
     passMetadataBufferLocked(buffer);

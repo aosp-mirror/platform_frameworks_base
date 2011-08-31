@@ -347,6 +347,13 @@ private:
     // encoder
     int mNumFramesEncoded;
 
+    // mFirstFrameTimestamp is the timestamp of the first received frame.
+    // It is used to offset the output timestamps so recording starts at time 0.
+    int64_t mFirstFrameTimestamp;
+    // mStartTimeNs is the start time passed into the source at start, used to
+    // offset timestamps.
+    int64_t mStartTimeNs;
+
     // mFrameAvailableCondition condition used to indicate whether there
     // is a frame available for dequeuing
     Condition mFrameAvailableCondition;
