@@ -106,13 +106,14 @@ protected:
             mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
                     window.get(), NULL);
         } else {
-            EGLint pbufferAttribs[] = {
-                EGL_WIDTH, getSurfaceWidth(),
-                EGL_HEIGHT, getSurfaceHeight(),
-                EGL_NONE };
+            LOGV("No actual display. Choosing EGLSurface based on SurfaceMediaSource");
+            sp<SurfaceMediaSource> sms = new SurfaceMediaSource(
+                    getSurfaceWidth(), getSurfaceHeight());
+            sp<SurfaceTextureClient> stc = new SurfaceTextureClient(sms);
+            sp<ANativeWindow> window = stc;
 
-            mEglSurface = eglCreatePbufferSurface(mEglDisplay, mGlConfig,
-                    pbufferAttribs);
+            mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
+                    window.get(), NULL);
         }
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
         ASSERT_NE(EGL_NO_SURFACE, mEglSurface);
@@ -408,7 +409,6 @@ protected:
         mSTC.clear();
         mANW.clear();
         GLTest::TearDown();
-        eglDestroySurface(mEglDisplay, mSmsEglSurface);
     }
 
     void setUpEGLSurfaceFromMediaRecorder(sp<MediaRecorder>& mr);
@@ -419,8 +419,6 @@ protected:
     sp<SurfaceMediaSource> mSMS;
     sp<SurfaceTextureClient> mSTC;
     sp<ANativeWindow> mANW;
-    EGLConfig  mSMSGlConfig;
-    EGLSurface  mSmsEglSurface;
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -462,7 +460,7 @@ void SurfaceMediaSourceGLTest::oneBufferPassGL(int num) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // The following call dequeues and queues the buffer
-    eglSwapBuffers(mEglDisplay, mSmsEglSurface);
+    eglSwapBuffers(mEglDisplay, mEglSurface);
     glDisable(GL_SCISSOR_TEST);
 }
 
@@ -488,19 +486,12 @@ void SurfaceMediaSourceGLTest::setUpEGLSurfaceFromMediaRecorder(sp<MediaRecorder
     mSTC = new SurfaceTextureClient(iST);
     mANW = mSTC;
 
-    EGLint numConfigs = 0;
-    EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(), &mSMSGlConfig,
-            1, &numConfigs));
-    ASSERT_EQ(EGL_SUCCESS, eglGetError());
-
-    LOGV("Native Window = %p, mSTC = %p", mANW.get(), mSTC.get());
-
-    mSmsEglSurface = eglCreateWindowSurface(mEglDisplay, mSMSGlConfig,
+    mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
                                 mANW.get(), NULL);
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
-    ASSERT_NE(EGL_NO_SURFACE, mSmsEglSurface) ;
+    ASSERT_NE(EGL_NO_SURFACE, mEglSurface) ;
 
-    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mSmsEglSurface, mSmsEglSurface,
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
             mEglContext));
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
 }
@@ -778,9 +769,9 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaS
 
 // Test to examine whether we can choose the Recordable Android GLConfig
 // DummyRecorder used- no real encoding here
-TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWrite) {
+TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
     LOGV("Test # %d", testId++);
-    LOGV("Test to verify creating a surface w/ right config *********");
+    LOGV("Verify creating a surface w/ right config + dummy writer*********");
 
     mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
     mSTC = new SurfaceTextureClient(mSMS);
@@ -789,17 +780,12 @@ TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWrite) {
     DummyRecorder writer(mSMS);
     writer.start();
 
-    EGLint numConfigs = 0;
-    EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(), &mSMSGlConfig,
-            1, &numConfigs));
-    ASSERT_EQ(EGL_SUCCESS, eglGetError());
-
-    mSmsEglSurface = eglCreateWindowSurface(mEglDisplay, mSMSGlConfig,
+    mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
                                 mANW.get(), NULL);
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
-    ASSERT_NE(EGL_NO_SURFACE, mSmsEglSurface) ;
+    ASSERT_NE(EGL_NO_SURFACE, mEglSurface) ;
 
-    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mSmsEglSurface, mSmsEglSurface,
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
             mEglContext));
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
 
