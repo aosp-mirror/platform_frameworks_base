@@ -266,6 +266,17 @@ public class ActionBarView extends AbsActionBarView {
         if (mActionMenuPresenter != null) {
             mActionMenuPresenter.onConfigurationChanged(newConfig);
         }
+
+        mTitleView = null;
+        mSubtitleView = null;
+        mTitleUpView = null;
+        if (mTitleLayout != null && mTitleLayout.getParent() == this) {
+            removeView(mTitleLayout);
+        }
+        mTitleLayout = null;
+        if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+            initTitle();
+        }
     }
 
     @Override

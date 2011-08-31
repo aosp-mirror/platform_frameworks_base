@@ -37,6 +37,10 @@
     <dimen name="action_bar_title_text_size">18dp</dimen>
     <!-- Text size for action bar subtitles -->
     <dimen name="action_bar_subtitle_text_size">14dp</dimen>
+    <!-- Top margin for action bar subtitles -->
+    <dimen name="action_bar_subtitle_top_margin">-3dp</dimen>
+    <!-- Bottom margin for action bar subtitles -->
+    <dimen name="action_bar_subtitle_bottom_margin">9dip</dimen>
 
     <!-- Size of clock font in LockScreen. -->
     <dimen name="keyguard_pattern_unlock_clock_font_size">98sp</dimen>
