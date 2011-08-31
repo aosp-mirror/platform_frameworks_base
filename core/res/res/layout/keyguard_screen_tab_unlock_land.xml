@@ -136,7 +136,7 @@
 
         android:targetDrawables="@array/lockscreen_targets_with_camera"
         android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
-        android:directionDescriptions="@array/lockscreen_direction_descriptions_with_camera"
+        android:directionDescriptions="@array/lockscreen_direction_descriptions"
         android:handleDrawable="@drawable/ic_lockscreen_handle"
         android:waveDrawable="@drawable/ic_lockscreen_outerring"
         android:outerRadius="@dimen/multiwaveview_target_placement_radius"
