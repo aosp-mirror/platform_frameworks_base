@@ -1040,6 +1040,7 @@ public final class WebViewCore {
         // Flag for blocking messages. This is used during DESTROY to avoid
         // posting more messages to the EventHub or to WebView's event handler.
         private boolean mBlockMessages;
+        private boolean mDestroying;
 
         private int mTid;
         private int mSavedPriority;
@@ -1071,12 +1072,20 @@ public final class WebViewCore {
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
-                    if (mWebView == null
+                    if (mWebView == null || mNativeClass == 0) {
+                        if (DebugFlags.WEB_VIEW_CORE) {
+                            Log.w(LOGTAG, "Rejecting message " + msg.what
+                                    + " because we are destroyed");
+                        }
+                        return;
+                    }
+                    if (mDestroying == true
                             && msg.what != EventHub.RESUME_TIMERS
-                            && msg.what != EventHub.PAUSE_TIMERS) {
+                            && msg.what != EventHub.PAUSE_TIMERS
+                            && msg.what != EventHub.DESTROY) {
                         if (DebugFlags.WEB_VIEW_CORE) {
                             Log.v(LOGTAG, "Rejecting message " + msg.what
-                                    + " because we are destroyed");
+                                    + " because we are being destroyed");
                         }
                         return;
                     }
@@ -1780,7 +1789,8 @@ public final class WebViewCore {
             // or RESUME_TIMERS messages, which we must still handle as they
             // are per process. DESTROY will instead trigger a white list in
             // mEventHub, skipping any remaining messages in the queue
-            mEventHub.sendMessageAtFrontOfQueue(
+            mEventHub.mDestroying = true;
+            mEventHub.sendMessage(
                     Message.obtain(null, EventHub.DESTROY));
             mEventHub.blockMessages();
         }
