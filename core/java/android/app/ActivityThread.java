@@ -1291,7 +1291,8 @@ public final class ActivityThread {
         public final boolean queueIdle() {
             ActivityClientRecord a = mNewActivities;
             boolean stopProfiling = false;
-            if (mBoundApplication.profileFd != null && mBoundApplication.autoStopProfiler) {
+            if (mBoundApplication != null && mBoundApplication.profileFd != null
+                    && mBoundApplication.autoStopProfiler) {
                 stopProfiling = true;
             }
             if (a != null) {
