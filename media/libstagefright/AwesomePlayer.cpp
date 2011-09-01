@@ -978,7 +978,7 @@ status_t AwesomePlayer::startAudioPlayer_l(bool sendErrorNotification) {
             CHECK(!mAudioPlayer->isSeeking());
 
             // We will have finished the seek while starting the audio player.
-            postAudioSeekComplete_l();
+            postAudioSeekComplete();
         }
     } else {
         mAudioPlayer->resume();
@@ -1877,7 +1877,8 @@ void AwesomePlayer::postVideoLagEvent_l() {
     mQueue.postEventWithDelay(mVideoLagEvent, 1000000ll);
 }
 
-void AwesomePlayer::postCheckAudioStatusEvent_l(int64_t delayUs) {
+void AwesomePlayer::postCheckAudioStatusEvent(int64_t delayUs) {
+    Mutex::Autolock autoLock(mAudioLock);
     if (mAudioStatusEventPending) {
         return;
     }
@@ -1886,14 +1887,18 @@ void AwesomePlayer::postCheckAudioStatusEvent_l(int64_t delayUs) {
 }
 
 void AwesomePlayer::onCheckAudioStatus() {
-    Mutex::Autolock autoLock(mLock);
-    if (!mAudioStatusEventPending) {
-        // Event was dispatched and while we were blocking on the mutex,
-        // has already been cancelled.
-        return;
+    {
+        Mutex::Autolock autoLock(mAudioLock);
+        if (!mAudioStatusEventPending) {
+            // Event was dispatched and while we were blocking on the mutex,
+            // has already been cancelled.
+            return;
+        }
+
+        mAudioStatusEventPending = false;
     }
 
-    mAudioStatusEventPending = false;
+    Mutex::Autolock autoLock(mLock);
 
     if (mWatchForAudioSeekComplete && !mAudioPlayer->isSeeking()) {
         mWatchForAudioSeekComplete = false;
@@ -2239,17 +2244,11 @@ uint32_t AwesomePlayer::flags() const {
 }
 
 void AwesomePlayer::postAudioEOS(int64_t delayUs) {
-    Mutex::Autolock autoLock(mLock);
-    postCheckAudioStatusEvent_l(delayUs);
+    postCheckAudioStatusEvent(delayUs);
 }
 
 void AwesomePlayer::postAudioSeekComplete() {
-    Mutex::Autolock autoLock(mLock);
-    postAudioSeekComplete_l();
-}
-
-void AwesomePlayer::postAudioSeekComplete_l() {
-    postCheckAudioStatusEvent_l(0 /* delayUs */);
+    postCheckAudioStatusEvent(0);
 }
 
 status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
