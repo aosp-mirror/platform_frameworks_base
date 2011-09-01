@@ -4007,12 +4007,9 @@ public class WebView extends AbsoluteLayout
         // state.
         // If mNativeClass is 0, we should not reach here, so we do not
         // need to check it again.
-        if (mDrawCursorRing && drawRings) {
-            // Only update if we are actually going to use the result
-            nativeRecordButtons(hasFocus() && hasWindowFocus(),
-                    mTouchMode == TOUCH_SHORTPRESS_START_MODE
-                    || mTrackballDown || mGotCenterDown, false);
-        }
+        nativeRecordButtons(hasFocus() && hasWindowFocus(),
+                (mTouchMode == TOUCH_SHORTPRESS_START_MODE && !USE_WEBKIT_RINGS)
+                || mTrackballDown || mGotCenterDown, false);
         drawCoreAndCursorRing(canvas, mBackgroundColor,
                 mDrawCursorRing && drawRings);
     }
