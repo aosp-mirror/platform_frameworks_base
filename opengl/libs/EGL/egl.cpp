@@ -95,12 +95,12 @@ void initEglTraceLevel() {
         if (fgets(cmdline, sizeof(cmdline) - 1, file))
         {
             if (!strcmp(value, cmdline))
-                sEGLTraceLevel = 1;
+                gEGLDebugLevel = 1;
         }
         fclose(file);
     }
 
-    if (sEGLTraceLevel > 0)
+    if (gEGLDebugLevel > 0)
     {
         property_get("debug.egl.debug_port", value, "5039");
         const unsigned short port = (unsigned short)atoi(value);
@@ -117,7 +117,7 @@ void setGLHooksThreadSpecific(gl_hooks_t const *value) {
     if (sEGLTraceLevel > 0) {
         setGlTraceThreadSpecific(value);
         setGlThreadSpecific(&gHooksTrace);
-    } else if (sEGLTraceLevel > 0 && value != &gHooksNoContext) {
+    } else if (gEGLDebugLevel > 0 && value != &gHooksNoContext) {
         setGlTraceThreadSpecific(value);
         setGlThreadSpecific(&gHooksDebug);
     } else {
