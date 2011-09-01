@@ -57,13 +57,14 @@ public final class WebViewCore {
     private static final String LOGTAG = "webcore";
 
     static {
-        // Load libwebcore during static initialization. This happens in the
-        // zygote process so it will be shared read-only across all app
-        // processes.
+        // Load libwebcore and libchromium_net during static initialization.
+        // This happens in the zygote process so they will be shared read-only
+        // across all app processes.
         try {
             System.loadLibrary("webcore");
+            System.loadLibrary("chromium_net");
         } catch (UnsatisfiedLinkError e) {
-            Log.e(LOGTAG, "Unable to load webcore library");
+            Log.e(LOGTAG, "Unable to load native support libraries.");
         }
     }
 
