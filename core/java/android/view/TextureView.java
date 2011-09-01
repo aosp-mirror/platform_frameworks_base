@@ -286,6 +286,11 @@ public class TextureView extends View {
     }
 
     @Override
+    boolean destroyLayer() {
+        return false;
+    }
+
+    @Override
     HardwareLayer getHardwareLayer() {
         if (mLayer == null) {
             if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
