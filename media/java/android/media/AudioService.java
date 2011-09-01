@@ -2638,7 +2638,7 @@ public class AudioService extends IAudioService.Stub {
                 notifyTopOfAudioFocusStack();
                 // there's a new top of the stack, let the remote control know
                 synchronized(mRCStack) {
-                    checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
             }
         } else {
@@ -2681,7 +2681,7 @@ public class AudioService extends IAudioService.Stub {
             notifyTopOfAudioFocusStack();
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
             }
         }
     }
@@ -2785,7 +2785,7 @@ public class AudioService extends IAudioService.Stub {
 
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
             }
         }//synchronized(mAudioFocusLock)
 
@@ -3183,7 +3183,7 @@ public class AudioService extends IAudioService.Stub {
      * Helper function:
      * Called synchronized on mRCStack
      */
-    private void clearRemoteControlDisplay_syncRcs() {
+    private void clearRemoteControlDisplay_syncAfRcs() {
         synchronized(mCurrentRcLock) {
             mCurrentRcClient = null;
         }
@@ -3192,18 +3192,21 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /**
-     * Helper function:
-     * Called synchronized on mRCStack
-     * mRCStack.isEmpty() is false
+     * Helper function for code readability: only to be called from
+     *    checkUpdateRemoteControlDisplay_syncAfRcs() which checks the preconditions for
+     *    this method.
+     * Preconditions:
+     *    - called synchronized mAudioFocusLock then on mRCStack
+     *    - mRCStack.isEmpty() is false
      */
-    private void updateRemoteControlDisplay_syncRcs(int infoChangedFlags) {
+    private void updateRemoteControlDisplay_syncAfRcs(int infoChangedFlags) {
         RemoteControlStackEntry rcse = mRCStack.peek();
         int infoFlagsAboutToBeUsed = infoChangedFlags;
         // this is where we enforce opt-in for information display on the remote controls
         //   with the new AudioManager.registerRemoteControlClient() API
         if (rcse.mRcClient == null) {
             //Log.w(TAG, "Can't update remote control display with null remote control client");
-            clearRemoteControlDisplay_syncRcs();
+            clearRemoteControlDisplay_syncAfRcs();
             return;
         }
         synchronized(mCurrentRcLock) {
@@ -3220,17 +3223,17 @@ public class AudioService extends IAudioService.Stub {
 
     /**
      * Helper function:
-     * Called synchronized on mFocusLock, then mRCStack
+     * Called synchronized on mAudioFocusLock, then mRCStack
      * Check whether the remote control display should be updated, triggers the update if required
      * @param infoChangedFlags the flags corresponding to the remote control client information
      *     that has changed, if applicable (checking for the update conditions might trigger a
      *     clear, rather than an update event).
      */
-    private void checkUpdateRemoteControlDisplay_syncRcs(int infoChangedFlags) {
+    private void checkUpdateRemoteControlDisplay_syncAfRcs(int infoChangedFlags) {
         // determine whether the remote control display should be refreshed
         // if either stack is empty, there is a mismatch, so clear the RC display
         if (mRCStack.isEmpty() || mFocusStack.isEmpty()) {
-            clearRemoteControlDisplay_syncRcs();
+            clearRemoteControlDisplay_syncAfRcs();
             return;
         }
         // if the top of the two stacks belong to different packages, there is a mismatch, clear
@@ -3238,18 +3241,18 @@ public class AudioService extends IAudioService.Stub {
                 && (mFocusStack.peek().mPackageName != null)
                 && !(mRCStack.peek().mCallingPackageName.compareTo(
                         mFocusStack.peek().mPackageName) == 0)) {
-            clearRemoteControlDisplay_syncRcs();
+            clearRemoteControlDisplay_syncAfRcs();
             return;
         }
         // if the audio focus didn't originate from the same Uid as the one in which the remote
         //   control information will be retrieved, clear
         if (mRCStack.peek().mCallingUid != mFocusStack.peek().mCallingUid) {
-            clearRemoteControlDisplay_syncRcs();
+            clearRemoteControlDisplay_syncAfRcs();
             return;
         }
         // refresh conditions were verified: update the remote controls
-        // ok to call, mRCStack is not empty
-        updateRemoteControlDisplay_syncRcs(infoChangedFlags);
+        // ok to call: synchronized mAudioFocusLock then on mRCStack, mRCStack is not empty
+        updateRemoteControlDisplay_syncAfRcs(infoChangedFlags);
     }
 
     /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
@@ -3260,7 +3263,7 @@ public class AudioService extends IAudioService.Stub {
             synchronized(mRCStack) {
                 pushMediaButtonReceiver(eventReceiver);
                 // new RC client, assume every type of information shall be queried
-                checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
             }
         }
     }
@@ -3275,7 +3278,7 @@ public class AudioService extends IAudioService.Stub {
                 removeMediaButtonReceiver(eventReceiver);
                 if (topOfStackWillChange) {
                     // current RC client will change, assume every type of info needs to be queried
-                    checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
             }
         }
@@ -3284,6 +3287,7 @@ public class AudioService extends IAudioService.Stub {
     /** see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...) */
     public void registerRemoteControlClient(ComponentName eventReceiver,
             IRemoteControlClient rcClient, String clientName, String callingPackageName) {
+        if (DEBUG_RC) Log.i(TAG, "Register remote control client rcClient="+rcClient);
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 // store the new display information
@@ -3331,7 +3335,7 @@ public class AudioService extends IAudioService.Stub {
                 // if the eventReceiver is at the top of the stack
                 // then check for potential refresh of the remote controls
                 if (isCurrentRcController(eventReceiver)) {
-                    checkUpdateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
             }
         }
@@ -3436,35 +3440,35 @@ public class AudioService extends IAudioService.Stub {
      */
     public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
         if (DEBUG_RC) Log.d(TAG, ">>> registerRemoteControlDisplay("+rcd+")");
-        synchronized(mRCStack) {
-            if ((mRcDisplay == rcd) || (rcd == null)) {
-                return;
-            }
-            // if we had a display before, stop monitoring its death
-            rcDisplay_stopDeathMonitor_syncRcStack();
-            mRcDisplay = rcd;
-            // new display, start monitoring its death
-            rcDisplay_startDeathMonitor_syncRcStack();
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                if ((mRcDisplay == rcd) || (rcd == null)) {
+                    return;
+                }
+                // if we had a display before, stop monitoring its death
+                rcDisplay_stopDeathMonitor_syncRcStack();
+                mRcDisplay = rcd;
+                // new display, start monitoring its death
+                rcDisplay_startDeathMonitor_syncRcStack();
 
-            // let all the remote control clients there is a new display
-            // no need to unplug the previous because we only support one display
-            // and the clients don't track the death of the display
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                if(rcse.mRcClient != null) {
-                    try {
-                        rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error connecting remote control display to client: " + e);
-                        e.printStackTrace();
+                // let all the remote control clients there is a new display
+                // no need to unplug the previous because we only support one display
+                // and the clients don't track the death of the display
+                Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+                while(stackIterator.hasNext()) {
+                    RemoteControlStackEntry rcse = stackIterator.next();
+                    if(rcse.mRcClient != null) {
+                        try {
+                            rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error connecting remote control display to client: " + e);
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
 
-            if (!mRCStack.isEmpty()) {
                 // we have a new display, of which all the clients are now aware: have it be updated
-                updateRemoteControlDisplay_syncRcs(RC_INFO_ALL);
+                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
             }
         }
     }
