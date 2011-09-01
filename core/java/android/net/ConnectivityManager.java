@@ -814,4 +814,22 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Returns true if the hardware supports the given network type
+     * else it returns false.  This doesn't indicate we have coverage
+     * or are authorized onto a network, just whether or not the
+     * hardware supports it.  For example a gsm phone without a sim
+     * should still return true for mobile data, but a wifi only tablet
+     * would return false.
+     * @param networkType The nework type we'd like to check
+     * @return true if supported, else false
+     * @hide
+     */
+    public boolean isNetworkSupported(int networkType) {
+        try {
+            return mService.isNetworkSupported(networkType);
+        } catch (RemoteException e) {}
+        return false;
+    }
 }
