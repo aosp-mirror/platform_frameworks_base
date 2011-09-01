@@ -10333,6 +10333,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private abstract class HandleView extends View implements TextViewPositionListener {
         protected Drawable mDrawable;
+        protected Drawable mDrawableLtr;
+        protected Drawable mDrawableRtl;
         private final PopupWindow mContainer;
         // Position with respect to the parent TextView
         private int mPositionX, mPositionY;
@@ -10355,7 +10357,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Used to delay the appearance of the action popup window
         private Runnable mActionPopupShower;
 
-        public HandleView() {
+        public HandleView(Drawable drawableLtr, Drawable drawableRtl) {
             super(TextView.this.mContext);
             mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
@@ -10364,14 +10366,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainer.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
             mContainer.setContentView(this);
 
-            initDrawable();
+            mDrawableLtr = drawableLtr;
+            mDrawableRtl = drawableRtl;
+
+            updateDrawable();
 
             final int handleHeight = mDrawable.getIntrinsicHeight();
             mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
         }
 
-        protected abstract void initDrawable();
+        protected void updateDrawable() {
+            final int offset = getCurrentCursorOffset();
+            final boolean isRtlCharAtOffset = mLayout.isRtlCharAt(offset);
+            mDrawable = isRtlCharAtOffset ? mDrawableRtl : mDrawableLtr;
+            mHotspotX = getHotspotX(mDrawable, isRtlCharAtOffset);
+        }
+
+        protected abstract int getHotspotX(Drawable drawable, boolean isRtlRun);
 
         // Touch-up filter: number of previous positions remembered
         private static final int HISTORY_SIZE = 5;
@@ -10487,7 +10499,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public abstract int getCurrentCursorOffset();
 
-        public abstract void updateSelection(int offset);
+        protected void updateSelection(int offset) {
+            updateDrawable();
+        }
 
         public abstract void updatePosition(float x, float y);
 
@@ -10629,6 +10643,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mDownPositionX, mDownPositionY;
         private Runnable mHider;
 
+        public InsertionHandleView(Drawable drawable) {
+            super(drawable, drawable);
+        }
+
         @Override
         public void show() {
             super.show();
@@ -10665,13 +10683,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        protected void initDrawable() {
-            if (mSelectHandleCenter == null) {
-                mSelectHandleCenter = mContext.getResources().getDrawable(
-                        mTextSelectHandleRes);
-            }
-            mDrawable = mSelectHandleCenter;
-            mHotspotX = mDrawable.getIntrinsicWidth() / 2;
+        protected int getHotspotX(Drawable drawable, boolean isRtlRun) {
+            return drawable.getIntrinsicWidth() / 2;
         }
 
         @Override
@@ -10741,14 +10754,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class SelectionStartHandleView extends HandleView {
+
+        public SelectionStartHandleView(Drawable drawableLtr, Drawable drawableRtl) {
+            super(drawableLtr, drawableRtl);
+        }
+
         @Override
-        protected void initDrawable() {
-            if (mSelectHandleLeft == null) {
-                mSelectHandleLeft = mContext.getResources().getDrawable(
-                        mTextSelectHandleLeftRes);
+        protected int getHotspotX(Drawable drawable, boolean isRtlRun) {
+            if (isRtlRun) {
+                return drawable.getIntrinsicWidth() / 4;
+            } else {
+                return (drawable.getIntrinsicWidth() * 3) / 4;
             }
-            mDrawable = mSelectHandleLeft;
-            mHotspotX = (mDrawable.getIntrinsicWidth() * 3) / 4;
         }
 
         @Override
@@ -10758,6 +10775,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updateSelection(int offset) {
+            super.updateSelection(offset);
             Selection.setSelection((Spannable) mText, offset, getSelectionEnd());
         }
 
@@ -10778,14 +10796,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class SelectionEndHandleView extends HandleView {
+
+        public SelectionEndHandleView(Drawable drawableLtr, Drawable drawableRtl) {
+            super(drawableLtr, drawableRtl);
+        }
+
         @Override
-        protected void initDrawable() {
-            if (mSelectHandleRight == null) {
-                mSelectHandleRight = mContext.getResources().getDrawable(
-                        mTextSelectHandleRightRes);
+        protected int getHotspotX(Drawable drawable, boolean isRtlRun) {
+            if (isRtlRun) {
+                return (drawable.getIntrinsicWidth() * 3) / 4;
+            } else {
+                return drawable.getIntrinsicWidth() / 4;
             }
-            mDrawable = mSelectHandleRight;
-            mHotspotX = mDrawable.getIntrinsicWidth() / 4;
         }
 
         @Override
@@ -10795,6 +10817,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updateSelection(int offset) {
+            super.updateSelection(offset);
             Selection.setSelection((Spannable) mText, getSelectionStart(), offset);
         }
 
@@ -10864,8 +10887,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private InsertionHandleView getHandle() {
+            if (mSelectHandleCenter == null) {
+                mSelectHandleCenter = mContext.getResources().getDrawable(
+                        mTextSelectHandleRes);
+            }
             if (mHandle == null) {
-                mHandle = new InsertionHandleView();
+                mHandle = new InsertionHandleView(mSelectHandleCenter);
             }
             return mHandle;
         }
@@ -10899,10 +10926,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (isInBatchEditMode()) {
                 return;
             }
+            initDrawables();
+            initHandles();
+            hideInsertionPointCursorController();
+        }
 
+        private void initDrawables() {
+            if (mSelectHandleLeft == null) {
+                mSelectHandleLeft = mContext.getResources().getDrawable(
+                        mTextSelectHandleLeftRes);
+            }
+            if (mSelectHandleRight == null) {
+                mSelectHandleRight = mContext.getResources().getDrawable(
+                        mTextSelectHandleRightRes);
+            }
+        }
+
+        private void initHandles() {
             // Lazy object creation has to be done before updatePosition() is called.
-            if (mStartHandle == null) mStartHandle = new SelectionStartHandleView();
-            if (mEndHandle == null) mEndHandle = new SelectionEndHandleView();
+            if (mStartHandle == null) {
+                mStartHandle = new SelectionStartHandleView(mSelectHandleLeft, mSelectHandleRight);
+            }
+            if (mEndHandle == null) {
+                mEndHandle = new SelectionEndHandleView(mSelectHandleRight, mSelectHandleLeft);
+            }
 
             mStartHandle.show();
             mEndHandle.show();
