@@ -24,8 +24,6 @@
     <dimen name="status_bar_recents_thumbnail_left_margin">8dp</dimen>
     <!-- How far the thumbnail for a recent app appears from top edge -->
     <dimen name="status_bar_recents_thumbnail_top_margin">12dp</dimen>
-    <!-- Width of scrollable area in recents -->
-    <dimen name="status_bar_recents_width">128dp</dimen>
     <!-- Padding for text descriptions -->
     <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
     <!-- Width of application label text -->

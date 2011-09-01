@@ -16,12 +16,6 @@
 */
 -->
 <resources>
-    <!-- Offsets for rendering thumbnails over drawable recents_thumbnail_bg -->
-    <dimen name="recents_thumbnail_bg_padding_left">6px</dimen>
-    <dimen name="recents_thumbnail_bg_padding_top">7px</dimen>
-    <dimen name="recents_thumbnail_bg_padding_right">6px</dimen>
-    <dimen name="recents_thumbnail_bg_padding_bottom">6px</dimen>
-
     <!-- thickness (height) of each notification row, including any separators or padding -->
     <!-- Note: this is 64dip + 1px divider = 97px. -->
     <dimen name="notification_height">97px</dimen>

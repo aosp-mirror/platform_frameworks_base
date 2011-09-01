@@ -307,6 +307,7 @@ public class SwipeHelper {
                         dismissChild(mCurrView, childSwipedFastEnough ? velocity : 0f);
                     } else {
                         // snappity
+                        mCallback.onDragCancelled(mCurrView);
                         snapChild(mCurrView, velocity);
                     }
                 }
@@ -325,5 +326,7 @@ public class SwipeHelper {
         void onBeginDrag(View v);
 
         void onChildDismissed(View v);
+
+        void onDragCancelled(View v);
     }
 }

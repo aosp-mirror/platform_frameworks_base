@@ -38,8 +38,7 @@
             android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
             android:scaleType="center"
             android:clickable="true"
-            android:background="@drawable/recents_thumbnail_bg"
-            android:foreground="@drawable/recents_thumbnail_overlay">
+            android:background="@drawable/recents_thumbnail_overlay">
             <ImageView android:id="@+id/app_thumbnail_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -54,8 +53,8 @@
             android:layout_alignTop="@id/app_thumbnail"
             android:layout_marginTop="@dimen/status_bar_recents_app_icon_top_margin"
             android:layout_marginLeft="@dimen/status_bar_recents_app_icon_left_margin"
-            android:maxWidth="@dimen/status_bar_recents_thumbnail_max_width"
-            android:maxHeight="@dimen/status_bar_recents_thumbnail_max_height"
+            android:maxWidth="@dimen/status_bar_recents_app_icon_max_width"
+            android:maxHeight="@dimen/status_bar_recents_app_icon_max_height"
             android:adjustViewBounds="true"
             android:visibility="invisible"
         />
@@ -70,7 +69,6 @@
             android:layout_alignLeft="@id/app_thumbnail"
             android:layout_below="@id/app_thumbnail"
             android:layout_marginTop="@dimen/status_bar_recents_text_description_padding"
-            android:layout_marginLeft="@dimen/recents_thumbnail_bg_padding_left"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:visibility="invisible"
@@ -86,7 +84,6 @@
             android:layout_alignLeft="@id/app_thumbnail"
             android:layout_below="@id/app_label"
             android:layout_marginTop="@dimen/status_bar_recents_text_description_padding"
-            android:layout_marginLeft="@dimen/recents_thumbnail_bg_padding_left"
             android:singleLine="true"
             android:ellipsize="marquee"
         />
