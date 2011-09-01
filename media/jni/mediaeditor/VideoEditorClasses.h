@@ -145,6 +145,7 @@ typedef struct {
     M4OSA_UInt32 uiAudioBitrate;
     M4OSA_UInt32 uiNbChannels;
     M4OSA_UInt32 uiSamplingFrequency;
+    M4OSA_UInt32 uiRotation;
 } VideoEditPropClass_Properties;
 
 typedef struct
@@ -166,6 +167,7 @@ typedef struct
     jfieldID audioBitrate;
     jfieldID audioChannels;
     jfieldID audioSamplingFrequency;
+    jfieldID videoRotation;
 } VideoEditJava_PropertiesFieldIds;
 
 
@@ -187,6 +189,7 @@ typedef struct
     jfieldID mediaRendering;
     jfieldID rgbFileWidth;
     jfieldID rgbFileHeight;
+    jfieldID rotationDegree;
 } VideoEditJava_ClipSettingsFieldIds;
 
 typedef struct

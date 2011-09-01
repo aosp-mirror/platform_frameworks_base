@@ -258,6 +258,8 @@ jobject videoEditProp_getProperties(
                 pProperties->uiAudioBitrate      = pClipProperties->uiAudioBitrate;
                 pProperties->uiNbChannels        = pClipProperties->uiNbChannels;
                 pProperties->uiSamplingFrequency = pClipProperties->uiSamplingFrequency;
+                pProperties->uiRotation          = pClipProperties->videoRotationDegrees;
+
             }
 
             // Free the clip properties.
