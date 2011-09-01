@@ -60,6 +60,7 @@ static RsdHalFunctions FunctionTable = {
         rsdScriptInvokeRoot,
         rsdScriptInvokeForEach,
         rsdScriptInvokeInit,
+        rsdScriptInvokeFreeChildren,
         rsdScriptSetGlobalVar,
         rsdScriptSetGlobalBind,
         rsdScriptSetGlobalObj,

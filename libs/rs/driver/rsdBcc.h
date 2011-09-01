@@ -43,6 +43,8 @@ int rsdScriptInvokeRoot(const android::renderscript::Context *dc,
                         android::renderscript::Script *script);
 void rsdScriptInvokeInit(const android::renderscript::Context *dc,
                          android::renderscript::Script *script);
+void rsdScriptInvokeFreeChildren(const android::renderscript::Context *dc,
+                                 android::renderscript::Script *script);
 
 void rsdScriptSetGlobalVar(const android::renderscript::Context *,
                            const android::renderscript::Script *,
