@@ -267,6 +267,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidOpen = LID_ABSENT;
 
     boolean mSystemReady;
+    boolean mSystemBooted;
     boolean mHdmiPlugged;
     int mUiMode = Configuration.UI_MODE_TYPE_NORMAL;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
@@ -2504,6 +2505,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                                 mKeyguardMediator.isShowingAndNotHidden() :
                                                 mKeyguardMediator.isShowing()));
 
+        if (!mSystemBooted) {
+            // If we have not yet booted, don't let key events do anything.
+            return 0;
+        }
+
         if (false) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
                   + " screenIsOn=" + isScreenOn + " keyguardActive=" + keyguardActive);
@@ -3121,6 +3127,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    /** {@inheritDoc} */
+    public void systemBooted() {
+        synchronized (mLock) {
+            mSystemBooted = true;
+        }
+    }
+
     ProgressDialog mBootMsgDialog = null;
 
     /** {@inheritDoc} */
@@ -3516,7 +3529,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public void dump(String prefix, FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
-                pw.print(" mSystemRead="); pw.println(mSystemReady);
+                pw.print(" mSystemReady="); pw.print(mSystemReady);
+                pw.print(" mSystemBooted="); pw.println(mSystemBooted);
         pw.print(prefix); pw.print("mLidOpen="); pw.print(mLidOpen);
                 pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
                 pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);

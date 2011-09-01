@@ -872,6 +872,12 @@ public interface WindowManagerPolicy {
     public void systemReady();
 
     /**
+     * Called when the system is done booting to the point where the
+     * user can start interacting with it.
+     */
+    public void systemBooted();
+
+    /**
      * Show boot time message to the user.
      */
     public void showBootMessage(final CharSequence msg, final boolean always);

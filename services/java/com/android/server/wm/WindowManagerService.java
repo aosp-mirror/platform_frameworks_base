@@ -4707,6 +4707,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendMessageDelayed(msg, 30*1000);
         }
 
+        mPolicy.systemBooted();
+
         performEnableScreen();
     }
 
@@ -7927,13 +7929,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mWindowDetachedWallpaper != windowDetachedWallpaper) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
                             "Detached wallpaper changed from " + mWindowDetachedWallpaper
-                            + windowDetachedWallpaper);
+                            + " to " + windowDetachedWallpaper);
                     mWindowDetachedWallpaper = windowDetachedWallpaper;
                     wallpaperMayChange = true;
                 }
 
                 if (windowAnimationBackgroundColor != 0) {
-                    // If this window that wants black is the current wallpaper
+                    // If the window that wants black is the current wallpaper
                     // target, then the black goes *below* the wallpaper so we
                     // don't cause the wallpaper to suddenly disappear.
                     WindowState target = windowAnimationBackground;
