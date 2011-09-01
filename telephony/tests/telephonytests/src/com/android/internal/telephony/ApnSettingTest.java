@@ -44,6 +44,8 @@ public class ApnSettingTest extends TestCase {
         for (i = 0; i < a1.types.length; i++) {
             assertEquals(a1.types[i], a2.types[i]);
         }
+        assertEquals(a1.carrierEnabled, a2.carrierEnabled);
+        assertEquals(a1.bearer, a2.bearer);
     }
 
     @SmallTest
@@ -58,21 +60,21 @@ public class ApnSettingTest extends TestCase {
         testString = "Vodafone IT,web.omnitel.it,,,,,,,,,222,10,,DUN";
         expected_apn =  new ApnSetting(
                 -1, "22210", "Vodafone IT", "web.omnitel.it", "", "",
-                "", "", "", "", "", 0, dunTypes, "IP", "IP");
+                "", "", "", "", "", 0, dunTypes, "IP", "IP",true,0);
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
 
         // A v2 string.
-        testString = "[ApnSettingV2] Name,apn,,,,,,,,,123,45,,mms|*,IPV6,IP";
+        testString = "[ApnSettingV2] Name,apn,,,,,,,,,123,45,,mms|*,IPV6,IP,true,14";
         expected_apn =  new ApnSetting(
                 -1, "12345", "Name", "apn", "", "",
-                "", "", "", "", "", 0, mmsTypes, "IPV6", "IP");
+                "", "", "", "", "", 0, mmsTypes, "IPV6", "IP",true,14);
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
 
         // A v2 string with spaces.
-        testString = "[ApnSettingV2] Name,apn, ,,,,,,,,123,45,,mms|*,IPV4V6, IP";
+        testString = "[ApnSettingV2] Name,apn, ,,,,,,,,123,45,,mms|*,IPV4V6, IP,true,14";
         expected_apn =  new ApnSetting(
                 -1, "12345", "Name", "apn", "", "",
-                "", "", "", "", "", 0, mmsTypes, "IPV4V6", "IP");
+                "", "", "", "", "", 0, mmsTypes, "IPV4V6", "IP",true,14);
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
 
         // Return null if insufficient fields given.
@@ -83,11 +85,11 @@ public class ApnSettingTest extends TestCase {
         assertEquals(null, ApnSetting.fromString(testString));
 
         // Parse (incorrect) V2 format without the tag as V1.
-        testString = "Name,apn,,,,,,,,,123, 45,,mms|*,IPV6";
+        testString = "Name,apn,,,,,,,,,123, 45,,mms|*,IPV6,true,14";
         String[] incorrectTypes = {"mms|*", "IPV6"};
         expected_apn =  new ApnSetting(
                 -1, "12345", "Name", "apn", "", "",
-                "", "", "", "", "", 0, incorrectTypes, "IP", "IP");
+                "", "", "", "", "", 0, incorrectTypes, "IP", "IP",true,14);
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
     }
 
@@ -98,11 +100,10 @@ public class ApnSettingTest extends TestCase {
         ApnSetting apn =  new ApnSetting(
                 99, "12345", "Name", "apn", "proxy", "port",
                 "mmsc", "mmsproxy", "mmsport", "user", "password", 0,
-                types, "IPV4V6", "IP");
+                types, "IPV4V6", "IP", true, 14);
         String expected = "[ApnSettingV2] Name, 99, 12345, apn, proxy, " +
                 "mmsc, mmsproxy, mmsport, port, 0, default | *, " +
-                "IPV4V6, IP";
+                "IPV4V6, IP, true, 14";
         assertEquals(expected, apn.toString());
     }
 }
-
