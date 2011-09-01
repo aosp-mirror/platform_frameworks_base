@@ -29,5 +29,7 @@
                 android:interpolator="@interpolator/accelerate_quint"
                 android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
                 android:duration="200" />
-
+        <!-- This is needed to keep the animation running while wallpaper_open_enter completes -->
+        <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
+                android:duration="500" />
 </set>

@@ -78,8 +78,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
-import android.os.FileUtils.FileStatus;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -706,6 +704,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Runtime.getRuntime().gc();
                     }
                     if (msg.obj != null) {
+                        @SuppressWarnings("unchecked")
                         Set<SdInstallArgs> args = (Set<SdInstallArgs>) msg.obj;
                         if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading all containers");
                         // Unload containers
@@ -3039,10 +3038,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             return null;
         }
         mScanningPath = scanFile;
-        if (pkg == null) {
-            mLastScanError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
-            return null;
-        }
 
         if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
