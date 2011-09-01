@@ -34,7 +34,7 @@ class GraphicBuffer;
 class SurfaceMediaSource : public BnSurfaceTexture, public MediaSource,
                                             public MediaBufferObserver {
 public:
-    enum { MIN_UNDEQUEUED_BUFFERS = 3 };
+    enum { MIN_UNDEQUEUED_BUFFERS = 4 };
     enum {
         MIN_ASYNC_BUFFER_SLOTS = MIN_UNDEQUEUED_BUFFERS + 1,
         MIN_SYNC_BUFFER_SLOTS  = MIN_UNDEQUEUED_BUFFERS
