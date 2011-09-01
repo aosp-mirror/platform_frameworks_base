@@ -36,11 +36,15 @@ class ViewStateSerializer {
 
     static boolean serializeViewState(OutputStream stream, WebView web)
             throws IOException {
+        int baseLayer = web.getBaseLayer();
+        if (baseLayer == 0) {
+            return false;
+        }
         DataOutputStream dos = new DataOutputStream(stream);
         dos.writeInt(VERSION);
         dos.writeInt(web.getContentWidth());
         dos.writeInt(web.getContentHeight());
-        return nativeSerializeViewState(web.getBaseLayer(), dos,
+        return nativeSerializeViewState(baseLayer, dos,
                 new byte[WORKING_STREAM_STORAGE]);
     }
 
