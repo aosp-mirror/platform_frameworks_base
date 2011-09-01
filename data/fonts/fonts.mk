@@ -14,15 +14,14 @@
 
 # Warning: this is actually a product definition, to be inherited from
 
+# On space-constrained devices, we include a subset of fonts:
+# First, core/required fonts
 PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/Roboto-Regular.ttf:system/fonts/Roboto-Regular.ttf \
     frameworks/base/data/fonts/Roboto-Bold.ttf:system/fonts/Roboto-Bold.ttf \
     frameworks/base/data/fonts/Roboto-Italic.ttf:system/fonts/Roboto-Italic.ttf \
     frameworks/base/data/fonts/Roboto-BoldItalic.ttf:system/fonts/Roboto-BoldItalic.ttf \
-    frameworks/base/data/fonts/DroidSans.ttf:system/fonts/DroidSans.ttf \
-    frameworks/base/data/fonts/DroidSans-Bold.ttf:system/fonts/DroidSans-Bold.ttf \
     frameworks/base/data/fonts/DroidNaskh-Regular.ttf:system/fonts/DroidNaskh-Regular.ttf \
-    frameworks/base/data/fonts/DroidSansEthiopic-Regular.ttf:system/fonts/DroidSansEthiopic-Regular.ttf \
     frameworks/base/data/fonts/DroidSansHebrew-Regular.ttf:system/fonts/DroidSansHebrew-Regular.ttf \
     frameworks/base/data/fonts/DroidSansHebrew-Bold.ttf:system/fonts/DroidSansHebrew-Bold.ttf \
     frameworks/base/data/fonts/DroidSansThai.ttf:system/fonts/DroidSansThai.ttf \
@@ -33,9 +32,22 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/DroidSansMono.ttf:system/fonts/DroidSansMono.ttf \
     frameworks/base/data/fonts/Lohit_Hindi.ttf:system/fonts/Lohit_Hindi.ttf \
     frameworks/base/data/fonts/Clockopia.ttf:system/fonts/Clockopia.ttf \
-    frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf \
     frameworks/base/data/fonts/AndroidClock.ttf:system/fonts/AndroidClock.ttf \
     frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Highlight.ttf \
     frameworks/base/data/fonts/AndroidClock_Solid.ttf:system/fonts/AndroidClock_Solid.ttf \
     frameworks/base/data/fonts/system_fonts.xml:system/etc/system_fonts.xml \
     frameworks/base/data/fonts/fallback_fonts.xml:system/etc/fallback_fonts.xml
+
+# Next, include additional fonts, depending on how much space we have
+ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+# Smaller fonts alternatives
+PRODUCT_COPY_FILES += \
+    frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf
+else
+# Full font set alternatives
+PRODUCT_COPY_FILES += \
+    frameworks/base/data/fonts/DroidSansFallbackFull.ttf:system/fonts/DroidSansFallback.ttf \
+    frameworks/base/data/fonts/DroidSans.ttf:system/fonts/DroidSans.ttf \
+    frameworks/base/data/fonts/DroidSans-Bold.ttf:system/fonts/DroidSans-Bold.ttf \
+    frameworks/base/data/fonts/DroidSansEthiopic-Regular.ttf:system/fonts/DroidSansEthiopic-Regular.ttf
+endif
