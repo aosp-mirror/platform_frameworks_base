@@ -490,7 +490,8 @@ VIDEOEDIT_JAVA_DEFINE_FIELDS(Properties)
     VIDEOEDIT_JAVA_FIELD_INIT("audioDuration",          "I"),
     VIDEOEDIT_JAVA_FIELD_INIT("audioBitrate",           "I"),
     VIDEOEDIT_JAVA_FIELD_INIT("audioChannels",          "I"),
-    VIDEOEDIT_JAVA_FIELD_INIT("audioSamplingFrequency", "I")
+    VIDEOEDIT_JAVA_FIELD_INIT("audioSamplingFrequency", "I"),
+    VIDEOEDIT_JAVA_FIELD_INIT("videoRotation",          "I")
 };
 
 VIDEOEDIT_JAVA_DEFINE_FIELD_CLASS(Properties, PROPERTIES_CLASS_NAME)
@@ -540,7 +541,8 @@ VIDEOEDIT_JAVA_DEFINE_FIELDS(ClipSettings)
     VIDEOEDIT_JAVA_FIELD_INIT("panZoomTopLeftYEnd",   "I"                 ),
     VIDEOEDIT_JAVA_FIELD_INIT("mediaRendering",       "I"                 ),
     VIDEOEDIT_JAVA_FIELD_INIT("rgbWidth",           "I"                 ),
-    VIDEOEDIT_JAVA_FIELD_INIT("rgbHeight",          "I"                 )
+    VIDEOEDIT_JAVA_FIELD_INIT("rgbHeight",          "I"                 ),
+    VIDEOEDIT_JAVA_FIELD_INIT("rotationDegree",     "I"                 )
 };
 
 VIDEOEDIT_JAVA_DEFINE_FIELD_CLASS(ClipSettings, CLIP_SETTINGS_CLASS_NAME)
@@ -1402,6 +1404,10 @@ videoEditClasses_getClipSettings(
             VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", \
                 "getClipSettings-- rgbFileHeight %d ",
                 pSettings->ClipProperties.uiStillPicHeight);
+
+            // Set the video rotation degree
+            pSettings->ClipProperties.videoRotationDegrees =
+                (M4OSA_UInt32)pEnv->GetIntField(object, fieldIds.rotationDegree);
         }
 
         // Check if settings could be set.
@@ -1513,6 +1519,10 @@ videoEditClasses_createClipSettings(
                 pSettings->ClipProperties.uiStillPicWidth ,
                 pSettings->ClipProperties.uiStillPicHeight);
 
+            // Set the video rotation
+            pEnv->SetIntField(object, fieldIds.rotationDegree,
+                pSettings->ClipProperties.videoRotationDegrees);
+
             // Return the object.
             (*pObject) = object;
         }
@@ -1608,6 +1618,9 @@ videoEditPropClass_createProperties(
             // Set the audioSamplingFrequency field.
             pEnv->SetIntField(object, fieldIds.audioSamplingFrequency,
                 pProperties->uiSamplingFrequency);
+
+            // Set the video rotation field.
+            pEnv->SetIntField(object, fieldIds.videoRotation, pProperties->uiRotation);
 
             // Return the object.
             (*pObject) = object;

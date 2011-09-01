@@ -71,6 +71,7 @@ typedef struct
     M4OSA_Bool      bApplyEffect;        /* Apply video effects before render*/
     M4OSA_UInt32    clipBeginCutTime;  /* Clip begin cut time relative to storyboard */
     M4OSA_UInt32    clipEndCutTime;    /* Clip end cut time relative to storyboard */
+    M4OSA_UInt32    videoRotationDegree; /* Video rotation degree */
 
 } VideoEditor_renderPreviewFrameStr;
 #endif /*__VIDEO_EDITOR_API_H__*/
