@@ -47,7 +47,7 @@
             android:clipChildren="false"
             >
             <com.android.systemui.recent.RecentsVerticalScrollView android:id="@+id/recents_container"
-                android:layout_width="@dimen/status_bar_recents_width"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/status_bar_recents_right_glow_margin"
                 android:divider="@null"

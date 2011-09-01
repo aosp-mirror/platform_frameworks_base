@@ -36,8 +36,7 @@
             android:clickable="true"
             android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
             android:scaleType="center"
-            android:background="@drawable/recents_thumbnail_bg"
-            android:foreground="@drawable/recents_thumbnail_overlay">
+            android:background="@drawable/recents_thumbnail_overlay">
             <ImageView android:id="@+id/app_thumbnail_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -52,8 +51,8 @@
             android:layout_alignTop="@id/app_thumbnail"
             android:layout_marginLeft="@dimen/status_bar_recents_app_icon_left_margin"
             android:layout_marginTop="@dimen/status_bar_recents_app_icon_top_margin"
-            android:maxWidth="@dimen/status_bar_recents_thumbnail_max_width"
-            android:maxHeight="@dimen/status_bar_recents_thumbnail_max_height"
+            android:maxWidth="@dimen/status_bar_recents_app_icon_max_width"
+            android:maxHeight="@dimen/status_bar_recents_app_icon_max_height"
             android:adjustViewBounds="true"
         />
 

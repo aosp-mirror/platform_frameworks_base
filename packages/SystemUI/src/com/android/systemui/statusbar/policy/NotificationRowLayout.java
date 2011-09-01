@@ -124,6 +124,9 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
         requestDisallowInterceptTouchEvent(true);
     }
 
+    public void onDragCancelled(View v) {
+    }
+
     public View getChildAtPosition(MotionEvent ev) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
