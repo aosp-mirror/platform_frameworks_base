@@ -37,6 +37,7 @@ using namespace android::renderscript;
 struct DrvScript {
     int (*mRoot)();
     void (*mInit)();
+    void (*mFreeChildren)();
 
     BCCScriptRef mBccScript;
 
@@ -125,6 +126,7 @@ bool rsdScriptInit(const Context *rsc,
 
     drv->mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(drv->mBccScript, "root"));
     drv->mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, "init"));
+    drv->mFreeChildren = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, ".rs.dtor"));
 
     exportFuncCount = drv->ME->getExportFuncCount();
     if (exportFuncCount > 0) {
@@ -430,6 +432,13 @@ void rsdScriptInvokeInit(const Context *dc, Script *script) {
     }
 }
 
+void rsdScriptInvokeFreeChildren(const Context *dc, Script *script) {
+    DrvScript *drv = (DrvScript *)script->mHal.drv;
+
+    if (drv->mFreeChildren) {
+        drv->mFreeChildren();
+    }
+}
 
 void rsdScriptInvokeFunction(const Context *dc, Script *script,
                             uint32_t slot,

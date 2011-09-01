@@ -73,6 +73,8 @@ public:
     void setVar(uint32_t slot, const void *val, size_t len);
     void setVarObj(uint32_t slot, ObjectBase *val);
 
+    virtual bool freeChildren();
+
     virtual void runForEach(Context *rsc,
                             const Allocation * ain,
                             Allocation * aout,

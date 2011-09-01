@@ -72,6 +72,12 @@ void Script::setVarObj(uint32_t slot, ObjectBase *val) {
     mRSC->mHal.funcs.script.setGlobalObj(mRSC, this, slot, val);
 }
 
+bool Script::freeChildren() {
+    incSysRef();
+    mRSC->mHal.funcs.script.invokeFreeChildren(mRSC, this);
+    return decSysRef();
+}
+
 namespace android {
 namespace renderscript {
 

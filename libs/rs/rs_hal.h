@@ -90,6 +90,7 @@ typedef struct {
                               uint32_t usrLen,
                               const RsScriptCall *sc);
         void (*invokeInit)(const Context *rsc, Script *s);
+        void (*invokeFreeChildren)(const Context *rsc, Script *s);
 
         void (*setGlobalVar)(const Context *rsc, const Script *s,
                              uint32_t slot,
