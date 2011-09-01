@@ -3091,6 +3091,38 @@
     <string name="number_picker_increment_button">Increment</string>
     <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrement</string>
+    <!-- Description of the tap and hold action to get into scroll mode in NumberPicker. [CHAR LIMIT=NONE] -->
+    <string name="number_picker_increment_scroll_mode"><xliff:g id="value" example="3">%s</xliff:g> tap and hold.</string>
+    <!-- Description of the scrolling action in NumberPicker. [CHAR LIMIT=NONE] -->
+    <string name="number_picker_increment_scroll_action">Slide up to increment and down to decrement.</string>
+
+    <!-- TimePicker - accessibility support -->
+    <!-- Description of the button to increment the TimePicker's minute value. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_increment_minute_button">Increment minute</string>
+    <!-- Description of the button to decrement the TimePicker's minute value. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_decrement_minute_button">Decrement minute</string>
+    <!-- Description of the button to increment the TimePicker's hour value. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_increment_hour_button">Increment hour</string>
+    <!-- Description of the button to decrement the TimePicker's hour value. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_decrement_hour_button">Decrement hour</string>
+    <!-- Description of the button to increment the TimePicker's set PM value. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_increment_set_pm_button">Set PM</string>
+    <!-- Description of the button to decrement the TimePicker's set AM value. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_decrement_set_am_button">Set AM</string>
+
+    <!-- DatePicker - accessibility support -->
+    <!-- Description of the button to increment the DatePicker's month value. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_increment_month_button">Increment month</string>
+    <!-- Description of the button to decrement the DatePicker's month value. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_decrement_month_button">Decrement month</string>
+    <!-- Description of the button to increment the DatePicker's day value. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_increment_day_button">Increment day</string>
+    <!-- Description of the button to decrement the DatePicker's day value. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_decrement_day_button">Decrement day</string>
+    <!-- Description of the button to increment the DatePicker's year value. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_increment_year_button">Increment year</string>
+    <!-- Description of the button to decrement the DatePicker's year value. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_decrement_year_button">Decrement year</string>
 
     <!-- CheckBox - accessibility support -->
     <!-- Description of the checked state of a CheckBox. [CHAR LIMIT=NONE] -->

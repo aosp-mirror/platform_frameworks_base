@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.NumberPicker.OnValueChangeListener;
 
 import com.android.internal.R;
@@ -264,6 +265,11 @@ public class DatePicker extends FrameLayout {
 
         // re-order the number spinners to match the current date format
         reorderSpinners();
+
+        // set content descriptions
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            setContentDescriptions();
+        }
     }
 
     /**
@@ -357,11 +363,16 @@ public class DatePicker extends FrameLayout {
     }
 
     @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        onPopulateAccessibilityEvent(event);
+        return true;
+    }
+
+    @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         super.onPopulateAccessibilityEvent(event);
 
-        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY
-                | DateUtils.FORMAT_SHOW_YEAR;
+        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
         String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                 mCurrentDate.getTimeInMillis(), flags);
         event.getText().add(selectedDateUtterance);
@@ -709,5 +720,22 @@ public class DatePicker extends FrameLayout {
             }
         };
     }
-}
 
+    private void setContentDescriptions() {
+        // Day
+        String text = mContext.getString(R.string.date_picker_increment_day_button);
+        mDaySpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_day_button);
+        mDaySpinner.findViewById(R.id.decrement).setContentDescription(text);
+        // Month
+        text = mContext.getString(R.string.date_picker_increment_month_button);
+        mMonthSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_month_button);
+        mMonthSpinner.findViewById(R.id.decrement).setContentDescription(text);
+        // Year
+        text = mContext.getString(R.string.date_picker_increment_year_button);
+        mYearSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_year_button);
+        mYearSpinner.findViewById(R.id.decrement).setContentDescription(text);
+    }
+}
