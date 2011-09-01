@@ -920,7 +920,7 @@
     <!-- Allows applications to write the apn settings -->
     <permission android:name="android.permission.WRITE_APN_SETTINGS"
                 android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-                android:protectionLevel="dangerous"
+                android:protectionLevel="signatureOrSystem"
                 android:description="@string/permdesc_writeApnSettings"
                 android:label="@string/permlab_writeApnSettings" />
 
