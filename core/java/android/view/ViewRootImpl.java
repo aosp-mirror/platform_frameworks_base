@@ -2141,6 +2141,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     void dispatchDetachedFromWindow() {
         if (mView != null && mView.mAttachInfo != null) {
+            if (mAttachInfo.mHardwareRenderer != null &&
+                    mAttachInfo.mHardwareRenderer.isEnabled()) {
+                mAttachInfo.mHardwareRenderer.validate();
+            }
             mView.dispatchDetachedFromWindow();
         }
 
@@ -3568,6 +3572,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         checkThread();
         if (LOCAL_LOGV) Log.v(TAG, "DIE in " + this + " of " + mSurface);
         synchronized (this) {
+            if (mAdded) {
+                mAdded = false;
+                dispatchDetachedFromWindow();
+            }
+
             if (mAdded && !mFirst) {
                 destroyHardwareRenderer();
 
@@ -3587,10 +3596,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
 
                 mSurface.release();
-            }
-            if (mAdded) {
-                mAdded = false;
-                dispatchDetachedFromWindow();
             }
         }
     }
