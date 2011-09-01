@@ -5627,6 +5627,10 @@ public class Intent implements Parcelable, Cloneable {
             if (scheme != null) {
                 if (scheme.equalsIgnoreCase("tel")) {
                     b.append("tel:xxx-xxx-xxxx");
+                } else if (scheme.equalsIgnoreCase("sip")) {
+                    b.append("sip:xxxxxxxxxx");
+                } else if (scheme.equalsIgnoreCase("sms")) {
+                    b.append("sms:xxx-xxx-xxxx");
                 } else if (scheme.equalsIgnoreCase("smsto")) {
                     b.append("smsto:xxx-xxx-xxxx");
                 } else {
