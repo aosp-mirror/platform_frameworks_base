@@ -148,6 +148,7 @@ private:
     mutable Mutex mLock;
     Mutex mMiscStateLock;
     mutable Mutex mStatsLock;
+    Mutex mAudioLock;
 
     OMXClient mClient;
     TimedEventQueue mQueue;
@@ -223,7 +224,7 @@ private:
     void postVideoEvent_l(int64_t delayUs = -1);
     void postBufferingEvent_l();
     void postStreamDoneEvent_l(status_t status);
-    void postCheckAudioStatusEvent_l(int64_t delayUs);
+    void postCheckAudioStatusEvent(int64_t delayUs);
     void postVideoLagEvent_l();
     status_t play_l();
 
@@ -295,7 +296,6 @@ private:
     void ensureCacheIsFetching_l();
 
     status_t startAudioPlayer_l(bool sendErrorNotification = true);
-    void postAudioSeekComplete_l();
 
     void shutdownVideoDecoder_l();
     status_t setNativeWindow_l(const sp<ANativeWindow> &native);
