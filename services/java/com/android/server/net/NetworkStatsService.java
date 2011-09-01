@@ -31,6 +31,8 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
@@ -76,6 +78,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.EventLog;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -83,6 +86,7 @@ import android.util.TrustedTime;
 
 import com.android.internal.os.AtomicFile;
 import com.android.internal.util.Objects;
+import com.android.server.EventLogTags;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -387,7 +391,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     entry.uid = UID_ALL;
                     entry.tag = TAG_NONE;
                     entry.rxBytes = historyEntry.rxBytes;
+                    entry.rxPackets = historyEntry.rxPackets;
                     entry.txBytes = historyEntry.txBytes;
+                    entry.txPackets = historyEntry.txPackets;
 
                     stats.combineValues(entry);
                 }
@@ -716,6 +722,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             Slog.v(TAG, "performPollLocked() took " + duration + "ms");
         }
 
+        // sample stats after detailed poll
+        if (detailedPoll) {
+            performSample();
+        }
+
         // finally, dispatch updated event to any listeners
         final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
         updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -806,6 +817,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mLastPollUidSnapshot = uidSnapshot;
         mLastPollOperationsSnapshot = mOperations;
         mOperations = new NetworkStats(0L, 10);
+    }
+
+    /**
+     * Sample recent statistics summary into {@link EventLog}.
+     */
+    private void performSample() {
+        // take sample as total over last 4 hours
+        final long end = mTime.hasCache() ? mTime.currentTimeMillis() : System.currentTimeMillis();
+        final long start = end - (4 * HOUR_IN_MILLIS);
+
+        NetworkTemplate template = null;
+        NetworkStats.Entry ifaceTotal = null;
+        NetworkStats.Entry uidTotal = null;
+
+        // collect mobile sample
+        template = buildTemplateMobileAll(getActiveSubscriberId(mContext));
+        ifaceTotal = getSummaryForNetwork(template, start, end).getTotal(ifaceTotal);
+        uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
+        EventLogTags.writeNetstatsMobileSample(
+                ifaceTotal.rxBytes, ifaceTotal.txBytes, uidTotal.rxBytes, uidTotal.txBytes);
+
+        // collect wifi sample
+        template = buildTemplateWifi();
+        ifaceTotal = getSummaryForNetwork(template, start, end).getTotal(ifaceTotal);
+        uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
+        EventLogTags.writeNetstatsWifiSample(
+                ifaceTotal.rxBytes, ifaceTotal.txBytes, uidTotal.rxBytes, uidTotal.txBytes);
     }
 
     /**
@@ -1248,6 +1286,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
     };
+
+    private static String getActiveSubscriberId(Context context) {
+        final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
+                Context.TELEPHONY_SERVICE);
+        return telephony.getSubscriberId();
+    }
 
     /**
      * Key uniquely identifying a {@link NetworkStatsHistory} for a UID.
