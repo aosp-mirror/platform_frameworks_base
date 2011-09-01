@@ -1091,18 +1091,9 @@ public class PhoneStatusBar extends StatusBar {
             }
         }
 
-        if ((diff & StatusBarManager.DISABLE_NAVIGATION) != 0) {
-            if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
-                Slog.d(TAG, "DISABLE_NAVIGATION: yes");
-
-                // close recents if it's visible
-                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
-            }
-
-            if (mNavigationBarView != null) {
-                mNavigationBarView.setEnabled((state & StatusBarManager.DISABLE_NAVIGATION) == 0);
-            }
+        if ((diff & (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK)) != 0) {
+            setNavigationVisibility(state &
+                    (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK));
         }
 
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
@@ -1124,6 +1115,30 @@ public class PhoneStatusBar extends StatusBar {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
                 mTicker.halt();
             }
+        }
+    }
+
+    private void setNavigationVisibility(int visibility) {
+        boolean disableNavigation = ((visibility & StatusBarManager.DISABLE_NAVIGATION) != 0);
+        boolean disableBack = ((visibility & StatusBarManager.DISABLE_BACK) != 0);
+
+        Slog.i(TAG, "DISABLE_BACK: " + (disableBack ? "yes" : "no"));
+        Slog.i(TAG, "DISABLE_NAVIGATION: " + (disableNavigation ? "yes" : "no"));
+
+        if (disableNavigation && disableBack) {
+            mNavigationBarView.setEnabled(false);
+        } else {
+            mNavigationBarView.getBackButton().setEnabled(!disableBack);
+            mNavigationBarView.getHomeButton().setEnabled(!disableNavigation);
+            mNavigationBarView.getRecentsButton().setEnabled(!disableNavigation);
+
+            if (disableNavigation) {
+                // close recents if it's visible
+                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+            }
+
+            mNavigationBarView.setEnabled(true);
         }
     }
 

@@ -70,6 +70,14 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.menu);
     }
 
+    public View getBackButton() {
+        return mCurrentView.findViewById(R.id.back);
+    }
+
+    public View getHomeButton() {
+        return mCurrentView.findViewById(R.id.home);
+    }
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
