@@ -89,7 +89,7 @@ struct ATSParser::Stream : public RefBase {
     unsigned pid() const { return mElementaryPID; }
     void setPID(unsigned pid) { mElementaryPID = pid; }
 
-    void parse(
+    status_t parse(
             unsigned payload_unit_start_indicator,
             ABitReader *br);
 
@@ -114,8 +114,8 @@ private:
 
     ElementaryStreamQueue *mQueue;
 
-    void flush();
-    void parsePES(ABitReader *br);
+    status_t flush();
+    status_t parsePES(ABitReader *br);
 
     void onPayloadData(
             unsigned PTS_DTS_flags, uint64_t PTS, uint64_t DTS,
@@ -159,7 +159,7 @@ bool ATSParser::Program::parsePID(
         return false;
     }
 
-    mStreams.editValueAt(index)->parse(
+    *err = mStreams.editValueAt(index)->parse(
             payload_unit_start_indicator, br);
 
     return true;
@@ -438,10 +438,10 @@ ATSParser::Stream::~Stream() {
     mQueue = NULL;
 }
 
-void ATSParser::Stream::parse(
+status_t ATSParser::Stream::parse(
         unsigned payload_unit_start_indicator, ABitReader *br) {
     if (mQueue == NULL) {
-        return;
+        return OK;
     }
 
     if (payload_unit_start_indicator) {
@@ -450,14 +450,18 @@ void ATSParser::Stream::parse(
             // of a PES packet that we never saw the start of and assuming
             // we have a a complete PES packet.
 
-            flush();
+            status_t err = flush();
+
+            if (err != OK) {
+                return err;
+            }
         }
 
         mPayloadStarted = true;
     }
 
     if (!mPayloadStarted) {
-        return;
+        return OK;
     }
 
     size_t payloadSizeBits = br->numBitsLeft();
@@ -478,6 +482,8 @@ void ATSParser::Stream::parse(
 
     memcpy(mBuffer->data() + mBuffer->size(), br->data(), payloadSizeBits / 8);
     mBuffer->setRange(0, mBuffer->size() + payloadSizeBits / 8);
+
+    return OK;
 }
 
 void ATSParser::Stream::signalDiscontinuity(
@@ -526,7 +532,7 @@ void ATSParser::Stream::signalEOS(status_t finalResult) {
     }
 }
 
-void ATSParser::Stream::parsePES(ABitReader *br) {
+status_t ATSParser::Stream::parsePES(ABitReader *br) {
     unsigned packet_startcode_prefix = br->getBits(24);
 
     LOGV("packet_startcode_prefix = 0x%08x", packet_startcode_prefix);
@@ -534,7 +540,8 @@ void ATSParser::Stream::parsePES(ABitReader *br) {
     if (packet_startcode_prefix != 1) {
         LOGV("Supposedly payload_unit_start=1 unit does not start "
              "with startcode.");
-        return;
+
+        return ERROR_MALFORMED;
     }
 
     CHECK_EQ(packet_startcode_prefix, 0x000001u);
@@ -661,6 +668,14 @@ void ATSParser::Stream::parsePES(ABitReader *br) {
             unsigned dataLength =
                 PES_packet_length - 3 - PES_header_data_length;
 
+            if (br->numBitsLeft() < dataLength * 8) {
+                LOGE("PES packet does not carry enough data to contain "
+                     "payload. (numBitsLeft = %d, required = %d)",
+                     br->numBitsLeft(), dataLength * 8);
+
+                return ERROR_MALFORMED;
+            }
+
             CHECK_GE(br->numBitsLeft(), dataLength * 8);
 
             onPayloadData(
@@ -684,19 +699,24 @@ void ATSParser::Stream::parsePES(ABitReader *br) {
         CHECK_NE(PES_packet_length, 0u);
         br->skipBits(PES_packet_length * 8);
     }
+
+    return OK;
 }
 
-void ATSParser::Stream::flush() {
+status_t ATSParser::Stream::flush() {
     if (mBuffer->size() == 0) {
-        return;
+        return OK;
     }
 
     LOGV("flushing stream 0x%04x size = %d", mElementaryPID, mBuffer->size());
 
     ABitReader br(mBuffer->data(), mBuffer->size());
-    parsePES(&br);
+
+    status_t err = parsePES(&br);
 
     mBuffer->setRange(0, 0);
+
+    return err;
 }
 
 void ATSParser::Stream::onPayloadData(
