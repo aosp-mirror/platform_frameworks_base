@@ -36,7 +36,7 @@ public interface IMountService extends IInterface {
     /** Local-side IPC implementation stub class. */
     public static abstract class Stub extends Binder implements IMountService {
         private static class Proxy implements IMountService {
-            private IBinder mRemote;
+            private final IBinder mRemote;
 
             Proxy(IBinder remote) {
                 mRemote = remote;
@@ -589,6 +589,22 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
+            public int getEncryptionState() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getEncryptionState, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
             public int decryptStorage(String password) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -740,6 +756,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_getVolumeList = IBinder.FIRST_CALL_TRANSACTION + 29;
 
         static final int TRANSACTION_getSecureContainerFilesystemPath = IBinder.FIRST_CALL_TRANSACTION + 30;
+
+        static final int TRANSACTION_getEncryptionState = IBinder.FIRST_CALL_TRANSACTION + 31;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1062,6 +1080,13 @@ public interface IMountService extends IInterface {
                     reply.writeString(path);
                     return true;
                 }
+                case TRANSACTION_getEncryptionState: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int result = getEncryptionState();
+                    reply.writeNoException();
+                    reply.writeInt(result);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1221,6 +1246,21 @@ public interface IMountService extends IInterface {
      * Returns whether or not the external storage is emulated.
      */
     public boolean isExternalStorageEmulated() throws RemoteException;
+
+    /** The volume is not encrypted. */
+    static final int ENCRYPTION_STATE_NONE = 1;
+    /** The volume has been encrypted succesfully. */
+    static final int ENCRYPTION_STATE_OK = 0;
+    /** The volume is in a bad state. */
+    static final int ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
+    /** The volume is in a bad state - partially encrypted. Data is likely irrecoverable. */
+    static final int ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+
+    /**
+     * Determines the encryption state of the volume.
+     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible values.
+     */
+    public int getEncryptionState() throws RemoteException;
 
     /**
      * Decrypts any encrypted volumes.

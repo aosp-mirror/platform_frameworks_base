@@ -454,7 +454,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -484,7 +484,7 @@ class MountService extends IMountService.Stub
                             synchronized (mVolumeStates) {
                                 Set<String> keys = mVolumeStates.keySet();
                                 count = keys.size();
-                                paths = (String[])keys.toArray(new String[count]);
+                                paths = keys.toArray(new String[count]);
                                 states = new String[count];
                                 for (int i = 0; i < count; i++) {
                                     states[i] = mVolumeStates.get(paths[i]);
@@ -1761,6 +1761,37 @@ class MountService extends IMountService.Stub
             Slog.i(TAG, "Send to OBB handler: " + action.toString());
     }
 
+    @Override
+    public int getEncryptionState() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
+                "no permission to access the crypt keeper");
+
+        waitForReady();
+
+        try {
+            ArrayList<String> rsp = mConnector.doCommand("cryptfs cryptocomplete");
+            String[] tokens = rsp.get(0).split(" ");
+
+            if (tokens == null || tokens.length != 2) {
+                // Unexpected.
+                Slog.w(TAG, "Unexpected result from cryptfs cryptocomplete");
+                return ENCRYPTION_STATE_ERROR_UNKNOWN;
+            }
+
+            return Integer.parseInt(tokens[1]);
+
+        } catch (NumberFormatException e) {
+            // Bad result - unexpected.
+            Slog.w(TAG, "Unable to parse result from cryptfs cryptocomplete");
+            return ENCRYPTION_STATE_ERROR_UNKNOWN;
+        } catch (NativeDaemonConnectorException e) {
+            // Something bad happened.
+            Slog.w(TAG, "Error in communicating with cryptfs in validating");
+            return ENCRYPTION_STATE_ERROR_UNKNOWN;
+        }
+    }
+
+    @Override
     public int decryptStorage(String password) {
         if (TextUtils.isEmpty(password)) {
             throw new IllegalArgumentException("password cannot be empty");
@@ -2090,7 +2121,7 @@ class MountService extends IMountService.Stub
         public void execute(ObbActionHandler handler) {
             try {
                 if (DEBUG_OBB)
-                    Slog.i(TAG, "Starting to execute action: " + this.toString());
+                    Slog.i(TAG, "Starting to execute action: " + toString());
                 mRetries++;
                 if (mRetries > MAX_RETRIES) {
                     Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
@@ -2147,7 +2178,7 @@ class MountService extends IMountService.Stub
     }
 
     class MountObbAction extends ObbAction {
-        private String mKey;
+        private final String mKey;
 
         MountObbAction(ObbState obbState, String key) {
             super(obbState);
@@ -2258,7 +2289,7 @@ class MountService extends IMountService.Stub
     }
 
     class UnmountObbAction extends ObbAction {
-        private boolean mForceUnmount;
+        private final boolean mForceUnmount;
 
         UnmountObbAction(ObbState obbState, boolean force) {
             super(obbState);
