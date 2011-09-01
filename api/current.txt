@@ -20716,7 +20716,6 @@ package android.text.style {
 
   public class EasyEditSpan implements android.text.ParcelableSpan {
     ctor public EasyEditSpan();
-    ctor public EasyEditSpan(android.os.Parcel);
     method public int describeContents();
     method public int getSpanTypeId();
     method public void writeToParcel(android.os.Parcel, int);

@@ -255,11 +255,6 @@ please see styles_device_defaults.xml.
         <item name="android:textUnderlineColor">@color/holo_red_light</item>
     </style>
 
-    <style name="TextAppearance.SuggestionRange">
-        <item name="android:textColor">@color/white</item>
-        <item name="android:colorBackground">@color/holo_blue_dark</item>
-    </style>
-
     <!-- Widget Styles -->
 
     <style name="Widget">

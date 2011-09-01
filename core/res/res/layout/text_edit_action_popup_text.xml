@@ -25,4 +25,5 @@
     android:textAppearance="?android:attr/textAppearanceSmallInverse"
     android:textColor="@android:color/black"
     android:textAllCaps="true"
+    android:textStyle="bold"
 />

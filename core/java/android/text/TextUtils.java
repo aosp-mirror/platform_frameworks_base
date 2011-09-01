@@ -24,8 +24,8 @@ import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.EasyEditSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.QuoteSpan;
@@ -748,11 +748,11 @@ public class TextUtils {
                     break;
 
                 case SUGGESTION_RANGE_SPAN:
-                    readSpan(p, sp, new SuggestionRangeSpan());
+                    readSpan(p, sp, new SuggestionRangeSpan(p));
                     break;
                     
                 case EASY_EDIT_SPAN:
-                    readSpan(p, sp, new EasyEditSpan(p));
+                    readSpan(p, sp, new EasyEditSpan());
                     break;
 
                 default:
