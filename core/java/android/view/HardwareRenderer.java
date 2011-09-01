@@ -344,9 +344,9 @@ public abstract class HardwareRenderer {
         static final int EGL_SURFACE_TYPE = 0x3033;
         static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;        
 
-        private static final int SURFACE_STATE_ERROR = 0;
-        private static final int SURFACE_STATE_SUCCESS = 1;
-        private static final int SURFACE_STATE_UPDATED = 2;
+        static final int SURFACE_STATE_ERROR = 0;
+        static final int SURFACE_STATE_SUCCESS = 1;
+        static final int SURFACE_STATE_UPDATED = 2;
         
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
@@ -913,8 +913,7 @@ public abstract class HardwareRenderer {
 
         @Override
         void destroyLayers(View view) {
-            if (view != null && isEnabled()) {
-                checkCurrent();
+            if (view != null && isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) {
                 destroyHardwareLayer(view);
                 GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
             }
