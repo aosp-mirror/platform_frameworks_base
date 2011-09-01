@@ -2595,11 +2595,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     protected static int DEFAULT_TEXT_DIRECTION = TEXT_DIRECTION_INHERIT;
 
     /**
-     * Default threshold for "char count" heuristic.
-     */
-    protected static float DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD = 0.6f;
-
-    /**
      * The text direction that has been defined by {@link #setTextDirection(int)}.
      *
      * {@hide}

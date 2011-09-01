@@ -1594,7 +1594,7 @@ public class Paint {
     }
 
     /**
-     * Return the glypth Ids for the characters in the string.
+     * Return the glyph Ids for the characters in the string.
      *
      * @param text   The text to measure
      * @param start  The index of the first char to to measure
@@ -1613,7 +1613,7 @@ public class Paint {
      *
      * Used only for BiDi / RTL Tests
      */
-    public int getTextGlypths(String text, int start, int end, int contextStart, int contextEnd,
+    public int getTextGlyphs(String text, int start, int end, int contextStart, int contextEnd,
             int flags, char[] glyphs) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
