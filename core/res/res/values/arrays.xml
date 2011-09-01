@@ -356,7 +356,7 @@
         <item>@null</item>
     </array>
 
-    <array name="lockscreen_direction_descriptions_when_silent">
+    <array name="lockscreen_direction_descriptions">
         <item>@string/description_direction_right</item>
         <item>@null</item>
         <item>@string/description_direction_left</item>
@@ -377,13 +377,6 @@
         <item>@null</item>
     </array>
 
-    <array name="lockscreen_direction_descriptions_when_soundon">
-        <item>@string/description_direction_right</item>
-        <item>@null</item>
-        <item>@string/description_direction_left</item>
-        <item>@null</item>
-    </array>
-
     <array name="lockscreen_targets_with_camera">
         <item>@drawable/ic_lockscreen_unlock</item>
         <item>@null</item>
@@ -395,13 +388,6 @@
         <item>@string/description_target_unlock</item>
         <item>@null</item>
         <item>@string/description_target_camera</item>
-        <item>@null</item>
-    </array>
-
-    <array name="lockscreen_direction_descriptions_with_camera">
-        <item>@string/description_direction_right</item>
-        <item>@null</item>
-        <item>@string/description_direction_left</item>
         <item>@null</item>
     </array>
 
