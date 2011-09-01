@@ -23046,7 +23046,6 @@ package android.view {
     method public boolean willNotDraw();
     field public static android.util.Property ALPHA;
     field protected static int DEFAULT_TEXT_DIRECTION;
-    field protected static float DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
