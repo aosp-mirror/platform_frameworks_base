@@ -63,8 +63,8 @@ import android.text.TextDirectionHeuristic;
 import android.text.TextDirectionHeuristics;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.TextUtils.TruncateAt;
+import android.text.TextWatcher;
 import android.text.method.AllCapsTransformationMethod;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
@@ -82,7 +82,6 @@ import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.method.TransformationMethod2;
 import android.text.method.WordIterator;
-import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
 import android.text.style.EasyEditSpan;
 import android.text.style.ParagraphStyle;
@@ -131,6 +130,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.util.FastMath;
@@ -7868,7 +7868,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         protected void initContentView() {
-            mContentView.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout linearLayout = new LinearLayout(TextView.this.getContext());
+            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            mContentView = linearLayout;
             mContentView.setBackgroundResource(
                     com.android.internal.R.drawable.text_edit_side_paste_window);
 
@@ -8175,17 +8177,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         startStopMarquee(hasWindowFocus);
-    }
-
-    private void removeSpans(int start, int end, Class<?> type) {
-        if (mText instanceof Editable) {
-            Editable editable = ((Editable) mText);
-            Object[] spans = editable.getSpans(start, end, type);
-            final int length = spans.length;
-            for (int i = 0; i < length; i++) {
-                editable.removeSpan(spans[i]);
-            }
-        }
     }
 
     @Override
@@ -9326,7 +9317,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private abstract class PinnedPopupWindow implements TextViewPositionListener {
         protected PopupWindow mPopupWindow;
-        protected LinearLayout mContentView;
+        protected ViewGroup mContentView;
         int mPositionX, mPositionY;
 
         protected abstract void createPopupWindow();
@@ -9342,23 +9333,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
             mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            mContentView = new LinearLayout(TextView.this.getContext());
-            LayoutParams wrapContent = new LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            initContentView();
+
+            LayoutParams wrapContent = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
             mContentView.setLayoutParams(wrapContent);
 
-            initContentView();
             mPopupWindow.setContentView(mContentView);
         }
 
         public void show() {
-            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-            mContentView.measure(
-                    View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels,
-                            View.MeasureSpec.AT_MOST),
-                    View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels,
-                            View.MeasureSpec.AT_MOST));
-
             TextView.this.getPositionListener().addSubscriber(this, false);
 
             computeLocalPosition();
@@ -9366,11 +9350,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final PositionListener positionListener = TextView.this.getPositionListener();
             updatePosition(positionListener.getPositionX(), positionListener.getPositionY());
         }
+        
+        protected void measureContent() {
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            mContentView.measure(
+                    View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels,
+                            View.MeasureSpec.AT_MOST),
+                    View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels,
+                            View.MeasureSpec.AT_MOST));
+        }
 
+        /* The popup window will be horizontally centered on the getTextOffset() and vertically
+         * positioned according to viewportToContentHorizontalOffset.
+         * 
+         * This method assumes that mContentView has properly been measured from its content. */
         private void computeLocalPosition() {
-            final int offset = getTextOffset();
-
+            measureContent();
             final int width = mContentView.getMeasuredWidth();
+            final int offset = getTextOffset();
             mPositionX = (int) (mLayout.getPrimaryHorizontal(offset) - width / 2.0f);
             mPositionX += viewportToContentHorizontalOffset();
 
@@ -9418,42 +9415,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private static class SuggestionRangeSpan extends CharacterStyle {
-
-        private final int mTextColor;
-        private final int mBackgroundColor;
-
-        public SuggestionRangeSpan(Context context) {
-            TypedArray typedArray = context.obtainStyledAttributes(null,
-                    com.android.internal.R.styleable.SuggestionRangeSpan,
-                    com.android.internal.R.attr.textAppearanceSuggestionRange, 0);
-
-            mTextColor = typedArray.getColor(
-                    com.android.internal.R.styleable.SuggestionRangeSpan_textColor, 0);
-            mBackgroundColor = typedArray.getColor(
-                    com.android.internal.R.styleable.SuggestionRangeSpan_colorBackground, 0);
-        }
-
-        @Override
-        public void updateDrawState(TextPaint tp) {
-            if (mTextColor != 0) {
-                tp.setColor(mTextColor);
-            }
-
-            if (mBackgroundColor != 0) {
-                tp.bgColor = mBackgroundColor;
-            }
-        }
-    }
-
-    private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnClickListener {
+    private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
         private static final int NO_SUGGESTIONS = -1;
         private static final float AVERAGE_HIGHLIGHTS_PER_SUGGESTION = 1.4f;
         private WordIterator mSuggestionWordIterator;
         private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan
                 [(int) (AVERAGE_HIGHLIGHTS_PER_SUGGESTION * MAX_NUMBER_SUGGESTIONS)];
+        private SuggestionInfo[] mSuggestionInfos;
+        private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
+        private SuggestionAdapter mSuggestionsAdapter;
 
         private class CustomPopupWindow extends PopupWindow {
             public CustomPopupWindow(Context context, int defStyle) {
@@ -9494,29 +9466,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         protected void initContentView() {
-            mContentView.setOrientation(LinearLayout.VERTICAL);
-
-            LayoutInflater inflater = (LayoutInflater) TextView.this.mContext.
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-            if (inflater == null) {
-                throw new IllegalArgumentException(
-                        "Unable to create inflater for TextEdit suggestions");
-            }
+            ListView listView = new ListView(TextView.this.getContext());
+            mSuggestionsAdapter = new SuggestionAdapter();
+            listView.setAdapter(mSuggestionsAdapter);
+            listView.setOnItemClickListener(this);
+            mContentView = listView;
 
             // Inflate the suggestion items once and for all.
+            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS];
             for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
-                View childView = inflater.inflate(mTextEditSuggestionItemLayout,
-                        mContentView, false);
-
-                if (! (childView instanceof TextView)) {
-                    throw new IllegalArgumentException(
-                            "Inflated TextEdit suggestion item is not a TextView: " + childView);
-                }
-
-                childView.setTag(new SuggestionInfo());
-                mContentView.addView(childView);
-                childView.setOnClickListener(this);
+                mSuggestionInfos[i] = new SuggestionInfo();
             }
         }
 
@@ -9525,6 +9484,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int spanStart, spanEnd; // range in TextView where text should be inserted
             SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
             int suggestionIndex; // the index of the suggestion inside suggestionSpan
+            SpannableStringBuilder text = new SpannableStringBuilder();
+        }
+
+        private class SuggestionAdapter extends BaseAdapter {
+            private LayoutInflater mInflater = (LayoutInflater) TextView.this.mContext.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            @Override
+            public int getCount() {
+                return mNumberOfSuggestions;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return mSuggestionInfos[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView textView = (TextView) convertView;
+
+                if (textView == null) {
+                    textView = (TextView) mInflater.inflate(mTextEditSuggestionItemLayout, parent,
+                            false);
+                }
+
+                textView.setText(mSuggestionInfos[position].text);
+                return textView;
+            }
         }
 
         /**
@@ -9569,6 +9562,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
+        protected void measureContent() {
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            final int horizontalMeasure = View.MeasureSpec.makeMeasureSpec(
+                    displayMetrics.widthPixels, View.MeasureSpec.AT_MOST);
+            final int verticalMeasure = View.MeasureSpec.makeMeasureSpec(
+                    displayMetrics.heightPixels, View.MeasureSpec.AT_MOST);
+            
+            int width = 0;
+            View view = null;
+            for (int i = 0; i < mNumberOfSuggestions; i++) {
+                view = mSuggestionsAdapter.getView(i, view, mContentView);
+                view.measure(horizontalMeasure, verticalMeasure);
+                width = Math.max(width, view.getMeasuredWidth());
+            }
+
+            // Enforce the width based on actual text widths
+            mContentView.measure(
+                    View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                    verticalMeasure);
+
+            Drawable popupBackground = mPopupWindow.getBackground();
+            if (popupBackground != null) {
+                if (mTempRect == null) mTempRect = new Rect();
+                popupBackground.getPadding(mTempRect);
+                width += mTempRect.left + mTempRect.right;
+            }
+            mPopupWindow.setWidth(width);
+        }
+
+        @Override
         protected int getTextOffset() {
             return getSelectionStart();
         }
@@ -9596,7 +9619,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             final int nbSpans = suggestionSpans.length;
 
-            int totalNbSuggestions = 0;
+            mNumberOfSuggestions = 0;
             int spanUnionStart = mText.length();
             int spanUnionEnd = 0;
 
@@ -9610,17 +9633,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
-                    TextView textView = (TextView) mContentView.getChildAt(
-                            totalNbSuggestions);
-                    textView.setText(suggestions[suggestionIndex]);
-                    SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+                    SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
                     suggestionInfo.spanStart = spanStart;
                     suggestionInfo.spanEnd = spanEnd;
                     suggestionInfo.suggestionSpan = suggestionSpan;
                     suggestionInfo.suggestionIndex = suggestionIndex;
+                    suggestionInfo.text = new SpannableStringBuilder(suggestions[suggestionIndex]);
 
-                    totalNbSuggestions++;
-                    if (totalNbSuggestions == MAX_NUMBER_SUGGESTIONS) {
+                    mNumberOfSuggestions++;
+                    if (mNumberOfSuggestions == MAX_NUMBER_SUGGESTIONS) {
                         // Also end outer for loop
                         spanIndex = nbSpans;
                         break;
@@ -9628,31 +9649,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
-            if (totalNbSuggestions == 0) return false;
+            if (mNumberOfSuggestions == 0) return false;
 
-            if (mSuggestionRangeSpan == null) {
-                mSuggestionRangeSpan = new SuggestionRangeSpan(getContext());
-            }
-            
-            ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan =
+                    new SuggestionRangeSpan(mHighlightColor);
 
-            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = 
-                    new SuggestionRangeSpan(getContext());
             ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            for (int i = 0; i < totalNbSuggestions; i++) {
-                final TextView textView = (TextView) mContentView.getChildAt(i);
-                highlightTextDifferences(textView, spanUnionStart, spanUnionEnd);
+            for (int i = 0; i < mNumberOfSuggestions; i++) {
+                highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
             }
-
-            for (int i = 0; i < totalNbSuggestions; i++) {
-                mContentView.getChildAt(i).setVisibility(VISIBLE);
-            }
-            for (int i = totalNbSuggestions; i < MAX_NUMBER_SUGGESTIONS; i++) {
-                mContentView.getChildAt(i).setVisibility(GONE);
-            }
+            mSuggestionsAdapter.notifyDataSetChanged();
 
             return true;
         }
@@ -9719,13 +9727,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return highlightSpan;
         }
 
-        private void highlightTextDifferences(TextView textView, int unionStart, int unionEnd) {
-            SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+        private void highlightTextDifferences(SuggestionInfo suggestionInfo,
+                int unionStart, int unionEnd) {
             final int spanStart = suggestionInfo.spanStart;
             final int spanEnd = suggestionInfo.spanEnd;
 
             // Remove all text formating by converting to Strings
-            final String text = textView.getText().toString();
+            final String text = suggestionInfo.text.toString();
             final String sourceText = mText.subSequence(spanStart, spanEnd).toString();
 
             long[] sourceWordLimits = getWordLimits(sourceText);
@@ -9800,7 +9808,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (previousCommonWordIndex < words.length - 1) {
                 int firstDifferentPosition = previousCommonWordIndex < 0 ? 0 :
                     extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
-                int lastDifferentPosition = textView.length();
+                int lastDifferentPosition = text.length();
                 ssb.setSpan(highlightSpan(nbHighlightSpans++),
                         shift + firstDifferentPosition, shift + lastDifferentPosition,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -9811,25 +9819,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 int lastCommonTextWordEnd = previousCommonWordIndex < 0 ? 0 :
                     extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
-                String textSpaces = text.substring(lastCommonTextWordEnd, textView.length());
+                String textSpaces = text.substring(lastCommonTextWordEnd, text.length());
 
                 if (!sourceSpaces.equals(textSpaces) && textSpaces.length() > 0) {
                     ssb.setSpan(highlightSpan(nbHighlightSpans++),
-                            shift + lastCommonTextWordEnd, shift + textView.length(),
+                            shift + lastCommonTextWordEnd, shift + text.length(),
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
 
             // Final part, text after the current suggestion range.
             ssb.append(mText.subSequence(spanEnd, unionEnd).toString());
-            textView.setText(ssb);
         }
 
         @Override
-        public void onClick(View view) {
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
-                SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+                SuggestionInfo suggestionInfo = mSuggestionInfos[position];
                 final int spanStart = suggestionInfo.spanStart;
                 final int spanEnd = suggestionInfo.spanEnd;
                 if (spanStart != NO_SUGGESTIONS) {
@@ -10190,9 +10197,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         protected void initContentView() {
-            mContentView.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout linearLayout = new LinearLayout(TextView.this.getContext());
+            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            mContentView = linearLayout;
             mContentView.setBackgroundResource(
-                    com.android.internal.R.drawable.text_edit_side_paste_window);
+                    com.android.internal.R.drawable.text_edit_paste_window);
 
             LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -11282,7 +11291,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final TextPaint         mTextPaint;
     private boolean                 mUserSetTextScaleX;
     private final Paint             mHighlightPaint;
-    private int                     mHighlightColor = 0xCC475925;
+    private int                     mHighlightColor = 0x4C33B5E5;
     /**
      * This is temporarily visible to fix bug 3085564 in webView. Do not rely on
      * this field being protected. Will be restored as private when lineHeight

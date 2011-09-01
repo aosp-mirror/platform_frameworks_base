@@ -16,7 +16,6 @@
 
 package android.text.style;
 
-import android.graphics.Color;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
@@ -29,12 +28,20 @@ import android.text.TextUtils;
  * @hide
  */
 public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpan {
+    private final int mBackgroundColor;
+
     @Override
     public void updateDrawState(TextPaint tp) {
-        tp.setColor(Color.GREEN);            
+        tp.bgColor = mBackgroundColor;
     }
 
-    public SuggestionRangeSpan() { /* Nothing to do*/ }
+    public SuggestionRangeSpan(int color) {
+        mBackgroundColor = color;
+    }
+
+    public SuggestionRangeSpan(Parcel src) {
+        mBackgroundColor = src.readInt();
+    }
 
     @Override
     public int describeContents() {
@@ -42,7 +49,9 @@ public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpa
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) { /* Nothing to do*/ }
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mBackgroundColor);
+    }
 
     @Override
     public int getSpanTypeId() {

@@ -158,10 +158,6 @@
         <!-- The underline color and thickness for misspelled suggestion -->
         <attr name="textAppearanceMisspelledSuggestion" format="reference" />
 
-        <!-- The text color and the background for suggestion range span. This span identifies the
-        portion of text the suggestions refer to). -->
-        <attr name="textAppearanceSuggestionRange" format="reference" />
-
         <!--  The underline color -->
         <attr name="textUnderlineColor" format="reference|color" />
         <!--  The underline thickness -->
@@ -3153,10 +3149,6 @@
     <declare-styleable name="SuggestionSpan">
         <attr name="textUnderlineColor" />
         <attr name="textUnderlineThickness" />
-    </declare-styleable>
-    <declare-styleable name="SuggestionRangeSpan">
-        <attr name="textColor" />
-        <attr name="colorBackground" />
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains

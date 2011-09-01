@@ -1,4 +1,18 @@
-// Copyright 2011 Google Inc. All Rights Reserved.
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package android.widget;
 
@@ -32,7 +46,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private final TextView mTextView;
 
-    final SpellCheckerSession spellCheckerSession;
+    final SpellCheckerSession mSpellCheckerSession;
     final int mCookie;
 
     // Paired arrays for the (id, spellCheckSpan) pair. mIndex is the next available position
@@ -49,7 +63,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         final TextServicesManager textServicesManager = (TextServicesManager) textView.getContext().
                 getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        spellCheckerSession = textServicesManager.newSpellCheckerSession(
+        mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
                 null /* not currently used by the textServicesManager */, Locale.getDefault(),
                 this, true /* means use the languages defined in Settings */);
         mCookie = hashCode();
@@ -112,7 +126,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private void scheduleSpellCheck() {
         if (mLength == 0) return;
-        if (spellCheckerSession == null) return;
+        if (mSpellCheckerSession == null) return;
 
         if (mChecker != null) {
             mTextView.removeCallbacks(mChecker);
@@ -157,7 +171,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 System.arraycopy(textInfos, 0, textInfosCopy, 0, textInfosCount);
                 textInfos = textInfosCopy;
             }
-            spellCheckerSession.getSuggestions(textInfos, SuggestionSpan.SUGGESTIONS_MAX_SIZE,
+            mSpellCheckerSession.getSuggestions(textInfos, SuggestionSpan.SUGGESTIONS_MAX_SIZE,
                     false /* TODO Set sequentialWords to true for initial spell check */);
         }
     }
