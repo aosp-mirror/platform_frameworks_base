@@ -703,6 +703,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return result.toArray(new NetworkInfo[result.size()]);
     }
 
+    @Override
+    public boolean isNetworkSupported(int networkType) {
+        enforceAccessPermission();
+        return (isNetworkTypeValid(networkType) && (mNetTrackers[networkType] != null));
+    }
+
     /**
      * Return LinkProperties for the active (i.e., connected) default
      * network interface.  It is assumed that at most one default network

@@ -130,6 +130,8 @@ public class NetworkController extends BroadcastReceiver {
     int mLastDataTypeIconId = -1;
     String mLastLabel = "";
 
+    private boolean mHasMobileDataFeature;
+
     boolean mDataAndWifiStacked = false;
 
     // yuck -- stop doing this here and put it in the framework
@@ -146,6 +148,10 @@ public class NetworkController extends BroadcastReceiver {
      */
     public NetworkController(Context context) {
         mContext = context;
+
+        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        mHasMobileDataFeature = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
 
         // set up the default wifi icon, used when no radios have ever appeared
         updateWifiIcons();
@@ -229,7 +235,7 @@ public class NetworkController extends BroadcastReceiver {
                 mWifiIconId,
                 mWifiActivityIconId);
         cluster.setMobileDataIndicators(
-                hasMobileDataFeature(),
+                mHasMobileDataFeature,
                 mPhoneSignalIconId,
                 mMobileActivityIconId,
                 mDataTypeIconId);
@@ -375,12 +381,6 @@ public class NetworkController extends BroadcastReceiver {
             return false;
         }
     }
-
-    private boolean hasMobileDataFeature() {
-        // XXX: HAX: replace when a more reliable method is available
-        return (! "wifi-only".equals(SystemProperties.get("ro.carrier")));
-    }
-
 
     private void updateAirplaneMode() {
         mAirplaneMode = (Settings.System.getInt(mContext.getContentResolver(),
@@ -828,8 +828,8 @@ public class NetworkController extends BroadcastReceiver {
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             // On devices without mobile radios, we want to show the wifi icon
             combinedSignalIconId =
-                hasMobileDataFeature() ? mDataSignalIconId : mWifiIconId;
-            mContentDescriptionCombinedSignal = hasMobileDataFeature()
+                mHasMobileDataFeature ? mDataSignalIconId : mWifiIconId;
+            mContentDescriptionCombinedSignal = mHasMobileDataFeature
                 ? mContentDescriptionDataType : mContentDescriptionWifi;
             mDataTypeIconId = 0;
         }
@@ -866,7 +866,7 @@ public class NetworkController extends BroadcastReceiver {
                         mWifiIconId,
                         mWifiActivityIconId);
                 cluster.setMobileDataIndicators(
-                        hasMobileDataFeature(),
+                        mHasMobileDataFeature,
                         mPhoneSignalIconId,
                         mMobileActivityIconId,
                         mDataTypeIconId);

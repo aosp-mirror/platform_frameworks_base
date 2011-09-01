@@ -352,7 +352,6 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "Wi-Fi Service");
                 wifi = new WifiService(context);
                 ServiceManager.addService(Context.WIFI_SERVICE, wifi);
-                wifi.checkAndStartWifi();
             } catch (Throwable e) {
                 reportWtf("starting Wi-Fi Service", e);
             }
@@ -363,6 +362,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
                 networkStats.bindConnectivityManager(connectivity);
                 networkPolicy.bindConnectivityManager(connectivity);
+                wifi.checkAndStartWifi();
                 wifiP2p.connectivityServiceReady();
             } catch (Throwable e) {
                 reportWtf("starting Connectivity Service", e);
