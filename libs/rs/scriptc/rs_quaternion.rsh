@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/** @file rs_matrix.rsh
+/** @file rs_quaternion.rsh
  *  \brief Quaternion routines
  *
  *
