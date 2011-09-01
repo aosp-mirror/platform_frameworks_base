@@ -4308,6 +4308,9 @@ public class WebView extends AbsoluteLayout
     }
 
     int getBaseLayer() {
+        if (mNativeClass == 0) {
+            return 0;
+        }
         return nativeGetBaseLayer();
     }
 
