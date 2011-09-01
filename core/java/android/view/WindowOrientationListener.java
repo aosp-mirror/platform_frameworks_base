@@ -332,7 +332,7 @@ public abstract class WindowOrientationListener {
         // we perform an orientation change under ideal conditions.  It will take
         // proportionally longer than this to effect an orientation change when
         // the proposed orientation confidence is low.
-        private static final float ORIENTATION_SETTLE_TIME_MS = 100;
+        private static final float ORIENTATION_SETTLE_TIME_MS = 250;
 
         // The confidence that we have abount effecting each orientation change.
         // When one of these values exceeds 1.0, we have determined our new orientation!
