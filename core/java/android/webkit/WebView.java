@@ -34,7 +34,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.CornerPathEffect;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
@@ -58,8 +57,6 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
-import android.text.Selection;
-import android.text.Spannable;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -606,9 +603,15 @@ public class WebView extends AbsoluteLayout
     // know to handle Shift and arrows natively first
     private boolean mAccessibilityScriptInjected;
 
+    static final boolean USE_JAVA_TEXT_SELECTION = true;
+    private Region mTextSelectionRegion = new Region();
+    private Paint mTextSelectionPaint;
+    private Drawable mSelectHandleLeft;
+    private Drawable mSelectHandleRight;
+
     static final boolean USE_WEBKIT_RINGS = true;
     // the color used to highlight the touch rectangles
-    private static final int mHightlightColor = 0x6633b5e5;
+    private static final int HIGHLIGHT_COLOR = 0x6633b5e5;
     // the round corner for the highlight path
     private static final float TOUCH_HIGHLIGHT_ARC = 5.0f;
     // the region indicating where the user touched on the screen
@@ -4050,8 +4053,10 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // if mNativeClass is 0, the WebView has been destroyed. Do nothing.
+        // if mNativeClass is 0, the WebView is either destroyed or not
+        // initialized. In either case, just draw the background color and return
         if (mNativeClass == 0) {
+            canvas.drawColor(mBackgroundColor);
             return;
         }
 
@@ -4105,7 +4110,7 @@ public class WebView extends AbsoluteLayout
             } else {
                 if (mTouchHightlightPaint == null) {
                     mTouchHightlightPaint = new Paint();
-                    mTouchHightlightPaint.setColor(mHightlightColor);
+                    mTouchHightlightPaint.setColor(HIGHLIGHT_COLOR);
                 }
                 RegionIterator iter = new RegionIterator(mTouchHighlightRegion);
                 Rect r = new Rect();
@@ -4400,7 +4405,7 @@ public class WebView extends AbsoluteLayout
         int extras = DRAW_EXTRAS_NONE;
         if (mFindIsUp) {
             extras = DRAW_EXTRAS_FIND;
-        } else if (mSelectingText) {
+        } else if (mSelectingText && !USE_JAVA_TEXT_SELECTION) {
             extras = DRAW_EXTRAS_SELECTION;
             nativeSetSelectionPointer(mDrawSelectionPointer,
                     mZoomManager.getInvScale(),
@@ -4425,6 +4430,10 @@ public class WebView extends AbsoluteLayout
             if (mHardwareAccelSkia != getSettings().getHardwareAccelSkiaEnabled()) {
                 mHardwareAccelSkia = getSettings().getHardwareAccelSkiaEnabled();
                 nativeUseHardwareAccelSkia(mHardwareAccelSkia);
+            }
+
+            if (mSelectingText && USE_JAVA_TEXT_SELECTION) {
+                drawTextSelectionHandles(canvas);
             }
 
         } else {
@@ -4459,6 +4468,56 @@ public class WebView extends AbsoluteLayout
                 didUpdateWebTextViewDimensions(ANYWHERE);
             }
         }
+    }
+
+    private void drawTextSelectionHandles(Canvas canvas) {
+        if (mTextSelectionPaint == null) {
+            mTextSelectionPaint = new Paint();
+            mTextSelectionPaint.setColor(HIGHLIGHT_COLOR);
+        }
+        mTextSelectionRegion.setEmpty();
+        nativeGetTextSelectionRegion(mTextSelectionRegion);
+        Rect r = new Rect();
+        RegionIterator iter = new RegionIterator(mTextSelectionRegion);
+        int start_x = -1;
+        int start_y = -1;
+        int end_x = -1;
+        int end_y = -1;
+        while (iter.next(r)) {
+            r = new Rect(
+                    contentToViewDimension(r.left),
+                    contentToViewDimension(r.top),
+                    contentToViewDimension(r.right),
+                    contentToViewDimension(r.bottom));
+            // Regions are in order. First one is where selection starts,
+            // last one is where it ends
+            if (start_x < 0 || start_y < 0) {
+                start_x = r.left;
+                start_y = r.bottom;
+            }
+            end_x = r.right;
+            end_y = r.bottom;
+            canvas.drawRect(r, mTextSelectionPaint);
+        }
+        if (mSelectHandleLeft == null) {
+            mSelectHandleLeft = mContext.getResources().getDrawable(
+                    com.android.internal.R.drawable.text_select_handle_left);
+        }
+        // Magic formula copied from TextView
+        start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
+        mSelectHandleLeft.setBounds(start_x, start_y,
+                start_x + mSelectHandleLeft.getIntrinsicWidth(),
+                start_y + mSelectHandleLeft.getIntrinsicHeight());
+        if (mSelectHandleRight == null) {
+            mSelectHandleRight = mContext.getResources().getDrawable(
+                    com.android.internal.R.drawable.text_select_handle_right);
+        }
+        end_x -= mSelectHandleRight.getIntrinsicWidth() / 4;
+        mSelectHandleRight.setBounds(end_x, end_y,
+                end_x + mSelectHandleRight.getIntrinsicWidth(),
+                end_y + mSelectHandleRight.getIntrinsicHeight());
+        mSelectHandleLeft.draw(canvas);
+        mSelectHandleRight.draw(canvas);
     }
 
     // draw history
@@ -9329,4 +9388,5 @@ public class WebView extends AbsoluteLayout
     private native int      nativeGetBackgroundColor();
     native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
+    private native void     nativeGetTextSelectionRegion(Region region);
 }
