@@ -3138,13 +3138,13 @@
     <string name="content_description_sliding_handle">"Sliding handle. Tap and hold."</string>
 
     <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_up">"Up</string>
+    <string name="description_direction_up">Up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
     <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_down">Down</string>
+    <string name="description_direction_down">Down for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
     <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_left">"Left</string>
+    <string name="description_direction_left">"Left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
     <!-- Description of the right direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_right">Right</string>
+    <string name="description_direction_right">Right for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
     <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_target_unlock">Unlock</string>

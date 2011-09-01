@@ -902,13 +902,13 @@ public class MultiWaveView extends View {
             String directionDescription = getDirectionDescription(i);
             if (!TextUtils.isEmpty(targetDescription)
                     && !TextUtils.isEmpty(directionDescription)) {
-                utterance.append(targetDescription);
-                utterance.append(" ");
-                utterance.append(directionDescription);
-                utterance.append(".");
+                String text = String.format(directionDescription, targetDescription);
+                utterance.append(text);
+            }
+            if (utterance.length() > 0) {
+                announceText(utterance.toString());
             }
         }
-        announceText(utterance.toString());
     }
 
     private void announceText(String text) {
