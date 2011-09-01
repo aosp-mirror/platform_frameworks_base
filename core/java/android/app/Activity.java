@@ -4471,9 +4471,12 @@ public class Activity extends ContextThemeWrapper
                     ManagedCursor mc = mManagedCursors.get(i);
                     if (mc.mReleased || mc.mUpdated) {
                         if (!mc.mCursor.requery()) {
-                            throw new IllegalStateException(
-                                    "trying to requery an already closed cursor  "
-                                    + mc.mCursor);
+                            if (getApplicationInfo().targetSdkVersion
+                                    >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                                throw new IllegalStateException(
+                                        "trying to requery an already closed cursor  "
+                                        + mc.mCursor);
+                            }
                         }
                         mc.mReleased = false;
                         mc.mUpdated = false;
