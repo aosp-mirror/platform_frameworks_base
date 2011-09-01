@@ -949,29 +949,34 @@ public class TabletStatusBar extends StatusBar implements
                 mTicker.halt();
             }
         }
-        if ((diff & StatusBarManager.DISABLE_NAVIGATION) != 0) {
-            if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
-                Slog.i(TAG, "DISABLE_NAVIGATION: yes");
-                mNavigationArea.setVisibility(View.INVISIBLE);
-                mInputMethodSwitchButton.setScreenLocked(true);
-            } else {
-                Slog.i(TAG, "DISABLE_NAVIGATION: no");
-                mNavigationArea.setVisibility(View.VISIBLE);
-                mInputMethodSwitchButton.setScreenLocked(false);
-            }
+        if ((diff & (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK)) != 0) {
+            setNavigationVisibility(state &
+                    (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK));
         }
-        if ((diff & StatusBarManager.DISABLE_BACK) != 0) {
-            if ((state & StatusBarManager.DISABLE_BACK) != 0) {
-                Slog.i(TAG, "DISABLE_BACK: yes");
-                mBackButton.setEnabled(false);
-                mInputMethodSwitchButton.setScreenLocked(true);
-            } else {
-                Slog.i(TAG, "DISABLE_BACK: no");
-                mBackButton.setEnabled(true);
-                mInputMethodSwitchButton.setScreenLocked(false);
-            }
+    }
+
+    private void setNavigationVisibility(int visibility) {
+        boolean disableNavigation = ((visibility & StatusBarManager.DISABLE_NAVIGATION) != 0);
+        boolean disableBack = ((visibility & StatusBarManager.DISABLE_BACK) != 0);
+
+        Slog.i(TAG, "DISABLE_BACK: " + (disableBack ? "yes" : "no"));
+        Slog.i(TAG, "DISABLE_NAVIGATION: " + (disableNavigation ? "yes" : "no"));
+
+        if (disableNavigation && disableBack) {
+            mNavigationArea.setVisibility(View.INVISIBLE);
+        } else {
+            int backVisiblity = (disableBack ? View.INVISIBLE : View.VISIBLE);
+            int navVisibility = (disableNavigation ? View.INVISIBLE : View.VISIBLE);
+
+            mBackButton.setVisibility(backVisiblity);
+            mHomeButton.setVisibility(navVisibility);
+            mRecentButton.setVisibility(navVisibility);
+            // don't change menu button visibility here
+
+            mNavigationArea.setVisibility(View.VISIBLE);
         }
 
+        mInputMethodSwitchButton.setScreenLocked(disableNavigation);
     }
 
     private boolean hasTicker(Notification n) {
