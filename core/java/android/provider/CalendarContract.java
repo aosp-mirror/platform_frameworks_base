@@ -599,7 +599,7 @@ public final class CalendarContract {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "displayName";
+        public static final String DEFAULT_SORT_ORDER = CALENDAR_DISPLAY_NAME;
 
         /**
          * The name of the calendar. Column name.
