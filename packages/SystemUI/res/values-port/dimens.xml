@@ -17,8 +17,6 @@
 -->
 <resources>
     <!-- Recent Applications parameters -->
-    <!-- Width of a recent app view, including all content -->
-    <dimen name="status_bar_recents_thumbnail_view_width">156dp</dimen>
     <!-- How far the thumbnail for a recent app appears from left edge -->
     <dimen name="status_bar_recents_thumbnail_left_margin">110dp</dimen>
     <!-- Width of scrollable area in recents -->

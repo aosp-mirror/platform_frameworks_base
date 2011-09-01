@@ -380,7 +380,7 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     protected WindowManager.LayoutParams getRecentsLayoutParams(LayoutParams layoutParams) {
-        boolean translucent = false;
+        boolean opaque = false;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 layoutParams.width,
                 layoutParams.height,
@@ -388,7 +388,7 @@ public class PhoneStatusBar extends StatusBar {
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                (translucent ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
+                (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
         if (ActivityManager.isHighEndGfx(mDisplay)) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }
