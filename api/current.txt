@@ -15624,7 +15624,7 @@ package android.provider {
   public static final class CalendarContract.Calendars implements android.provider.BaseColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.SyncColumns {
     field public static final java.lang.String CALENDAR_LOCATION = "calendar_location";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String DEFAULT_SORT_ORDER = "displayName";
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "calendar_displayName";
     field public static final java.lang.String NAME = "name";
   }
 
