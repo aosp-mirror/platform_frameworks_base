@@ -6052,23 +6052,29 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #onHoverChanged
      */
     public boolean onHoverEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_HOVER_ENTER:
-                if (!hasHoveredChild() && !mSendingHoverAccessibilityEvents) {
-                    mSendingHoverAccessibilityEvents = true;
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
-                }
-                break;
-            case MotionEvent.ACTION_HOVER_EXIT:
-                if (mSendingHoverAccessibilityEvents) {
-                    mSendingHoverAccessibilityEvents = false;
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-                }
-                break;
+        // The root view may receive hover (or touch) events that are outside the bounds of
+        // the window.  This code ensures that we only send accessibility events for
+        // hovers that are actually within the bounds of the root view.
+        final int action = event.getAction();
+        if (!mSendingHoverAccessibilityEvents) {
+            if ((action == MotionEvent.ACTION_HOVER_ENTER
+                    || action == MotionEvent.ACTION_HOVER_MOVE)
+                    && !hasHoveredChild()
+                    && pointInView(event.getX(), event.getY())) {
+                mSendingHoverAccessibilityEvents = true;
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+            }
+        } else {
+            if (action == MotionEvent.ACTION_HOVER_EXIT
+                    || (action == MotionEvent.ACTION_HOVER_MOVE
+                            && !pointInView(event.getX(), event.getY()))) {
+                mSendingHoverAccessibilityEvents = false;
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            }
         }
 
         if (isHoverable()) {
-            switch (event.getAction()) {
+            switch (action) {
                 case MotionEvent.ACTION_HOVER_ENTER:
                     setHovered(true);
                     break;
