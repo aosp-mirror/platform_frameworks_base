@@ -23,6 +23,7 @@ struct Options
     string outputFileName;
     string outputBaseFolder;
     string depFileName;
+    bool autoDepFile;
 
     vector<string> filesToPreprocess;
 };
