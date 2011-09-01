@@ -20,8 +20,6 @@
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_width</dimen>
 
     <!-- Recent Applications parameters -->
-    <!-- Width of a recent app view, including all content -->
-    <dimen name="status_bar_recents_thumbnail_view_width">156dp</dimen>
     <!-- How far the thumbnail for a recent app appears from left edge -->
     <dimen name="status_bar_recents_thumbnail_left_margin">8dp</dimen>
     <!-- How far the thumbnail for a recent app appears from top edge -->
@@ -31,7 +29,7 @@
     <!-- Padding for text descriptions -->
     <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
     <!-- Width of application label text -->
-    <dimen name="status_bar_recents_app_label_width">97dip</dimen>
+    <dimen name="status_bar_recents_app_label_width">156dip</dimen>
     <!-- Left margin of application label text -->
     <dimen name="status_bar_recents_app_label_left_margin">16dip</dimen>
     <!-- Margin between recents container and glow on the right -->

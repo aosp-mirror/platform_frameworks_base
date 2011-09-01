@@ -19,10 +19,10 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<RelativeLayout
+<RelativeLayout android:id="@+id/recent_item"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
-    android:layout_width="@dimen/status_bar_recents_thumbnail_view_width">
+    android:layout_width="wrap_content">
 
     <FrameLayout android:id="@+id/app_thumbnail"
         android:layout_width="wrap_content"
