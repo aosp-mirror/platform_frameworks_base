@@ -2445,7 +2445,7 @@ public final class WebViewCore {
                     if (mSettings.isNarrowColumnLayout()) {
                         // In case of automatic text reflow in fixed view port mode.
                         mInitialViewState.mTextWrapScale =
-                                ZoomManager.computeReadingLevelScale(data.mScale);
+                                mWebView.getReadingLevelScale();
                     }
                 } else {
                     // Scale is given such as when page is restored, use it.

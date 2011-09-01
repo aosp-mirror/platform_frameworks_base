@@ -2343,6 +2343,14 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Return the reading level scale of the WebView
+     * @return The reading level scale.
+     */
+    /*package*/ float getReadingLevelScale() {
+        return mZoomManager.getReadingLevelScale();
+    }
+
+    /**
      * Set the initial scale for the WebView. 0 means default. If
      * {@link WebSettings#getUseWideViewPort()} is true, it zooms out all the
      * way. Otherwise it starts with 100%. If initial scale is greater than 0,
