@@ -36,6 +36,8 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     DataSetObservable mDataSetObservable = new DataSetObservable();
     ContentObservable mContentObservable = new ContentObservable();
 
+    Bundle mExtras = Bundle.EMPTY;
+
     /* -------------------------------------------------------- */
     /* These need to be implemented by subclasses */
     abstract public int getCount();
@@ -71,11 +73,11 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     public int getColumnCount() {
         return getColumnNames().length;
     }
-    
+
     public void deactivate() {
         deactivateInternal();
     }
-    
+
     /**
      * @hide
      */
@@ -99,7 +101,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     public boolean isClosed() {
         return mClosed;
     }
-    
+
     public void close() {
         mClosed = true;
         mContentObservable.unregisterAll();
@@ -120,7 +122,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return true;
     }
 
-    
+
     public void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer) {
         // Default implementation, uses getString
         String result = getString(columnIndex);
@@ -136,7 +138,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             buffer.sizeCopied = 0;
         }
     }
-    
+
     /* -------------------------------------------------------- */
     /* Implementation */
     public AbstractCursor() {
@@ -181,7 +183,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
 
         return result;
     }
-    
+
     /**
      * Copy data from cursor to CursorWindow
      * @param position start position of data
@@ -199,7 +201,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             window.setStartPosition(position);
             int columnNum = getColumnCount();
             window.setNumColumns(columnNum);
-            while (moveToNext() && window.allocRow()) {            
+            while (moveToNext() && window.allocRow()) {
                 for (int i = 0; i < columnNum; i++) {
                     String field = getString(i);
                     if (field != null) {
@@ -215,7 +217,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
                     }
                 }
             }
-            
+
             mPos = oldpos;
         } catch (IllegalStateException e){
             // simply ignore it
@@ -314,7 +316,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             mContentObservable.unregisterObserver(observer);
         }
     }
-    
+
     /**
      * This is hidden until the data set change model has been re-evaluated.
      * @hide
@@ -322,14 +324,14 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     protected void notifyDataSetChange() {
         mDataSetObservable.notifyChanged();
     }
-    
+
     /**
      * This is hidden until the data set change model has been re-evaluated.
      * @hide
      */
     protected DataSetObservable getDataSetObservable() {
         return mDataSetObservable;
-        
+
     }
 
     public void registerDataSetObserver(DataSetObserver observer) {
@@ -383,8 +385,19 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return false;
     }
 
+    /**
+     * Sets a {@link Bundle} that will be returned by {@link #getExtras()}.  <code>null</code> will
+     * be converted into {@link Bundle#EMPTY}.
+     *
+     * @param extras {@link Bundle} to set.
+     * @hide
+     */
+    public void setExtras(Bundle extras) {
+        mExtras = (extras == null) ? Bundle.EMPTY : extras;
+    }
+
     public Bundle getExtras() {
-        return Bundle.EMPTY;
+        return mExtras;
     }
 
     public Bundle respond(Bundle extras) {
