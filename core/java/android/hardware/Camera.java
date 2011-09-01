@@ -1468,6 +1468,7 @@ public class Camera {
         private static final String KEY_MAX_NUM_DETECTED_FACES_HW = "max-num-detected-faces-hw";
         private static final String KEY_MAX_NUM_DETECTED_FACES_SW = "max-num-detected-faces-sw";
         private static final String KEY_RECORDING_HINT = "recording-hint";
+        private static final String KEY_VIDEO_SNAPSHOT_SUPPORTED = "video-snapshot-supported";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -3208,6 +3209,35 @@ public class Camera {
          */
         public void setRecordingHint(boolean hint) {
             set(KEY_RECORDING_HINT, hint ? TRUE : FALSE);
+        }
+
+        /**
+         * Returns true if video snapshot is supported. That is, applications
+         * can call {@link #takePicture(Camera.ShutterCallback,
+         * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}
+         * during recording. Applications do not need to call {@link
+         * #startPreview()} after taking a picture. The preview will be still
+         * active. Other than that, taking a picture during recording is
+         * identical to taking a picture normally. All settings and methods
+         * related to takePicture work identically. Ex: {@link
+         * #getPictureSize()}, {@link #getSupportedPictureSizes()}, {@link
+         * #setJpegQuality(int)}, {@link #setRotation(int)}, and etc. The
+         * picture will have an EXIF header. {@link #FLASH_MODE_AUTO} and {@link
+         * #FLASH_MODE_ON} also still work, but the video will record the flash.
+         *
+         * Applications can set shutter callback as null to avoid the shutter
+         * sound. It is also recommended to set raw picture and post view
+         * callbacks to null to avoid the interrupt of preview display.
+         *
+         * Field-of-view of the recorded video may be different from that of the
+         * captured pictures.
+         *
+         * @return true if video snapshot is supported.
+         * @hide
+         */
+        public boolean isVideoSnapshotSupported() {
+            String str = get(KEY_VIDEO_SNAPSHOT_SUPPORTED);
+            return TRUE.equals(str);
         }
 
         // Splits a comma delimited string to an ArrayList of String.

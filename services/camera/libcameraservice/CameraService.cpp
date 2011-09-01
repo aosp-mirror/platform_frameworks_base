@@ -769,11 +769,6 @@ status_t CameraService::Client::takePicture(int msgType) {
     status_t result = checkPidAndHardware();
     if (result != NO_ERROR) return result;
 
-    if (mHardware->recordingEnabled()) {
-        LOGE("Cannot take picture during recording.");
-        return INVALID_OPERATION;
-    }
-
     if ((msgType & CAMERA_MSG_RAW_IMAGE) &&
         (msgType & CAMERA_MSG_RAW_IMAGE_NOTIFY)) {
         LOGE("CAMERA_MSG_RAW_IMAGE and CAMERA_MSG_RAW_IMAGE_NOTIFY"
