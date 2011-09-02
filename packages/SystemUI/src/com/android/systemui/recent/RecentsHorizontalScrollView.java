@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.View.OnClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -75,13 +76,23 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                 mPerformanceHelper.addViewCallback(view);
             }
 
-            final View thumbnail = view.findViewById(R.id.app_thumbnail);
-            // thumbnail is set to clickable in the layout file
-            thumbnail.setOnClickListener(new OnClickListener() {
+            view.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    mCallback.dismiss();
+                }
+            });
+
+            OnClickListener launchAppListener = new OnClickListener() {
                 public void onClick(View v) {
                     mCallback.handleOnClick(view);
                 }
-            });
+            };
+            final View thumbnail = view.findViewById(R.id.app_thumbnail);
+            thumbnail.setClickable(true);
+            thumbnail.setOnClickListener(launchAppListener);
+            final View appTitle = view.findViewById(R.id.app_label);
+            appTitle.setClickable(true);
+            appTitle.setOnClickListener(launchAppListener);
             mLinearLayout.addView(view);
         }
         // Scroll to end after layout.
