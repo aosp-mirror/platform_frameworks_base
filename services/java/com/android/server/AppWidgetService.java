@@ -170,6 +170,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     final ArrayList<AppWidgetId> mAppWidgetIds = new ArrayList<AppWidgetId>();
     ArrayList<Host> mHosts = new ArrayList<Host>();
     boolean mSafeMode;
+    boolean mStateLoaded;
 
     AppWidgetService(Context context) {
         mContext = context;
@@ -180,8 +181,9 @@ class AppWidgetService extends IAppWidgetService.Stub
     public void systemReady(boolean safeMode) {
         mSafeMode = safeMode;
 
-        loadAppWidgetList();
-        loadStateLocked();
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+        }
 
         // Register for the boot completed broadcast, so we can send the
         // ENABLE broacasts.  If we try to send them now, they time out,
@@ -207,6 +209,14 @@ class AppWidgetService extends IAppWidgetService.Stub
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
+    }
+
+    private void ensureStateLoadedLocked() {
+        if (!mStateLoaded) {
+            loadAppWidgetList();
+            loadStateLocked();
+            mStateLoaded = true;
+        }
     }
 
     @Override
@@ -285,6 +295,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     public int allocateAppWidgetId(String packageName, int hostId) {
         int callingUid = enforceCallingUid(packageName);
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             int appWidgetId = mNextAppWidgetId++;
 
             Host host = lookupOrAddHostLocked(callingUid, packageName, hostId);
@@ -304,6 +315,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public void deleteAppWidgetId(int appWidgetId) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null) {
                 deleteAppWidgetLocked(id);
@@ -314,6 +326,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public void deleteHost(int hostId) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             int callingUid = getCallingUid();
             Host host = lookupHostLocked(callingUid, hostId);
             if (host != null) {
@@ -325,6 +338,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public void deleteAllHosts() {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             int callingUid = getCallingUid();
             final int N = mHosts.size();
             boolean changed = false;
@@ -405,6 +419,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mAppWidgetIds) {
+                ensureStateLoadedLocked();
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
                 if (id == null) {
                     throw new IllegalArgumentException("bad appWidgetId");
@@ -448,6 +463,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     // Binds to a specific RemoteViewsService
     public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id == null) {
                 throw new IllegalArgumentException("bad appWidgetId");
@@ -499,6 +515,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     // Unbinds from a specific RemoteViewsService
     public void unbindRemoteViewsService(int appWidgetId, Intent intent) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             // Unbind from the RemoteViewsService (which will trigger a callback to the bound
             // RemoteViewsAdapter)
             Pair<Integer, FilterComparison> key = Pair.create(appWidgetId,
@@ -610,6 +627,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null && id.provider != null && !id.provider.zombie) {
                 return id.provider.info;
@@ -620,6 +638,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public RemoteViews getAppWidgetViews(int appWidgetId) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null) {
                 return id.views;
@@ -630,6 +649,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public List<AppWidgetProviderInfo> getInstalledProviders() {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             final int N = mInstalledProviders.size();
             ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>(N);
             for (int i=0; i<N; i++) {
@@ -652,6 +672,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         final int N = appWidgetIds.length;
 
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             for (int i=0; i<N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
                 updateAppWidgetInstanceLocked(id, views);
@@ -669,6 +690,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         final int N = appWidgetIds.length;
 
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             for (int i=0; i<N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
                 updateAppWidgetInstanceLocked(id, views, true);
@@ -686,6 +708,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         final int N = appWidgetIds.length;
 
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             for (int i=0; i<N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
                 notifyAppWidgetViewDataChangedInstanceLocked(id, viewId);
@@ -695,6 +718,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public void updateAppWidgetProvider(ComponentName provider, RemoteViews views) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             Provider p = lookupProviderLocked(provider);
             if (p == null) {
                 Slog.w(TAG, "updateAppWidgetProvider: provider doesn't exist: " + provider);
@@ -759,6 +783,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             List<RemoteViews> updatedViews) {
         int callingUid = enforceCallingUid(packageName);
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             Host host = lookupOrAddHostLocked(callingUid, packageName, hostId);
             host.callbacks = callbacks;
 
@@ -778,6 +803,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public void stopListening(int hostId) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             Host host = lookupHostLocked(getCallingUid(), hostId);
             if (host != null) {
                 host.callbacks = null;
@@ -965,6 +991,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     
     public int[] getAppWidgetIds(ComponentName provider) {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             Provider p = lookupProviderLocked(provider);
             if (p != null && getCallingUid() == p.uid) {
                 return getAppWidgetIds(p);                
@@ -1087,6 +1114,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     void sendInitialBroadcasts() {
         synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
             final int N = mInstalledProviders.size();
             for (int i=0; i<N; i++) {
                 Provider p = mInstalledProviders.get(i);
@@ -1391,6 +1419,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                     mLocale = revised;
 
                     synchronized (mAppWidgetIds) {
+                        ensureStateLoadedLocked();
                         int N = mInstalledProviders.size();
                         for (int i=N-1; i>=0; i--) {
                             Provider p = mInstalledProviders.get(i);
@@ -1428,6 +1457,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 }
                 if (added || changed) {
                     synchronized (mAppWidgetIds) {
+                        ensureStateLoadedLocked();
                         Bundle extras = intent.getExtras();
                         if (changed || (extras != null &&
                                     extras.getBoolean(Intent.EXTRA_REPLACING, false))) {
@@ -1449,6 +1479,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                         // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
                     } else {
                         synchronized (mAppWidgetIds) {
+                            ensureStateLoadedLocked();
                             for (String pkgName : pkgList) {
                                 removeProvidersForPackageLocked(pkgName);
                                 saveStateLocked();
