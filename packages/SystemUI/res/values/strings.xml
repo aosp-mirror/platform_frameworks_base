@@ -36,10 +36,10 @@
     <string name="status_bar_please_disturb_button">Show notifications</string>
 
     <!-- Title shown in recents popup for removing an application from the list -->
-    <string name="status_bar_recent_remove_item_title">Remove</string>
+    <string name="status_bar_recent_remove_item_title">Remove from list</string>
 
     <!-- Title shown in recents popup for inspecting an application's properties -->
-    <string name="status_bar_recent_inspect_item_title">Inspect</string>
+    <string name="status_bar_recent_inspect_item_title">App info</string>
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing.  [CHAR LIMIT=40]-->
