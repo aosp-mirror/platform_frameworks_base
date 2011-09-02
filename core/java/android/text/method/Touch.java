@@ -147,12 +147,10 @@ public class Touch {
                     int nx = widget.getScrollX() + (int) dx;
                     int ny = widget.getScrollY() + (int) dy;
 
-                    int padding = widget.getTotalPaddingTop() +
-                                  widget.getTotalPaddingBottom();
+                    int padding = widget.getTotalPaddingTop() + widget.getTotalPaddingBottom();
                     Layout layout = widget.getLayout();
 
-                    ny = Math.min(ny, layout.getHeight() - (widget.getHeight() -
-                                                            padding));
+                    ny = Math.min(ny, layout.getHeight() - (widget.getHeight() - padding));
                     ny = Math.max(ny, 0);
         
                     int oldX = widget.getScrollX();
@@ -161,8 +159,7 @@ public class Touch {
                     scrollTo(widget, layout, nx, ny);
 
                     // If we actually scrolled, then cancel the up action.
-                    if (oldX != widget.getScrollX()
-                            || oldY != widget.getScrollY()) {
+                    if (oldX != widget.getScrollX() || oldY != widget.getScrollY()) {
                         widget.cancelLongPress();
                     }
 
