@@ -1033,6 +1033,38 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
+        final HashSet<String> knownIfaces = Sets.newHashSet();
+        final HashSet<String> activeIfaces = Sets.newHashSet();
+
+        // collect any historical stats and active state
+        // TODO: migrate to reading from single file
+        if (mBandwidthControlEnabled) {
+            for (String iface : fileListWithoutNull(mStatsXtIface)) {
+                final File ifacePath = new File(mStatsXtIface, iface);
+
+                final long active = readSingleLongFromFile(new File(ifacePath, "active"));
+                if (active == 1) {
+                    knownIfaces.add(iface);
+                    activeIfaces.add(iface);
+                } else if (active == 0) {
+                    knownIfaces.add(iface);
+                } else {
+                    continue;
+                }
+
+                entry.iface = iface;
+                entry.uid = UID_ALL;
+                entry.set = SET_DEFAULT;
+                entry.tag = TAG_NONE;
+                entry.rxBytes = readSingleLongFromFile(new File(ifacePath, "rx_bytes"));
+                entry.rxPackets = readSingleLongFromFile(new File(ifacePath, "rx_packets"));
+                entry.txBytes = readSingleLongFromFile(new File(ifacePath, "tx_bytes"));
+                entry.txPackets = readSingleLongFromFile(new File(ifacePath, "tx_packets"));
+
+                stats.addValues(entry);
+            }
+        }
+
         final ArrayList<String> values = Lists.newArrayList();
 
         BufferedReader reader = null;
@@ -1058,7 +1090,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     entry.txBytes = Long.parseLong(values.get(9));
                     entry.txPackets = Long.parseLong(values.get(10));
 
-                    stats.addValues(entry);
+                    if (activeIfaces.contains(entry.iface)) {
+                        // combine stats when iface is active
+                        stats.combineValues(entry);
+                    } else if (!knownIfaces.contains(entry.iface)) {
+                        // add stats when iface is unknown
+                        stats.addValues(entry);
+                    }
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
                 }
@@ -1071,24 +1109,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             throw new IllegalStateException("problem parsing stats: " + e);
         } finally {
             IoUtils.closeQuietly(reader);
-        }
-
-        // splice in historical stats not reflected in mStatsIface
-        if (mBandwidthControlEnabled) {
-            for (String iface : fileListWithoutNull(mStatsXtIface)) {
-                final File ifacePath = new File(mStatsXtIface, iface);
-
-                entry.iface = iface;
-                entry.uid = UID_ALL;
-                entry.set = SET_DEFAULT;
-                entry.tag = TAG_NONE;
-                entry.rxBytes = readSingleLongFromFile(new File(ifacePath, "rx_bytes"));
-                entry.rxPackets = readSingleLongFromFile(new File(ifacePath, "rx_packets"));
-                entry.txBytes = readSingleLongFromFile(new File(ifacePath, "tx_bytes"));
-                entry.txPackets = readSingleLongFromFile(new File(ifacePath, "tx_packets"));
-
-                stats.combineValues(entry);
-            }
         }
 
         return stats;

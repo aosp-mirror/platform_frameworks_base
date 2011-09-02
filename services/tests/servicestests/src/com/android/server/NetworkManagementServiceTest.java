@@ -106,6 +106,7 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
 
     public void testNetworkStatsSummaryDown() throws Exception {
         stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
+        stageLong(1L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/active"));
         stageLong(1024L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/rx_bytes"));
         stageLong(128L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/rx_packets"));
         stageLong(2048L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/tx_bytes"));
@@ -119,6 +120,7 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
 
     public void testNetworkStatsCombined() throws Exception {
         stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
+        stageLong(1L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/active"));
         stageLong(10L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_bytes"));
         stageLong(20L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_packets"));
         stageLong(30L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_bytes"));
@@ -127,6 +129,18 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         final NetworkStats stats = mService.getNetworkStatsSummary();
         assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L + 10L,
                 2205L + 20L, 489339L + 30L, 2237L + 40L);
+    }
+
+    public void testNetworkStatsCombinedInactive() throws Exception {
+        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
+        stageLong(0L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/active"));
+        stageLong(10L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_bytes"));
+        stageLong(20L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_packets"));
+        stageLong(30L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_bytes"));
+        stageLong(40L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_packets"));
+
+        final NetworkStats stats = mService.getNetworkStatsSummary();
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 10L, 20L, 30L, 40L);
     }
 
     public void testKernelTags() throws Exception {
