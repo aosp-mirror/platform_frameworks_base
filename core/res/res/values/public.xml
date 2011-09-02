@@ -2010,4 +2010,5 @@
   <public type="attr" name="targetDescriptions" />
   <public type="attr" name="directionDescriptions" />
 
+  <public type="attr" name="overridesImplicitlyEnabledSubtype" />
 </resources>

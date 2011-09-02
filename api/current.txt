@@ -709,6 +709,7 @@ package android {
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
+    field public static final int overridesImplicitlyEnabledSubtype = 16843696; // 0x10103b0
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
@@ -24531,6 +24532,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodSubtype implements android.os.Parcelable {
+    ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean);
     method public boolean containsExtraValueKey(java.lang.String);
     method public int describeContents();
     method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);
@@ -24541,6 +24543,7 @@ package android.view.inputmethod {
     method public java.lang.String getMode();
     method public int getNameResId();
     method public boolean isAuxiliary();
+    method public boolean overridesImplicitlyEnabledSubtype();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }

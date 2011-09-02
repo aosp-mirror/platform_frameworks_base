@@ -42,6 +42,7 @@ public final class InputMethodSubtype implements Parcelable {
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
 
     private final boolean mIsAuxiliary;
+    private final boolean mOverridesImplicitlyEnabledSubtype;
     private final int mSubtypeHashCode;
     private final int mSubtypeIconResId;
     private final int mSubtypeNameResId;
@@ -57,11 +58,12 @@ public final class InputMethodSubtype implements Parcelable {
      * @param locale The locale supported by the subtype
      * @param mode The mode supported by the subtype
      * @param extraValue The extra value of the subtype
+     * @param isAuxiliary true when this subtype is one shot subtype.
      * @hide
      */
-    public InputMethodSubtype(
-            int nameId, int iconId, String locale, String mode, String extraValue) {
-        this(nameId, iconId, locale, mode, extraValue, false);
+    public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
+            boolean isAuxiliary) {
+        this(nameId, iconId, locale, mode, extraValue, false, false);
     }
 
     /**
@@ -72,18 +74,21 @@ public final class InputMethodSubtype implements Parcelable {
      * @param mode The mode supported by the subtype
      * @param extraValue The extra value of the subtype
      * @param isAuxiliary true when this subtype is one shot subtype.
-     * @hide
+     * @param overridesImplicitlyEnabledSubtype true when this subtype should be selected by default
+     * if no other subtypes are selected explicitly. Note that a subtype with this parameter being
+     * true will not be shown in the subtypes list.
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
-            boolean isAuxiliary) {
+            boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
         mSubtypeNameResId = nameId;
         mSubtypeIconResId = iconId;
         mSubtypeLocale = locale != null ? locale : "";
         mSubtypeMode = mode != null ? mode : "";
         mSubtypeExtraValue = extraValue != null ? extraValue : "";
         mIsAuxiliary = isAuxiliary;
+        mOverridesImplicitlyEnabledSubtype = overridesImplicitlyEnabledSubtype;
         mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
-                mIsAuxiliary);
+                mIsAuxiliary, mOverridesImplicitlyEnabledSubtype);
     }
 
     InputMethodSubtype(Parcel source) {
@@ -97,8 +102,9 @@ public final class InputMethodSubtype implements Parcelable {
         s = source.readString();
         mSubtypeExtraValue = s != null ? s : "";
         mIsAuxiliary = (source.readInt() == 1);
+        mOverridesImplicitlyEnabledSubtype = (source.readInt() == 1);
         mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
-                mIsAuxiliary);
+                mIsAuxiliary, mOverridesImplicitlyEnabledSubtype);
     }
 
     /**
@@ -143,6 +149,14 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public boolean isAuxiliary() {
         return mIsAuxiliary;
+    }
+
+    /**
+     * @return true when this subtype is selected by default if no other subtypes are selected
+     * explicitly. Note that a subtype that returns true will not be shown in the subtypes list.
+     */
+    public boolean overridesImplicitlyEnabledSubtype() {
+        return mOverridesImplicitlyEnabledSubtype;
     }
 
     /**
@@ -244,6 +258,7 @@ public final class InputMethodSubtype implements Parcelable {
         dest.writeString(mSubtypeMode);
         dest.writeString(mSubtypeExtraValue);
         dest.writeInt(mIsAuxiliary ? 1 : 0);
+        dest.writeInt(mOverridesImplicitlyEnabledSubtype ? 1 : 0);
     }
 
     public static final Parcelable.Creator<InputMethodSubtype> CREATOR
@@ -276,8 +291,9 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     private static int hashCodeInternal(String locale, String mode, String extraValue,
-            boolean isAuxiliary) {
-        return Arrays.hashCode(new Object[] {locale, mode, extraValue, isAuxiliary});
+            boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
+        return Arrays.hashCode(new Object[] {locale, mode, extraValue, isAuxiliary,
+                overridesImplicitlyEnabledSubtype});
     }
 
     /**

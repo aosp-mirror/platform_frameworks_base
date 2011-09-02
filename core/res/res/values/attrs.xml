@@ -2237,6 +2237,10 @@
              InputMethodManager#switchToLastInputMethod will ignore auxiliary subtypes when it
              chooses a target subtype. -->
         <attr name="isAuxiliary" format="boolean" />
+        <!-- Set true when this subtype should be selected by default if no other subtypes are
+             selected explicitly. Note that a subtype with this parameter being true will
+             not be shown in the subtypes list. -->
+        <attr name="overridesImplicitlyEnabledSubtype" format="boolean" />
         <!-- The extra value of the subtype. This string can be any string and will be passed to
              the IME when the framework calls the IME with the subtype.  -->
         <attr name="imeSubtypeExtraValue" format="string" />
