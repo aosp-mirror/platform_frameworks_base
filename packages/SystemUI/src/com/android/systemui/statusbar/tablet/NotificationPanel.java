@@ -28,6 +28,10 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
@@ -52,6 +56,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     ViewGroup mContentParent;
     TabletStatusBar mBar;
     View mClearButton;
+    static Interpolator sAccelerateInterpolator = new AccelerateInterpolator();
+    static Interpolator sDecelerateInterpolator = new DecelerateInterpolator();
 
     // amount to slide mContentParent down by when mContentFrame is missing
     float mContentFrameMissingTranslation;
@@ -117,14 +123,33 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 mShowing = show;
                 if (show) {
                     setVisibility(View.VISIBLE);
+                    // Don't start the animation until we've created the layer, which is done
+                    // right before we are drawn
+                    mContentParent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                    getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
+                } else {
+                    mChoreo.startAnimation(show);
                 }
-                mChoreo.startAnimation(show);
             }
         } else {
             mShowing = show;
             setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
+
+    /**
+     * This is used only when we've created a hardware layer and are waiting until it's
+     * been created in order to start the appearing animation.
+     */
+    private ViewTreeObserver.OnPreDrawListener mPreDrawListener =
+            new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            mChoreo.startAnimation(true);
+            return true;
+        }
+    };
 
     /**
      * Whether the panel is showing, or, if it's animating, whether it will be
@@ -330,8 +355,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         AnimatorSet mContentAnim;
 
         // should group this into a multi-property animation
-        final static int OPEN_DURATION = 300;
-        final static int CLOSE_DURATION = 300;
+        final static int OPEN_DURATION = 250;
+        final static int CLOSE_DURATION = 250;
 
         // the panel will start to appear this many px from the end
         final int HYPERSPACE_OFFRAMP = 200;
@@ -362,19 +387,15 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
             Animator posAnim = ObjectAnimator.ofFloat(mContentParent, "translationY",
                     start, end);
-            posAnim.setInterpolator(appearing
-                    ? new android.view.animation.DecelerateInterpolator(1.0f)
-                    : new android.view.animation.AccelerateInterpolator(1.0f));
+            posAnim.setInterpolator(appearing ? sDecelerateInterpolator : sAccelerateInterpolator);
 
             if (mContentAnim != null && mContentAnim.isRunning()) {
                 mContentAnim.cancel();
             }
 
             Animator fadeAnim = ObjectAnimator.ofFloat(mContentParent, "alpha",
-                                mContentParent.getAlpha(), appearing ? 1.0f : 0.0f);
-            fadeAnim.setInterpolator(appearing
-                    ? new android.view.animation.AccelerateInterpolator(2.0f)
-                    : new android.view.animation.DecelerateInterpolator(2.0f));
+                    appearing ? 1.0f : 0.0f);
+            fadeAnim.setInterpolator(appearing ? sAccelerateInterpolator : sDecelerateInterpolator);
 
             mContentAnim = new AnimatorSet();
             mContentAnim
@@ -389,8 +410,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             if (DEBUG) Slog.d(TAG, "startAnimation(appearing=" + appearing + ")");
 
             createAnimation(appearing);
-
-            mContentParent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             mContentAnim.start();
 
             mVisible = appearing;

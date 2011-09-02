@@ -111,8 +111,11 @@ public class ColorDrawable extends Drawable {
         alpha += alpha >> 7;   // make it 0..256
         int baseAlpha = mState.mBaseColor >>> 24;
         int useAlpha = baseAlpha * alpha >> 8;
+        int oldUseColor = mState.mUseColor;
         mState.mUseColor = (mState.mBaseColor << 8 >>> 8) | (useAlpha << 24);
-        invalidateSelf();
+        if (oldUseColor != mState.mUseColor) {
+            invalidateSelf();
+        }
     }
 
     /**
