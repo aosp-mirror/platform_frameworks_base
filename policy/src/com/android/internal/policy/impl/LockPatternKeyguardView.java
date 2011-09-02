@@ -180,7 +180,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private Runnable mRecreateRunnable = new Runnable() {
         public void run() {
-            updateScreen(mMode, false);
+            updateScreen(mMode, true);
         }
     };
 
@@ -400,7 +400,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             // then finish and get out
             if (mEnableFallback || mAccountIndex >= mAccounts.length) {
                 if (mUnlockScreen == null) {
-                    Log.w(TAG, "no unlock screen when trying to enable fallback");
+                    if (DEBUG) Log.w(TAG, "no unlock screen when trying to enable fallback");
                 } else if (mUnlockScreen instanceof PatternUnlockScreen) {
                     ((PatternUnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
                 }
@@ -459,7 +459,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public void reset() {
         mIsVerifyUnlockOnly = false;
         mForgotPattern = false;
-        updateScreen(getInitialMode(), false);
+        post(mRecreateRunnable);
     }
 
     @Override
@@ -485,9 +485,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private void recreateLockScreen() {
         if (mLockScreen != null) {
-            if (mLockScreen.getVisibility() == View.VISIBLE) {
-                ((KeyguardScreen) mLockScreen).onPause();
-            }
+            ((KeyguardScreen) mLockScreen).onPause();
             ((KeyguardScreen) mLockScreen).cleanUp();
             removeView(mLockScreen);
         }
@@ -499,9 +497,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private void recreateUnlockScreen(UnlockMode unlockMode) {
         if (mUnlockScreen != null) {
-            if (mUnlockScreen.getVisibility() == View.VISIBLE) {
-                ((KeyguardScreen) mUnlockScreen).onPause();
-            }
+            ((KeyguardScreen) mUnlockScreen).onPause();
             ((KeyguardScreen) mUnlockScreen).cleanUp();
             removeView(mUnlockScreen);
         }
@@ -611,7 +607,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private void updateScreen(Mode mode, boolean force) {
 
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** UPDATE SCREEN: mode=" + mode
-                + " last mode=" + mMode, new RuntimeException());
+                + " last mode=" + mMode + ", force = " + force, new RuntimeException());
 
         mMode = mode;
 
