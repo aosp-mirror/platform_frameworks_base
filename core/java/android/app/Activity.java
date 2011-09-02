@@ -1638,6 +1638,12 @@ public class Activity extends ContextThemeWrapper
      * or later, consider instead using {@link LoaderManager} instead, available
      * via {@link #getLoaderManager()}.</em>
      *
+     * <p><strong>Warning:</strong> Do not call {@link Cursor#close()} on a cursor obtained using
+     * this method, because the activity will do that for you at the appropriate time. However, if
+     * you call {@link #stopManagingCursor} on a cursor from a managed query, the system <em>will
+     * not</em> automatically close the cursor and, in that case, you must call
+     * {@link Cursor#close()}.</p>
+     * 
      * @param uri The URI of the content provider to query.
      * @param projection List of columns to return.
      * @param selection SQL WHERE clause.
@@ -1672,6 +1678,12 @@ public class Activity extends ContextThemeWrapper
      * or later, consider instead using {@link LoaderManager} instead, available
      * via {@link #getLoaderManager()}.</em>
      *
+     * <p><strong>Warning:</strong> Do not call {@link Cursor#close()} on a cursor obtained using
+     * this method, because the activity will do that for you at the appropriate time. However, if
+     * you call {@link #stopManagingCursor} on a cursor from a managed query, the system <em>will
+     * not</em> automatically close the cursor and, in that case, you must call
+     * {@link Cursor#close()}.</p>
+     * 
      * @param uri The URI of the content provider to query.
      * @param projection List of columns to return.
      * @param selection SQL WHERE clause.
@@ -1707,6 +1719,12 @@ public class Activity extends ContextThemeWrapper
      * or later, consider instead using {@link LoaderManager} instead, available
      * via {@link #getLoaderManager()}.</em>
      *
+     * <p><strong>Warning:</strong> Do not call {@link Cursor#close()} on cursor obtained from
+     * {@link #managedQuery}, because the activity will do that for you at the appropriate time.
+     * However, if you call {@link #stopManagingCursor} on a cursor from a managed query, the system
+     * <em>will not</em> automatically close the cursor and, in that case, you must call
+     * {@link Cursor#close()}.</p>
+     * 
      * @param c The Cursor to be managed.
      * 
      * @see #managedQuery(android.net.Uri , String[], String, String[], String)
@@ -1727,6 +1745,10 @@ public class Activity extends ContextThemeWrapper
      * Given a Cursor that was previously given to
      * {@link #startManagingCursor}, stop the activity's management of that
      * cursor.
+     * 
+     * <p><strong>Warning:</strong> After calling this method on a cursor from a managed query,
+     * the system <em>will not</em> automatically close the cursor and you must call 
+     * {@link Cursor#close()}.</p>
      * 
      * @param c The Cursor that was being managed.
      * 
