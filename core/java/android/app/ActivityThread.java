@@ -372,6 +372,7 @@ public final class ActivityThread {
         IInstrumentationWatcher instrumentationWatcher;
         int debugMode;
         boolean restrictedBackupMode;
+        boolean persistent;
         Configuration config;
         CompatibilityInfo compatInfo;
         boolean handlingProfiling;
@@ -644,9 +645,9 @@ public final class ActivityThread {
                 ComponentName instrumentationName, String profileFile,
                 ParcelFileDescriptor profileFd, boolean autoStopProfiler,
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
-                int debugMode, boolean isRestrictedBackupMode, Configuration config,
-                CompatibilityInfo compatInfo, Map<String, IBinder> services,
-                Bundle coreSettings) {
+                int debugMode, boolean isRestrictedBackupMode, boolean persistent,
+                Configuration config, CompatibilityInfo compatInfo,
+                Map<String, IBinder> services, Bundle coreSettings) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -666,6 +667,7 @@ public final class ActivityThread {
             data.instrumentationWatcher = instrumentationWatcher;
             data.debugMode = debugMode;
             data.restrictedBackupMode = isRestrictedBackupMode;
+            data.persistent = persistent;
             data.config = config;
             data.compatInfo = compatInfo;
             queueOrSendMessage(H.BIND_APPLICATION, data);
@@ -3687,6 +3689,16 @@ public final class ActivityThread {
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
 
+        if (data.persistent) {
+            // Persistent processes on low-memory devices do not get to
+            // use hardware accelerated drawing, since this can add too much
+            // overhead to the process.
+            Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+            if (!ActivityManager.isHighEndGfx(display)) {
+                HardwareRenderer.disable(false);
+            }
+        }
+
         if (data.profileFd != null) {
             data.startProfiling();
         }
@@ -4242,7 +4254,7 @@ public final class ActivityThread {
     }
 
     public static final ActivityThread systemMain() {
-        HardwareRenderer.disable();
+        HardwareRenderer.disable(true);
         ActivityThread thread = new ActivityThread();
         thread.attach(true);
         return thread;
