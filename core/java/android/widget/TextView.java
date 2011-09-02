@@ -8121,6 +8121,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Selection.setSelection((Spannable) mText, selStart, selEnd);
             } else {
                 hideControllers();
+                downgradeEasyCorrectionSpans();
             }
 
             // No need to create the controller
@@ -8325,6 +8326,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         return false;
+    }
+
+    /**
+     * Downgrades to simple suggestions all the easy correction spans that are not a spell check
+     * span.
+     */
+    private void downgradeEasyCorrectionSpans() {
+        if (mText instanceof Spannable) {
+            Spannable spannable = (Spannable) mText;
+            SuggestionSpan[] suggestionSpans = spannable.getSpans(0,
+                    spannable.length(), SuggestionSpan.class);
+            for (int i = 0; i < suggestionSpans.length; i++) {
+                int flags = suggestionSpans[i].getFlags();
+                if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
+                        && (flags & SuggestionSpan.FLAG_MISSPELLED) == 0) {
+                    flags = flags & ~SuggestionSpan.FLAG_EASY_CORRECT;
+                    suggestionSpans[i].setFlags(flags);
+                }
+            }
+        }
     }
 
     @Override
