@@ -680,6 +680,20 @@ SwitchStatement::Write(FILE* to)
     fprintf(to, "}\n");
 }
 
+Break::Break()
+{
+}
+
+Break::~Break()
+{
+}
+
+void
+Break::Write(FILE* to)
+{
+    fprintf(to, "break;\n");
+}
+
 Method::Method()
     :ClassElement(),
      modifiers(0),
