@@ -108,8 +108,21 @@ status_t HWComposer::commit() const {
 }
 
 status_t HWComposer::release() const {
-    int err = mHwc->set(mHwc, NULL, NULL, NULL);
-    return (status_t)err;
+    if (mHwc) {
+        int err = mHwc->set(mHwc, NULL, NULL, NULL);
+        return (status_t)err;
+    }
+    return NO_ERROR;
+}
+
+status_t HWComposer::disable() {
+    if (mHwc) {
+        free(mList);
+        mList = NULL;
+        int err = mHwc->prepare(mHwc, NULL);
+        return (status_t)err;
+    }
+    return NO_ERROR;
 }
 
 size_t HWComposer::getNumLayers() const {
