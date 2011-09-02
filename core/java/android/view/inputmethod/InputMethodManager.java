@@ -1593,15 +1593,13 @@ public final class InputMethodManager {
      * to the current implementation.)
      * @param imiId Id of InputMethodInfo which additional input method subtypes will be added to.
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
-     * @return true if the additional input method subtypes are successfully added.
      */
-    public boolean setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
         synchronized (mH) {
             try {
-                return mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
+                mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
-                return false;
             }
         }
     }
