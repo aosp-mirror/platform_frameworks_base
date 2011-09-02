@@ -1125,20 +1125,22 @@ public class PhoneStatusBar extends StatusBar {
         Slog.i(TAG, "DISABLE_BACK: " + (disableBack ? "yes" : "no"));
         Slog.i(TAG, "DISABLE_NAVIGATION: " + (disableNavigation ? "yes" : "no"));
 
-        if (disableNavigation && disableBack) {
-            mNavigationBarView.setEnabled(false);
-        } else {
-            mNavigationBarView.getBackButton().setEnabled(!disableBack);
-            mNavigationBarView.getHomeButton().setEnabled(!disableNavigation);
-            mNavigationBarView.getRecentsButton().setEnabled(!disableNavigation);
+        if (mNavigationBarView != null) {
+            if (disableNavigation && disableBack) {
+                mNavigationBarView.setEnabled(false);
+            } else {
+                mNavigationBarView.getBackButton().setEnabled(!disableBack);
+                mNavigationBarView.getHomeButton().setEnabled(!disableNavigation);
+                mNavigationBarView.getRecentsButton().setEnabled(!disableNavigation);
 
-            if (disableNavigation) {
-                // close recents if it's visible
-                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+                mNavigationBarView.setEnabled(true);
             }
+        }
 
-            mNavigationBarView.setEnabled(true);
+        if (disableNavigation) {
+            // close recents if it's visible
+            mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         }
     }
 
