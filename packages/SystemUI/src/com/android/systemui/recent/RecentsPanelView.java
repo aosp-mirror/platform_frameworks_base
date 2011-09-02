@@ -84,7 +84,7 @@ public class RecentsPanelView extends RelativeLayout
     private View mRecentsScrim;
     private View mRecentsGlowView;
     private ViewGroup mRecentsContainer;
-    private Bitmap mAppThumbnailBackground;
+    private Bitmap mDefaultThumbnailBackground;
 
     private boolean mShowing;
     private Choreographer mChoreo;
@@ -125,7 +125,7 @@ public class RecentsPanelView extends RelativeLayout
         }
 
         public void setThumbnail(Bitmap thumbnail) {
-            mThumbnail = compositeBitmap(mAppThumbnailBackground, thumbnail);
+            mThumbnail = compositeBitmap(mDefaultThumbnailBackground, thumbnail);
         }
 
         public Bitmap getThumbnail() {
@@ -336,8 +336,8 @@ public class RecentsPanelView extends RelativeLayout
         int width = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_width);
         int height = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_height);
         int color = res.getColor(R.drawable.status_bar_recents_app_thumbnail_background);
-        mAppThumbnailBackground = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(mAppThumbnailBackground);
+        mDefaultThumbnailBackground = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(mDefaultThumbnailBackground);
         c.drawColor(color);
     }
 
@@ -514,7 +514,7 @@ public class RecentsPanelView extends RelativeLayout
         synchronized (ad) {
             ad.mLabel = label;
             ad.mIcon = icon;
-            ad.setThumbnail(thumbs != null ? thumbs.mainThumbnail : null);
+            ad.setThumbnail(thumbs != null ? thumbs.mainThumbnail : mDefaultThumbnailBackground);
         }
     }
 
@@ -574,7 +574,7 @@ public class RecentsPanelView extends RelativeLayout
         }
         mActivityDescriptions = getRecentTasks();
         for (ActivityDescription ad : mActivityDescriptions) {
-            ad.setThumbnail(mAppThumbnailBackground);
+            ad.setThumbnail(mDefaultThumbnailBackground);
         }
         mListAdapter.notifyDataSetInvalidated();
         if (mActivityDescriptions.size() > 0) {
