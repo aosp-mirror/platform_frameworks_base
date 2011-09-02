@@ -21,7 +21,6 @@ import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
-import static com.android.server.NetworkManagementSocketTagger.tagToKernel;
 
 import android.content.res.Resources;
 import android.net.NetworkStats;
@@ -144,12 +143,6 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
     }
 
     public void testKernelTags() throws Exception {
-        assertEquals("0", tagToKernel(0x0));
-        assertEquals("214748364800", tagToKernel(0x32));
-        assertEquals("9223372032559808512", tagToKernel(Integer.MAX_VALUE));
-        assertEquals("0", tagToKernel(Integer.MIN_VALUE));
-        assertEquals("9223369837831520256", tagToKernel(Integer.MIN_VALUE - 512));
-
         assertEquals(0, kernelToTag("0x0000000000000000"));
         assertEquals(0x32, kernelToTag("0x0000003200000000"));
         assertEquals(2147483647, kernelToTag("0x7fffffff00000000"));
