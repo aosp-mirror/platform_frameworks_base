@@ -16789,7 +16789,7 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
   }
 
-  public final class LiveFolders implements android.provider.BaseColumns {
+  public final deprecated class LiveFolders implements android.provider.BaseColumns {
     field public static final java.lang.String ACTION_CREATE_LIVE_FOLDER = "android.intent.action.CREATE_LIVE_FOLDER";
     field public static final java.lang.String DESCRIPTION = "description";
     field public static final int DISPLAY_MODE_GRID = 1; // 0x1
