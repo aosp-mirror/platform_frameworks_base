@@ -320,15 +320,36 @@ public class NetworkStats implements Parcelable {
      * checking if a {@link #subtract(NetworkStats)} delta passes a threshold.
      */
     public long getTotalBytes() {
-        long totalBytes = 0;
+        final Entry entry = getTotal(null);
+        return entry.rxBytes + entry.txBytes;
+    }
+
+    /**
+     * Return total of all fields represented by this snapshot object.
+     */
+    public Entry getTotal(Entry recycle) {
+        final Entry entry = recycle != null ? recycle : new Entry();
+
+        entry.iface = IFACE_ALL;
+        entry.uid = UID_ALL;
+        entry.set = SET_ALL;
+        entry.tag = TAG_NONE;
+        entry.rxBytes = 0;
+        entry.rxPackets = 0;
+        entry.txBytes = 0;
+        entry.txPackets = 0;
+
         for (int i = 0; i < size; i++) {
             // skip specific tags, since already counted in TAG_NONE
             if (tag[i] != TAG_NONE) continue;
 
-            totalBytes += rxBytes[i];
-            totalBytes += txBytes[i];
+            entry.rxBytes += rxBytes[i];
+            entry.rxPackets += rxPackets[i];
+            entry.txBytes += txBytes[i];
+            entry.txPackets += txPackets[i];
+            entry.operations += operations[i];
         }
-        return totalBytes;
+        return entry;
     }
 
     /**
