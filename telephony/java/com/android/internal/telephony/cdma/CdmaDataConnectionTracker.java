@@ -582,7 +582,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     @Override
     protected void onRoamingOff() {
-        trySetupData(Phone.REASON_ROAMING_OFF);
+        if (getDataOnRoamingEnabled() == false) {
+            notifyDataAvailability(Phone.REASON_ROAMING_OFF);
+            trySetupData(Phone.REASON_ROAMING_OFF);
+        } else {
+            notifyDataConnection(Phone.REASON_ROAMING_OFF);
+        }
     }
 
     /**
@@ -592,9 +597,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     protected void onRoamingOn() {
         if (getDataOnRoamingEnabled()) {
             trySetupData(Phone.REASON_ROAMING_ON);
+            notifyDataConnection(Phone.REASON_ROAMING_ON);
         } else {
             if (DBG) log("Tear down data connection on roaming.");
             cleanUpAllConnections(null);
+            notifyDataAvailability(Phone.REASON_ROAMING_ON);
         }
     }
 

@@ -113,10 +113,15 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         TelephonyManager telephony = TelephonyManager.getDefault();
         LinkProperties linkProperties = null;
         LinkCapabilities linkCapabilities = null;
+        boolean roaming = false;
+
         if (state == Phone.DataState.CONNECTED) {
             linkProperties = sender.getLinkProperties(apnType);
             linkCapabilities = sender.getLinkCapabilities(apnType);
         }
+        ServiceState ss = sender.getServiceState();
+        if (ss != null) roaming = ss.getRoaming();
+
         try {
             mRegistry.notifyDataConnection(
                     convertDataState(state),
@@ -126,7 +131,8 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
                     linkProperties,
                     linkCapabilities,
                     ((telephony!=null) ? telephony.getNetworkType() :
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN));
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN),
+                    roaming);
         } catch (RemoteException ex) {
             // system process is dead
         }
