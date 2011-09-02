@@ -22,7 +22,7 @@
     <string name="restore_confirm_text" msgid="7499866728030461776">"系統收到從連線電腦完整還原所有資料的要求，請問您允許進行還原嗎？"\n\n"如果您本人並未提出還原要求，請勿允許繼續進行這項作業。這項作業將取代裝置上現有的全部資料！"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"還原我的資料"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"不要還原"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"在下面輸入您目前的備份密碼："</string>
+    <string name="current_password_text" msgid="8268189555578298067">"請在下面輸入您目前的備份密碼："</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"請輸入完整備份資料加密專用的密碼。如果您沒有輸入密碼，系統會使用您目前的備用密碼："</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"如果您想要將完整備份資料進行加密，請在下面輸入一組密碼："</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"如果還原的資料經過加密處理，請在下面輸入密碼："</string>

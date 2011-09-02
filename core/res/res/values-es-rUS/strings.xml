@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"¡Código de PIN incorrecto!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, presiona el menú y luego 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emergencia"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Sin servicio)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Sin servicio)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Pantalla bloqueada."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Presiona el Menú para desbloquear o realizar una llamada de emergencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Presionar Menú para desbloquear."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Lo sentimos, vuelve a intentarlo"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Lo sentimos, vuelve a intentarlo"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Cargando <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Cargada."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
@@ -671,10 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Has ingresado tu PIN de manera incorrecta <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Has extraído incorrectamente tu gráfico de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tablet al inciar sesión en Google."\n\n"  Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Has extraído incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos, se te solicitará que desbloquees tu teléfono al iniciar sesión en Google. "\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Intentaste desbloquear la tableta <xliff:g id="NUMBER_0">%d</xliff:g> veces pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica de la tableta y se pierdan todos los datos de usuario."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER_0">%d</xliff:g> veces pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica del teléfono y se pierdan todos los datos de usuario."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Intentaste desbloquear la tableta <xliff:g id="NUMBER">%d</xliff:g> veces pero no lo lograste. Se restablecerán los valores predeterminados de fábrica de la tableta."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces pero no lo lograste. Se restablecerán los valores predeterminados de fábrica del teléfono."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Intentaste desbloquear la tableta <xliff:g id="NUMBER_0">%d</xliff:g> veces, pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica de la tableta y se pierdan todos los datos de usuario."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER_0">%d</xliff:g> veces, pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica del teléfono y se pierdan todos los datos de usuario."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Intentaste desbloquear la tableta <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo lograste. Se restablecerán los valores predeterminados de fábrica de la tableta."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo lograste. Se restablecerán los valores predeterminados de fábrica del teléfono."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Vuelve a intentarlo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"¿Olvidaste el patrón?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloquear cuenta"</string>
@@ -854,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Reemplazar"</string>
+    <string name="replace" msgid="5781686059063148930">"¿Reemplazar?"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selección de texto"</string>
@@ -878,8 +880,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Selecciona una aplicación para el dispositivo USB."</string>
     <string name="noApplications" msgid="1691104391758345586">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Lamentablemente <xliff:g id="APPLICATION">%1$s</xliff:g> se detuvo."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Lamentablemente el proceso <xliff:g id="PROCESS">%1$s</xliff:g> se detuvo."</string>
+    <string name="aerr_application" msgid="932628488013092776">"Lamentablemente, la aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> se detuvo."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Lamentablemente, el proceso <xliff:g id="PROCESS">%1$s</xliff:g> se detuvo."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"La aplicación <xliff:g id="APPLICATION">%2$s</xliff:g> no responde."\n\n"¿Quieres cerrarla?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"La actividad <xliff:g id="ACTIVITY">%1$s</xliff:g> no responde."\n\n"¿Quieres cerrarla?"</string>
@@ -937,7 +939,7 @@
     <item quantity="other" msgid="7915895323644292768">"Abrir redes disponibles de Wi-Fi"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"tiene una mala conexión a Internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" tiene una mala conexión a Internet."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Iniciar operación de Wi-Fi Direct. Esto desactivará la operación de cliente/zona Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"No se pudo iniciar Wi-Fi Direct."</string>
@@ -981,7 +983,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Se ha producido un problema al desactivar el almacenamiento USB. Asegúrate de haber desmontado el host USB, luego vuelve a intentarlo."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activar el almacenamiento USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activas el almacenamiento USB, algunas aplicaciones que estás usando se detendrán y es posible que no estén disponibles hasta que desactives el almacenamiento USB."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Se produjo un error durante la operación del USB."</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Error en el funcionamiento del USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como un dispositivo de medios"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como una cámara"</string>
@@ -1106,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleccionar una cuenta"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incremento"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decremento"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"marcado"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"no marcado"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"seleccionado"</string>
@@ -1121,7 +1151,25 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Cambio de modo"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Mayúscula"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Ingresar"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tecla. Se requieren auriculares para escuchar el sonido de las teclas al tipear una contraseña."</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
+    <skip />
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
+    <skip />
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
+    <skip />
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
+    <skip />
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
+    <skip />
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
+    <skip />
+    <!-- no translation found for description_target_camera (969071997552486814) -->
+    <skip />
+    <!-- no translation found for description_target_silent (893551287746522182) -->
+    <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tecla. Se requieren auriculares para escuchar el sonido de las teclas al ingresar una contraseña."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Desplazarse hasta la página principal"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>
@@ -1134,14 +1182,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Datos de 2 GB - 3 GB desactivados"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datos de 4 GB desactivados"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Datos móviles desactivados"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Datos Wi-Fi desactivados"</string>
     <string name="data_usage_limit_body" msgid="4313857592916426843">"Tocar para habilitar"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Supera límite de datos de 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Límite de datos de 4G superado"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Límite de datos móviles superado"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> sobre el límite especificado"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Datos de referencia restringidos"</string>
     <string name="data_usage_restricted_body" msgid="5087354814839059798">"Tocar para eliminar restricción"</string>

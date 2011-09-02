@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"تأیید اعتبار ناموفق بود."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"تأیید اعتبار از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"اتصال به سرور برقرار نشد."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"سرور نتوانست ارتباط برقرار کند. بعداً دوباره امتحان کنید."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"سرور نمی‌تواند ارتباط برقرار کند. بعداً دوباره امتحان کنید."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"پروتکل پشتیبانی نمی شود."</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"پین کد اشتباه است!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"برای بازگشایی قفل، منو را فشار دهید و سپس 0 را فشار دهید."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"شماره اضطراری"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(فاقد سرویس)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(فاقد سرویس)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"صفحه قفل شد."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"برای بازگشایی قفل یا انجام تماس اضطراری روی منو فشار دهید."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"برای بازگشایی قفل روی منو فشار دهید."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"صحیح است!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"متأسفیم، دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"متأسفیم، دوباره امتحان کنید"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"شارژ کردن (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"در حال شارژ،<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"شارژ شد."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"شارژر خود را متصل کنید."</string>
@@ -671,14 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"شما کد پین خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه وارد کرده اید. "\n\n"لطفاً پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می شود که برای بازگشایی قفل رایانه لوحی خود به Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش های ناموفق بیشتر سبب می شود از شما خواسته شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، رایانه لوحی به پیش فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از<xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"شما به اشتباه اقدام به باز کردن قفل <xliff:g id="NUMBER">%d</xliff:g> رایانه لوحی کرده‌اید. رایانه لوحی در حال حاضر به پیش فرض کارخانه بازنشانی می‌شود."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن در حال حاضر به پیش فرض کارخانه بازنشانی می‌شود."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"در <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"الگو را فراموش کرده اید؟"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"بازگشایی قفل حساب"</string>
@@ -858,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
     <string name="paste" msgid="5629880836805036433">"جای گذاری"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"جایگزینی"</string>
+    <string name="replace" msgid="5781686059063148930">"جایگزین شود؟؟؟"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"کپی URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"انتخاب متن..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
@@ -882,10 +880,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"انتخاب یک برنامه کاربردی برای دستگاه USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"هیچ برنامه ای نمی تواند این عملکرد را اجرا کند."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"متأسفانه، <xliff:g id="APPLICATION">%1$s</xliff:g> متوقف شده است."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"متأسفانه، پردازش <xliff:g id="PROCESS">%1$s</xliff:g> متوقف شده است."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‌دهد."\n\n"آیا می‌خواهید آن را ببندید؟"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"فعالیت <xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‌دهد."\n\n"آیا می‌خواهید آن را ببندید؟"</string>
@@ -902,14 +898,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"این را با تنظیمات &gt; برنامه‌ها &gt; مدیریت برنامه‌های کاربردی دوباره فعال کنید."</string>
     <string name="smv_application" msgid="295583804361236288">"برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> (پردازش <xliff:g id="PROCESS">%2$s</xliff:g>) خط مشی StrictMode اجرای خودکار را نقض کرده است."</string>
     <string name="smv_process" msgid="5120397012047462446">"فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
-    <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
-    <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
-    <skip />
-    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
-    <skip />
+    <string name="android_upgrading_title" msgid="378740715658358071">"Android در حال ارتقا است..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"بهینه‌سازی برنامه <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"شروع برنامه‌ها."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"در حال اتمام راه‌اندازی."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"انتخاب برای رفتن به برنامه"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"جابجایی در برنامه ها؟"</string>
@@ -947,10 +939,10 @@
     <item quantity="other" msgid="7915895323644292768">"شبکه های Wi-Fi موجود را باز کنید"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"اتصال به Wi-Fi ممکن نیست"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"اتصال به اینترنت ضعیف است."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" اتصال اینترنتی ضعیف است."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"عملکرد Wi-Fi Direct شروع می‌شود. این کار عملکرد مشتری/نقطه دسترسی Wi-Fi را خاموش می‌کند."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"شروع Wi-Fi Direct انجام نشد"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"نمی‌توانید Wi-Fi Direct را شروع کنید"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"درخواست راه‌اندازی Wi-Fi Direct از طرف <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> دریافت شد. برای قبول کردن، تأیید را کلیک کنید."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"درخواست راه‌اندازی Wi-Fi Direct از طرف <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> دریافت شد. برای ادامه پین را وارد کنید."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"پین WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> باید در دستگاه مرتبط شده <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> نیز وارد شود تا راه‌اندازی اتصال ادامه یابد."</string>
@@ -991,7 +983,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"مشکلی در خاموش کردن دستگاه ذخیره سازی USB وجود داشت. بررسی کنید که میزبان USB را جدا کرده باشید و سپس دوباره امتحان کنید."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"روشن کردن دستگاه ذخیره سازی USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"در صورت روشن کردن دستگاه ذخیره سازی USB، برخی از برنامه هایی که از آنها استفاده می کنید متوقف می شوند و تا زمانی که دستگاه ذخیره سازی USB را خاموش نکنید امکان استفاده از آنها وجود نخواهد داشت."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"عملکرد USB انجام نشد"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"راه‌اندازی USB ناموفق بود."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"تأیید"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به عنوان دستگاه رسانه ای"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به عنوان دوربین"</string>
@@ -1091,8 +1083,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"قطع اتصال کارت SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"در حال پاک کردن حافظه USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"در حال پاک کردن کارت SD..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"حافظه USB پاک نشد."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"حافظه USB پاک نشد."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"پاک کردن محل ذخیره  USB ممکن نیست."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"پاک کردن کارت SD ممکن نیست."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"کارت SD قبل از قطع اتصال از دستگاه خارج شد."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"حافظه USB اکنون در حال بررسی شدن است."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"کارت SD در حال حاضر در حال بررسی است."</string>
@@ -1116,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"انتخاب یک حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"علامت زده"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"بدون علامت"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"انتخاب شد"</string>
@@ -1124,22 +1144,32 @@
     <string name="switch_off" msgid="7249798614327155088">"خاموش"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"فشرده شد"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"فشرده نشد"</string>
-    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"لغو"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"انجام شد"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغییر حالت"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <!-- no translation found for description_target_camera (969071997552486814) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"کلید. برای شنیدن کلیدها هنگام تایپ یک گذرواژه به گوشی نیاز است."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحه اصلی"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه ها"</string>
@@ -1152,19 +1182,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"داده های 2G-3G غیرفعال شد"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"داده 4G غیر فعال شده است"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"داده های تلفن همراه غیرفعال شد"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"برای فعال کردن ضربه بزنید"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"داده‌های Wi-Fi غیرفعال شد"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"لمس برای فعال کردن"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"اطلاعات 2G-3G بیش از حد مجاز است"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"بیش از حد مجاز 4G است"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"داده‌های تلفن همراه از مقدار مجاز بیشتر است"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"از محدوده مجاز داده‌های Wi-Fi بیشتر شد"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> از حد مشخص شده بیشتر شد"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"داده پس‌زمینه محدود شد"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"لمس برای حذف محدودیت"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"گواهی امنیتی"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"این گواهی معتبر است."</string>
     <string name="issued_to" msgid="454239480274921032">"صادر شده برای:"</string>
@@ -1183,6 +1209,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"انتخاب فعالیت"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک‌گذاری با..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"دستگاه قفل است."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">"، "</string>
 </resources>
