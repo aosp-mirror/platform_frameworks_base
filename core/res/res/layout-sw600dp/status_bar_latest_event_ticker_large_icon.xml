@@ -33,8 +33,9 @@
         android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_marginBottom="6dip"
+        android:gravity="bottom"
         android:singleLine="true"
-        android:layout_marginTop="-10dp"
         />
     <ImageView android:id="@+id/icon"
         android:layout_width="wrap_content"
