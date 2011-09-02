@@ -856,6 +856,14 @@ public class PowerManagerService extends IPowerManager.Stub
                 if ((wl.flags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0) {
                     int oldWakeLockState = mWakeLockState;
                     mWakeLockState = mLocks.reactivateScreenLocksLocked();
+
+                    // Disable proximity sensor if if user presses power key while we are in the
+                    // "waiting for proximity sensor to go negative" state.
+                    if ((mWakeLockState & SCREEN_ON_BIT) != 0
+                            && mProximitySensorActive && mProximityWakeLockCount == 0) {
+                        mProximitySensorActive = false;
+                    }
+
                     if (mSpew) {
                         Slog.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
                                 + " mWakeLockState=0x"
