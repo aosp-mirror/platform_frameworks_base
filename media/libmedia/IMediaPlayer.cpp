@@ -21,14 +21,20 @@
 #include <binder/Parcel.h>
 
 #include <media/IMediaPlayer.h>
+#include <media/IStreamSource.h>
+
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
+#include <utils/String8.h>
 
 namespace android {
 
 enum {
     DISCONNECT = IBinder::FIRST_CALL_TRANSACTION,
+    SET_DATA_SOURCE_URL,
+    SET_DATA_SOURCE_FD,
+    SET_DATA_SOURCE_STREAM,
     SET_VIDEO_SURFACE,
     PREPARE_ASYNC,
     START,
@@ -66,6 +72,43 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         remote()->transact(DISCONNECT, data, &reply);
+    }
+
+    status_t setDataSource(const char* url,
+            const KeyedVector<String8, String8>* headers)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeCString(url);
+        if (headers == NULL) {
+            data.writeInt32(0);
+        } else {
+            // serialize the headers
+            data.writeInt32(headers->size());
+            for (size_t i = 0; i < headers->size(); ++i) {
+                data.writeString8(headers->keyAt(i));
+                data.writeString8(headers->valueAt(i));
+            }
+        }
+        remote()->transact(SET_DATA_SOURCE_URL, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setDataSource(int fd, int64_t offset, int64_t length) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeFileDescriptor(fd);
+        data.writeInt64(offset);
+        data.writeInt64(length);
+        remote()->transact(SET_DATA_SOURCE_FD, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setDataSource(const sp<IStreamSource> &source) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeStrongBinder(source->asBinder());
+        return reply.readInt32();
     }
 
     // pass the buffered Surface to the media player service
@@ -273,6 +316,34 @@ status_t BnMediaPlayer::onTransact(
             disconnect();
             return NO_ERROR;
         } break;
+        case SET_DATA_SOURCE_URL: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            const char* url = data.readCString();
+            KeyedVector<String8, String8> headers;
+            int32_t numHeaders = data.readInt32();
+            for (int i = 0; i < numHeaders; ++i) {
+                String8 key = data.readString8();
+                String8 value = data.readString8();
+                headers.add(key, value);
+            }
+            reply->writeInt32(setDataSource(url, numHeaders > 0 ? &headers : NULL));
+            return NO_ERROR;
+        } break;
+        case SET_DATA_SOURCE_FD: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            int fd = data.readFileDescriptor();
+            int64_t offset = data.readInt64();
+            int64_t length = data.readInt64();
+            reply->writeInt32(setDataSource(fd, offset, length));
+            return NO_ERROR;
+        }
+        case SET_DATA_SOURCE_STREAM: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            sp<IStreamSource> source =
+                interface_cast<IStreamSource>(data.readStrongBinder());
+            reply->writeInt32(setDataSource(source));
+            return NO_ERROR;
+        }
         case SET_VIDEO_SURFACE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             sp<Surface> surface = Surface::readFromParcel(data);

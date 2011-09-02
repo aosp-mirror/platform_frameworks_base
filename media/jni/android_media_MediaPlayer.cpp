@@ -155,6 +155,8 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
     } else {  // Throw exception!
         if ( opStatus == (status_t) INVALID_OPERATION ) {
             jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        } else if ( opStatus == (status_t) PERMISSION_DENIED ) {
+            jniThrowException(env, "java/lang/SecurityException", NULL);
         } else if ( opStatus != (status_t) OK ) {
             if (strlen(message) > 230) {
                // if the message is too long, don't bother displaying the status code

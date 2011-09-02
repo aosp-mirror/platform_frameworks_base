@@ -108,7 +108,7 @@ status_t MediaPlayer::setListener(const sp<MediaPlayerListener>& listener)
 }
 
 
-status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
+status_t MediaPlayer::attachNewPlayer(const sp<IMediaPlayer>& player)
 {
     status_t err = UNKNOWN_ERROR;
     sp<IMediaPlayer> p;
@@ -117,7 +117,7 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
 
         if ( !( (mCurrentState & MEDIA_PLAYER_IDLE) ||
                 (mCurrentState == MEDIA_PLAYER_STATE_ERROR ) ) ) {
-            LOGE("setDataSource called in state %d", mCurrentState);
+            LOGE("attachNewPlayer called in state %d", mCurrentState);
             return INVALID_OPERATION;
         }
 
@@ -147,9 +147,11 @@ status_t MediaPlayer::setDataSource(
     if (url != NULL) {
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
-            sp<IMediaPlayer> player(
-                    service->create(getpid(), this, url, headers, mAudioSessionId));
-            err = setDataSource(player);
+            sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
+            err = attachNewPlayer(player);
+            if (err == NO_ERROR) {
+                err = mPlayer->setDataSource(url, headers);
+            }
         }
     }
     return err;
@@ -161,8 +163,26 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     status_t err = UNKNOWN_ERROR;
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
-        sp<IMediaPlayer> player(service->create(getpid(), this, fd, offset, length, mAudioSessionId));
-        err = setDataSource(player);
+        sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
+        err = attachNewPlayer(player);
+        if (err == NO_ERROR) {
+            err = mPlayer->setDataSource(fd, offset, length);
+        }
+    }
+    return err;
+}
+
+status_t MediaPlayer::setDataSource(const sp<IStreamSource> &source)
+{
+    LOGV("setDataSource");
+    status_t err = UNKNOWN_ERROR;
+    const sp<IMediaPlayerService>& service(getMediaPlayerService());
+    if (service != 0) {
+        sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
+        err = attachNewPlayer(player);
+        if (err == NO_ERROR) {
+            err = mPlayer->setDataSource(source);
+        }
     }
     return err;
 }

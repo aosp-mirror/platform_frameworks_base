@@ -357,9 +357,9 @@ int main(int argc, char **argv) {
     }
 
     sp<IMediaPlayer> player =
-        service->create(getpid(), client, source, 0);
+        service->create(getpid(), client, 0);
 
-    if (player != NULL) {
+    if (player != NULL && player->setDataSource(source) == NO_ERROR) {
         player->setVideoSurface(surface);
         player->start();
 

@@ -10682,7 +10682,7 @@ package android.media {
     method public void setAuxEffectSendLevel(float);
     method public void setDataSource(android.content.Context, android.net.Uri) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.SecurityException;
     method public void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.SecurityException;
-    method public void setDataSource(java.lang.String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
+    method public void setDataSource(java.lang.String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.SecurityException;
     method public void setDataSource(java.io.FileDescriptor) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setDataSource(java.io.FileDescriptor, long, long) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setDisplay(android.view.SurfaceHolder);
