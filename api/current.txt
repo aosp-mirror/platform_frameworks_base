@@ -24545,8 +24545,6 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodSubtype implements android.os.Parcelable {
-    ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String);
-    ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean);
     method public boolean containsExtraValueKey(java.lang.String);
     method public int describeContents();
     method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);
