@@ -76,8 +76,11 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private final String mNotificationTargetClassName;
     private final int mHashCode;
 
-    private float mUnderlineThickness;
-    private int mUnderlineColor;
+    private float mEasyCorrectUnderlineThickness;
+    private int mEasyCorrectUnderlineColor;
+
+    private float mMisspelledUnderlineThickness;
+    private int mMisspelledUnderlineColor;
 
     /*
      * TODO: If switching IME is required, needs to add parameters for ids of InputMethodInfo
@@ -132,25 +135,22 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     private void initStyle(Context context) {
-        int defStyle = 0;
-        if ((getFlags() & FLAG_MISSPELLED) != 0) {
-            defStyle = com.android.internal.R.attr.textAppearanceMisspelledSuggestion;
-        } else if ((getFlags() & FLAG_EASY_CORRECT) != 0) {
-            defStyle = com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion;
-        } else {
-            // No style is applied.
-            mUnderlineThickness = 0;
-            mUnderlineColor = 0;
-            return;
-        }
-
-        TypedArray typedArray = context.obtainStyledAttributes(null,
-                com.android.internal.R.styleable.SuggestionSpan,
-                defStyle, 0);
-
-        mUnderlineThickness = typedArray.getDimension(
+        int defStyle = com.android.internal.R.attr.textAppearanceMisspelledSuggestion;
+        TypedArray typedArray = context.obtainStyledAttributes(
+                null, com.android.internal.R.styleable.SuggestionSpan, defStyle, 0);
+        mMisspelledUnderlineThickness = typedArray.getDimension(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
-        mUnderlineColor = typedArray.getColor(
+        mMisspelledUnderlineColor = typedArray.getColor(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
+
+        defStyle = com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion;
+
+        typedArray = context.obtainStyledAttributes(
+                null, com.android.internal.R.styleable.SuggestionSpan, defStyle, 0);
+
+        mEasyCorrectUnderlineThickness = typedArray.getDimension(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
+        mEasyCorrectUnderlineColor = typedArray.getColor(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
     }
 
@@ -160,8 +160,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         mLocaleString = src.readString();
         mNotificationTargetClassName = src.readString();
         mHashCode = src.readInt();
-        mUnderlineColor = src.readInt();
-        mUnderlineThickness = src.readFloat();
+        mEasyCorrectUnderlineColor = src.readInt();
+        mEasyCorrectUnderlineThickness = src.readFloat();
+        mMisspelledUnderlineColor = src.readInt();
+        mMisspelledUnderlineThickness = src.readFloat();
     }
 
     /**
@@ -211,8 +213,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         dest.writeString(mLocaleString);
         dest.writeString(mNotificationTargetClassName);
         dest.writeInt(mHashCode);
-        dest.writeInt(mUnderlineColor);
-        dest.writeFloat(mUnderlineThickness);
+        dest.writeInt(mEasyCorrectUnderlineColor);
+        dest.writeFloat(mEasyCorrectUnderlineThickness);
+        dest.writeInt(mMisspelledUnderlineColor);
+        dest.writeFloat(mMisspelledUnderlineThickness);
     }
 
     @Override
@@ -254,6 +258,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
 
     @Override
     public void updateDrawState(TextPaint tp) {
-        tp.setUnderlineText(mUnderlineColor, mUnderlineThickness);
+        if ((mFlags & FLAG_MISSPELLED) != 0) {
+            tp.setUnderlineText(mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
+        } else if ((mFlags & FLAG_EASY_CORRECT) != 0) {
+            tp.setUnderlineText(mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
+        }
     }
 }
