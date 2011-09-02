@@ -381,4 +381,8 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         mWidgetCallbacks = callback;
     }
 
+    public boolean providesClock() {
+        return false;
+    }
+
 }

@@ -21,6 +21,7 @@ import com.android.internal.policy.impl.LockPatternKeyguardView.UnlockMode;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockScreenWidgetCallback;
+import com.android.internal.widget.LockScreenWidgetInterface;
 import com.android.internal.widget.TransportControlView;
 
 import android.accounts.Account;
@@ -191,11 +192,17 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         public void requestShow(View view) {
             if (DEBUG) Log.v(TAG, "View " + view + " requested show transports");
             view.setVisibility(View.VISIBLE);
+
+            // TODO: examine all widgets to derive clock status
+            mUpdateMonitor.reportClockVisible(false);
         }
 
         public void requestHide(View view) {
             if (DEBUG) Log.v(TAG, "View " + view + " requested hide transports");
             view.setVisibility(View.GONE);
+
+            // TODO: examine all widgets to derive clock status
+            mUpdateMonitor.reportClockVisible(true);
         }
     };
 
@@ -743,6 +750,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (tcv == null) {
             if (DEBUG) Log.w(TAG, "Couldn't find transport control widget");
         } else {
+            mUpdateMonitor.reportClockVisible(true);
             tcv.setVisibility(View.GONE); // hide tcv until we get the callback below to show it.
             tcv.setCallback(mWidgetCallback);
         }
