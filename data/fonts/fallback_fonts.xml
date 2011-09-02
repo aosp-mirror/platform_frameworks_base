@@ -46,6 +46,16 @@
     </family>
     <family>
         <fileset>
+            <file>DroidSansArmenian.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>DroidSansGeorgian.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>Lohit_Hindi.ttf</file>
         </fileset>
     </family>
