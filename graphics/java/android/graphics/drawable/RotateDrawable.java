@@ -83,7 +83,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         float px = st.mPivotXRel ? (w * st.mPivotX) : st.mPivotX;
         float py = st.mPivotYRel ? (h * st.mPivotY) : st.mPivotY;
 
-        canvas.rotate(st.mCurrentDegrees, px, py);
+        canvas.rotate(st.mCurrentDegrees, px + bounds.left, py + bounds.top);
 
         st.mDrawable.draw(canvas);
 
