@@ -1549,6 +1549,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
         <item name="android:background">@android:drawable/list_section_divider_holo_dark</item>
+        <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle">
@@ -1992,6 +1993,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.Light.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
         <item name="android:background">@android:drawable/list_section_divider_holo_light</item>
+        <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle">
