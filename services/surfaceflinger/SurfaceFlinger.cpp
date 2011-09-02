@@ -2113,6 +2113,12 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked(int32_t mode)
         // we're already off
         return NO_ERROR;
     }
+
+    // turn off hwc while we're doing the animation
+    hw.getHwComposer().disable();
+    // and make sure to turn it back on (if needed) next time we compose
+    invalidateHwcGeometry();
+
     if (mode & ISurfaceComposer::eElectronBeamAnimationOff) {
         electronBeamOffAnimationImplLocked();
     }
