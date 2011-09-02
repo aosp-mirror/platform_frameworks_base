@@ -1599,6 +1599,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
             }
         } else {
+            // If we're not drawing, then we don't need to draw the transitions, either
+            if (mPendingTransitions != null) {
+                mPendingTransitions.clear();
+            }
+
             // We were supposed to report when we are done drawing. Since we canceled the
             // draw, remember it here.
             if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
