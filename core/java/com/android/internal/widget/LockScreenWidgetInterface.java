@@ -20,4 +20,6 @@ public interface LockScreenWidgetInterface {
 
     public void setCallback(LockScreenWidgetCallback callback);
 
+    public boolean providesClock();
+
 }

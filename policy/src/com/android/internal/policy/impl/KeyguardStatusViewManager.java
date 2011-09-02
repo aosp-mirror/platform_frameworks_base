@@ -589,6 +589,11 @@ class KeyguardStatusViewManager implements OnClickListener {
         public void onPhoneStateChanged(String newState) {
             updateEmergencyCallButtonState();
         }
+
+        /** {@inheritDoc} */
+        public void onClockVisibilityChanged() {
+            // ignored
+        }
     };
 
     private SimStateCallback mSimStateCallback = new SimStateCallback() {

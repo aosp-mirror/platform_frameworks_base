@@ -92,7 +92,7 @@ import android.view.WindowManagerPolicy;
  * thread of the keyguard.
  */
 public class KeyguardViewMediator implements KeyguardViewCallback,
-        KeyguardUpdateMonitor.SimStateCallback {
+        KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private final static boolean DEBUG = false;
     private final static boolean DBG_WAKE = false;
@@ -284,6 +284,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         mUpdateMonitor = new KeyguardUpdateMonitor(context);
 
+        mUpdateMonitor.registerInfoCallback(this);
         mUpdateMonitor.registerSimStateCallback(this);
 
         mLockPatternUtils = new LockPatternUtils(mContext);
@@ -1190,9 +1191,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 flags |= StatusBarManager.DISABLE_NAVIGATION;
                 if (!mHidden) {
                     // showing lockscreen exclusively (no activities in front of it)
-                    // disable clock and back button too
+                    // disable back button too
                     flags |= StatusBarManager.DISABLE_BACK;
-                    flags |= StatusBarManager.DISABLE_CLOCK;
+                    if (mUpdateMonitor.isClockVisible()) {
+                        // lockscreen showing a clock, so hide statusbar clock
+                        flags |= StatusBarManager.DISABLE_CLOCK;
+                    }
                 }
                 if (isSecure() || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
                     // showing secure lockscreen; disable expanding.
@@ -1282,5 +1286,35 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOn");
             mKeyguardViewManager.onScreenTurnedOn();
         }
+    }
+
+    /** {@inheritDoc} */
+    public void onClockVisibilityChanged() {
+        adjustStatusBarLocked();
+    }
+
+    /** {@inheritDoc} */
+    public void onPhoneStateChanged(String newState) {
+        // ignored
+    }
+
+    /** {@inheritDoc} */
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
+        // ignored
+    }
+
+    /** {@inheritDoc} */
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
+        // ignored
+    }
+
+    /** {@inheritDoc} */
+    public void onRingerModeChanged(int state) {
+        // ignored
+    }
+
+    /** {@inheritDoc} */
+    public void onTimeChanged() {
+        // ignored
     }
 }

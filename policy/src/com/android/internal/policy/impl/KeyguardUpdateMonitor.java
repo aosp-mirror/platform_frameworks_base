@@ -81,6 +81,8 @@ public class KeyguardUpdateMonitor {
 
     private int mFailedAttempts = 0;
 
+    private boolean mClockVisible;
+
     private Handler mHandler;
 
     private ArrayList<InfoCallback> mInfoCallbacks = Lists.newArrayList();
@@ -94,6 +96,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_SIM_STATE_CHANGE = 304;
     private static final int MSG_RINGER_MODE_CHANGED = 305;
     private static final int MSG_PHONE_STATE_CHANGED = 306;
+    private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
 
     /**
      * When we receive a
@@ -169,6 +172,9 @@ public class KeyguardUpdateMonitor {
                         break;
                     case MSG_PHONE_STATE_CHANGED:
                         handlePhoneStateChanged((String)msg.obj);
+                        break;
+                    case MSG_CLOCK_VISIBILITY_CHANGED:
+                        handleClockVisibilityChanged();
                         break;
                 }
             }
@@ -334,6 +340,13 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    private void handleClockVisibilityChanged() {
+        if (DEBUG) Log.d(TAG, "handleClockVisibilityChanged()");
+        for (int i = 0; i < mInfoCallbacks.size(); i++) {
+            mInfoCallbacks.get(i).onClockVisibilityChanged();
+        }
+    }
+
     /**
      * @param status One of the statuses of {@link android.os.BatteryManager}
      * @return Whether the status maps to a status for being plugged in.
@@ -448,6 +461,12 @@ public class KeyguardUpdateMonitor {
          */
         void onPhoneStateChanged(String newState);
 
+        /**
+         * Called when visibility of lockscreen clock changes, such as when
+         * obscured by a widget.
+         */
+        void onClockVisibilityChanged();
+
     }
 
     /**
@@ -482,6 +501,11 @@ public class KeyguardUpdateMonitor {
             if (DEBUG) Log.e(TAG, "Object tried to add another SIM callback",
                     new Exception("Whoops"));
         }
+    }
+
+    public void reportClockVisible(boolean visible) {
+        mClockVisible = visible;
+        mHandler.obtainMessage(MSG_CLOCK_VISIBILITY_CHANGED).sendToTarget();
     }
 
     public IccCard.State getSimState() {
@@ -544,6 +568,10 @@ public class KeyguardUpdateMonitor {
 
     public void reportFailedAttempt() {
         mFailedAttempts++;
+    }
+
+    public boolean isClockVisible() {
+        return mClockVisible;
     }
 
 }
