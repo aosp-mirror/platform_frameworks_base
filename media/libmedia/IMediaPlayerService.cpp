@@ -30,9 +30,7 @@
 namespace android {
 
 enum {
-    CREATE_URL = IBinder::FIRST_CALL_TRANSACTION,
-    CREATE_FD,
-    CREATE_STREAM,
+    CREATE = IBinder::FIRST_CALL_TRANSACTION,
     DECODE_URL,
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
@@ -60,28 +58,14 @@ public:
     }
 
     virtual sp<IMediaPlayer> create(
-            pid_t pid, const sp<IMediaPlayerClient>& client,
-            const char* url, const KeyedVector<String8, String8> *headers, int audioSessionId) {
+            pid_t pid, const sp<IMediaPlayerClient>& client, int audioSessionId) {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
         data.writeInt32(pid);
         data.writeStrongBinder(client->asBinder());
-        data.writeCString(url);
-
-        if (headers == NULL) {
-            data.writeInt32(0);
-        } else {
-            // serialize the headers
-            data.writeInt32(headers->size());
-            for (size_t i = 0; i < headers->size(); ++i) {
-                data.writeString8(headers->keyAt(i));
-                data.writeString8(headers->valueAt(i));
-            }
-        }
         data.writeInt32(audioSessionId);
 
-        remote()->transact(CREATE_URL, data, &reply);
-
+        remote()->transact(CREATE, data, &reply);
         return interface_cast<IMediaPlayer>(reply.readStrongBinder());
     }
 
@@ -92,38 +76,6 @@ public:
         data.writeInt32(pid);
         remote()->transact(CREATE_MEDIA_RECORDER, data, &reply);
         return interface_cast<IMediaRecorder>(reply.readStrongBinder());
-    }
-
-    virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd,
-            int64_t offset, int64_t length, int audioSessionId)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
-        data.writeInt32(pid);
-        data.writeStrongBinder(client->asBinder());
-        data.writeFileDescriptor(fd);
-        data.writeInt64(offset);
-        data.writeInt64(length);
-        data.writeInt32(audioSessionId);
-
-        remote()->transact(CREATE_FD, data, &reply);
-
-        return interface_cast<IMediaPlayer>(reply.readStrongBinder());;
-    }
-
-    virtual sp<IMediaPlayer> create(
-            pid_t pid, const sp<IMediaPlayerClient> &client,
-            const sp<IStreamSource> &source, int audioSessionId) {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
-        data.writeInt32(static_cast<int32_t>(pid));
-        data.writeStrongBinder(client->asBinder());
-        data.writeStrongBinder(source->asBinder());
-        data.writeInt32(static_cast<int32_t>(audioSessionId));
-
-        remote()->transact(CREATE_STREAM, data, &reply);
-
-        return interface_cast<IMediaPlayer>(reply.readStrongBinder());;
     }
 
     virtual sp<IMemory> decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
@@ -181,62 +133,16 @@ status_t BnMediaPlayerService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch(code) {
-        case CREATE_URL: {
+        case CREATE: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             pid_t pid = data.readInt32();
             sp<IMediaPlayerClient> client =
                 interface_cast<IMediaPlayerClient>(data.readStrongBinder());
-            const char* url = data.readCString();
-
-            KeyedVector<String8, String8> headers;
-            int32_t numHeaders = data.readInt32();
-            for (int i = 0; i < numHeaders; ++i) {
-                String8 key = data.readString8();
-                String8 value = data.readString8();
-                headers.add(key, value);
-            }
             int audioSessionId = data.readInt32();
-
-            sp<IMediaPlayer> player = create(
-                    pid, client, url, numHeaders > 0 ? &headers : NULL, audioSessionId);
-
+            sp<IMediaPlayer> player = create(pid, client, audioSessionId);
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;
-        case CREATE_FD: {
-            CHECK_INTERFACE(IMediaPlayerService, data, reply);
-            pid_t pid = data.readInt32();
-            sp<IMediaPlayerClient> client = interface_cast<IMediaPlayerClient>(data.readStrongBinder());
-            int fd = dup(data.readFileDescriptor());
-            int64_t offset = data.readInt64();
-            int64_t length = data.readInt64();
-            int audioSessionId = data.readInt32();
-
-            sp<IMediaPlayer> player = create(pid, client, fd, offset, length, audioSessionId);
-            reply->writeStrongBinder(player->asBinder());
-            return NO_ERROR;
-        } break;
-        case CREATE_STREAM:
-        {
-            CHECK_INTERFACE(IMediaPlayerService, data, reply);
-
-            pid_t pid = static_cast<pid_t>(data.readInt32());
-
-            sp<IMediaPlayerClient> client =
-                interface_cast<IMediaPlayerClient>(data.readStrongBinder());
-
-            sp<IStreamSource> source =
-                interface_cast<IStreamSource>(data.readStrongBinder());
-
-            int audioSessionId = static_cast<int>(data.readInt32());
-
-            sp<IMediaPlayer> player =
-                create(pid, client, source, audioSessionId);
-
-            reply->writeStrongBinder(player->asBinder());
-            return OK;
-            break;
-        }
         case DECODE_URL: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             const char* url = data.readCString();

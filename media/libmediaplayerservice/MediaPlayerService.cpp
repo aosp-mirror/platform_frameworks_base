@@ -176,6 +176,16 @@ bool findMetadata(const Metadata::Filter& filter, const int32_t val)
 
 namespace android {
 
+static bool checkPermission(const char* permissionString) {
+#ifndef HAVE_ANDROID_OS
+    return true;
+#endif
+    if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
+    bool ok = checkCallingPermission(String16(permissionString));
+    if (!ok) LOGE("Request requires %s", permissionString);
+    return ok;
+}
+
 // TODO: Temp hack until we can register players
 typedef struct {
     const char *extension;
@@ -245,31 +255,8 @@ sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever(pid_t pi
     return retriever;
 }
 
-sp<IMediaPlayer> MediaPlayerService::create(
-        pid_t pid, const sp<IMediaPlayerClient>& client, const char* url,
-        const KeyedVector<String8, String8> *headers, int audioSessionId)
-{
-    int32_t connId = android_atomic_inc(&mNextConnId);
-
-    sp<Client> c = new Client(
-            this, pid, connId, client, audioSessionId,
-            IPCThreadState::self()->getCallingUid());
-
-    LOGV("Create new client(%d) from pid %d, uid %d, url=%s, connId=%d, audioSessionId=%d",
-            connId, pid, IPCThreadState::self()->getCallingUid(), url, connId, audioSessionId);
-    if (NO_ERROR != c->setDataSource(url, headers))
-    {
-        c.clear();
-        return c;
-    }
-    wp<Client> w = c;
-    Mutex::Autolock lock(mLock);
-    mClients.add(w);
-    return c;
-}
-
 sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClient>& client,
-        int fd, int64_t offset, int64_t length, int audioSessionId)
+        int audioSessionId)
 {
     int32_t connId = android_atomic_inc(&mNextConnId);
 
@@ -277,40 +264,14 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
             this, pid, connId, client, audioSessionId,
             IPCThreadState::self()->getCallingUid());
 
-    LOGV("Create new client(%d) from pid %d, uid %d, fd=%d, offset=%lld, "
-         "length=%lld, audioSessionId=%d", connId, pid,
-         IPCThreadState::self()->getCallingUid(), fd, offset, length, audioSessionId);
-    if (NO_ERROR != c->setDataSource(fd, offset, length)) {
-        c.clear();
-    } else {
-        wp<Client> w = c;
+    LOGV("Create new client(%d) from pid %d, uid %d, ", connId, pid,
+         IPCThreadState::self()->getCallingUid());
+
+    wp<Client> w = c;
+    {
         Mutex::Autolock lock(mLock);
         mClients.add(w);
     }
-    ::close(fd);
-    return c;
-}
-
-sp<IMediaPlayer> MediaPlayerService::create(
-        pid_t pid, const sp<IMediaPlayerClient> &client,
-        const sp<IStreamSource> &source, int audioSessionId) {
-    int32_t connId = android_atomic_inc(&mNextConnId);
-
-    sp<Client> c = new Client(
-            this, pid, connId, client, audioSessionId,
-            IPCThreadState::self()->getCallingUid());
-
-    LOGV("Create new client(%d) from pid %d, audioSessionId=%d",
-         connId, pid, audioSessionId);
-
-    if (OK != c->setDataSource(source)) {
-        c.clear();
-    } else {
-        wp<Client> w = c;
-        Mutex::Autolock lock(mLock);
-        mClients.add(w);
-    }
-
     return c;
 }
 
@@ -701,6 +662,14 @@ status_t MediaPlayerService::Client::setDataSource(
     if (url == NULL)
         return UNKNOWN_ERROR;
 
+    if ((strncmp(url, "http://", 7) == 0) ||
+        (strncmp(url, "https://", 8) == 0) ||
+        (strncmp(url, "rtsp://", 7) == 0)) {
+        if (!checkPermission("android.permission.INTERNET")) {
+            return PERMISSION_DENIED;
+        }
+    }
+
     if (strncmp(url, "content://", 10) == 0) {
         // get a filedescriptor for the content Uri and
         // pass it to the setDataSource(fd) method
@@ -781,6 +750,7 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
     // now set data source
     mStatus = p->setDataSource(fd, offset, length);
     if (mStatus == NO_ERROR) mPlayer = p;
+
     return mStatus;
 }
 
