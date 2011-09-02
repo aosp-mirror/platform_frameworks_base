@@ -162,7 +162,17 @@ import android.annotation.SdkConstant;
  *     </tr>
  *     </tbody>
  * </table>
+ * 
+ * @deprecated Live folders are no longer supported by Android.  These have been
+ * replaced by the new
+ * <a href="{@docRoot}guide/topics/appwidgets/index.html#collections">AppWidget Collection</a>
+ * APIs introduced in {@link android.os.Build.VERSION_CODES#HONEYCOMB}.  These provide
+ * all of the features of live folders plus many more.  The use of live folders is greatly
+ * discouraged because of security issues they introduce -- publishing a live folder requires
+ * making all data show for the live folder available to all applications with no
+ * permissions protecting it.
  */
+@Deprecated
 public final class LiveFolders implements BaseColumns {
     /**
      * <p>Content provider column.</p>
