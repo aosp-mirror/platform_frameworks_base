@@ -161,6 +161,7 @@ public class Switch extends CompoundButton {
         mMinFlingVelocity = config.getScaledMinimumFlingVelocity();
 
         // Refresh display with current params
+        refreshDrawableState();
         setChecked(isChecked());
     }
 
@@ -632,8 +633,9 @@ public class Switch extends CompoundButton {
         int[] myDrawableState = getDrawableState();
 
         // Set the state of the Drawable
-        mThumbDrawable.setState(myDrawableState);
-        mTrackDrawable.setState(myDrawableState);
+        // Drawable may be null when checked state is set from XML, from super constructor
+        if (mThumbDrawable != null) mThumbDrawable.setState(myDrawableState);
+        if (mTrackDrawable != null) mTrackDrawable.setState(myDrawableState);
 
         invalidate();
     }
