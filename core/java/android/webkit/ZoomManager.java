@@ -58,13 +58,6 @@ class ZoomManager {
     private ZoomControlExternal mExternalZoomControl;
 
     /*
-     * For large screen devices, the defaultScale usually set to 1.0 and
-     * equal to the overview scale, to differentiate the zoom level for double tapping,
-     * a default reading level scale is used.
-     */
-    private static final float DEFAULT_READING_LEVEL_SCALE = 1.5f;
-
-    /*
      * The scale factors that determine the upper and lower bounds for the
      * default zoom scale.
      */
@@ -151,6 +144,19 @@ class ZoomManager {
     private float mDefaultScale;
     private float mInvDefaultScale;
 
+    /*
+     * The scale factor that is used to determine the zoom level for reading text.
+     * The value is initially set to equal the display density.
+     * TODO: Support changing this in WebSettings
+     */
+    private float mReadingLevelScale;
+
+    /*
+     * The scale factor that is used as the minimum increment when going from
+     * overview to reading level on a double tap.
+     */
+    private static float MIN_DOUBLE_TAP_SCALE_INCREMENT = 0.5f;
+
     // the current computed zoom scale and its inverse.
     private float mActualScale;
     private float mInvActualScale;
@@ -230,6 +236,7 @@ class ZoomManager {
         setDefaultZoomScale(density);
         mActualScale = density;
         mInvActualScale = 1 / density;
+        mReadingLevelScale = density;
         mTextWrapScale = density;
     }
 
@@ -304,13 +311,7 @@ class ZoomManager {
     }
 
     public final float getReadingLevelScale() {
-        return computeScaleWithLimits(computeReadingLevelScale(getZoomOverviewScale()));
-    }
-
-    /* package */ final static float computeReadingLevelScale(float scale) {
-        // The reading scale is at least 0.5f apart from the input scale.
-        final float MIN_SCALE_DIFF = 0.5f;
-        return Math.max(scale + MIN_SCALE_DIFF, DEFAULT_READING_LEVEL_SCALE);
+        return mReadingLevelScale;
     }
 
     public final float getInvDefaultScale() {
@@ -652,7 +653,7 @@ class ZoomManager {
         } else if (!mInZoomOverview && willScaleTriggerZoom(getZoomOverviewScale())) {
             zoomToOverview();
         } else {
-            zoomToReadingLevel();
+            zoomToReadingLevelOrMore();
         }
     }
 
@@ -683,8 +684,10 @@ class ZoomManager {
             !mWebView.getSettings().getUseFixedViewport());
     }
 
-    private void zoomToReadingLevel() {
-        final float readingScale = getReadingLevelScale();
+    private void zoomToReadingLevelOrMore() {
+        final float zoomScale = Math.max(getReadingLevelScale(),
+                mActualScale + MIN_DOUBLE_TAP_SCALE_INCREMENT);
+
         int left = mWebView.nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
         if (left != WebView.NO_LEFTEDGE) {
             // add a 5pt padding to the left edge.
@@ -693,13 +696,13 @@ class ZoomManager {
             // Re-calculate the zoom center so that the new scroll x will be
             // on the left edge.
             if (viewLeft > 0) {
-                mZoomCenterX = viewLeft * readingScale / (readingScale - mActualScale);
+                mZoomCenterX = viewLeft * zoomScale / (zoomScale - mActualScale);
             } else {
                 mWebView.scrollBy(viewLeft, 0);
                 mZoomCenterX = 0;
             }
         }
-        startZoomAnimation(readingScale,
+        startZoomAnimation(zoomScale,
             !mWebView.getSettings().getUseFixedViewport());
     }
 
