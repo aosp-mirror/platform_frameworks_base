@@ -165,11 +165,13 @@ public class SwipeHelper {
             case MotionEvent.ACTION_DOWN:
                 mDragging = false;
                 mCurrView = mCallback.getChildAtPosition(ev);
-                mCurrAnimView = mCallback.getChildContentView(mCurrView);
-                mCanCurrViewBeDimissed = mCallback.canChildBeDismissed(mCurrView);
                 mVelocityTracker.clear();
-                mVelocityTracker.addMovement(ev);
-                mInitialTouchPos = getPos(ev);
+                if (mCurrView != null) {
+                    mCurrAnimView = mCallback.getChildContentView(mCurrView);
+                    mCanCurrViewBeDimissed = mCallback.canChildBeDismissed(mCurrView);
+                    mVelocityTracker.addMovement(ev);
+                    mInitialTouchPos = getPos(ev);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mCurrView != null) {
