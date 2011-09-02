@@ -88,7 +88,7 @@ DbgContext* CreateDbgContext(const unsigned version, const gl_hooks_t * const ho
     msg.set_arg1(MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     Send(msg, cmd);
 
-    *(DbgContext **)pthread_getspecific(dbgEGLThreadLocalStorageKey) = dbg;
+    pthread_setspecific(dbgEGLThreadLocalStorageKey, dbg);
     return dbg;
 }
 
