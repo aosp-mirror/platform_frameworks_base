@@ -232,8 +232,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
         if (widget.isFocused() && !widget.didTouchFocusSelect()) {
             if (action == MotionEvent.ACTION_DOWN) {
-              boolean cap = isSelecting(buffer);
-              if (cap) {
+              if (isSelecting(buffer)) {
                   int offset = widget.getOffsetForPosition(event.getX(), event.getY());
 
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
@@ -245,9 +244,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                   widget.getParent().requestDisallowInterceptTouchEvent(true);
               }
             } else if (action == MotionEvent.ACTION_MOVE) {
-                boolean cap = isSelecting(buffer);
-
-                if (cap && handled) {
+                if (isSelecting(buffer) && handled) {
                     // Before selecting, make sure we've moved out of the "slop".
                     // handled will be true, if we're in select mode AND we're
                     // OUT of the slop
@@ -279,7 +276,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                 if (isSelecting(buffer)) {
                     buffer.removeSpan(LAST_TAP_DOWN);
                     Selection.extendSelection(buffer, offset);
-                } else {
+                } else if (!widget.shouldIgnoreActionUpEvent()) {
                     Selection.setSelection(buffer, offset);
                 }
 

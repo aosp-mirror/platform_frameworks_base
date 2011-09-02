@@ -8243,10 +8243,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
-        final boolean touchIsFinished = action == MotionEvent.ACTION_UP && !mIgnoreActionUpEvent &&
-                isFocused();
+        final boolean touchIsFinished = (action == MotionEvent.ACTION_UP) &&
+                !shouldIgnoreActionUpEvent() && isFocused();
 
-        if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
+         if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
                 && mText instanceof Spannable && mLayout != null) {
             boolean handled = false;
 
@@ -8254,9 +8254,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
             }
 
-            if (mLinksClickable && mAutoLinkMask != 0 && mTextIsSelectable && touchIsFinished) {
+            if (touchIsFinished && mLinksClickable && mAutoLinkMask != 0 && mTextIsSelectable) {
                 // The LinkMovementMethod which should handle taps on links has not been installed
-                // to support text selection. We reproduce its behavior here to open links.
+                // on non editable text that support text selection.
+                // We reproduce its behavior here to open links for these.
                 ClickableSpan[] links = ((Spannable) mText).getSpans(getSelectionStart(),
                         getSelectionEnd(), ClickableSpan.class);
 
@@ -8266,7 +8267,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
-            if ((isTextEditable() || mTextIsSelectable) && touchIsFinished) {
+            if (touchIsFinished && (isTextEditable() || mTextIsSelectable)) {
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null) {
@@ -8277,16 +8278,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 boolean selectAllGotFocus = mSelectAllOnFocus && didTouchFocusSelect();
-                if (!selectAllGotFocus && hasSelection()) {
-                    startSelectionActionMode();
-                } else {
-                    hideControllers();
-                    if (!selectAllGotFocus && mText.length() > 0) {
-                        if (isCursorInsideEasyCorrectionSpan()) {
-                            showSuggestions();
-                        } else if (hasInsertionController()) {
-                            getInsertionController().show();
-                        }
+                hideControllers();
+                if (!selectAllGotFocus && mText.length() > 0) {
+                    if (isCursorInsideEasyCorrectionSpan()) {
+                        showSuggestions();
+                    } else if (hasInsertionController()) {
+                        getInsertionController().show();
                     }
                 }
 
@@ -8398,7 +8395,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.cancelLongPress();
         mIgnoreActionUpEvent = true;
     }
-    
+
+    /**
+     * This method is only valid during a touch event.
+     *
+     * @return true when the ACTION_UP event should be ignored, false otherwise.
+     *
+     * @hide
+     */
+    public boolean shouldIgnoreActionUpEvent() {
+        return mIgnoreActionUpEvent;
+    }
+
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
         if (mMovement != null && mText instanceof Spannable &&
