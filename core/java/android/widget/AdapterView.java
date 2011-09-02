@@ -926,6 +926,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         }
         event.setItemCount(getCount());
         event.setCurrentItemIndex(getSelectedItemPosition());
+        event.setFromIndex(mFirstPosition);
+        event.setToIndex(mFirstPosition + getChildCount());
     }
 
     @Override
