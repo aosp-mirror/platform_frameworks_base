@@ -20,7 +20,7 @@ import android.app.Activity;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.HashMap;
+import java.util.WeakHashMap;
 
 /**
  * Manages NFC API's that are coupled to the life-cycle of an Activity.
@@ -38,7 +38,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub {
     static final Boolean DBG = false;
 
     final NfcAdapter mAdapter;
-    final HashMap<Activity, NfcActivityState> mNfcState;  // contents protected by this
+    final WeakHashMap<Activity, NfcActivityState> mNfcState;  // contents protected by this
     final NfcEvent mDefaultEvent;  // can re-use one NfcEvent because it just contains adapter
 
     /**
@@ -60,7 +60,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub {
 
     public NfcActivityManager(NfcAdapter adapter) {
         mAdapter = adapter;
-        mNfcState = new HashMap<Activity, NfcActivityState>();
+        mNfcState = new WeakHashMap<Activity, NfcActivityState>();
         mDefaultEvent = new NfcEvent(mAdapter);
     }
 
@@ -86,6 +86,13 @@ public final class NfcActivityManager extends INdefPushCallback.Stub {
             state.resumed = false;
             updateNfcService(state);
         }
+    }
+
+    /**
+     * onDestroy hook from fragment attached to activity
+     */
+    public void onDestroy(Activity activity) {
+        mNfcState.remove(activity);
     }
 
     public synchronized void setNdefPushMessage(Activity activity, NdefMessage message) {
@@ -214,4 +221,5 @@ public final class NfcActivityManager extends INdefPushCallback.Stub {
             callback.onNdefPushComplete(mDefaultEvent);
         }
     }
+
 }
