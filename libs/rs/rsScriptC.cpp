@@ -44,6 +44,7 @@ ScriptC::~ScriptC() {
         BT = NULL;
     }
 #endif
+    mRSC->mHal.funcs.script.invokeFreeChildren(mRSC, this);
     mRSC->mHal.funcs.script.destroy(mRSC, this);
 }
 
