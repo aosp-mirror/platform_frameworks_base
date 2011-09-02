@@ -37,7 +37,6 @@
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
             android:scaleType="center"
-            android:clickable="true"
             android:background="@drawable/recents_thumbnail_overlay">
             <ImageView android:id="@+id/app_thumbnail_image"
                 android:layout_width="match_parent"

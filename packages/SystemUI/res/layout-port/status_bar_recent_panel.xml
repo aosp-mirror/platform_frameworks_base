@@ -38,6 +38,7 @@
             android:orientation="horizontal"
             android:clipChildren="false"
             android:layout_marginTop="@*android:dimen/status_bar_height">
+
             <com.android.systemui.recent.RecentsVerticalScrollView
                 android:id="@+id/recents_container"
                 android:layout_width="match_parent"
@@ -61,7 +62,6 @@
                 </LinearLayout>
 
             </com.android.systemui.recent.RecentsVerticalScrollView>
-
 
         </LinearLayout>
 
