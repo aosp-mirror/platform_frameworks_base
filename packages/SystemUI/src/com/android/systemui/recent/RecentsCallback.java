@@ -28,6 +28,7 @@ public interface RecentsCallback {
     void handleSwipe(View selectedView);
     void handleLongPress(View selectedView, View anchorView);
     void handleShowBackground(boolean show);
+    void dismiss();
 
     // TODO: find another way to get this info from RecentsPanelView
     boolean isRecentsVisible();
