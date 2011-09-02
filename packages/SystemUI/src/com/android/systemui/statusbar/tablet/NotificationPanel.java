@@ -147,7 +147,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         public boolean onPreDraw() {
             getViewTreeObserver().removeOnPreDrawListener(this);
             mChoreo.startAnimation(true);
-            return true;
+            return false;
         }
     };
 
