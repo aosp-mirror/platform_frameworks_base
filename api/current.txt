@@ -18463,7 +18463,7 @@ package android.service.textservice {
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textservice.SpellCheckerService";
   }
 
-  public abstract class SpellCheckerService.Session {
+  public static abstract class SpellCheckerService.Session {
     ctor public SpellCheckerService.Session();
     method public android.os.Bundle getBundle();
     method public java.lang.String getLocale();
