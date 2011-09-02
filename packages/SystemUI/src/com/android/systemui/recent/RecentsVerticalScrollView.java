@@ -84,15 +84,26 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
             if (old == null) {
                 view.setClickable(true);
                 view.setOnLongClickListener(mOnLongClick);
-
-                final View thumbnail = view.findViewById(R.id.app_thumbnail);
-                // thumbnail is set to clickable in the layout file
-                thumbnail.setOnClickListener(new OnClickListener() {
+                view.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        mCallback.handleOnClick(view);
+                        mCallback.dismiss();
                     }
                 });
 
+                OnClickListener launchAppListener = new OnClickListener() {
+                    public void onClick(View v) {
+                        mCallback.handleOnClick(view);
+                    }
+                };
+                final View thumbnail = view.findViewById(R.id.app_thumbnail);
+                thumbnail.setClickable(true);
+                thumbnail.setOnClickListener(launchAppListener);
+                final View appTitle = view.findViewById(R.id.app_label);
+                appTitle.setClickable(true);
+                appTitle.setOnClickListener(launchAppListener);
+                final View calloutLine = view.findViewById(R.id.recents_callout_line);
+                calloutLine.setClickable(true);
+                calloutLine.setOnClickListener(launchAppListener);
                 mLinearLayout.addView(view);
             }
         }

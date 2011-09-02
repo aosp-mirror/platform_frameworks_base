@@ -243,8 +243,11 @@ public class RecentsPanelView extends RelativeLayout
         }
     }
 
+    public void dismiss() {
+        hide(true);
+    }
+
     public void hide(boolean animate) {
-        mShowing = false;
         if (!animate) {
             setVisibility(View.GONE);
         }

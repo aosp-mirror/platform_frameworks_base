@@ -196,7 +196,11 @@ public class SwipeHelper {
         final View animView = mCallback.getChildContentView(view);
         final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
         float newPos;
-        if (velocity < 0 || (velocity == 0 && getTranslation(animView) < 0)) {
+
+        if (velocity < 0
+                || (velocity == 0 && getTranslation(animView) < 0)
+                // if we use the Menu to dismiss an item in landscape, animate up
+                || (velocity == 0 && getTranslation(animView) == 0 && mSwipeDirection == Y)) {
             newPos = -getSize(animView);
         } else {
             newPos = getSize(animView);
