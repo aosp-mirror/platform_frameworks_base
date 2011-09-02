@@ -59,7 +59,9 @@ public class BluetoothProfileState extends StateMachine {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
+            if (device == null) {
+                return;
+            }
             if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);
                 if (mProfile == HFP && (newState == BluetoothProfile.STATE_CONNECTED ||
