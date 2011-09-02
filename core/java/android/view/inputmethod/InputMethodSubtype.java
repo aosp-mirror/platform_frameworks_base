@@ -57,6 +57,7 @@ public final class InputMethodSubtype implements Parcelable {
      * @param locale The locale supported by the subtype
      * @param mode The mode supported by the subtype
      * @param extraValue The extra value of the subtype
+     * @hide
      */
     public InputMethodSubtype(
             int nameId, int iconId, String locale, String mode, String extraValue) {
@@ -71,6 +72,7 @@ public final class InputMethodSubtype implements Parcelable {
      * @param mode The mode supported by the subtype
      * @param extraValue The extra value of the subtype
      * @param isAuxiliary true when this subtype is one shot subtype.
+     * @hide
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary) {
