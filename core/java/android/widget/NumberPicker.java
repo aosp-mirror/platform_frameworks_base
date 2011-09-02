@@ -33,6 +33,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Align;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -48,6 +49,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.LayoutInflater.Filter;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
@@ -471,7 +474,7 @@ public class NumberPicker extends LinearLayout {
         // the fading edge effect implemented by View and we need our
         // draw() method to be called. Therefore, we declare we will draw.
         setWillNotDraw(false);
-        setDrawSelectorWheel(false);
+        setDrawScrollWheel(false);
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
@@ -561,7 +564,7 @@ public class NumberPicker extends LinearLayout {
             public void onAnimationEnd(Animator animation) {
                 if (!mCanceled) {
                     // if canceled => we still want the wheel drawn
-                    setDrawSelectorWheel(false);
+                    setDrawScrollWheel(false);
                 }
                 mCanceled = false;
                 mSelectorPaint.setAlpha(255);
@@ -587,7 +590,7 @@ public class NumberPicker extends LinearLayout {
             // Start with shown selector wheel and hidden controls. When made
             // visible hide the selector and fade-in the controls to suggest
             // fling interaction.
-            setDrawSelectorWheel(true);
+            setDrawScrollWheel(true);
             hideInputControls();
         }
     }
@@ -630,7 +633,7 @@ public class NumberPicker extends LinearLayout {
                         || (!mDecrementButton.isShown()
                                 && isEventInViewHitRect(event, mDecrementButton))) {
                     mAdjustScrollerOnUpEvent = false;
-                    setDrawSelectorWheel(true);
+                    setDrawScrollWheel(true);
                     hideInputControls();
                     return true;
                 }
@@ -641,7 +644,7 @@ public class NumberPicker extends LinearLayout {
                 if (deltaDownY > mTouchSlop) {
                     mBeginEditOnUpEvent = false;
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
-                    setDrawSelectorWheel(true);
+                    setDrawScrollWheel(true);
                     hideInputControls();
                     return true;
                 }
@@ -678,7 +681,7 @@ public class NumberPicker extends LinearLayout {
                 break;
             case MotionEvent.ACTION_UP:
                 if (mBeginEditOnUpEvent) {
-                    setDrawSelectorWheel(false);
+                    setDrawScrollWheel(false);
                     showInputControls(mShowInputControlsAnimimationDuration);
                     mInputText.requestFocus();
                     InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
@@ -1135,6 +1138,12 @@ public class NumberPicker extends LinearLayout {
         }
     }
 
+    @Override
+    public void sendAccessibilityEvent(int eventType) {
+        // Do not send accessibility events - we want the user to
+        // perceive this widget as several controls rather as a whole.
+    }
+
     /**
      * Resets the selector indices and clear the cached
      * string representation of these indices.
@@ -1192,10 +1201,19 @@ public class NumberPicker extends LinearLayout {
     /**
      * Sets if to <code>drawSelectionWheel</code>.
      */
-    private void setDrawSelectorWheel(boolean drawSelectorWheel) {
+    private void setDrawScrollWheel(boolean drawSelectorWheel) {
         mDrawSelectorWheel = drawSelectorWheel;
         // do not fade if the selector wheel not shown
         setVerticalFadingEdgeEnabled(drawSelectorWheel);
+
+        if (mFlingable && mDrawSelectorWheel
+                && AccessibilityManager.getInstance(mContext).isEnabled()) {
+            AccessibilityManager.getInstance(mContext).interrupt();
+            String text = mContext.getString(R.string.number_picker_increment_scroll_action);
+            mInputText.setContentDescription(text);
+            mInputText.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            mInputText.setContentDescription(null);
+        }
     }
 
     private void initializeScrollWheel() {
@@ -1429,6 +1447,12 @@ public class NumberPicker extends LinearLayout {
             mInputText.setText(mDisplayedValues[mValue - mMinValue]);
         }
         mInputText.setSelection(mInputText.getText().length());
+
+        if (mFlingable && AccessibilityManager.getInstance(mContext).isEnabled()) {
+            String text = mContext.getString(R.string.number_picker_increment_scroll_mode,
+                    mInputText.getText());
+            mInputText.setContentDescription(text);
+        }
     }
 
     /**
