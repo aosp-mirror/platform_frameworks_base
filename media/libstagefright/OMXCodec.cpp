@@ -2442,8 +2442,10 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                 // Don't notify clients if the output port settings change
                 // wasn't of importance to them, i.e. it may be that just the
                 // number of buffers has changed and nothing else.
-                mOutputPortSettingsHaveChanged =
-                    formatHasNotablyChanged(oldOutputFormat, mOutputFormat);
+                bool formatChanged = formatHasNotablyChanged(oldOutputFormat, mOutputFormat);
+                if (!mOutputPortSettingsHaveChanged) {
+                    mOutputPortSettingsHaveChanged = formatChanged;
+                }
 
                 enablePortAsync(portIndex);
 
