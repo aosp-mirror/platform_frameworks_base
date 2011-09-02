@@ -59,8 +59,7 @@ ending on the data collection date noted below.</p>
 
 <div class="dashboard-panel">
 
-<img alt="" width="400" height="250"
-src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=Xlarge%20/%20mdpi|Large%20/%20mdpi|Normal%20/%20hdpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Small%20/%20hdpi&chd=t%3A0.9,2.8,75,1.0,17,3.3" />
+<img alt="" width="400" height="250" src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=Xlarge%20/%20mdpi| Large%20/%20mdpi|Normal%20/%20hdpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Small%20/%20hdpi&chd=t%3A1.5, 3.2,74,0.9,16.9,3.5" />
 
 <table>
 <tr>
@@ -73,29 +72,29 @@ src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=
 <tr><th scope="row">small</th> 
 <td></td>     <!-- small/ldpi -->
 <td></td>     <!-- small/mdpi -->
-<td>3.3%</td> <!-- small/hdpi -->
+<td>3.5%</td> <!-- small/hdpi -->
 <td></td>     <!-- small/xhdpi -->
 </tr> 
 <tr><th scope="row">normal</th> 
-<td>1%</td>  <!-- normal/ldpi -->
-<td>17%</td> <!-- normal/mdpi -->
-<td>75%</td> <!-- normal/hdpi -->
+<td>0.9%</td>  <!-- normal/ldpi -->
+<td>16.9%</td> <!-- normal/mdpi -->
+<td>74%</td> <!-- normal/hdpi -->
 <td></td>      <!-- normal/xhdpi -->
 </tr> 
 <tr><th scope="row">large</th> 
 <td></td>     <!-- large/ldpi -->
-<td>2.8%</td> <!-- large/mdpi -->
+<td>3.2%</td> <!-- large/mdpi -->
 <td></td>     <!-- large/hdpi -->
 <td></td>     <!-- large/xhdpi -->
 </tr> 
 <tr><th scope="row">xlarge</th> 
 <td></td>     <!-- xlarge/ldpi -->
-<td>0.9%</td> <!-- xlarge/mdpi -->
+<td>1.5%</td> <!-- xlarge/mdpi -->
 <td></td>     <!-- xlarge/hdpi -->
 <td></td>     <!-- xlarge/xhdpi -->
 </tr> 
 </table>
 
-<p><em>Data collected during a 7-day period ending on July 1, 2011</em></p>
+<p><em>Data collected during a 7-day period ending on September 2, 2011</em></p>
 </div>
 
