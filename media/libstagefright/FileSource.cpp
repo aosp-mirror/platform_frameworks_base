@@ -110,6 +110,8 @@ ssize_t FileSource::readAt(off64_t offset, void *data, size_t size) {
 }
 
 status_t FileSource::getSize(off64_t *size) {
+    Mutex::Autolock autoLock(mLock);
+
     if (mFd < 0) {
         return NO_INIT;
     }
