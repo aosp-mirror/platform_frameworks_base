@@ -2318,12 +2318,11 @@ class MediaArtistNativeHelper {
             editSettings.audioBitrate = Bitrate.BR_64_KBPS;
             editSettings.audioSamplingFreq = AudioSamplingFrequency.FREQ_32000;
 
-            editSettings.videoBitrate = Bitrate.BR_5_MBPS;
-            //editSettings.videoFormat = VideoFormat.MPEG4;
             editSettings.videoFormat = VideoFormat.H264;
             editSettings.videoFrameRate = VideoFrameRate.FR_30_FPS;
             editSettings.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(),
                     m.getHeight());
+            editSettings.videoBitrate = findVideoBitrate(editSettings.videoFrameSize);
         } else {
             MediaImageItem m = (MediaImageItem)lMediaItem;
             editSettings.audioBitrate = Bitrate.BR_64_KBPS;
@@ -2331,11 +2330,11 @@ class MediaArtistNativeHelper {
             editSettings.audioFormat = AudioFormat.AAC;
             editSettings.audioSamplingFreq = AudioSamplingFrequency.FREQ_32000;
 
-            editSettings.videoBitrate = Bitrate.BR_5_MBPS;
             editSettings.videoFormat = VideoFormat.H264;
             editSettings.videoFrameRate = VideoFrameRate.FR_30_FPS;
             editSettings.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(),
                     m.getScaledHeight());
+            editSettings.videoBitrate = findVideoBitrate(editSettings.videoFrameSize);
         }
 
         editSettings.outputFile = EffectClipPath;
@@ -2395,11 +2394,12 @@ class MediaArtistNativeHelper {
         e.audioFormat = AudioFormat.AAC;
         e.audioSamplingFreq = AudioSamplingFrequency.FREQ_32000;
 
-        e.videoBitrate = Bitrate.BR_5_MBPS;
         e.videoFormat = VideoFormat.H264;
         e.videoFrameRate = VideoFrameRate.FR_30_FPS;
         e.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(),
                                                            m.getScaledHeight());
+        e.videoBitrate = findVideoBitrate(e.videoFrameSize);
+
         mProcessingState  = PROCESSING_KENBURNS;
         mProcessingObject = m;
         err = generateClip(e);
@@ -2490,10 +2490,10 @@ class MediaArtistNativeHelper {
         e.audioFormat = AudioFormat.AAC;
         e.audioSamplingFreq = AudioSamplingFrequency.FREQ_32000;
 
-        e.videoBitrate = Bitrate.BR_5_MBPS;
         e.videoFormat = VideoFormat.H264;
         e.videoFrameRate = VideoFrameRate.FR_30_FPS;
         e.videoFrameSize = getTransitionResolution(m1, m2);
+        e.videoBitrate = findVideoBitrate(e.videoFrameSize);
 
         if (new File(outputFilename).exists()) {
             new File(outputFilename).delete();
@@ -3568,6 +3568,34 @@ class MediaArtistNativeHelper {
     }
 
     /**
+     *  Calculate a reasonable bitrate for generating intermediate clips.
+     */
+    private int findVideoBitrate(int videoFrameSize) {
+        switch (videoFrameSize) {
+            case VideoFrameSize.SQCIF:
+            case VideoFrameSize.QQVGA:
+            case VideoFrameSize.QCIF:
+                return Bitrate.BR_128_KBPS;
+            case VideoFrameSize.QVGA:
+            case VideoFrameSize.CIF:
+                return Bitrate.BR_384_KBPS;
+            case VideoFrameSize.VGA:
+            case VideoFrameSize.WVGA:
+            case VideoFrameSize.NTSC:
+            case VideoFrameSize.nHD:
+            case VideoFrameSize.WVGA16x9:
+                return Bitrate.BR_2_MBPS;
+            case VideoFrameSize.V720p:
+            case VideoFrameSize.W720p:
+            case VideoFrameSize.S720p:
+                return Bitrate.BR_5_MBPS;
+            case VideoFrameSize.V1080p:
+            default:
+                return Bitrate.BR_8_MBPS;
+        }
+    }
+
+    /**
      * This method is responsible for exporting a movie
      *
      * @param filePath The output file path
@@ -3643,7 +3671,6 @@ class MediaArtistNativeHelper {
             case MediaProperties.BITRATE_2M:
                 outBitrate = Bitrate.BR_2_MBPS;
                 break;
-
             case MediaProperties.BITRATE_5M:
                 outBitrate = Bitrate.BR_5_MBPS;
                 break;
