@@ -63,9 +63,6 @@ public:
                                     Variable* data, int flags);
     virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, Variable** cl);
-    virtual void    ReadFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
-
 
 protected:
     void SetQualifiedName(const string& qualified);
@@ -88,11 +85,17 @@ private:
 class BasicType : public Type
 {
 public:
-                    BasicType(const string& name, const string& marshallMethod,
-                              const string& unmarshallMethod,
-                              const string& writeArray,
-                              const string& createArray,
-                              const string& readArray);
+                    BasicType(const string& name,
+                              const string& marshallParcel,
+                              const string& unmarshallParcel,
+                              const string& writeArrayParcel,
+                              const string& createArrayParcel,
+                              const string& readArrayParcel,
+                              const string& marshallRpc,
+                              const string& unmarshallRpc,
+                              const string& writeArrayRpc,
+                              const string& createArrayRpc,
+                              const string& readArrayRpc);
 
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
@@ -108,12 +111,22 @@ public:
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
 
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+
 private:
-    string m_marshallMethod;
-    string m_unmarshallMethod;
-    string m_writeArrayMethod;
-    string m_createArrayMethod;
-    string m_readArrayMethod;
+    string m_marshallParcel;
+    string m_unmarshallParcel;
+    string m_writeArrayParcel;
+    string m_createArrayParcel;
+    string m_readArrayParcel;
+    string m_marshallRpc;
+    string m_unmarshallRpc;
+    string m_writeArrayRpc;
+    string m_createArrayRpc;
+    string m_readArrayRpc;
 };
 
 class BooleanType : public Type
@@ -134,6 +147,11 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
 };
 
 class CharType : public Type
@@ -154,6 +172,11 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
 };
 
 
@@ -318,6 +341,11 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
 };
 
 class ParcelableType : public Type
@@ -370,6 +398,7 @@ public:
                     GenericType(const string& package, const string& name,
                                  const vector<Type*>& args);
 
+    const vector<Type*>& GenericArgumentTypes() const;
     string          GenericArguments() const;
 
     virtual string  ImportType() const;
@@ -404,6 +433,11 @@ public:
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
 
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+    
 private:
     string m_creator;
 };

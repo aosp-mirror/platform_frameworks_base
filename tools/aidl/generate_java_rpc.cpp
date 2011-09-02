@@ -169,7 +169,7 @@ ServiceBaseClass::generate_process()
     this->processMethod->statements->Add(new VariableDeclaration(requestData,
                 new NewExpression(RPC_DATA_TYPE, 1, requestParam)));
 
-    this->resultData = new Variable(RPC_DATA_TYPE, "response");
+    this->resultData = new Variable(RPC_DATA_TYPE, "resultData");
     this->processMethod->statements->Add(new VariableDeclaration(this->resultData,
                 NULL_VALUE));
 }
@@ -299,6 +299,7 @@ ResultDispatcherClass::AddMethod(int index, const string& name, Method** method,
 
     Case* c = new Case(format_int(index));
     c->statements->Add(new MethodCall(new LiteralExpression("this"), name, 1, this->resultParam));
+    c->statements->Add(new Break());
 
     this->methodSwitch->cases.push_back(c);
 }
@@ -579,6 +580,7 @@ generate_service_base_methods(const method_type* method, ServiceBaseClass* servi
     }
 
     // the real call
+    bool first = true;
     Variable* _result = NULL;
     if (0 == strcmp(method->type.type.data, "void")) {
         block->Add(realCall);
@@ -586,6 +588,13 @@ generate_service_base_methods(const method_type* method, ServiceBaseClass* servi
         _result = new Variable(decl->returnType, "_result",
                                 decl->returnTypeDimension);
         block->Add(new VariableDeclaration(_result, realCall));
+
+        // need the result RpcData
+        if (first) {
+            block->Add(new Assignment(serviceBaseClass->resultData,
+                        new NewExpression(RPC_DATA_TYPE)));
+            first = false;
+        }
 
         // marshall the return value
         generate_write_to_data(decl->returnType, block,
@@ -600,6 +609,14 @@ generate_service_base_methods(const method_type* method, ServiceBaseClass* servi
         Variable* v = stubArgs.Get(i++);
 
         if (convert_direction(arg->direction.data) & OUT_PARAMETER) {
+            // need the result RpcData
+            if (first) {
+                block->Add(new Assignment(serviceBaseClass->resultData,
+                            new NewExpression(RPC_DATA_TYPE)));
+                first = false;
+            }
+
+
             generate_write_to_data(t, block, new StringLiteralExpression(arg->name.data),
                     v, serviceBaseClass->resultData);
         }

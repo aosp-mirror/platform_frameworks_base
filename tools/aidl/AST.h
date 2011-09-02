@@ -307,6 +307,13 @@ struct SwitchStatement : public Statement
     virtual void Write(FILE* to);
 };
 
+struct Break : public Statement
+{
+    Break();
+    virtual ~Break();
+    virtual void Write(FILE* to);
+};
+
 struct Method : public ClassElement
 {
     string comment;
