@@ -933,9 +933,32 @@ public class ProgressBar extends View {
         // onDraw will translate the canvas so we draw starting at 0,0
         int right = w - mPaddingRight - mPaddingLeft;
         int bottom = h - mPaddingBottom - mPaddingTop;
+        int top = 0;
+        int left = 0;
 
         if (mIndeterminateDrawable != null) {
-            mIndeterminateDrawable.setBounds(0, 0, right, bottom);
+            if (mOnlyIndeterminate) {
+                // Maintain aspect ratio. Certain kinds of animated drawables
+                // get very confused otherwise.
+                final int intrinsicWidth = mIndeterminateDrawable.getIntrinsicWidth();
+                final int intrinsicHeight = mIndeterminateDrawable.getIntrinsicHeight();
+                final float intrinsicAspect = (float) intrinsicWidth / intrinsicHeight;
+                final float boundAspect = (float) w / h;
+                if (intrinsicAspect != boundAspect) {
+                    if (boundAspect > intrinsicAspect) {
+                        // New width is larger. Make it smaller to match height.
+                        final int width = (int) (h * intrinsicAspect);
+                        left = (w - width) / 2;
+                        right = left + width;
+                    } else {
+                        // New height is larger. Make it smaller to match width.
+                        final int height = (int) (w * (1 / intrinsicAspect));
+                        top = (h - height) / 2;
+                        bottom = top + height;
+                    }
+                }
+            }
+            mIndeterminateDrawable.setBounds(left, top, right, bottom);
         }
         
         if (mProgressDrawable != null) {
