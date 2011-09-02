@@ -191,6 +191,12 @@ public class SyncManager implements OnAccountsUpdateListener {
     private static final long SYNC_ALARM_TIMEOUT_MIN = 30 * 1000; // 30 seconds
     private static final long SYNC_ALARM_TIMEOUT_MAX = 2 * 60 * 60 * 1000; // two hours
 
+    /**
+     * The amount of time to wait after attempting a bind before canceling a sync and disabling
+     * the sync adapter
+     */
+    public static final long BIND_TIMEOUT_MS = 30 * 1000;
+
     public void onAccountsUpdated(Account[] accounts) {
         // remember if this was the first time this was called after an update
         final boolean justBootedUp = mAccounts == INITIAL_ACCOUNTS_ARRAY;
@@ -1068,6 +1074,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             pw.print(" - ");
             pw.print(activeSyncContext.mSyncOperation.dump(false));
             pw.println();
+            if (activeSyncContext.mSyncAdapter == null) {
+                pw.println("   **** Waiting for onServiceConnected ****");
+            }
         }
 
         synchronized (mSyncQueue) {
@@ -1424,6 +1433,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         public void handleMessage(Message msg) {
             long earliestFuturePollTime = Long.MAX_VALUE;
             long nextPendingSyncTime = Long.MAX_VALUE;
+            long nextBindTimeoutTime = Long.MAX_VALUE;
 
             // Setting the value here instead of a method because we want the dumpsys logs
             // to have the most recent value used.
@@ -1431,6 +1441,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 waitUntilReadyToRun();
                 mDataConnectionIsConnected = readDataConnectionState();
                 mSyncManagerWakeLock.acquire();
+                nextBindTimeoutTime = auditRunningSyncsForStuckBindsLocked();
                 // Always do this first so that we be sure that any periodic syncs that
                 // are ready to run have been converted into pending syncs. This allows the
                 // logic that considers the next steps to take based on the set of pending syncs
@@ -1532,11 +1543,42 @@ public class SyncManager implements OnAccountsUpdateListener {
                         break;
                 }
             } finally {
+                nextPendingSyncTime = Math.min(nextBindTimeoutTime, nextPendingSyncTime);
                 manageSyncNotificationLocked();
                 manageSyncAlarmLocked(earliestFuturePollTime, nextPendingSyncTime);
                 mSyncTimeTracker.update();
                 mSyncManagerWakeLock.release();
             }
+        }
+
+        /**
+         * Looks to see if any of the active syncs have been waiting for a bind for too long,
+         * and if so the sync is canceled and the sync adapter is disabled for that account.
+         * @return the earliest time that an active sync can have waited too long to bind,
+         * relative to {@link android.os.SystemClock#elapsedRealtime()}.
+         */
+        private long auditRunningSyncsForStuckBindsLocked() {
+            final long now = SystemClock.elapsedRealtime();
+            long oldest = Long.MAX_VALUE;
+            for (ActiveSyncContext active : mActiveSyncContexts) {
+                if (active.mSyncAdapter == null) {
+                    final long timeoutTime = active.mStartTime + BIND_TIMEOUT_MS;
+                    if (timeoutTime < now) {
+                        Log.w(TAG, "canceling long-running bind and disabling sync for "
+                                + active.mSyncOperation.account + ", authority "
+                                + active.mSyncOperation.authority);
+                        runSyncFinishedOrCanceledLocked(null, active);
+                        ContentResolver.setIsSyncable(active.mSyncOperation.account,
+                                active.mSyncOperation.authority, 0);
+                    } else {
+                        if (oldest > timeoutTime) {
+                            oldest = timeoutTime;
+                        }
+                    }
+                }
+            }
+
+            return oldest;
         }
 
         /**
@@ -1819,13 +1861,17 @@ public class SyncManager implements OnAccountsUpdateListener {
                 synchronized (mSyncQueue){
                     mSyncQueue.remove(candidate);
                 }
-                dispatchSyncOperation(candidate);
+                ActiveSyncContext newSyncContext = dispatchSyncOperation(candidate);
+                if (newSyncContext != null) {
+                    nextReadyToRunTime = Math.min(nextReadyToRunTime,
+                            newSyncContext.mStartTime + BIND_TIMEOUT_MS);
+                }
             }
 
             return nextReadyToRunTime;
      }
 
-        private boolean dispatchSyncOperation(SyncOperation op) {
+        private ActiveSyncContext dispatchSyncOperation(SyncOperation op) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "dispatchSyncOperation: we are going to sync " + op);
                 Log.v(TAG, "num active syncs: " + mActiveSyncContexts.size());
@@ -1842,7 +1888,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Log.d(TAG, "can't find a sync adapter for " + syncAdapterType
                         + ", removing settings for it");
                 mSyncStorageEngine.removeAuthority(op.account, op.authority);
-                return false;
+                return null;
             }
 
             ActiveSyncContext activeSyncContext =
@@ -1855,10 +1901,10 @@ public class SyncManager implements OnAccountsUpdateListener {
             if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
                 Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
                 closeActiveSyncContext(activeSyncContext);
-                return false;
+                return null;
             }
 
-            return true;
+            return activeSyncContext;
         }
 
         private void runBoundToSyncAdapter(final ActiveSyncContext activeSyncContext,
