@@ -127,7 +127,7 @@ public final class BluetoothDeviceProfileState extends StateMachine {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            if (!device.equals(mDevice)) return;
+            if (device == null || !device.equals(mDevice)) return;
 
             if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
                 int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);

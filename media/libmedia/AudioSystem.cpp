@@ -511,9 +511,15 @@ status_t AudioSystem::setDeviceConnectionState(audio_devices_t device,
                                                const char *device_address)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    const char *address = "";
+
     if (aps == 0) return PERMISSION_DENIED;
 
-    return aps->setDeviceConnectionState(device, state, device_address);
+    if (device_address != NULL) {
+        address = device_address;
+    }
+
+    return aps->setDeviceConnectionState(device, state, address);
 }
 
 audio_policy_dev_state_t AudioSystem::getDeviceConnectionState(audio_devices_t device,

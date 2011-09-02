@@ -2295,7 +2295,13 @@ public class AudioService extends IAudioService.Stub {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (btDevice == null) {
+                    return;
+                }
                 String address = btDevice.getAddress();
+                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+                    address = "";
+                }
                 boolean isConnected =
                     (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
                      mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP).equals(address));
@@ -2331,24 +2337,30 @@ public class AudioService extends IAudioService.Stub {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
                 int device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String address = null;
-                if (btDevice != null) {
-                    address = btDevice.getAddress();
-                    BluetoothClass btClass = btDevice.getBluetoothClass();
-                    if (btClass != null) {
-                        switch (btClass.getDeviceClass()) {
-                        case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-                        case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-                            device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
-                            break;
-                        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-                            device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
-                            break;
-                        }
+
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (btDevice == null) {
+                    return;
+                }
+
+                address = btDevice.getAddress();
+                BluetoothClass btClass = btDevice.getBluetoothClass();
+                if (btClass != null) {
+                    switch (btClass.getDeviceClass()) {
+                    case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+                    case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+                        device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                        break;
+                    case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                        device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                        break;
                     }
                 }
 
+                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+                    address = "";
+                }
                 boolean isConnected = (mConnectedDevices.containsKey(device) &&
                                        mConnectedDevices.get(device).equals(address));
 
