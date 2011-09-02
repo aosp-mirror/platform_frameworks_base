@@ -68,5 +68,5 @@ interface IInputMethodManager {
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     boolean switchToLastInputMethod(in IBinder token);
     boolean setInputMethodEnabled(String id, boolean enabled);
-    boolean setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
+    oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
 }

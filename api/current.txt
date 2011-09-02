@@ -24486,7 +24486,7 @@ package android.view.inputmethod {
     method public boolean isWatchingCursor(android.view.View);
     method public void restartInput(android.view.View);
     method public void sendAppPrivateCommand(android.view.View, java.lang.String, android.os.Bundle);
-    method public boolean setAdditionalInputMethodSubtypes(java.lang.String, android.view.inputmethod.InputMethodSubtype[]);
+    method public void setAdditionalInputMethodSubtypes(java.lang.String, android.view.inputmethod.InputMethodSubtype[]);
     method public boolean setCurrentInputMethodSubtype(android.view.inputmethod.InputMethodSubtype);
     method public void setInputMethod(android.os.IBinder, java.lang.String);
     method public void setInputMethodAndSubtype(android.os.IBinder, java.lang.String, android.view.inputmethod.InputMethodSubtype);

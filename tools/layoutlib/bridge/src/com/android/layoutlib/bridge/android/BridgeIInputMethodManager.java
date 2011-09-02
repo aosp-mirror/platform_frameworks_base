@@ -107,10 +107,9 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
 
     }
 
-    public boolean setAdditionalInputMethodSubtypes(String arg0, InputMethodSubtype[] arg1)
+    public void setAdditionalInputMethodSubtypes(String arg0, InputMethodSubtype[] arg1)
             throws RemoteException {
         // TODO Auto-generated method stub
-        return false;
     }
 
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype arg0) throws RemoteException {
@@ -187,11 +186,4 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
         // TODO Auto-generated method stub
         return null;
     }
-
-    public boolean setAdditionalInputMethodSubtypes(IBinder arg0, InputMethodSubtype[] arg1)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
 }

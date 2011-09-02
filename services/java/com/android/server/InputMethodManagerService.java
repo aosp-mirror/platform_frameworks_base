@@ -1668,13 +1668,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
-        if (TextUtils.isEmpty(imiId) || subtypes == null || subtypes.length == 0) return false;
+        if (TextUtils.isEmpty(imiId) || subtypes == null || subtypes.length == 0) return;
         synchronized (mMethodMap) {
             final InputMethodInfo imi = mMethodMap.get(imiId);
-            if (imi == null) return false;
+            if (imi == null) return;
             final PackageManager pm = mContext.getPackageManager();
             final String[] packageInfos = pm.getPackagesForUid(Binder.getCallingUid());
             if (packageInfos != null) {
@@ -1688,12 +1688,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
-                        return true;
+                        return;
                     }
                 }
             }
         }
-        return false;
+        return;
     }
 
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
