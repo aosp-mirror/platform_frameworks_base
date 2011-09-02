@@ -243,6 +243,16 @@ public class RecentsPanelView extends RelativeLayout
         }
     }
 
+    public void hide(boolean animate) {
+        mShowing = false;
+        if (!animate) {
+            setVisibility(View.GONE);
+        }
+        if (mBar != null) {
+            mBar.animateCollapse();
+        }
+    }
+
     public void handleShowBackground(boolean show) {
         if (show) {
             mRecentsScrim.setBackgroundResource(R.drawable.status_bar_recents_background);
@@ -652,15 +662,6 @@ public class RecentsPanelView extends RelativeLayout
 
         mRecentsContainer.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
         mRecentsGlowView.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
-    }
-
-    public void hide(boolean animate) {
-        if (!animate) {
-            setVisibility(View.GONE);
-        }
-        if (mBar != null) {
-            mBar.animateCollapse();
-        }
     }
 
     public void handleOnClick(View view) {

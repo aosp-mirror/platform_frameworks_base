@@ -404,7 +404,7 @@ public class PhoneStatusBar extends StatusBar {
         // Recents Panel
         boolean visible = false;
         if (mRecentsPanel != null) {
-            visible = mRecentsPanel.getVisibility() == View.VISIBLE;
+            visible = mRecentsPanel.isShowing();
             WindowManagerImpl.getDefault().removeView(mRecentsPanel);
         }
 
