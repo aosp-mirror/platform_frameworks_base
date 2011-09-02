@@ -9350,7 +9350,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         if (mAttachInfo != null) {
             mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_MSG, this);
-            mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_RECT_MSG, this);
         }
 
         mCurrentAnimation = null;
@@ -13898,6 +13897,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                         }
 
                         public void onReleased(InvalidateInfo element) {
+                            element.target = null;
                         }
                     }, POOL_LIMIT)
             );
