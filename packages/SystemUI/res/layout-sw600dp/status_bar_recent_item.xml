@@ -29,7 +29,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:clickable="true"
         android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
         android:scaleType="center"
         android:background="@drawable/recents_thumbnail_overlay">
