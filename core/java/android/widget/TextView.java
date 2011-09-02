@@ -21,6 +21,7 @@ import android.content.ClipData;
 import android.content.ClipData.Item;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -42,6 +43,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
 import android.text.Editable;
@@ -9425,7 +9427,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
-        private static final int NO_SUGGESTIONS = -1;
         private static final float AVERAGE_HIGHLIGHTS_PER_SUGGESTION = 1.4f;
         private WordIterator mSuggestionWordIterator;
         private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan
@@ -9480,9 +9481,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             listView.setOnItemClickListener(this);
             mContentView = listView;
 
-            // Inflate the suggestion items once and for all.
-            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS];
-            for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
+            // Inflate the suggestion items once and for all. +1 for add to dictionary
+            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS + 1];
+            for (int i = 0; i < MAX_NUMBER_SUGGESTIONS + 1; i++) {
                 mSuggestionInfos[i] = new SuggestionInfo();
             }
         }
@@ -9493,6 +9494,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
             int suggestionIndex; // the index of the suggestion inside suggestionSpan
             SpannableStringBuilder text = new SpannableStringBuilder();
+
+            void removeMisspelledFlag() {
+                int suggestionSpanFlags = suggestionSpan.getFlags();
+                if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
+                    suggestionSpanFlags &= ~(SuggestionSpan.FLAG_MISSPELLED);
+                    suggestionSpanFlags &= ~(SuggestionSpan.FLAG_EASY_CORRECT);
+                    suggestionSpan.setFlags(suggestionSpanFlags);
+                }
+            }
         }
 
         private class SuggestionAdapter extends BaseAdapter {
@@ -9631,12 +9641,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int spanUnionStart = mText.length();
             int spanUnionEnd = 0;
 
+            SuggestionSpan misspelledSpan = null;
+
             for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
                 SuggestionSpan suggestionSpan = suggestionSpans[spanIndex];
                 final int spanStart = spannable.getSpanStart(suggestionSpan);
                 final int spanEnd = spannable.getSpanEnd(suggestionSpan);
                 spanUnionStart = Math.min(spanStart, spanUnionStart);
                 spanUnionEnd = Math.max(spanEnd, spanUnionEnd);
+
+                if ((suggestionSpan.getFlags() & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                    misspelledSpan = suggestionSpan;
+                }
 
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
@@ -9646,7 +9662,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionInfo.spanEnd = spanEnd;
                     suggestionInfo.suggestionSpan = suggestionSpan;
                     suggestionInfo.suggestionIndex = suggestionIndex;
-                    suggestionInfo.text = new SpannableStringBuilder(suggestions[suggestionIndex]);
+                    suggestionInfo.text.replace(0, suggestionInfo.text.length(),
+                            suggestions[suggestionIndex]);
 
                     mNumberOfSuggestions++;
                     if (mNumberOfSuggestions == MAX_NUMBER_SUGGESTIONS) {
@@ -9657,39 +9674,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
+            for (int i = 0; i < mNumberOfSuggestions; i++) {
+                highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
+            }
+
+            if (misspelledSpan != null) {
+                final int misspelledStart = spannable.getSpanStart(misspelledSpan);
+                final int misspelledEnd = spannable.getSpanEnd(misspelledSpan);
+                if (misspelledStart >= 0 && misspelledEnd > misspelledStart) {
+                    SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
+                    suggestionInfo.spanStart = misspelledStart;
+                    suggestionInfo.spanEnd = misspelledEnd;
+                    suggestionInfo.suggestionSpan = misspelledSpan;
+                    suggestionInfo.suggestionIndex = -1;
+                    suggestionInfo.text.replace(0, suggestionInfo.text.length(),
+                            getContext().getString(com.android.internal.R.string.addToDictionary));
+
+                    mNumberOfSuggestions++;
+                }
+            }
+
             if (mNumberOfSuggestions == 0) return false;
 
             if (mSuggestionRangeSpan == null) mSuggestionRangeSpan =
                     new SuggestionRangeSpan(mHighlightColor);
-
             ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            for (int i = 0; i < mNumberOfSuggestions; i++) {
-                highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
-            }
             mSuggestionsAdapter.notifyDataSetChanged();
 
             return true;
-        }
-
-        private void onDictionarySuggestionsReceived(String[] suggestions) {
-            if (suggestions.length == 0) {
-                // TODO Actual implementation of this feature
-                suggestions = new String[] {"Add to dictionary"};
-            }
-
-            WordIterator wordIterator = getWordIterator();
-            wordIterator.setCharSequence(mText);
-
-            final int pos = getSelectionStart();
-            int wordStart = wordIterator.getBeginning(pos);
-            int wordEnd = wordIterator.getEnd(pos);
-
-            SuggestionSpan suggestionSpan = new SuggestionSpan(getContext(), suggestions, 0);
-            ((Editable) mText).setSpan(suggestionSpan, wordStart, wordEnd,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            show();
         }
 
         private long[] getWordLimits(CharSequence text) {
@@ -9844,10 +9858,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
+
                 SuggestionInfo suggestionInfo = mSuggestionInfos[position];
                 final int spanStart = suggestionInfo.spanStart;
                 final int spanEnd = suggestionInfo.spanEnd;
-                if (spanStart != NO_SUGGESTIONS) {
+                final String originalText = mText.subSequence(spanStart, spanEnd).toString();
+
+                if (suggestionInfo.suggestionIndex < 0) {
+                    Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
+                    intent.putExtra("word", originalText);
+                    intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getContext().startActivity(intent);
+                    suggestionInfo.removeMisspelledFlag();
+                } else {
                     // SuggestionSpans are removed by replace: save them before
                     Editable editable = (Editable) mText;
                     SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
@@ -9867,17 +9890,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final int suggestionEnd = suggestionInfo.suggestionEnd;
                     final String suggestion = textView.getText().subSequence(
                             suggestionStart, suggestionEnd).toString();
-                    final String originalText = mText.subSequence(spanStart, spanEnd).toString();
                     editable.replace(spanStart, spanEnd, suggestion);
 
-                    // A replacement on a misspelled text removes the misspelled flag.
-                    // TODO restore the flag if the misspelled word is selected back?
-                    int suggestionSpanFlags = suggestionInfo.suggestionSpan.getFlags();
-                    if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
-                        suggestionSpanFlags &= ~(SuggestionSpan.FLAG_MISSPELLED);
-                        suggestionSpanFlags &= ~(SuggestionSpan.FLAG_EASY_CORRECT);
-                        suggestionInfo.suggestionSpan.setFlags(suggestionSpanFlags);
-                    }
+                    suggestionInfo.removeMisspelledFlag();
 
                     // Notify source IME of the suggestion pick. Do this before swaping texts.
                     if (!TextUtils.isEmpty(
@@ -9922,12 +9937,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     boolean areSuggestionsShown() {
         return mSuggestionsPopupWindow != null && mSuggestionsPopupWindow.isShowing();
-    }
-
-    void onDictionarySuggestionsReceived(String[] suggestions) {
-        if (mSuggestionsPopupWindow != null) {
-            mSuggestionsPopupWindow.onDictionarySuggestionsReceived(suggestions);
-        }
     }
 
     /**

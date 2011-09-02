@@ -2484,6 +2484,9 @@
     <!-- Text selection contextual mode title, displayed in the CAB. [CHAR LIMIT=20] -->
     <string name="textSelectionCABTitle">Text selection</string>
 
+    <!-- Option to add the current misspelled word to the user dictionary. [CHAR LIMIT=25] -->
+    <string name="addToDictionary">+ add to dictionary</string>
+
     <!-- EditText context menu -->
     <string name="inputMethod">Input method</string>
 
