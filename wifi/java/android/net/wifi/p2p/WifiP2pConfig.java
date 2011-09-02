@@ -28,11 +28,6 @@ import android.os.Parcel;
 public class WifiP2pConfig implements Parcelable {
 
     /**
-     * Device name
-     */
-    public String deviceName;
-
-    /**
      * Device address
      */
     public String deviceAddress;
@@ -53,6 +48,7 @@ public class WifiP2pConfig implements Parcelable {
 
     /**
      * Indicates whether the configuration is saved
+     * @hide
      */
     public enum Persist {
         SYSTEM_DEFAULT,
@@ -60,6 +56,7 @@ public class WifiP2pConfig implements Parcelable {
         NO
     }
 
+    /** @hide */
     public Persist persist = Persist.SYSTEM_DEFAULT;
 
     public WifiP2pConfig() {
@@ -110,7 +107,6 @@ public class WifiP2pConfig implements Parcelable {
 
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
-        sbuf.append("Device: ").append(deviceName);
         sbuf.append("\n address: ").append(deviceAddress);
         sbuf.append("\n wps: ").append(wpsConfig);
         sbuf.append("\n groupOwnerIntent: ").append(groupOwnerIntent);
@@ -132,7 +128,6 @@ public class WifiP2pConfig implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(deviceName);
         dest.writeString(deviceAddress);
         dest.writeParcelable(wpsConfig, flags);
         dest.writeInt(groupOwnerIntent);
@@ -144,7 +139,6 @@ public class WifiP2pConfig implements Parcelable {
         new Creator<WifiP2pConfig>() {
             public WifiP2pConfig createFromParcel(Parcel in) {
                 WifiP2pConfig config = new WifiP2pConfig();
-                config.deviceName = in.readString();
                 config.deviceAddress = in.readString();
                 config.wpsConfig = (WpsConfiguration) in.readParcelable(null);
                 config.groupOwnerIntent = in.readInt();

@@ -46,16 +46,21 @@ public class WpsConfiguration implements Parcelable {
 
     public Setup setup;
 
+    /** @hide */
     public String BSSID;
 
     public String pin;
 
+    /** @hide */
     public IpAssignment ipAssignment;
 
+    /** @hide */
     public ProxySettings proxySettings;
 
+    /** @hide */
     public LinkProperties linkProperties;
 
+    /** @hide */
     public WpsConfiguration() {
         setup = Setup.INVALID;
         BSSID = null;
@@ -65,6 +70,7 @@ public class WpsConfiguration implements Parcelable {
         linkProperties = new LinkProperties();
     }
 
+    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append(" setup: ").append(setup.toString());
