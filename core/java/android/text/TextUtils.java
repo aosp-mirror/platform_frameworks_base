@@ -750,7 +750,7 @@ public class TextUtils {
                 case SUGGESTION_RANGE_SPAN:
                     readSpan(p, sp, new SuggestionRangeSpan(p));
                     break;
-                    
+
                 case EASY_EDIT_SPAN:
                     readSpan(p, sp, new EasyEditSpan());
                     break;
