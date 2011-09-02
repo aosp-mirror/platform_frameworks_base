@@ -69,7 +69,7 @@ public class WifiP2pGroup implements Parcelable {
     }
 
     /**
-     * @param string formats supported include
+     * @param supplicantEvent formats supported include
      *
      *  P2P-GROUP-STARTED p2p-wlan0-0 [client|GO] ssid="DIRECT-W8" freq=2437
      *  [psk=2182b2e50e53f260d04f3c7b25ef33c965a3291b9b36b455a82d77fd82ca15bc|
