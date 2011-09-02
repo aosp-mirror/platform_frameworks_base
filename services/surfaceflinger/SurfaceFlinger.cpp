@@ -817,6 +817,20 @@ void SurfaceFlinger::handleWorkList()
     mHwWorkListDirty = false;
     HWComposer& hwc(graphicPlane(0).displayHardware().getHwComposer());
     if (hwc.initCheck() == NO_ERROR) {
+
+        const DisplayHardware& hw(graphicPlane(0).displayHardware());
+        uint32_t flags = hw.getFlags();
+        if ((flags & DisplayHardware::SWAP_RECTANGLE) ||
+            (flags & DisplayHardware::BUFFER_PRESERVED))
+        {
+            // we need to redraw everything (the whole screen)
+            // NOTE: we could be more subtle here and redraw only
+            // the area which will end-up in an overlay. But since this
+            // shouldn't happen often, we invalidate everything.
+            mDirtyRegion.set(hw.bounds());
+            mInvalidRegion = mDirtyRegion;
+        }
+
         const Vector< sp<LayerBase> >& currentLayers(mVisibleLayersSortedByZ);
         const size_t count = currentLayers.size();
         hwc.createWorkList(count);
