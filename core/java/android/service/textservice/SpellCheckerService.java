@@ -66,7 +66,7 @@ public abstract class SpellCheckerService extends Service {
     /**
      * This abstract class should be overridden by a concrete implementation of a spell checker.
      */
-    public abstract class Session {
+    public static abstract class Session {
         private InternalISpellCheckerSession mInternalSession;
 
         /**
