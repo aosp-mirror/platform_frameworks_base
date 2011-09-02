@@ -80,4 +80,14 @@ public final class NfcFragment extends Fragment {
             sNfcActivityManager.onPause(getActivity());
         }
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (sNfcActivityManager != null) {
+            sNfcActivityManager.onDestroy(getActivity());
+        }
+    }
+
+
 }
