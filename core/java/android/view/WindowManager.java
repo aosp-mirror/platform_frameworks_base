@@ -412,12 +412,6 @@ public interface WindowManager extends ViewManager {
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
-        
-        /**
-         * @deprecated this is ignored
-         */
-        @Deprecated
-        public int memoryType;
 
         /** @deprecated this is ignored, this value is set automatically when needed. */
         @Deprecated
@@ -431,58 +425,12 @@ public interface WindowManager extends ViewManager {
         /** @deprecated this is ignored, this value is set automatically when needed. */
         @Deprecated
         public static final int MEMORY_TYPE_PUSH_BUFFERS = 3;
-
+        
         /**
-         * Various behavioral options/flags.  Default is none.
-         * 
-         * @see #FLAG_BLUR_BEHIND
-         * @see #FLAG_DIM_BEHIND
-         * @see #FLAG_NOT_FOCUSABLE
-         * @see #FLAG_NOT_TOUCHABLE
-         * @see #FLAG_NOT_TOUCH_MODAL
-         * @see #FLAG_LAYOUT_IN_SCREEN
-         * @see #FLAG_DITHER
-         * @see #FLAG_KEEP_SCREEN_ON
-         * @see #FLAG_FULLSCREEN
-         * @see #FLAG_FORCE_NOT_FULLSCREEN
-         * @see #FLAG_IGNORE_CHEEK_PRESSES
-         * @see #FLAG_HARDWARE_ACCELERATED
+         * @deprecated this is ignored
          */
-        @ViewDebug.ExportedProperty(flagMapping = {
-            @ViewDebug.FlagToString(mask = FLAG_BLUR_BEHIND, equals = FLAG_BLUR_BEHIND,
-                    name = "FLAG_BLUR_BEHIND"),
-            @ViewDebug.FlagToString(mask = FLAG_DIM_BEHIND, equals = FLAG_DIM_BEHIND,
-                    name = "FLAG_DIM_BEHIND"),
-            @ViewDebug.FlagToString(mask = FLAG_NOT_FOCUSABLE, equals = FLAG_NOT_FOCUSABLE,
-                    name = "FLAG_NOT_FOCUSABLE"),
-            @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCHABLE, equals = FLAG_NOT_TOUCHABLE,
-                    name = "FLAG_NOT_TOUCHABLE"),
-            @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCH_MODAL, equals = FLAG_NOT_TOUCH_MODAL,
-                    name = "FLAG_NOT_TOUCH_MODAL"),
-            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_SCREEN, equals = FLAG_LAYOUT_IN_SCREEN,
-                    name = "FLAG_LAYOUT_IN_SCREEN"),
-            @ViewDebug.FlagToString(mask = FLAG_DITHER, equals = FLAG_DITHER,
-                    name = "FLAG_DITHER"),
-            @ViewDebug.FlagToString(mask = FLAG_TURN_SCREEN_ON, equals = FLAG_TURN_SCREEN_ON,
-                    name = "FLAG_TURN_SCREEN_ON"),
-            @ViewDebug.FlagToString(mask = FLAG_KEEP_SCREEN_ON, equals = FLAG_KEEP_SCREEN_ON,
-                    name = "FLAG_KEEP_SCREEN_ON"),
-            @ViewDebug.FlagToString(mask = FLAG_SHOW_WHEN_LOCKED, equals = FLAG_SHOW_WHEN_LOCKED,
-                    name = "FLAG_SHOW_WHEN_LOCKED"),
-            @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
-                    name = "FLAG_ALLOW_LOCK_WHILE_SCREEN_ON"),
-            @ViewDebug.FlagToString(mask = FLAG_DISMISS_KEYGUARD, equals = FLAG_DISMISS_KEYGUARD,
-                    name = "FLAG_DISMISS_KEYGUARD"),
-            @ViewDebug.FlagToString(mask = FLAG_FULLSCREEN, equals = FLAG_FULLSCREEN,
-                    name = "FLAG_FULLSCREEN"),
-            @ViewDebug.FlagToString(mask = FLAG_FORCE_NOT_FULLSCREEN,
-                    equals = FLAG_FORCE_NOT_FULLSCREEN, name = "FLAG_FORCE_NOT_FULLSCREEN"),
-            @ViewDebug.FlagToString(mask = FLAG_IGNORE_CHEEK_PRESSES,
-                    equals = FLAG_IGNORE_CHEEK_PRESSES, name = "FLAG_IGNORE_CHEEK_PRESSES"),
-            @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED,
-                    equals = FLAG_HARDWARE_ACCELERATED, name = "FLAG_HARDWARE_ACCELERATED")
-        })
-        public int flags;
+        @Deprecated
+        public int memoryType;
         
         /** Window flag: as long as this window is visible to the user, allow
          *  the lock screen to activate while the screen is on. 
@@ -493,10 +441,12 @@ public interface WindowManager extends ViewManager {
         /** Window flag: everything behind this window will be dimmed.
          *  Use {@link #dimAmount} to control the amount of dim. */
         public static final int FLAG_DIM_BEHIND        = 0x00000002;
-        
-        /** Window flag: blur everything behind this window. */
+
+        /** Window flag: blur everything behind this window.
+         * @deprecated Blurring is no longer supported. */
+        @Deprecated
         public static final int FLAG_BLUR_BEHIND        = 0x00000004;
-        
+
         /** Window flag: this window won't ever get key input focus, so the
          * user can not send key or other button events to it.  Those will
          * instead go to whatever focusable window is behind it.  This flag
@@ -686,17 +636,6 @@ public interface WindowManager extends ViewManager {
          * XML attribute is set to true on an activity or on the application.</p>
          */
         public static final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
-        
-        /**
-         * Like {@link #FLAG_HARDWARE_ACCELERATED} except for trusted system windows
-         * that need hardware acceleration (e.g. LockScreen), where hardware acceleration
-         * is generally disabled. This flag must be specified in addition to 
-         * {@link #FLAG_HARDWARE_ACCELERATED} to enable hardware acceleration for system
-         * windows.
-         * 
-         * @hide
-         */
-        public static final int FLAG_HARDWARE_ACCELERATED_SYSTEM = 0x02000000;
 
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.
@@ -745,6 +684,125 @@ public interface WindowManager extends ViewManager {
          * it is created.
          * {@hide} */
         public static final int FLAG_SYSTEM_ERROR = 0x40000000;
+
+        /**
+         * Various behavioral options/flags.  Default is none.
+         * 
+         * @see #FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+         * @see #FLAG_DIM_BEHIND
+         * @see #FLAG_NOT_FOCUSABLE
+         * @see #FLAG_NOT_TOUCHABLE
+         * @see #FLAG_NOT_TOUCH_MODAL
+         * @see #FLAG_TOUCHABLE_WHEN_WAKING
+         * @see #FLAG_KEEP_SCREEN_ON
+         * @see #FLAG_LAYOUT_IN_SCREEN
+         * @see #FLAG_LAYOUT_NO_LIMITS
+         * @see #FLAG_FULLSCREEN
+         * @see #FLAG_FORCE_NOT_FULLSCREEN
+         * @see #FLAG_DITHER
+         * @see #FLAG_SECURE
+         * @see #FLAG_SCALED
+         * @see #FLAG_IGNORE_CHEEK_PRESSES
+         * @see #FLAG_LAYOUT_INSET_DECOR
+         * @see #FLAG_ALT_FOCUSABLE_IM
+         * @see #FLAG_WATCH_OUTSIDE_TOUCH
+         * @see #FLAG_SHOW_WHEN_LOCKED
+         * @see #FLAG_SHOW_WALLPAPER
+         * @see #FLAG_TURN_SCREEN_ON
+         * @see #FLAG_DISMISS_KEYGUARD
+         * @see #FLAG_SPLIT_TOUCH
+         * @see #FLAG_HARDWARE_ACCELERATED
+         */
+        @ViewDebug.ExportedProperty(flagMapping = {
+            @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
+                    name = "FLAG_ALLOW_LOCK_WHILE_SCREEN_ON"),
+            @ViewDebug.FlagToString(mask = FLAG_DIM_BEHIND, equals = FLAG_DIM_BEHIND,
+                    name = "FLAG_DIM_BEHIND"),
+            @ViewDebug.FlagToString(mask = FLAG_BLUR_BEHIND, equals = FLAG_BLUR_BEHIND,
+                    name = "FLAG_BLUR_BEHIND"),
+            @ViewDebug.FlagToString(mask = FLAG_NOT_FOCUSABLE, equals = FLAG_NOT_FOCUSABLE,
+                    name = "FLAG_NOT_FOCUSABLE"),
+            @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCHABLE, equals = FLAG_NOT_TOUCHABLE,
+                    name = "FLAG_NOT_TOUCHABLE"),
+            @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCH_MODAL, equals = FLAG_NOT_TOUCH_MODAL,
+                    name = "FLAG_NOT_TOUCH_MODAL"),
+            @ViewDebug.FlagToString(mask = FLAG_TOUCHABLE_WHEN_WAKING, equals = FLAG_TOUCHABLE_WHEN_WAKING,
+                    name = "FLAG_TOUCHABLE_WHEN_WAKING"),
+            @ViewDebug.FlagToString(mask = FLAG_KEEP_SCREEN_ON, equals = FLAG_KEEP_SCREEN_ON,
+                    name = "FLAG_KEEP_SCREEN_ON"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_SCREEN, equals = FLAG_LAYOUT_IN_SCREEN,
+                    name = "FLAG_LAYOUT_IN_SCREEN"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_NO_LIMITS, equals = FLAG_LAYOUT_NO_LIMITS,
+                    name = "FLAG_LAYOUT_NO_LIMITS"),
+            @ViewDebug.FlagToString(mask = FLAG_FULLSCREEN, equals = FLAG_FULLSCREEN,
+                    name = "FLAG_FULLSCREEN"),
+            @ViewDebug.FlagToString(mask = FLAG_FORCE_NOT_FULLSCREEN, equals = FLAG_FORCE_NOT_FULLSCREEN,
+                    name = "FLAG_FORCE_NOT_FULLSCREEN"),
+            @ViewDebug.FlagToString(mask = FLAG_DITHER, equals = FLAG_DITHER,
+                    name = "FLAG_DITHER"),
+            @ViewDebug.FlagToString(mask = FLAG_SECURE, equals = FLAG_SECURE,
+                    name = "FLAG_SECURE"),
+            @ViewDebug.FlagToString(mask = FLAG_SCALED, equals = FLAG_SCALED,
+                    name = "FLAG_SCALED"),
+            @ViewDebug.FlagToString(mask = FLAG_IGNORE_CHEEK_PRESSES, equals = FLAG_IGNORE_CHEEK_PRESSES,
+                    name = "FLAG_IGNORE_CHEEK_PRESSES"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_INSET_DECOR, equals = FLAG_LAYOUT_INSET_DECOR,
+                    name = "FLAG_LAYOUT_INSET_DECOR"),
+            @ViewDebug.FlagToString(mask = FLAG_ALT_FOCUSABLE_IM, equals = FLAG_ALT_FOCUSABLE_IM,
+                    name = "FLAG_ALT_FOCUSABLE_IM"),
+            @ViewDebug.FlagToString(mask = FLAG_WATCH_OUTSIDE_TOUCH, equals = FLAG_WATCH_OUTSIDE_TOUCH,
+                    name = "FLAG_WATCH_OUTSIDE_TOUCH"),
+            @ViewDebug.FlagToString(mask = FLAG_SHOW_WHEN_LOCKED, equals = FLAG_SHOW_WHEN_LOCKED,
+                    name = "FLAG_SHOW_WHEN_LOCKED"),
+            @ViewDebug.FlagToString(mask = FLAG_SHOW_WALLPAPER, equals = FLAG_SHOW_WALLPAPER,
+                    name = "FLAG_SHOW_WALLPAPER"),
+            @ViewDebug.FlagToString(mask = FLAG_TURN_SCREEN_ON, equals = FLAG_TURN_SCREEN_ON,
+                    name = "FLAG_TURN_SCREEN_ON"),
+            @ViewDebug.FlagToString(mask = FLAG_DISMISS_KEYGUARD, equals = FLAG_DISMISS_KEYGUARD,
+                    name = "FLAG_DISMISS_KEYGUARD"),
+            @ViewDebug.FlagToString(mask = FLAG_SPLIT_TOUCH, equals = FLAG_SPLIT_TOUCH,
+                    name = "FLAG_SPLIT_TOUCH"),
+            @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED, equals = FLAG_HARDWARE_ACCELERATED,
+                    name = "FLAG_HARDWARE_ACCELERATED")
+        })
+        public int flags;
+
+        /**
+         * If the window has requested hardware acceleration, but this is not
+         * allowed in the process it is in, then still render it as if it is
+         * hardware accelerated.  This is used for the starting preview windows
+         * in the system process, which don't need to have the overhead of
+         * hardware acceleration (they are just a static rendering), but should
+         * be rendered as much to match the actual window of the app even if it
+         * is hardware accelerated.
+         * Even if the window isn't hardware accelerated, still do its rendering
+         * as if it is.
+         * Like {@link #FLAG_HARDWARE_ACCELERATED} except for trusted system windows
+         * that need hardware acceleration (e.g. LockScreen), where hardware acceleration
+         * is generally disabled. This flag must be specified in addition to 
+         * {@link #FLAG_HARDWARE_ACCELERATED} to enable hardware acceleration for system
+         * windows.
+         * 
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED = 0x00000001;
+
+        /**
+         * In the system process, we globally do not use hardware acceleration
+         * because there are many threads doing UI there and they an conflict.
+         * If certain parts of the UI that really do want to use hardware
+         * acceleration, this flag can be set to force it.  This is basically
+         * for the lock screen.  Anyone else using it, you are probably wrong.
+         * 
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED = 0x00000002;
+
+        /**
+         * Control flags that are private to the platform.
+         * @hide
+         */
+        public int privateFlags;
 
         /**
          * Given a particular set of window manager flags, determine whether
@@ -1110,6 +1168,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(y);
             out.writeInt(type);
             out.writeInt(flags);
+            out.writeInt(privateFlags);
             out.writeInt(softInputMode);
             out.writeInt(gravity);
             out.writeFloat(horizontalMargin);
@@ -1149,6 +1208,7 @@ public interface WindowManager extends ViewManager {
             y = in.readInt();
             type = in.readInt();
             flags = in.readInt();
+            privateFlags = in.readInt();
             softInputMode = in.readInt();
             gravity = in.readInt();
             horizontalMargin = in.readFloat();
@@ -1190,6 +1250,8 @@ public interface WindowManager extends ViewManager {
         public static final int SYSTEM_UI_LISTENER_CHANGED = 1<<14;
         /** {@hide} */
         public static final int INPUT_FEATURES_CHANGED = 1<<15;
+        /** {@hide} */
+        public static final int PRIVATE_FLAGS_CHANGED = 1<<16;
     
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -1236,6 +1298,10 @@ public interface WindowManager extends ViewManager {
             if (flags != o.flags) {
                 flags = o.flags;
                 changes |= FLAGS_CHANGED;
+            }
+            if (privateFlags != o.privateFlags) {
+                privateFlags = o.privateFlags;
+                changes |= PRIVATE_FLAGS_CHANGED;
             }
             if (softInputMode != o.softInputMode) {
                 softInputMode = o.softInputMode;
@@ -1353,6 +1419,9 @@ public interface WindowManager extends ViewManager {
             sb.append(type);
             sb.append(" fl=#");
             sb.append(Integer.toHexString(flags));
+            if (privateFlags != 0) {
+                sb.append(" pfl=0x").append(Integer.toHexString(privateFlags));
+            }
             if (format != PixelFormat.OPAQUE) {
                 sb.append(" fmt=");
                 sb.append(format);

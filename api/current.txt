@@ -23728,7 +23728,7 @@ package android.view {
     field public static final int FLAGS_CHANGED = 4; // 0x4
     field public static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON = 1; // 0x1
     field public static final int FLAG_ALT_FOCUSABLE_IM = 131072; // 0x20000
-    field public static final int FLAG_BLUR_BEHIND = 4; // 0x4
+    field public static final deprecated int FLAG_BLUR_BEHIND = 4; // 0x4
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
     field public static final int FLAG_DITHER = 4096; // 0x1000

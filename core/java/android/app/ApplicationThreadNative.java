@@ -267,13 +267,14 @@ public abstract class ApplicationThreadNative extends Binder
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
             int testMode = data.readInt();
             boolean restrictedBackupMode = (data.readInt() != 0);
+            boolean persistent = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info,
                             providers, testName, profileName, profileFd, autoStopProfiler,
-                            testArgs, testWatcher, testMode, restrictedBackupMode,
+                            testArgs, testWatcher, testMode, restrictedBackupMode, persistent,
                             config, compatInfo, services, coreSettings);
             return true;
         }
@@ -811,8 +812,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName, String profileName,
             ParcelFileDescriptor profileFd, boolean autoStopProfiler, Bundle testArgs,
-            IInstrumentationWatcher testWatcher, int debugMode,
-            boolean restrictedBackupMode, Configuration config, CompatibilityInfo compatInfo,
+            IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
+            boolean persistent, Configuration config, CompatibilityInfo compatInfo,
             Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -837,6 +838,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongInterface(testWatcher);
         data.writeInt(debugMode);
         data.writeInt(restrictedBackupMode ? 1 : 0);
+        data.writeInt(persistent ? 1 : 0);
         config.writeToParcel(data, 0);
         compatInfo.writeToParcel(data, 0);
         data.writeMap(services);

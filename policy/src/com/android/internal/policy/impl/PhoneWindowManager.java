@@ -1229,6 +1229,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             params.packageName = packageName;
             params.windowAnimations = win.getWindowStyle().getResourceId(
                     com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
+            params.privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
             params.setTitle("Starting " + packageName);
 
             WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
