@@ -219,9 +219,12 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
     if (i < 0) {
         return i;
     }
-    mSurfaceTexture->queueBuffer(i, timestamp,
+    status_t err = mSurfaceTexture->queueBuffer(i, timestamp,
             &mDefaultWidth, &mDefaultHeight, &mTransformHint);
-    return OK;
+    if (err != OK)  {
+        LOGE("queueBuffer: error queuing buffer to SurfaceTexture, %d", err);
+    }
+    return err;
 }
 
 int SurfaceTextureClient::query(int what, int* value) const {
