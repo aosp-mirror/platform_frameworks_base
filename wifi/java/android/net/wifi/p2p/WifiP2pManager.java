@@ -212,8 +212,8 @@ public class WifiP2pManager {
     /**
      * Message {@link android.os.Message#what} value indicating that the {@link #discoverPeers}
      * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #P2P_DISABLED}
-     * or {@link #ALREADY_IN_EFFECT}
+     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
+     * or {@link #BUSY}
      */
     public static final int DISCOVER_PEERS_FAILED                   = BASE + 8;
     /**
@@ -230,8 +230,8 @@ public class WifiP2pManager {
     /**
      * Message {@link android.os.Message#what} value indicating that the {@link #connect}
      * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #P2P_DISABLED}
-     * or {@link #ALREADY_IN_EFFECT}
+     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
+     * or {@link #BUSY}
      */
     public static final int CONNECT_FAILED                          = BASE + 11;
     /**
@@ -248,8 +248,8 @@ public class WifiP2pManager {
     /**
      * Message {@link android.os.Message#what} value indicating that the {@link #createGroup}
      * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #P2P_DISABLED}
-     * or {@link #ALREADY_IN_EFFECT}
+     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
+     * or {@link #BUSY}
      */
     public static final int CREATE_GROUP_FAILED                     = BASE + 14;
     /**
@@ -264,8 +264,8 @@ public class WifiP2pManager {
     /**
      * Message {@link android.os.Message#what} value indicating that the {@link #removeGroup}
      * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #P2P_DISABLED}
-     * or {@link #ALREADY_IN_EFFECT}
+     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
+     * or {@link #BUSY}
      */
     public static final int REMOVE_GROUP_FAILED                     = BASE + 17;
     /**
@@ -279,7 +279,16 @@ public class WifiP2pManager {
      * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
      * and {@link #REMOVE_GROUP_FAILED}
      *
-     * <p> This indicates that the reason for failure is because p2p is unsupported on the
+     * <p> This indicates that the operation failed due to an internal error
+     */
+    public static final int ERROR               = 0;
+
+    /**
+     * Supported {@link android.os.Message#arg1} value on the following response messages:
+     * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
+     * and {@link #REMOVE_GROUP_FAILED}
+     *
+     * <p> This indicates that the operation failed because p2p is unsupported on the
      * device
      */
     public static final int P2P_UNSUPPORTED     = 1;
@@ -289,21 +298,10 @@ public class WifiP2pManager {
      * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
      * and {@link #REMOVE_GROUP_FAILED}
      *
-     * <p> This indicates that the reason for failure is because p2p is currently disabled
-     * by the user
+     * <p> This indicates that the operation failed because the framework is busy and
+     * unable to service the request
      */
-    public static final int P2P_DISABLED        = 2;
-
-    /**
-     * Supported {@link android.os.Message#arg1} value on the following response messages:
-     * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
-     * and {@link #REMOVE_GROUP_FAILED}
-     *
-     * <p> This indicates that the reason for failure is because the operation is already in
-     * effect
-     */
-    public static final int ALREADY_IN_EFFECT   = 3;
-
+    public static final int BUSY                = 2;
 
     /** @hide */
     public static final int REQUEST_PEERS                           = BASE + 19;
@@ -342,11 +340,11 @@ public class WifiP2pManager {
     public static final int RESPONSE_GROUP_INFO                     = BASE + 24;
 
     /** @hide */
-    public static final int WPS_PBC                                 = BASE + 23;
+    public static final int WPS_PBC                                 = BASE + 25;
     /** @hide */
-    public static final int WPS_PIN                                 = BASE + 24;
+    public static final int WPS_PIN                                 = BASE + 26;
     /** @hide */
-    public static final int WPS_PIN_AVAILABLE                       = BASE + 25;
+    public static final int WPS_PIN_AVAILABLE                       = BASE + 27;
 
     /**
      * Create a new WifiP2pManager instance. Applications use

@@ -57,9 +57,21 @@ public class WifiP2pDeviceList implements Parcelable {
         return true;
     }
 
-    public void add(WifiP2pDevice device) {
+    public void update(WifiP2pDevice device) {
         if (device == null) return;
-        if (mDevices.contains(device)) return;
+        for (WifiP2pDevice d : mDevices) {
+            //Found, update fields that can change
+            if (d.equals(device)) {
+                d.deviceName = device.deviceName;
+                d.primaryDeviceType = device.primaryDeviceType;
+                d.secondaryDeviceType = device.secondaryDeviceType;
+                d.wpsConfigMethodsSupported = device.wpsConfigMethodsSupported;
+                d.deviceCapability = device.deviceCapability;
+                d.groupCapability = device.groupCapability;
+                return;
+            }
+        }
+        //Not found, add a new one
         mDevices.add(device);
     }
 
@@ -101,7 +113,7 @@ public class WifiP2pDeviceList implements Parcelable {
 
                 int deviceCount = in.readInt();
                 for (int i = 0; i < deviceCount; i++) {
-                    deviceList.add((WifiP2pDevice)in.readParcelable(null));
+                    deviceList.update((WifiP2pDevice)in.readParcelable(null));
                 }
                 return deviceList;
             }
