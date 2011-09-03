@@ -662,9 +662,12 @@ public class PhoneStatusBar extends StatusBar {
                 // update the contentIntent
                 final PendingIntent contentIntent = notification.notification.contentIntent;
                 if (contentIntent != null) {
-                    oldEntry.content.setOnClickListener(new NotificationClicker(contentIntent,
-                                notification.pkg, notification.tag, notification.id));
+                    final View.OnClickListener listener = new NotificationClicker(contentIntent,
+                            notification.pkg, notification.tag, notification.id);
+                    oldEntry.largeIcon.setOnClickListener(listener);
+                    oldEntry.content.setOnClickListener(listener);
                 } else {
+                    oldEntry.largeIcon.setOnClickListener(null);
                     oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
@@ -779,9 +782,12 @@ public class PhoneStatusBar extends StatusBar {
         content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = n.contentIntent;
         if (contentIntent != null) {
-            content.setOnClickListener(new NotificationClicker(contentIntent, notification.pkg,
-                        notification.tag, notification.id));
+            final View.OnClickListener listener = new NotificationClicker(contentIntent,
+                    notification.pkg, notification.tag, notification.id);
+            largeIcon.setOnClickListener(listener);
+            content.setOnClickListener(listener);
         } else {
+            largeIcon.setOnClickListener(null);
             content.setOnClickListener(null);
         }
 
@@ -979,9 +985,12 @@ public class PhoneStatusBar extends StatusBar {
 //        content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = sbn.notification.contentIntent;
         if (contentIntent != null) {
-            content.setOnClickListener(new NotificationClicker(contentIntent,
-                        sbn.pkg, sbn.tag, sbn.id));
+            final View.OnClickListener listener = new NotificationClicker(contentIntent,
+                    sbn.pkg, sbn.tag, sbn.id);
+            largeIcon.setOnClickListener(listener);
+            content.setOnClickListener(listener);
         } else {
+            largeIcon.setOnClickListener(null);
             content.setOnClickListener(null);
         }
 
