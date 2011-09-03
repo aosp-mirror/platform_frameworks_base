@@ -156,8 +156,6 @@ protected:
             eglDestroySurface(mEglDisplay, mEglSurface);
         }
         if (mEglDisplay != EGL_NO_DISPLAY) {
-            eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                    EGL_NO_CONTEXT);
             eglTerminate(mEglDisplay);
         }
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
@@ -461,6 +459,7 @@ void SurfaceMediaSourceGLTest::oneBufferPassGL(int num) {
 
     // The following call dequeues and queues the buffer
     eglSwapBuffers(mEglDisplay, mEglSurface);
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
     glDisable(GL_SCISSOR_TEST);
 }
 
@@ -796,7 +795,12 @@ TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
         LOGV("framesCount = %d", nFramesCount);
     }
 
-    ASSERT_EQ(NO_ERROR, native_window_api_disconnect(mANW.get(), NATIVE_WINDOW_API_EGL));
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    eglDestroySurface(mEglDisplay, mEglSurface);
+    mEglSurface = EGL_NO_SURFACE;
+
     writer.stop();
 }
 // Test to examine whether we can render GL buffers in to the surface
@@ -875,7 +879,12 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
         LOGV("framesCount = %d", nFramesCount);
     }
 
-    ASSERT_EQ(NO_ERROR, native_window_api_disconnect(mANW.get(), NATIVE_WINDOW_API_EGL));
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    eglDestroySurface(mEglDisplay, mEglSurface);
+    mEglSurface = EGL_NO_SURFACE;
+
     LOGV("Stopping MediaRecorder...");
     CHECK_EQ(OK, mr->stop());
     mr.clear();
@@ -913,7 +922,12 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
         LOGV("framesCount = %d", nFramesCount);
     }
 
-    ASSERT_EQ(NO_ERROR, native_window_api_disconnect(mANW.get(), NATIVE_WINDOW_API_EGL));
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    eglDestroySurface(mEglDisplay, mEglSurface);
+    mEglSurface = EGL_NO_SURFACE;
+
     LOGV("Stopping MediaRecorder...");
     CHECK_EQ(OK, mr->stop());
     mr.clear();
