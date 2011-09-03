@@ -82,7 +82,7 @@ public class DevicePolicyManager {
     /**
      * Activity action: send when any policy admin changes a policy.
      * This is generally used to find out when a new policy is in effect.
-     * 
+     *
      * @hide
      */
     public static final String ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
@@ -204,6 +204,14 @@ public class DevicePolicyManager {
      * values are more restrictive.
      */
     public static final int PASSWORD_QUALITY_UNSPECIFIED = 0;
+
+    /**
+     * Constant for {@link #setPasswordQuality}: the policy allows for low-security biometric
+     * recognition technology.  This implies technologies that can recognize the identity of
+     * an individual to about a 3 digit PIN (false detection is less than 1 in 1,000).
+     * Note that quality constants are ordered so that higher values are more restrictive.
+     */
+    public static final int PASSWORD_QUALITY_BIOMETRIC_WEAK = 0x8000;
 
     /**
      * Constant for {@link #setPasswordQuality}: the policy requires some kind
