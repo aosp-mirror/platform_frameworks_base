@@ -6546,6 +6546,13 @@ public class WebView extends AbsoluteLayout
     }
 
     private void stopTouch() {
+        if (mScroller.isFinished() && !mSelectingText
+                && (mTouchMode == TOUCH_DRAG_MODE || mTouchMode == TOUCH_DRAG_LAYER_MODE)) {
+            WebViewCore.resumePriority();
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
+            nativeSetIsScrolling(false);
+        }
+
         // we also use mVelocityTracker == null to tell us that we are
         // not "moving around", so we can take the slower/prettier
         // mode in the drawing code
