@@ -22,6 +22,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:scaleType="center"
+        android:clickable="true"
         />
 
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
