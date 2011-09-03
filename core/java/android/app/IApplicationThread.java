@@ -88,8 +88,8 @@ public interface IApplicationThread extends IInterface {
     static final int DEBUG_WAIT = 2;
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, String profileName, ParcelFileDescriptor profileFd,
-            boolean autoStopProfiler, Bundle testArguments,
-            IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
+            boolean autoStopProfiler, Bundle testArguments, IInstrumentationWatcher testWatcher,
+            int debugMode, boolean restrictedBackupMode, boolean persistent,
             Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
             Bundle coreSettings) throws RemoteException;
     void scheduleExit() throws RemoteException;

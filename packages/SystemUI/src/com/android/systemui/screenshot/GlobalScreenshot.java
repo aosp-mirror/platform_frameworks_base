@@ -232,7 +232,6 @@ class GlobalScreenshot {
                 WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED_SYSTEM
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);

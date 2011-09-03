@@ -94,6 +94,13 @@ public abstract class HardwareRenderer {
      */
     public static boolean sRendererDisabled = false;
 
+    /**
+     * Further hardware renderer disabling for the system process.
+     * 
+     * @hide
+     */
+    public static boolean sSystemRendererDisabled = false;
+
     private boolean mEnabled;
     private boolean mRequested = true;
 
@@ -102,8 +109,11 @@ public abstract class HardwareRenderer {
      * 
      * @hide
      */
-    public static void disable() {
+    public static void disable(boolean system) {
         sRendererDisabled = true;
+        if (system) {
+            sSystemRendererDisabled = true;
+        }
     }
 
     /**

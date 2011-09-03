@@ -584,16 +584,25 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 return;
             }
 
-            // Only enable hardware acceleration if we are not in the system process
-            // The window manager creates ViewAncestors to display animated preview windows
-            // of launching apps and we don't want those to be hardware accelerated
+            // Persistent processes (including the system) should not do
+            // accelerated rendering on low-end devices.  In that case,
+            // sRendererDisabled will be set.  In addition, the system process
+            // itself should never do accelerated rendering.  In that case, both
+            // sRendererDisabled and sSystemRendererDisabled are set.  When
+            // sSystemRendererDisabled is set, PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED
+            // can be used by code on the system process to escape that and enable
+            // HW accelerated drawing.  (This is basically for the lock screen.)
 
-            final boolean systemHwAccelerated =
-                (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED_SYSTEM) != 0;
+            final boolean fakeHwAccelerated = (attrs.privateFlags &
+                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED) != 0;
+            final boolean forceHwAccelerated = (attrs.privateFlags &
+                    WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED) != 0;
 
-            if (!HardwareRenderer.sRendererDisabled || systemHwAccelerated) {
+            if (!HardwareRenderer.sRendererDisabled || (HardwareRenderer.sSystemRendererDisabled
+                    && forceHwAccelerated)) {
                 // Don't enable hardware acceleration when we're not on the main thread
-                if (!systemHwAccelerated && Looper.getMainLooper() != Looper.myLooper()) {
+                if (!HardwareRenderer.sSystemRendererDisabled
+                        && Looper.getMainLooper() != Looper.myLooper()) {
                     Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware "
                             + "acceleration outside of the main thread, aborting");
                     return;
@@ -606,12 +615,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
                 mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareAccelerationRequested
                         = mAttachInfo.mHardwareRenderer != null;
-            } else {
-                // We would normally have enabled hardware acceleration, but
-                // haven't because we are in the system process.  We still want
-                // what is drawn on the screen to behave as if it is accelerated,
-                // so that our preview starting windows visually match what will
-                // actually be drawn by the app.
+            } else if (fakeHwAccelerated) {
+                // The window had wanted to use hardware acceleration, but this
+                // is not allowed in its process.  By setting this flag, it can
+                // still render as if it was accelerated.  This is basically for
+                // the preview windows the window manager shows for launching
+                // applications, so they will look more like the app being launched.
                 mAttachInfo.mHardwareAccelerationRequested = true;
             }
         }

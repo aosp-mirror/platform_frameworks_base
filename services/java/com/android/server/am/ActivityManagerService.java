@@ -3598,7 +3598,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             thread.bindApplication(processName, appInfo, providers,
                     app.instrumentationClass, profileFile, profileFd, profileAutoStop,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
-                    isRestrictedBackupMode || !normalMode,
+                    isRestrictedBackupMode || !normalMode, app.persistent,
                     mConfiguration, app.compat, getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, true);
