@@ -3384,11 +3384,11 @@ public class ListView extends AbsListView {
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
 
+        final ListAdapter adapter = mAdapter;
         int closetChildIndex = -1;
-        if (gainFocus && previouslyFocusedRect != null) {
+        if (adapter != null && gainFocus && previouslyFocusedRect != null) {
             previouslyFocusedRect.offset(mScrollX, mScrollY);
 
-            final ListAdapter adapter = mAdapter;
             // Don't cache the result of getChildCount or mFirstPosition here,
             // it could change in layoutChildren.
             if (adapter.getCount() < getChildCount() + mFirstPosition) {
