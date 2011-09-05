@@ -31,6 +31,8 @@ import android.view.ViewManager;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import android.graphics.Color;
+
 /**
  * Manages creating, showing, hiding and resetting the keyguard.  Calls back
  * via {@link com.android.internal.policy.impl.KeyguardViewCallback} to poke
@@ -160,6 +162,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
                 mKeyguardView.onScreenTurnedOn();
             }
         }
+
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
         mKeyguardHost.setVisibility(View.VISIBLE);
         mKeyguardView.requestFocus();
@@ -195,6 +198,9 @@ public class KeyguardViewManager implements KeyguardWindowController {
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOff();
         }
+
+        // When screen is turned off, need to unbind from FaceLock service if we are using FaceLock
+        mKeyguardView.stopAndUnbindFromFaceLock();
     }
 
     public synchronized void onScreenTurnedOn() {
@@ -203,6 +209,9 @@ public class KeyguardViewManager implements KeyguardWindowController {
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
         }
+
+        // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
+        mKeyguardView.bindToFaceLock();
     }
 
     public synchronized void verifyUnlock() {
@@ -238,6 +247,11 @@ public class KeyguardViewManager implements KeyguardWindowController {
      */
     public synchronized void hide() {
         if (DEBUG) Log.d(TAG, "hide()");
+
+        // When view is hidden, need to unbind from FaceLock service if we are using FaceLock
+        // e.g., when device becomes unlocked
+        mKeyguardView.stopAndUnbindFromFaceLock();
+
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);
             // Don't do this right away, so we can let the view continue to animate

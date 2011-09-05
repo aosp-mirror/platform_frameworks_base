@@ -18,6 +18,8 @@ package com.android.internal.policy.impl;
 
 import com.android.internal.R;
 import com.android.internal.policy.impl.LockPatternKeyguardView.UnlockMode;
+import com.android.internal.policy.IFaceLockCallback;
+import com.android.internal.policy.IFaceLockInterface;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockScreenWidgetCallback;
@@ -32,16 +34,20 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
@@ -55,6 +61,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import java.io.IOException;
+
 
 /**
  * The host view for all of the screens of the pattern unlock screen.  There are
@@ -92,6 +99,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private boolean mEnableFallback = false; // assume no fallback UI until we know better
 
     private boolean mShowLockBeforeUnlock = false;
+
+    // The following were added to support FaceLock
+    private IFaceLockInterface mFaceLockService;
+    private boolean mBoundToFaceLockService = false;
+    private boolean mFaceLockServiceRunning = false;
+    private View mFaceLockAreaView;
 
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
@@ -580,6 +593,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     }
 
     private boolean isSecure() {
+        // TODO: make this work with SIM and Account cases below.
+        boolean usingBiometric = mLockPatternUtils.usingBiometricWeak();
+        if (usingBiometric && mLockPatternUtils.isBiometricEnabled())
+            return true;
         UnlockMode unlockMode = getUnlockMode();
         boolean secure = false;
         switch (unlockMode) {
@@ -687,6 +704,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                     mKeyguardScreenCallback,
                     mUpdateMonitor.getFailedAttempts());
             view.setEnableFallback(mEnableFallback);
+
+            // TODO(bcolonna): For pattern unlock, it can give us the view where the pattern is
+            // displayed and FaceLock can draw in that area.
+            // For other views it's not so simple and we should probably change how the FaceLock
+            // area is determined.
+            mFaceLockAreaView = view.getUnlockAreaView();
             unlockView = view;
         } else if (unlockMode == UnlockMode.SimPuk) {
             unlockView = new SimPukUnlockScreen(
@@ -912,5 +935,142 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             return mBitmap.getHeight();
         }
     }
-}
 
+    // Everything below pertains to FaceLock - might want to separate this out
+
+    // Binds to FaceLock service, but does not tell it to start
+    public void bindToFaceLock() {
+        if (mLockPatternUtils.usingBiometricWeak()) {
+            if (!mBoundToFaceLockService) {
+                if (DEBUG) Log.d(TAG, "before bind to FaceLock service");
+                mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
+                        mFaceLockConnection,
+                        Context.BIND_AUTO_CREATE);
+                if (DEBUG) Log.d(TAG, "after bind to FaceLock service");
+                mBoundToFaceLockService = true;
+            } else {
+                // On startup I've seen onScreenTurnedOn() get called twice without
+                // onScreenTurnedOff() being called in between, which can cause this (bcolonna)
+                if (DEBUG) Log.w(TAG, "Attempt to bind to FaceLock when already bound");
+            }
+        }
+    }
+
+    // Tells FaceLock to stop and then unbinds from the FaceLock service
+    public void stopAndUnbindFromFaceLock() {
+        if (mLockPatternUtils.usingBiometricWeak()) {
+            stopFaceLock();
+
+            if (mBoundToFaceLockService) {
+                if (DEBUG) Log.d(TAG, "before unbind from FaceLock service");
+                mContext.unbindService(mFaceLockConnection);
+                if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
+                mBoundToFaceLockService = false;
+            } else {
+                // This could probably happen after the session when someone activates FaceLock
+                // because it wasn't active when the phone was turned on
+                if (DEBUG) Log.w(TAG, "Attempt to unbind from FaceLock when not bound");
+            }
+        }
+    }
+
+    private ServiceConnection mFaceLockConnection = new ServiceConnection() {
+        // Completes connection, registers callback and starts FaceLock when service is bound
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder iservice) {
+            mFaceLockService = IFaceLockInterface.Stub.asInterface(iservice);
+            if (DEBUG) Log.d(TAG, "Connected to FaceLock service");
+            try {
+                mFaceLockService.registerCallback(mFaceLockCallback);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Remote exception");
+            }
+
+            // TODO(bcolonna): Need to set location properly (only works for pattern view now)
+            if (mFaceLockAreaView != null) {
+                int[] unlockLocationOnScreen = new int[2];
+                mFaceLockAreaView.getLocationOnScreen(unlockLocationOnScreen);
+                int x = unlockLocationOnScreen[0];
+                int y = unlockLocationOnScreen[1];
+                int w = mFaceLockAreaView.getWidth();
+                int h = mFaceLockAreaView.getHeight();
+                if (DEBUG) Log.d(TAG, "(x,y) (wxh): (" + x + "," + y + ") (" + w + "x" + h + ")");
+                startFaceLock(mFaceLockAreaView.getWindowToken(), x, y, w, h);
+            }
+        }
+
+        // Cleans up if FaceLock service unexpectedly disconnects
+        @Override
+        public void onServiceDisconnected(ComponentName className) {
+            mFaceLockService = null;
+            if (DEBUG) Log.w(TAG, "Unexpected disconnect from FaceLock service");
+        }
+    };
+
+    // Tells the FaceLock service to start displaying its UI and perform recognition
+    public void startFaceLock(IBinder windowToken, int x, int y, int h, int w)
+    {
+        if (mLockPatternUtils.usingBiometricWeak()) {
+            if (!mFaceLockServiceRunning) {
+                if (DEBUG) Log.d(TAG, "Starting FaceLock");
+                try {
+                    mFaceLockService.startUi(windowToken, x, y, h, w);
+                } catch (RemoteException e) {
+                    throw new RuntimeException("Remote exception");
+                }
+                mFaceLockServiceRunning = true;
+            } else {
+                if (DEBUG) Log.w(TAG, "startFaceLock() attempted while running");
+            }
+        }
+    }
+
+    // Tells the FaceLock service to stop displaying its UI and stop recognition
+    public void stopFaceLock()
+    {
+        if (mLockPatternUtils.usingBiometricWeak()) {
+            // Note that attempting to stop FaceLock when it's not running is not an issue.
+            // FaceLock can return, which stops it and then we try to stop it when the
+            // screen is turned off.  That's why we check.
+            if (mFaceLockServiceRunning) {
+                try {
+                    if (DEBUG) Log.d(TAG, "Stopping FaceLock");
+                    mFaceLockService.stopUi();
+                } catch (RemoteException e) {
+                    throw new RuntimeException("Remote exception");
+                }
+                mFaceLockServiceRunning = false;
+            }
+        }
+    }
+
+    // Implements the FaceLock service callback interface defined in AIDL
+    private final IFaceLockCallback mFaceLockCallback = new IFaceLockCallback.Stub() {
+
+        // Stops the FaceLock UI and indicates that the phone should be unlocked
+        @Override
+        public void unlock() {
+            if (DEBUG) Log.d(TAG, "FaceLock unlock");
+            stopFaceLock();
+            mKeyguardScreenCallback.keyguardDone(true);
+            mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
+        }
+
+        // Stops the FaceLock UI and exposes the backup method without unlocking
+        @Override
+        public void cancel() {
+            // In this case, either the user has cancelled out, or FaceLock failed to recognize them
+            if (DEBUG) Log.d(TAG, "FaceLock cancel");
+            stopFaceLock();
+        }
+
+        // Stops the FaceLock UI and puts the phone to sleep
+        @Override
+        public void sleepDevice() {
+            // In this case, it appears the phone has been turned on accidentally
+            if (DEBUG) Log.d(TAG, "FaceLock accidental turn on");
+            stopFaceLock();
+            // TODO(bcolonna): how do we put the phone back to sleep (i.e., turn off the screen)
+        }
+    };
+}
