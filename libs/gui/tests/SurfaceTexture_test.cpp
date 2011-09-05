@@ -974,8 +974,6 @@ TEST_F(SurfaceTextureGLTest, TexturingFromGLFilledRGBABufferPow2) {
 
     eglSwapBuffers(mEglDisplay, stcEglSurface);
 
-    eglDestroySurface(mEglDisplay, stcEglSurface);
-
     // Do the consumer side of things
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
             mEglContext));
@@ -984,6 +982,10 @@ TEST_F(SurfaceTextureGLTest, TexturingFromGLFilledRGBABufferPow2) {
     glDisable(GL_SCISSOR_TEST);
 
     mST->updateTexImage();
+
+    // We must wait until updateTexImage has been called to destroy the
+    // EGLSurface because we're in synchronous mode.
+    eglDestroySurface(mEglDisplay, stcEglSurface);
 
     glClearColor(0.2, 0.2, 0.2, 0.2);
     glClear(GL_COLOR_BUFFER_BIT);
