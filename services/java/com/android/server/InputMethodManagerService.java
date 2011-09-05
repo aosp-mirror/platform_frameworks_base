@@ -80,6 +80,9 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.IWindowManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
@@ -87,6 +90,9 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.ArrayAdapter;
+import android.widget.RadioButton;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -337,11 +343,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
     int mImeWindowVis;
 
-    AlertDialog.Builder mDialogBuilder;
-    AlertDialog mSwitchingDialog;
-    InputMethodInfo[] mIms;
-    CharSequence[] mItems;
-    int[] mSubtypeIds;
+    private AlertDialog.Builder mDialogBuilder;
+    private AlertDialog mSwitchingDialog;
+    private InputMethodInfo[] mIms;
+    private int[] mSubtypeIds;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -1148,7 +1153,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             ? TextUtils.concat(mCurrentSubtype.getDisplayName(mContext,
                                         imi.getPackageName(), imi.getServiceInfo().applicationInfo),
                                                 (TextUtils.isEmpty(imiLabel) ?
-                                                        "" : " (" + imiLabel + ")"))
+                                                        "" : " - " + imiLabel))
                             : imiLabel;
 
                     mImeSwitcherNotification.setLatestEventInfo(
@@ -2073,8 +2078,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             sortedImmis.putAll(immis);
 
-            final ArrayList<Pair<CharSequence, Pair<InputMethodInfo, Integer>>> imList =
-                    new ArrayList<Pair<CharSequence, Pair<InputMethodInfo, Integer>>>();
+            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<ImeSubtypeListItem>();
 
             for (InputMethodInfo imi : sortedImmis.keySet()) {
                 if (imi == null) continue;
@@ -2084,7 +2088,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
                 }
                 ArrayList<InputMethodSubtype> subtypes = getSubtypes(imi);
-                final CharSequence label = imi.loadLabel(pm);
+                final CharSequence imeLabel = imi.loadLabel(pm);
                 if (showSubtypes && enabledSubtypeSet.size() > 0) {
                     final int subtypeCount = imi.getSubtypeCount();
                     if (DEBUG) {
@@ -2096,13 +2100,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // We show all enabled IMEs and subtypes when an IME is shown.
                         if (enabledSubtypeSet.contains(subtypeHashCode)
                                 && ((mInputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
-                            final CharSequence title;
-                            final String mode = subtype.getMode();
-                            title = TextUtils.concat(subtype.getDisplayName(context,
-                                    imi.getPackageName(), imi.getServiceInfo().applicationInfo),
-                                    (TextUtils.isEmpty(label) ? "" : " (" + label + ")"));
-                            imList.add(new Pair<CharSequence, Pair<InputMethodInfo, Integer>>(
-                                    title, new Pair<InputMethodInfo, Integer>(imi, j)));
+                            final CharSequence subtypeLabel = subtype.getDisplayName(context,
+                                    imi.getPackageName(), imi.getServiceInfo().applicationInfo);
+                            imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j));
+
                             // Removing this subtype from enabledSubtypeSet because we no longer
                             // need to add an entry of this subtype to imList to avoid duplicated
                             // entries.
@@ -2110,23 +2111,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                 } else {
-                    imList.add(new Pair<CharSequence, Pair<InputMethodInfo, Integer>>(
-                            label, new Pair<InputMethodInfo, Integer>(imi, NOT_A_SUBTYPE_ID)));
+                    imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID));
                 }
             }
 
             final int N = imList.size();
-            mItems = new CharSequence[N];
-            for (int i = 0; i < N; ++i) {
-                mItems[i] = imList.get(i).first;
-            }
             mIms = new InputMethodInfo[N];
             mSubtypeIds = new int[N];
             int checkedItem = 0;
             for (int i = 0; i < N; ++i) {
-                Pair<InputMethodInfo, Integer> value = imList.get(i).second;
-                mIms[i] = value.first;
-                mSubtypeIds[i] = value.second;
+                final ImeSubtypeListItem item = imList.get(i);
+                mIms[i] = item.mImi;
+                mSubtypeIds[i] = item.mSubtypeId;
                 if (mIms[i].getId().equals(lastInputMethodId)) {
                     int subtypeId = mSubtypeIds[i];
                     if ((subtypeId == NOT_A_SUBTYPE_ID)
@@ -2137,14 +2133,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
-            AlertDialog.OnClickListener adocl = new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    hideInputMethodMenu();
-                }
-            };
-
-            TypedArray a = context.obtainStyledAttributes(null,
+            final TypedArray a = context.obtainStyledAttributes(null,
                     com.android.internal.R.styleable.DialogPreference,
                     com.android.internal.R.attr.alertDialogStyle, 0);
             mDialogBuilder = new AlertDialog.Builder(context)
@@ -2159,7 +2148,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             com.android.internal.R.styleable.DialogPreference_dialogTitle));
             a.recycle();
 
-            mDialogBuilder.setSingleChoiceItems(mItems, checkedItem,
+            final ImeSubtypeListAdapter adapter = new ImeSubtypeListAdapter(context,
+                    com.android.internal.R.layout.simple_list_item_2_single_choice, imList,
+                    checkedItem);
+
+            mDialogBuilder.setSingleChoiceItems(adapter, checkedItem,
                     new AlertDialog.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -2201,6 +2194,59 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private static class ImeSubtypeListItem {
+        public final CharSequence mImeName;
+        public final CharSequence mSubtypeName;
+        public final InputMethodInfo mImi;
+        public final int mSubtypeId;
+        public ImeSubtypeListItem(CharSequence imeName, CharSequence subtypeName,
+                InputMethodInfo imi, int subtypeId) {
+            mImeName = imeName;
+            mSubtypeName = subtypeName;
+            mImi = imi;
+            mSubtypeId = subtypeId;
+        }
+    }
+
+    private static class ImeSubtypeListAdapter extends ArrayAdapter<ImeSubtypeListItem> {
+        private final LayoutInflater mInflater;
+        private final int mTextViewResourceId;
+        private final List<ImeSubtypeListItem> mItemsList;
+        private final int mCheckedItem;
+        public ImeSubtypeListAdapter(Context context, int textViewResourceId,
+                List<ImeSubtypeListItem> itemsList, int checkedItem) {
+            super(context, textViewResourceId, itemsList);
+            mTextViewResourceId = textViewResourceId;
+            mItemsList = itemsList;
+            mCheckedItem = checkedItem;
+            mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final View view = convertView != null ? convertView
+                    : mInflater.inflate(mTextViewResourceId, null);
+            if (position < 0 || position >= mItemsList.size()) return view;
+            final ImeSubtypeListItem item = mItemsList.get(position);
+            final CharSequence imeName = item.mImeName;
+            final CharSequence subtypeName = item.mSubtypeName;
+            final TextView firstTextView = (TextView)view.findViewById(android.R.id.text1);
+            final TextView secondTextView = (TextView)view.findViewById(android.R.id.text2);
+            if (TextUtils.isEmpty(subtypeName)) {
+                firstTextView.setText(imeName);
+                secondTextView.setVisibility(View.GONE);
+            } else {
+                firstTextView.setText(subtypeName);
+                secondTextView.setText(imeName);
+                secondTextView.setVisibility(View.VISIBLE);
+            }
+            final RadioButton radioButton =
+                    (RadioButton)view.findViewById(com.android.internal.R.id.radio);
+            radioButton.setChecked(position == mCheckedItem);
+            return view;
+        }
+    }
+
     void hideInputMethodMenu() {
         synchronized (mMethodMap) {
             hideInputMethodMenuLocked();
@@ -2216,7 +2262,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mDialogBuilder = null;
-        mItems = null;
         mIms = null;
     }
 
