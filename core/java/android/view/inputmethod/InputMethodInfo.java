@@ -77,6 +77,8 @@ public final class InputMethodInfo implements Parcelable {
      */
     private final ArrayList<InputMethodSubtype> mSubtypes = new ArrayList<InputMethodSubtype>();
 
+    private boolean mIsAuxIme;
+
     /**
      * Constructor.
      *
@@ -104,6 +106,7 @@ public final class InputMethodInfo implements Parcelable {
         mService = service;
         ServiceInfo si = service.serviceInfo;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
+        mIsAuxIme = true;
 
         PackageManager pm = context.getPackageManager();
         String settingsActivityComponent = null;
@@ -167,6 +170,9 @@ public final class InputMethodInfo implements Parcelable {
                                     .InputMethod_Subtype_isAuxiliary, false),
                             a.getBoolean(com.android.internal.R.styleable
                                     .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false));
+                    if (!subtype.isAuxiliary()) {
+                        mIsAuxIme = false;
+                    }
                     mSubtypes.add(subtype);
                 }
             }
@@ -175,6 +181,10 @@ public final class InputMethodInfo implements Parcelable {
                     "Unable to create context for: " + si.packageName);
         } finally {
             if (parser != null) parser.close();
+        }
+
+        if (mSubtypes.size() == 0) {
+            mIsAuxIme = false;
         }
 
         if (additionalSubtypesMap != null && additionalSubtypesMap.containsKey(mId)) {
@@ -195,6 +205,7 @@ public final class InputMethodInfo implements Parcelable {
         mId = source.readString();
         mSettingsActivityName = source.readString();
         mIsDefaultResId = source.readInt();
+        mIsAuxIme = source.readInt() == 1;
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         source.readTypedList(mSubtypes, InputMethodSubtype.CREATOR);
     }
@@ -220,6 +231,7 @@ public final class InputMethodInfo implements Parcelable {
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
         mSettingsActivityName = settingsActivity;
         mIsDefaultResId = 0;
+        mIsAuxIme = false;
     }
 
     /**
@@ -361,15 +373,24 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public boolean isAuxiliaryIme() {
+        return mIsAuxIme;
+    }
+
+    /**
      * Used to package this object into a {@link Parcel}.
      * 
      * @param dest The {@link Parcel} to be written.
      * @param flags The flags used for parceling.
      */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mSettingsActivityName);
         dest.writeInt(mIsDefaultResId);
+        dest.writeInt(mIsAuxIme ? 1 : 0);
         mService.writeToParcel(dest, flags);
         dest.writeTypedList(mSubtypes);
     }
@@ -379,15 +400,18 @@ public final class InputMethodInfo implements Parcelable {
      */
     public static final Parcelable.Creator<InputMethodInfo> CREATOR
             = new Parcelable.Creator<InputMethodInfo>() {
+        @Override
         public InputMethodInfo createFromParcel(Parcel source) {
             return new InputMethodInfo(source);
         }
 
+        @Override
         public InputMethodInfo[] newArray(int size) {
             return new InputMethodInfo[size];
         }
     };
 
+    @Override
     public int describeContents() {
         return 0;
     }
