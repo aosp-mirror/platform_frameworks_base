@@ -658,40 +658,6 @@ public class MediaPlayer
     }
 
     /**
-     * Sets the {@link SurfaceTexture} to be used as the sink for the
-     * video portion of the media. Either a surface or surface texture
-     * must be set if a video sink is needed.  The same surface texture
-     * can be re-set without harm. Setting a surface texture will un-set
-     * any surface that was set via {@link #setDisplay(SurfaceHolder)}.
-     * Not calling this method or {@link #setDisplay(SurfaceHolder)}
-     * when playing back a video will result in only the audio track
-     * being played. Note that if a SurfaceTexture is used, the value
-     * set via setScreenOnWhilePlaying has no effect.
-     *
-     * The timestamps provided by {@link SurfaceTexture#getTimestamp()} for a
-     * SurfaceTexture set as the video sink have an unspecified zero point,
-     * and cannot be directly compared between different media sources or different
-     * instances of the same media source, or across multiple runs of the same
-     * program.  The timestamp is normally monotonically increasing and unaffected
-     * by time-of-day adjustments, but is reset when the position is set.
-     */
-    public void setTexture(SurfaceTexture st) {
-        // TODO: This method should be hidden before it is published and setSurface
-        // should be unhidden and made public instead.
-        if (st != null) {
-            Surface surface = new Surface(st);
-            setSurface(surface);
-
-            // It is safe and desired to release the newly created Surface here since the
-            // native code will grab a reference to the underlying ISurfaceTexture. At that
-            // point the Surface we just created is no longer needed.
-            surface.release();
-        } else {
-            setSurface(null);
-        }
-    }
-
-    /**
      * Convenience method to create a MediaPlayer for a given Uri.
      * On success, {@link #prepare()} will already have been called and must not be called again.
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
