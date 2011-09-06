@@ -17,6 +17,9 @@
 package android.net.wifi.p2p;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -84,6 +87,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private Context mContext;
     private String mInterface;
+    private Notification mNotification;
 
     INetworkManagementService mNwService;
     private DhcpStateMachine mDhcpStateMachine;
@@ -605,6 +609,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             sendP2pStateChangedBroadcast(true);
             mNetworkInfo.setIsAvailable(true);
             initializeP2pSettings();
+            showNotification();
         }
 
         @Override
@@ -695,6 +700,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void exit() {
             sendP2pStateChangedBroadcast(false);
             mNetworkInfo.setIsAvailable(false);
+            clearNotification();
         }
     }
 
@@ -1216,6 +1222,43 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private void loge(String s) {
         Slog.e(TAG, s);
+    }
+
+    private void showNotification() {
+        NotificationManager notificationManager =
+            (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager == null || mNotification != null) {
+            return;
+        }
+
+        Intent intent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+
+        Resources r = Resources.getSystem();
+        CharSequence title = r.getText(R.string.wifi_p2p_enabled_notification_title);
+        CharSequence message = r.getText(R.string.wifi_p2p_enabled_notification_message);
+
+        mNotification = new Notification();
+        mNotification.when = 0;
+        //TODO: might change to be a seperate icon
+        mNotification.icon = R.drawable.stat_sys_tether_wifi;
+        mNotification.defaults &= ~Notification.DEFAULT_SOUND;
+        mNotification.flags = Notification.FLAG_ONGOING_EVENT;
+        mNotification.tickerText = title;
+        mNotification.setLatestEventInfo(mContext, title, message, pi);
+
+        notificationManager.notify(mNotification.icon, mNotification);
+    }
+
+    private void clearNotification() {
+        NotificationManager notificationManager =
+            (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null && mNotification != null) {
+            notificationManager.cancel(mNotification.icon);
+            mNotification = null;
+        }
     }
 
     }
