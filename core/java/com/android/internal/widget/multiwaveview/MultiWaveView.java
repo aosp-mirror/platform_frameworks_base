@@ -79,6 +79,7 @@ public class MultiWaveView extends View {
     private static final int HIDE_ANIMATION_DURATION = RETURN_TO_HOME_DELAY;
     private static final int SHOW_ANIMATION_DURATION = 0;
     private static final int SHOW_ANIMATION_DELAY = 0;
+    private static final float TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.3f;
     private TimeInterpolator mChevronAnimationInterpolator = Ease.Quad.easeOut;
 
     private ArrayList<TargetDrawable> mTargetDrawables = new ArrayList<TargetDrawable>();
@@ -663,7 +664,7 @@ public class MultiWaveView extends View {
         final float y = event.getY();
         final float dx = x - mWaveCenterX;
         final float dy = y - mWaveCenterY;
-        if (dist2(dx,dy) <= square(mTapRadius)) {
+        if (dist2(dx,dy) <= getScaledTapRadiusSquared()) {
             if (DEBUG) Log.v(TAG, "** Handle HIT");
             switchToState(STATE_FIRST_TOUCH, x, y);
             moveHandleTo(x, y, false);
@@ -684,7 +685,7 @@ public class MultiWaveView extends View {
                 case MotionEvent.ACTION_HOVER_MOVE:
                     final float dx = event.getX() - mWaveCenterX;
                     final float dy = event.getY() - mWaveCenterY;
-                    if (dist2(dx,dy) <= square(mTapRadius)) {
+                    if (dist2(dx,dy) <= getScaledTapRadiusSquared()) {
                         if (!mWaveHovered) {
                             mWaveHovered = true;
                             final long timeSinceLastHoverExitMillis =
@@ -892,6 +893,16 @@ public class MultiWaveView extends View {
 
     private float dist2(float dx, float dy) {
         return dx*dx + dy*dy;
+    }
+
+    private float getScaledTapRadiusSquared() {
+        final float scaledTapRadius;
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            scaledTapRadius = TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED * mTapRadius;
+        } else {
+            scaledTapRadius = mTapRadius;
+        }
+        return square(scaledTapRadius);
     }
 
     private void announceTargets() {
