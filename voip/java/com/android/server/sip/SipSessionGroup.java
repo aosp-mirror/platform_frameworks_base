@@ -883,12 +883,15 @@ class SipSessionGroup implements SipListener {
             if (expires != null && (time < 0 || time > expires.getExpires())) {
                 time = expires.getExpires();
             }
+            if (time <= 0) {
+                time = EXPIRY_TIME;
+            }
             expires = (ExpiresHeader) response.getHeader(MinExpiresHeader.NAME);
             if (expires != null && time < expires.getExpires()) {
                 time = expires.getExpires();
             }
             Log.v(TAG, "Expiry time = " + time);
-            return (time > 0) ? time : EXPIRY_TIME;
+            return time;
         }
 
         private boolean registeringToReady(EventObject evt)
