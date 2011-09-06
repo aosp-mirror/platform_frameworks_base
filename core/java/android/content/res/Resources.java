@@ -73,6 +73,7 @@ public class Resources {
     private static final boolean DEBUG_LOAD = false;
     private static final boolean DEBUG_CONFIG = false;
     private static final boolean TRACE_FOR_PRELOAD = false;
+    private static final boolean TRACE_FOR_MISS_PRELOAD = false;
 
     private static final int ID_OTHER = 0x01000004;
 
@@ -1898,6 +1899,16 @@ public class Resources {
                 }
 
                 String file = value.string.toString();
+
+                if (TRACE_FOR_MISS_PRELOAD) {
+                    // Log only framework resources
+                    if ((id >>> 24) == 0x1) {
+                        final String name = getResourceName(id);
+                        if (name != null) android.util.Log.d(TAG, "Loading framework drawable #"
+                                + Integer.toHexString(id) + ": " + name
+                                + " at " + file);
+                    }
+                }
 
                 if (DEBUG_LOAD) Log.v(TAG, "Loading drawable for cookie "
                         + value.assetCookie + ": " + file);

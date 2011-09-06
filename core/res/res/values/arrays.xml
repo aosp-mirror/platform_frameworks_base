@@ -60,7 +60,10 @@
        <item>@drawable/btn_check_off_disabled_focused_holo_dark</item>
        <item>@drawable/btn_check_off_disable_focused</item>
        <item>@drawable/btn_check_off_disable</item>
-       <item>@drawable/btn_check_off</item>
+       <item>@drawable/btn_check_label_background</item>
+       <item>@drawable/btn_check_holo_light</item>
+       <item>@drawable/btn_check_holo_dark</item>
+       <item>@drawable/btn_check</item>
        <item>@drawable/btn_radio_on_selected</item>
        <item>@drawable/btn_radio_on_pressed_holo_light</item>
        <item>@drawable/btn_radio_on_pressed_holo_dark</item>
@@ -86,7 +89,8 @@
        <item>@drawable/btn_radio_off_disabled_holo_dark</item>
        <item>@drawable/btn_radio_off_disabled_focused_holo_light</item>
        <item>@drawable/btn_radio_off_disabled_focused_holo_dark</item>
-       <item>@drawable/btn_radio_off</item>
+       <item>@drawable/btn_radio_label_background</item>
+       <item>@drawable/btn_radio</item>
        <item>@drawable/btn_default_transparent_normal</item>
        <item>@drawable/btn_default_small_selected</item>
        <item>@drawable/btn_default_small_pressed</item>
@@ -108,11 +112,49 @@
        <item>@drawable/btn_default_disabled_holo_dark</item>
        <item>@drawable/btn_default_disabled_focused_holo_light</item>
        <item>@drawable/btn_default_disabled_focused_holo_dark</item>
+       <item>@drawable/btn_default_holo_dark</item>
+       <item>@drawable/btn_default_holo_light</item>
+       <item>@drawable/btn_default</item>
+       <item>@drawable/btn_default_small</item>
        <item>@drawable/btn_dropdown_disabled</item>
        <item>@drawable/btn_dropdown_disabled_focused</item>
        <item>@drawable/btn_dropdown_normal</item>
        <item>@drawable/btn_dropdown_pressed</item>
        <item>@drawable/btn_dropdown_selected</item>
+       <item>@drawable/btn_star_label_background</item>
+       <item>@drawable/btn_star_big_off</item>
+       <item>@drawable/btn_star_big_on</item>
+       <item>@drawable/btn_star_big_on_disable</item>
+       <item>@drawable/btn_star_big_off_disable</item>
+       <item>@drawable/btn_star_big_on_pressed</item>
+       <item>@drawable/btn_star_big_off_pressed</item>
+       <item>@drawable/btn_star_big_on_selected</item>
+       <item>@drawable/btn_star_big_off_selected</item>
+       <item>@drawable/btn_star_big_on_disable_focused</item>
+       <item>@drawable/btn_star_big_off_disable_focused</item>
+       <item>@drawable/btn_star_off_normal_holo_light</item>
+       <item>@drawable/btn_star_on_normal_holo_light</item>
+       <item>@drawable/btn_star_on_disabled_holo_light</item>
+       <item>@drawable/btn_star_off_disabled_holo_light</item>
+       <item>@drawable/btn_star_on_pressed_holo_light</item>
+       <item>@drawable/btn_star_off_pressed_holo_light</item>
+       <item>@drawable/btn_star_on_focused_holo_light</item>
+       <item>@drawable/btn_star_off_focused_holo_light</item>
+       <item>@drawable/btn_star_on_disabled_focused_holo_light</item>
+       <item>@drawable/btn_star_off_disabled_focused_holo_light</item>
+       <item>@drawable/btn_star_holo_light</item>
+       <item>@drawable/btn_star_off_normal_holo_dark</item>
+       <item>@drawable/btn_star_on_normal_holo_dark</item>
+       <item>@drawable/btn_star_on_disabled_holo_dark</item>
+       <item>@drawable/btn_star_off_disabled_holo_dark</item>
+       <item>@drawable/btn_star_on_pressed_holo_dark</item>
+       <item>@drawable/btn_star_off_pressed_holo_dark</item>
+       <item>@drawable/btn_star_on_focused_holo_dark</item>
+       <item>@drawable/btn_star_off_focused_holo_dark</item>
+       <item>@drawable/btn_star_on_disabled_focused_holo_dark</item>
+       <item>@drawable/btn_star_off_disabled_focused_holo_dark</item>
+       <item>@drawable/btn_star_holo_dark</item>
+       <item>@drawable/btn_star</item>
        <item>@drawable/btn_toggle_on_pressed_holo_light</item>
        <item>@drawable/btn_toggle_on_pressed_holo_dark</item>
        <item>@drawable/btn_toggle_on_normal_holo_light</item>
@@ -135,7 +177,13 @@
        <item>@drawable/btn_toggle_off_disabled_focused_holo_light</item>
        <item>@drawable/btn_toggle_off_disabled_focused_holo_dark</item>
        <item>@drawable/btn_toggle_off</item>
-       <item>@drawable/ic_emergency</item>
+       <item>@drawable/btn_toggle_holo_light</item>
+       <item>@drawable/btn_toggle_holo_dark</item>
+       <item>@drawable/btn_toggle</item>
+       <item>@drawable/btn_toggle_bg</item>
+       <item>@drawable/btn_dropdown</item>
+       <item>@drawable/btn_dropdown</item>
+       <item>@drawable/light_header_dither</item>
        <item>@drawable/divider_horizontal_textfield</item>
        <item>@drawable/divider_horizontal_dark_opaque</item>
        <item>@drawable/divider_horizontal_dark</item>
@@ -145,6 +193,11 @@
        <item>@drawable/edit_text_holo_light</item>
        <item>@drawable/edit_text_holo_dark</item>
        <item>@drawable/edit_text</item>
+       <item>@drawable/text_cursor_holo_light</item>
+       <item>@drawable/text_cursor_holo_dark</item>
+       <item>@drawable/text_select_handle_left</item>
+       <item>@drawable/text_select_handle_right</item>
+       <item>@drawable/text_edit_paste_window</item>
        <item>@drawable/expander_close_holo_dark</item>
        <item>@drawable/expander_close_holo_light</item>
        <item>@drawable/expander_ic_maximized</item>
@@ -161,12 +214,16 @@
        <item>@drawable/list_selector_background_selected</item>
        <item>@drawable/list_selector_holo_dark</item>
        <item>@drawable/list_selector_holo_light</item>
+       <item>@drawable/list_section_divider_holo_light</item>
+       <item>@drawable/list_section_divider_holo_dark</item>
        <item>@drawable/menu_background</item>
        <item>@drawable/menu_background_fill_parent_width</item>
        <item>@drawable/menu_hardkey_panel_holo_dark</item>
        <item>@drawable/menu_hardkey_panel_holo_light</item>
        <item>@drawable/menu_submenu_background</item>
        <item>@drawable/menu_selector</item>
+       <item>@drawable/menu_dropdown_panel_holo_light</item>
+       <item>@drawable/menu_dropdown_panel_holo_dark</item>
        <item>@drawable/overscroll_edge</item>
        <item>@drawable/overscroll_glow</item>
        <item>@drawable/panel_background</item>
@@ -252,6 +309,8 @@
        <item>@drawable/btn_cab_done_pressed_holo_dark</item>
        <item>@drawable/btn_cab_done_focused_holo_dark</item>
        <item>@drawable/btn_cab_done_pressed_holo_light</item>
+       <item>@drawable/btn_cab_done_holo_light</item>
+       <item>@drawable/btn_cab_done_holo_dark</item>
        <item>@drawable/ic_menu_close_clear_cancel</item>
        <item>@drawable/ic_menu_copy_holo_dark</item>
        <item>@drawable/ic_menu_copy_holo_light</item>
@@ -262,6 +321,14 @@
        <item>@drawable/ic_menu_moreoverflow_holo_light</item>
        <item>@drawable/ic_menu_paste_holo_dark</item>
        <item>@drawable/ic_menu_paste_holo_light</item>
+       <item>@drawable/ic_menu_selectall_holo_light</item>
+       <item>@drawable/ic_menu_selectall_holo_dark</item>
+       <item>@drawable/ic_clear</item>
+       <item>@drawable/ic_clear_disabled</item>
+       <item>@drawable/ic_clear_normal</item>
+       <item>@drawable/ic_search</item>
+       <item>@drawable/ic_go</item>
+       <item>@drawable/ic_voice_search</item>
        <item>@drawable/dialog_bottom_holo_dark</item>
        <item>@drawable/dialog_bottom_holo_light</item>
        <item>@drawable/dialog_full_holo_dark</item>
@@ -275,12 +342,67 @@
        <item>@drawable/ic_dialog_alert_holo_light</item>
        <item>@drawable/list_divider_holo_dark</item>
        <item>@drawable/list_divider_holo_light</item>
-        <!-- Visual lock screen -->
-        <item>@drawable/indicator_code_lock_drag_direction_green_up</item>
-        <item>@drawable/indicator_code_lock_drag_direction_red_up</item>
-        <item>@drawable/indicator_code_lock_point_area_default</item>
-        <item>@drawable/indicator_code_lock_point_area_green</item>
-        <item>@drawable/indicator_code_lock_point_area_red</item>
+       <item>@drawable/list_divider_holo_light</item>
+       <item>@drawable/ic_lockscreen_handle</item>
+       <item>@drawable/ic_lockscreen_outerring</item>
+       <item>@drawable/ic_lockscreen_chevron_left</item>
+       <item>@drawable/ic_lockscreen_chevron_right</item>
+       <item>@drawable/ab_transparent_dark_holo</item>
+       <item>@drawable/ab_stacked_transparent_dark_holo</item>
+       <item>@drawable/ab_bottom_transparent_dark_holo</item>
+       <item>@drawable/ab_solid_dark_holo</item>
+       <item>@drawable/ab_stacked_solid_dark_holo</item>
+       <item>@drawable/ab_bottom_solid_dark_holo</item>
+       <item>@drawable/ab_transparent_light_holo</item>
+       <item>@drawable/ab_stacked_transparent_light_holo</item>
+       <item>@drawable/ab_bottom_transparent_light_holo</item>
+       <item>@drawable/ab_solid_light_holo</item>
+       <item>@drawable/ab_stacked_solid_light_holo</item>
+       <item>@drawable/ab_bottom_solid_light_holo</item>
+       <item>@drawable/ab_solid_shadow_holo</item>
+       <item>@drawable/item_background_holo_dark</item>
+       <item>@drawable/item_background_holo_light</item>
+       <item>@drawable/ic_ab_back_holo_dark</item>
+       <item>@drawable/ic_ab_back_holo_light</item>
+       <item>@drawable/fastscroll_thumb_holo</item>
+       <item>@drawable/fastscroll_thumb_pressed_holo</item>
+       <item>@drawable/fastscroll_thumb_default_holo</item>
+       <item>@drawable/fastscroll_track_holo_dark</item>
+       <item>@drawable/fastscroll_track_pressed_holo_dark</item>
+       <item>@drawable/fastscroll_track_default_holo_dark</item>
+       <item>@drawable/fastscroll_label_left_holo_dark</item>
+       <item>@drawable/fastscroll_label_right_holo_dark</item>
+       <item>@drawable/fastscroll_track_holo_light</item>
+       <item>@drawable/fastscroll_track_pressed_holo_light</item>
+       <item>@drawable/fastscroll_track_default_holo_light</item>
+       <item>@drawable/fastscroll_label_left_holo_light</item>
+       <item>@drawable/fastscroll_label_right_holo_light</item>
+       <item>@drawable/editbox_dropdown_background_dark</item>
+       <item>@drawable/textfield_searchview_holo_dark</item>
+       <item>@drawable/textfield_searchview_right_holo_dark</item>
+       <item>@drawable/textfield_searchview_holo_light</item>
+       <item>@drawable/textfield_searchview_right_holo_light</item>
+       <item>@drawable/textfield_search_selected_holo_dark</item>
+       <item>@drawable/textfield_search_default_holo_dark</item>
+       <item>@drawable/textfield_search_right_selected_holo_dark</item>
+       <item>@drawable/textfield_search_right_default_holo_dark</item>
+       <item>@drawable/textfield_search_selected_holo_light</item>
+       <item>@drawable/textfield_search_default_holo_light</item>
+       <item>@drawable/textfield_search_right_selected_holo_light</item>
+       <item>@drawable/textfield_search_right_default_holo_light</item>
+       <item>@drawable/tab_indicator_holo</item>
+       <item>@drawable/tab_unselected_holo</item>
+       <item>@drawable/tab_selected_holo</item>
+       <item>@drawable/tab_unselected_focused_holo</item>
+       <item>@drawable/tab_selected_focused_holo</item>
+       <item>@drawable/tab_unselected_pressed_holo</item>
+       <item>@drawable/tab_selected_pressed_holo</item>
+       <item>@drawable/quickcontact_badge_overlay_dark</item>
+       <item>@drawable/quickcontact_badge_overlay_normal_dark</item>
+       <item>@drawable/quickcontact_badge_overlay_pressed_dark</item>
+       <item>@drawable/quickcontact_badge_overlay_light</item>
+       <item>@drawable/quickcontact_badge_overlay_normal_light</item>
+       <item>@drawable/quickcontact_badge_overlay_pressed_light</item>
     </array>
 
     <!-- Do not translate. These are all of the color state list resources that should be
