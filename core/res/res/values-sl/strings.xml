@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Preverjanje pristnosti ni bilo uspešno."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Preverjanje pristnosti s strežnikom proxy ni bilo uspešno."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Povezava s strežnikom ni bila uspešna."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Pri komunikaciji strežnika je prišlo do napake. Poskusite pozneje."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"Strežnik ni mogel vzpostaviti povezave. Poskusite znova pozneje."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Časovna omejitev za povezavo s strežnikom je potekla."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Na tej strani je preveč preusmeritev strežnika."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokol ni podprt."</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Nepravilna koda PIN."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Če želite telefon odkleniti, pritisnite meni in nato 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Številka za klic v sili"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Ni storitve)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Ni storitve)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Zaslon je zaklenjen."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Če želite odkleniti napravo ali opraviti klic v sili, pritisnite meni."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Če želite odkleniti, pritisnite meni."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Pravilno."</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Poskusite znova"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Poskusite znova"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Polnjenje (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Polnjenje (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Napolnjeno."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Priključite napajalnik."</string>
@@ -671,14 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"<xliff:g id="NUMBER_0">%d</xliff:g>-krat ste vnesli napačen PIN. "\n\n"Poskusite znova čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"<xliff:g id="NUMBER_0">%d</xliff:g>-krat ste narisali napačen vzorec za odklepanje. Če vam tudi v <xliff:g id="NUMBER_1">%d</xliff:g>. ne uspe, boste tablični računalnik morali odkleniti s podatki za prijavo v Google."\n\n" Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vzorec za odklepanje ste nepravilno vnesli <xliff:g id="NUMBER_0">%d</xliff:g>-krat. Po <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n" Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> sekund."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablični računalnik ste poskusili <xliff:g id="NUMBER_0">%d</xliff:g>-krat nepravilno odkleniti. Če poskusite še <xliff:g id="NUMBER_1">%d</xliff:g>-krat in ne uspete, bo ponastavljen na privzete tovarniške nastavitve, vsi uporabniški podatki pa bodo izbrisani."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefon ste poskusili <xliff:g id="NUMBER_0">%d</xliff:g>-krat nepravilno odkleniti. Če poskusite še <xliff:g id="NUMBER_1">%d</xliff:g>-krat in ne uspete, bo ponastavljen na privzete tovarniške nastavitve, vsi uporabniški podatki pa bodo izgubljeni."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablični računalnik ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat nepravilno odkleniti, zato bo zdaj ponastavljen na privzete tovarniške nastavitve."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat nepravilno odkleniti, zato bo ponastavljen na privzete tovarniške nastavitve."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekund."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Ali ste pozabili vzorec?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Odklepanje računa"</string>
@@ -858,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"Izreži"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiraj"</string>
     <string name="paste" msgid="5629880836805036433">"Prilepi"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Zamenjaj"</string>
+    <string name="replace" msgid="5781686059063148930">"Zamenjaj???"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopiraj URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Izbiranje besedila ..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Izbrano besedilo"</string>
@@ -882,10 +880,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Izberite program za napravo USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tega dejanja ne more izvesti noben program."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"Žal se je program <xliff:g id="APPLICATION">%1$s</xliff:g> ustavil."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Žal se je postopek <xliff:g id="PROCESS">%1$s</xliff:g> ustavil."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"Program <xliff:g id="APPLICATION">%2$s</xliff:g> se ne odziva."\n\n"Ali ga želite zapreti?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Dejavnost <xliff:g id="ACTIVITY">%1$s</xliff:g> se ne odziva."\n\n"Ali jo želite zapreti?"</string>
@@ -902,14 +898,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Znova omogočite pri možnosti Nastavitve &gt; Programi &gt; Upravljanje programov."</string>
     <string name="smv_application" msgid="295583804361236288">"Program <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) krši svoj samoizvedljivi pravilnik o strogem načinu."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> krši svoj samoizvedljivi pravilnik o strogem načinu."</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
-    <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
-    <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
-    <skip />
-    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
-    <skip />
+    <string name="android_upgrading_title" msgid="378740715658358071">"Poteka nadgradnja sistema Android ..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Optimiranje programa <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Zagon programov."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Dokončevanje zagona."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> se izvaja"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Izberite za preklop na program"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Ali želite preklopiti program?"</string>
@@ -947,10 +939,10 @@
     <item quantity="other" msgid="7915895323644292768">"Odpiranje razpoložljivih brezžičnih omrežij"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Z omrežjem Wi-Fi se ni mogoče povezati"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"ima slabo internetno povezavo."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ima slabo internetno povezavo."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Začnite s postopkom Wi-Fi Direct. S tem bo izklopljen postopek odjemalca/dostopne točke Wi-Fi."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Napaka pri zagonu Wi-Fi Direct"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Wi-Fi Direct ni mogoče zagnati"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Zahteva za nastavitev povezave Wi-Fi Direct z naslova <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Če želite sprejeti, kliknite V redu."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Zahteva za nastavitev povezave Wi-Fi Direct z naslova <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Če želite nadaljevati, vnesite PIN."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pred začetkom nastavitve povezave morate PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> vnesti v enakovredno napravo <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
@@ -991,7 +983,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Pri izklopu shrambe USB je prišlo do napake. Preverite, ali ste izpeli gostitelja USB, in poskusite znova."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Vklop shrambe USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Če vklopite shrambo USB, bodo nekateri programi, ki jih uporabljate, ustavljeni in morda ne bodo na voljo, dokler je ne izklopite."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Operacija USB ni uspela"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Operacija v pomnilniku USB ni uspela"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"V redu"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Povezan kot predstavnostna naprava"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Povezan kot fotoaparat"</string>
@@ -1091,8 +1083,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Izpenjanje kartice SD ..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Brisanje pomnilnika USB ..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Brisanje kartice SD ..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Brisanje pomnilnika USB ni uspelo."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Brisanje pomnilnika USB ni uspelo."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Pomnilnika USB ni bilo mogoče izbrisati."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"Kartice SD ni bilo mogoče izbrisati."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Kartica SD je bila odstranjena, preden je bila izpeta."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Trenutno poteka preverjanje pomnilnika USB."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Poteka preverjanje kartice SD."</string>
@@ -1116,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Izberite račun"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Povečaj"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Zmanjšaj"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"potrjeno"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"ni odkljukano"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"izbrano"</string>
@@ -1124,22 +1144,32 @@
     <string name="switch_off" msgid="7249798614327155088">"izklopljeno"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"vklopljen"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"izklopljen"</string>
-    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Tipka Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Prekliči"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Tipka Delete"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Končano"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Sprememba načina"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Tipka Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Tipka Enter"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <!-- no translation found for description_target_camera (969071997552486814) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Če želite med vnašanjem gesla slišati tipke, potrebujete slušalke."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Krmarjenje domov"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Krmarjenje navzgor"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
@@ -1152,19 +1182,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Podatki 2G-3G so onemogočeni"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Podatki 4G so onemogočeni"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilni podatki so onemogočeni"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"tapnite, če želite omogočiti"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Upor. podatk. Wi-Fi onemogočena"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"Dotaknite se, da omogočite"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Omejit. za podat. 2G-3G presež."</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Omejitev za podat. 4G presež."</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Omej. za pod. v mob. n. presež."</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Presež. omej. za podatke Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> nad določeno mejo"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Podatki v ozadju so omejeni"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Dotaknite se, da odstranite omejitev"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Varnostno potrdilo"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"To potrdilo je veljavno."</string>
     <string name="issued_to" msgid="454239480274921032">"Izdano za:"</string>
@@ -1183,6 +1209,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Izberite dejavnost"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Skupna raba z ..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naprava zaklenjena."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

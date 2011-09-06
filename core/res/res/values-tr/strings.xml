@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Kimlik doğrulanamadı."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Proxy sunucusu üzerinden kimlik doğrulanamadı."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Sunucu ile bağlantı kurulamadı."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Sunucu iletişim kuramadı. Daha sonra yeniden deneyin."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"Sunucu iletişim kuramadı. Daha sonra tekrar deneyin."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Sunucuya bağlanma işlemi zaman aşımına uğradı."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Sayfada çok fazla sunucu yeniden yönlendirmesi bulunuyor."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokol desteklenmiyor."</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Yanlış PIN kodu!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmak için önce Menü\'ye, sonra 0\'a basın."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Acil durum numarası"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Hizmet yok)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Hizmet yok)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekran kilitli."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Kilidi açmak için Menü\'ye basın."</string>
@@ -650,7 +650,8 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Üzgünüz, lütfen yeniden deneyin"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Maalesef, tekrar deneyin"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (8057762828355572315) -->
+    <skip />
     <string name="lockscreen_charged" msgid="4938930459620989972">"Şarj oldu."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Şarj cihazınızı bağlayın."</string>
@@ -671,14 +672,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"PIN\'inizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış girdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra tabletinizi Google oturum açma bilgilerinizi kullanarak açmanız istenir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra telefonunuzu Google oturum açma bilgilerinizi kullanarak açmanız istenir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde yeniden deneyin."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet kilidini <xliff:g id="NUMBER_0">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%d</xliff:g> defa daha başarısız deneme yapılırsa, tablet fabrika varsayılanına sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefonun kilidini <xliff:g id="NUMBER_0">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%d</xliff:g> defa daha başarısız deneme yapılırsa, telefon fabrika varsayılanına sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Tablet şimdi fabrika varsayılanına sıfırlanacak."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Telefon şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Deseni unuttunuz mu?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Hesap kilidini açma"</string>
@@ -859,6 +856,8 @@
     <string name="copy" msgid="2681946229533511987">"Kopyala"</string>
     <string name="paste" msgid="5629880836805036433">"Yapıştır"</string>
     <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Değiştir"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"URL\'yi kopyala"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Metin seç..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Metin seçimi"</string>
@@ -882,10 +881,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"USB cihazı için bir uygulama seçin"</string>
     <string name="noApplications" msgid="1691104391758345586">"Hiçbir uygulama bu işlemi yapamaz."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"Maalesef <xliff:g id="APPLICATION">%1$s</xliff:g> durdu."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Maalesef <xliff:g id="PROCESS">%1$s</xliff:g> işlemi durdu."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> yanıt vermiyor."\n\n"Bu uygulamayı kapatmak ister misiniz?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"<xliff:g id="ACTIVITY">%1$s</xliff:g>  yanıt vermiyor."\n\n"Bu etkinliği kapatmak ister misiniz?"</string>
@@ -902,14 +899,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Bunu Ayarlar &gt; Uygulamalar &gt; Uygulamaları yönet bölümünden yeniden etkinleştirebilirsiniz."</string>
     <string name="smv_application" msgid="295583804361236288">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
-    <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
-    <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
-    <skip />
-    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
-    <skip />
+    <string name="android_upgrading_title" msgid="378740715658358071">"Android yeni sürüme geçiriliyor..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> uygulama optimize ediliyor."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Uygulamalar başlatılıyor."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Açılış tamamlanıyor."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> çalışıyor"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Uygulama değiştirmeyi seçin"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Uygulamaların arasında geçiş yapılsın mı?"</string>
@@ -947,10 +940,10 @@
     <item quantity="other" msgid="7915895323644292768">"Kullanılabilir kablosuz ağları aç"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kablosuz bağlantısı kurulamadı"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"internet bağlantısı zayıf."</string>
+    <!-- outdated translation 2517058131278770509 -->     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" internet bağlantısı zayıf."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Kablosuz Doğrudan Bağlantı"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Kablosuz Doğrudan Bağlantı işlemini başlat. Bu durumda Kablosuz istemci/hotspot işlemi kapatılacak."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Kablosuz Doğrudan bağlantısı başlatılamadı"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Kablosuz Doğrudan bağlantı başlatılamadı"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> tarafından gelen Kablosuz Doğrudan bağlantı kurulumu isteği. Kabul etmek için TAMAM\'ı tıklayın."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> tarafından gelen Kablosuz Doğrudan bağlantı kurulumu isteği. Devam etmek için pin girin."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Bağlantı kurulum işleminin devamı için <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> eş cihazında WPS pin <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> girilmelidir."</string>
@@ -991,7 +984,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB depolama birimini kapatırken bir sorun oluştu. USB ana makinesini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB depolama birimini aç"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB depolama birimini açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB depolama birimi kapatılıncaya kadar kullanılamayabilir."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB işlemi başarısız oldu"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Medya cihazı olarak bağlandı"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Kamera olarak bağlandı"</string>
@@ -1091,8 +1084,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SD kartın bağlantısı kesiliyor..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USB dep brm silinyr..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"SD kart siliniyor..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB depolama birimi silinemedi."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"USB depolama birimi silinemedi."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB depolama birimi silinemedi."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"SD kart silinemedi."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD kart, bağlantısı kesilmeden çıkarıldı."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB depolama birimi şu anda denetleniyor."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD kart şu anda denetleniyor."</string>
@@ -1116,6 +1109,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Bir hesap seçin"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Artır"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Azalt"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"işaretli"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"işaretlenmedi"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"seçili"</string>
@@ -1124,22 +1145,32 @@
     <string name="switch_off" msgid="7249798614327155088">"kapalı"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"basıldı"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"basılmadı"</string>
-    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"İptal"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Sil"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Bitti"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mod değiştirme"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"ÜstKrkt"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Giriş"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <!-- no translation found for description_target_camera (969071997552486814) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tuş. Şifre yazarken tuşları duyabilmek için kulaklık gerekir."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ana sayfaya git"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Yukarı git"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Diğer seçenekler"</string>
@@ -1152,19 +1183,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G verileri devre dışı"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G verileri devre dışı"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobil veriler devre dışı"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"etkinleştirmek içn hafifçe vurun"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Kablosuz veri devre dışı bırkldı"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"Etkinleştirmek için dokunun"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G veri limiti aşıldı"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G veri limiti aşıldı"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobil veri limiti aşıldı"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Kablosuz veri limiti aşıldı"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> belirlenen limitin üzerinde"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Arka plan verileri kısıtlı"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Kısıtlamayı kaldrmk için dokn"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Güvenlik sertifikası"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Bu sertifika geçerli."</string>
     <string name="issued_to" msgid="454239480274921032">"Verilen:"</string>
@@ -1183,6 +1210,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Etkinlik seçin"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Şununla paylaş..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Cihaz kilitli."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

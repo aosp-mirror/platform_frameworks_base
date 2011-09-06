@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Удостоверяването не бе успешно."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Удостоверяването през прокси сървъра не бе успешно."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Връзката със сървъра не бе успешна."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Комуникацията със сървъра не бе успешна. Опитайте отново по-късно."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"Комуникацията със сървъра не можа да бъде осъществена. Опитайте отново по-късно."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Времето за изчакване на връзката със сървъра изтече."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страницата съдържа твърде много сървърни пренасочвания."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Протоколът не се поддържа."</string>
@@ -327,7 +327,7 @@
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Разрешава на приложението да променя данните за контактите (за адрес), съхранени в телефона ви. Злонамерените приложения могат да използват това, за да изтрият или променят тези данни."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"четене на данните в профила ви"</string>
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Разрешава на приложението да чете информацията от личния потребителски профил, съхранена на устройството ви, например вашето име и данни за връзка. Това означава, че приложението може да ви идентифицира и да изпраща информацията за потребителския ви профил на други хора."</string>
-    <string name="permlab_writeProfile" msgid="4679878325177177400">"запис в данните на профила ви"</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"запис в потр. ви профил"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Разрешава на приложението да променя или добавя към личния потребителски профил информация, съхранена на устройството ви, като например вашето име и данни за връзка. Това означава, че приложението може да ви идентифицира и да изпраща информацията за потребителския ви профил на други хора."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"четене на събития от календари плюс поверителна информация"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Разрешава на приложението да чете всички събития от календари, съхранявани на таблета ви, включително тези на приятели или колеги. Злонамерено приложение с това разрешение може да извлича лична информация от тези календари без знанието на собствениците."</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неправилен PIN код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"За да отключите, натиснете „Меню“ и после 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Спешен номер"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Няма покритие)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Няма покритие)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Екранът е заключен."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Натиснете „Меню“, за да отключите или да извършите спешно обаждане."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Натиснете „Меню“, за да отключите."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правилно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Съжаляваме, опитайте отново"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Съжаляваме, опитайте отново"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Зарежда се (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Зарежда се, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Зареден."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Свържете зарядното си устройство."</string>
@@ -671,14 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Въведохте неправилно своя PIN <xliff:g id="NUMBER_0">%d</xliff:g> пъти. "\n\n"Моля, опитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством данните си за вход в Google."\n\n" Моля, опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Нарисувахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще ви бъде поискано да отключите телефона, използвайки данните си за вход в Google."\n\n" Моля, опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Направихте опит да отключите таблета неправилно <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Направихте опит да отключите телефона неправилно <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Направихте опит да отключите таблета неправилно <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Направихте опит да отключите телефона неправилно <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Опитайте отново след <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забравили сте фигурата?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Отключване на профила"</string>
@@ -858,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"Изрязване"</string>
     <string name="copy" msgid="2681946229533511987">"Копиране"</string>
     <string name="paste" msgid="5629880836805036433">"Поставяне"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Замяна"</string>
+    <string name="replace" msgid="5781686059063148930">"Замяна???"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копиране на URL адреса"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Избиране на текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Избиране на текст"</string>
@@ -882,10 +880,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Избор на приложение за USB устройството"</string>
     <string name="noApplications" msgid="1691104391758345586">"Това действие не може да се изпълни от нито едно приложение."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"За съжаление <xliff:g id="APPLICATION">%1$s</xliff:g> спря."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"За съжаление процесът <xliff:g id="PROCESS">%1$s</xliff:g> спря."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"Приложението „<xliff:g id="APPLICATION">%2$s</xliff:g>“ не отговаря."\n\n"Искате ли да го затворите?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Дейността „<xliff:g id="ACTIVITY">%1$s</xliff:g>“ не отговаря."\n\n"Искате ли да я затворите?"</string>
@@ -902,14 +898,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Активирайте отново това в „Настройки“ &gt; „Приложения“ &gt; „Управление на приложенията“."</string>
     <string name="smv_application" msgid="295583804361236288">"Приложението <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) наруши правилото за стриктен режим, наложено от самото него."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесът <xliff:g id="PROCESS">%1$s</xliff:g> наруши правилото за стриктен режим, наложено от самия него."</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
-    <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
-    <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
-    <skip />
-    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
-    <skip />
+    <string name="android_upgrading_title" msgid="378740715658358071">"Android се надстройва..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Оптимизира се приложение <xliff:g id="NUMBER_0">%1$d</xliff:g> от <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Приложенията стартират."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Зареждането завършва."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Изберете за превключване към приложение"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Да се превключат ли приложенията?"</string>
@@ -947,10 +939,10 @@
     <item quantity="other" msgid="7915895323644292768">"Има достъпни отворени Wi-Fi мрежи"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можа да се свърже с Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"има лоша връзка с интернет."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" има лоша връзка с интернет."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Стартиране на операция за Wi-Fi Direct. Това ще изключи операцията за клиентска програма/точка за достъп до Wi-Fi."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Стартирането на Wi-Fi Direct не бе успешно"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Wi-Fi Direct не можа да се стартира"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Заявка за настройка на връзка с Wi-Fi Direct от <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Кликнете върху „OK“, за да приемете."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Заявка за настройка на връзка с Wi-Fi Direct от <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Въведете ПИН, за да продължите."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS ПИН кодът <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> трябва да бъде въведен в съответното устройство <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>, за да продължи настройката за връзка"</string>
@@ -961,7 +953,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Отказ"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картата е премахната"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Мобилната мрежа няма да бъде достъпна, докато не рестартирате с поставена валидна SIM карта."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Няма да имате достъп до мобилната мрежа, докато не рестартирате с поставена валидна SIM карта."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картата е добавена"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Трябва да рестартирате устройството си, за да осъществите достъп до мобилната мрежа."</string>
@@ -991,7 +983,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"При изключването на работата като USB устройство за съхранение възникна проблем. Уверете се, че сте премахнали активирането на USB хоста, и опитайте отново."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Включване на USB устройството за съхранение"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Ако включите работата като USB устройство за съхранение, някои използвани от вас приложения ще спрат и може да бъдат недостъпни, докато не я изключите."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Операцията през USB не бе успешна"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Операцията през USB не бе успешна"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Свързан като медийно устройство"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Свързан като камера"</string>
@@ -1091,8 +1083,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SD картата се спира..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USB хранилището се изтрива..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"SD картата се изтрива..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Изтриването на USB хранилището не бе успешно."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Изтриването на USB хранилището не бе успешно."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB хранилището не можа да бъде изтрито."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"SD картата не можа да бъде изтрита."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD картата бе премахната, преди да бъде спряна."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB хранилището понастоящем се проверява."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD картата се проверява понастоящем."</string>
@@ -1116,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Избор на профил"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Увеличаване"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Намаляване"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"отметнато"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"не е отметнато"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"избрано"</string>
@@ -1124,22 +1144,32 @@
     <string name="switch_off" msgid="7249798614327155088">"изключено"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"натиснато"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"не е натиснато"</string>
-    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Отказ"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Изтриване"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Готово"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Промяна на режима"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <!-- no translation found for description_target_camera (969071997552486814) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Клавиш. Необходими са слушалки, за да чуете клавишите при въвеждането на парола."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Придвижване към „Начало“"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Придвижване нагоре"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Още опции"</string>
@@ -1152,19 +1182,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G данните са деактивирани"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G данните са деактивирани"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобилните данни са деактивирани"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"докоснете за активиране"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi данните са деактивирани"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"Докоснете, за да активирате"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Превишен лимит на 2G–3G данните"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Лимит за 4G данните – превишен"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Лимит за моб. данни – превишен"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Превишен лимит на Wi-Fi данните"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> над определения лимит"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Ограничени данни на заден план"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Докоснете и махнете ограничението"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертификат за сигурност"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Този сертификат е валиден."</string>
     <string name="issued_to" msgid="454239480274921032">"Издаден на:"</string>
@@ -1183,6 +1209,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Избор на активност"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Споделяне със..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройството е заключено."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

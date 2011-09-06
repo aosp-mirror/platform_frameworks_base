@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"لم تتم المصادقة بنجاح."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"لم تتم المصادقة عبر الخادم الوكيل بنجاح."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"لم ينجح الاتصال بالخادم."</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"أخفق الخادم في الاتصال. الرجاء المحاولة مرة أخرى لاحقًا."</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"تعذر على الخادم الاتصال. أعد المحاولة لاحقًا."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"انتهت مهلة الاتصال بالخادم."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"تحتوي هذه الصفحة على عمليات إعادة توجيه خادم كثيرة للغاية."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"البروتوكول غير معتمد."</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"كود PIN غير صحيح!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"لإلغاء التأمين، اضغط على \"القائمة\" ثم على 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"رقم الطوارئ"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(ليس هناك خدمة)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(ليس هناك خدمة)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"الشاشة مؤمّنة."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"اضغط على \"القائمة\" لإلغاء التأمين أو إجراء اتصال بالطوارئ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
@@ -650,7 +650,8 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"صحيح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"عذرًا، حاول مرة أخرى"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"عذرًا، أعد المحاولة"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"شحن (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (8057762828355572315) -->
+    <skip />
     <string name="lockscreen_charged" msgid="4938930459620989972">"تم الشحن."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"توصيل جهاز الشحن."</string>
@@ -671,14 +672,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"لقد أدخلت رقم التعريف الشخصي (PIN) بشكل غير صحيح عدد <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. "\n\n"الرجاء إعادة المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"لقد رسمت نقش إلغاء التأمين بصورة خاطئة عدد <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات الأخرى غير الناجحة، ستتم مطالبتك بإلغاء تأمين الجهاز اللوحي باستخدام معلومات تسجيل الدخول إلى Google."\n\n" الرجاء إعادة المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام معلومات تسجيل الدخول إلى Google."\n\n" الرجاء المحاولة مرة أخرى خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الجهاز اللوحي إلى الإعدادات الافتراضية للمصنع."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الهاتف إلى الإعدادات الافتراضية للمصنع."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"هل نسيت النمط؟"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"إلغاء تأمين الحساب"</string>
@@ -859,6 +856,8 @@
     <string name="copy" msgid="2681946229533511987">"نسخ"</string>
     <string name="paste" msgid="5629880836805036433">"لصق"</string>
     <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"استبدال"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"نسخ عنوان URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"تحديد نص..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"تحديد النص"</string>
@@ -882,10 +881,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"تحديد تطبيق لجهاز USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"ليس هناك تطبيقات يمكنها تنفيذ هذا الإجراء."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"للأسف، توقف <xliff:g id="APPLICATION">%1$s</xliff:g>."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"للأسف، توقفت العملية <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> غير مستجيب."\n\n"هل تريد إغلاقه؟"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"النشاط <xliff:g id="ACTIVITY">%1$s</xliff:g> غير مستجيب."\n\n"هل تريد إغلاقه؟"</string>
@@ -902,14 +899,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"يمكنك إعادة تمكين هذا من خلال الإعدادات &gt; التطبيقات &gt; إدارة التطبيقات."</string>
     <string name="smv_application" msgid="295583804361236288">"انتهك التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) سياسة.StrictMode المفروضة ذاتيًا."</string>
     <string name="smv_process" msgid="5120397012047462446">"انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
-    <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
-    <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
-    <skip />
-    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
-    <skip />
+    <string name="android_upgrading_title" msgid="378740715658358071">"جارٍ تحديث Android..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"جارٍ بدء التطبيقات."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"جارٍ إعادة التشغيل."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"تحديد للتبديل إلى التطبيق"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"هل تريد التبديل بين التطبيقات؟"</string>
@@ -947,10 +940,10 @@
     <item quantity="other" msgid="7915895323644292768">"هناك شبكات Wi-Fi مفتوحة متاحة"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"تعذر الاتصال بـ Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"تحتوي على اتصال إنترنت ضعيف."</string>
+    <!-- outdated translation 2517058131278770509 -->     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" تحتوي على اتصال إنترنت ضعيف."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"اتصال Wi-Fi مباشر"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"ابدأ تشغيل اتصال Wi-Fi المباشر. يؤدي ذلك إلى إيقاف تشغيل عميل/نقطة اتصال Wi-Fi."</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"أخفق بدء اتصال Wi-Fi مباشر."</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"تعذر بدء اتصال Wi-Fi مباشر"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. انقر على \"موافق\" للقبول."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. أدخل رقم التعريف الشخصي للبدء."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"يجب إدخال رقم التعريف الشخصي لـ WPS‏ <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> في الجهاز النظير <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> حتى يبدأ إعداد الاتصال."</string>
@@ -991,7 +984,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"حدثت مشكلة في إيقاف تشغيل سعة USB التخزينية. تحقق من إلغاء تحميل مضيف USB، ثم حاول مرة أخرى."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"تشغيل سعة تخزين USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"إذا شغّلت سعة تخزين USB، فستتوقف بعض التطبيقات التي تستخدمها وربما تصبح غير متاحة لحين إيقاف تشغيل سعة تخزين USB."</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"أخفقت عملية USB"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"لم تتم عملية USB بنجاح"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"موافق"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"التوصيل كجهاز وسائط"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"التوصيل ككاميرا"</string>
@@ -1091,8 +1084,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"جارٍ إلغاء تركيب بطاقة SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"جارٍ محو وحدة تخزين USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"جارٍ محو بطاقة SD..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"أخفق محو وحدة تخزين USB."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"أخفق محو وحدة تخزين USB."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"تعذر مسح وحدة تخزين USB."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"تعذر مسح بطاقة SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"تمت إزالة بطاقة SD قبل أن يتم إلغاء تركيبها."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"يتم حاليًا التحقق من وحدة تخزين USB."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"يتم الآن التحقق من بطاقة SD."</string>
@@ -1116,6 +1109,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"حدد حسابًا."</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"زيادة"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"تناقص"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"تم التحديد"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"لم يتم التحديد"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"محدد"</string>
@@ -1124,22 +1145,32 @@
     <string name="switch_off" msgid="7249798614327155088">"إيقاف"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"مضغوط"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"غير مضغوط"</string>
-    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"إلغاء"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"حذف"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"تم"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغيير الوضع"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"العالي"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <!-- no translation found for description_target_camera (969071997552486814) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"سماعة رأس مطلوبة لسماع المفاتيح أثناء كتابة كلمة مرور."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"التنقل إلى الشاشة الرئيسية"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"التنقل إلى أعلى"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
@@ -1152,19 +1183,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"تم تعطيل بيانات شبكات الجيل الثاني والجيل الثالث"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"تم تعطيل بيانات شبكة الجيل الرابع"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"تم تعطيل بيانات الجوال"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"انقر للتمكين."</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"تم تعطيل بيانات Wi-Fi"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"المس للتمكين"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"تم تجاوز حد بيانات شبكات 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"تم تجاوز حد بيانات 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"تم تجاوز حد بيانات الجوال"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"تم تجاوز حد بيانات شبكة Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> أكثر من الحد المعين"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"تم تقييد بيانات الخلفية"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"انقر لإزالة التقييد"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="454239480274921032">"إصدار لـ:"</string>
@@ -1183,6 +1210,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"تحديد نشاط"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"مشاركة مع..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"تم تأمين الجهاز."</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">"، "</string>
 </resources>

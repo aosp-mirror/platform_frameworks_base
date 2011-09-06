@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Codice PIN errato."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Per sbloccare, premi Menu, poi 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numero di emergenza"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Nessun servizio)"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nessun servizio."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Schermo bloccato."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Premi Menu per sbloccare o effettuare chiamate di emergenza."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Premi Menu per sbloccare."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Corretta."</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Riprova"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Riprova"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Carico."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Collegare il caricabatterie."</string>
@@ -854,7 +854,8 @@
     <string name="cut" msgid="3092569408438626261">"Taglia"</string>
     <string name="copy" msgid="2681946229533511987">"Copia"</string>
     <string name="paste" msgid="5629880836805036433">"Incolla"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Sostituisci"</string>
+    <string name="replace" msgid="5781686059063148930">"Sostituisci..."</string>
+    <string name="delete" msgid="6098684844021697789">"Elimina"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copia URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleziona testo..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selezione testo"</string>
@@ -937,7 +938,7 @@
     <item quantity="other" msgid="7915895323644292768">"Reti Wi-Fi aperte disponibili"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossibile connettersi alla rete Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"ha una connessione a Internet insufficiente."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ha una connessione Internet debole."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Avvia funzionamento Wi-Fi Direct. Verrà disattivato il funzionamento con hotspot/client Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Avvio di Wi-Fi Direct non riuscito"</string>
@@ -1106,6 +1107,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleziona un account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumenta"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuisci"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"selezionata"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"non selezionato"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"selezionato"</string>
@@ -1121,6 +1150,19 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Cambio modalità"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maiuscolo"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invio"</string>
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Maniglia scorrevole. Tocca e tieni premuto."</string>
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
+    <skip />
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
+    <skip />
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
+    <skip />
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
+    <skip />
+    <string name="description_target_unlock" msgid="2228524900439801453">"Sblocca"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Fotocamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Silenzioso"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Audio attivato"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tasto. Set auricolari richiesto per udire i tasti durante la digitazione di una password."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Vai alla home page"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Vai in alto"</string>
@@ -1134,14 +1176,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Dati 2G-3G disattivati"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dati 4G disattivati"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dati mobili disattivati"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Dati Wi-Fi disattivati"</string>
     <string name="data_usage_limit_body" msgid="4313857592916426843">"Tocca per abilitare"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Limite dati 2G-3G superato"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Limite dati 4G superato"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Limite dati cellulare superato"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Limite dati Wi-Fi superato"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> oltre il limite indicato"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dati in background limitati"</string>
     <string name="data_usage_restricted_body" msgid="5087354814839059798">"Tocca per rimuovere restrizione"</string>
