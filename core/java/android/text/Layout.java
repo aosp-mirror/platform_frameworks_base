@@ -673,6 +673,35 @@ public abstract class Layout {
         return false;
     }
 
+    /**
+     * Returns true if the character at offset is right to left (RTL).
+     * @param offset the offset
+     * @return true if the character is RTL, false if it is LTR
+     */
+    public boolean isRtlCharAt(int offset) {
+        int line = getLineForOffset(offset);
+        Directions dirs = getLineDirections(line);
+        if (dirs == DIRS_ALL_LEFT_TO_RIGHT) {
+            return false;
+        }
+        if (dirs == DIRS_ALL_RIGHT_TO_LEFT) {
+            return  true;
+        }
+        int[] runs = dirs.mDirections;
+        int lineStart = getLineStart(line);
+        for (int i = 0; i < runs.length; i += 2) {
+            int start = lineStart + (runs[i] & RUN_LENGTH_MASK);
+            // No need to test the end as an offset after the last run should return the value
+            // corresponding of the last run
+            if (offset >= start) {
+                int level = (runs[i+1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK;
+                return ((level & 1) != 0);
+            }
+        }
+        // Should happen only if the offset is "out of bounds"
+        return false;
+    }
+
     private boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
