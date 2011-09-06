@@ -62,24 +62,6 @@ public class TextDirectionHeuristics {
         new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, false);
 
     /**
-     * Examines only the strong directional non-format characters, and if either
-     * left to right or right to left characters are 60% or more of this total,
-     * determines that the direction follows the majority of characters.  Falls
-     * back to left to right if neither direction meets this threshold.
-     */
-    public static final TextDirectionHeuristic CHARCOUNT_LTR =
-        new TextDirectionHeuristicInternal(CharCount.INSTANCE_DEFAULT, false);
-
-    /**
-     * Examines only the strong directional non-format characters, and if either
-     * left to right or right to left characters are 60% or more of this total,
-     * determines that the direction follows the majority of characters.  Falls
-     * back to right to left if neither direction meets this threshold.
-     */
-    public static final TextDirectionHeuristic CHARCOUNT_RTL =
-        new TextDirectionHeuristicInternal(CharCount.INSTANCE_DEFAULT, true);
-
-    /**
      * Force the paragraph direction to the Locale direction. Falls back to left to right.
      */
     public static final TextDirectionHeuristic LOCALE = TextDirectionHeuristicLocale.INSTANCE;
@@ -252,62 +234,6 @@ public class TextDirectionHeuristics {
 
         public static final AnyStrong INSTANCE_RTL = new AnyStrong(true);
         public static final AnyStrong INSTANCE_LTR = new AnyStrong(false);
-    }
-
-    /**
-     * Algorithm that uses the relative proportion of strong directional
-     * characters (excluding LRE, LRO, RLE, RLO) to determine the direction
-     * of the paragraph, if the proportion exceeds a given threshold.
-     *
-     * @hide
-     */
-    public static class CharCount implements TextDirectionAlgorithm {
-        private final float mThreshold;
-
-        @Override
-        public TriState checkRtl(char[] text, int start, int count) {
-            int countLtr = 0;
-            int countRtl = 0;
-            for(int i = start, e = start + count; i < e; ++i) {
-                switch (isRtlText(Character.getDirectionality(text[i]))) {
-                    case TRUE:
-                        ++countLtr;
-                        break;
-                    case FALSE:
-                        ++countRtl;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            int limit = (int)((countLtr + countRtl) * mThreshold);
-            if (limit > 0) {
-                if (countLtr > limit) {
-                    return TriState.FALSE;
-                }
-                if (countRtl > limit) {
-                    return TriState.TRUE;
-                }
-            }
-            return TriState.UNKNOWN;
-        }
-
-        private CharCount(float threshold) {
-            mThreshold = threshold;
-        }
-
-        public static CharCount withThreshold(float threshold) {
-            if (threshold < 0 || threshold > 1) {
-                throw new IllegalArgumentException();
-            }
-            if (threshold == DEFAULT_THRESHOLD) {
-                return INSTANCE_DEFAULT;
-            }
-            return new CharCount(threshold);
-        }
-
-        public static final float DEFAULT_THRESHOLD = 0.6f;
-        public static final CharCount INSTANCE_DEFAULT = new CharCount(DEFAULT_THRESHOLD);
     }
 
     /**
