@@ -19932,6 +19932,7 @@ package android.text {
     method public abstract int getTopPadding();
     method public final int getWidth();
     method public final void increaseWidthTo(int);
+    method public boolean isRtlCharAt(int);
     method protected final boolean isSpanned();
     field public static final int DIR_LEFT_TO_RIGHT = 1; // 0x1
     field public static final int DIR_RIGHT_TO_LEFT = -1; // 0xffffffff
