@@ -10320,7 +10320,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             throw new OutOfMemoryError();
         }
 
-        bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
+        Resources resources = getResources();
+        if (resources != null) {
+            bitmap.setDensity(resources.getDisplayMetrics().densityDpi);
+        }
 
         Canvas canvas;
         if (attachInfo != null) {
