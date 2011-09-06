@@ -2689,6 +2689,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message">Wi-Fi Direct connection setup request from <xliff:g id="p2p_device_address">%1$s</xliff:g>. Click OK to accept. </string>
     <string name="wifi_p2p_pin_go_negotiation_request_message">Wi-Fi Direct connection setup request from <xliff:g id="p2p_device_address">%1$s</xliff:g>. Enter pin to proceed. </string>
     <string name="wifi_p2p_pin_display_message">WPS pin <xliff:g id="p2p_wps_pin">%1$s</xliff:g> needs to be entered on the peer device <xliff:g id="p2p_client_address">%2$s</xliff:g> for connection setup to proceed </string>
+    <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
+    <string name="wifi_p2p_enabled_notification_message">Touch for settings</string>
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
     <string name="select_character">Insert character</string>
