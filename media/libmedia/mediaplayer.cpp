@@ -148,10 +148,10 @@ status_t MediaPlayer::setDataSource(
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
             sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-            err = attachNewPlayer(player);
-            if (err == NO_ERROR) {
-                err = mPlayer->setDataSource(url, headers);
+            if (NO_ERROR != player->setDataSource(url, headers)) {
+                player.clear();
             }
+            err = attachNewPlayer(player);
         }
     }
     return err;
@@ -164,10 +164,10 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
         sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-        err = attachNewPlayer(player);
-        if (err == NO_ERROR) {
-            err = mPlayer->setDataSource(fd, offset, length);
+        if (NO_ERROR != player->setDataSource(fd, offset, length)) {
+            player.clear();
         }
+        err = attachNewPlayer(player);
     }
     return err;
 }
@@ -179,10 +179,10 @@ status_t MediaPlayer::setDataSource(const sp<IStreamSource> &source)
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
         sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-        err = attachNewPlayer(player);
-        if (err == NO_ERROR) {
-            err = mPlayer->setDataSource(source);
+        if (NO_ERROR != player->setDataSource(source)) {
+            player.clear();
         }
+        err = attachNewPlayer(player);
     }
     return err;
 }
