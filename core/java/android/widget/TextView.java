@@ -9467,10 +9467,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
-        private static final float AVERAGE_HIGHLIGHTS_PER_SUGGESTION = 1.4f;
-        private WordIterator mSuggestionWordIterator;
-        private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan
-                [(int) (AVERAGE_HIGHLIGHTS_PER_SUGGESTION * MAX_NUMBER_SUGGESTIONS)];
         private SuggestionInfo[] mSuggestionInfos;
         private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
@@ -9497,10 +9493,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public SuggestionsPopupWindow() {
-            for (int i = 0; i < mHighlightSpans.length; i++) {
-                mHighlightSpans[i] = new TextAppearanceSpan(mContext,
-                        android.R.style.TextAppearance_SuggestionHighlight);
-            }
             mCursorWasVisibleBeforeSuggestions = mCursorVisible;
         }
 
@@ -9534,6 +9526,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
             int suggestionIndex; // the index of the suggestion inside suggestionSpan
             SpannableStringBuilder text = new SpannableStringBuilder();
+            TextAppearanceSpan highlightSpan = new TextAppearanceSpan(mContext,
+                    android.R.style.TextAppearance_SuggestionHighlight);
 
             void removeMisspelledFlag() {
                 int suggestionSpanFlags = suggestionSpan.getFlags();
@@ -9746,152 +9740,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
-        private long[] getWordLimits(CharSequence text) {
-            // TODO locale for mSuggestionWordIterator
-            if (mSuggestionWordIterator == null) mSuggestionWordIterator = new WordIterator();
-            mSuggestionWordIterator.setCharSequence(text);
-
-            // First pass will simply count the number of words to be able to create an array
-            // Not too expensive since previous break positions are cached by the BreakIterator
-            int nbWords = 0;
-            int position = mSuggestionWordIterator.following(0);
-            while (position != BreakIterator.DONE) {
-                nbWords++;
-                position = mSuggestionWordIterator.following(position);
-            }
-
-            int index = 0;
-            long[] result = new long[nbWords];
-
-            position = mSuggestionWordIterator.following(0);
-            while (position != BreakIterator.DONE) {
-                int wordStart = mSuggestionWordIterator.getBeginning(position);
-                result[index++] = packRangeInLong(wordStart, position);
-                position = mSuggestionWordIterator.following(position);
-            }
-
-            return result;
-        }
-
-        private TextAppearanceSpan highlightSpan(int index) {
-            final int length = mHighlightSpans.length;
-            if (index < length) {
-                return mHighlightSpans[index];
-            }
-
-            // Assumes indexes are requested in sequence: simply append one more item
-            TextAppearanceSpan[] newArray = new TextAppearanceSpan[length + 1];
-            System.arraycopy(mHighlightSpans, 0, newArray, 0, length);
-            TextAppearanceSpan highlightSpan = new TextAppearanceSpan(mContext,
-                    android.R.style.TextAppearance_SuggestionHighlight);
-            newArray[length] = highlightSpan;
-            mHighlightSpans = newArray;
-            return highlightSpan;
-        }
-
-        private void highlightTextDifferences(SuggestionInfo suggestionInfo,
-                int unionStart, int unionEnd) {
+        private void highlightTextDifferences(SuggestionInfo suggestionInfo, int unionStart,
+                int unionEnd) {
             final int spanStart = suggestionInfo.spanStart;
             final int spanEnd = suggestionInfo.spanEnd;
 
-            // Remove all text formating by converting to Strings
-            final String text = suggestionInfo.text.toString();
-            final String sourceText = mText.subSequence(spanStart, spanEnd).toString();
+            // Adjust the start/end of the suggestion span
+            suggestionInfo.suggestionStart = spanStart - unionStart;
+            suggestionInfo.suggestionEnd = suggestionInfo.suggestionStart 
+                    + suggestionInfo.text.length();
+            
+            suggestionInfo.text.clearSpans();
+            suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0,
+                    suggestionInfo.text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            long[] sourceWordLimits = getWordLimits(sourceText);
-            long[] wordLimits = getWordLimits(text);
-
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            // span [spanStart, spanEnd] is included in union [spanUnionStart, int spanUnionEnd]
-            // The final result is made of 3 parts: the text before, between and after the span
-            // This is the text before, provided for context
-            ssb.append(mText.subSequence(unionStart, spanStart).toString());
-
-            // shift is used to offset spans positions wrt span's beginning
-            final int shift = spanStart - unionStart;
-            suggestionInfo.suggestionStart = shift;
-            suggestionInfo.suggestionEnd = shift + text.length();
-
-            // This is the actual suggestion text, which will be highlighted by the following code
-            ssb.append(text);
-
-            String[] words = new String[wordLimits.length];
-            for (int i = 0; i < wordLimits.length; i++) {
-                int wordStart = extractRangeStartFromLong(wordLimits[i]);
-                int wordEnd = extractRangeEndFromLong(wordLimits[i]);
-                words[i] = text.substring(wordStart, wordEnd);
-            }
-
-            // Highlighted word algorithm is based on word matching between source and text
-            // Matching words are found from left to right. TODO: change for RTL languages
-            // Characters between matching words are highlighted
-            int previousCommonWordIndex = -1;
-            int nbHighlightSpans = 0;
-            for (int i = 0; i < sourceWordLimits.length; i++) {
-                int wordStart = extractRangeStartFromLong(sourceWordLimits[i]);
-                int wordEnd = extractRangeEndFromLong(sourceWordLimits[i]);
-                String sourceWord = sourceText.substring(wordStart, wordEnd);
-
-                for (int j = previousCommonWordIndex + 1; j < words.length; j++) {
-                    if (sourceWord.equals(words[j])) {
-                        if (j != previousCommonWordIndex + 1) {
-                            int firstDifferentPosition = previousCommonWordIndex < 0 ? 0 :
-                                extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
-                            int lastDifferentPosition = extractRangeStartFromLong(wordLimits[j]);
-                            ssb.setSpan(highlightSpan(nbHighlightSpans++),
-                                    shift + firstDifferentPosition, shift + lastDifferentPosition,
-                                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        } else {
-                            // Compare characters between words
-                            int previousSourceWordEnd = i == 0 ? 0 :
-                                extractRangeEndFromLong(sourceWordLimits[i - 1]);
-                            int sourceWordStart = extractRangeStartFromLong(sourceWordLimits[i]);
-                            String sourceSpaces = sourceText.substring(previousSourceWordEnd,
-                                    sourceWordStart);
-
-                            int previousWordEnd = j == 0 ? 0 :
-                                extractRangeEndFromLong(wordLimits[j - 1]);
-                            int currentWordStart = extractRangeStartFromLong(wordLimits[j]);
-                            String textSpaces = text.substring(previousWordEnd, currentWordStart);
-
-                            if (!sourceSpaces.equals(textSpaces)) {
-                                ssb.setSpan(highlightSpan(nbHighlightSpans++),
-                                        shift + previousWordEnd, shift + currentWordStart,
-                                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            }
-                        }
-                        previousCommonWordIndex = j;
-                        break;
-                    }
-                }
-            }
-
-            // Finally, compare ends of Strings
-            if (previousCommonWordIndex < words.length - 1) {
-                int firstDifferentPosition = previousCommonWordIndex < 0 ? 0 :
-                    extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
-                int lastDifferentPosition = text.length();
-                ssb.setSpan(highlightSpan(nbHighlightSpans++),
-                        shift + firstDifferentPosition, shift + lastDifferentPosition,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            } else {
-                int lastSourceWordEnd = sourceWordLimits.length == 0 ? 0 :
-                    extractRangeEndFromLong(sourceWordLimits[sourceWordLimits.length - 1]);
-                String sourceSpaces = sourceText.substring(lastSourceWordEnd, sourceText.length());
-
-                int lastCommonTextWordEnd = previousCommonWordIndex < 0 ? 0 :
-                    extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
-                String textSpaces = text.substring(lastCommonTextWordEnd, text.length());
-
-                if (!sourceSpaces.equals(textSpaces) && textSpaces.length() > 0) {
-                    ssb.setSpan(highlightSpan(nbHighlightSpans++),
-                            shift + lastCommonTextWordEnd, shift + text.length(),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-            }
-
-            // Final part, text after the current suggestion range.
-            ssb.append(mText.subSequence(spanEnd, unionEnd).toString());
+            // Add the text before and after the span.
+            suggestionInfo.text.insert(0, mText.subSequence(unionStart, spanStart).toString());
+            suggestionInfo.text.append(mText.subSequence(spanEnd, unionEnd).toString());
         }
 
         @Override
