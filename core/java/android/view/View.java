@@ -2568,26 +2568,18 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public static final int TEXT_DIRECTION_ANY_RTL = 2;
 
     /**
-     * Text direction is the same as the one held by a 60% majority of the characters. If there is
-     * no majority then the paragraph direction is the resolved layout direction of the View.
-     *
-     * @hide
-     */
-    public static final int TEXT_DIRECTION_CHAR_COUNT = 3;
-
-    /**
      * Text direction is forced to LTR.
      *
      * @hide
      */
-    public static final int TEXT_DIRECTION_LTR = 4;
+    public static final int TEXT_DIRECTION_LTR = 3;
 
     /**
      * Text direction is forced to RTL.
      *
      * @hide
      */
-    public static final int TEXT_DIRECTION_RTL = 5;
+    public static final int TEXT_DIRECTION_RTL = 4;
 
     /**
      * Default text direction is inherited
@@ -2603,7 +2595,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_CHAR_COUNT, to = "CHAR_COUNT"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
     })
@@ -2621,7 +2612,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_CHAR_COUNT, to = "CHAR_COUNT"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
     })
