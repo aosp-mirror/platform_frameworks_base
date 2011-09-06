@@ -72,13 +72,12 @@
 
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"
-            android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:singleLine="true"
             android:paddingRight="6dip"
             android:textSize="16sp"
-            android:textStyle="bold"
             android:gravity="center_vertical|left"
             />
     </LinearLayout>
