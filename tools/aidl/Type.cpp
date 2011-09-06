@@ -130,8 +130,7 @@ register_base_types()
                                     Type::BUILT_IN, false, false);
     NAMES.Add(RPC_SERVICE_BASE_TYPE);
 
-    RPC_DATA_TYPE = new Type("com.android.athome.rpc", "RpcData",
-                                    Type::BUILT_IN, false, false);
+    RPC_DATA_TYPE = new RpcDataType();
     NAMES.Add(RPC_DATA_TYPE);
 
     RPC_BROKER_TYPE = new Type("com.android.athome.utils", "AndroidAtHomeBroker",
@@ -1206,6 +1205,29 @@ GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variabl
     addTo->Add(new Assignment(v, new MethodCall(data, "getList", 2, k,
                     new LiteralExpression(classArg))));
 }
+
+
+// ================================================================
+
+RpcDataType::RpcDataType()
+    :Type("com.android.athome.rpc", "RpcData", Type::BUILT_IN, false, false)
+{
+}
+
+void
+RpcDataType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+        Variable* data, int flags)
+{
+    addTo->Add(new MethodCall(data, "putRpcData", 2, k, v));
+}
+
+void
+RpcDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, Variable* data,
+        Variable** cl)
+{
+    addTo->Add(new Assignment(v, new MethodCall(data, "getRpcData", 1, k)));
+}
+
 
 // ================================================================
 
