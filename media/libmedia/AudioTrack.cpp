@@ -1231,16 +1231,33 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
                                false);
 
         if (result == NO_ERROR) {
+            uint32_t user = cblk->user;
+            uint32_t server = cblk->server;
             // restore write index and set other indexes to reflect empty buffer status
-            mCblk->user = cblk->user;
-            mCblk->server = cblk->user;
-            mCblk->userBase = cblk->user;
-            mCblk->serverBase = cblk->user;
+            mCblk->user = user;
+            mCblk->server = user;
+            mCblk->userBase = user;
+            mCblk->serverBase = user;
             // restore loop: this is not guaranteed to succeed if new frame count is not
             // compatible with loop length
             setLoop_l(cblk->loopStart, cblk->loopEnd, cblk->loopCount);
             if (!fromStart) {
                 mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                // Make sure that a client relying on callback events indicating underrun or
+                // the actual amount of audio frames played (e.g SoundPool) receives them.
+                if (mSharedBuffer == 0) {
+                    uint32_t frames = 0;
+                    if (user > server) {
+                        frames = ((user - server) > mCblk->frameCount) ?
+                                mCblk->frameCount : (user - server);
+                        memset(mCblk->buffers, 0, frames * mCblk->frameSize);
+                    }
+                    // restart playback even if buffer is not completely filled.
+                    android_atomic_or(CBLK_FORCEREADY_ON, &mCblk->flags);
+                    // stepUser() clears CBLK_UNDERRUN_ON flag enabling underrun callbacks to
+                    // the client
+                    mCblk->stepUser(frames);
+                }
             }
             if (mActive) {
                 result = mAudioTrack->start();
