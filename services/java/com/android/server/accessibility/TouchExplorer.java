@@ -84,7 +84,7 @@ public class TouchExplorer implements Explorer {
 
     // The minimum of the cosine between the vectors of two moving
     // pointers so they can be considered moving in the same direction.
-    private static final float MIN_ANGLE_COS = 0.866025404f; // cos(pi/6)
+    private static final float MAX_DRAGGING_ANGLE_COS = 0.525321989f; // cos(pi/4)
 
     // The delay for sending a hover enter event.
     private static final long DELAY_SEND_HOVER_ENTER = 200;
@@ -364,13 +364,13 @@ public class TouchExplorer implements Explorer {
                         }
 
                         mPerformLongPressDelayed.remove();
-                        mSendHoverDelayed.forceSendAndRemove();
-                        ensureHoverExitSent(event, pointerIdBits, policyFlags);
 
                         // If touch exploring announce the end of the gesture.
                         // Also do not click on the last explored location.
                         if (mTouchExploreGestureInProgress) {
                             mTouchExploreGestureInProgress = false;
+                            mSendHoverDelayed.forceSendAndRemove();
+                            ensureHoverExitSent(event, pointerIdBits, policyFlags);
                             mLastTouchExploreEvent = MotionEvent.obtain(event);
                             sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
                             break;
@@ -384,6 +384,8 @@ public class TouchExplorer implements Explorer {
                             final long exploreTime = mLastTouchExploreEvent.getEventTime();
                             final long deltaTime = eventTime - exploreTime;
                             if (deltaTime > ACTIVATION_TIME_SLOP) {
+                                mSendHoverDelayed.forceSendAndRemove();
+                                ensureHoverExitSent(event, pointerIdBits, policyFlags);
                                 mLastTouchExploreEvent = MotionEvent.obtain(event);
                                 break;
                             }
@@ -396,14 +398,25 @@ public class TouchExplorer implements Explorer {
                                     - event.getY(pointerIndex);
                             final float deltaMove = (float) Math.hypot(deltaX, deltaY);
                             if (deltaMove > mTouchExplorationTapSlop) {
+                                mSendHoverDelayed.forceSendAndRemove();
+                                ensureHoverExitSent(event, pointerIdBits, policyFlags);
                                 mLastTouchExploreEvent = MotionEvent.obtain(event);
                                 break;
                             }
+
+                            // This is a tap so do not send hover events since
+                            // this events will result in firing the corresponding
+                            // accessibility events confusing the user about what
+                            // is actually clicked.
+                            mSendHoverDelayed.remove();
+                            ensureHoverExitSent(event, pointerIdBits, policyFlags);
 
                             // All preconditions are met, so click the last explored location.
                             sendActionDownAndUp(mLastTouchExploreEvent, policyFlags);
                             mLastTouchExploreEvent = null;
                         } else {
+                            mSendHoverDelayed.forceSendAndRemove();
+                            ensureHoverExitSent(event, pointerIdBits, policyFlags);
                             mLastTouchExploreEvent = MotionEvent.obtain(event);
                         }
                     } break;
@@ -782,7 +795,7 @@ public class TouchExplorer implements Explorer {
         final float angleCos =
             firstXNormalized * secondXNormalized + firstYNormalized * secondYNormalized;
 
-        if (angleCos < MIN_ANGLE_COS) {
+        if (angleCos < MAX_DRAGGING_ANGLE_COS) {
             return false;
         }
 
