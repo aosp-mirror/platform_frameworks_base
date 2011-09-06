@@ -356,6 +356,21 @@ public class WifiNative {
         return null;
     }
 
+    public static String p2pGetDeviceAddress() {
+        String status = statusCommand();
+        if (status == null) return "";
+
+        String[] tokens = status.split("\n");
+        for (String token : tokens) {
+            if (token.startsWith("p2p_device_address=")) {
+                String[] nameValue = token.split("=");
+                if (nameValue.length != 2) break;
+                return nameValue[1];
+            }
+        }
+        return "";
+    }
+
     public static String p2pPeer(String deviceAddress) {
         return doStringCommand("P2P_PEER " + deviceAddress);
     }

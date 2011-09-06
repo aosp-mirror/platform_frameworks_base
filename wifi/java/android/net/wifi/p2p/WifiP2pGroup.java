@@ -33,9 +33,6 @@ public class WifiP2pGroup implements Parcelable {
     /** The network name */
     private String mNetworkName;
 
-    /** The network bssid */
-    private String mNetworkBssid;
-
     /** Group owner */
     private WifiP2pDevice mOwner;
 
@@ -45,27 +42,12 @@ public class WifiP2pGroup implements Parcelable {
     /** Group clients */
     private List<WifiP2pDevice> mClients = new ArrayList<WifiP2pDevice>();
 
-    private int mChannel;
-
-    /**
-     * The network passphrase
-     * <p/>
-     * The passphrase used for WPA2-PSK
-     */
+    /** The passphrase used for WPA2-PSK */
     private String mPassphrase;
-
-    /**
-     * TODO: fix
-     * Sometimes supplicant sends a psk
-     */
-    private String mPsk;
-
-    /** Indicates that the group is persistent */
-    private boolean mIsPersistent;
 
     private String mInterface;
 
-    public WifiP2pGroup() {
+    WifiP2pGroup() {
     }
 
     /**
@@ -81,6 +63,7 @@ public class WifiP2pGroup implements Parcelable {
      *  bssid=fa:7b:7a:42:82:13 unknown-network
      *
      *  Note: The events formats can be looked up in the wpa_supplicant code
+     *  @hide
      */
     public WifiP2pGroup(String supplicantEvent) throws IllegalArgumentException {
 
@@ -103,20 +86,6 @@ public class WifiP2pGroup implements Parcelable {
                     continue;
                 }
 
-                if (nameValue[0].equals("freq")) {
-                    try {
-                        mChannel = Integer.parseInt(nameValue[1]);
-                    } catch (NumberFormatException e) {
-                        mChannel = 0; //invalid
-                    }
-                    continue;
-                }
-
-                if (nameValue[0].equals("psk")) {
-                    mPsk = nameValue[1];
-                    continue;
-                }
-
                 if (nameValue[0].equals("passphrase")) {
                     mPassphrase = nameValue[1];
                     continue;
@@ -135,28 +104,51 @@ public class WifiP2pGroup implements Parcelable {
                     mOwner = new WifiP2pDevice(nameValue[1]);
                     continue;
                 }
-
-                if (nameValue[0].equals("bssid")) {
-                    mNetworkBssid = nameValue[1];
-                }
             }
         } else {
             throw new IllegalArgumentException("Malformed supplicant event");
         }
     }
 
+    /** @hide */
+    public void setNetworkName(String networkName) {
+        mNetworkName = networkName;
+    }
+
+    /**
+     * Get the network name (SSID) of the group. Legacy Wi-Fi clients will discover
+     * the p2p group using the network name.
+     */
+    public String getNetworkName() {
+        return mNetworkName;
+    }
+
+    /** @hide */
+    public void setIsGroupOwner(boolean isGo) {
+        mIsGroupOwner = isGo;
+    }
+
+    /** Check whether this device is the group owner of the created p2p group */
     public boolean isGroupOwner() {
         return mIsGroupOwner;
     }
 
+    /** @hide */
+    public void setOwner(WifiP2pDevice device) {
+        mOwner = device;
+    }
+
+    /** Get the details of the group owner as a {@link WifiP2pDevice} object */
     public WifiP2pDevice getOwner() {
         return mOwner;
     }
 
+    /** @hide */
     public void addClient(String address) {
         addClient(new WifiP2pDevice(address));
     }
 
+    /** @hide */
     public void addClient(WifiP2pDevice device) {
         for (WifiP2pDevice client : mClients) {
             if (client.equals(device)) return;
@@ -164,31 +156,60 @@ public class WifiP2pGroup implements Parcelable {
         mClients.add(device);
     }
 
+    /** @hide */
     public boolean removeClient(String address) {
         return mClients.remove(new WifiP2pDevice(address));
     }
 
+    /** @hide */
     public boolean removeClient(WifiP2pDevice device) {
         return mClients.remove(device);
     }
 
+    /** @hide */
     public boolean isClientListEmpty() {
         return mClients.size() == 0;
     }
 
+    /** Get the list of clients currently part of the p2p group */
     public Collection<WifiP2pDevice> getClientList() {
         return Collections.unmodifiableCollection(mClients);
     }
 
+    /** @hide */
+    public void setPassphrase(String passphrase) {
+        mPassphrase = passphrase;
+    }
+
+    /**
+     * Get the passphrase of the group. This function will return a valid passphrase only
+     * at the group owner. Legacy Wi-Fi clients will need this passphrase alongside
+     * network name obtained from {@link #getNetworkName()} to join the group
+     */
+    public String getPassphrase() {
+        return mPassphrase;
+    }
+
+    /** @hide */
+    public void setInterface(String intf) {
+        mInterface = intf;
+    }
+
+    /** Get the interface name on which the group is created */
     public String getInterface() {
         return mInterface;
     }
 
-    // TODO: implement
+    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
-        //sbuf.append("SSID: ").append(SSID);
-        //sbuf.append("\n passphrase: ").append(passphrase);
+        sbuf.append("network: ").append(mNetworkName);
+        sbuf.append("\n isGO: ").append(mIsGroupOwner);
+        sbuf.append("\n GO: ").append(mOwner);
+        for (WifiP2pDevice client : mClients) {
+            sbuf.append("\n Client: ").append(client);
+        }
+        sbuf.append("\n interface: ").append(mInterface);
         return sbuf.toString();
     }
 
@@ -205,8 +226,16 @@ public class WifiP2pGroup implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    // STOPSHIP: implement
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mNetworkName);
+        dest.writeParcelable(mOwner, flags);
+        dest.writeByte(mIsGroupOwner ? (byte) 1: (byte) 0);
+        dest.writeInt(mClients.size());
+        for (WifiP2pDevice client : mClients) {
+            dest.writeParcelable(client, flags);
+        }
+        dest.writeString(mPassphrase);
+        dest.writeString(mInterface);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -214,6 +243,15 @@ public class WifiP2pGroup implements Parcelable {
         new Creator<WifiP2pGroup>() {
             public WifiP2pGroup createFromParcel(Parcel in) {
                 WifiP2pGroup group = new WifiP2pGroup();
+                group.setNetworkName(in.readString());
+                group.setOwner((WifiP2pDevice)in.readParcelable(null));
+                group.setIsGroupOwner(in.readByte() == (byte)1);
+                int clientCount = in.readInt();
+                for (int i=0; i<clientCount; i++) {
+                    group.addClient((WifiP2pDevice) in.readParcelable(null));
+                }
+                group.setPassphrase(in.readString());
+                group.setInterface(in.readString());
                 return group;
             }
 
