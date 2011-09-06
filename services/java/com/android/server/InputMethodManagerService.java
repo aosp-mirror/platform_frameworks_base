@@ -2100,8 +2100,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // We show all enabled IMEs and subtypes when an IME is shown.
                         if (enabledSubtypeSet.contains(subtypeHashCode)
                                 && ((mInputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
-                            final CharSequence subtypeLabel = subtype.getDisplayName(context,
-                                    imi.getPackageName(), imi.getServiceInfo().applicationInfo);
+                            final CharSequence subtypeLabel =
+                                    subtype.overridesImplicitlyEnabledSubtype() ? null
+                                            : subtype.getDisplayName(context, imi.getPackageName(),
+                                                    imi.getServiceInfo().applicationInfo);
                             imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j));
 
                             // Removing this subtype from enabledSubtypeSet because we no longer
