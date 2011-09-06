@@ -442,6 +442,17 @@ private:
     string m_creator;
 };
 
+class RpcDataType : public Type
+{
+public:
+                    RpcDataType();
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+};
+
 class ClassLoaderType : public Type
 {
 public:
