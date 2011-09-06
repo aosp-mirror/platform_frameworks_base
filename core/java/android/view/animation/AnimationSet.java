@@ -18,6 +18,7 @@ package android.view.animation;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.graphics.RectF;
 
@@ -31,6 +32,22 @@ import java.util.List;
  * If AnimationSet sets any properties that its children also set
  * (for example, duration or fillBefore), the values of AnimationSet
  * override the child values.
+ *
+ * <p>The way that AnimationSet inherits behavior from Animation is important to
+ * understand. Some of the Animation attributes applied to AnimationSet affect the
+ * AnimationSet itself, some are pushed down to the children, and some are ignored,
+ * as follows:
+ * <ul>
+ *     <li>duration, repeatMode, fillBefore, fillAfter: These properties, when set
+ *     on an AnimationSet object, will be pushed down to all child animations.</li>
+ *     <li>repeatCount, fillEnabled: These properties are ignored for AnimationSet.</li>
+ *     <li>startOffset, shareInterpolator: These properties apply to the AnimationSet itself.</li>
+ * </ul>
+ * Starting with {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH},
+ * the behavior of these properties is the same in XML resources and at runtime (prior to that
+ * release, the values set in XML were ignored for AnimationSet). That is, calling
+ * <code>setDuration(500)</code> on an AnimationSet has the same effect as declaring
+ * <code>android:duration="500"</code> in an XML resource for an AnimationSet object.</p>
  */
 public class AnimationSet extends Animation {
     private static final int PROPERTY_FILL_AFTER_MASK         = 0x1;
@@ -69,7 +86,26 @@ public class AnimationSet extends Animation {
         setFlag(PROPERTY_SHARE_INTERPOLATOR_MASK,
                 a.getBoolean(com.android.internal.R.styleable.AnimationSet_shareInterpolator, true));
         init();
-        
+
+        if (context.getApplicationInfo().targetSdkVersion >=
+                Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (a.hasValue(com.android.internal.R.styleable.Animation_duration)) {
+                mFlags |= PROPERTY_DURATION_MASK;
+            }
+            if (a.hasValue(com.android.internal.R.styleable.Animation_fillBefore)) {
+                mFlags |= PROPERTY_FILL_BEFORE_MASK;
+            }
+            if (a.hasValue(com.android.internal.R.styleable.Animation_fillAfter)) {
+                mFlags |= PROPERTY_FILL_AFTER_MASK;
+            }
+            if (a.hasValue(com.android.internal.R.styleable.Animation_repeatMode)) {
+                mFlags |= PROPERTY_REPEAT_MODE_MASK;
+            }
+            if (a.hasValue(com.android.internal.R.styleable.Animation_startOffset)) {
+                mFlags |= PROPERTY_START_OFFSET_MASK;
+            }
+        }
+
         a.recycle();
     }
     
@@ -112,7 +148,6 @@ public class AnimationSet extends Animation {
 
     private void init() {
         mStartTime = 0;
-        mDuration = 0;
     }
 
     @Override
@@ -171,6 +206,7 @@ public class AnimationSet extends Animation {
     public void setDuration(long durationMillis) {
         mFlags |= PROPERTY_DURATION_MASK;
         super.setDuration(durationMillis);
+        mLastEnd = mStartOffset + mDuration;
     }
 
     /**
@@ -192,12 +228,16 @@ public class AnimationSet extends Animation {
             mFlags |= PROPERTY_CHANGE_BOUNDS_MASK;
         }
 
-        if (mAnimations.size() == 1) {
-            mDuration = a.getStartOffset() + a.getDuration();
+        if ((mFlags & PROPERTY_DURATION_MASK) == PROPERTY_DURATION_MASK) {
             mLastEnd = mStartOffset + mDuration;
         } else {
-            mLastEnd = Math.max(mLastEnd, a.getStartOffset() + a.getDuration());
-            mDuration = mLastEnd - mStartOffset;
+            if (mAnimations.size() == 1) {
+                mDuration = a.getStartOffset() + a.getDuration();
+                mLastEnd = mStartOffset + mDuration;
+            } else {
+                mLastEnd = Math.max(mLastEnd, a.getStartOffset() + a.getDuration());
+                mDuration = mLastEnd - mStartOffset;
+            }
         }
 
         mDirty = true;
