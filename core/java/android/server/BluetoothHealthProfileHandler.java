@@ -294,7 +294,7 @@ final class BluetoothHealthProfileHandler {
 
     private HealthChannel findChannelByPath(BluetoothDevice device, String path) {
         for (HealthChannel chan : mHealthChannels) {
-            if (chan.mChannelPath.equals(path) && chan.mDevice.equals(device)) return chan;
+            if (path.equals(chan.mChannelPath) && device.equals(chan.mDevice)) return chan;
         }
         return null;
     }
