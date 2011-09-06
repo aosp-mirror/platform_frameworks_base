@@ -7591,7 +7591,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Hide the controllers if the amount of content changed
         if (before != after) {
-            hideControllers();
+            // We do not hide the span controllers, as they can be added when a new text is
+            // inserted into the text view
+            hideCursorControllers();
         }
     }
     
@@ -7799,20 +7801,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Controls the {@link EasyEditSpan} monitoring when it is added, and when the related
      * pop-up should be displayed.
      */
-    private class EditTextShortcutController {
+    private class EasyEditSpanController {
 
-        private EditTextShortcutPopupWindow mPopupWindow;
+        private static final int DISPLAY_TIMEOUT_MS = 3000; // 3 secs
 
-        private EasyEditSpan mEditTextShortcutSpan;
+        private EasyEditPopupWindow mPopupWindow;
+
+        private EasyEditSpan mEasyEditSpan;
+
+        private Runnable mHidePopup;
 
         private void hide() {
-            if (mEditTextShortcutSpan != null) {
+            if (mPopupWindow != null) {
                 mPopupWindow.hide();
-                if (mText instanceof Spannable) {
-                    ((Spannable) mText).removeSpan(mEditTextShortcutSpan);
-                }
-                mEditTextShortcutSpan = null;
+                TextView.this.removeCallbacks(mHidePopup);
             }
+            removeSpans(mText);
+            mEasyEditSpan = null;
         }
 
         /**
@@ -7822,43 +7827,111 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * as the notifications are not sent when a spannable (with spans) is inserted.
          */
         public void onTextChange(CharSequence buffer) {
-            if (mEditTextShortcutSpan != null) {
-                hide();
+            adjustSpans(mText);
+
+            if (getWindowVisibility() != View.VISIBLE) {
+                // The window is not visible yet, ignore the text change.
+                return;
             }
 
+            if (mLayout == null) {
+                // The view has not been layout yet, ignore the text change
+                return;
+            }
+
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (!(TextView.this instanceof ExtractEditText)
+                    && imm != null && imm.isFullscreenMode()) {
+                // The input is in extract mode. We do not have to handle the easy edit in the
+                // original TextView, as the ExtractEditText will do
+                return;
+            }
+
+            // Remove the current easy edit span, as the text changed, and remove the pop-up
+            // (if any)
+            if (mEasyEditSpan != null) {
+                if (mText instanceof Spannable) {
+                    ((Spannable) mText).removeSpan(mEasyEditSpan);
+                }
+                mEasyEditSpan = null;
+            }
+            if (mPopupWindow != null && mPopupWindow.isShowing()) {
+                mPopupWindow.hide();
+            }
+
+            // Display the new easy edit span (if any).
             if (buffer instanceof Spanned) {
-                mEditTextShortcutSpan = getSpan((Spanned) buffer);
-                if (mEditTextShortcutSpan != null) {
+                mEasyEditSpan = getSpan((Spanned) buffer);
+                if (mEasyEditSpan != null) {
                     if (mPopupWindow == null) {
-                        mPopupWindow = new EditTextShortcutPopupWindow();
+                        mPopupWindow = new EasyEditPopupWindow();
+                        mHidePopup = new Runnable() {
+                            @Override
+                            public void run() {
+                                hide();
+                            }
+                        };
                     }
-                    mPopupWindow.show(mEditTextShortcutSpan);
+                    mPopupWindow.show(mEasyEditSpan);
+                    TextView.this.removeCallbacks(mHidePopup);
+                    TextView.this.postDelayed(mHidePopup, DISPLAY_TIMEOUT_MS);
+                }
+            }
+        }
+
+        /**
+         * Adjusts the spans by removing all of them except the last one.
+         */
+        private void adjustSpans(CharSequence buffer) {
+            // This method enforces that only one easy edit span is attached to the text.
+            // A better way to enforce this would be to listen for onSpanAdded, but this method
+            // cannot be used in this scenario as no notification is triggered when a text with
+            // spans is inserted into a text.
+            if (buffer instanceof Spannable) {
+                Spannable spannable = (Spannable) buffer;
+                EasyEditSpan[] spans = spannable.getSpans(0, spannable.length(),
+                        EasyEditSpan.class);
+                for (int i = 0; i < spans.length - 1; i++) {
+                    spannable.removeSpan(spans[i]);
+                }
+            }
+        }
+
+        /**
+         * Removes all the {@link EasyEditSpan} currently attached.
+         */
+        private void removeSpans(CharSequence buffer) {
+            if (buffer instanceof Spannable) {
+                Spannable spannable = (Spannable) buffer;
+                EasyEditSpan[] spans = spannable.getSpans(0, spannable.length(),
+                        EasyEditSpan.class);
+                for (int i = 0; i < spans.length; i++) {
+                    spannable.removeSpan(spans[i]);
                 }
             }
         }
 
         private EasyEditSpan getSpan(Spanned spanned) {
-            EasyEditSpan[] inputMethodSpans = spanned.getSpans(0, spanned.length(),
+            EasyEditSpan[] easyEditSpans = spanned.getSpans(0, spanned.length(),
                     EasyEditSpan.class);
-
-            if (inputMethodSpans.length == 0) {
+            if (easyEditSpans.length == 0) {
                 return null;
             } else {
-                return inputMethodSpans[0];
+                return easyEditSpans[0];
             }
         }
     }
 
     /**
      * Displays the actions associated to an {@link EasyEditSpan}. The pop-up is controlled
-     * by {@link EditTextShortcutController}.
+     * by {@link EasyEditSpanController}.
      */
-    private class EditTextShortcutPopupWindow extends PinnedPopupWindow
+    private class EasyEditPopupWindow extends PinnedPopupWindow
             implements OnClickListener {
         private static final int POPUP_TEXT_LAYOUT =
                 com.android.internal.R.layout.text_edit_action_popup_text;
         private TextView mDeleteTextView;
-        private EasyEditSpan mEditTextShortcutSpan;
+        private EasyEditSpan mEasyEditSpan;
 
         @Override
         protected void createPopupWindow() {
@@ -7889,8 +7962,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContentView.addView(mDeleteTextView);
         }
 
-        public void show(EasyEditSpan inputMethodSpan) {
-            mEditTextShortcutSpan = inputMethodSpan;
+        public void show(EasyEditSpan easyEditSpan) {
+            mEasyEditSpan = easyEditSpan;
             super.show();
         }
 
@@ -7903,8 +7976,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         private void deleteText() {
             Editable editable = (Editable) mText;
-            int start = editable.getSpanStart(mEditTextShortcutSpan);
-            int end = editable.getSpanEnd(mEditTextShortcutSpan);
+            int start = editable.getSpanStart(mEasyEditSpan);
+            int end = editable.getSpanEnd(mEasyEditSpan);
             if (start >= 0 && end >= 0) {
                 editable.delete(start, end);
             }
@@ -7914,7 +7987,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         protected int getTextOffset() {
             // Place the pop-up at the end of the span
             Editable editable = (Editable) mText;
-            return editable.getSpanEnd(mEditTextShortcutSpan);
+            return editable.getSpanEnd(mEasyEditSpan);
         }
 
         @Override
@@ -7933,10 +8006,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         private CharSequence mBeforeText;
 
-        private EditTextShortcutController mEditTextShortcutController;
+        private EasyEditSpanController mEasyEditSpanController;
 
         private ChangeWatcher() {
-            mEditTextShortcutController = new EditTextShortcutController();
+            mEasyEditSpanController = new EasyEditSpanController();
         }
 
         public void beforeTextChanged(CharSequence buffer, int start,
@@ -7959,7 +8032,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + " before=" + before + " after=" + after + ": " + buffer);
             TextView.this.handleTextChanged(buffer, start, before, after);
 
-            mEditTextShortcutController.onTextChange(buffer);
+            mEasyEditSpanController.onTextChange(buffer);
 
             if (AccessibilityManager.getInstance(mContext).isEnabled() &&
                     (isFocused() || isSelected() && isShown())) {
@@ -7997,7 +8070,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private void hideControllers() {
-            mEditTextShortcutController.hide();
+            mEasyEditSpanController.hide();
         }
     }
 
@@ -9236,8 +9309,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class PositionListener implements ViewTreeObserver.OnPreDrawListener {
-        // 3 handles, 2 ActionPopup (suggestionsPopup first hides the others)
-        private final int MAXIMUM_NUMBER_OF_LISTENERS = 5;
+        // 3 handles
+        // 3 ActionPopup [replace, suggestion, easyedit] (suggestionsPopup first hides the others)
+        private final int MAXIMUM_NUMBER_OF_LISTENERS = 6;
         private TextViewPositionListener[] mPositionListeners =
                 new TextViewPositionListener[MAXIMUM_NUMBER_OF_LISTENERS];
         private boolean mCanMove[] = new boolean[MAXIMUM_NUMBER_OF_LISTENERS];
@@ -11022,12 +11096,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Hides the insertion controller and stops text selection mode, hiding the selection controller
      */
     private void hideControllers() {
-        hideInsertionPointCursorController();
-        stopSelectionActionMode();
+        hideCursorControllers();
+        hideSpanControllers();
+    }
 
+    private void hideSpanControllers() {
         if (mChangeWatcher != null) {
             mChangeWatcher.hideControllers();
         }
+    }
+
+    private void hideCursorControllers() {
+        hideInsertionPointCursorController();
+        stopSelectionActionMode();
     }
 
     /**
