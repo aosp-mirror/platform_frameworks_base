@@ -283,8 +283,15 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
         return NULL;
     }
 
+    sp<MetaData> fileMeta = mExtractor->getMetaData();
+
+    if (fileMeta == NULL) {
+        LOGV("extractor doesn't publish metadata, failed to initialize?");
+        return NULL;
+    }
+
     int32_t drm = 0;
-    if (mExtractor->getMetaData()->findInt32(kKeyIsDRM, &drm) && drm != 0) {
+    if (fileMeta->findInt32(kKeyIsDRM, &drm) && drm != 0) {
         LOGE("frame grab not allowed.");
         return NULL;
     }
@@ -320,7 +327,7 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
     const void *data;
     uint32_t type;
     size_t dataSize;
-    if (mExtractor->getMetaData()->findData(kKeyAlbumArt, &type, &data, &dataSize)
+    if (fileMeta->findData(kKeyAlbumArt, &type, &data, &dataSize)
             && mAlbumArt == NULL) {
         mAlbumArt = new MediaAlbumArt;
         mAlbumArt->mSize = dataSize;
@@ -386,6 +393,11 @@ const char *StagefrightMetadataRetriever::extractMetadata(int keyCode) {
 
 void StagefrightMetadataRetriever::parseMetaData() {
     sp<MetaData> meta = mExtractor->getMetaData();
+
+    if (meta == NULL) {
+        LOGV("extractor doesn't publish metadata, failed to initialize?");
+        return;
+    }
 
     struct Map {
         int from;
