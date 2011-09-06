@@ -58,22 +58,24 @@
             android:textColor="?android:attr/textColorSecondary"
             />
         -->
+
         <ImageView android:id="@+id/settings_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_toRightOf="@id/date"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:src="@drawable/ic_sysbar_quicksettings"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:src="@drawable/ic_notify_quicksettings"
             />
+
         <ImageView android:id="@+id/clear_all_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:src="@drawable/ic_notify_clear"
-            />
+            />            
     </RelativeLayout>
 
     <View
