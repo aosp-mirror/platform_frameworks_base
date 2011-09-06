@@ -395,7 +395,8 @@ void AudioStream::decode(int tick)
         mLatencyTimer = tick;
     }
 
-    if (mBufferTail - mBufferHead > BUFFER_SIZE - mInterval) {
+    int count = (BUFFER_SIZE - (mBufferTail - mBufferHead)) * mSampleRate;
+    if (count < mSampleCount) {
         // Buffer overflow. Drop the packet.
         LOGV("stream[%d] buffer overflow", mSocket);
         recv(mSocket, &c, 1, MSG_DONTWAIT);
@@ -403,19 +404,18 @@ void AudioStream::decode(int tick)
     }
 
     // Receive the packet and decode it.
-    int16_t samples[mSampleCount];
-    int length = 0;
+    int16_t samples[count];
     if (!mCodec) {
         // Special case for device stream.
-        length = recv(mSocket, samples, sizeof(samples),
+        count = recv(mSocket, samples, sizeof(samples),
             MSG_TRUNC | MSG_DONTWAIT) >> 1;
     } else {
         __attribute__((aligned(4))) uint8_t buffer[2048];
         sockaddr_storage remote;
-        socklen_t len = sizeof(remote);
+        socklen_t addrlen = sizeof(remote);
 
-        length = recvfrom(mSocket, buffer, sizeof(buffer),
-            MSG_TRUNC | MSG_DONTWAIT, (sockaddr *)&remote, &len);
+        int length = recvfrom(mSocket, buffer, sizeof(buffer),
+            MSG_TRUNC | MSG_DONTWAIT, (sockaddr *)&remote, &addrlen);
 
         // Do we need to check SSRC, sequence, and timestamp? They are not
         // reliable but at least they can be used to identify duplicates?
@@ -433,14 +433,15 @@ void AudioStream::decode(int tick)
         }
         length -= offset;
         if (length >= 0) {
-            length = mCodec->decode(samples, &buffer[offset], length);
+            length = mCodec->decode(samples, count, &buffer[offset], length);
         }
         if (length > 0 && mFixRemote) {
             mRemote = remote;
             mFixRemote = false;
         }
+        count = length;
     }
-    if (length <= 0) {
+    if (count <= 0) {
         LOGV("stream[%d] decoder error", mSocket);
         return;
     }
@@ -462,7 +463,7 @@ void AudioStream::decode(int tick)
 
     // Append to the jitter buffer.
     int tail = mBufferTail * mSampleRate;
-    for (int i = 0; i < mSampleCount; ++i) {
+    for (int i = 0; i < count; ++i) {
         mBuffer[tail & mBufferMask] = samples[i];
         ++tail;
     }
