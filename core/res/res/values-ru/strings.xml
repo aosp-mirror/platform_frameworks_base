@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Код функции выполнен."</string>
     <string name="fcError" msgid="3327560126588500777">"Неполадки подключения или неверный код функции."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ОК"</string>
-    <string name="httpError" msgid="6603022914760066338">"Произошла ошибка сети."</string>
+    <string name="httpError" msgid="6603022914760066338">"Произошла сетевая ошибка."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Не удалось найти URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Схема аутентификации сайта не поддерживается."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Не удалось провести аутентификацию."</string>
@@ -266,8 +266,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"привязка к службе текстовых сообщений"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Позволяет выполнить привязку к интерфейсу текстовой службы верхнего уровня (например, SpellCheckerService). Не требуется для обычных приложений."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"привязывать к службе VPN"</string>
-    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Разрешает выполнять привязку к интерфейсу верхнего уровня службы VPN. Не требуется для обычных приложений."</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"подключаться к VPN-службе"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Разрешает подключаться к базовому интерфейсу VPN-сервиса. Не требуется для обычных приложений."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"связать с фоновым рисунком"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Разрешает выполнять привязку к интерфейсу фонового рисунка верхнего уровня. Не требуется для обычных приложений."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"привязка к службе виджетов"</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неверный PIN-код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Экстренная служба"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Сеть не найдена)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Сеть не найдена)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Экран заблокирован."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Для разблокировки нажмите \"Меню\"."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Повторите попытку"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Повторите попытку"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Батарея заряжена"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Подключите зарядное устройство."</string>
@@ -728,8 +728,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Разрешает приложению изменять историю и закладки браузера, сохраненные в вашем телефоне. Вредоносное ПО может пользоваться этим, чтобы стирать или изменять данные вашего браузера."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"настраивать сигнал будильника"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Позволяет настраивать сигнал установленного приложения будильника. Для некоторых приложений будильника эта функция может быть недоступна."</string>
-    <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавлять голосовое сообщение"</string>
-    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Разрешает приложению добавлять сообщения в почтовый ящик голосовой почты."</string>
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавлять голосовые сообщения"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Приложение сможет добавлять голосовые сообщения во входящие."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Изменить разрешения браузера для доступа к географическому местоположению"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Позволяет программе изменять разрешения браузера для доступа к географическому положению. Вредоносные программы могут пользоваться этим для отправки информации о местоположении на некоторые сайты."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"проверять пакеты"</string>
@@ -854,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"Вырезать"</string>
     <string name="copy" msgid="2681946229533511987">"Копировать"</string>
     <string name="paste" msgid="5629880836805036433">"Вставить"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Заменить"</string>
+    <string name="replace" msgid="5781686059063148930">"Заменить"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Выбрать текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Выбор текста"</string>
@@ -936,8 +938,8 @@
     <item quantity="one" msgid="1634101450343277345">"Найдена доступная сеть Wi-Fi"</item>
     <item quantity="other" msgid="7915895323644292768">"Найдены доступные сети Wi-Fi"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Невозможно подключиться к Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">": плохое интернет-соединение."</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не удалось подключиться к сети Wi-Fi"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" – плохое интернет-соединение."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Начать соединение через Wi-Fi Direct. Клиент Wi-Fi и точка доступа будут отключены."</string>
     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Не удалось запустить Wi-Fi Direct"</string>
@@ -1106,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Выберите аккаунт"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Увеличить"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Уменьшить"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"установлено"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"не установлено"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"выбрано"</string>
@@ -1121,6 +1151,24 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Клавиша смены режима"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Клавиша смены регистра"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Клавиша ввода"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
+    <skip />
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
+    <skip />
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
+    <skip />
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
+    <skip />
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
+    <skip />
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
+    <skip />
+    <!-- no translation found for description_target_camera (969071997552486814) -->
+    <skip />
+    <!-- no translation found for description_target_silent (893551287746522182) -->
+    <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Необходима гарнитура, чтобы услышать нажатие клавиш при вводе пароля."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на главную"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вверх"</string>
@@ -1134,14 +1182,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Передача данных 2G/3G отключена"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Передача данных 4G отключена"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобильный Интернет отключен"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Передача данных Wi-Fi отключена"</string>
     <string name="data_usage_limit_body" msgid="4313857592916426843">"Нажмите, чтобы включить"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Превышен лимита трафика 2G и 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Превышен лимит на трафик 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Превышен лимит на моб. трафик"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Превышен лимит трафика Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> превышает установленный лимит"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фоновый режим ограничен"</string>
     <string name="data_usage_restricted_body" msgid="5087354814839059798">"Нажмите, чтобы снять ограничение"</string>

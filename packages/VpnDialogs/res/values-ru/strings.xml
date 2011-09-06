@@ -17,15 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> пытается установить VPN-соединение."</string>
-    <string name="warning" msgid="5470743576660160079">"Продолжая, вы разрешаете приложению перехватывать весь сетевой трафик. "<b>"Не делайте этого, если не доверяете приложению."</b>" В противном случае к вашим данным может получить доступ вредоносное ПО."</string>
+    <string name="warning" msgid="5470743576660160079">"Если продолжить, вы разрешите приложению перехватывать весь сетевой трафик. "<b>"Не делайте этого, если не доверяете приложению."</b>" В противном случае к вашим данным может получить доступ вредоносное ПО."</string>
     <string name="accept" msgid="2889226408765810173">"Я доверяю этому приложению."</string>
-    <string name="legacy_title" msgid="192936250066580964">"Сеть VPN подключена"</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN-подключение установлено"</string>
     <string name="configure" msgid="4905518375574791375">"Настроить"</string>
     <string name="disconnect" msgid="971412338304200056">"Разъединить"</string>
     <string name="session" msgid="6470628549473641030">"Сеанс:"</string>
     <string name="duration" msgid="3584782459928719435">"Продолжительность:"</string>
-    <string name="data_transmitted" msgid="8239988320199846094">"Отправленные данные:"</string>
-    <string name="data_received" msgid="7431729884377019935">"Полученные данные:"</string>
+    <string name="data_transmitted" msgid="8239988320199846094">"Отправлено:"</string>
+    <string name="data_received" msgid="7431729884377019935">"Получено:"</string>
     <string name="blank_value" msgid="6278484582661984635">"–"</string>
-    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> байт; пакетов: <xliff:g id="NUMBER_1">%2$s</xliff:g>"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> Б; пакетов: <xliff:g id="NUMBER_1">%2$s</xliff:g>"</string>
 </resources>

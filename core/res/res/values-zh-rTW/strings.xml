@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"驗證失敗。"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"透過 proxy 伺服器驗證失敗。"</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"連線到伺服器失敗。"</string>
-    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"無法與伺服器溝通，請稍後再試一次 。"</string>
+    <string name="httpErrorIO" msgid="4270874999047767599">"無法連上伺服器，請稍後再試。"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"連線到伺服器逾時。"</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"此網頁包含太多伺服器轉址。"</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"不支援此通訊協定。"</string>
@@ -195,7 +195,7 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"允許應用程式接收並處理緊急廣播訊息，只有系統應用程式可以具備這項權限。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"傳送 SMS 簡訊"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"允許應用程式傳送 SMS 簡訊。請注意：惡意程式可能會擅自傳送簡訊，增加您的支出。"</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"傳送 SMS 簡訊而不需經過確認"</string>
+    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"不需經過確認即傳送 SMS 簡訊"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"允許應用程式傳送 SMS 簡訊。惡意應用程式可能會藉此擅自傳送簡訊，導致您的支出增加。"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"讀取 SMS 或 MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"允許應用程式讀取平板電腦或 SIM 卡上儲存的簡訊。惡意應用程式可藉此讀取您的機密簡訊。"</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 碼錯誤！"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"如要解鎖，請按 Menu 鍵，然後按 0。"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急電話號碼"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(沒有服務)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(沒有服務)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"螢幕已鎖定。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"按下 [Menu] 解鎖或撥打緊急電話。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"按下 Menu 鍵解鎖。"</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正確！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"很抱歉，請再試一次"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"很抱歉，請再試一次"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"正在充電 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"充電中 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"充電完成。"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"請連接充電器。"</string>
@@ -671,14 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"您已 <xliff:g id="NUMBER_0">%d</xliff:g> 次輸入不正確的 PIN。"\n\n"請於 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您使用您的 Google 登入程序解除平板電腦的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒之內再試一次。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"畫出解鎖圖形已錯誤 <xliff:g id="NUMBER_0">%d</xliff:g> 次。再錯誤 <xliff:g id="NUMBER_1">%d</xliff:g> 次後，系統會要求使用 Google 登入來解鎖。"\n\n" 請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (280873516493934365) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3025504721764922246) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，平板電腦將恢復原廠設定，所有使用者資料都會遺失。"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，手機將恢復原廠設定，所有使用者資料都會遺失。"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，平板電腦現在將恢復原廠設定。"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，手機現在將恢復原廠設定。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘記解鎖圖形？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"解除封鎖帳戶"</string>
@@ -858,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"剪下"</string>
     <string name="copy" msgid="2681946229533511987">"複製"</string>
     <string name="paste" msgid="5629880836805036433">"貼上"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"取代"</string>
+    <string name="replace" msgid="5781686059063148930">"取代???"</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"複製網址"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"選取文字..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"選取文字"</string>
@@ -882,10 +880,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="1691104391758345586">"沒有應用程式可執行此項操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
+    <string name="aerr_application" msgid="932628488013092776">"很抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g> 已停止。"</string>
+    <string name="aerr_process" msgid="4507058997035697579">"很抱歉，處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已停止。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。"\n\n"您要結束嗎？"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"活動 <xliff:g id="ACTIVITY">%1$s</xliff:g> 沒有回應。"\n\n"您要結束嗎？"</string>
@@ -902,14 +898,10 @@
     <string name="screen_compat_mode_hint" msgid="2953716574198046484">"如要重新啟用這個模式，請至 [設定] &gt; [應用程式] &gt; [管理應用程式]。"</string>
     <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
-    <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
-    <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
-    <skip />
-    <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
-    <skip />
+    <string name="android_upgrading_title" msgid="378740715658358071">"正在升級 Android..."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"正在最佳化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 個應用程式 (共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 個)。"</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"正在啟動應用程式。"</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"啟動完成。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"選取以切換到該應用程式"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"切換應用程式？"</string>
@@ -947,10 +939,10 @@
     <item quantity="other" msgid="7915895323644292768">"開啟可用 Wi-Fi 網路"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"無法連線至 Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"網路連線狀況不佳。"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" 網際網路連線狀況不佳。"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"啟動 Wi-Fi Direct 作業，這會關閉 Wi-Fi 用戶端/無線基地台作業。"</string>
-    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"無法啟動 Wi-Fi Direct"</string>
+    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"無法啟動 Wi-Fi Direct"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求，按一下 [確定] 即可接受。"</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求。輸入 PIN 即可繼續進行。"</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"必須在對端裝置 <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> 上輸入 WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>，才能繼續進行連線設定"</string>
@@ -991,7 +983,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"開啟 USB 儲存裝置"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"如果您開啟 USB 儲存裝置，則您正在使用的某些應用程式會停止運作，而且可能無法使用，待您將 USB 儲存裝置關閉才會恢復正常。"</string>
-    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失敗"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失敗"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"已視為媒體裝置連線"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"已視為相機連線"</string>
@@ -1091,8 +1083,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"正在卸載 SD 卡..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"正在清除 USB 儲存裝置..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"正在清除 SD 卡..."</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"無法清除 USB 儲存裝置。"</string>
-    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"無法清除 USB 儲存裝置。"</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"無法清除 USB 儲存裝置。"</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"無法清除 SD 卡。"</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD 卡尚未卸載就已移除。"</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB 儲存裝置目前正在接受檢查。"</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD 卡目前正在接受檢查。"</string>
@@ -1116,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"選取帳戶"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"增加"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減少"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"已勾選"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"尚未勾選"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"已選取"</string>
@@ -1124,22 +1144,32 @@
     <string name="switch_off" msgid="7249798614327155088">"關閉"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"已按下"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"未按下"</string>
-    <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt 鍵"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"取消"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete 鍵"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"完成"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"模式變更"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift 鍵"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 鍵"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_delete (3337914833206635744) -->
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_done (1992571118466679775) -->
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_mode_change (4547387741906537519) -->
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_shift (2270748814315147690) -->
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
-    <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
+    <!-- no translation found for description_target_camera (969071997552486814) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"提醒您，輸入密碼時需要使用耳機才能聽到按鍵名稱。"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"瀏覽首頁"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上瀏覽"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多選項"</string>
@@ -1152,19 +1182,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"已停用 2G-3G 數據"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"已停用 4G 數據"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"已停用行動數據"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
-    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"輕按一下即可啟用"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi 數據已停用"</string>
+    <string name="data_usage_limit_body" msgid="4313857592916426843">"輕觸即可啟用"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超過 2G-3G 數據上限"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超過 4G 數據上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超過行動數據上限"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"已超過 Wi-Fi 數據上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> 超過規定上限"</string>
-    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
-    <skip />
-    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
-    <skip />
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"已限制背景資料"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"輕觸即可解除限制"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全性憑證"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"憑證有效。"</string>
     <string name="issued_to" msgid="454239480274921032">"發佈至："</string>
@@ -1183,6 +1209,5 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"選取活動"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"分享活動..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
-    <!-- no translation found for list_delimeter (3975117572185494152) -->
-    <skip />
+    <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
 </resources>

@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"请勿打扰"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"显示通知"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"删除"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"检查"</string>
+    <!-- outdated translation 6561944127804037619 -->     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"删除"</string>
+    <!-- outdated translation 4906947311448880529 -->     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"检查"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"无通知"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"正在进行的"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
@@ -84,7 +84,7 @@
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"手机信号强度为两格。"</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"手机信号强度为三格。"</string>
     <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"手机信号满格。"</string>
-    <string name="accessibility_no_data" msgid="4791966295096867555">"没有数据信号。"</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"没有数据网络信号。"</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"数据信号强度为一格。"</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"数据信号强度为两格。"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"数据信号强度为三格。"</string>
@@ -102,7 +102,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙绑定。"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -120,7 +120,7 @@
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据已停用"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"数据已停用"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"已达到指定的数据流量上限。"\n\n"如果使用额外的数据流量，运营商可能会收取相应的费用。"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据网络"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据连接"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已连接"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜索 GPS"</string>

@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неправильний PIN-код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Щоб розбл., натисн. меню та 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Аварійний номер"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Немає служби)"</string>
+    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Немає служби)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Екран заблоков."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Натис. меню, щоб розбл. чи зробити авар. виклик."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Натисн. меню, щоб розбл."</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Спробуйте ще"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Спробуйте ще"</string>
-    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Зарядж-ся (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Заряджається, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Заряджено."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Підкл. заряд. пристрій."</string>
@@ -672,7 +672,7 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Неправильно намал. ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш пристрій потрібно буде розблок-ти за допомогою входу в Google після стількох додатк. неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Неправильно намал. ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш телефон потрібно буде розблок-ти за допомогою входу в Google після стількох додатк. неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Кількість невдалих спроб розблокувати пристрій: <xliff:g id="NUMBER_0">%d</xliff:g>. Налаштування пристрою буде змінено на заводські за умовчанням, а всі дані користувача буде втрачено після ще стількох невдалих спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%d</xliff:g>. Налаштування телефона буде змінено на заводські за умовчанням, а всі дані користувача буде втрачено після ще стількох невдалих спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням, а всі дані користувача буде втрачено після ще стількох невдалих спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Кількість невдалих спроб розблокувати пристрій: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування пристрою буде змінено на заводські за умовчанням."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Спробуйте ще через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
@@ -854,7 +854,9 @@
     <string name="cut" msgid="3092569408438626261">"Виріз."</string>
     <string name="copy" msgid="2681946229533511987">"Копіюв."</string>
     <string name="paste" msgid="5629880836805036433">"Вставити"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"Замінити"</string>
+    <string name="replace" msgid="5781686059063148930">"Замінити..."</string>
+    <!-- no translation found for delete (6098684844021697789) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копіюв. URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Вибрати текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Вибір тексту"</string>
@@ -937,7 +939,7 @@
     <item quantity="other" msgid="7915895323644292768">"Відкриті Wi-Fi мережі доступні"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"має погане з’єднання з Інтернетом."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" має погане з’єднання з Інтернетом."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Почати операцію Wi-Fi Direct. Це вимкне Wi-Fi-операцію клієнт/точка доступу."</string>
     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Не вдалося запустити Wi-Fi Direct"</string>
@@ -1106,6 +1108,34 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Вибрати обліковий запис"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Додати"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Відняти"</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"перевірено"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"не перевірено"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"вибрано"</string>
@@ -1121,6 +1151,24 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Зміна режиму"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
+    <skip />
+    <!-- no translation found for description_direction_up (1983114130441878529) -->
+    <skip />
+    <!-- no translation found for description_direction_down (4294993639091088240) -->
+    <skip />
+    <!-- no translation found for description_direction_left (6814008463839915747) -->
+    <skip />
+    <!-- no translation found for description_direction_right (4296057241963012862) -->
+    <skip />
+    <!-- no translation found for description_target_unlock (2228524900439801453) -->
+    <skip />
+    <!-- no translation found for description_target_camera (969071997552486814) -->
+    <skip />
+    <!-- no translation found for description_target_silent (893551287746522182) -->
+    <skip />
+    <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Клавіша. Гарнітура має чути звук клавіш під час введення пароля."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на головну"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вгору"</string>
@@ -1134,14 +1182,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Дані 2G–3G вимкнено"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Дані 4G вимкнено"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобільне передав. даних вимкнено"</string>
-    <!-- no translation found for data_usage_wifi_limit_title (8992154736441284865) -->
-    <skip />
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Дані Wi-Fi вимкнено"</string>
     <string name="data_usage_limit_body" msgid="4313857592916426843">"Торкніться, щоб увімкнути"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Перевищено ліміт даних 2G–3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Перевищено ліміт даних 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Перевищено ліміт мобільних даних"</string>
-    <!-- no translation found for data_usage_wifi_limit_snoozed_title (8743856006384825974) -->
-    <skip />
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Перевищено ліміт даних Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> понад указаний ліміт."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Викор-ня фонових даних обмежено"</string>
     <string name="data_usage_restricted_body" msgid="5087354814839059798">"Торкн., щоб видалити обмеження"</string>

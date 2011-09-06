@@ -23,7 +23,7 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restabiliţi datele dvs."</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Nu restabiliţi"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Introduceţi mai jos parola actuală pentru copia de rezervă:"</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduceţi o parolă pentru a o utiliza la criptarea datelor copiei de rezervă completă. Dacă acest câmp rămâne necompletat, pentru copierea de rezervă se va utiliza parola dvs. actuală."</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Dacă doriţi să criptaţi datele copiei de rezervă completă, introduceţi o parolă mai jos:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduceţi o parolă pentru a o utiliza la criptarea datelor copiei de rezervă complete. Dacă acest câmp rămâne necompletat, pentru copierea de rezervă se va utiliza parola dvs. actuală."</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Dacă doriţi să criptaţi datele copiei de rezervă complete, introduceţi o parolă mai jos:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Dacă datele pentru restabilire sunt criptate, introduceţi parola mai jos:"</string>
 </resources>
