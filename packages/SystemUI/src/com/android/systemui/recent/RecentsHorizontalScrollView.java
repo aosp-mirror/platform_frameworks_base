@@ -26,7 +26,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.View.OnClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -48,7 +47,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     private OnLongClickListener mOnLongClick = new OnLongClickListener() {
         public boolean onLongClick(View v) {
             final View anchorView = v.findViewById(R.id.app_description);
-            mCallback.handleLongPress(v, anchorView);
+            final View thumbnailView = v.findViewById(R.id.app_thumbnail);
+            mCallback.handleLongPress(v, anchorView, thumbnailView);
             return true;
         }
     };

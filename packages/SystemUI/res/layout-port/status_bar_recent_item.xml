@@ -18,7 +18,6 @@
 */
 -->
 
-<!--    android:background="@drawable/status_bar_closed_default_background" -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
@@ -35,7 +34,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
             android:scaleType="center"
-            android:background="@drawable/recents_thumbnail_overlay">
+            android:background="@drawable/recents_thumbnail_bg">
             <ImageView android:id="@+id/app_thumbnail_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

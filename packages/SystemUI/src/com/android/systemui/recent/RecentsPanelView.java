@@ -30,15 +30,14 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -57,6 +56,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -85,6 +85,7 @@ public class RecentsPanelView extends RelativeLayout
     private View mRecentsGlowView;
     private ViewGroup mRecentsContainer;
     private Bitmap mDefaultThumbnailBackground;
+    private BitmapDrawable mPressedDrawable;
 
     private boolean mShowing;
     private Choreographer mChoreo;
@@ -182,6 +183,13 @@ public class RecentsPanelView extends RelativeLayout
                 holder.iconView = (ImageView) convertView.findViewById(R.id.app_icon);
                 holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
                 holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
+
+                StateListDrawable thumbnailForegroundDrawable = new StateListDrawable();
+                thumbnailForegroundDrawable.addState(new int[] { android.R.attr.state_pressed },
+                        mPressedDrawable);
+                thumbnailForegroundDrawable.addState(new int[] { android.R.attr.state_selected },
+                        mPressedDrawable);
+                ((FrameLayout)holder.thumbnailView).setForeground(thumbnailForegroundDrawable);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -339,9 +347,23 @@ public class RecentsPanelView extends RelativeLayout
         int width = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_width);
         int height = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_height);
         int color = res.getColor(R.drawable.status_bar_recents_app_thumbnail_background);
+
+        // Render the default thumbnail background
         mDefaultThumbnailBackground = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(mDefaultThumbnailBackground);
         c.drawColor(color);
+
+        // Render the pressed state (setting the 9 patch drawable directly causes padding issues)
+        int bgPadding = (int) res.getDimension(R.dimen.recents_thumbnail_bg_press_padding);
+        Bitmap pressedOverlay = Bitmap.createBitmap(
+                width + 2 * bgPadding, height + 2 * bgPadding, Bitmap.Config.ARGB_8888);
+        c.setBitmap(pressedOverlay);
+
+        Drawable pressedDrawable9Patch = res.getDrawable(R.drawable.recents_thumbnail_bg_press);
+        pressedDrawable9Patch.getCurrent().setBounds(
+                0, 0, pressedOverlay.getWidth(), pressedOverlay.getHeight());
+        pressedDrawable9Patch.draw(c);
+        mPressedDrawable = new BitmapDrawable(res, pressedOverlay);
     }
 
     @Override
@@ -715,7 +737,9 @@ public class RecentsPanelView extends RelativeLayout
         getContext().startActivity(intent);
     }
 
-    public void handleLongPress(final View selectedView, final View anchorView) {
+    public void handleLongPress(
+            final View selectedView, final View anchorView, final View thumbnailView) {
+        thumbnailView.setSelected(true);
         PopupMenu popup = new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
         popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -735,6 +759,11 @@ public class RecentsPanelView extends RelativeLayout
                     return false;
                 }
                 return true;
+            }
+        });
+        popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
+            public void onDismiss(PopupMenu menu) {
+                thumbnailView.setSelected(false);
             }
         });
         popup.show();

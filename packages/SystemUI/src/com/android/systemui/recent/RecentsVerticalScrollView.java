@@ -46,7 +46,8 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
     private OnLongClickListener mOnLongClick = new OnLongClickListener() {
         public boolean onLongClick(View v) {
             final View anchorView = v.findViewById(R.id.app_description);
-            mCallback.handleLongPress(v, anchorView);
+            final View thumbnailView = v.findViewById(R.id.app_thumbnail);
+            mCallback.handleLongPress(v, anchorView, thumbnailView);
             return true;
         }
     };
