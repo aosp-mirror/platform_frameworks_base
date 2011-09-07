@@ -1034,7 +1034,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private void notifyP2pGoNegotationRequest(WifiP2pConfig config) {
         Resources r = Resources.getSystem();
-        Wps wpsConfig = config.wpsConfig;
+        Wps wps = config.wps;
         final View textEntryView = LayoutInflater.from(mContext)
                 .inflate(R.layout.wifi_p2p_go_negotiation_request_alert, null);
         final EditText pin = (EditText) textEntryView .findViewById(R.id.wifi_p2p_wps_pin);
@@ -1047,10 +1047,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             if (DBG) logd(getName() + " connect " + pin.getText());
 
                             if (pin.getVisibility() == View.GONE) {
-                                mSavedGoNegotiationConfig.wpsConfig.setup = Setup.PBC;
+                                mSavedGoNegotiationConfig.wps.setup = Setup.PBC;
                             } else {
-                                mSavedGoNegotiationConfig.wpsConfig.setup = Setup.KEYPAD;
-                                mSavedGoNegotiationConfig.wpsConfig.pin = pin.getText().toString();
+                                mSavedGoNegotiationConfig.wps.setup = Setup.KEYPAD;
+                                mSavedGoNegotiationConfig.wps.pin = pin.getText().toString();
                             }
                             sendMessage(WifiP2pManager.CONNECT, mSavedGoNegotiationConfig);
                             mSavedGoNegotiationConfig = null;
@@ -1065,7 +1065,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     })
             .create();
 
-        if (wpsConfig.setup == Setup.PBC) {
+        if (wps.setup == Setup.PBC) {
             pin.setVisibility(View.GONE);
             dialog.setMessage(r.getString(R.string.wifi_p2p_pbc_go_negotiation_request_message,
                         config.deviceAddress));

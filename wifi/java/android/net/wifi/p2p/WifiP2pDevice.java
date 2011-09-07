@@ -25,17 +25,20 @@ import java.util.regex.Pattern;
 /**
  * A class representing a Wi-Fi p2p device
  * @hide
+ *
+ * {@see WifiP2pManager}
  */
 public class WifiP2pDevice implements Parcelable {
 
     private static final String TAG = "WifiP2pDevice";
+
     /**
-     * Device name
+     * The device name is a user friendly string to identify a Wi-Fi p2p device
      */
     public String deviceName;
 
     /**
-     * Device MAC address
+     * The device MAC address uniquely identifies a Wi-Fi p2p device
      */
     public String deviceAddress;
 
@@ -46,35 +49,30 @@ public class WifiP2pDevice implements Parcelable {
      * P2P Interface Address and the group interface will be created with
      * address as the local address in case of successfully completed
      * negotiation.
+     * @hide
      */
     public String interfaceAddress;
 
     /**
-     * Primary device type
+     * Primary device type identifies the type of device. For example, an application
+     * could filter the devices discovered to only display printers if the purpose is to
+     * enable a printing action from the user. See the Wi-Fi Direct technical specification
+     * for the full list of standard device types supported.
      */
     public String primaryDeviceType;
 
     /**
-     * Secondary device type
+     * Secondary device type is an optional attribute that can be provided by a device in
+     * addition to the primary device type.
      */
     public String secondaryDeviceType;
 
 
     // These definitions match the ones in wpa_supplicant
     /* WPS config methods supported */
-    private static final int WPS_CONFIG_USBA            = 0x0001;
-    private static final int WPS_CONFIG_ETHERNET        = 0x0002;
-    private static final int WPS_CONFIG_LABEL           = 0x0004;
     private static final int WPS_CONFIG_DISPLAY         = 0x0008;
-    private static final int WPS_CONFIG_EXT_NFC_TOKEN   = 0x0010;
-    private static final int WPS_CONFIG_INT_NFC_TOKEN   = 0x0020;
-    private static final int WPS_CONFIG_NFC_INTERFACE   = 0x0040;
     private static final int WPS_CONFIG_PUSHBUTTON      = 0x0080;
     private static final int WPS_CONFIG_KEYPAD          = 0x0100;
-    private static final int WPS_CONFIG_VIRT_PUSHBUTTON = 0x0280;
-    private static final int WPS_CONFIG_PHY_PUSHBUTTON  = 0x0480;
-    private static final int WPS_CONFIG_VIRT_DISPLAY    = 0x2008;
-    private static final int WPS_CONFIG_PHY_DISPLAY     = 0x4008;
 
     /* Device Capability bitmap */
     private static final int DEVICE_CAPAB_SERVICE_DISCOVERY         = 1;
@@ -95,19 +93,23 @@ public class WifiP2pDevice implements Parcelable {
 
     /**
      * WPS config methods supported
+     * @hide
      */
     public int wpsConfigMethodsSupported;
 
     /**
      * Device capability
+     * @hide
      */
     public int deviceCapability;
 
     /**
      * Group capability
+     * @hide
      */
     public int groupCapability;
 
+    /** Device connection status */
     public enum Status {
         CONNECTED,
         INVITED,
@@ -118,7 +120,7 @@ public class WifiP2pDevice implements Parcelable {
 
     public Status status = Status.UNAVAILABLE;
 
-    public WifiP2pDevice() {
+    WifiP2pDevice() {
     }
 
     /**
@@ -144,6 +146,7 @@ public class WifiP2pDevice implements Parcelable {
      *  group_capab=0x0
      *
      *  Note: The events formats can be looked up in the wpa_supplicant code
+     * @hide
      */
     public WifiP2pDevice(String string) throws IllegalArgumentException {
         String[] tokens = string.split(" ");
@@ -198,11 +201,33 @@ public class WifiP2pDevice implements Parcelable {
         }
     }
 
+    /** Returns true if WPS push button configuration is supported */
+    public boolean wpsPbcSupported() {
+        return (wpsConfigMethodsSupported & WPS_CONFIG_PUSHBUTTON) != 0;
+    }
+
+    /** Returns true if WPS keypad configuration is supported */
+    public boolean wpsKeypadSupported() {
+        return (wpsConfigMethodsSupported & WPS_CONFIG_KEYPAD) != 0;
+    }
+
+    /** Returns true if WPS display configuration is supported */
+    public boolean wpsDisplaySupported() {
+        return (wpsConfigMethodsSupported & WPS_CONFIG_DISPLAY) != 0;
+    }
+
+    /** Returns true if the device is capable of service discovery */
+    public boolean isServiceDiscoveryCapable() {
+        return (deviceCapability & DEVICE_CAPAB_SERVICE_DISCOVERY) != 0;
+    }
+
+    /** Returns true if the device is a group owner */
     public boolean isGroupOwner() {
         return (groupCapability & GROUP_CAPAB_GROUP_OWNER) != 0;
     }
 
     @Override
+    /** @hide */
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof WifiP2pDevice)) return false;
@@ -214,6 +239,7 @@ public class WifiP2pDevice implements Parcelable {
         return other.deviceAddress.equals(deviceAddress);
     }
 
+    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Device: ").append(deviceName);
