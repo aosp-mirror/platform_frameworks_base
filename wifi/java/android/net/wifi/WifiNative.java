@@ -261,10 +261,10 @@ public class WifiNative {
     public static String p2pConnect(WifiP2pConfig config, boolean joinExistingGroup) {
         if (config == null) return null;
         List<String> args = new ArrayList<String>();
-        Wps wpsConfig = config.wpsConfig;
+        Wps wps = config.wps;
         args.add(config.deviceAddress);
 
-        switch (wpsConfig.setup) {
+        switch (wps.setup) {
             case PBC:
                 args.add("pbc");
                 break;
@@ -274,11 +274,11 @@ public class WifiNative {
                 args.add("display");
                 break;
             case KEYPAD:
-                args.add(wpsConfig.pin);
+                args.add(wps.pin);
                 args.add("keypad");
                 break;
             case LABEL:
-                args.add(wpsConfig.pin);
+                args.add(wps.pin);
                 args.add("label");
             default:
                 break;

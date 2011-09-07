@@ -28,22 +28,25 @@ import java.util.Collections;
 /**
  * A class representing a Wi-Fi P2p device list
  * @hide
+ *
+ * {@see WifiP2pManager}
  */
 public class WifiP2pDeviceList implements Parcelable {
 
     private Collection<WifiP2pDevice> mDevices;
 
-    public WifiP2pDeviceList() {
+    WifiP2pDeviceList() {
         mDevices = new ArrayList<WifiP2pDevice>();
     }
 
-    //copy constructor
+    /** copy constructor {@hide} */
     public WifiP2pDeviceList(WifiP2pDeviceList source) {
         if (source != null) {
             mDevices = source.getDeviceList();
         }
     }
 
+    /** @hide */
     public WifiP2pDeviceList(ArrayList<WifiP2pDevice> devices) {
         mDevices = new ArrayList<WifiP2pDevice>();
         for (WifiP2pDevice device : devices) {
@@ -51,12 +54,14 @@ public class WifiP2pDeviceList implements Parcelable {
         }
     }
 
+    /** @hide */
     public boolean clear() {
         if (mDevices.isEmpty()) return false;
         mDevices.clear();
         return true;
     }
 
+    /** @hide */
     public void update(WifiP2pDevice device) {
         if (device == null) return;
         for (WifiP2pDevice d : mDevices) {
@@ -75,15 +80,18 @@ public class WifiP2pDeviceList implements Parcelable {
         mDevices.add(device);
     }
 
+    /** @hide */
     public boolean remove(WifiP2pDevice device) {
         if (device == null) return false;
         return mDevices.remove(device);
     }
 
+    /** Get the list of devices */
     public Collection<WifiP2pDevice> getDeviceList() {
         return Collections.unmodifiableCollection(mDevices);
     }
 
+    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         for (WifiP2pDevice device : mDevices) {

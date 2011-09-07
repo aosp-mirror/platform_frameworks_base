@@ -23,15 +23,20 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * A class representing connection info on Wi-fi P2p
+ * A class representing connection information about a Wi-Fi p2p group
  * @hide
+ *
+ * {@see WifiP2pManager}
  */
 public class WifiP2pInfo implements Parcelable {
 
+    /** Indicates if a p2p group has been successfully formed */
     public boolean groupFormed;
 
+    /** Indicates if the current device is the group owner */
     public boolean isGroupOwner;
 
+    /** Group owner address */
     public InetAddress groupOwnerAddress;
 
     /** @hide */
