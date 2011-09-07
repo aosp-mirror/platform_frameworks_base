@@ -880,7 +880,7 @@ public class WifiStateMachine extends StateMachine {
         sendMessage(message);
     }
 
-    public void startWps(Messenger replyTo, WpsConfiguration config) {
+    public void startWps(Messenger replyTo, Wps config) {
         Message msg = obtainMessage(CMD_START_WPS, config);
         msg.replyTo = replyTo;
         sendMessage(msg);

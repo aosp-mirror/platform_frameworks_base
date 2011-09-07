@@ -37,7 +37,7 @@ import android.net.wifi.WifiStateMachine;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiWatchdogStateMachine;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WpsConfiguration;
+import android.net.wifi.Wps;
 import android.net.wifi.WpsResult;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
@@ -286,7 +286,7 @@ public class WifiService extends IWifiManager.Stub {
                 }
                 case WifiManager.CMD_START_WPS: {
                     //replyTo has the original source
-                    mWifiStateMachine.startWps(msg.replyTo, (WpsConfiguration)msg.obj);
+                    mWifiStateMachine.startWps(msg.replyTo, (Wps)msg.obj);
                     break;
                 }
                 case WifiManager.CMD_DISABLE_NETWORK: {

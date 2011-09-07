@@ -53,7 +53,7 @@ class WpsStateMachine extends StateMachine {
 
     private WifiStateMachine mWifiStateMachine;
 
-    private WpsConfiguration mWpsConfig;
+    private Wps mWpsConfig;
 
     private Context mContext;
     AsyncChannel mReplyChannel = new AsyncChannel();
@@ -90,10 +90,10 @@ class WpsStateMachine extends StateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            WpsConfiguration wpsConfig;
+            Wps wpsConfig;
             switch (message.what) {
                 case WifiStateMachine.CMD_START_WPS:
-                    mWpsConfig = (WpsConfiguration) message.obj;
+                    mWpsConfig = (Wps) message.obj;
                     WpsResult result;
                     switch (mWpsConfig.setup) {
                         case PBC:
