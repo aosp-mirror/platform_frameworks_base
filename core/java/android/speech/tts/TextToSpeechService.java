@@ -260,6 +260,17 @@ public abstract class TextToSpeechService extends Service {
             return old;
         }
 
+        private synchronized SpeechItem maybeRemoveCurrentSpeechItem(String callingApp) {
+            if (mCurrentSpeechItem != null &&
+                    TextUtils.equals(mCurrentSpeechItem.getCallingApp(), callingApp)) {
+                SpeechItem current = mCurrentSpeechItem;
+                mCurrentSpeechItem = null;
+                return current;
+            }
+
+            return null;
+        }
+
         public boolean isSpeaking() {
             return getCurrentSpeechItem() != null;
         }
@@ -287,14 +298,9 @@ public abstract class TextToSpeechService extends Service {
             }
 
             if (queueMode == TextToSpeech.QUEUE_FLUSH) {
-                stop(speechItem.getCallingApp());
+                stopForApp(speechItem.getCallingApp());
             } else if (queueMode == TextToSpeech.QUEUE_DESTROY) {
-                // Stop the current speech item.
-                stop(speechItem.getCallingApp());
-                // Remove all other items from the queue.
-                removeCallbacksAndMessages(null);
-                // Remove all pending playback as well.
-                mAudioPlaybackHandler.removeAllItems();
+                stopAll();
             }
             Runnable runnable = new Runnable() {
                 @Override
@@ -305,7 +311,8 @@ public abstract class TextToSpeechService extends Service {
                 }
             };
             Message msg = Message.obtain(this, runnable);
-            // The obj is used to remove all callbacks from the given app in stop(String).
+            // The obj is used to remove all callbacks from the given app in
+            // stopForApp(String).
             //
             // Note that this string is interned, so the == comparison works.
             msg.obj = speechItem.getCallingApp();
@@ -323,7 +330,7 @@ public abstract class TextToSpeechService extends Service {
          *
          * Called on a service binder thread.
          */
-        public int stop(String callingApp) {
+        public int stopForApp(String callingApp) {
             if (TextUtils.isEmpty(callingApp)) {
                 return TextToSpeech.ERROR;
             }
@@ -331,13 +338,32 @@ public abstract class TextToSpeechService extends Service {
             removeCallbacksAndMessages(callingApp);
             // This stops writing data to the file / or publishing
             // items to the audio playback handler.
-            SpeechItem current = setCurrentSpeechItem(null);
-            if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
+            //
+            // Note that the current speech item must be removed only if it
+            // belongs to the callingApp, else the item will be "orphaned" and
+            // not stopped correctly if a stop request comes along for the item
+            // from the app it belongs to.
+            SpeechItem current = maybeRemoveCurrentSpeechItem(callingApp);
+            if (current != null) {
                 current.stop();
             }
 
             // Remove any enqueued audio too.
             mAudioPlaybackHandler.removePlaybackItems(callingApp);
+
+            return TextToSpeech.SUCCESS;
+        }
+
+        public int stopAll() {
+            // Stop the current speech item unconditionally.
+            SpeechItem current = setCurrentSpeechItem(null);
+            if (current != null) {
+                current.stop();
+            }
+            // Remove all other items from the queue.
+            removeCallbacksAndMessages(null);
+            // Remove all pending playback as well.
+            mAudioPlaybackHandler.removeAllItems();
 
             return TextToSpeech.SUCCESS;
         }
@@ -412,6 +438,10 @@ public abstract class TextToSpeechService extends Service {
             }
         }
 
+        protected synchronized boolean isStopped() {
+             return mStopped;
+        }
+
         protected abstract int playImpl();
 
         protected abstract void stopImpl();
@@ -473,7 +503,7 @@ public abstract class TextToSpeechService extends Service {
                 Log.w(TAG, "Got empty text");
                 return false;
             }
-            if (mText.length() >= MAX_SPEECH_ITEM_CHAR_LENGTH){
+            if (mText.length() >= MAX_SPEECH_ITEM_CHAR_LENGTH) {
                 Log.w(TAG, "Text too long: " + mText.length() + " chars");
                 return false;
             }
@@ -485,6 +515,11 @@ public abstract class TextToSpeechService extends Service {
             AbstractSynthesisCallback synthesisCallback;
             mEventLogger.onRequestProcessingStart();
             synchronized (this) {
+                // stop() might have been called before we enter this
+                // synchronized block.
+                if (isStopped()) {
+                    return TextToSpeech.ERROR;
+                }
                 mSynthesisCallback = createSynthesisCallback();
                 synthesisCallback = mSynthesisCallback;
             }
@@ -510,8 +545,13 @@ public abstract class TextToSpeechService extends Service {
             synchronized (this) {
                 synthesisCallback = mSynthesisCallback;
             }
-            synthesisCallback.stop();
-            TextToSpeechService.this.onStop();
+            if (synthesisCallback != null) {
+                // If the synthesis callback is null, it implies that we haven't
+                // entered the synchronized(this) block in playImpl which in
+                // turn implies that synthesis would not have started.
+                synthesisCallback.stop();
+                TextToSpeechService.this.onStop();
+            }
         }
 
         public String getLanguage() {
@@ -719,7 +759,7 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.ERROR;
             }
 
-            return mSynthHandler.stop(intern(callingApp));
+            return mSynthHandler.stopForApp(intern(callingApp));
         }
 
         public String[] getLanguage() {
@@ -811,7 +851,7 @@ public abstract class TextToSpeechService extends Service {
             synchronized (mAppToCallback) {
                 mAppToCallback.remove(packageName);
             }
-            mSynthHandler.stop(packageName);
+            mSynthHandler.stopForApp(packageName);
         }
 
         @Override
