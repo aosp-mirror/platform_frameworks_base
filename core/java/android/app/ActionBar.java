@@ -417,7 +417,7 @@ public abstract class ActionBar {
      *
      * @param d Background drawable for the stacked row
      */
-    public abstract void setStackedBackgroundDrawable(Drawable d);
+    public void setStackedBackgroundDrawable(Drawable d) { }
 
     /**
      * Set the ActionBar's split background. This will appear in
@@ -426,7 +426,7 @@ public abstract class ActionBar {
      *
      * @param d Background drawable for the split bar
      */
-    public abstract void setSplitBackgroundDrawable(Drawable d);
+    public void setSplitBackgroundDrawable(Drawable d) { }
 
     /**
      * @return The current custom view.
