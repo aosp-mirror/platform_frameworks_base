@@ -304,17 +304,19 @@ class MountService extends IMountService.Stub
     class UnmountCallBack {
         final String path;
         final boolean force;
+        final boolean removeEncryption;
         int retries;
 
-        UnmountCallBack(String path, boolean force) {
+        UnmountCallBack(String path, boolean force, boolean removeEncryption) {
             retries = 0;
             this.path = path;
             this.force = force;
+            this.removeEncryption = removeEncryption;
         }
 
         void handleFinished() {
             if (DEBUG_UNMOUNT) Slog.i(TAG, "Unmounting " + path);
-            doUnmountVolume(path, true);
+            doUnmountVolume(path, true, removeEncryption);
         }
     }
 
@@ -322,7 +324,7 @@ class MountService extends IMountService.Stub
         final String method;
 
         UmsEnableCallBack(String path, String method, boolean force) {
-            super(path, force);
+            super(path, force, false);
             this.method = method;
         }
 
@@ -336,13 +338,13 @@ class MountService extends IMountService.Stub
     class ShutdownCallBack extends UnmountCallBack {
         IMountShutdownObserver observer;
         ShutdownCallBack(String path, IMountShutdownObserver observer) {
-            super(path, true);
+            super(path, true, false);
             this.observer = observer;
         }
 
         @Override
         void handleFinished() {
-            int ret = doUnmountVolume(path, true);
+            int ret = doUnmountVolume(path, true, removeEncryption);
             if (observer != null) {
                 try {
                     observer.onShutDownComplete(ret);
@@ -888,8 +890,10 @@ class MountService extends IMountService.Stub
      * This might even take a while and might be retried after timed delays
      * to make sure we dont end up in an instable state and kill some core
      * processes.
+     * If removeEncryption is set, force is implied, and the system will remove any encryption
+     * mapping set on the volume when unmounting.
      */
-    private int doUnmountVolume(String path, boolean force) {
+    private int doUnmountVolume(String path, boolean force, boolean removeEncryption) {
         if (!getVolumeState(path).equals(Environment.MEDIA_MOUNTED)) {
             return VoldResponseCode.OpFailedVolNotMounted;
         }
@@ -905,8 +909,10 @@ class MountService extends IMountService.Stub
         // Redundant probably. But no harm in updating state again.
         mPms.updateExternalMediaStatus(false, false);
         try {
-            mConnector.doCommand(String.format(
-                    "volume unmount %s%s", path, (force ? " force" : "")));
+            String arg = removeEncryption
+                    ? " force_and_revert"
+                    : (force ? " force" : "");
+            mConnector.doCommand(String.format("volume unmount %s%s", path, arg));
             // We unmounted the volume. None of the asec containers are available now.
             synchronized (mAsecMountSet) {
                 mAsecMountSet.clear();
@@ -1371,12 +1377,16 @@ class MountService extends IMountService.Stub
         return doMountVolume(path);
     }
 
-    public void unmountVolume(String path, boolean force) {
+    public void unmountVolume(String path, boolean force, boolean removeEncryption) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
         String volState = getVolumeState(path);
-        if (DEBUG_UNMOUNT) Slog.i(TAG, "Unmounting " + path + " force = " + force);
+        if (DEBUG_UNMOUNT) {
+            Slog.i(TAG, "Unmounting " + path
+                    + " force = " + force
+                    + " removeEncryption = " + removeEncryption);
+        }
         if (Environment.MEDIA_UNMOUNTED.equals(volState) ||
                 Environment.MEDIA_REMOVED.equals(volState) ||
                 Environment.MEDIA_SHARED.equals(volState) ||
@@ -1385,7 +1395,7 @@ class MountService extends IMountService.Stub
             // TODO return valid return code when adding observer call back.
             return;
         }
-        UnmountCallBack ucb = new UnmountCallBack(path, force);
+        UnmountCallBack ucb = new UnmountCallBack(path, force, removeEncryption);
         mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, ucb));
     }
 

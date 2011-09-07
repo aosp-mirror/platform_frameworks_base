@@ -157,12 +157,13 @@ public:
         return reply.readInt32();
     }
 
-    int32_t unmountVolume(const String16& mountPoint, const bool force)
+    int32_t unmountVolume(const String16& mountPoint, const bool force, const bool removeEncryption)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
         data.writeString16(mountPoint);
         data.writeInt32(force ? 1 : 0);
+        data.writeInt32(removeEncryption ? 1 : 0);
         if (remote()->transact(TRANSACTION_unmountVolume, data, &reply) != NO_ERROR) {
             LOGD("unmountVolume could not contact remote\n");
             return -1;
