@@ -52,10 +52,7 @@ static bool Resync(
         *post_id3_pos = 0;
     }
 
-    bool resync_from_head = false;
     if (*inout_pos == 0) {
-        resync_from_head = true;
-
         // Skip an optional ID3 header if syncing at the very beginning
         // of the datasource.
 
@@ -140,20 +137,22 @@ static bool Resync(
 
         uint32_t header = U32_AT(tmp);
 
+        if (match_header != 0 && (header & kMask) != (match_header & kMask)) {
+            ++pos;
+            ++tmp;
+            --remainingBytes;
+            continue;
+        }
+
         size_t frame_size;
-        if ((match_header != 0 && (header & kMask) != (match_header & kMask))
-                || !GetMPEGAudioFrameSize(header, &frame_size)) {
-            if (resync_from_head) {
-                // This isn't a valid mp3 file because it failed to detect
-                // a header while a valid mp3 file should have a valid
-                // header here.
-                break;
-            } else {
-                ++pos;
-                ++tmp;
-                --remainingBytes;
-                continue;
-            }
+        int sample_rate, num_channels, bitrate;
+        if (!GetMPEGAudioFrameSize(
+                    header, &frame_size,
+                    &sample_rate, &num_channels, &bitrate)) {
+            ++pos;
+            ++tmp;
+            --remainingBytes;
+            continue;
         }
 
         LOGV("found possible 1st frame at %lld (header = 0x%08x)", pos, header);
