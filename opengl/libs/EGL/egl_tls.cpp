@@ -14,9 +14,13 @@
  ** limitations under the License.
  */
 
+#include <stdlib.h>
 #include <pthread.h>
 
 #include <cutils/log.h>
+#include <cutils/properties.h>
+
+#include <utils/CallStack.h>
 
 #include <EGL/egl.h>
 
@@ -69,6 +73,13 @@ void egl_tls_t::setErrorEtcImpl(const char* caller, int line, EGLint error) {
     if (tls->error != error) {
         LOGE("%s:%d error %x (%s)", caller, line, error, egl_strerror(error));
         tls->error = error;
+        char value[PROPERTY_VALUE_MAX];
+        property_get("debug.egl.callstack", value, "0");
+        if (atoi(value)) {
+            CallStack stack;
+            stack.update();
+            stack.dump();
+        }
     }
 }
 

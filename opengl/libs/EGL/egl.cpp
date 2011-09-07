@@ -148,10 +148,13 @@ static int gl_no_context() {
     if (egl_tls_t::logNoContextCall()) {
         LOGE("call to OpenGL ES API with no current context "
              "(logged once per thread)");
-        LOGE("call stack before error:");
-        CallStack stack;
-        stack.update();
-        stack.dump();
+        char value[PROPERTY_VALUE_MAX];
+        property_get("debug.egl.callstack", value, "0");
+        if (atoi(value)) {
+            CallStack stack;
+            stack.update();
+            stack.dump();
+        }
     }
     return 0;
 }
