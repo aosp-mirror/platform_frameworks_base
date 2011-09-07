@@ -6211,6 +6211,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
     field public static final java.lang.String FEATURE_USB_HOST = "android.hardware.usb.host";
     field public static final java.lang.String FEATURE_WIFI = "android.hardware.wifi";
+    field public static final java.lang.String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
     field public static final int GET_ACTIVITIES = 1; // 0x1
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
