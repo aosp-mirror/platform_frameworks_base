@@ -536,4 +536,20 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         // The given number was formatted.
         assertEquals("650-291-0000", PhoneNumberUtils.formatNumber("650-291-0000", null, "US"));
     }
+    @SmallTest
+    public void testIsEmergencyNumber() {
+      assertTrue(PhoneNumberUtils.isEmergencyNumber("911", "US"));
+      assertTrue(PhoneNumberUtils.isEmergencyNumber("112", "US"));
+      // The next two numbers are not valid phone numbers in the US, but can be used to trick the
+      // system to dial 911 and 112, which are emergency numbers in the US. For the purpose of
+      // addressing that, they are also classified as emergency numbers in the US.
+      assertTrue(PhoneNumberUtils.isEmergencyNumber("91112345", "US"));
+      assertTrue(PhoneNumberUtils.isEmergencyNumber("11212345", "US"));
+      // A valid mobile phone number from Singapore shouldn't be classified as an emergency number
+      // in Singapore, as 911 is not an emergency number there.
+      assertFalse(PhoneNumberUtils.isEmergencyNumber("91121234", "SG"));
+      // A valid fixed-line phone number from Brazil shouldn't be classified as an emergency number
+      // in Brazil, as 112 is not an emergency number there.
+      assertFalse(PhoneNumberUtils.isEmergencyNumber("1121234567", "BR"));
+    }
 }
