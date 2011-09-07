@@ -597,6 +597,9 @@
         <!-- The DatePicker style. -->
         <attr name="datePickerStyle" format="reference" />
 
+        <!-- Default ActivityChooserView style. -->
+        <attr name="activityChooserViewStyle" format="reference" />
+
         <!-- Fast scroller styles -->
         <eat-comment />
 
