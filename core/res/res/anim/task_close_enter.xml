@@ -18,17 +18,17 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="#ff000000" android:shareInterpolator="false">
-    <scale 	android:fromXScale="1.0" android:toXScale="1.0"
+        android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="normal">
+    <scale android:fromXScale="0.95" android:toXScale="1.0"
             android:fromYScale="0.95" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
-			android:fillEnabled="true" android:fillBefore="true"
+            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_quint"
-            android:startOffset="150"
-            android:duration="250" />
-    <alpha 	android:fromAlpha="0" android:toAlpha="1.0"
-            android:fillEnabled="true" android:fillBefore="true"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:startOffset="150"
-            android:duration="250"/>
+            android:startOffset="200"
+            android:duration="300" />
+    <alpha android:fromAlpha="0" android:toAlpha="1.0"
+            android:interpolator="@interpolator/decelerate_cubic"
+            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+            android:startOffset="200"
+            android:duration="300"/>
 </set>
