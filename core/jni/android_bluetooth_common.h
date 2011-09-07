@@ -202,6 +202,13 @@ bool debug_no_encrypt();
 #define INPUT_OPERATION_GENERIC_FAILURE        5003
 #define INPUT_OPERATION_SUCCESS                5004
 
+#define HEALTH_OPERATION_SUCCESS               6000
+#define HEALTH_OPERATION_ERROR                 6001
+#define HEALTH_OPERATION_INVALID_ARGS          6002
+#define HEALTH_OPERATION_GENERIC_FAILURE       6003
+#define HEALTH_OPERATION_NOT_FOUND             6004
+#define HEALTH_OPERATION_NOT_ALLOWED           6005
+
 #endif
 } /* namespace android */
 
