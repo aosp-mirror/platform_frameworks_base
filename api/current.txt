@@ -9329,6 +9329,7 @@ package android.hardware {
     method public boolean isAutoExposureLockSupported();
     method public boolean isAutoWhiteBalanceLockSupported();
     method public boolean isSmoothZoomSupported();
+    method public boolean isVideoSnapshotSupported();
     method public boolean isZoomSupported();
     method public void remove(java.lang.String);
     method public void removeGpsData();
