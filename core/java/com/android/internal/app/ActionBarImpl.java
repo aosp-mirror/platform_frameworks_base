@@ -346,7 +346,17 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public void setBackgroundDrawable(Drawable d) {
-        mContainerView.setBackgroundDrawable(d);
+        mContainerView.setPrimaryBackground(d);
+    }
+
+    public void setStackedBackgroundDrawable(Drawable d) {
+        mContainerView.setStackedBackground(d);
+    }
+
+    public void setSplitBackgroundDrawable(Drawable d) {
+        if (mSplitView != null) {
+            mSplitView.setSplitBackground(d);
+        }
     }
 
     public View getCustomView() {

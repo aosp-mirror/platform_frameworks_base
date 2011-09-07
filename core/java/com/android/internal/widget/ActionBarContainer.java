@@ -76,6 +76,21 @@ public class ActionBarContainer extends FrameLayout {
         mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
     }
 
+    public void setPrimaryBackground(Drawable bg) {
+        mBackground = bg;
+        invalidate();
+    }
+
+    public void setStackedBackground(Drawable bg) {
+        mStackedBackground = bg;
+        invalidate();
+    }
+
+    public void setSplitBackground(Drawable bg) {
+        mSplitBackground = bg;
+        invalidate();
+    }
+
     /**
      * Set the action bar into a "transitioning" state. While transitioning
      * the bar will block focus and touch from all of its descendants. This
