@@ -51,35 +51,33 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
 
     /**
      * Convenience definition of our log tag.
-     */ 
+     */
     private static final String TAG = "InstrumentationCoreTestRunner";
-    
+
     /**
      * True if (and only if) we are running in single-test mode (as opposed to
      * batch mode).
      */
     private boolean singleTest = false;
-    
+
     @Override
     public void onCreate(Bundle arguments) {
         // We might want to move this to /sdcard, if is is mounted/writable.
         File cacheDir = getTargetContext().getCacheDir();
 
-        // Set some properties that the core tests absolutely need. 
+        // Set some properties that the core tests absolutely need.
         System.setProperty("user.language", "en");
         System.setProperty("user.region", "US");
-        
+
         System.setProperty("java.home", cacheDir.getAbsolutePath());
         System.setProperty("user.home", cacheDir.getAbsolutePath());
         System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
-        System.setProperty("javax.net.ssl.trustStore",
-                "/etc/security/cacerts.bks");
-        
+
         if (arguments != null) {
             String classArg = arguments.getString(ARGUMENT_TEST_CLASS);
-            singleTest = classArg != null && classArg.contains("#"); 
+            singleTest = classArg != null && classArg.contains("#");
         }
-        
+
         super.onCreate(arguments);
     }
 
@@ -89,36 +87,36 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
 
         runner.addTestListener(new TestListener() {
             /**
-             * The last test class we executed code from.  
+             * The last test class we executed code from.
              */
             private Class<?> lastClass;
-            
+
             /**
              * The minimum time we expect a test to take.
              */
             private static final int MINIMUM_TIME = 100;
-            
+
             /**
              * The start time of our current test in System.currentTimeMillis().
              */
             private long startTime;
-            
+
             public void startTest(Test test) {
                 if (test.getClass() != lastClass) {
                     lastClass = test.getClass();
                     printMemory(test.getClass());
                 }
-                
+
                 Thread.currentThread().setContextClassLoader(
                         test.getClass().getClassLoader());
-                
+
                 startTime = System.currentTimeMillis();
             }
-            
+
             public void endTest(Test test) {
                 if (test instanceof TestCase) {
                     cleanup((TestCase)test);
-                    
+
                     /*
                      * Make sure all tests take at least MINIMUM_TIME to
                      * complete. If they don't, we wait a bit. The Cupcake
@@ -126,7 +124,7 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
                      * short time, which causes headache for the CTS.
                      */
                     long timeTaken = System.currentTimeMillis() - startTime;
-                    
+
                     if (timeTaken < MINIMUM_TIME) {
                         try {
                             Thread.sleep(MINIMUM_TIME - timeTaken);
@@ -136,15 +134,15 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
                     }
                 }
             }
-            
+
             public void addError(Test test, Throwable t) {
                 // This space intentionally left blank.
             }
-            
+
             public void addFailure(Test test, AssertionFailedError t) {
                 // This space intentionally left blank.
             }
-            
+
             /**
              * Dumps some memory info.
              */
@@ -154,7 +152,7 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
                 long total = runtime.totalMemory();
                 long free = runtime.freeMemory();
                 long used = total - free;
-                
+
                 Log.d(TAG, "Total memory  : " + total);
                 Log.d(TAG, "Used memory   : " + used);
                 Log.d(TAG, "Free memory   : " + free);
@@ -170,7 +168,7 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
              */
             private void cleanup(TestCase test) {
                 Class<?> clazz = test.getClass();
-                
+
                 while (clazz != TestCase.class) {
                     Field[] fields = clazz.getDeclaredFields();
                     for (int i = 0; i < fields.length; i++) {
@@ -185,15 +183,15 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
                             }
                         }
                     }
-                    
+
                     clazz = clazz.getSuperclass();
                 }
             }
-            
+
         });
-        
+
         return runner;
-    }    
+    }
 
     @Override
     List<Predicate<TestMethod>> getBuilderRequirements() {
