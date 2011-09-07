@@ -215,6 +215,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     boolean mLastWasImTarget;
 
     boolean mWindowAttributesChanged = false;
+    int mWindowAttributesChangesFlag = 0;
 
     // These can be accessed by any thread, must be protected with a lock.
     // Surface can never be reassigned or cleared (use Surface.clear()).
@@ -439,6 +440,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
                 mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
+                mWindowAttributesChangesFlag = WindowManager.LayoutParams.EVERYTHING_CHANGED;
                 mAttachInfo.mRootView = view;
                 mAttachInfo.mScalingRequired = mTranslator != null;
                 mAttachInfo.mApplicationScale =
@@ -640,7 +642,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // preserve compatible window flag if exists.
             int compatibleWindowFlag =
                 mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
-            mWindowAttributes.copyFrom(attrs);
+            mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
             mWindowAttributes.flags |= compatibleWindowFlag;
             
             if (newView) {
@@ -844,14 +846,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 || mNewSurfaceNeeded;
 
         WindowManager.LayoutParams params = null;
+        int windowAttributesChanges = 0;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
             surfaceChanged = true;
             params = lp;
+            windowAttributesChanges = mWindowAttributesChangesFlag;
         }
         CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
             params = lp;
+            windowAttributesChanges |= WindowManager.LayoutParams.BUFFER_CHANGED;
             fullRedrawNeeded = true;
             mLayoutRequested = true;
             if (mLastInCompatMode) {
@@ -862,6 +867,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 mLastInCompatMode = true;
             }
         }
+        
+        mWindowAttributesChangesFlag = 0;
+        
         Rect frame = mWinFrame;
         if (mFirst) {
             fullRedrawNeeded = true;
@@ -1041,6 +1049,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     || attachInfo.mSystemUiVisibility != oldVis
                     || attachInfo.mHasSystemUiListeners) {
                 params = lp;
+                windowAttributesChanges |= WindowManager.LayoutParams.BUFFER_CHANGED;
             }
         }
 
@@ -1066,6 +1075,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                             ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) |
                             resizeMode;
                     params = lp;
+                    windowAttributesChanges |= WindowManager.LayoutParams.BUFFER_CHANGED;
                 }
             }
         }
@@ -1362,7 +1372,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
             }
 
-            if (hwInitialized || ((windowShouldResize || params != null) &&
+            if (hwInitialized || ((windowShouldResize || (params != null &&
+                    (windowAttributesChanges & WindowManager.LayoutParams.BUFFER_CHANGED) != 0)) &&
                     mAttachInfo.mHardwareRenderer != null &&
                     mAttachInfo.mHardwareRenderer.isEnabled())) {
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
@@ -1637,6 +1648,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // Need to make sure we re-evaluate the window attributes next
             // time around, to ensure the window has the correct format.
             mWindowAttributesChanged = true;
+            mWindowAttributesChangesFlag = 0;
             requestLayout();
         }
     }
