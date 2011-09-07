@@ -3233,7 +3233,6 @@ public class Camera {
          * captured pictures.
          *
          * @return true if video snapshot is supported.
-         * @hide
          */
         public boolean isVideoSnapshotSupported() {
             String str = get(KEY_VIDEO_SNAPSHOT_SUPPORTED);
