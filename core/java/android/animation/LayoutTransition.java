@@ -793,11 +793,30 @@ public class LayoutTransition {
      * @hide
      */
     public void startChangingAnimations() {
-        for (Animator anim : currentChangingAnimations.values()) {
+        LinkedHashMap<View, Animator> currentAnimCopy =
+                (LinkedHashMap<View, Animator>) currentChangingAnimations.clone();
+        for (Animator anim : currentAnimCopy.values()) {
             if (anim instanceof ObjectAnimator) {
                 ((ObjectAnimator) anim).setCurrentPlayTime(0);
             }
             anim.start();
+        }
+    }
+
+    /**
+     * Ends the animations that are set up for a CHANGING transition. This is a variant of
+     * startChangingAnimations() which is called when the window the transition is playing in
+     * is not visible. We need to make sure the animations put their targets in their end states
+     * and that the transition finishes to remove any mid-process state (such as isRunning()).
+     *
+     * @hide
+     */
+    public void endChangingAnimations() {
+        LinkedHashMap<View, Animator> currentAnimCopy =
+                (LinkedHashMap<View, Animator>) currentChangingAnimations.clone();
+        for (Animator anim : currentAnimCopy.values()) {
+            anim.start();
+            anim.end();
         }
     }
 
