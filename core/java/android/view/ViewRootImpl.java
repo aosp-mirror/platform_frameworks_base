@@ -1564,13 +1564,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw() ||
                 viewVisibility != View.VISIBLE;
 
-        if (!cancelDraw && !newSurface) {
-            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
-                for (int i = 0; i < mPendingTransitions.size(); ++i) {
-                    mPendingTransitions.get(i).startChangingAnimations();
-                }
-                mPendingTransitions.clear();
+        if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+            for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                mPendingTransitions.get(i).startChangingAnimations();
             }
+            mPendingTransitions.clear();
+        }
+        if (!cancelDraw && !newSurface) {
             mFullRedrawNeeded = false;
 
             final long drawStartTime;
@@ -1608,10 +1608,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
             }
         } else {
-            // If we're not drawing, then we don't need to draw the transitions, either
-            if (mPendingTransitions != null) {
-                mPendingTransitions.clear();
-            }
 
             // We were supposed to report when we are done drawing. Since we canceled the
             // draw, remember it here.
@@ -1621,7 +1617,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (fullRedrawNeeded) {
                 mFullRedrawNeeded = true;
             }
-            
+
             if (viewVisibility == View.VISIBLE) {
                 // Try again
                 scheduleTraversals();
