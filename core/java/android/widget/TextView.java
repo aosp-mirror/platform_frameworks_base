@@ -9485,6 +9485,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             public void dismiss() {
                 super.dismiss();
 
+                TextView.this.getPositionListener().removeSubscriber(SuggestionsPopupWindow.this);
+
                 if ((mText instanceof Editable) && mSuggestionRangeSpan != null) {
                     ((Editable) mText).removeSpan(mSuggestionRangeSpan);
                 }
