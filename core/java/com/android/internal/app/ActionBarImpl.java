@@ -783,6 +783,7 @@ public class ActionBarImpl extends ActionBar {
         private Object mTag;
         private Drawable mIcon;
         private CharSequence mText;
+        private CharSequence mContentDesc;
         private int mPosition = -1;
         private View mCustomView;
 
@@ -877,6 +878,25 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public void select() {
             selectTab(this);
+        }
+
+        @Override
+        public Tab setContentDescription(int resId) {
+            return setContentDescription(mContext.getResources().getText(resId));
+        }
+
+        @Override
+        public Tab setContentDescription(CharSequence contentDesc) {
+            mContentDesc = contentDesc;
+            if (mPosition >= 0) {
+                mTabScrollView.updateTab(mPosition);
+            }
+            return this;
+        }
+
+        @Override
+        public CharSequence getContentDescription() {
+            return mContentDesc;
         }
     }
 
