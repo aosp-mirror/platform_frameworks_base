@@ -93,7 +93,7 @@ struct BlockIterator {
 
     void advance();
     void reset();
-    void seek(int64_t seekTimeUs);
+    void seek(int64_t seekTimeUs, bool seekToKeyFrame);
 
     const mkvparser::Block *block() const;
     int64_t blockTimeUs() const;
@@ -137,6 +137,7 @@ private:
     sp<MatroskaExtractor> mExtractor;
     size_t mTrackIndex;
     Type mType;
+    bool mIsAudio;
     BlockIterator mBlockIter;
     size_t mNALSizeLen;  // for type AVC
 
@@ -156,6 +157,7 @@ MatroskaSource::MatroskaSource(
     : mExtractor(extractor),
       mTrackIndex(index),
       mType(OTHER),
+      mIsAudio(false),
       mBlockIter(mExtractor.get(),
                  mExtractor->mTracks.itemAt(index).mTrackNum),
       mNALSizeLen(0) {
@@ -163,6 +165,8 @@ MatroskaSource::MatroskaSource(
 
     const char *mime;
     CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+    mIsAudio = !strncasecmp("audio/", mime, 6);
 
     if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
         mType = AVC;
@@ -299,7 +303,7 @@ void BlockIterator::reset() {
     } while (!eos() && block()->GetTrackNumber() != mTrackNum);
 }
 
-void BlockIterator::seek(int64_t seekTimeUs) {
+void BlockIterator::seek(int64_t seekTimeUs, bool seekToKeyFrame) {
     Mutex::Autolock autoLock(mExtractor->mLock);
 
     mCluster = mExtractor->mSegment->FindCluster(seekTimeUs * 1000ll);
@@ -311,8 +315,10 @@ void BlockIterator::seek(int64_t seekTimeUs) {
     }
     while (!eos() && block()->GetTrackNumber() != mTrackNum);
 
-    while (!eos() && !mBlockEntry->GetBlock()->IsKey()) {
-        advance_l();
+    if (seekToKeyFrame) {
+        while (!eos() && !mBlockEntry->GetBlock()->IsKey()) {
+            advance_l();
+        }
     }
 }
 
@@ -396,7 +402,11 @@ status_t MatroskaSource::read(
     if (options && options->getSeekTo(&seekTimeUs, &mode)
             && !mExtractor->isLiveStreaming()) {
         clearPendingFrames();
-        mBlockIter.seek(seekTimeUs);
+
+        // Apparently keyframe indication in audio tracks is unreliable,
+        // fortunately in all our currently supported audio encodings every
+        // frame is effectively a keyframe.
+        mBlockIter.seek(seekTimeUs, !mIsAudio);
     }
 
 again:
@@ -536,6 +546,13 @@ MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
         mSegment = NULL;
         return;
     }
+
+#if 0
+    const mkvparser::SegmentInfo *info = mSegment->GetInfo();
+    LOGI("muxing app: %s, writing app: %s",
+         info->GetMuxingAppAsUTF8(),
+         info->GetWritingAppAsUTF8());
+#endif
 
     addTracks();
 }
