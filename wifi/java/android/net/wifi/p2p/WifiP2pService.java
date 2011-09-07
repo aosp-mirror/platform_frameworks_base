@@ -128,7 +128,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     public static final int GROUP_NEGOTIATION_TIMED_OUT     =   BASE + 3;
 
     /* User accepted to disable Wi-Fi in order to enable p2p */
-    private static final int WIFI_DISABLE_USER_ACCEPT       =   BASE + 11;
+    private static final int WIFI_DISABLE_USER_ACCEPT       =   BASE + 4;
+    /* User rejected to disable Wi-Fi in order to enable p2p */
+    private static final int WIFI_DISABLE_USER_REJECT       =   BASE + 5;
 
     private final boolean mP2pSupported;
     private final String mDeviceType;
@@ -359,6 +361,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 // Ignore
                 case WIFI_DISABLE_USER_ACCEPT:
+                case WIFI_DISABLE_USER_REJECT:
                 case GROUP_NEGOTIATION_TIMED_OUT:
                     break;
                 default:
@@ -457,8 +460,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             if (which == DialogInterface.BUTTON_POSITIVE) {
                                 sendMessage(WIFI_DISABLE_USER_ACCEPT);
                             } else {
-                                logd("User rejected enabling p2p");
-                                //ignore
+                                sendMessage(WIFI_DISABLE_USER_REJECT);
                             }
                         }
                     };
@@ -508,6 +510,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WIFI_DISABLE_USER_ACCEPT:
                     mWifiChannel.sendMessage(P2P_ENABLE_PENDING);
                     transitionTo(mWaitForWifiDisableState);
+                    break;
+                case WIFI_DISABLE_USER_REJECT:
+                    logd("User rejected enabling p2p");
+                    sendP2pStateChangedBroadcast(false);
+                    transitionTo(mP2pDisabledState);
                     break;
                 case WifiP2pManager.ENABLE_P2P:
                 case WifiP2pManager.DISABLE_P2P:
