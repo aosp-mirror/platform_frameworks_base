@@ -25,10 +25,10 @@ import android.os.Parcel;
 import java.util.BitSet;
 
 /**
- * A class representing a WPS network configuration
+ * A class representing Wi-Fi Protected Setup
  * @hide
  */
-public class WpsConfiguration implements Parcelable {
+public class Wps implements Parcelable {
 
     /* Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
     public enum Setup {
@@ -61,7 +61,7 @@ public class WpsConfiguration implements Parcelable {
     public LinkProperties linkProperties;
 
     /** @hide */
-    public WpsConfiguration() {
+    public Wps() {
         setup = Setup.INVALID;
         BSSID = null;
         pin = null;
@@ -94,7 +94,7 @@ public class WpsConfiguration implements Parcelable {
     }
 
     /** copy constructor {@hide} */
-    public WpsConfiguration(WpsConfiguration source) {
+    public Wps(Wps source) {
         if (source != null) {
             setup = source.setup;
             BSSID = source.BSSID;
@@ -116,10 +116,10 @@ public class WpsConfiguration implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Creator<WpsConfiguration> CREATOR =
-        new Creator<WpsConfiguration>() {
-            public WpsConfiguration createFromParcel(Parcel in) {
-                WpsConfiguration config = new WpsConfiguration();
+    public static final Creator<Wps> CREATOR =
+        new Creator<Wps>() {
+            public Wps createFromParcel(Parcel in) {
+                Wps config = new Wps();
                 config.setup = Setup.valueOf(in.readString());
                 config.BSSID = in.readString();
                 config.pin = in.readString();
@@ -129,8 +129,8 @@ public class WpsConfiguration implements Parcelable {
                 return config;
             }
 
-            public WpsConfiguration[] newArray(int size) {
-                return new WpsConfiguration[size];
+            public Wps[] newArray(int size) {
+                return new Wps[size];
             }
         };
 }

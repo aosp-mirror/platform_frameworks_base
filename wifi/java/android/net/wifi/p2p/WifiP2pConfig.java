@@ -16,8 +16,8 @@
 
 package android.net.wifi.p2p;
 
-import android.net.wifi.WpsConfiguration;
-import android.net.wifi.WpsConfiguration.Setup;
+import android.net.wifi.Wps;
+import android.net.wifi.Wps.Setup;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -35,7 +35,7 @@ public class WifiP2pConfig implements Parcelable {
     /**
      * WPS configuration
      */
-    public WpsConfiguration wpsConfig;
+    public Wps wpsConfig;
 
     /**
      * This is an integer value between 0 and 15 where 0 indicates the least
@@ -61,7 +61,7 @@ public class WifiP2pConfig implements Parcelable {
 
     public WifiP2pConfig() {
         //set defaults
-        wpsConfig = new WpsConfiguration();
+        wpsConfig = new Wps();
         wpsConfig.setup = Setup.PBC;
     }
 
@@ -74,7 +74,7 @@ public class WifiP2pConfig implements Parcelable {
         }
 
         deviceAddress = tokens[1];
-        wpsConfig = new WpsConfiguration();
+        wpsConfig = new Wps();
 
         if (tokens.length > 2) {
             String[] nameVal = tokens[2].split("=");
@@ -140,7 +140,7 @@ public class WifiP2pConfig implements Parcelable {
             public WifiP2pConfig createFromParcel(Parcel in) {
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = in.readString();
-                config.wpsConfig = (WpsConfiguration) in.readParcelable(null);
+                config.wpsConfig = (Wps) in.readParcelable(null);
                 config.groupOwnerIntent = in.readInt();
                 config.persist = Persist.valueOf(in.readString());
                 return config;

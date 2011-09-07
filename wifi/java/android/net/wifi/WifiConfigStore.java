@@ -397,7 +397,7 @@ class WifiConfigStore {
      * Start WPS pin method configuration with pin obtained
      * from the access point
      */
-    static WpsResult startWpsWithPinFromAccessPoint(WpsConfiguration config) {
+    static WpsResult startWpsWithPinFromAccessPoint(Wps config) {
         WpsResult result = new WpsResult();
         if (WifiNative.startWpsWithPinFromAccessPointCommand(config.BSSID, config.pin)) {
             /* WPS leaves all networks disabled */
@@ -415,7 +415,7 @@ class WifiConfigStore {
      * from the device
      * @return WpsResult indicating status and pin
      */
-    static WpsResult startWpsWithPinFromDevice(WpsConfiguration config) {
+    static WpsResult startWpsWithPinFromDevice(Wps config) {
         WpsResult result = new WpsResult();
         result.pin = WifiNative.startWpsWithPinFromDeviceCommand(config.BSSID);
         /* WPS leaves all networks disabled */
@@ -432,7 +432,7 @@ class WifiConfigStore {
     /**
      * Start WPS push button configuration
      */
-    static WpsResult startWpsPbc(WpsConfiguration config) {
+    static WpsResult startWpsPbc(Wps config) {
         WpsResult result = new WpsResult();
         if (WifiNative.startWpsPbcCommand(config.BSSID)) {
             /* WPS leaves all networks disabled */
@@ -594,7 +594,7 @@ class WifiConfigStore {
         sendConfiguredNetworksChangedBroadcast();
     }
 
-    static void updateIpAndProxyFromWpsConfig(int netId, WpsConfiguration wpsConfig) {
+    static void updateIpAndProxyFromWpsConfig(int netId, Wps wpsConfig) {
         synchronized (sConfiguredNetworks) {
             WifiConfiguration config = sConfiguredNetworks.get(netId);
             if (config != null) {

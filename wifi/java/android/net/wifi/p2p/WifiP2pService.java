@@ -41,8 +41,8 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiMonitor;
 import android.net.wifi.WifiNative;
 import android.net.wifi.WifiStateMachine;
-import android.net.wifi.WpsConfiguration;
-import android.net.wifi.WpsConfiguration.Setup;
+import android.net.wifi.Wps;
+import android.net.wifi.Wps.Setup;
 import android.net.wifi.p2p.WifiP2pDevice.Status;
 import android.os.Binder;
 import android.os.IBinder;
@@ -1034,7 +1034,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private void notifyP2pGoNegotationRequest(WifiP2pConfig config) {
         Resources r = Resources.getSystem();
-        WpsConfiguration wpsConfig = config.wpsConfig;
+        Wps wpsConfig = config.wpsConfig;
         final View textEntryView = LayoutInflater.from(mContext)
                 .inflate(R.layout.wifi_p2p_go_negotiation_request_alert, null);
         final EditText pin = (EditText) textEntryView .findViewById(R.id.wifi_p2p_wps_pin);
