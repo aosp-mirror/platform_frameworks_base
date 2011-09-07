@@ -108,6 +108,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         data.writeStrongBinder(source->asBinder());
+        remote()->transact(SET_DATA_SOURCE_STREAM, data, &reply);
         return reply.readInt32();
     }
 
