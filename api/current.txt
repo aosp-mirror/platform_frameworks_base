@@ -2453,6 +2453,8 @@ package android.app {
     method public abstract void setLogo(android.graphics.drawable.Drawable);
     method public abstract void setNavigationMode(int);
     method public abstract void setSelectedNavigationItem(int);
+    method public abstract void setSplitBackgroundDrawable(android.graphics.drawable.Drawable);
+    method public abstract void setStackedBackgroundDrawable(android.graphics.drawable.Drawable);
     method public abstract void setSubtitle(java.lang.CharSequence);
     method public abstract void setSubtitle(int);
     method public abstract void setTitle(java.lang.CharSequence);

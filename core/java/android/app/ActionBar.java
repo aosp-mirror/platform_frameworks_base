@@ -402,11 +402,31 @@ public abstract class ActionBar {
     public abstract void setDisplayShowCustomEnabled(boolean showCustom);
 
     /**
-     * Set the ActionBar's background.
+     * Set the ActionBar's background. This will be used for the primary
+     * action bar.
      * 
      * @param d Background drawable
+     * @see #setStackedBackgroundDrawable(Drawable)
+     * @see #setSplitBackgroundDrawable(Drawable)
      */
     public abstract void setBackgroundDrawable(Drawable d);
+
+    /**
+     * Set the ActionBar's stacked background. This will appear
+     * in the second row/stacked bar on some devices and configurations.
+     *
+     * @param d Background drawable for the stacked row
+     */
+    public abstract void setStackedBackgroundDrawable(Drawable d);
+
+    /**
+     * Set the ActionBar's split background. This will appear in
+     * the split action bar containing menu-provided action buttons
+     * on some devices and configurations.
+     *
+     * @param d Background drawable for the split bar
+     */
+    public abstract void setSplitBackgroundDrawable(Drawable d);
 
     /**
      * @return The current custom view.
