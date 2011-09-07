@@ -261,7 +261,7 @@ public class WifiNative {
     public static String p2pConnect(WifiP2pConfig config, boolean joinExistingGroup) {
         if (config == null) return null;
         List<String> args = new ArrayList<String>();
-        WpsConfiguration wpsConfig = config.wpsConfig;
+        Wps wpsConfig = config.wpsConfig;
         args.add(config.deviceAddress);
 
         switch (wpsConfig.setup) {

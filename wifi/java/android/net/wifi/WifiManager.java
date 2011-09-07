@@ -1175,7 +1175,7 @@ public class WifiManager {
      * @param config WPS configuration
      * @hide
      */
-    public void startWps(WpsConfiguration config) {
+    public void startWps(Wps config) {
         if (config == null) {
             return;
         }
