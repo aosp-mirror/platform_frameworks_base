@@ -43,6 +43,7 @@ import junit.framework.Assert;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charsets;
 import java.security.PrivateKey;
@@ -1171,7 +1172,8 @@ class BrowserFrame extends Handler {
             X509Certificate cert = new X509CertImpl(cert_der);
             SslCertificate sslCert = new SslCertificate(cert);
             if (JniUtil.useChromiumHttpStack()) {
-                ssl_error = SslError.SslErrorFromChromiumErrorCode(cert_error, sslCert, url);
+                ssl_error = SslError.SslErrorFromChromiumErrorCode(cert_error, sslCert,
+                        new URL(url).getHost());
             } else {
                 ssl_error = new SslError(cert_error, cert, url);
             }
