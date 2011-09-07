@@ -2487,12 +2487,15 @@ package android.app {
 
   public static abstract class ActionBar.Tab {
     ctor public ActionBar.Tab();
+    method public abstract java.lang.CharSequence getContentDescription();
     method public abstract android.view.View getCustomView();
     method public abstract android.graphics.drawable.Drawable getIcon();
     method public abstract int getPosition();
     method public abstract java.lang.Object getTag();
     method public abstract java.lang.CharSequence getText();
     method public abstract void select();
+    method public abstract android.app.ActionBar.Tab setContentDescription(int);
+    method public abstract android.app.ActionBar.Tab setContentDescription(java.lang.CharSequence);
     method public abstract android.app.ActionBar.Tab setCustomView(android.view.View);
     method public abstract android.app.ActionBar.Tab setCustomView(int);
     method public abstract android.app.ActionBar.Tab setIcon(android.graphics.drawable.Drawable);

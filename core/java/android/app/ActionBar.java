@@ -790,6 +790,37 @@ public abstract class ActionBar {
          * Select this tab. Only valid if the tab has been added to the action bar.
          */
         public abstract void select();
+
+        /**
+         * Set a description of this tab's content for use in accessibility support.
+         * If no content description is provided the title will be used.
+         *
+         * @param resId A resource ID referring to the description text
+         * @return The current instance for call chaining
+         * @see #setContentDescription(CharSequence)
+         * @see #getContentDescription()
+         */
+        public abstract Tab setContentDescription(int resId);
+
+        /**
+         * Set a description of this tab's content for use in accessibility support.
+         * If no content description is provided the title will be used.
+         *
+         * @param contentDesc Description of this tab's content
+         * @return The current instance for call chaining
+         * @see #setContentDescription(int)
+         * @see #getContentDescription()
+         */
+        public abstract Tab setContentDescription(CharSequence contentDesc);
+
+        /**
+         * Gets a brief description of this tab's content for use in accessibility support.
+         *
+         * @return Description of this tab's content
+         * @see #setContentDescription(CharSequence)
+         * @see #setContentDescription(int)
+         */
+        public abstract CharSequence getContentDescription();
     }
 
     /**
