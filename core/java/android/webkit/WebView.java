@@ -383,6 +383,39 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    private static class OnTrimMemoryListener implements ComponentCallbacks2 {
+        private static OnTrimMemoryListener sInstance = null;
+
+        static void init(Context c) {
+            if (sInstance == null) {
+                sInstance = new OnTrimMemoryListener(c.getApplicationContext());
+            }
+        }
+
+        private OnTrimMemoryListener(Context c) {
+            c.registerComponentCallbacks(this);
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            // Ignore
+        }
+
+        @Override
+        public void onLowMemory() {
+            // Ignore
+        }
+
+        @Override
+        public void onTrimMemory(int level) {
+            if (DebugFlags.WEB_VIEW) {
+                Log.d("WebView", "onTrimMemory: " + level);
+            }
+            WebView.nativeOnTrimMemory(level);
+        }
+
+    }
+
     // A final CallbackProxy shared by WebViewCore and BrowserFrame.
     private final CallbackProxy mCallbackProxy;
 
@@ -1195,6 +1228,8 @@ public class WebView extends AbsoluteLayout
     }
 
     private void init() {
+        OnTrimMemoryListener.init(getContext());
+
         setWillNotDraw(false);
         setFocusable(true);
         setFocusableInTouchMode(true);
