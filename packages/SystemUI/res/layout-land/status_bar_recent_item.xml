@@ -21,7 +21,9 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:layout_width="wrap_content">
+    android:layout_width="wrap_content"
+    android:paddingLeft="@dimen/status_bar_recents_item_padding"
+    android:paddingRight="@dimen/status_bar_recents_item_padding">
 
     <RelativeLayout android:id="@+id/recent_item"
         android:layout_gravity="bottom"
@@ -35,12 +37,11 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
-            android:scaleType="center"
-            android:background="@drawable/recents_thumbnail_bg">
+            android:background="@drawable/recents_thumbnail_bg"
+            android:foreground="@drawable/recents_thumbnail_fg">
             <ImageView android:id="@+id/app_thumbnail_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
             />
         </FrameLayout>
 

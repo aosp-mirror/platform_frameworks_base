@@ -85,7 +85,6 @@ public class RecentsPanelView extends RelativeLayout
     private View mRecentsGlowView;
     private ViewGroup mRecentsContainer;
     private Bitmap mDefaultThumbnailBackground;
-    private BitmapDrawable mPressedDrawable;
 
     private boolean mShowing;
     private Choreographer mChoreo;
@@ -184,12 +183,12 @@ public class RecentsPanelView extends RelativeLayout
                 holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
                 holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
 
-                StateListDrawable thumbnailForegroundDrawable = new StateListDrawable();
+		/*                StateListDrawable thumbnailForegroundDrawable = new StateListDrawable();
                 thumbnailForegroundDrawable.addState(new int[] { android.R.attr.state_pressed },
                         mPressedDrawable);
                 thumbnailForegroundDrawable.addState(new int[] { android.R.attr.state_selected },
                         mPressedDrawable);
-                ((FrameLayout)holder.thumbnailView).setForeground(thumbnailForegroundDrawable);
+			((FrameLayout)holder.thumbnailView).setForeground(thumbnailForegroundDrawable);*/
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -352,18 +351,6 @@ public class RecentsPanelView extends RelativeLayout
         mDefaultThumbnailBackground = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(mDefaultThumbnailBackground);
         c.drawColor(color);
-
-        // Render the pressed state (setting the 9 patch drawable directly causes padding issues)
-        int bgPadding = (int) res.getDimension(R.dimen.recents_thumbnail_bg_press_padding);
-        Bitmap pressedOverlay = Bitmap.createBitmap(
-                width + 2 * bgPadding, height + 2 * bgPadding, Bitmap.Config.ARGB_8888);
-        c.setBitmap(pressedOverlay);
-
-        Drawable pressedDrawable9Patch = res.getDrawable(R.drawable.recents_thumbnail_bg_press);
-        pressedDrawable9Patch.getCurrent().setBounds(
-                0, 0, pressedOverlay.getWidth(), pressedOverlay.getHeight());
-        pressedDrawable9Patch.draw(c);
-        mPressedDrawable = new BitmapDrawable(res, pressedOverlay);
     }
 
     @Override
