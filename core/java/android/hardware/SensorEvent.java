@@ -154,16 +154,16 @@ public class SensorEvent {
      * All values are in micro-Tesla (uT) and measure the ambient magnetic field
      * in the X, Y and Z axis.
      * 
-     * <h4>{@link android.hardware.Sensor#TYPE_GYROSCOPE Sensor.TYPE_GYROSCOPE}:</h4>
-     *  All values are in radians/second and measure the rate of rotation
-     *  around the X, Y and Z axis. The coordinate system is the same as is
-     *  used for the acceleration sensor.  Rotation is positive in the counter-clockwise
-     *  direction.  That is, an observer looking from some positive location on the x, y.
-     *  or z axis at a device positioned on the origin would report positive rotation
-     *  if the device appeared to be rotating counter clockwise.  Note that this is the
-     *  standard mathematical definition of positive rotation and does not agree with the
-     *  definition of roll given earlier.
-     *
+     * <h4>{@link android.hardware.Sensor#TYPE_GYROSCOPE Sensor.TYPE_GYROSCOPE}:
+     * </h4> All values are in radians/second and measure the rate of rotation
+     * around the device's local X, Y and Z axis. The coordinate system is the
+     * same as is used for the acceleration sensor. Rotation is positive in the
+     * counter-clockwise direction. That is, an observer looking from some
+     * positive location on the x, y or z axis at a device positioned on the
+     * origin would report positive rotation if the device appeared to be
+     * rotating counter clockwise. Note that this is the standard mathematical
+     * definition of positive rotation and does not agree with the definition of
+     * roll given earlier.
      * <ul>
      * <p>
      * values[0]: Angular speed around the x-axis
@@ -176,28 +176,61 @@ public class SensorEvent {
      * </p>
      * </ul>
      * <p>
-     * Typically the output of the gyroscope is integrated over time to calculate
-     * an angle, for example:
+     * Typically the output of the gyroscope is integrated over time to
+     * calculate a rotation describing the change of angles over the timestep,
+     * for example:
      * </p>
+     *
      * <pre class="prettyprint">
      *     private static final float NS2S = 1.0f / 1000000000.0f;
+     *     private final float[] deltaRotationVector = new float[4]();
      *     private float timestamp;
-     *     public void onSensorChanged(SensorEvent event)
-     *     {
+     *
+     *     public void onSensorChanged(SensorEvent event) {
+     *          // This timestep's delta rotation to be multiplied by the current rotation
+     *          // after computing it from the gyro sample data.
      *          if (timestamp != 0) {
      *              final float dT = (event.timestamp - timestamp) * NS2S;
-     *              angle[0] += event.values[0] * dT;
-     *              angle[1] += event.values[1] * dT;
-     *              angle[2] += event.values[2] * dT;
+     *              // Axis of the rotation sample, not normalized yet.
+     *              float axisX = event.values[0];
+     *              float axisY = event.values[1];
+     *              float axisZ = event.values[2];
+     *
+     *              // Calculate the angular speed of the sample
+     *              float omegaMagnitude = sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
+     *
+     *              // Normalize the rotation vector if it's big enough to get the axis
+     *              if (omegaMagnitude > EPSILON) {
+     *                  axisX /= omegaMagnitude;
+     *                  axisY /= omegaMagnitude;
+     *                  axisZ /= omegaMagnitude;
+     *              }
+     *
+     *              // Integrate around this axis with the angular speed by the timestep
+     *              // in order to get a delta rotation from this sample over the timestep
+     *              // We will convert this axis-angle representation of the delta rotation
+     *              // into a quaternion before turning it into the rotation matrix.
+     *              float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+     *              float sinThetaOverTwo = sin(thetaOverTwo);
+     *              float cosThetaOverTwo = cos(thetaOverTwo);
+     *              deltaRotationVector[0] = sinThetaOverTwo * axisX;
+     *              deltaRotationVector[1] = sinThetaOverTwo * axisY;
+     *              deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+     *              deltaRotationVector[3] = cosThetaOverTwo;
      *          }
      *          timestamp = event.timestamp;
+     *          float[] deltaRotationMatrix = new float[9];
+     *          SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+     *          // User code should concatenate the delta rotation we computed with the current rotation
+     *          // in order to get the updated rotation.
+     *          // rotationCurrent = rotationCurrent * deltaRotationMatrix;
      *     }
      * </pre>
-     *
-     * <p>In practice, the gyroscope noise and offset will introduce some errors which need
-     * to be compensated for. This is usually done using the information from other
-     * sensors, but is beyond the scope of this document.</p>
-     *
+     * <p>
+     * In practice, the gyroscope noise and offset will introduce some errors
+     * which need to be compensated for. This is usually done using the
+     * information from other sensors, but is beyond the scope of this document.
+     * </p>
      * <h4>{@link android.hardware.Sensor#TYPE_LIGHT Sensor.TYPE_LIGHT}:</h4>
      * <ul>
      * <p>
