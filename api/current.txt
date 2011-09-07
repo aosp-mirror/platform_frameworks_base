@@ -22678,7 +22678,7 @@ package android.view {
     method public void recycle();
   }
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.view.KeyEvent.Callback {
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);

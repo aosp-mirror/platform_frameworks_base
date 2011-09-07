@@ -636,7 +636,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @see android.view.ViewGroup
  */
-public class View implements Drawable.Callback2, KeyEvent.Callback, AccessibilityEventSource {
+public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Callback,
+        AccessibilityEventSource {
     private static final boolean DBG = false;
 
     /**
