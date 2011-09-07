@@ -129,7 +129,7 @@ import javax.crypto.spec.SecretKeySpec;
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
-    private static final boolean MORE_DEBUG = true;
+    private static final boolean MORE_DEBUG = false;
 
     // Name and current contents version of the full-backup manifest file
     static final String BACKUP_MANIFEST_FILENAME = "_manifest";
