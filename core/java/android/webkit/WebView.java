@@ -20,6 +20,7 @@ import android.annotation.Widget;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ClipboardManager;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -9404,4 +9405,8 @@ public class WebView extends AbsoluteLayout
     native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
     private native void     nativeGetTextSelectionRegion(Region region);
+    /**
+     * See {@link ComponentCallbacks2} for the trim levels and descriptions
+     */
+    private static native void     nativeOnTrimMemory(int level);
 }
