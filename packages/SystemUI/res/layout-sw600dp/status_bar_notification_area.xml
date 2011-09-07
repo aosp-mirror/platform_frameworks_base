@@ -89,9 +89,10 @@
             <TextView android:id="@+id/time_solid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
                 android:singleLine="true"
                 android:textSize="40sp"
-                android:textColor="#ff525e79" />
+                />
         </com.android.systemui.statusbar.tablet.HoloClock>
 
         <TextView

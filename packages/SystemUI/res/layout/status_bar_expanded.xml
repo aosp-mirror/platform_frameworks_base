@@ -34,9 +34,7 @@
         android:paddingRight="3dp"
         >
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
-            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent.Title"
-            android:textColor="@android:color/holo_blue_light"
-            android:textStyle="normal"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
