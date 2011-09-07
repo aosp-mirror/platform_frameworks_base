@@ -8899,7 +8899,6 @@ package android.graphics.drawable {
     method public int getMinimumWidth();
     method public abstract int getOpacity();
     method public boolean getPadding(android.graphics.Rect);
-    method public int getResolvedLayoutDirectionSelf();
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
@@ -8932,10 +8931,6 @@ package android.graphics.drawable {
     method public abstract void invalidateDrawable(android.graphics.drawable.Drawable);
     method public abstract void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public abstract void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
-  }
-
-  public static abstract interface Drawable.Callback2 implements android.graphics.drawable.Drawable.Callback {
-    method public abstract int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
   }
 
   public static abstract class Drawable.ConstantState {
@@ -22669,7 +22664,7 @@ package android.view {
     method public void recycle();
   }
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback2 android.view.KeyEvent.Callback {
+  public class View implements android.view.accessibility.AccessibilityEventSource android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
@@ -22686,7 +22681,6 @@ package android.view {
     method public void buildDrawingCache();
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
-    method protected boolean canResolveLayoutDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -22798,7 +22792,6 @@ package android.view {
     method public final android.view.ViewParent getParent();
     method public float getPivotX();
     method public float getPivotY();
-    method public int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
@@ -22863,7 +22856,6 @@ package android.view {
     method public boolean isHovered();
     method public boolean isInEditMode();
     method public boolean isInTouchMode();
-    method protected static boolean isLayoutDirectionRtl(java.util.Locale);
     method public boolean isLayoutRequested();
     method public boolean isLongClickable();
     method public boolean isOpaque();
@@ -22949,10 +22941,8 @@ package android.view {
     method public void requestLayout();
     method public boolean requestRectangleOnScreen(android.graphics.Rect);
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
-    method protected void resetResolvedTextDirection();
     method public static int resolveSize(int, int);
     method public static int resolveSizeAndState(int, int, int);
-    method protected void resolveTextDirection();
     method public void restoreHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void saveHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
@@ -23053,7 +23043,6 @@ package android.view {
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
     field public static android.util.Property ALPHA;
-    field protected static int DEFAULT_TEXT_DIRECTION;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
@@ -23382,6 +23371,7 @@ package android.view {
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
     method protected void resetResolvedLayoutDirection();
+    method protected void resetResolvedTextDirection();
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
     method public void setAlwaysDrawnWithCacheEnabled(boolean);
@@ -27179,6 +27169,7 @@ package android.widget {
     method protected void resetResolvedDrawables();
     method protected void resetResolvedLayoutDirection();
     method protected void resolveDrawables();
+    method protected void resolveTextDirection();
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);

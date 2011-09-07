@@ -290,6 +290,8 @@ public abstract class Drawable {
 
     /**
      * Implement this interface if you want to create an drawable that is RTL aware
+     *
+     * @hide
      */
     public static interface Callback2 extends Callback {
         /**
@@ -379,6 +381,8 @@ public abstract class Drawable {
     /**
      * Use the current {@link android.graphics.drawable.Drawable.Callback2} implementation to get
      * the resolved layout direction of this Drawable.
+     *
+     * @hide
      */
     public int getResolvedLayoutDirectionSelf() {
         final Callback callback = getCallback();
