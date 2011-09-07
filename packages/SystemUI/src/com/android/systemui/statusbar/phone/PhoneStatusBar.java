@@ -1829,7 +1829,6 @@ public class PhoneStatusBar extends StatusBar {
         Drawable bg;
 
         /// ---------- Tracking View --------------
-        pixelFormat = PixelFormat.RGBX_8888;
         bg = mTrackingView.getBackground();
         if (bg != null) {
             pixelFormat = bg.getOpacity();
@@ -1843,7 +1842,10 @@ public class PhoneStatusBar extends StatusBar {
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
-                pixelFormat);
+                PixelFormat.OPAQUE);
+        if (ActivityManager.isHighEndGfx(mDisplay)) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
 //        lp.token = mStatusBarView.getWindowToken();
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("TrackingView");
@@ -1870,6 +1872,9 @@ public class PhoneStatusBar extends StatusBar {
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_DITHER
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        if (ActivityManager.isHighEndGfx(mDisplay)) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
         lp.format = pixelFormat;
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBarExpanded");
