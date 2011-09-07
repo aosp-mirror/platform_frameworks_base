@@ -27,10 +27,12 @@ import java.util.BitSet;
 /**
  * A class representing Wi-Fi Protected Setup
  * @hide
+ *
+ * {@see WifiP2pConfig}
  */
 public class Wps implements Parcelable {
 
-    /* Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
+    /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
     public enum Setup {
         /* Push button configuration */
         PBC,
@@ -49,6 +51,7 @@ public class Wps implements Parcelable {
     /** @hide */
     public String BSSID;
 
+    /** Passed with pin method configuration */
     public String pin;
 
     /** @hide */
@@ -60,7 +63,6 @@ public class Wps implements Parcelable {
     /** @hide */
     public LinkProperties linkProperties;
 
-    /** @hide */
     public Wps() {
         setup = Setup.INVALID;
         BSSID = null;

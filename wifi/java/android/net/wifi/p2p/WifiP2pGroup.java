@@ -27,6 +27,8 @@ import java.util.Collections;
 /**
  * A class representing a Wi-Fi P2p group
  * @hide
+ *
+ * {@see WifiP2pManager}
  */
 public class WifiP2pGroup implements Parcelable {
 

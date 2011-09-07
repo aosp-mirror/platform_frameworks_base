@@ -64,7 +64,7 @@ import com.android.internal.util.Protocol;
  * use {@link #requestConnectionInfo} to fetch the connection details. Connection information
  * can be obtained with {@link #connectionInfoInResponse} on a {@link #RESPONSE_CONNECTION_INFO}
  * message. The connection info {@link WifiP2pInfo} contains the address of the group owner
- * {@link WifiP2pInfo#groupOwnerAddress} and a flag {@link #WifiP2pInfo#isGroupOwner} to indicate
+ * {@link WifiP2pInfo#groupOwnerAddress} and a flag {@link WifiP2pInfo#isGroupOwner} to indicate
  * if the current device is a p2p group owner. A p2p client can thus communicate with
  * the p2p group owner through a socket connection.
  *
@@ -85,6 +85,7 @@ import com.android.internal.util.Protocol;
  * {@see WifiP2pGroup}
  * {@see WifiP2pDevice}
  * {@see WifiP2pDeviceList}
+ * {@see android.net.wifi.Wps}
  * @hide
  */
 public class WifiP2pManager {
