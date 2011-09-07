@@ -148,14 +148,23 @@ public class StackView extends AdapterViewAnimator {
     private int mFramePadding;
     private final Rect stackInvalidateRect = new Rect();
 
+    /**
+     * {@inheritDoc}
+     */
     public StackView(Context context) {
         this(context, null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public StackView(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.stackViewStyle);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public StackView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         TypedArray a = context.obtainStyledAttributes(attrs,
