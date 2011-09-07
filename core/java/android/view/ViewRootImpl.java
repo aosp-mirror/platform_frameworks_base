@@ -1575,13 +1575,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw() ||
                 viewVisibility != View.VISIBLE;
 
-        if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
-            for (int i = 0; i < mPendingTransitions.size(); ++i) {
-                mPendingTransitions.get(i).startChangingAnimations();
-            }
-            mPendingTransitions.clear();
-        }
         if (!cancelDraw && !newSurface) {
+            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                    mPendingTransitions.get(i).startChangingAnimations();
+                }
+                mPendingTransitions.clear();
+            }
             mFullRedrawNeeded = false;
 
             final long drawStartTime;
@@ -1619,7 +1619,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
             }
         } else {
-
+            // End any pending transitions on this non-visible window
+            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                    mPendingTransitions.get(i).endChangingAnimations();
+                }
+                mPendingTransitions.clear();
+            }
             // We were supposed to report when we are done drawing. Since we canceled the
             // draw, remember it here.
             if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
