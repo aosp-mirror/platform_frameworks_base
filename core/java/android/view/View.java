@@ -13249,7 +13249,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * {@link #TEXT_DIRECTION_INHERIT},
      * {@link #TEXT_DIRECTION_FIRST_STRONG}
      * {@link #TEXT_DIRECTION_ANY_RTL},
-     * {@link #TEXT_DIRECTION_CHAR_COUNT},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      *
@@ -13267,7 +13266,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * {@link #TEXT_DIRECTION_INHERIT},
      * {@link #TEXT_DIRECTION_FIRST_STRONG}
      * {@link #TEXT_DIRECTION_ANY_RTL},
-     * {@link #TEXT_DIRECTION_CHAR_COUNT},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      *
@@ -13288,7 +13286,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *
      * {@link #TEXT_DIRECTION_FIRST_STRONG}
      * {@link #TEXT_DIRECTION_ANY_RTL},
-     * {@link #TEXT_DIRECTION_CHAR_COUNT},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      *
