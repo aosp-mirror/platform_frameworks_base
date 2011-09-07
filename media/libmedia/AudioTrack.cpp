@@ -1078,6 +1078,11 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         frames = mRemainingFrames;
     }
 
+    int32_t waitCount = -1;
+    if (mUpdatePeriod || (!mMarkerReached && mMarkerPosition) || mLoopCount) {
+        waitCount = 1;
+    }
+
     do {
 
         audioBuffer.frameCount = frames;
@@ -1085,7 +1090,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         // Calling obtainBuffer() with a wait count of 1
         // limits wait time to WAIT_PERIOD_MS. This prevents from being
         // stuck here not being able to handle timed events (position, markers, loops).
-        status_t err = obtainBuffer(&audioBuffer, 1);
+        status_t err = obtainBuffer(&audioBuffer, waitCount);
         if (err < NO_ERROR) {
             if (err != TIMED_OUT) {
                 LOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
