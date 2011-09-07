@@ -72,8 +72,15 @@ public class TextPaint extends Paint {
         linkColor = tp.linkColor;
         drawableState = tp.drawableState;
         density = tp.density;
-        underlineColors = tp.underlineColors;
-        underlineThicknesses = tp.underlineThicknesses;
+
+        if (tp.underlineColors != null) {
+            if (underlineColors == null || underlineColors.length < tp.underlineCount) {
+                underlineColors = new int[tp.underlineCount];
+                underlineThicknesses = new float[tp.underlineCount];
+            }
+            System.arraycopy(tp.underlineColors, 0, underlineColors, 0, tp.underlineCount);
+            System.arraycopy(tp.underlineThicknesses, 0, underlineThicknesses, 0, tp.underlineCount);
+        }
         underlineCount = tp.underlineCount;
     }
 
