@@ -5118,6 +5118,7 @@ package android.content {
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String VIBRATOR_SERVICE = "vibrator";
     field public static final java.lang.String WALLPAPER_SERVICE = "wallpaper";
+    field public static final java.lang.String WIFI_P2P_SERVICE = "wifip2p";
     field public static final java.lang.String WIFI_SERVICE = "wifi";
     field public static final java.lang.String WINDOW_SERVICE = "window";
   }
@@ -12442,6 +12443,142 @@ package android.net.wifi {
     method public void release();
     method public void setReferenceCounted(boolean);
     method public void setWorkSource(android.os.WorkSource);
+  }
+
+  public class WpsInfo implements android.os.Parcelable {
+    ctor public WpsInfo();
+    ctor public WpsInfo(android.net.wifi.WpsInfo);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int DISPLAY = 1; // 0x1
+    field public static final int INVALID = 4; // 0x4
+    field public static final int KEYPAD = 2; // 0x2
+    field public static final int LABEL = 3; // 0x3
+    field public static final int PBC = 0; // 0x0
+    field public java.lang.String pin;
+    field public int setup;
+  }
+
+}
+
+package android.net.wifi.p2p {
+
+  public class WifiP2pConfig implements android.os.Parcelable {
+    ctor public WifiP2pConfig();
+    ctor public WifiP2pConfig(android.net.wifi.p2p.WifiP2pConfig);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public java.lang.String deviceAddress;
+    field public int groupOwnerIntent;
+    field public android.net.wifi.WpsInfo wps;
+  }
+
+  public class WifiP2pDevice implements android.os.Parcelable {
+    ctor public WifiP2pDevice();
+    ctor public WifiP2pDevice(android.net.wifi.p2p.WifiP2pDevice);
+    method public int describeContents();
+    method public boolean isGroupOwner();
+    method public boolean isServiceDiscoveryCapable();
+    method public boolean wpsDisplaySupported();
+    method public boolean wpsKeypadSupported();
+    method public boolean wpsPbcSupported();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int AVAILABLE = 3; // 0x3
+    field public static final int CONNECTED = 0; // 0x0
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FAILED = 2; // 0x2
+    field public static final int INVITED = 1; // 0x1
+    field public static final int UNAVAILABLE = 4; // 0x4
+    field public java.lang.String deviceAddress;
+    field public java.lang.String deviceName;
+    field public java.lang.String primaryDeviceType;
+    field public java.lang.String secondaryDeviceType;
+    field public int status;
+  }
+
+  public class WifiP2pDeviceList implements android.os.Parcelable {
+    ctor public WifiP2pDeviceList();
+    ctor public WifiP2pDeviceList(android.net.wifi.p2p.WifiP2pDeviceList);
+    method public int describeContents();
+    method public java.util.Collection<android.net.wifi.p2p.WifiP2pDevice> getDeviceList();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class WifiP2pGroup implements android.os.Parcelable {
+    ctor public WifiP2pGroup();
+    ctor public WifiP2pGroup(android.net.wifi.p2p.WifiP2pGroup);
+    method public int describeContents();
+    method public java.util.Collection<android.net.wifi.p2p.WifiP2pDevice> getClientList();
+    method public java.lang.String getInterface();
+    method public java.lang.String getNetworkName();
+    method public android.net.wifi.p2p.WifiP2pDevice getOwner();
+    method public java.lang.String getPassphrase();
+    method public boolean isGroupOwner();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class WifiP2pInfo implements android.os.Parcelable {
+    ctor public WifiP2pInfo();
+    ctor public WifiP2pInfo(android.net.wifi.p2p.WifiP2pInfo);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public boolean groupFormed;
+    field public java.net.InetAddress groupOwnerAddress;
+    field public boolean isGroupOwner;
+  }
+
+  public class WifiP2pManager {
+    method public void cancelConnect(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void connect(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pConfig, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void createGroup(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void discoverPeers(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public android.net.wifi.p2p.WifiP2pManager.Channel initialize(android.content.Context, android.os.Looper, android.net.wifi.p2p.WifiP2pManager.ChannelListener);
+    method public void removeGroup(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void requestConnectionInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener);
+    method public void requestGroupInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.GroupInfoListener);
+    method public void requestPeers(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.PeerListListener);
+    field public static final int BUSY = 2; // 0x2
+    field public static final int ERROR = 0; // 0x0
+    field public static final java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
+    field public static final java.lang.String EXTRA_WIFI_P2P_DEVICE = "wifiP2pDevice";
+    field public static final java.lang.String EXTRA_WIFI_P2P_INFO = "wifiP2pInfo";
+    field public static final java.lang.String EXTRA_WIFI_STATE = "wifi_p2p_state";
+    field public static final int P2P_UNSUPPORTED = 1; // 0x1
+    field public static final java.lang.String WIFI_P2P_CONNECTION_CHANGED_ACTION = "android.net.wifi.p2p.CONNECTION_STATE_CHANGE";
+    field public static final java.lang.String WIFI_P2P_PEERS_CHANGED_ACTION = "android.net.wifi.p2p.PEERS_CHANGED";
+    field public static final java.lang.String WIFI_P2P_STATE_CHANGED_ACTION = "android.net.wifi.p2p.STATE_CHANGED";
+    field public static final int WIFI_P2P_STATE_DISABLED = 1; // 0x1
+    field public static final int WIFI_P2P_STATE_ENABLED = 2; // 0x2
+    field public static final java.lang.String WIFI_P2P_THIS_DEVICE_CHANGED_ACTION = "android.net.wifi.p2p.THIS_DEVICE_CHANGED";
+  }
+
+  public static abstract interface WifiP2pManager.ActionListener {
+    method public abstract void onFailure(int);
+    method public abstract void onSuccess();
+  }
+
+  public static class WifiP2pManager.Channel {
+  }
+
+  public static abstract interface WifiP2pManager.ChannelListener {
+    method public abstract void onChannelDisconnected();
+  }
+
+  public static abstract interface WifiP2pManager.ConnectionInfoListener {
+    method public abstract void onConnectionInfoAvailable(android.net.wifi.p2p.WifiP2pInfo);
+  }
+
+  public static abstract interface WifiP2pManager.GroupInfoListener {
+    method public abstract void onGroupInfoAvailable(android.net.wifi.p2p.WifiP2pGroup);
+  }
+
+  public static abstract interface WifiP2pManager.PeerListListener {
+    method public abstract void onPeersAvailable(android.net.wifi.p2p.WifiP2pDeviceList);
   }
 
 }

@@ -24,7 +24,6 @@ import java.net.UnknownHostException;
 
 /**
  * A class representing connection information about a Wi-Fi p2p group
- * @hide
  *
  * {@see WifiP2pManager}
  */
@@ -39,11 +38,9 @@ public class WifiP2pInfo implements Parcelable {
     /** Group owner address */
     public InetAddress groupOwnerAddress;
 
-    /** @hide */
-    WifiP2pInfo() {
+    public WifiP2pInfo() {
     }
 
-    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("groupFormed: ").append(groupFormed)
@@ -52,12 +49,12 @@ public class WifiP2pInfo implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /** copy constructor {@hide} */
+    /** copy constructor */
     public WifiP2pInfo(WifiP2pInfo source) {
         if (source != null) {
             groupFormed = source.groupFormed;
@@ -66,7 +63,7 @@ public class WifiP2pInfo implements Parcelable {
        }
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte(groupFormed ? (byte)1 : (byte)0);
         dest.writeByte(isGroupOwner ? (byte)1 : (byte)0);
@@ -79,7 +76,7 @@ public class WifiP2pInfo implements Parcelable {
         }
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public static final Creator<WifiP2pInfo> CREATOR =
         new Creator<WifiP2pInfo>() {
             public WifiP2pInfo createFromParcel(Parcel in) {

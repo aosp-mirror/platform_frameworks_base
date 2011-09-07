@@ -261,23 +261,23 @@ public class WifiNative {
     public static String p2pConnect(WifiP2pConfig config, boolean joinExistingGroup) {
         if (config == null) return null;
         List<String> args = new ArrayList<String>();
-        Wps wps = config.wps;
+        WpsInfo wps = config.wps;
         args.add(config.deviceAddress);
 
         switch (wps.setup) {
-            case PBC:
+            case WpsInfo.PBC:
                 args.add("pbc");
                 break;
-            case DISPLAY:
+            case WpsInfo.DISPLAY:
                 //TODO: pass the pin back for display
                 args.add("pin");
                 args.add("display");
                 break;
-            case KEYPAD:
+            case WpsInfo.KEYPAD:
                 args.add(wps.pin);
                 args.add("keypad");
                 break;
-            case LABEL:
+            case WpsInfo.LABEL:
                 args.add(wps.pin);
                 args.add("label");
             default:
@@ -301,6 +301,10 @@ public class WifiNative {
         for (String s : args) command += s + " ";
 
         return doStringCommand(command);
+    }
+
+    public static boolean p2pCancelConnect() {
+        return doBooleanCommand("P2P_CANCEL");
     }
 
     public static boolean p2pGroupAdd() {
