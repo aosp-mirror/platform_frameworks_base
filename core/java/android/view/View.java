@@ -2583,6 +2583,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Default text direction is inherited
+     *
+     * @hide
      */
     protected static int DEFAULT_TEXT_DIRECTION = TEXT_DIRECTION_INHERIT;
 
@@ -9294,6 +9296,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         recomputePadding();
     }
 
+    /**
+     * Return true if layout direction resolution can be done
+     *
+     * @hide
+     */
     protected boolean canResolveLayoutDirection() {
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
@@ -9322,6 +9329,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *
      * @param locale Locale to check
      * @return true if a Locale is corresponding to a RTL script.
+     *
+     * @hide
      */
     protected static boolean isLayoutDirectionRtl(Locale locale) {
         return (LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE ==
@@ -13294,6 +13303,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Resolve the text direction.
+     *
+     * @hide
      */
     protected void resolveTextDirection() {
         if (mTextDirection != TEXT_DIRECTION_INHERIT) {
@@ -13309,6 +13320,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Reset resolved text direction. Will be resolved during a call to getResolvedTextDirection().
+     *
+     * @hide
      */
     protected void resetResolvedTextDirection() {
         mResolvedTextDirection = TEXT_DIRECTION_INHERIT;
