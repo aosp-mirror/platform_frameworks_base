@@ -33,11 +33,13 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.view.View;
+import android.util.Log;
 import java.lang.Math;
 
 public class ImageProcessingActivity extends Activity
                                        implements SurfaceHolder.Callback,
                                        SeekBar.OnSeekBarChangeListener {
+    private final String TAG = "Img";
     private Bitmap mBitmapIn;
     private Bitmap mBitmapOut;
     private ScriptC_threshold mScript;
@@ -268,7 +270,15 @@ public class ImageProcessingActivity extends Activity
 
     // button hook
     public void benchmark(View v) {
-        android.util.Log.v("Img", "Benchmarking");
+        long t = getBenchmark();
+        //long javaTime = javaFilter();
+        //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
+        mBenchmarkResult.setText("Result: " + t + " ms");
+    }
+
+    // For benchmark test
+    public long getBenchmark() {
+        Log.v(TAG, "Benchmarking");
         int oldRadius = mRadius;
         mRadius = MAX_RADIUS;
         mScript.set_radius(mRadius);
@@ -279,16 +289,12 @@ public class ImageProcessingActivity extends Activity
         mOutPixelsAllocation.copyTo(mBitmapOut);
 
         t = java.lang.System.currentTimeMillis() - t;
-        android.util.Log.v("Img", "Renderscript frame time core ms " + t);
-
-        //long javaTime = javaFilter();
-        //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
-        mBenchmarkResult.setText("Result: " + t + " ms");
-
+        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + t);
         mRadius = oldRadius;
         mScript.set_radius(mRadius);
 
         mScript.invoke_filter();
         mOutPixelsAllocation.copyTo(mBitmapOut);
+        return t;
     }
 }
