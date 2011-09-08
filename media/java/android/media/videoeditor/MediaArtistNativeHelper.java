@@ -3758,65 +3758,33 @@ class MediaArtistNativeHelper {
 
     /**
      * This method extracts a frame from the input file
-     * and returns the frame as a bitmap
-     *
-     * @param inputFile The inputFile
-     * @param width The width of the output frame
-     * @param height The height of the output frame
-     * @param timeMS The time in ms at which the frame has to be extracted
+     * and returns the frame as a bitmap. See getPixelsList() for more information.
      */
-    Bitmap getPixels(String inputFile, int width, int height, long timeMS) {
-        if (inputFile == null) {
-            throw new IllegalArgumentException("Invalid input file");
-        }
-
-        /* Make width and height as even */
-        final int newWidth = (width + 1) & 0xFFFFFFFE;
-        final int newHeight = (height + 1) & 0xFFFFFFFE;
-
-        /* Create a temp bitmap for resized thumbnails */
-        Bitmap tempBitmap = null;
-        if ((newWidth != width) || (newHeight != height)) {
-             tempBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
-        }
-
-        IntBuffer rgb888 = IntBuffer.allocate(newWidth * newHeight * 4);
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        nativeGetPixels(inputFile, rgb888.array(), newWidth, newHeight, timeMS);
-
-        if ((newWidth == width) && (newHeight == height)) {
-            bitmap.copyPixelsFromBuffer(rgb888);
-        } else {
-            /* Create a temp bitmap to be used for resize */
-            tempBitmap.copyPixelsFromBuffer(rgb888);
-
-            /* Create a canvas to resize */
-            final Canvas canvas = new Canvas(bitmap);
-            canvas.drawBitmap(tempBitmap, new Rect(0, 0, newWidth, newHeight),
-                                          new Rect(0, 0, width, height), sResizePaint);
-            canvas.setBitmap(null);
-        }
-
-        if (tempBitmap != null) {
-            tempBitmap.recycle();
-        }
-
-        return bitmap;
+    Bitmap getPixels(String filename, int width, int height, long timeMs,
+            int videoRotation) {
+        final Bitmap result[] = new Bitmap[1];
+        getPixelsList(filename, width, height, timeMs, timeMs, 1, new int[] {0},
+                new MediaItem.GetThumbnailListCallback() {
+            public void onThumbnail(Bitmap bitmap, int index) {
+                result[0] = bitmap;
+            }
+        }, videoRotation);
+        return result[0];
     }
 
     /**
      * This method extracts a list of frame from the
      * input file and returns the frame in bitmap array
      *
-     * @param filename The inputFile
-     * @param width The width of the output frame
-     * @param height The height of the output frame
+     * @param filename The input file name
+     * @param width The width of the output frame, before rotation
+     * @param height The height of the output frame, before rotation
      * @param startMs The starting time in ms
      * @param endMs The end time in ms
      * @param thumbnailCount The number of frames to be extracted
      * @param indices The indices of thumbnails wanted
      * @param callback The callback used to pass back the bitmaps
-     * from startMs to endMs
+     * @param videoRotation The rotation degree need to be done for the bitmap
      *
      * @return The frames as bitmaps in bitmap array
      **/
@@ -3824,62 +3792,69 @@ class MediaArtistNativeHelper {
             long startMs, long endMs, int thumbnailCount, int[] indices,
             final MediaItem.GetThumbnailListCallback callback,
             final int videoRotation) {
-        /* Make width and height as even */
-        final int newWidth = (width + 1) & 0xFFFFFFFE;
-        final int newHeight = (height + 1) & 0xFFFFFFFE;
-        final int thumbnailSize = newWidth * newHeight;
 
-        /* Create a temp bitmap for resized thumbnails */
-        final Bitmap tempBitmap =
-                (newWidth != width || newHeight != height)
-                ? Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        // The decoder needs output width and height as even
+        final int decWidth = (width + 1) & 0xFFFFFFFE;
+        final int decHeight = (height + 1) & 0xFFFFFFFE;
+        final int thumbnailSize = decWidth * decHeight;
+
+        // We convert the decoder output (in int[]) to a bitmap by first
+        // copy it into an IntBuffer, then use Bitmap.copyPixelsFromBuffer to
+        // copy it to the bitmap.
+        final int[] decArray = new int[thumbnailSize];
+        final IntBuffer decBuffer = IntBuffer.allocate(thumbnailSize);
+
+        // If we need to resize and/or rotate the decoder output, we need a
+        // temporary bitmap to hold the decoded output.
+        final boolean needToMassage =
+                (decWidth != width || decHeight != height || videoRotation != 0);
+        final Bitmap tmpBitmap = needToMassage
+                ? Bitmap.createBitmap(decWidth, decHeight, Bitmap.Config.ARGB_8888)
                 : null;
 
-        final int[] rgb888 = new int[thumbnailSize];
-        final IntBuffer tmpBuffer = IntBuffer.allocate(thumbnailSize);
-        nativeGetPixelsList(filename, rgb888, newWidth, newHeight,
-                thumbnailCount, videoRotation, startMs, endMs, indices,
+        // The final output bitmap width/height may swap because of rotation.
+        final boolean needToSwapWH = (videoRotation == 90 || videoRotation == 270);
+        final int outWidth = needToSwapWH ? height : width;
+        final int outHeight = needToSwapWH ? width : height;
+
+        nativeGetPixelsList(filename, decArray, decWidth, decHeight,
+                thumbnailCount, startMs, endMs, indices,
                 new NativeGetPixelsListCallback() {
             public void onThumbnail(int index) {
-                Bitmap bitmap = Bitmap.createBitmap(
-                        width, height, Bitmap.Config.ARGB_8888);
-                tmpBuffer.put(rgb888, 0, thumbnailSize);
-                tmpBuffer.rewind();
+                // This is the bitmap we will output to the client
+                Bitmap outBitmap = Bitmap.createBitmap(
+                        outWidth, outHeight, Bitmap.Config.ARGB_8888);
 
-                if ((newWidth == width) && (newHeight == height)) {
-                    bitmap.copyPixelsFromBuffer(tmpBuffer);
+                // Copy int[] to IntBuffer
+                decBuffer.put(decArray, 0, thumbnailSize);
+                decBuffer.rewind();
+
+                if (!needToMassage) {
+                    // We can directly read the decoded result to output bitmap
+                    outBitmap.copyPixelsFromBuffer(decBuffer);
                 } else {
-                    /* Copy the out rgb buffer to temp bitmap */
-                    tempBitmap.copyPixelsFromBuffer(tmpBuffer);
+                    // Copy the decoded result to an intermediate bitmap first
+                    tmpBitmap.copyPixelsFromBuffer(decBuffer);
 
-                    /* Create a canvas to resize */
-                    final Canvas canvas = new Canvas(bitmap);
-                    canvas.drawBitmap(tempBitmap,
-                            new Rect(0, 0, newWidth, newHeight),
-                            new Rect(0, 0, width, height), sResizePaint);
-
-                    canvas.setBitmap(null);
+                    // Create a canvas to resize/rotate the bitmap
+                    // First scale the decoded bitmap to (0,0)-(1,1), rotate it
+                    // with (0.5, 0.5) as center, then scale it to
+                    // (outWidth, outHeight).
+                    final Canvas canvas = new Canvas(outBitmap);
+                    Matrix m = new Matrix();
+                    float sx = 1f / decWidth;
+                    float sy = 1f / decHeight;
+                    m.postScale(sx, sy);
+                    m.postRotate(videoRotation, 0.5f, 0.5f);
+                    m.postScale(outWidth, outHeight);
+                    canvas.drawBitmap(tmpBitmap, m, sResizePaint);
                 }
-
-                if (videoRotation == 0) {
-                    callback.onThumbnail(bitmap, index);
-                } else {
-                    Matrix mtx = new Matrix();
-                    mtx.postRotate(videoRotation);
-                    Bitmap rotatedBmp =
-                        Bitmap.createBitmap(bitmap, 0, 0, width, height, mtx, false);
-                    callback.onThumbnail(rotatedBmp, index);
-
-                    if (bitmap != null) {
-                        bitmap.recycle();
-                    }
-                }
-
+                callback.onThumbnail(outBitmap, index);
             }
         });
 
-        if (tempBitmap != null) {
-            tempBitmap.recycle();
+        if (tmpBitmap != null) {
+            tmpBitmap.recycle();
         }
     }
 
@@ -3996,7 +3971,7 @@ class MediaArtistNativeHelper {
             long timeMS);
 
     private native int nativeGetPixelsList(String fileName, int[] pixelArray,
-            int width, int height, int nosofTN, int videoRotation, long startTimeMs,
+            int width, int height, int nosofTN, long startTimeMs,
             long endTimeMs, int[] indices, NativeGetPixelsListCallback callback);
 
     /**

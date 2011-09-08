@@ -293,7 +293,14 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("Invalid Dimensions");
         }
 
-        return mMANativeHelper.getPixels(super.getFilename(), width, height,timeMs);
+        if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270) {
+            int temp = width;
+            width = height;
+            height = temp;
+        }
+
+        return mMANativeHelper.getPixels(
+                getFilename(), width, height, timeMs, mVideoRotationDegree);
     }
 
     /*
@@ -318,8 +325,14 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("Invalid dimension");
         }
 
-        mMANativeHelper.getPixelsList(super.getFilename(), width,
-                height, startMs, endMs, thumbnailCount, indices, callback,
+        if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270) {
+            int temp = width;
+            width = height;
+            height = temp;
+        }
+
+        mMANativeHelper.getPixelsList(getFilename(), width, height,
+                startMs, endMs, thumbnailCount, indices, callback,
                 mVideoRotationDegree);
     }
 
