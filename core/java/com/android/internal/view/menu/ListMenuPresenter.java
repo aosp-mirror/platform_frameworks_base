@@ -34,6 +34,8 @@ import java.util.ArrayList;
  * MenuPresenter for list-style menus.
  */
 public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClickListener {
+    private static final String TAG = "ListMenuPresenter";
+
     Context mContext;
     LayoutInflater mInflater;
     MenuBuilder mMenu;
@@ -76,7 +78,7 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
     public void initForMenu(Context context, MenuBuilder menu) {
         if (mThemeRes != 0) {
             mContext = new ContextThemeWrapper(context, mThemeRes);
-        } else if (mContext == null) {
+        } else if (mContext != null) {
             mContext = context;
         }
         mInflater = LayoutInflater.from(mContext);
