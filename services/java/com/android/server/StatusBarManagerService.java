@@ -301,7 +301,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
-        if (SPEW) Slog.d(TAG, "setSystemUiVisibility(" + vis + ")");
+        if (SPEW) Slog.d(TAG, "setSystemUiVisibility(0x" + Integer.toHexString(vis) + ")");
 
         synchronized (mLock) {
             updateUiVisibilityLocked(vis);

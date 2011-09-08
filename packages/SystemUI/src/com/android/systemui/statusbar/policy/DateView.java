@@ -22,11 +22,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
-import android.util.Slog;
-import android.widget.TextView;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
@@ -42,9 +40,10 @@ public final class DateView extends TextView {
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_TIME_TICK)
-                    || action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_TIME_TICK.equals(action)
+                    || Intent.ACTION_TIME_CHANGED.equals(action)
+                    || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                 updateClock();
             }
         }
@@ -118,6 +117,7 @@ public final class DateView extends TextView {
                 // Register for Intent broadcasts for the clock and battery
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_TIME_TICK);
+                filter.addAction(Intent.ACTION_TIME_CHANGED);
                 filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
                 mContext.registerReceiver(mIntentReceiver, filter, null, null);
                 updateClock();
@@ -127,4 +127,3 @@ public final class DateView extends TextView {
         }
     }
 }
-

@@ -1202,12 +1202,15 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     // showing secure lockscreen; disable expanding.
                     flags |= StatusBarManager.DISABLE_EXPAND;
                 }
+                if (isSecure()) {
+                    // showing secure lockscreen; disable ticker.
+                    flags |= StatusBarManager.DISABLE_NOTIFICATION_TICKER;
+                }
             }
 
             if (DEBUG) {
-                Log.d(TAG,
-                        "adjustStatusBarLocked: mShowing=" + mShowing + " mHidden=" + mHidden
-                                + " isSecure=" + isSecure() + " --> flags=" + flags);
+                Log.d(TAG, "adjustStatusBarLocked: mShowing=" + mShowing + " mHidden=" + mHidden
+                        + " isSecure=" + isSecure() + " --> flags=0x" + Integer.toHexString(flags));
             }
 
             mStatusBarManager.disable(flags);
