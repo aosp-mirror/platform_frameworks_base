@@ -9995,6 +9995,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
 
             final HardwareCanvas canvas = mDisplayList.start();
+            int restoreCount = 0;
             try {
                 int width = mRight - mLeft;
                 int height = mBottom - mTop;
@@ -10004,6 +10005,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 canvas.onPreDraw(null);
 
                 computeScroll();
+
+                restoreCount = canvas.save();
                 canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
                 mPrivateFlags &= ~DIRTY_MASK;
@@ -10015,6 +10018,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     draw(canvas);
                 }
             } finally {
+                canvas.restoreToCount(restoreCount);
                 canvas.onPostDraw();
 
                 mDisplayList.end();
