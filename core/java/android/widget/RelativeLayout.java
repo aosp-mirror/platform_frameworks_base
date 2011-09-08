@@ -961,7 +961,8 @@ public class RelativeLayout extends ViewGroup {
         }
 
         for (View view : mTopToBottomLeftToRightSet) {
-            if (view.dispatchPopulateAccessibilityEvent(event)) {
+            if (view.getVisibility() == View.VISIBLE
+                    && view.dispatchPopulateAccessibilityEvent(event)) {
                 mTopToBottomLeftToRightSet.clear();
                 return true;
             }
