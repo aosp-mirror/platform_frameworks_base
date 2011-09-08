@@ -465,23 +465,42 @@ public class FrameLayout extends ViewGroup {
     }
 
     /**
-     * Determines whether to measure all children or just those in 
-     * the VISIBLE or INVISIBLE state when measuring. Defaults to false.
+     * Sets whether to consider all children, or just those in
+     * the VISIBLE or INVISIBLE state, when measuring. Defaults to false.
+     *
      * @param measureAll true to consider children marked GONE, false otherwise.
      * Default value is false.
-     * 
+     *
      * @attr ref android.R.styleable#FrameLayout_measureAllChildren
      */
     @android.view.RemotableViewMethod
     public void setMeasureAllChildren(boolean measureAll) {
         mMeasureAllChildren = measureAll;
     }
-    
+
     /**
-     * Determines whether to measure all children or just those in 
-     * the VISIBLE or INVISIBLE state when measuring. 
+     * Determines whether all children, or just those in the VISIBLE or
+     * INVISIBLE state, are considered when measuring.
+     *
+     * @return Whether all children are considered when measuring.
+     *
+     * @deprecated This method is deprecated in favor of
+     * {@link #getMeasureAllChildren() getMeasureAllChildren()}, which was
+     * renamed for consistency with
+     * {@link #setMeasureAllChildren(boolean) setMeasureAllChildren()}.
      */
+    @Deprecated
     public boolean getConsiderGoneChildrenWhenMeasuring() {
+        return getMeasureAllChildren();
+    }
+
+    /**
+     * Determines whether all children, or just those in the VISIBLE or
+     * INVISIBLE state, are considered when measuring.
+     *
+     * @return Whether all children are considered when measuring.
+     */
+    public boolean getMeasureAllChildren() {
         return mMeasureAllChildren;
     }
 
