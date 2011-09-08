@@ -16,6 +16,7 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaScanner"
+#include <cutils/properties.h>
 #include <utils/Log.h>
 
 #include <media/mediascanner.h>
@@ -26,11 +27,14 @@
 namespace android {
 
 MediaScanner::MediaScanner()
-    : mLocale(NULL) {
+    : mLocale(NULL), mSkipList(NULL), mSkipIndex(NULL) {
+    loadSkipList();
 }
 
 MediaScanner::~MediaScanner() {
     setLocale(NULL);
+    free(mSkipList);
+    free(mSkipIndex);
 }
 
 void MediaScanner::setLocale(const char *locale) {
@@ -45,6 +49,33 @@ void MediaScanner::setLocale(const char *locale) {
 
 const char *MediaScanner::locale() const {
     return mLocale;
+}
+
+void MediaScanner::loadSkipList() {
+    mSkipList = (char *)malloc(PROPERTY_VALUE_MAX * sizeof(char));
+    if (mSkipList) {
+      property_get("testing.mediascanner.skiplist", mSkipList, "");
+    }
+    if (!mSkipList || (strlen(mSkipList) == 0)) {
+        free(mSkipList);
+        mSkipList = NULL;
+        return;
+    }
+    mSkipIndex = (int *)malloc(PROPERTY_VALUE_MAX * sizeof(int));
+    if (mSkipIndex) {
+        // dup it because strtok will modify the string
+        char *skipList = strdup(mSkipList);
+        if (skipList) {
+            char * path = strtok(skipList, ",");
+            int i = 0;
+            while (path) {
+                mSkipIndex[i++] = strlen(path);
+                path = strtok(NULL, ",");
+            }
+            mSkipIndex[i] = -1;
+            free(skipList);
+        }
+    }
 }
 
 MediaScanResult MediaScanner::processDirectory(
@@ -75,11 +106,38 @@ MediaScanResult MediaScanner::processDirectory(
     return result;
 }
 
+bool MediaScanner::shouldSkipDirectory(char *path) {
+    if (path && mSkipList && mSkipIndex) {
+        int len = strlen(path);
+        int idx = 0;
+        // track the start position of next path in the comma
+        // separated list obtained from getprop
+        int startPos = 0;
+        while (mSkipIndex[idx] != -1) {
+            // no point to match path name if strlen mismatch
+            if ((len == mSkipIndex[idx])
+                // pick out the path segment from comma separated list
+                // to compare against current path parameter
+                && (strncmp(path, &mSkipList[startPos], len) == 0)) {
+                return true;
+            }
+            startPos += mSkipIndex[idx] + 1; // extra char for the delimiter
+            idx++;
+        }
+    }
+    return false;
+}
+
 MediaScanResult MediaScanner::doProcessDirectory(
         char *path, int pathRemaining, MediaScannerClient &client, bool noMedia) {
     // place to copy file or directory name
     char* fileSpot = path + strlen(path);
     struct dirent* entry;
+
+    if (shouldSkipDirectory(path)) {
+      LOGD("Skipping: %s", path);
+      return MEDIA_SCAN_RESULT_OK;
+    }
 
     // Treat all files as non-media in directories that contain a  ".nomedia" file
     if (pathRemaining >= 8 /* strlen(".nomedia") */ ) {
