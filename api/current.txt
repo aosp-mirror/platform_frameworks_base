@@ -25917,8 +25917,9 @@ package android.widget {
     ctor public FrameLayout(android.content.Context);
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet);
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet, int);
-    method public boolean getConsiderGoneChildrenWhenMeasuring();
+    method public deprecated boolean getConsiderGoneChildrenWhenMeasuring();
     method public android.graphics.drawable.Drawable getForeground();
+    method public boolean getMeasureAllChildren();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setForeground(android.graphics.drawable.Drawable);
     method public void setForegroundGravity(int);
