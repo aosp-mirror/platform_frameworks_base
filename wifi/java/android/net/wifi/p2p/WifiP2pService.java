@@ -155,8 +155,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mInterface = SystemProperties.get("wifi.interface", "wlan0");
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
 
-        mP2pSupported = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_wifi_p2p_support);
+        mP2pSupported = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WIFI_DIRECT);
+
         mDeviceType = mContext.getResources().getString(
                 com.android.internal.R.string.config_wifi_p2p_device_type);
         mDeviceName = getDefaultDeviceName();
@@ -216,14 +217,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         enforceAccessPermission();
         enforceChangePermission();
         return new Messenger(mP2pStateMachine.getHandler());
-    }
-
-    /**
-     * Return if p2p is supported
-     */
-    public boolean isP2pSupported() {
-        enforceAccessPermission();
-        return mP2pSupported;
     }
 
     @Override
