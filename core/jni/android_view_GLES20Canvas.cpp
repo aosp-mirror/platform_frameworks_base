@@ -477,7 +477,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 #if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-    value = gTextLayoutCache.getValue(paint, text, 0, count, count, flags);
+    value = TextLayoutCache::getInstance().getValue(paint, text, 0, count, count, flags);
     if (value == NULL) {
         LOGE("Cannot get TextLayoutCache value");
         return ;
@@ -507,7 +507,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 #if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-    value = gTextLayoutCache.getValue(paint, text, start, count, contextCount, flags);
+    value = TextLayoutCache::getInstance().getValue(paint, text, start, count, contextCount, flags);
     if (value == NULL) {
         LOGE("Cannot get TextLayoutCache value");
         return ;

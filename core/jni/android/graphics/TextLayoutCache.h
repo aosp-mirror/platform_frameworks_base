@@ -25,6 +25,7 @@
 #include <utils/GenerationCache.h>
 #include <utils/Compare.h>
 #include <utils/RefBase.h>
+#include <utils/Singleton.h>
 
 #include <SkPaint.h>
 #include <SkTemplates.h>
@@ -187,11 +188,11 @@ private:
 /**
  * Cache of text layout information.
  */
-class TextLayoutCache : public OnEntryRemoved<TextLayoutCacheKey, sp<TextLayoutCacheValue> >
+class TextLayoutCache : public OnEntryRemoved<TextLayoutCacheKey, sp<TextLayoutCacheValue> >,
+        public Singleton<TextLayoutCache>
 {
 public:
     TextLayoutCache();
-    TextLayoutCache(uint32_t maxByteSize);
 
     virtual ~TextLayoutCache();
 

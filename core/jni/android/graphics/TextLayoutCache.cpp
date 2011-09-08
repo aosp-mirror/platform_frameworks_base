@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "TextLayoutCache"
+
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
 
@@ -23,16 +25,15 @@ extern "C" {
 
 namespace android {
 
+//--------------------------------------------------------------------------------------------------
+#if USE_TEXT_LAYOUT_CACHE
+    ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutCache);
+#endif
+//--------------------------------------------------------------------------------------------------
+
 TextLayoutCache::TextLayoutCache() :
         mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> >::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB)),
-        mCacheHitCount(0), mNanosecondsSaved(0) {
-    init();
-}
-
-TextLayoutCache::TextLayoutCache(uint32_t max):
-        mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> >::kUnlimitedCapacity),
-        mSize(0), mMaxSize(max),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
 }
@@ -46,25 +47,21 @@ void TextLayoutCache::init() {
 
     mDebugLevel = readRtlDebugLevel();
     mDebugEnabled = mDebugLevel & kRtlDebugCaches;
-    LOGD("Using TextLayoutCache debug level: %d - Debug Enabled: %d", mDebugLevel, mDebugEnabled);
+    LOGD("Using debug level: %d - Debug Enabled: %d", mDebugLevel, mDebugEnabled);
 
     mCacheStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
-    if (mDebugEnabled) {
-        LOGD("TextLayoutCache start time: %lld", mCacheStartTime);
-    }
-    mInitialized = true;
 
     if (mDebugEnabled) {
+        LOGD("Start time: %lld", mCacheStartTime);
 #if RTL_USE_HARFBUZZ
-        LOGD("TextLayoutCache is using HARFBUZZ");
+        LOGD("Using HARFBUZZ");
 #else
-        LOGD("TextLayoutCache is using ICU");
+        LOGD("Using ICU");
 #endif
+        LOGD("Initialization is done");
     }
 
-    if (mDebugEnabled) {
-        LOGD("TextLayoutCache initialization is done");
-    }
+    mInitialized = true;
 }
 
 /*
@@ -147,8 +144,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             // Cleanup to make some room if needed
             if (mSize + size > mMaxSize) {
                 if (mDebugEnabled) {
-                    LOGD("TextLayoutCache: need to clean some entries "
-                            "for making some room for a new entry");
+                    LOGD("Need to clean some entries for making some room for a new entry");
                 }
                 while (mSize + size > mMaxSize) {
                     // This will call the callback
@@ -213,7 +209,7 @@ void TextLayoutCache::dumpCacheStats() {
     float remainingPercent = 100 * ((mMaxSize - mSize) / ((float)mMaxSize));
     float timeRunningInSec = (systemTime(SYSTEM_TIME_MONOTONIC) - mCacheStartTime) / 1000000000;
     LOGD("------------------------------------------------");
-    LOGD("TextLayoutCache stats");
+    LOGD("Cache stats");
     LOGD("------------------------------------------------");
     LOGD("pid       : %d", getpid());
     LOGD("running   : %.0f seconds", timeRunningInSec);
