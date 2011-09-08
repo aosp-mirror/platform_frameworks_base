@@ -30,7 +30,7 @@ public:
     // Returns the length of payload in bytes.
     virtual int encode(void *payload, int16_t *samples) = 0;
     // Returns the number of decoded samples.
-    virtual int decode(int16_t *samples, void *payload, int length) = 0;
+    virtual int decode(int16_t *samples, int count, void *payload, int length) = 0;
 };
 
 AudioCodec *newAudioCodec(const char *codecName);

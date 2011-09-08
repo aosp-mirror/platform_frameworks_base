@@ -39,7 +39,7 @@ public:
         return mSampleCount;
     }
     int encode(void *payload, int16_t *samples);
-    int decode(int16_t *samples, void *payload, int length);
+    int decode(int16_t *samples, int count, void *payload, int length);
 private:
     int mSampleCount;
 };
@@ -64,9 +64,12 @@ int UlawCodec::encode(void *payload, int16_t *samples)
     return mSampleCount;
 }
 
-int UlawCodec::decode(int16_t *samples, void *payload, int length)
+int UlawCodec::decode(int16_t *samples, int count, void *payload, int length)
 {
     int8_t *ulaws = (int8_t *)payload;
+    if (length > count) {
+        length = count;
+    }
     for (int i = 0; i < length; ++i) {
         int ulaw = ~ulaws[i];
         int exponent = (ulaw >> 4) & 0x07;
@@ -87,7 +90,7 @@ public:
         return mSampleCount;
     }
     int encode(void *payload, int16_t *samples);
-    int decode(int16_t *samples, void *payload, int length);
+    int decode(int16_t *samples, int count, void *payload, int length);
 private:
     int mSampleCount;
 };
@@ -111,9 +114,12 @@ int AlawCodec::encode(void *payload, int16_t *samples)
     return mSampleCount;
 }
 
-int AlawCodec::decode(int16_t *samples, void *payload, int length)
+int AlawCodec::decode(int16_t *samples, int count, void *payload, int length)
 {
     int8_t *alaws = (int8_t *)payload;
+    if (length > count) {
+        length = count;
+    }
     for (int i = 0; i < length; ++i) {
         int alaw = alaws[i] ^ 0x55;
         int exponent = (alaw >> 4) & 0x07;
