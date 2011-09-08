@@ -4377,6 +4377,12 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "raw_contact_entities");
 
         /**
+         * The content:// style URI for this table, specific to the user's profile.
+         */
+        public static final Uri PROFILE_CONTENT_URI =
+                Uri.withAppendedPath(Profile.CONTENT_URI, "raw_contact_entities");
+
+        /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of raw contact entities.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/raw_contact_entity";
