@@ -5746,7 +5746,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             MetaKeyKeyListener.stopSelecting(this, sp);
         }
     }
-    
+
     /**
      * @hide
      */
@@ -5754,10 +5754,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mInputMethodState != null) {
             mInputMethodState.mExtracting = req;
         }
-        // This stops a possible text selection mode. Maybe not intended.
+        // This would stop a possible selection mode, but no such mode is started in case
+        // extracted mode will start. Some text is selected though, and will trigger an action mode
+        // in the extracted view.
         hideControllers();
     }
-    
+
     /**
      * Called by the framework in response to a text completion from
      * the current input method, provided by it calling
@@ -10015,14 +10017,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
-        mSelectionActionMode = startActionMode(actionModeCallback);
-        final boolean selectionStarted = mSelectionActionMode != null;
+        final InputMethodManager imm = InputMethodManager.peekInstance();
+        boolean extractedTextModeWillBeStartedFullScreen = !(this instanceof ExtractEditText) &&
+                imm != null && imm.isFullscreenMode();
 
-        if (selectionStarted && !mTextIsSelectable) {
+        // Do not start the action mode when extracted text will show up full screen, thus
+        // immediately hiding the newly created action bar, which would be visually distracting.
+        if (!extractedTextModeWillBeStartedFullScreen) {
+            ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
+            mSelectionActionMode = startActionMode(actionModeCallback);
+        }
+        final boolean selectionStarted = mSelectionActionMode != null ||
+                extractedTextModeWillBeStartedFullScreen;
+
+        if (selectionStarted && !mTextIsSelectable && imm != null) {
             // Show the IME to be able to replace text, except when selecting non editable text.
-            final InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) imm.showSoftInput(this, 0, null);
+            imm.showSoftInput(this, 0, null);
         }
 
         return selectionStarted;
