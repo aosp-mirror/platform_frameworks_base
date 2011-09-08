@@ -924,7 +924,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             mStartTime = SystemClock.elapsedRealtime();
             mTimeoutStartTime = mStartTime;
             mSyncWakeLock = mSyncHandler.getSyncWakeLock(
-                    mSyncOperation.account.type, mSyncOperation.authority);
+                    mSyncOperation.account, mSyncOperation.authority);
             mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterUid));
             mSyncWakeLock.acquire();
         }
@@ -1365,7 +1365,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         public final SyncNotificationInfo mSyncNotificationInfo = new SyncNotificationInfo();
         private Long mAlarmScheduleTime = null;
         public final SyncTimeTracker mSyncTimeTracker = new SyncTimeTracker();
-        private final HashMap<Pair<String, String>, PowerManager.WakeLock> mWakeLocks =
+        private final HashMap<Pair<Account, String>, PowerManager.WakeLock> mWakeLocks =
                 Maps.newHashMap();
 
         private volatile CountDownLatch mReadyToRunLatch = new CountDownLatch(1);
@@ -1377,11 +1377,11 @@ public class SyncManager implements OnAccountsUpdateListener {
             }
         }
 
-        private PowerManager.WakeLock getSyncWakeLock(String accountType, String authority) {
-            final Pair<String, String> wakeLockKey = Pair.create(accountType, authority);
+        private PowerManager.WakeLock getSyncWakeLock(Account account, String authority) {
+            final Pair<Account, String> wakeLockKey = Pair.create(account, authority);
             PowerManager.WakeLock wakeLock = mWakeLocks.get(wakeLockKey);
             if (wakeLock == null) {
-                final String name = SYNC_WAKE_LOCK_PREFIX + "_" + authority + "_" + accountType;
+                final String name = SYNC_WAKE_LOCK_PREFIX + "_" + authority + "_" + account;
                 wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, name);
                 wakeLock.setReferenceCounted(false);
                 mWakeLocks.put(wakeLockKey, wakeLock);
