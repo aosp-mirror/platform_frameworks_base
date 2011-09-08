@@ -301,6 +301,7 @@ public class TabletStatusBar extends StatusBar implements
         mRecentsPanel = (RecentsPanelView) View.inflate(context,
                 R.layout.status_bar_recent_panel, null);
         mRecentsPanel.setVisibility(View.GONE);
+        mRecentsPanel.setSystemUiVisibility(View.STATUS_BAR_DISABLE_BACK);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                 mRecentsPanel));
         mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
@@ -705,7 +706,6 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
                     if (mRecentsPanel != null) {
-                        disable(StatusBarManager.DISABLE_BACK);
                         mRecentsPanel.setVisibility(View.VISIBLE);
                         mRecentsPanel.show(true, true);
                     }
@@ -713,7 +713,6 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_CLOSE_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing recents panel");
                     if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                        disable(StatusBarManager.DISABLE_NONE);
                         mRecentsPanel.show(false, true);
                     }
                     break;
