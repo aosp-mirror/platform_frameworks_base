@@ -20,7 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.TimeAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -37,12 +37,12 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 
-import java.util.HashSet;
+import java.util.HashMap;
 
 public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Callback {
     private static final String TAG = "NotificationRowLayout";
     private static final boolean DEBUG = false;
-    private static final boolean SLOW_ANIMATIONS = false; // DEBUG;
+    private static final boolean SLOW_ANIMATIONS = DEBUG;
 
     private static final boolean ANIMATE_LAYOUT = true;
 
@@ -54,8 +54,8 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
     int mRowHeight = 0;
     int mHeight = 0;
 
-    HashSet<View> mAppearingViews = new HashSet<View>();
-    HashSet<View> mDisappearingViews = new HashSet<View>();
+    HashMap<View, ValueAnimator> mAppearingViews = new HashMap<View, ValueAnimator>();
+    HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
 
@@ -166,8 +166,6 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
         final View childF = child;
 
         if (ANIMATE_LAYOUT) {
-            mAppearingViews.add(child);
-
             child.setPivotY(0);
             final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f, 1f);
             alphaFade.setDuration(APPEAR_ANIM_LEN);
@@ -178,7 +176,11 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
                     requestLayout(); // pick up any final changes in position
                 }
             });
+
             alphaFade.start();
+
+            mAppearingViews.put(child, alphaFade);
+
             requestLayout(); // start the container animation
         }
     }
@@ -187,27 +189,27 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
     public void removeView(View child) {
         final View childF = child;
         if (ANIMATE_LAYOUT) {
-            if (mAppearingViews.contains(child)) {
+            if (mAppearingViews.containsKey(child)) {
                 mAppearingViews.remove(child);
             }
-            mDisappearingViews.add(child);
-
             child.setPivotY(0);
 
             final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f);
+            alphaFade.setDuration(DISAPPEAR_ANIM_LEN);
             alphaFade.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     if (DEBUG) Slog.d(TAG, "actually removing child: " + childF);
                     NotificationRowLayout.super.removeView(childF);
-                    childF.setAlpha(1f);
                     mDisappearingViews.remove(childF);
                     requestLayout(); // pick up any final changes in position
                 }
             });
 
-            alphaFade.setDuration(DISAPPEAR_ANIM_LEN);
             alphaFade.start();
+
+            mDisappearingViews.put(child, alphaFade);
+
             requestLayout(); // start the container animation
         } else {
             super.removeView(child);
@@ -246,7 +248,7 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            if (mDisappearingViews.contains(child)) {
+            if (mDisappearingViews.containsKey(child)) {
                 continue;
             }
             numRows++;
@@ -304,14 +306,19 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            float alpha = child.getAlpha();
-            if (alpha > 1.0f) {
-                if (DEBUG) {
-                    Slog.w(TAG, "alpha=" + alpha + " > 1!!! " + child);
-                }
-                alpha = 1f;
+            float progress = 1.0f;
+            if (mDisappearingViews.containsKey(child)) {
+                progress = 1.0f - mDisappearingViews.get(child).getAnimatedFraction();
+            } else if (mAppearingViews.containsKey(child)) {
+                progress = 1.0f - mAppearingViews.get(child).getAnimatedFraction();
             }
-            final int thisRowHeight = (int)(alpha * mRowHeight);
+            if (progress > 1.0f) {
+                if (DEBUG) {
+                    Slog.w(TAG, "progress=" + progress + " > 1!!! " + child);
+                }
+                progress = 1f;
+            }
+            final int thisRowHeight = (int)(progress * mRowHeight);
             if (DEBUG) {
                 Slog.d(TAG, String.format(
                             "laying out child #%d: (0, %d, %d, %d) h=%d",
