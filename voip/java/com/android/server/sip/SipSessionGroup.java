@@ -100,7 +100,7 @@ class SipSessionGroup implements SipListener {
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
     private static final int END_CALL_TIMER = 3; // in seconds
-    private static final int KEEPALIVE_TIMEOUT = 3; // in seconds
+    private static final int KEEPALIVE_TIMEOUT = 5; // in seconds
     private static final int INCALL_KEEPALIVE_INTERVAL = 10; // in seconds
     private static final long WAKE_LOCK_HOLDING_TIME = 500; // in milliseconds
 
@@ -1555,7 +1555,7 @@ class SipSessionGroup implements SipListener {
                     try {
                         sendKeepAlive();
                     } catch (Throwable t) {
-                        Log.w(TAG, "keepalive error: " + ": "
+                        Log.w(TAG, "keepalive error: "
                                 + mLocalProfile.getUriString(), getRootCause(t));
                         // It's possible that the keepalive process is being stopped
                         // during session.sendKeepAlive() so need to check mRunning
