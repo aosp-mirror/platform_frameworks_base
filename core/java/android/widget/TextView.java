@@ -4050,16 +4050,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int wid = tv.getPaddingLeft() + tv.getPaddingRight();
         int ht = tv.getPaddingTop() + tv.getPaddingBottom();
 
-        /*
-         * Figure out how big the text would be if we laid it out to the
-         * full width of this view minus the border.
-         */
-        int cap = getWidth() - wid;
-        if (cap < 0) {
-            cap = 200; // We must not be measured yet -- setFrame() will fix it.
-        }
-
-        Layout l = new StaticLayout(text, tv.getPaint(), cap,
+        int defaultWidthInPixels = (int) (DEFAULT_ERROR_POPUP_MAX_WIDTH_IN_DP *
+                getResources().getDisplayMetrics().density);
+        Layout l = new StaticLayout(text, tv.getPaint(), defaultWidthInPixels,
                                     Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
         float max = 0;
         for (int i = 0; i < l.getLineCount(); i++) {
@@ -4067,7 +4060,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         /*
-         * Now set the popup size to be big enough for the text plus the border.
+         * Now set the popup size to be big enough for the text plus the border capped
+         * to DEFAULT_MAX_POPUP_WIDTH
          */
         pop.setWidth(wid + (int) Math.ceil(max));
         pop.setHeight(ht + l.getHeight());
@@ -11423,4 +11417,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CorrectionHighlighter mCorrectionHighlighter;
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
+
+    private static final int DEFAULT_ERROR_POPUP_MAX_WIDTH_IN_DP = 240;
 }
