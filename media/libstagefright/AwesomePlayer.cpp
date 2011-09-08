@@ -1736,7 +1736,9 @@ void AwesomePlayer::onVideoEvent() {
         modifyFlags(TEXT_RUNNING, SET);
     }
 
-    TimeSource *ts = (mFlags & AUDIO_AT_EOS) ? &mSystemTimeSource : mTimeSource;
+    TimeSource *ts =
+        ((mFlags & AUDIO_AT_EOS) || !(mFlags & AUDIOPLAYER_STARTED))
+            ? &mSystemTimeSource : mTimeSource;
 
     if (mFlags & FIRST_FRAME) {
         modifyFlags(FIRST_FRAME, CLEAR);
