@@ -16688,6 +16688,7 @@ package android.provider {
     field public static final java.lang.String ACCOUNT_NAME = "account_name";
     field public static final java.lang.String ACCOUNT_TYPE = "account_type";
     field public static final java.lang.String ANY_UNSYNCED = "any_unsynced";
+    field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String SHOULD_SYNC = "should_sync";
     field public static final java.lang.String UNGROUPED_COUNT = "summ_count";
     field public static final java.lang.String UNGROUPED_VISIBLE = "ungrouped_visible";
