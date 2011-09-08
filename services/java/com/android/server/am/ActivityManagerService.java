@@ -106,6 +106,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.EventLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -5016,7 +5017,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                             maxNum < N ? maxNum : N);
             for (int i=0; i<N && maxNum > 0; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
-                if (((flags&ActivityManager.RECENT_WITH_EXCLUDED) != 0)
+                // Return the entry if desired by the caller.  We always return
+                // the first entry, because callers always expect this to be the
+                // forground app.  We may filter others if the caller has
+                // not supplied RECENT_WITH_EXCLUDED and there is some reason
+                // we should exclude the entry.
+                if (i == 0
+                        || ((flags&ActivityManager.RECENT_WITH_EXCLUDED) != 0)
                         || (tr.intent == null)
                         || ((tr.intent.getFlags()
                                 &Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0)) {
@@ -7558,7 +7565,33 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         return errList;
     }
-    
+
+    static int oomAdjToImportance(int adj, ActivityManager.RunningAppProcessInfo currApp) {
+        if (adj >= ProcessList.EMPTY_APP_ADJ) {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;
+        } else if (adj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
+            if (currApp != null) {
+                currApp.lru = adj - ProcessList.HIDDEN_APP_MIN_ADJ + 1;
+            }
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+        } else if (adj >= ProcessList.HOME_APP_ADJ) {
+            if (currApp != null) {
+                currApp.lru = 0;
+            }
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+        } else if (adj >= ProcessList.SECONDARY_SERVER_ADJ) {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
+        } else if (adj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
+        } else if (adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
+        } else if (adj >= ProcessList.VISIBLE_APP_ADJ) {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+        } else {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+        }
+    }
+
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() {
         // Lazy instantiation of list
         List<ActivityManager.RunningAppProcessInfo> runList = null;
@@ -7579,28 +7612,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_PERSISTENT;
                     }
                     int adj = app.curAdj;
-                    if (adj >= ProcessList.EMPTY_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;
-                    } else if (adj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-                        currApp.lru = adj - ProcessList.HIDDEN_APP_MIN_ADJ + 1;
-                    } else if (adj >= ProcessList.HOME_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-                        currApp.lru = 0;
-                    } else if (adj >= ProcessList.SECONDARY_SERVER_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
-                    } else if (adj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
-                    } else if (adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
-                    } else if (adj >= ProcessList.VISIBLE_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
-                    } else {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-                    }
+                    currApp.importance = oomAdjToImportance(adj, currApp);
                     currApp.importanceReasonCode = app.adjTypeCode;
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
+                        currApp.importanceReasonImportance = oomAdjToImportance(
+                                app.adjSourceOom, null);
                     } else if (app.adjSource instanceof ActivityRecord) {
                         ActivityRecord r = (ActivityRecord)app.adjSource;
                         if (r.app != null) currApp.importanceReasonPid = r.app.pid;
@@ -7903,7 +7920,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mLruProcesses.size() > 0) {
             if (needSep) pw.println(" ");
             needSep = true;
-            pw.println("  Process LRU list (most recent first):");
+            pw.println("  Process LRU list (sorted by oom_adj):");
             dumpProcessOomList(pw, this, mLruProcesses, "    ",
                     "Proc", "PERS", false);
             needSep = true;
@@ -8081,29 +8098,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean needSep = false;
 
         if (mLruProcesses.size() > 0) {
-            ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>(mLruProcesses);
-
-            Comparator<ProcessRecord> comparator = new Comparator<ProcessRecord>() {
-                @Override
-                public int compare(ProcessRecord object1, ProcessRecord object2) {
-                    if (object1.setAdj != object2.setAdj) {
-                        return object1.setAdj > object2.setAdj ? -1 : 1;
-                    }
-                    if (object1.setSchedGroup != object2.setSchedGroup) {
-                        return object1.setSchedGroup > object2.setSchedGroup ? -1 : 1;
-                    }
-                    if (object1.keeping != object2.keeping) {
-                        return object1.keeping ? -1 : 1;
-                    }
-                    if (object1.pid != object2.pid) {
-                        return object1.pid > object2.pid ? -1 : 1;
-                    }
-                    return 0;
-                }
-            };
-
-            Collections.sort(procs, comparator);
-
             if (needSep) pw.println(" ");
             needSep = true;
             pw.println("  OOM levels:");
@@ -8122,7 +8116,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (needSep) pw.println(" ");
             needSep = true;
             pw.println("  Process OOM control:");
-            dumpProcessOomList(pw, this, procs, "    ",
+            dumpProcessOomList(pw, this, mLruProcesses, "    ",
                     "Proc", "PERS", true);
             needSep = true;
         }
@@ -8871,9 +8865,32 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private static final void dumpProcessOomList(PrintWriter pw,
-            ActivityManagerService service, List<ProcessRecord> list,
+            ActivityManagerService service, List<ProcessRecord> origList,
             String prefix, String normalLabel, String persistentLabel,
             boolean inclDetails) {
+
+        ArrayList<Pair<ProcessRecord, Integer>> list
+                = new ArrayList<Pair<ProcessRecord, Integer>>(origList.size());
+        for (int i=0; i<origList.size(); i++) {
+            list.add(new Pair<ProcessRecord, Integer>(origList.get(i), i));
+        }
+
+        Comparator<Pair<ProcessRecord, Integer>> comparator
+                = new Comparator<Pair<ProcessRecord, Integer>>() {
+            @Override
+            public int compare(Pair<ProcessRecord, Integer> object1,
+                    Pair<ProcessRecord, Integer> object2) {
+                if (object1.first.setAdj != object2.first.setAdj) {
+                    return object1.first.setAdj > object2.first.setAdj ? -1 : 1;
+                }
+                if (object1.second.intValue() != object2.second.intValue()) {
+                    return object1.second.intValue() > object2.second.intValue() ? -1 : 1;
+                }
+                return 0;
+            }
+        };
+
+        Collections.sort(list, comparator);
 
         final long curRealtime = SystemClock.elapsedRealtime();
         final long realtimeSince = curRealtime - service.mLastPowerCheckRealtime;
@@ -8882,7 +8899,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final int N = list.size()-1;
         for (int i=N; i>=0; i--) {
-            ProcessRecord r = list.get(i);
+            ProcessRecord r = list.get(i).first;
             String oomAdj;
             if (r.setAdj >= ProcessList.EMPTY_APP_ADJ) {
                 oomAdj = buildOomTag("empty", null, r.setAdj, ProcessList.EMPTY_APP_ADJ);
@@ -8931,7 +8948,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             pw.println(String.format("%s%s #%2d: adj=%s/%s%s trm=%2d %s (%s)",
                     prefix, (r.persistent ? persistentLabel : normalLabel),
-                    N-i, oomAdj, schedGroup, foreground, r.trimMemoryLevel,
+                    N-list.get(i).second, oomAdj, schedGroup, foreground, r.trimMemoryLevel,
                     r.toShortString(), r.adjType));
             if (r.adjSource != null || r.adjTarget != null) {
                 pw.print(prefix);
@@ -13133,6 +13150,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                             .REASON_SERVICE_IN_USE;
                                     app.adjSource = cr.binding.client;
+                                    app.adjSourceOom = clientAdj;
                                     app.adjTarget = s.name;
                                 }
                                 if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
@@ -13155,6 +13173,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                             .REASON_SERVICE_IN_USE;
                                     app.adjSource = a;
+                                    app.adjSourceOom = adj;
                                     app.adjTarget = s.name;
                                 }
                             }
@@ -13216,6 +13235,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_PROVIDER_IN_USE;
                             app.adjSource = client;
+                            app.adjSourceOom = clientAdj;
                             app.adjTarget = cpr.name;
                         }
                         if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
@@ -13526,16 +13546,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         computeOomAdjLocked(app, hiddenAdj, TOP_APP, false);
 
         if (app.curRawAdj != app.setRawAdj) {
-            if (app.curRawAdj > ProcessList.FOREGROUND_APP_ADJ
-                    && app.setRawAdj <= ProcessList.FOREGROUND_APP_ADJ) {
-                // If this app is transitioning from foreground to
-                // non-foreground, have it do a gc.
-                scheduleAppGcLocked(app);
-            } else if (app.curRawAdj >= ProcessList.HIDDEN_APP_MIN_ADJ
-                    && app.setRawAdj < ProcessList.HIDDEN_APP_MIN_ADJ) {
-                // Likewise do a gc when an app is moving in to the
-                // background (such as a service stopping).
-                scheduleAppGcLocked(app);
+            if (false) {
+                // Removing for now.  Forcing GCs is not so useful anymore
+                // with Dalvik, and the new memory level hint facility is
+                // better for what we need to do these days.
+                if (app.curRawAdj > ProcessList.FOREGROUND_APP_ADJ
+                        && app.setRawAdj <= ProcessList.FOREGROUND_APP_ADJ) {
+                    // If this app is transitioning from foreground to
+                    // non-foreground, have it do a gc.
+                    scheduleAppGcLocked(app);
+                } else if (app.curRawAdj >= ProcessList.HIDDEN_APP_MIN_ADJ
+                        && app.setRawAdj < ProcessList.HIDDEN_APP_MIN_ADJ) {
+                    // Likewise do a gc when an app is moving in to the
+                    // background (such as a service stopping).
+                    scheduleAppGcLocked(app);
+                }
             }
 
             if (wasKeeping && !app.keeping) {

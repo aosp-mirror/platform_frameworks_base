@@ -99,6 +99,7 @@ class ProcessRecord {
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
+    int adjSourceOom;           // Debugging: oom_adj of adjSource's process.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     
     // contains HistoryRecord objects

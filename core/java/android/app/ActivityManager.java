@@ -1254,6 +1254,12 @@ public class ActivityManager {
          */
         public ComponentName importanceReasonComponent;
         
+        /**
+         * When {@link importanceReasonPid} is non-0, this is the importance
+         * of the other pid. @hide
+         */
+        public int importanceReasonImportance;
+
         public RunningAppProcessInfo() {
             importance = IMPORTANCE_FOREGROUND;
             importanceReasonCode = REASON_UNKNOWN;
@@ -1280,6 +1286,7 @@ public class ActivityManager {
             dest.writeInt(importanceReasonCode);
             dest.writeInt(importanceReasonPid);
             ComponentName.writeToParcel(importanceReasonComponent, dest);
+            dest.writeInt(importanceReasonImportance);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1293,6 +1300,7 @@ public class ActivityManager {
             importanceReasonCode = source.readInt();
             importanceReasonPid = source.readInt();
             importanceReasonComponent = ComponentName.readFromParcel(source);
+            importanceReasonImportance = source.readInt();
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR = 
