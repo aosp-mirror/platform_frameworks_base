@@ -637,6 +637,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * configuration change happens.
      */
     public void onInitializeInterface() {
+        // Intentionally empty
     }
 
     void initialize() {
@@ -876,8 +877,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         
         if (changed) {
-            onConfigureWindow(mWindow.getWindow(), isFullscreen,
-                    !mShowInputRequested);
+            onConfigureWindow(mWindow.getWindow(), isFullscreen, !mShowInputRequested);
             mLastShowInputRequested = mShowInputRequested;
         }
     }
@@ -935,7 +935,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         return true;
     }
-    
+
     /**
      * Controls the visibility of the extracted text area.  This only applies
      * when the input method is in fullscreen mode, and thus showing extracted
@@ -1242,6 +1242,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * same text field as before.
      */
     public void onStartInputView(EditorInfo info, boolean restarting) {
+        // Intentionally empty
     }
     
     /**
@@ -1286,6 +1287,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * same text field as before.
      */
     public void onStartCandidatesView(EditorInfo info, boolean restarting) {
+        // Intentionally empty
     }
     
     /**
@@ -1455,6 +1457,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * for the window has occurred (creating its views etc).
      */
     public void onWindowShown() {
+        // Intentionally empty
     }
     
     /**
@@ -1462,6 +1465,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * after previously being visible.
      */
     public void onWindowHidden() {
+        // Intentionally empty
     }
     
     /**
@@ -1472,6 +1476,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * and {@link #getCurrentInputConnection} return valid objects.
      */
     public void onBindInput() {
+        // Intentionally empty
     }
     
     /**
@@ -1481,6 +1486,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * valid objects.
      */
     public void onUnbindInput() {
+        // Intentionally empty
     }
     
     /**
@@ -1496,6 +1502,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * session with the editor.
      */
     public void onStartInput(EditorInfo attribute, boolean restarting) {
+        // Intentionally empty
     }
     
     void doFinishInput() {
@@ -1570,6 +1577,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * <p>The default implementation here does nothing.
      */
     public void onDisplayCompletions(CompletionInfo[] completions) {
+        // Intentionally empty
     }
     
     /**
@@ -1626,6 +1634,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param focusChanged true if the user changed the focused view by this click.
      */
     public void onViewClicked(boolean focusChanged) {
+        // Intentionally empty
     }
 
     /**
@@ -1634,6 +1643,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * The default implementation does nothing.
      */
     public void onUpdateCursor(Rect newCursor) {
+        // Intentionally empty
     }
 
     /**
@@ -1664,6 +1674,13 @@ public class InputMethodService extends AbstractInputMethodService {
     
     private boolean handleBack(boolean doIt) {
         if (mShowInputRequested) {
+            if (isExtractViewShown() && mExtractView instanceof ExtractEditLayout) {
+                ExtractEditLayout extractEditLayout = (ExtractEditLayout) mExtractView;
+                if (extractEditLayout.isActionModeStarted()) {
+                    if (doIt) extractEditLayout.finishActionMode();
+                    return true;
+                }
+            }
             // If the soft input area is shown, back closes it and we
             // consume the back key.
             if (doIt) requestHideSelf(0);
