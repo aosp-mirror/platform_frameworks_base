@@ -203,6 +203,7 @@ public class TouchExplorer implements Explorer {
                     }
                     case 1: {
                         mSendHoverDelayed.remove();
+                        mPerformLongPressDelayed.remove();
                         // Send a hover for every finger down so the user gets feedback.
                         final int pointerId = pointerTracker.getPrimaryActivePointerId();
                         final int pointerIdBits = (1 << pointerId);
