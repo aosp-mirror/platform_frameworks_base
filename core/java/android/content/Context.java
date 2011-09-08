@@ -239,6 +239,9 @@ public abstract class Context {
      * methods of activities and other components are called.  Note that you
      * <em>must</em> be sure to use {@link #unregisterComponentCallbacks} when
      * appropriate in the future; this will not be removed for you.
+     *
+     * @param callback The interface to call.  This can be either a
+     * {@link ComponentCallbacks} or {@link ComponentCallbacks2} interface.
      */
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         getApplicationContext().registerComponentCallbacks(callback);

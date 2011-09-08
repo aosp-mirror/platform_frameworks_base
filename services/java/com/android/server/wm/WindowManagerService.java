@@ -5824,27 +5824,6 @@ public class WindowManagerService extends IWindowManager.Stub
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
         config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
 
-        // We need to determine the smallest width that will occur under normal
-        // operation.  To this, start with the base screen size and compute the
-        // width under the different possible rotations.  We need to un-rotate
-        // the current screen dimensions before doing this.
-        int unrotDw, unrotDh;
-        if (rotated) {
-            unrotDw = dh;
-            unrotDh = dw;
-        } else {
-            unrotDw = dw;
-            unrotDh = dh;
-        }
-        config.smallestScreenWidthDp = reduceConfigWidthSize(unrotDw,
-                Surface.ROTATION_0, dm.density, unrotDw);
-        config.smallestScreenWidthDp = reduceConfigWidthSize(config.smallestScreenWidthDp,
-                Surface.ROTATION_90, dm.density, unrotDh);
-        config.smallestScreenWidthDp = reduceConfigWidthSize(config.smallestScreenWidthDp,
-                Surface.ROTATION_180, dm.density, unrotDw);
-        config.smallestScreenWidthDp = reduceConfigWidthSize(config.smallestScreenWidthDp,
-                Surface.ROTATION_270, dm.density, unrotDh);
-
         // Compute the screen layout size class.
         int screenLayout;
         int longSize = dw;

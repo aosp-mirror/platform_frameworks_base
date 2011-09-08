@@ -58,9 +58,20 @@ public class ResolverActivity extends AlertActivity implements
     private TextView mClearDefaultHint;
     private PackageManager mPm;
 
+    private Intent makeMyIntent() {
+        Intent intent = new Intent(getIntent());
+        // The resolver activity is set to be hidden from recent tasks.
+        // we don't want this attribute to be propagated to the next activity
+        // being launched.  Note that if the original Intent also had this
+        // flag set, we are now losing it.  That should be a very rare case
+        // and we can live with this.
+        intent.setFlags(intent.getFlags()&~Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        onCreate(savedInstanceState, new Intent(getIntent()),
+        onCreate(savedInstanceState, makeMyIntent(),
                 getResources().getText(com.android.internal.R.string.whichApplication),
                 null, null, true);
     }

@@ -1499,19 +1499,23 @@
                 android:theme="@style/Theme.Holo.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
-                android:excludeFromRecents="true">
+                android:excludeFromRecents="true"
+                android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen">
+                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+                android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.DisableCarModeActivity"
                 android:theme="@style/Theme.NoDisplay"
-                android:excludeFromRecents="true">
+                android:excludeFromRecents="true"
+                android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.RingtonePickerActivity"
                 android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true"
-                android:multiprocess="true">
+                android:multiprocess="true"
+                android:process=":ui">
             <intent-filter>
                 <action android:name="android.intent.action.RINGTONE_PICKER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -1522,18 +1526,21 @@
                 android:excludeFromRecents="true"
                 android:exported="true"
                 android:theme="@android:style/Theme.Holo.Dialog"
-                android:label="@string/choose_account_label">
+                android:label="@string/choose_account_label"
+                android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.DialogWhenLarge">
+                android:theme="@android:style/Theme.Holo.DialogWhenLarge"
+                android:process=":ui">
         </activity>
 
         <activity android:name="android.content.SyncActivityTooManyDeletes"
                android:theme="@android:style/Theme.Holo.Dialog"
-               android:label="@string/sync_too_many_deletes">
+               android:label="@string/sync_too_many_deletes"
+               android:process=":ui">
         </activity>
 
         <activity android:name="com.android.server.ShutdownActivity"
@@ -1551,7 +1558,8 @@
 
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
                 android:theme="@style/Theme.Holo.Dialog.Alert"
-                android:excludeFromRecents="true">
+                android:excludeFromRecents="true"
+                android:process=":ui">
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver" >
