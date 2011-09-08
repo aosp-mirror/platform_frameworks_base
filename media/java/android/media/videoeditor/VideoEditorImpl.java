@@ -1825,27 +1825,10 @@ public class VideoEditorImpl implements VideoEditor {
         if (mMediaItems.size() > 0) {
             MediaItem mI = mMediaItems.get(0);
             /*
-             * Lets initialize the width for default aspect ratio i.e 16:9
+             * Keep aspect ratio of the image
              */
             int height = 480;
-            int width = 854;
-            switch (mI.getAspectRatio()) {
-                case MediaProperties.ASPECT_RATIO_3_2:
-                    width = 720;
-                    break;
-                case MediaProperties.ASPECT_RATIO_4_3:
-                    width = 640;
-                    break;
-                case MediaProperties.ASPECT_RATIO_5_3:
-                    width = 800;
-                    break;
-                case MediaProperties.ASPECT_RATIO_11_9:
-                    width = 586;
-                    break;
-                case MediaProperties.ASPECT_RATIO_16_9:
-                case MediaProperties.ASPECT_RATIO_UNDEFINED:
-                    break;
-            }
+            int width = mI.getWidth() * height / mI.getHeight();
 
             Bitmap projectBitmap = null;
             String filename = mI.getFilename();

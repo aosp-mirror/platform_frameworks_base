@@ -606,7 +606,7 @@ public class MediaImageItem extends MediaItem {
     public Bitmap getThumbnail(int width, int height, long timeMs) throws IOException {
         if (getGeneratedImageClip() != null) {
             return mMANativeHelper.getPixels(getGeneratedImageClip(),
-                width, height,timeMs);
+                width, height, timeMs, 0);
         } else {
             return scaleImage(mFilename, width, height);
         }
