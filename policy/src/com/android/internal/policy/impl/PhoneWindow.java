@@ -384,7 +384,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 st.menu.stopDispatchingItemsChanged();
                 if ((cb == null) || !cb.onCreatePanelMenu(st.featureId, st.menu)) {
                     // Ditch the menu created above
-                    st.menu = null;
+                    st.setMenu(null);
 
                     if (mActionBar != null) {
                         // Don't show it in the action bar either
@@ -3207,7 +3207,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         void setMenu(MenuBuilder menu) {
+            if (menu == this.menu) return;
+
+            if (this.menu != null) {
+                this.menu.removeMenuPresenter(iconMenuPresenter);
+                this.menu.removeMenuPresenter(listMenuPresenter);
+            }
             this.menu = menu;
+            if (menu != null) {
+                if (iconMenuPresenter != null) menu.addMenuPresenter(iconMenuPresenter);
+                if (listMenuPresenter != null) menu.addMenuPresenter(listMenuPresenter);
+            }
         }
 
         MenuView getListMenuView(MenuPresenter.Callback cb) {
