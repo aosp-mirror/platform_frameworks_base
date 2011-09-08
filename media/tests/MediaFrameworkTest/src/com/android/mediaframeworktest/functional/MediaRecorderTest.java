@@ -247,7 +247,9 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             mCamera.unlock();
             mRecorder.setCamera(mCamera);
             Thread.sleep(1000);
-            recordVideo(15, 352, 288, MediaRecorder.VideoEncoder.H263,
+            int codec = MediaRecorder.VideoEncoder.H263;
+            int frameRate = MediaProfileReader.getMaxFrameRateForCodec(codec);
+            recordVideo(frameRate, 352, 288, codec,
                     MediaRecorder.OutputFormat.THREE_GPP, 
                     MediaNames.RECORDED_PORTRAIT_H263, true);
             mCamera.lock();

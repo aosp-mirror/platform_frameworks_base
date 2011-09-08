@@ -95,6 +95,25 @@ public class MediaProfileReader
         return audioEncoderMap.get(audioEncoder);
     }
 
+    public static int getMinFrameRateForCodec(int codec) {
+        return getMinOrMaxFrameRateForCodec(codec, false);
+    }
+
+    public static int getMaxFrameRateForCodec(int codec) {
+        return getMinOrMaxFrameRateForCodec(codec, true);
+    }
+
+    private static int getMinOrMaxFrameRateForCodec(int codec, boolean max) {
+        for (VideoEncoderCap cap: videoEncoders) {
+            if (cap.mCodec == codec) {
+                if (max) return cap.mMaxFrameRate;
+                else return cap.mMinFrameRate;
+            }
+        }
+        // Should never reach here
+        throw new IllegalArgumentException("Unsupported video codec " + codec);
+    }
+
     private MediaProfileReader() {} // Don't call me
 
     private static void initVideoEncoderMap() {
