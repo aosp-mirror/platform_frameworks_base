@@ -44,7 +44,7 @@ public:
     }
 
     int encode(void *payload, int16_t *samples);
-    int decode(int16_t *samples, void *payload, int length);
+    int decode(int16_t *samples, int count, void *payload, int length);
 
 private:
     gsm mEncode;
@@ -57,13 +57,17 @@ int GsmCodec::encode(void *payload, int16_t *samples)
     return 33;
 }
 
-int GsmCodec::decode(int16_t *samples, void *payload, int length)
+int GsmCodec::decode(int16_t *samples, int count, void *payload, int length)
 {
-    if (length == 33 &&
-        gsm_decode(mDecode, (unsigned char *)payload, samples) == 0) {
-        return 160;
+    unsigned char *bytes = (unsigned char *)payload;
+    int n = 0;
+    while (n + 160 <= count && length >= 33 &&
+        gsm_decode(mDecode, bytes, &samples[n]) == 0) {
+        n += 160;
+        length -= 33;
+        bytes += 33;
     }
-    return -1;
+    return n;
 }
 
 } // namespace
