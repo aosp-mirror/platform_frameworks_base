@@ -406,6 +406,9 @@
       <span class="en">Android Market Topics</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>guide/publishing/publishing.html">
+          <span class="en">Publishing on Android Market</span>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
           <span class="en">Application Licensing</span></a>
       </li>
@@ -649,28 +652,11 @@
         <span class="zh-TW" style="display:none">發佈</span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/publishing/app-signing.html">
-            <span class="en">Signing Your Applications</span>
-            <span class="de" style="display:none">Signieren Ihrer Anwendungen</span>
-            <span class="es" style="display:none">Firma de aplicaciones</span>
-            <span class="fr" style="display:none">Attribution de votre signature <br />à vos applications</span>
-            <span class="it" style="display:none">Firma delle applicazioni</span>
-            <span class="ja" style="display:none">アプリケーションへの署名</span>
-            <span class="zh-CN" style="display:none">应用程序签名</span>
-            <span class="zh-TW" style="display:none">簽署應用程式</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/publishing/versioning.html">
-            <span class="en">Versioning Your Applications</span>
-            <span class="de" style="display:none">Versionsverwaltung für Ihre <br />Anwendungen</span>
-            <span class="es" style="display:none">Versiones de las aplicaciones</span>
-            <span class="fr" style="display:none">Attribution d'une version à vos applications</span>
-            <span class="it" style="display:none">Controllo versioni delle applicazioni</span>
-            <span class="ja" style="display:none">アプリケーションのバージョニング</span>
-            <span class="zh-CN" style="display:none">应用程序版本控制</span>
-            <span class="zh-TW" style="display:none">應用程式版本設定</span>
-          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/publishing/publishing_overview.html">
+            <span class="en">Publishing Overview</span>
+          </a><span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/preparing.html">
-            <span class="en">Preparing to Publish</span>
+            <span class="en">Preparing for Release</span>
             <span class="de" style="display:none">Vorbereitung auf die Veröffentlichung</span>
             <span class="es" style="display:none">Publicación de aplicaciones</span>
             <span class="fr" style="display:none">Préparation à la publication</span>
@@ -678,9 +664,29 @@
             <span class="ja" style="display:none">公開の準備</span>
             <span class="zh-CN" style="display:none">准备发布</span>
             <span class="zh-TW" style="display:none">準備發佈</span>
+          </a><span class="new">updated</span></li>
+      <li><a href="<?cs var:toroot ?>guide/publishing/app-signing.html">
+            <span class="en">Signing Your Applications</span>
+            <span class="de" style="display:none">Signieren Ihrer Anwendungen</span>
+            <span class="es" style="display:none">Firma de aplicaciones</span>
+            <span class="fr" style="display:none">Attribution de votre signature <br />à vos
+applications</span>
+            <span class="it" style="display:none">Firma delle applicazioni</span>
+            <span class="ja" style="display:none">アプリケーションへの署名</span>
+            <span class="zh-CN" style="display:none">应用程序签名</span>
+            <span class="zh-TW" style="display:none">簽署應用程式</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/publishing/publishing.html">
-            <span class="en">Publishing on Android Market</span>
+      <li><a href="<?cs var:toroot ?>guide/publishing/versioning.html">
+            <span class="en">Versioning Your Applications</span>
+            <span class="de" style="display:none">Versionsverwaltung für Ihre <br
+/>Anwendungen</span>
+            <span class="es" style="display:none">Versiones de las aplicaciones</span>
+            <span class="fr" style="display:none">Attribution d'une version à vos
+applications</span>
+            <span class="it" style="display:none">Controllo versioni delle applicazioni</span>
+            <span class="ja" style="display:none">アプリケーションのバージョニング</span>
+            <span class="zh-CN" style="display:none">应用程序版本控制</span>
+            <span class="zh-TW" style="display:none">應用程式版本設定</span>
           </a></li>
     </ul>
   </li>

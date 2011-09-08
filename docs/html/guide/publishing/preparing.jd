@@ -1,253 +1,355 @@
-page.title=Preparing to Publish: A Checklist
+page.title=Preparing for Release
 @jd:body
 
-<p>Publishing an application means testing it, packaging it appropriately, and 
-making it available to users of Android-powered mobile devices.</p>
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Quickview</h2>
+    <ul>
+      <li>Learn which resources you'll need to release your app.</li>
+      <li>Find out how to configure and build your app for release.</li>
+      <li>Learn best practices for releasing your app.</li>
+    </ul>
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#publishing-intro">Introduction</a></li>
+      <li><a href="#publishing-gather">Gathering Materials and Resources</a></li>
+      <li><a href="#publishing-configure">Configuring Your Application</a></li>
+      <li><a href="#publishing-build">Building Your Application</a></li>
+      <li><a href="#publishing-resources">Preparing External Servers and Resources</a></li>
+      <li><a href="#publishing-test">Testing Your Application for Release</a></li>
+    </ol>
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a></li>
+      <li><a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a></li>
+      <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a></li>
+    </ol>
+  </div>
+</div>
 
-<p>If you plan to publish your application for installation on
-Android-powered devices, there are several things you need to do, to get
-your application ready. This document highlights the significant
-checkpoints for preparing your application for a successful release.
+<p>Before you distribute your Android application to users you need to prepare it for release. The
+preparation process is a required <a href="{@docRoot}guide/developing/index.html">development
+task</a> for all Android applications and is the first step in the publishing process (see figure
+1).</p>
+
+<p>When you prepare your application for release, you configure, build, and test a release
+version of your application. The configuration tasks are straightforward, involving basic code
+cleanup and code modification tasks that help optimize your application. The build process is
+similar to the debug build process and can be done using JDK and Android SDK tools. The testing
+tasks serve as a final check, ensuring that your application performs as expected under real-world
+conditions. When you are finished preparing your application for release you have a signed
+<code>.apk</code> file, which you can distribute directly to users or distribute through an
+application marketplace such as Android Market.</p>
+
+<p>This document summarizes the main tasks you need to perform to prepare your application for
+release. The tasks that are described in this document apply to all Android applications regardless
+how they are released or distributed to users. If you are releasing your application through Android
+Market, you should also read <a href="{@docRoot}guide/publishing/publishing.html">Publishing on
+Android Market</a> to be sure your release-ready application satisfies all Android Market
+requirements.</p>
+
+<p class="note"><strong>Note:</strong> As a best practice, your application should meet all of your
+release criteria for functionality, performance, and stability before you perform the tasks outlined
+in this document.</p>
+
+<img src="{@docRoot}images/publishing/publishing_overview_prep.png"
+     alt="Shows how the preparation process fits into the development process"
+     height="190"
+     id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Preparing for release is a required <a
+href="{@docRoot}guide/developing/index.html">development
+task</a> and is the first step in the publishing process.
 </p>
 
-<p>If you will publish your application on Android Market, please also see <a
-href="{@docRoot}guide/publishing/publishing.html#market">Publishing on Android Market</a> 
-for specific preparation requirements for your application. </p>
+<h2 id="publishing-intro">Introduction</h2>
 
-<p>For general information about the ways that you can publish an applications, 
-see the <a href="{@docRoot}guide/publishing/publishing.html">Publishing Your 
-Applications</a> document. </p>
+<p>To release your application to users you need to create a release-ready package that users can
+install and run on their Android-powered devices. The release-ready package contains the same
+components as the debug <code>.apk</code> file &mdash; compiled source code, resources, manifest
+file, and so on &mdash; and it is built using the same build tools. However, unlike the debug
+<code>.apk</code> file, the release-ready <code>.apk</code> file is signed with your own certificate
+and it is optimized with the zipalign tool.</p>
 
-<div class="special">
-
-<p><a href="#releaseready">Before you consider your application ready for release</a>:</p>
-
-<ol>
-<li>Test your application extensively on an actual device </li>
-<li>Consider adding an End User License Agreement in your application</li>
-<li>Consider adding licensing support</li>
-<li>Specify an icon and label in the application's manifest</li>
-<li>Turn off logging and debugging and clean up data/files</li>
-</ol>
-
-<p><a href="#finalcompile">Before you do the final compile of your application</a>:</p>
-
-<ol start="6">
-<li>Version your application</li>
-<li>Obtain a suitable cryptographic key</li>
-<li>Register for a Maps API Key, if your application is using MapView elements</li>
-</ol>
-
-<p><a href="#compile">Compile your application</a></p>
-
-<p><a href="#post-compile">After you compile your application</a>:</p>
-<ol start="9">
-<li>Sign your application</li>
-<li>Test your compiled application</li>
-</ol>
+<div class="figure" style="width:331px">
+  <img src="{@docRoot}images/publishing/publishing_preparing.png"
+       alt="Shows the five tasks you perform to prepare your app for release"
+       height="450" />
+  <p class="img-caption">
+    <strong>Figure 2.</strong> You perform five main tasks to prepare your application for
+    release.
+  </p>
 </div>
 
-<h2 id="releaseready">Before you consider your application ready for release</h2>
+<p>The signing and optimization tasks are usually seamless if you are building your application with
+Eclipse and the ADT plugin or with the Ant build script (included with the Android SDK). For
+example, you can use the Eclipse Export Wizard to compile, sign, and optimize your application all
+at once. You can also configure the Ant build script to do the same when you build from the command
+line.</p>
 
-<h3 id="test">1. Test your application extensively on an actual device</h3>
+<p>To prepare your application for release you typically perform five main tasks (see figure 2).
+Each main task may include one or more smaller tasks depending on how you are releasing your
+application. For example, if you are releasing your application through Android Market you may want
+to add special filtering rules to your manifest while you are configuring your application for
+release. Similarly, to meet Android Market publishing guidelines you may have to prepare screenshots
+and create promotional text while you are gathering materials for release.</p>
 
-<p>It's important to test your application as extensively as possible, in as
-many areas as possible. To help you do that, Android provides a variety of
-testing classes and tools. You can use 
-{@link android.app.Instrumentation Instrumentation} to run JUnit and other 
-test cases, and you can use testing
-tools such as the <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application
-Exerciser Monkey</a>.  </p>
+<p>You usually perform the tasks listed in figure 2 after you have throroughly debugged and tested
+your application. The Android SDK contains several tools to help you test and debug your Android
+applications. For more information, see the <a
+href="{@docRoot}guide/developing/debugging/index.html">Debugging</a> and <a
+href="{@docRoot}guide/developing/testing/index.html">Testing</a> sections in the Dev Guide.</p>
 
-<ul>
-<li>To ensure that your application will run properly for users, you should make
-every effort to obtain one or more physical mobile device(s) of the type on
-which you expect the application to run. You should then test your application
-on the actual device, under realistic network conditions. Testing  your
-application on a physical device is very important, because it enables you to
-verify that your user interface elements are sized correctly (especially for
-touch-screen UI) and that your application's performance and battery efficiency
-are acceptable.</li>
+<h2 id="publishing-gather">Gathering Materials and Resources</h2>
 
-<li>If you can not obtain a mobile device of the type you are targeting for your
-application, you can use emulator options such as <code>-dpi</code>,
-<code>-device</code>, <code>-scale</code>, <code>-netspeed</code>,
-<code>-netdelay</code>, <code>-cpu-delay</code> and others to model the
-emulator's screen, network performance, and other attributes to match the target
-device to the greatest extent possible. You can then test your application's UI
-and performance. However, we strongly recommend that you test your application
-on an actual target device before publishing it. </li>
+<p>To begin preparing your application for release you need to gather several supporting items. At a
+minimum this includes cryptographic keys for signing your application and an application icon. You
+might also want to include an end-user license agreement.</p>
 
-</ul>
+<h4 id="publishing-keys">Cryptographic keys</h4>
 
-<h3 id="eula">2. Consider adding an End User License Agreement in your 
-application</h3>
+<p>The Android system requires that each installed application be digitally signed with a
+certificate that is owned by the application's developer (that is, a certificate for which the
+developer holds the private key). The Android system uses the certificate as a means of identifying
+the author of an application and establishing trust relationships between applications. The
+certificate that you use for signing does not need to be signed by a certificate authority; the
+Android system allows you to sign your applications with a self-signed certificate. To learn about
+certificate requirements, see <a href="{@docRoot}guide/publishing/app-signing.html#cert">Obtain a
+suitable private key</a>.</p>
 
-<p>To protect your person, organization, and intellectual property, you may want
-to provide an End User License Agreement (EULA) with your application. 
+<p>You may also have to obtain other release keys if your application accesses a service or uses a
+third-party library that requires you to use a key that is based on your private key. For example,
+if your application uses the <a
+href="http://code.google.com/android/add-ons/google-apis/reference/com/google/android/maps/ MapView.
+html">MapView</a> class, which is part of the <a
+href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google Maps external
+library</a>, you will need to register your application with the Google Maps service and obtain
+a Maps API key. For information about getting a Maps API key, see <a
+href="http://code.google.com/android/add-ons/google-apis/mapkey.html"> Obtaining a Maps API
+key</a>.</p>
 
-<h3>3. Consider adding support for Android Market Licensing</h3>
+<h4>Application Icon</h4>
 
-<p>If you are publishing a paid application through Android Market, consider
-adding support for Android Market Licensing. Licensing lets you control access
-to your application based on whether the current user has purchased it.
-Using Android Market Licensing is optional. 
+<p>Be sure you have an application icon and that it meets the recommended <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design_launcher.html">icon guidelines</a>. Your
+application's icon helps users identify your application on a device's Home
+screen and in the Launcher window. It also appears in Manage Applications, My Downloads, and
+elsewhere. In addition, publishing services such as Android Market display your icon to users.</p>
 
-<p>For complete information about Android Market Licensing Service and how to
-use it in your application, see <a
-href="{@docRoot}guide/publishing/licensing.html">Licensing Your
-Applications</a>.</p>
+<p class="note"><strong>Note:</strong> If you are releasing your application on Android Market, you
+need to create a high resolution
+  version of your icon. See <a
+href="https://www.google.com/support/androidmarket/developer/bin/answer.py?answer=1078870">Graphic
+Assets for your Application</a> for more information.</p>
 
-<h3 id="iconlabel">4. Specify an icon and label in the application's manifest</h3>
+<h4>End-user License Agreement</h4>
 
-<p>The icon and label that you specify in an application's manifest are
-important because they are displayed to users as your application's icon and
-name. They are displayed on the device's Home screen, as well as in Manage
-Applications, My Downloads, and elsewhere. Additionally, publishing services may
-display the icon and label to users. </p>
+<p>Consider preparing an End User License Agreement (EULA) for your application. A EULA can help
+protect your person, organization, and intellectual property, and we recommend that you provide one
+with your application.</p>
 
-<p>To specify an icon and label, you define the attributes
-<code>android:icon</code> and <code>android:label</code> in the 
-<code>&lt;application&gt;</code> element of the manifest. </p>
+<h4>Miscellaneous Materials</h4>
 
-<p>As regards the design of your icon, you should try to make it match as much
-as possible the style used by the built-in Android applications.</p>
+<p>You might also have to prepare promotional and marketing materials to publicize your application.
+For example, if you are releasing your application on Android Market you will need to prepare some
+promotional text and you will need to create screenshots of your application. For more
+information, see
+<a href="https://www.google.com/support/androidmarket/developer/bin/answer.py?answer=1078870">
+Graphic Assets for your Application</a></p>
 
-<h3 id="logging">5. Turn off logging and debugging and clean up data/files</h3>
+<h2 id="publishing-configure">Configuring Your Application for Release</h2>
 
-<p>For release, you should make sure that debug facilities are turned off and
-that debug and other unnecessary data/files are removed from your application
-project.</p>
-<ul>
-<li>Remove the <code>android:debuggable="true"</code> attribute from the
-<code>&lt;application&gt;</code> element of the manifest.</li>
-<li>Remove log files, backup files, and other unnecessary files from the
-application project.</li>
-<li>Check for private or proprietary data and remove it as necessary.</li>
-<li>Deactivate any calls to {@link android.util.Log} methods in the source
-code.</li>
-</ul>
+<p>After you gather all of your supporting materials you can start configuring your application
+for release. This section provides a summary of the configuration changes we recommend that you make
+to your source code, resource files, and application manifest prior to releasing your application.
+Although most of the configuration changes listed in this section are optional, they are
+considered good coding practices and we encourage you to implement them. In some cases,
+you may have already made these configuration changes as part of your development process.</p>
 
-<h2 id="finalcompile">Before you do the final compile of your application</h2>
+<h4>Choose a good package name</h4>
 
-<h3 id="versionapp">6. Version your application</h3>
+<p>Make sure you choose a package name that is suitable over the life of your application. You
+cannot change the package name after you distribute your application to users. You can set the
+package name in application's manifest file. For more information, see the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a> attribute
+documentation.</p>
 
-<p>Before you compile your application, you must make sure that you have defined
-a version number for your application, specifying an appropriate value for both
-the <code>android:versionCode</code> and <code>android:versionName</code>
-attributes of the <code>&lt;manifest&gt;</code> element in the application's
-manifest file. Carefully consider your version numbering plans in the context of
-your overall application upgrade strategy. </p>
+<h4>Turn off logging and debugging</h4>
 
-<p>If you have previously released a version of your application, you must make
-sure to increment the version number of the current application. You must
-increment both the <code>android:versionCode</code> and
-<code>android:versionName</code> attributes of the <code>&lt;manifest&gt;</code>
-element in the application's manifest file, using appropriate values. </p>
+<p>Make sure you deactivate logging and disable the debugging option before you build your
+application for release. You can deactivate logging by removing calls to
+{@link android.util.Log} methods in your source files. You can disable debugging by removing the
+<code>android:debuggable</code> attribute from the <code>&lt;application&gt;</code> tag in your
+manifest file, or by setting the <code>android:debuggable</code> attribute to
+<code>false</code> in your manifest file. Also, remove any log files or static test files that
+were created in your project.</p>
 
-<p>For detailed information about how to define version information for your
-application, see <a href="{@docRoot}guide/publishing/versioning.html">Versioning 
-Your Applications</a>.</p>
+<p>Also, you should remove all {@link android.os.Debug} tracing calls that you
+added to your code, such as {@link android.os.Debug#startMethodTracing()} and
+{@link android.os.Debug#stopMethodTracing()} method calls.</p>
 
-<h3 id="cryptokey">7. Obtain a suitable cryptographic key</h3>
+<h4>Clean up your project directories</h4>
 
-<p>If you have read and followed all of the preparation steps up to this point,
-your application is compiled and ready for signing. Inside the .apk, the
-application is properly versioned, and you've cleaned out extra files and
-private data, as described above. </p>
-
-<p>Before you sign your application, you need to make sure that you have a
-suitable private key. For complete information about how to obtain (or generate)
-a private key, see <a href="{@docRoot}guide/publishing/app-signing.html#cert">
-Obtaining a Suitable Private Key</a>.</p>
-
-<p>Once you have obtained (or generated) a suitable private key, you will use it
-to:</p>
+<p>Clean up your project and make sure it conforms to the directory structure described in <a
+href="{@docRoot}guide/developing/projects/index.html#ApplicationProjects">Android Projects</a>.
+Leaving stray or orphaned files in your project can prevent your application from compiling and
+cause your application to behave unpredictably. At a minimum you should do the following cleanup
+tasks:</p>
 
 <ul>
-<li>Register for a Maps API Key (see below), if your application uses MapView
-elements.</li>
-<li>Sign your application for release, later in the preparation process</li>
+  <li>Review the contents of your <code>jni/</code>, <code>lib/</code>, and <code>src/</code>
+  directories.  The <code>jni/</code> directory should contain only source files associated with the
+  <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a>, such as
+  <code>.c</code>, <code>.cpp</code>, <code>.h</code>, and <code>.mk</code> files. The
+  <code>lib/</code> directory should contain only third-party library files or private library
+  files, including prebuilt shared and static libraries (for example, <code>.so</code> files). The
+  <code>src/</code> directory should contain only the source files for your application
+  (<code>.java</code> and <code>.aidl</code> files). The <code>src/</code> directory should not
+  contain any <code>.jar</code> files.</li>
+  <li>Check your project for private or proprietary data files that your application does not use
+  and remove them. For example, look in your project's <code>res/</code> directory for old
+  drawable files, layout files, and values files that you are no longer using and delete them.</li>
+  <li>Check your <code>lib/</code> directory for test libraries and remove them if they are no
+  longer being used by your application.</li>
+  <li>Review the contents of your <code>assets/</code> directory and your <code>res/raw/</code>
+    directory for raw asset files and static files that you need to update or remove prior to
+    release.</li>
 </ul>
 
-<h3 id="mapsApiKey">8. Register for a Maps API Key, if your application is using
-MapView elements</h3>
+<h4>Review and update your manifest settings</h4>
 
-<div class="sidebox-wrapper">
-<div class="sidebox"><p>
-For complete information about getting a Maps API Key, see <a
-href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
-Obtaining a Maps API Key</a>.</p>
-</div>
-</div>
+<p>Verify that the following manifest items are set correctly:</p>
 
-<p>If your application uses one or more Mapview elements, you will need to 
-register your application with the Google
-Maps service and obtain a Maps API Key, before your MapView(s) will be able to
-retrieve data from Google Maps. To do so, you supply an MD5 fingerprint of your
-signer certificate to the Maps service. </p>
+<ul>
+  <li><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+  &lt;uses-permission&gt;</a> element
+    <p>You should specify only those permissions that are relevant and required for your application.</p>
+  </li>
+  <li><code>android:icon</code> and <code>android:label</code> attributes
+    <p>You must specify values for these attributes, which are located in the
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+    element.</p>
+  </li>
+  <li><code>android:versionCode</code> and <code>android:versionName</code> attributes.
+    <p>We recommend that you specify values for these attributes, which are located in the
+      <a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
+      element. For more information see
+      <a href="{@docRoot}guide/publishing/versioning.html">Versioning your Application</a>.</p>
+  </li>
+</ul>
 
-<p>During development, you can get a temporary Maps API Key by registering the
-debug key generated by the SDK tools. However, before publishing your
-application, you must register for a new Maps API Key that is based on your
-private key. </p>
+<p>There are several additional manifest elements that you can set if you are releasing your
+application on Android Market. For example, the <code>android:minSdkVersion</code> and
+<code>android:targetSdkVersion</code> attributes, which are located in the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"> &lt;uses-sdk&gt;</a> element. For more
+information about these and other Android Market settings, see <a
+href="{@docRoot}/guide//appendix/market-filters.html">Market Filters</a>.</p>
 
-<p>If your application uses MapView elements, the important points to understand
-are:</p>
+<h4>Address compatibility issues</h4>
 
-<ol>
-<li>You <em>must</em> obtain the Maps API Key before you compile your
-application for release, because you must add the Key to a special attribute in
-each MapView element &mdash; <code>android:apiKey</code> &mdash; in your
-application's layout files. If you are instantiating MapView objects directly
-from code, you must pass the Maps API Key as a parameter in the constructor.
-</li>
-<li>The Maps API Key referenced by your application's MapView elements must be
-registered (in Google Maps) to the certificate used to sign the application.
-This is particularly important when publishing your application &mdash; your
-MapView elements must reference a Key that is registered to the release
-certificate that you will use to sign your application.  </li>
-<li>If you previously got a temporary Maps API Key by registering the debug
-certificate generated by the SDK tools, you <em>must</em> remember to obtain a
-new Maps API Key by registering your release certificate. You must then remember
-to change the MapView elements to reference the new Key, rather than the Key
-associated with the debug certificate. If you do not do so, your MapView
-elements will not have permission to download Maps data. </li>
-<li>If you change the private key that you will use to sign your application,
-you <em>must</em> remember to obtain a new Maps API Key from the Google Maps
-service. If you do not get a new Maps API Key and apply it to all MapView
-elements, any MapView elements referencing the old Key will not have permission
-to download Maps data. </li>
-</ol>
+<p>Android provides several tools and techniques to make your application compatible with a wide
+range of devices. To make your application available to the largest number of users, consider
+doing the following:</p>
 
-<h2 id="compile">Compile your application</h2>
+<ul>
+  <li><strong>Add support for multiple screen configurations</strong>
+    <p>Make sure you meet the
+    <a href="{@docRoot}guide/practices/screens_support.html#screen-independence">
+    best practices for supporting multiple screens</a>. By supporting multiple screen configurations
+    you can create an application that functions properly and looks good on any of the screen sizes
+    supported by Android.</p>
+  </li>
+  <li><strong>Optimize your application for Android 3.0 devices.</strong>
+    <p>If your application is designed for devices older than Android 3.0, make it compatible
+    with Android 3.0 devices by following the guidelines and best practices described in
+    <a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0
+    </a>.</p>
+  </li>
+  <li><strong>Consider using the Support Library</strong>
+    <p>If your application is designed for devices running Android 3.x, make your application
+    compatible with older versions of Android by adding the
+    <a href="{@docRoot}sdk/compatibility-library.html">Support Library</a> to your
+    application project. The Support Library provides static support libraries that you can add to
+    your Android application, which enables you to use APIs that are either not available on
+    older platform versions or use utility APIs that are not part of the framework APIs.</p>
+  </li>
+</ul>
 
-<p>When you've prepared your application as described in the previous sections,
-you can compile your application for release.</p>
+<h4>Update URLs for servers and services</h4>
 
+<p>If your application accesses remote servers or services, make sure you are using the production
+URL or path for the server or service and not a test URL or path.</p>
 
-<h2 id="post-compile">After you compile your application</h2>
+<h4>Implement Licensing (if you are releasing on Android Market)</h4>
 
-<h3 id="signapp">9. Sign your application</h3>
+<p>If you are releasing a paid application through Android Market, consider adding support for
+Android Market Licensing. Licensing lets you control access to your application based on whether the
+current user has purchased it. Using Android Market Licensing is optional even if you are
+releasing your app through Android Market.</p>
 
-<p>Sign your application using your private key and then
-align it with the {@code zipalign} tool. Signing your application
-correctly is critically important. Please see
-<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your 
-Applications</a> for complete information. </p>
+<p>For more information about Android Market Licensing Service and how to use it in your
+application, see <a href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a>.</p>
 
-<h3 id="testapp">10. Test your compiled and signed application</h3>
+<h2 id="publishing-build">Building Your Application for Release</h2>
 
-<p>Before you release your compiled application, you should thoroughly test it
-on the target mobile device (and target network, if possible). In particular,
-you should make sure that any MapView elements in your UI are receiving maps
-data properly. If they are not, go back to <a href="#mapsApiKey">Register for a
-Maps API Key</a> and correct the problem. You should also ensure that the
-application works correctly with any server-side services and data that you are
-providing or are relying on and that the application handles any authentication
-requirements correctly.  </p>
+<p>After you finish configuring your application you can build it into a release-ready
+<code>.apk</code> fle that is signed and optimized. The JDK includes the tools for signing the
+<code>.apk</code> file (Keytool and Jarsigner); the Android SDK includes the tools for compiling and
+optimizing the <code>.apk</code> file. If you are using Eclipse with the ADT plugin or you are using
+the Ant build script from the command line, you can automate the entire build process.</p>
 
-<p>After testing, you are now ready to publish your application to mobile device
-users.</p>
+<h3>Building with Eclipse</h3>
+
+<p>You can use the Eclipse Export Wizard to build a release-ready <code>.apk</code> file that is
+signed with your private key and optimized. To learn how to run the Export Wizard, see
+<a href="{@docRoot}guide/publishing/app-signing.html#ExportWizard">Compile and sign with Eclipse
+ADT</a>. The Export Wizard compiles your application for release, signs your application with your
+private key, and optimizes your application with the zipalign tool. The Export Wizard should run
+successfully if you have run or debugged your application from Eclipse and you have no errors in
+your application (see <a href="{@docRoot}guide/developing/building/building-eclipse.html">Building
+and Running from Eclipse with ADT</a> for more information.</p>
+
+<p>The Export Wizard assumes that you have a <a href="#billing-keys">certificate and private key</a>
+suitable for signing your application. If you do not have a suitable certificate and private key,
+the Export Wizard will help you generate one (see
+<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a> for more
+information about the signing process and signing guidelines.</p>
+
+<h3>Building with Ant</h3>
+
+<p>You can use the Ant build script (included in the Android SDK) to build a release-ready
+<code>.apk</code> file that is signed with your private key and optimized. To learn how to do this,
+see <a href="{@docRoot}guide/developing/building/building-cmdline.html#ReleaseMode">Building in
+Release Mode</a>. This build method assumes you have a <a href="#billing-keys">certificate and
+private key</a> suitable for signing your application. If you do not have a suitable certificate and
+private key, the Export Wizard will help you generate one (see
+<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a> for more
+information about the signing process and signing guidelines.</p>
+
+<h2 id="publishing-resources">Preparing External Servers and Resources</h2>
+
+<p>If your application relies on a remote server, make sure the server is secure and that it is
+configured for production use. This is particularly important if you are implementing <a
+href="{@docRoot}guide/market/billing/index.html">in-app billing</a> in your application and you are
+performing the signature verification step on a remote server.</p>
+
+<p>Also, if your application fetches content from a remote server or a real-time service (such as a
+content feed), be sure the content you are providing is up to date and production-ready.</p>
+
+<h2 id="publishing-test">Testing Your Application for Release</h2>
+
+<p>Testing the release version of your application helps ensure that your application runs properly
+under realistic device and network conditions. Ideally, you should test your application on at least
+one handset-sized device and one tablet-sized device to verify that your user interface elements are
+sized correctly and that your application's performance and battery efficiency are acceptable.</p>
+
+<p>As a starting point for testing, see
+<a href="{@docRoot}guide/topics/testing/what_to_test.html">What to Test</a>. This article provides
+a summary of common Android situations that you should consider when you are testing. When you are
+done testing and you are satisfied that the release version of your application
+behaves correctly, you can release your application to users. For more information, see
+<a href="{@docRoot}guide/publishing/publishing_overview.html#publishing-release">Releasing Your
+Application to Users</a>. If you are publishing your application on Android Market, see
+<a href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a>.</p>
 
 
