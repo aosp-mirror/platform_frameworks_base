@@ -1211,6 +1211,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mReplyChannel.replyToMessage(msg, what);
     }
 
+    private void replyToMessage(Message msg, int what, int arg1) {
+        if (msg.replyTo == null) return;
+        mReplyChannel.replyToMessage(msg, what, arg1);
+    }
+
     private void replyToMessage(Message msg, int what, Object obj) {
         if (msg.replyTo == null) return;
         mReplyChannel.replyToMessage(msg, what, obj);
