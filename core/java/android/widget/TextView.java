@@ -11339,7 +11339,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final TextPaint         mTextPaint;
     private boolean                 mUserSetTextScaleX;
     private final Paint             mHighlightPaint;
-    private int                     mHighlightColor = 0x4C33B5E5;
+    private int                     mHighlightColor = 0x6633B5E5;
     /**
      * This is temporarily visible to fix bug 3085564 in webView. Do not rely on
      * this field being protected. Will be restored as private when lineHeight
