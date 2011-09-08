@@ -16662,6 +16662,7 @@ package android.provider {
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/raw_contact_entity";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATA_ID = "data_id";
+    field public static final android.net.Uri PROFILE_CONTENT_URI;
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
