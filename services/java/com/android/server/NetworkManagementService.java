@@ -1325,7 +1325,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // TODO: remove knownLines check once 5087722 verified
         final HashSet<String> knownLines = Sets.newHashSet();
         // TODO: remove lastIdx check once 5270106 verified
-        int lastIdx = 0;
+        int lastIdx;
 
         final ArrayList<String> keys = Lists.newArrayList();
         final ArrayList<String> values = Lists.newArrayList();
@@ -1339,6 +1339,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // parse first line as header
             line = reader.readLine();
             splitLine(line, keys);
+            lastIdx = 1;
 
             // parse remaining lines
             while ((line = reader.readLine()) != null) {
@@ -1350,7 +1351,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
 
                 final int idx = getParsedInt(parsed, KEY_IDX);
-                if (idx > lastIdx + 1) {
+                if (idx != lastIdx + 1) {
                     throw new IllegalStateException(
                             "inconsistent idx=" + idx + " after lastIdx=" + lastIdx);
                 }
