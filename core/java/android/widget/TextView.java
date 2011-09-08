@@ -9228,21 +9228,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean performLongClick() {
+        boolean handled = false;
+        boolean vibrate = true;
+
         if (super.performLongClick()) {
             mDiscardNextActionUp = true;
-            return true;
+            handled = true;
         }
 
-        boolean handled = false;
-
         // Long press in empty space moves cursor and shows the Paste affordance if available.
-        if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
+        if (!handled && !isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
                 mInsertionControllerEnabled) {
             final int offset = getOffsetForPosition(mLastDownPositionX, mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable) mText, offset);
             getInsertionController().showWithActionPopup();
             handled = true;
+            vibrate = false;
         }
 
         if (!handled && mSelectionActionMode != null) {
@@ -9264,10 +9266,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Start a new selection
-        handled |= !handled && startSelectionActionMode();
+        if (!handled) {
+            handled = startSelectionActionMode();
+        }
+
+        if (vibrate) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
 
         if (handled) {
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mDiscardNextActionUp = true;
         }
 
