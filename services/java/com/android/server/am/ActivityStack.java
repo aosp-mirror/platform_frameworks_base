@@ -1151,6 +1151,7 @@ final class ActivityStack {
                     try {
                         mService.mWindowManager.setAppVisibility(r, true);
                         r.sleeping = false;
+                        r.app.pendingUiClean = true;
                         r.app.thread.scheduleWindowVisibility(r, true);
                         r.stopFreezingScreenLocked(false);
                     } catch (Exception e) {
@@ -1497,6 +1498,7 @@ final class ActivityStack {
                 
                 next.sleeping = false;
                 showAskCompatModeDialogLocked(next);
+                next.app.pendingUiClean = true;
                 next.app.thread.scheduleResumeActivity(next,
                         mService.isNextTransitionForward());
                 
