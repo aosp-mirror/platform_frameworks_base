@@ -1797,30 +1797,34 @@ public class PhoneStatusBar extends StatusBar {
                 pw.println("    [" + i + "] icon=" + ic);
             }
             
-            pw.println("see the logcat for a dump of the views we have created.");
-            // must happen on ui thread
-            mHandler.post(new Runnable() {
-                    public void run() {
-                        mStatusBarView.getLocationOnScreen(mAbsPos);
-                        Slog.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
-                                + ") " + mStatusBarView.getWidth() + "x"
-                                + mStatusBarView.getHeight());
-                        mStatusBarView.debug();
+            if (false) {
+                pw.println("see the logcat for a dump of the views we have created.");
+                // must happen on ui thread
+                mHandler.post(new Runnable() {
+                        public void run() {
+                            mStatusBarView.getLocationOnScreen(mAbsPos);
+                            Slog.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                                    + ") " + mStatusBarView.getWidth() + "x"
+                                    + mStatusBarView.getHeight());
+                            mStatusBarView.debug();
 
-                        mExpandedView.getLocationOnScreen(mAbsPos);
-                        Slog.d(TAG, "mExpandedView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
-                                + ") " + mExpandedView.getWidth() + "x"
-                                + mExpandedView.getHeight());
-                        mExpandedView.debug();
+                            mExpandedView.getLocationOnScreen(mAbsPos);
+                            Slog.d(TAG, "mExpandedView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                                    + ") " + mExpandedView.getWidth() + "x"
+                                    + mExpandedView.getHeight());
+                            mExpandedView.debug();
 
-                        mTrackingView.getLocationOnScreen(mAbsPos);
-                        Slog.d(TAG, "mTrackingView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
-                                + ") " + mTrackingView.getWidth() + "x"
-                                + mTrackingView.getHeight());
-                        mTrackingView.debug();
-                    }
-                });
+                            mTrackingView.getLocationOnScreen(mAbsPos);
+                            Slog.d(TAG, "mTrackingView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                                    + ") " + mTrackingView.getWidth() + "x"
+                                    + mTrackingView.getHeight());
+                            mTrackingView.debug();
+                        }
+                    });
+            }
         }
+
+        mNetworkController.dump(fd, pw, args);
     }
 
     void onBarViewAttached() {

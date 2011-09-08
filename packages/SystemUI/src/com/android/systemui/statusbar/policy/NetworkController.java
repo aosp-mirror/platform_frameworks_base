@@ -296,6 +296,7 @@ public class NetworkController extends BroadcastReceiver {
             }
             mServiceState = state;
             updateTelephonySignalStrength();
+            updateDataNetType();
             updateDataIcon();
             refreshViews();
         }
@@ -831,7 +832,12 @@ public class NetworkController extends BroadcastReceiver {
                 mHasMobileDataFeature ? mDataSignalIconId : mWifiIconId;
             mContentDescriptionCombinedSignal = mHasMobileDataFeature
                 ? mContentDescriptionDataType : mContentDescriptionWifi;
-            mDataTypeIconId = 0;
+
+            if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
+            } else {
+                mDataTypeIconId = 0;
+            }
         }
 
         if (DEBUG) {
@@ -969,6 +975,7 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("Network Controller state:");
         pw.println("  - telephony ------");
         pw.print("  mHspaDataDistinguishable=");
         pw.println(mHspaDataDistinguishable);
@@ -982,6 +989,10 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(mDataState);
         pw.print("  mDataActivity=");
         pw.println(mDataActivity);
+        pw.print("  mDataNetType=");
+        pw.print(mDataNetType);
+        pw.print("/");
+        pw.println(TelephonyManager.getNetworkTypeName(mDataNetType));
         pw.print("  mServiceState=");
         pw.println(mServiceState);
         pw.print("  mNetworkName=");
@@ -989,7 +1000,7 @@ public class NetworkController extends BroadcastReceiver {
         pw.print("  mNetworkNameDefault=");
         pw.println(mNetworkNameDefault);
         pw.print("  mNetworkNameSeparator=");
-        pw.println(mNetworkNameSeparator);
+        pw.println(mNetworkNameSeparator.replace("\n","\\n"));
         pw.print("  mPhoneSignalIconId=0x");
         pw.print(Integer.toHexString(mPhoneSignalIconId));
         pw.print("/");
@@ -1060,7 +1071,7 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     private String getResourceName(int resId) {
-        if (resId == 0) {
+        if (resId != 0) {
             final Resources res = mContext.getResources();
             try {
                 return res.getResourceName(resId);
