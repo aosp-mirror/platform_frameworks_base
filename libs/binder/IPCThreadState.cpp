@@ -78,12 +78,8 @@ static const void* printCommand(TextOutput& out, const void* _cmd);
 // conditionals don't get stripped...  but that is probably what we want.
 #if !LOG_NDEBUG
 static const char *kReturnStrings[] = {
-#if 1 /* TODO: error update strings */
-    "unknown",
-#else
+    "BR_ERROR",
     "BR_OK",
-    "BR_TIMEOUT",
-    "BR_WAKEUP",
     "BR_TRANSACTION",
     "BR_REPLY",
     "BR_ACQUIRE_RESULT",
@@ -94,25 +90,19 @@ static const char *kReturnStrings[] = {
     "BR_RELEASE",
     "BR_DECREFS",
     "BR_ATTEMPT_ACQUIRE",
-    "BR_EVENT_OCCURRED",
     "BR_NOOP",
     "BR_SPAWN_LOOPER",
     "BR_FINISHED",
     "BR_DEAD_BINDER",
-    "BR_CLEAR_DEATH_NOTIFICATION_DONE"
-#endif
+    "BR_CLEAR_DEATH_NOTIFICATION_DONE",
+    "BR_FAILED_REPLY"
 };
 
 static const char *kCommandStrings[] = {
-#if 1 /* TODO: error update strings */
-    "unknown",
-#else
-    "BC_NOOP",
     "BC_TRANSACTION",
     "BC_REPLY",
     "BC_ACQUIRE_RESULT",
     "BC_FREE_BUFFER",
-    "BC_TRANSACTION_COMPLETE",
     "BC_INCREFS",
     "BC_ACQUIRE",
     "BC_RELEASE",
@@ -120,18 +110,12 @@ static const char *kCommandStrings[] = {
     "BC_INCREFS_DONE",
     "BC_ACQUIRE_DONE",
     "BC_ATTEMPT_ACQUIRE",
-    "BC_RETRIEVE_ROOT_OBJECT",
-    "BC_SET_THREAD_ENTRY",
     "BC_REGISTER_LOOPER",
     "BC_ENTER_LOOPER",
     "BC_EXIT_LOOPER",
-    "BC_SYNC",
-    "BC_STOP_PROCESS",
-    "BC_STOP_SELF",
     "BC_REQUEST_DEATH_NOTIFICATION",
     "BC_CLEAR_DEATH_NOTIFICATION",
     "BC_DEAD_BINDER_DONE"
-#endif
 };
 
 static const char* getReturnString(size_t idx)
@@ -154,30 +138,36 @@ static const void* printBinderTransactionData(TextOutput& out, const void* data)
 {
     const binder_transaction_data* btd =
         (const binder_transaction_data*)data;
-    out << "target=" << btd->target.ptr << " (cookie " << btd->cookie << ")" << endl
+    if (btd->target.handle < 1024) {
+        /* want to print descriptors in decimal; guess based on value */
+        out << "target.desc=" << btd->target.handle;
+    } else {
+        out << "target.ptr=" << btd->target.ptr;
+    }
+    out << " (cookie " << btd->cookie << ")" << endl
         << "code=" << TypeCode(btd->code) << ", flags=" << (void*)btd->flags << endl
         << "data=" << btd->data.ptr.buffer << " (" << (void*)btd->data_size
         << " bytes)" << endl
         << "offsets=" << btd->data.ptr.offsets << " (" << (void*)btd->offsets_size
-        << " bytes)" << endl;
+        << " bytes)";
     return btd+1;
 }
 
 static const void* printReturnCommand(TextOutput& out, const void* _cmd)
 {
-    static const int32_t N = sizeof(kReturnStrings)/sizeof(kReturnStrings[0]);
-    
+    static const size_t N = sizeof(kReturnStrings)/sizeof(kReturnStrings[0]);
     const int32_t* cmd = (const int32_t*)_cmd;
     int32_t code = *cmd++;
-    if (code == BR_ERROR) {
+    size_t cmdIndex = code & 0xff;
+    if (code == (int32_t) BR_ERROR) {
         out << "BR_ERROR: " << (void*)(*cmd++) << endl;
         return cmd;
-    } else if (code < 0 || code >= N) {
+    } else if (cmdIndex >= N) {
         out << "Unknown reply: " << code << endl;
         return cmd;
     }
+    out << kReturnStrings[cmdIndex];
     
-    out << kReturnStrings[code];
     switch (code) {
         case BR_TRANSACTION:
         case BR_REPLY: {
@@ -213,6 +203,11 @@ static const void* printReturnCommand(TextOutput& out, const void* _cmd)
             const int32_t c = *cmd++;
             out << ": death cookie " << (void*)c;
         } break;
+
+        default:
+            // no details to show for: BR_OK, BR_DEAD_REPLY,
+            // BR_TRANSACTION_COMPLETE, BR_FINISHED
+            break;
     }
     
     out << endl;
@@ -221,16 +216,17 @@ static const void* printReturnCommand(TextOutput& out, const void* _cmd)
 
 static const void* printCommand(TextOutput& out, const void* _cmd)
 {
-    static const int32_t N = sizeof(kCommandStrings)/sizeof(kCommandStrings[0]);
-    
+    static const size_t N = sizeof(kCommandStrings)/sizeof(kCommandStrings[0]);
     const int32_t* cmd = (const int32_t*)_cmd;
     int32_t code = *cmd++;
-    if (code < 0 || code >= N) {
+    size_t cmdIndex = code & 0xff;
+
+    if (cmdIndex >= N) {
         out << "Unknown command: " << code << endl;
         return cmd;
     }
-    
-    out << kCommandStrings[code];
+    out << kCommandStrings[cmdIndex];
+
     switch (code) {
         case BC_TRANSACTION:
         case BC_REPLY: {
@@ -254,7 +250,7 @@ static const void* printCommand(TextOutput& out, const void* _cmd)
         case BC_RELEASE:
         case BC_DECREFS: {
             const int32_t d = *cmd++;
-            out << ": descriptor=" << (void*)d;
+            out << ": desc=" << d;
         } break;
     
         case BC_INCREFS_DONE:
@@ -267,7 +263,7 @@ static const void* printCommand(TextOutput& out, const void* _cmd)
         case BC_ATTEMPT_ACQUIRE: {
             const int32_t p = *cmd++;
             const int32_t d = *cmd++;
-            out << ": decriptor=" << (void*)d << ", pri=" << p;
+            out << ": desc=" << d << ", pri=" << p;
         } break;
         
         case BC_REQUEST_DEATH_NOTIFICATION:
@@ -281,6 +277,11 @@ static const void* printCommand(TextOutput& out, const void* _cmd)
             const int32_t c = *cmd++;
             out << ": death cookie " << (void*)c;
         } break;
+
+        default:
+            // no details to show for: BC_REGISTER_LOOPER, BC_ENTER_LOOPER,
+            // BC_EXIT_LOOPER
+            break;
     }
     
     out << endl;
@@ -592,6 +593,7 @@ void IPCThreadState::decWeakHandle(int32_t handle)
 
 status_t IPCThreadState::attemptIncStrongHandle(int32_t handle)
 {
+    LOG_REMOTEREFS("IPCThreadState::attemptIncStrongHandle(%d)\n", handle);
     mOut.writeInt32(BC_ATTEMPT_ACQUIRE);
     mOut.writeInt32(0); // xxx was thread priority
     mOut.writeInt32(handle);
@@ -772,7 +774,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
     } else {
         bwr.read_size = 0;
     }
-    
+
     IF_LOG_COMMANDS() {
         TextOutput::Bundle _b(alog);
         if (outAvail != 0) {
@@ -789,7 +791,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
     
     // Return immediately if there is nothing to do.
     if ((bwr.write_size == 0) && (bwr.read_size == 0)) return NO_ERROR;
-    
+
     bwr.write_consumed = 0;
     bwr.read_consumed = 0;
     status_t err;
@@ -809,7 +811,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
             alog << "Finished read/write, write size = " << mOut.dataSize() << endl;
         }
     } while (err == -EINTR);
-    
+
     IF_LOG_COMMANDS() {
         alog << "Our err: " << (void*)err << ", write consumed: "
             << bwr.write_consumed << " (of " << mOut.dataSize()
