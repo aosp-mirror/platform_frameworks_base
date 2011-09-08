@@ -192,10 +192,10 @@ public class SyncManager implements OnAccountsUpdateListener {
     private static final long SYNC_ALARM_TIMEOUT_MAX = 2 * 60 * 60 * 1000; // two hours
 
     /**
-     * The amount of time to wait after attempting a bind before canceling a sync and disabling
-     * the sync adapter
+     * The amount of time (in milliseconds) to wait after attempting a bind
+     * before canceling a sync and disabling the sync adapter
      */
-    public static final long BIND_TIMEOUT_MS = 30 * 1000;
+    public static final long BIND_TIMEOUT_MS = 5 * 60 * 1000;
 
     public void onAccountsUpdated(Account[] accounts) {
         // remember if this was the first time this was called after an update
