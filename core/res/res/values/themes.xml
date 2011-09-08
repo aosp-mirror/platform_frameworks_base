@@ -878,8 +878,8 @@ please see themes_device_defaults.xml.
         <item name="textColorSearchUrl">@android:color/search_url_text_holo</item>
         <item name="textColorHighlight">@android:color/highlighted_text_holo_dark</item>
         <item name="textColorHighlightInverse">@android:color/highlighted_text_holo_light</item>
-        <item name="textColorLink">@android:color/link_text_holo_dark</item>
-        <item name="textColorLinkInverse">@android:color/link_text_holo_light</item>
+        <item name="textColorLink">@android:color/holo_blue_light</item>
+        <item name="textColorLinkInverse">@android:color/holo_blue_light</item>
         <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_dark</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Holo.Large</item>
@@ -1182,8 +1182,8 @@ please see themes_device_defaults.xml.
         <item name="textColorSearchUrl">@android:color/search_url_text_holo</item>
         <item name="textColorHighlight">@android:color/highlighted_text_holo_light</item>
         <item name="textColorHighlightInverse">@android:color/highlighted_text_holo_dark</item>
-        <item name="textColorLink">@android:color/link_text_holo_light</item>
-        <item name="textColorLinkInverse">@android:color/link_text_holo_dark</item>
+        <item name="textColorLink">@android:color/holo_blue_light</item>
+        <item name="textColorLinkInverse">@android:color/holo_blue_light</item>
         <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_light</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Holo.Light.Large</item>
