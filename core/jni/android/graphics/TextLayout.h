@@ -41,11 +41,6 @@ namespace android {
  */
 #define USE_TEXT_LAYOUT_CACHE 1
 
-
-#if USE_TEXT_LAYOUT_CACHE
-    static TextLayoutCache gTextLayoutCache;
-#endif
-
 enum {
     kBidi_LTR = 0,
     kBidi_RTL = 1,

@@ -257,7 +257,7 @@ void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint sta
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     // Return advances from the cache. Compute them if needed
-    value = gTextLayoutCache.getValue(
+    value = TextLayoutCache::getInstance().getValue(
             paint, chars, start, count, contextCount, dirFlags);
 #else
     value = new TextLayoutCacheValue();

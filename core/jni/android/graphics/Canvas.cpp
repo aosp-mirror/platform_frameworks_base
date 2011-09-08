@@ -760,7 +760,8 @@ public:
         jint count = end - start;
         sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-        value = gTextLayoutCache.getValue(paint, textArray, start, count, end, flags);
+        value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
+                        end, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
@@ -780,7 +781,8 @@ public:
 
         sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-        value = gTextLayoutCache.getValue(paint, textArray, start, count, contextCount, flags);
+        value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
+                        contextCount, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
