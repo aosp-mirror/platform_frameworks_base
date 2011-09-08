@@ -26,6 +26,5 @@ import android.os.Messenger;
 interface IWifiP2pManager
 {
     Messenger getMessenger();
-    boolean isP2pSupported();
 }
 

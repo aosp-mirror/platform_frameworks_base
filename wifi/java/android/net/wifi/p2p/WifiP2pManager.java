@@ -400,15 +400,6 @@ public class WifiP2pManager {
         }
     }
 
-    /** @hide */
-    public boolean isP2pSupported() {
-        try {
-            return mService.isP2pSupported();
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
     /**
      * Sends in a request to the system to enable p2p. This will pop up a dialog
      * to the user and upon authorization will enable p2p.
