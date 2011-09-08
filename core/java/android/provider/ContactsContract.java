@@ -34,6 +34,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -44,6 +45,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -165,6 +169,22 @@ public final class ContactsContract {
      * @hide
      */
     public static final String STREQUENT_PHONE_ONLY = "strequent_phone_only";
+
+    /**
+     * A key to a boolean in the "extras" bundle of the cursor.
+     * The boolean indicates that the provider did not create a snippet and that the client asking
+     * for the snippet should do it (true means the snippeting was deferred to the client).
+     *
+     * @hide
+     */
+    public static final String DEFERRED_SNIPPETING = "deferred_snippeting";
+
+    /**
+     * Key to retrieve the original query on the client side.
+     *
+     * @hide
+     */
+    public static final String DEFERRED_SNIPPETING_QUERY = "deferred_snippeting_query";
 
     /**
      * @hide
@@ -4857,6 +4877,19 @@ public final class ContactsContract {
          * @hide
          */
         public static final String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
+
+        /**
+         * A key to ask the provider to defer the snippeting to the client if possible.
+         * Value of 1 implies true, 0 implies false when 0 is the default.
+         * When a cursor is returned to the client, it should check for an extra with the name
+         * {@link ContactsContract#DEFERRED_SNIPPETING} in the cursor. If it exists, the client
+         * should do its own snippeting using {@link ContactsContract#snippetize}. If
+         * it doesn't exist, the snippet column in the cursor should already contain a snippetized
+         * string.
+         *
+         * @hide
+         */
+        public static final String DEFERRED_SNIPPETING_KEY = "deferred_snippeting";
     }
 
     /**
@@ -8054,4 +8087,138 @@ public final class ContactsContract {
             public static final String DATA_SET = "com.android.contacts.extra.DATA_SET";
         }
     }
+
+    /**
+     * Creates a snippet out of the given content that matches the given query.
+     * @param content - The content to use to compute the snippet.
+     * @param displayName - Display name for the contact - if this already contains the search
+     *        content, no snippet should be shown.
+     * @param query - String to search for in the content.
+     * @param snippetStartMatch - Marks the start of the matching string in the snippet.
+     * @param snippetEndMatch - Marks the end of the matching string in the snippet.
+     * @param snippetEllipsis - Ellipsis string appended to the end of the snippet (if too long).
+     * @param snippetMaxTokens - Maximum number of words from the snippet that will be displayed.
+     * @return The computed snippet, or null if the snippet could not be computed or should not be
+     *         shown.
+     *
+     *  @hide
+     */
+    public static String snippetize(String content, String displayName, String query,
+            char snippetStartMatch, char snippetEndMatch, String snippetEllipsis,
+            int snippetMaxTokens) {
+
+        String lowerQuery = query != null ? query.toLowerCase() : null;
+        if (TextUtils.isEmpty(content) || TextUtils.isEmpty(query) ||
+                TextUtils.isEmpty(displayName) || !content.toLowerCase().contains(lowerQuery)) {
+            return null;
+        }
+
+        // If the display name already contains the query term, return empty - snippets should
+        // not be needed in that case.
+        String lowerDisplayName = displayName != null ? displayName.toLowerCase() : "";
+        List<String> nameTokens = new ArrayList<String>();
+        List<Integer> nameTokenOffsets = new ArrayList<Integer>();
+        split(lowerDisplayName.trim(), nameTokens, nameTokenOffsets);
+        for (String nameToken : nameTokens) {
+            if (nameToken.startsWith(lowerQuery)) {
+                return null;
+            }
+        }
+
+        String[] contentLines = content.split("\n");
+
+        // Locate the lines of the content that contain the query term.
+        for (String contentLine : contentLines) {
+            if (contentLine.toLowerCase().contains(lowerQuery)) {
+
+                // Line contains the query string - now search for it at the start of tokens.
+                List<String> lineTokens = new ArrayList<String>();
+                List<Integer> tokenOffsets = new ArrayList<Integer>();
+                split(contentLine.trim(), lineTokens, tokenOffsets);
+
+                // As we find matches against the query, we'll populate this list with the marked
+                // (or unchanged) tokens.
+                List<String> markedTokens = new ArrayList<String>();
+
+                int firstToken = -1;
+                int lastToken = -1;
+                for (int i = 0; i < lineTokens.size(); i++) {
+                    String token = lineTokens.get(i);
+                    String lowerToken = token.toLowerCase();
+                    if (lowerToken.startsWith(lowerQuery)) {
+
+                        // Query term matched; surround the token with match markers.
+                        markedTokens.add(snippetStartMatch + token + snippetEndMatch);
+
+                        // If this is the first token found with a match, mark the token
+                        // positions to use for assembling the snippet.
+                        if (firstToken == -1) {
+                            firstToken =
+                                    Math.max(0, i - (int) Math.floor(
+                                            Math.abs(snippetMaxTokens)
+                                            / 2.0));
+                            lastToken =
+                                    Math.min(lineTokens.size(), firstToken +
+                                            Math.abs(snippetMaxTokens));
+                        }
+                    } else {
+                        markedTokens.add(token);
+                    }
+                }
+
+                // Assemble the snippet by piecing the tokens back together.
+                if (firstToken > -1) {
+                    StringBuilder sb = new StringBuilder();
+                    if (firstToken > 0) {
+                        sb.append(snippetEllipsis);
+                    }
+                    for (int i = firstToken; i < lastToken; i++) {
+                        String markedToken = markedTokens.get(i);
+                        String originalToken = lineTokens.get(i);
+                        sb.append(markedToken);
+                        if (i < lastToken - 1) {
+                            // Add the characters that appeared between this token and the next.
+                            sb.append(contentLine.substring(
+                                    tokenOffsets.get(i) + originalToken.length(),
+                                    tokenOffsets.get(i + 1)));
+                        }
+                    }
+                    if (lastToken < lineTokens.size()) {
+                        sb.append(snippetEllipsis);
+                    }
+                    return sb.toString();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Pattern for splitting a line into tokens.  This matches e-mail addresses as a single token,
+     * otherwise splitting on any group of non-alphanumeric characters.
+     *
+     * @hide
+     */
+    private static Pattern SPLIT_PATTERN =
+        Pattern.compile("([\\w-\\.]+)@((?:[\\w]+\\.)+)([a-zA-Z]{2,4})|[\\w]+");
+
+    /**
+     * Helper method for splitting a string into tokens.  The lists passed in are populated with the
+     * tokens and offsets into the content of each token.  The tokenization function parses e-mail
+     * addresses as a single token; otherwise it splits on any non-alphanumeric character.
+     * @param content Content to split.
+     * @param tokens List of token strings to populate.
+     * @param offsets List of offsets into the content for each token returned.
+     *
+     * @hide
+     */
+    private static void split(String content, List<String> tokens, List<Integer> offsets) {
+        Matcher matcher = SPLIT_PATTERN.matcher(content);
+        while (matcher.find()) {
+            tokens.add(matcher.group());
+            offsets.add(matcher.start());
+        }
+    }
+
+
 }
