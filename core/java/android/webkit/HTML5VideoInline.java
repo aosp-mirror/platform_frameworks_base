@@ -7,6 +7,7 @@ import android.webkit.HTML5VideoView;
 import android.webkit.HTML5VideoViewProxy;
 import android.view.Surface;
 import android.opengl.GLES20;
+import android.os.PowerManager;
 
 /**
  * @hide This is only used by the browser
@@ -51,6 +52,7 @@ public class HTML5VideoInline extends HTML5VideoView{
     public void prepareDataAndDisplayMode(HTML5VideoViewProxy proxy) {
         super.prepareDataAndDisplayMode(proxy);
         setFrameAvailableListener(proxy);
+        mPlayer.setWakeMode(proxy.getContext(), PowerManager.FULL_WAKE_LOCK);
     }
 
     // Pause the play and update the play/pause button
