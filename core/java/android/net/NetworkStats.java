@@ -102,6 +102,21 @@ public class NetworkStats implements Parcelable {
             this.txPackets = txPackets;
             this.operations = operations;
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder();
+            builder.append("iface=").append(iface);
+            builder.append(" uid=").append(uid);
+            builder.append(" set=").append(setToString(set));
+            builder.append(" tag=").append(tagToString(tag));
+            builder.append(" rxBytes=").append(rxBytes);
+            builder.append(" rxPackets=").append(rxPackets);
+            builder.append(" txBytes=").append(txBytes);
+            builder.append(" txPackets=").append(txPackets);
+            builder.append(" operations=").append(operations);
+            return builder.toString();
+        }
     }
 
     public NetworkStats(long elapsedRealtime, int initialSize) {
