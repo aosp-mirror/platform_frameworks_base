@@ -87,9 +87,7 @@
     <protected-broadcast android:name="android.bluetooth.device.action.NAME_FAILED" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
-    <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REPLY" />
-    <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL" />
     <protected-broadcast
         android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
