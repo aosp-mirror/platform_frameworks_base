@@ -2075,7 +2075,8 @@ package android.accounts {
     method public android.accounts.Account[] getAccountsByType(java.lang.String);
     method public android.accounts.AccountManagerFuture<android.accounts.Account[]> getAccountsByTypeAndFeatures(java.lang.String, java.lang.String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
-    method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
+    method public deprecated android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
+    method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, android.os.Bundle, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthTokenByFeatures(java.lang.String, java.lang.String, java.lang.String[], android.app.Activity, android.os.Bundle, android.os.Bundle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public android.accounts.AuthenticatorDescription[] getAuthenticatorTypes();
     method public java.lang.String getPassword(android.accounts.Account);
@@ -2104,6 +2105,7 @@ package android.accounts {
     field public static final java.lang.String KEY_ACCOUNT_MANAGER_RESPONSE = "accountManagerResponse";
     field public static final java.lang.String KEY_ACCOUNT_NAME = "authAccount";
     field public static final java.lang.String KEY_ACCOUNT_TYPE = "accountType";
+    field public static final java.lang.String KEY_ANDROID_PACKAGE_NAME = "androidPackageName";
     field public static final java.lang.String KEY_AUTHENTICATOR_TYPES = "authenticator_types";
     field public static final java.lang.String KEY_AUTHTOKEN = "authtoken";
     field public static final java.lang.String KEY_AUTH_FAILED_MESSAGE = "authFailedMessage";
