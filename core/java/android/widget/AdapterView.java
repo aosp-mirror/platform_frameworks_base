@@ -886,9 +886,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             event.setEventType(AccessibilityEvent.TYPE_VIEW_SELECTED);
         }
 
-        // We first get a chance to populate the event.
-        onPopulateAccessibilityEvent(event);
-
+        View selectedView = getSelectedView();
+        if (selectedView != null && selectedView.getVisibility() == VISIBLE) {
+            // We first get a chance to populate the event.
+            onPopulateAccessibilityEvent(event);
+        }
         return false;
     }
 
@@ -896,10 +898,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         // We send selection events only from AdapterView to avoid
         // generation of such event for each child.
-        View selectedView = getSelectedView();
-        if (selectedView != null) {
-            selectedView.dispatchPopulateAccessibilityEvent(event);
-        }
+        getSelectedView().dispatchPopulateAccessibilityEvent(event);
     }
 
     @Override

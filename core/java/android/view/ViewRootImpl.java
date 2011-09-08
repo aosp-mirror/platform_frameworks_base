@@ -4529,7 +4529,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 predicate.init(accessibilityId);
                 View root = ViewRootImpl.this.mView;
                 View target = root.findViewByPredicate(predicate);
-                if (target != null && target.isShown()) {
+                if (target != null && target.getVisibility() == View.VISIBLE) {
                     info = target.createAccessibilityNodeInfo();
                 }
             } finally {
@@ -4572,7 +4572,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             try {
                 View root = ViewRootImpl.this.mView;
                 View target = root.findViewById(viewId);
-                if (target != null && target.isShown()) {
+                if (target != null && target.getVisibility() == View.VISIBLE) {
                     info = target.createAccessibilityNodeInfo();
                 }
             } finally {
@@ -4623,14 +4623,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 ArrayList<View> foundViews = mAttachInfo.mFocusablesTempList;
                 foundViews.clear();
 
-                View root;
+                View root = null;
                 if (accessibilityViewId != View.NO_ID) {
                     root = findViewByAccessibilityId(accessibilityViewId);
                 } else {
                     root = ViewRootImpl.this.mView;
                 }
 
-                if (root == null || !root.isShown()) {
+                if (root == null || root.getVisibility() != View.VISIBLE) {
                     return;
                 }
 
@@ -4645,7 +4645,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 final int viewCount = foundViews.size();
                 for (int i = 0; i < viewCount; i++) {
                     View foundView = foundViews.get(i);
-                    if (foundView.isShown()) {
+                    if (foundView.getVisibility() == View.VISIBLE) {
                         infos.add(foundView.createAccessibilityNodeInfo());
                     }
                  }
@@ -4718,7 +4718,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         private boolean performActionFocus(int accessibilityId) {
             View target = findViewByAccessibilityId(accessibilityId);
-            if (target == null) {
+            if (target == null || target.getVisibility() != View.VISIBLE) {
                 return false;
             }
             // Get out of touch mode since accessibility wants to move focus around.
@@ -4728,7 +4728,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         private boolean performActionClearFocus(int accessibilityId) {
             View target = findViewByAccessibilityId(accessibilityId);
-            if (target == null) {
+            if (target == null || target.getVisibility() != View.VISIBLE) {
                 return false;
             }
             if (!target.isFocused()) {
@@ -4740,7 +4740,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         private boolean performActionSelect(int accessibilityId) {
             View target = findViewByAccessibilityId(accessibilityId);
-            if (target == null) {
+            if (target == null || target.getVisibility() != View.VISIBLE) {
                 return false;
             }
             if (target.isSelected()) {
@@ -4752,7 +4752,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         private boolean performActionClearSelection(int accessibilityId) {
             View target = findViewByAccessibilityId(accessibilityId);
-            if (target == null) {
+            if (target == null || target.getVisibility() != View.VISIBLE) {
                 return false;
             }
             if (!target.isSelected()) {
@@ -4769,18 +4769,21 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
             mFindByAccessibilityIdPredicate.init(accessibilityId);
             View foundView = root.findViewByPredicate(mFindByAccessibilityIdPredicate);
-            return (foundView != null && foundView.isShown()) ? foundView : null;
+            if (foundView == null || foundView.getVisibility() != View.VISIBLE) {
+                return null;
+            }
+            return foundView;
         }
 
         private final class FindByAccessibilitytIdPredicate implements Predicate<View> {
-            public int mSerchedId;
+            public int mSearchedId;
 
             public void init(int searchedId) {
-                mSerchedId = searchedId;
+                mSearchedId = searchedId;
             }
 
             public boolean apply(View view) {
-                return (view.getAccessibilityViewId() == mSerchedId);
+                return (view.getAccessibilityViewId() == mSearchedId);
             }
         }
     }
