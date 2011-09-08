@@ -343,9 +343,8 @@ public class AudioService extends IAudioService.Stub {
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
         createStreamStates();
-        // Call setMode() to initialize mSetModeDeathHandlers
-        mMode = AudioSystem.MODE_INVALID;
-        setMode(AudioSystem.MODE_NORMAL, null);
+
+        mMode = AudioSystem.MODE_NORMAL;
         mMediaServerOk = true;
 
         // Call setRingerModeInt() to apply correct mute
@@ -768,36 +767,26 @@ public class AudioService extends IAudioService.Stub {
         private int mPid;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
 
-        SetModeDeathHandler(IBinder cb) {
+        SetModeDeathHandler(IBinder cb, int pid) {
             mCb = cb;
-            mPid = Binder.getCallingPid();
+            mPid = pid;
         }
 
         public void binderDied() {
+            IBinder newModeOwner = null;
             synchronized(mSetModeDeathHandlers) {
                 Log.w(TAG, "setMode() client died");
                 int index = mSetModeDeathHandlers.indexOf(this);
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
                 } else {
-                    mSetModeDeathHandlers.remove(this);
-                    // If dead client was a the top of client list,
-                    // apply next mode in the stack
-                    if (index == 0) {
-                        // mSetModeDeathHandlers is never empty as the initial entry
-                        // created when AudioService starts is never removed
-                        SetModeDeathHandler hdlr = mSetModeDeathHandlers.get(0);
-                        int mode = hdlr.getMode();
-                        if (AudioService.this.mMode != mode) {
-                            if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
-                                AudioService.this.mMode = mode;
-                                if (mode != AudioSystem.MODE_NORMAL) {
-                                    disconnectBluetoothSco(mCb);
-                                }
-                            }
-                        }
-                    }
+                    newModeOwner = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid);
                 }
+            }
+            // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
+            // SCO connections not started by the application changing the mode
+            if (newModeOwner != null) {
+                 disconnectBluetoothSco(newModeOwner);
             }
         }
 
@@ -828,60 +817,97 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        synchronized (mSettingsLock) {
+        IBinder newModeOwner = null;
+        synchronized(mSetModeDeathHandlers) {
             if (mode == AudioSystem.MODE_CURRENT) {
                 mode = mMode;
             }
-            if (mode != mMode) {
+            newModeOwner = setModeInt(mode, cb, Binder.getCallingPid());
+        }
+        // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
+        // SCO connections not started by the application changing the mode
+        if (newModeOwner != null) {
+             disconnectBluetoothSco(newModeOwner);
+        }
+    }
 
-                // automatically handle audio focus for mode changes
-                handleFocusForCalls(mMode, mode, cb);
+    // must be called synchronized on mSetModeDeathHandlers
+    // setModeInt() returns a non null IBInder if the audio mode was successfully set to
+    // any mode other than NORMAL.
+    IBinder setModeInt(int mode, IBinder cb, int pid) {
+        IBinder newModeOwner = null;
+        if (cb == null) {
+            Log.e(TAG, "setModeInt() called with null binder");
+            return newModeOwner;
+        }
 
-                if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
-                    mMode = mode;
-
-                    synchronized(mSetModeDeathHandlers) {
-                        SetModeDeathHandler hdlr = null;
-                        Iterator iter = mSetModeDeathHandlers.iterator();
-                        while (iter.hasNext()) {
-                            SetModeDeathHandler h = (SetModeDeathHandler)iter.next();
-                            if (h.getBinder() == cb) {
-                                hdlr = h;
-                                // Remove from client list so that it is re-inserted at top of list
-                                iter.remove();
-                                break;
-                            }
-                        }
-                        if (hdlr == null) {
-                            hdlr = new SetModeDeathHandler(cb);
-                            // cb is null when setMode() is called by AudioService constructor
-                            if (cb != null) {
-                                // Register for client death notification
-                                try {
-                                    cb.linkToDeath(hdlr, 0);
-                                } catch (RemoteException e) {
-                                    // Client has died!
-                                    Log.w(TAG, "setMode() could not link to "+cb+" binder death");
-                                }
-                            }
-                        }
-                        // Last client to call setMode() is always at top of client list
-                        // as required by SetModeDeathHandler.binderDied()
-                        mSetModeDeathHandlers.add(0, hdlr);
-                        hdlr.setMode(mode);
-                    }
-
-                    // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
-                    // SCO connections not started by the application changing the mode
-                    if (mode != AudioSystem.MODE_NORMAL) {
-                        disconnectBluetoothSco(cb);
-                    }
+        SetModeDeathHandler hdlr = null;
+        Iterator iter = mSetModeDeathHandlers.iterator();
+        while (iter.hasNext()) {
+            SetModeDeathHandler h = (SetModeDeathHandler)iter.next();
+            if (h.getPid() == pid) {
+                hdlr = h;
+                // Remove from client list so that it is re-inserted at top of list
+                iter.remove();
+                hdlr.getBinder().unlinkToDeath(hdlr, 0);
+                break;
+            }
+        }
+        int status = AudioSystem.AUDIO_STATUS_OK;
+        do {
+            if (mode == AudioSystem.MODE_NORMAL) {
+                // get new mode from client at top the list if any
+                if (!mSetModeDeathHandlers.isEmpty()) {
+                    hdlr = mSetModeDeathHandlers.get(0);
+                    cb = hdlr.getBinder();
+                    mode = hdlr.getMode();
                 }
+            } else {
+                if (hdlr == null) {
+                    hdlr = new SetModeDeathHandler(cb, pid);
+                }
+                // Register for client death notification
+                try {
+                    cb.linkToDeath(hdlr, 0);
+                } catch (RemoteException e) {
+                    // Client has died!
+                    Log.w(TAG, "setMode() could not link to "+cb+" binder death");
+                }
+
+                // Last client to call setMode() is always at top of client list
+                // as required by SetModeDeathHandler.binderDied()
+                mSetModeDeathHandlers.add(0, hdlr);
+                hdlr.setMode(mode);
+            }
+
+            if (mode != mMode) {
+                status = AudioSystem.setPhoneState(mode);
+                if (status == AudioSystem.AUDIO_STATUS_OK) {
+                    // automatically handle audio focus for mode changes
+                    handleFocusForCalls(mMode, mode, cb);
+                    mMode = mode;
+                } else {
+                    if (hdlr != null) {
+                        mSetModeDeathHandlers.remove(hdlr);
+                        cb.unlinkToDeath(hdlr, 0);
+                    }
+                    // force reading new top of mSetModeDeathHandlers stack
+                    mode = AudioSystem.MODE_NORMAL;
+                }
+            } else {
+                status = AudioSystem.AUDIO_STATUS_OK;
+            }
+        } while (status != AudioSystem.AUDIO_STATUS_OK && !mSetModeDeathHandlers.isEmpty());
+
+        if (status == AudioSystem.AUDIO_STATUS_OK) {
+            if (mode != AudioSystem.MODE_NORMAL) {
+                newModeOwner = cb;
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int index = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
             setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, true, false);
         }
+        return newModeOwner;
     }
 
     /** pre-condition: oldMode != newMode */
@@ -1345,28 +1371,30 @@ public class AudioService extends IAudioService.Stub {
                     broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTING);
                     // Accept SCO audio activation only in NORMAL audio mode or if the mode is
                     // currently controlled by the same client process.
-                    if ((AudioService.this.mMode == AudioSystem.MODE_NORMAL ||
-                            mSetModeDeathHandlers.get(0).getPid() == mCreatorPid) &&
-                            (mScoAudioState == SCO_STATE_INACTIVE ||
-                             mScoAudioState == SCO_STATE_DEACTIVATE_REQ)) {
-                        if (mScoAudioState == SCO_STATE_INACTIVE) {
-                            if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
-                                if (mBluetoothHeadset.startScoUsingVirtualVoiceCall(
-                                        mBluetoothHeadsetDevice)) {
-                                    mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                                } else {
-                                    broadcastScoConnectionState(
-                                            AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
+                    synchronized(mSetModeDeathHandlers) {
+                        if ((mSetModeDeathHandlers.isEmpty() ||
+                                mSetModeDeathHandlers.get(0).getPid() == mCreatorPid) &&
+                                (mScoAudioState == SCO_STATE_INACTIVE ||
+                                 mScoAudioState == SCO_STATE_DEACTIVATE_REQ)) {
+                            if (mScoAudioState == SCO_STATE_INACTIVE) {
+                                if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
+                                    if (mBluetoothHeadset.startScoUsingVirtualVoiceCall(
+                                            mBluetoothHeadsetDevice)) {
+                                        mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                                    } else {
+                                        broadcastScoConnectionState(
+                                                AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
+                                    }
+                                } else if (getBluetoothHeadset()) {
+                                    mScoAudioState = SCO_STATE_ACTIVATE_REQ;
                                 }
-                            } else if (getBluetoothHeadset()) {
-                                mScoAudioState = SCO_STATE_ACTIVATE_REQ;
+                            } else {
+                                mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                                broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTED);
                             }
                         } else {
-                            mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                            broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTED);
+                            broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
                         }
-                    } else {
-                        broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
                     }
                 } else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED &&
                               (mScoAudioState == SCO_STATE_ACTIVE_INTERNAL ||
