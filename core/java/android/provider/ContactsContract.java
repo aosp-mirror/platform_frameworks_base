@@ -7086,6 +7086,18 @@ public final class ContactsContract {
         public static final String ACCOUNT_TYPE = "account_type";
 
         /**
+         * The data set within the account that this row belongs to.  This allows
+         * multiple sync adapters for the same account type to distinguish between
+         * each others' data.
+         *
+         * This is empty by default, and is completely optional.  It only needs to
+         * be populated if multiple sync adapters are entering distinct data for
+         * the same account type and account name.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
          * Depending on the mode defined by the sync-adapter, this flag controls
          * the top-level sync behavior for this data source.
          * <p>
