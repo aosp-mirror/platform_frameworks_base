@@ -383,7 +383,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, LinkProperties linkProperties,
-            LinkCapabilities linkCapabilities, int networkType) {
+            LinkCapabilities linkCapabilities, int networkType, boolean roaming) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
@@ -437,7 +437,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                apnType, linkProperties, linkCapabilities);
+                apnType, linkProperties, linkCapabilities, roaming);
     }
 
     public void notifyDataConnectionFailed(String reason, String apnType) {
@@ -596,7 +596,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private void broadcastDataConnectionStateChanged(int state,
             boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, LinkProperties linkProperties,
-            LinkCapabilities linkCapabilities) {
+            LinkCapabilities linkCapabilities, boolean roaming) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -618,6 +618,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (linkCapabilities != null) {
             intent.putExtra(Phone.DATA_LINK_CAPABILITIES_KEY, linkCapabilities);
         }
+        if (roaming) intent.putExtra(Phone.DATA_NETWORK_ROAMING_KEY, true);
+
         intent.putExtra(Phone.DATA_APN_KEY, apn);
         intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);
         mContext.sendStickyBroadcast(intent);

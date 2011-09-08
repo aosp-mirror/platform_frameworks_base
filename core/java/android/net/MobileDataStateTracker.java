@@ -195,6 +195,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                         intent.getStringExtra(Phone.STATE_KEY));
                 String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                mNetworkInfo.setRoaming(intent.getBooleanExtra(Phone.DATA_NETWORK_ROAMING_KEY,
+                        false));
 
                 mNetworkInfo.setIsAvailable(!intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
                         false));
