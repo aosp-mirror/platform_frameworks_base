@@ -16,10 +16,6 @@
 
 package android.accounts;
 
-import com.android.internal.R;
-import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.TelephonyIntents;
-
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -51,12 +47,12 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.internal.R;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -924,9 +920,6 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
-        final int callerUid = Binder.getCallingUid();
-        final int callerPid = Binder.getCallingPid();
-
         AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
             mAuthenticatorCache.getServiceInfo(
                     AuthenticatorDescription.newKey(account.type));
@@ -934,20 +927,19 @@ public class AccountManagerService
             authenticatorInfo != null && authenticatorInfo.type.customTokens;
 
         // skip the check if customTokens
+        final int callerUid = Binder.getCallingUid();
         final boolean permissionGranted = customTokens ||
             permissionIsGranted(account, authTokenType, callerUid);
 
         final Bundle loginOptions = (loginOptionsIn == null) ? new Bundle() :
             loginOptionsIn;
-        if (customTokens) {
-            // let authenticator know the identity of the caller
-            loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
-            loginOptions.putInt(AccountManager.KEY_CALLER_PID, callerPid);
-            if (notifyOnAuthFailure) {
-                loginOptions.putBoolean(AccountManager.KEY_NOTIFY_ON_FAILURE, true);
-            }
+        // let authenticator know the identity of the caller
+        loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
+        loginOptions.putInt(AccountManager.KEY_CALLER_PID, Binder.getCallingPid());
+        if (notifyOnAuthFailure) {
+            loginOptions.putBoolean(AccountManager.KEY_NOTIFY_ON_FAILURE, true);
         }
-
+        
         long identityToken = clearCallingIdentity();
         try {
             // if the caller has permission, do the peek. otherwise go the more expensive
@@ -1120,7 +1112,7 @@ public class AccountManagerService
 
     public void addAcount(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
-            final boolean expectActivityLaunch, final Bundle options) {
+            final boolean expectActivityLaunch, final Bundle optionsIn) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccount: accountType " + accountType
                     + ", response " + response
@@ -1133,6 +1125,13 @@ public class AccountManagerService
         if (response == null) throw new IllegalArgumentException("response is null");
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
+
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
+        options.putInt(AccountManager.KEY_CALLER_UID, uid);
+        options.putInt(AccountManager.KEY_CALLER_PID, pid);
+
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, accountType, expectActivityLaunch,
