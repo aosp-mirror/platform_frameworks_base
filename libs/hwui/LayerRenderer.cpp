@@ -91,6 +91,13 @@ Region* LayerRenderer::getRegion() {
 #endif
 }
 
+// TODO: This implementation is flawed and can generate T-junctions
+//       in the mesh, which will in turn produce cracks when the
+//       mesh is rotated/skewed. The easiest way to fix this would
+//       be, for each row, to add new vertices shared with the previous
+//       row when the two rows share an edge.
+//       In practice, T-junctions do not appear often so this has yet
+//       to be fixed.
 void LayerRenderer::generateMesh() {
 #if RENDER_LAYERS_AS_REGIONS
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
