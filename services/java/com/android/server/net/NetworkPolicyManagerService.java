@@ -100,6 +100,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
 import android.text.format.Time;
+import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -298,18 +299,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         try {
             mActivityManager.registerProcessObserver(mProcessObserver);
-        } catch (RemoteException e) {
-            // ouch, no foregroundActivities updates means some processes may
-            // never get network access.
-            Slog.e(TAG, "unable to register IProcessObserver", e);
-        }
-
-        try {
             mNetworkManager.registerObserver(mAlertObserver);
         } catch (RemoteException e) {
-            // ouch, no alert updates means we fall back to
-            // ACTION_NETWORK_STATS_UPDATED broadcasts.
-            Slog.e(TAG, "unable to register INetworkManagementEventObserver", e);
+            // ignored; both services live in system_server
         }
 
         // TODO: traverse existing processes to know foreground state, or have
@@ -462,7 +454,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // caused alert to trigger.
                         mNetworkStats.forceUpdate();
                     } catch (RemoteException e) {
-                        Slog.w(TAG, "problem updating network stats");
+                        // ignored; service lives in system_server
                     }
 
                     updateNetworkEnabledLocked();
@@ -495,9 +487,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
-
             final long totalBytes = getTotalBytes(policy.template, start, end);
-            if (totalBytes == UNKNOWN_BYTES) continue;
 
             if (policy.limitBytes != LIMIT_DISABLED && totalBytes >= policy.limitBytes) {
                 if (policy.lastSnooze >= start) {
@@ -671,7 +661,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     packageName, tag, 0x0, builder.getNotification(), idReceived);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem during enqueueNotification: " + e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -705,7 +695,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     0x0, builder.getNotification(), idReceived);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem during enqueueNotification: " + e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -716,7 +706,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNotifManager.cancelNotificationWithTag(
                     packageName, tag, 0x0);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem during enqueueNotification: " + e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -758,9 +748,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
-
             final long totalBytes = getTotalBytes(policy.template, start, end);
-            if (totalBytes == UNKNOWN_BYTES) continue;
 
             // disable data connection when over limit and not snoozed
             final boolean overLimit = policy.limitBytes != LIMIT_DISABLED
@@ -810,7 +798,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             states = mConnManager.getAllNetworkState();
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading network state");
+            // ignored; service lives in system_server
             return;
         }
 
@@ -857,9 +845,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
-
             final long totalBytes = getTotalBytes(policy.template, start, end);
-            if (totalBytes == UNKNOWN_BYTES) continue;
 
             if (LOGD) {
                 Slog.d(TAG, "applying policy " + policy.toString() + " to ifaces "
@@ -1006,9 +992,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // missing policy is okay, probably first boot
             upgradeLegacyBackgroundData();
         } catch (IOException e) {
-            Slog.e(TAG, "problem reading network stats", e);
+            Log.wtf(TAG, "problem reading network policy", e);
         } catch (XmlPullParserException e) {
-            Slog.e(TAG, "problem reading network stats", e);
+            Log.wtf(TAG, "problem reading network policy", e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
@@ -1246,12 +1232,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final long currentTime = currentTimeMillis(false);
 
+        // find total bytes used under policy
         final long start = computeLastCycleBoundary(currentTime, policy);
         final long end = currentTime;
-
-        // find total bytes used under policy
         final long totalBytes = getTotalBytes(policy.template, start, end);
-        if (totalBytes == UNKNOWN_BYTES) return null;
 
         // report soft and hard limits under policy
         final long softLimitBytes = policy.warningBytes != WARNING_DISABLED ? policy.warningBytes
@@ -1369,6 +1353,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 mScreenOn = mPowerManager.isScreenOn();
             } catch (RemoteException e) {
+                // ignored; service lives in system_server
             }
             updateRulesForScreenLocked();
         }
@@ -1448,7 +1433,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // adjust stats accounting based on foreground status
             mNetworkStats.setUidForeground(uid, uidForeground);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem dispatching foreground change");
+            // ignored; service lives in system_server
         }
     }
 
@@ -1498,9 +1483,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             mNetworkManager.setInterfaceQuota(iface, quotaBytes);
         } catch (IllegalStateException e) {
-            Slog.e(TAG, "problem setting interface quota", e);
+            Log.wtf(TAG, "problem setting interface quota", e);
         } catch (RemoteException e) {
-            Slog.e(TAG, "problem setting interface quota", e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -1508,29 +1493,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             mNetworkManager.removeInterfaceQuota(iface);
         } catch (IllegalStateException e) {
-            Slog.e(TAG, "problem removing interface quota", e);
+            Log.wtf(TAG, "problem removing interface quota", e);
         } catch (RemoteException e) {
-            Slog.e(TAG, "problem removing interface quota", e);
-        }
-    }
-
-    private void setInterfaceAlert(String iface, long alertBytes) {
-        try {
-            mNetworkManager.setInterfaceAlert(iface, alertBytes);
-        } catch (IllegalStateException e) {
-            Slog.e(TAG, "problem setting interface alert", e);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "problem setting interface alert", e);
-        }
-    }
-
-    private void removeInterfaceAlert(String iface) {
-        try {
-            mNetworkManager.removeInterfaceAlert(iface);
-        } catch (IllegalStateException e) {
-            Slog.e(TAG, "problem removing interface alert", e);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "problem removing interface alert", e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -1538,9 +1503,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             mNetworkManager.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
         } catch (IllegalStateException e) {
-            Slog.e(TAG, "problem setting uid rules", e);
+            Log.wtf(TAG, "problem setting uid rules", e);
         } catch (RemoteException e) {
-            Slog.e(TAG, "problem setting uid rules", e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -1556,7 +1521,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 mConnManager.setPolicyDataEnable(networkType, enabled);
             } catch (RemoteException e) {
-                Slog.e(TAG, "problem setting network enabled", e);
+                // ignored; service lives in system_server
             }
 
             mActiveNetworkEnabled.put(networkType, enabled);
@@ -1569,8 +1534,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return telephony.getSubscriberId();
     }
 
-    private static final long UNKNOWN_BYTES = -1;
-
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
         try {
             final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
@@ -1578,8 +1541,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final NetworkStats.Entry entry = stats.getValues(0, null);
             return entry.rxBytes + entry.txBytes;
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading summary for template " + template);
-            return UNKNOWN_BYTES;
+            // ignored; service lives in system_server
+            return 0;
         }
     }
 

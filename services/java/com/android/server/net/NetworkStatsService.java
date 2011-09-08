@@ -79,6 +79,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -128,7 +129,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int VERSION_UID_WITH_SET = 4;
 
     private static final int MSG_PERFORM_POLL = 0x1;
-    private static final int MSG_PERFORM_POLL_DETAILED = 0x2;
+
+    /** Flags to control detail level of poll event. */
+    private static final int FLAG_POLL_NETWORK = 0x1;
+    private static final int FLAG_POLL_UID = 0x2;
+    private static final int FLAG_PERSIST_NETWORK = 0x10;
+    private static final int FLAG_PERSIST_UID = 0x20;
+    private static final int FLAG_FORCE_PERSIST = 0x100;
+
+    private static final int FLAG_POLL_ALL = FLAG_POLL_NETWORK | FLAG_POLL_UID;
+    private static final int FLAG_PERSIST_ALL = FLAG_PERSIST_NETWORK | FLAG_PERSIST_UID;
 
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
@@ -261,9 +271,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         try {
             mNetworkManager.registerObserver(mAlertObserver);
         } catch (RemoteException e) {
-            // ouch, no push updates means we fall back to
-            // ACTION_NETWORK_STATS_POLL intervals.
-            Slog.e(TAG, "unable to register INetworkManagementEventObserver", e);
+            // ignored; service lives in system_server
         }
 
         registerPollAlarmLocked();
@@ -305,7 +313,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
                     mSettings.getPollInterval(), mPollIntent);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem registering for poll alarm: " + e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -321,7 +329,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (IllegalStateException e) {
             Slog.w(TAG, "problem registering for global alert: " + e);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem registering for global alert: " + e);
+            // ignored; service lives in system_server
         }
     }
 
@@ -509,7 +517,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public void forceUpdate() {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
-        performPoll(true, false);
+        performPoll(FLAG_POLL_ALL | FLAG_PERSIST_ALL);
     }
 
     /**
@@ -538,7 +546,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified UPDATE_DEVICE_STATS
             // permission above.
-            performPoll(true, false);
+            performPoll(FLAG_POLL_ALL | FLAG_PERSIST_ALL);
 
             // verify that we're watching global alert
             registerGlobalAlert();
@@ -585,7 +593,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             if (LIMIT_GLOBAL_ALERT.equals(limitName)) {
                 // kick off background poll to collect network stats; UID stats
                 // are handled during normal polling interval.
-                mHandler.obtainMessage(MSG_PERFORM_POLL).sendToTarget();
+                final int flags = FLAG_POLL_NETWORK | FLAG_PERSIST_NETWORK;
+                mHandler.obtainMessage(MSG_PERFORM_POLL, flags, 0).sendToTarget();
 
                 // re-arm global alert for next update
                 registerGlobalAlert();
@@ -605,13 +614,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // take one last stats snapshot before updating iface mapping. this
         // isn't perfect, since the kernel may already be counting traffic from
         // the updated network.
-        performPollLocked(false, false);
+
+        // poll both network and UID stats, but only persist network stats,
+        // since this codepath should stay fast. UID stats will be persisted
+        // during next alarm poll event.
+        performPollLocked(FLAG_POLL_ALL | FLAG_PERSIST_NETWORK);
 
         final NetworkState[] states;
         try {
             states = mConnManager.getAllNetworkState();
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading network state");
+            // ignored; service lives in system_server
             return;
         }
 
@@ -646,15 +659,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (IllegalStateException e) {
             Slog.w(TAG, "problem reading network stats: " + e);
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading network stats: " + e);
+            // ignored; service lives in system_server
         }
     }
 
-    private void performPoll(boolean detailedPoll, boolean forcePersist) {
+    private void performPoll(int flags) {
         synchronized (mStatsLock) {
             mWakeLock.acquire();
             try {
-                performPollLocked(detailedPoll, forcePersist);
+                performPollLocked(flags);
             } finally {
                 mWakeLock.release();
             }
@@ -664,13 +677,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Periodic poll operation, reading current statistics and recording into
      * {@link NetworkStatsHistory}.
-     *
-     * @param detailedPoll Indicate if detailed UID stats should be collected
-     *            during this poll operation.
      */
-    private void performPollLocked(boolean detailedPoll, boolean forcePersist) {
-        if (LOGV) Slog.v(TAG, "performPollLocked()");
+    private void performPollLocked(int flags) {
+        if (LOGV) Slog.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
         final long startRealtime = SystemClock.elapsedRealtime();
+
+        final boolean pollNetwork = (flags & FLAG_POLL_NETWORK) != 0;
+        final boolean pollUid = (flags & FLAG_POLL_UID) != 0;
+        final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
+        final boolean persistUid = (flags & FLAG_PERSIST_UID) != 0;
+        final boolean forcePersist = (flags & FLAG_FORCE_PERSIST) != 0;
 
         // try refreshing time source when stale
         if (mTime.getCacheAge() > mSettings.getTimeCacheMaxAge()) {
@@ -680,41 +696,40 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // TODO: consider marking "untrusted" times in historical stats
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
-        final long persistThreshold = mSettings.getPersistThreshold();
+        final long threshold = mSettings.getPersistThreshold();
 
-        final NetworkStats networkSnapshot;
-        final NetworkStats uidSnapshot;
         try {
-            networkSnapshot = mNetworkManager.getNetworkStatsSummary();
-            uidSnapshot = detailedPoll ? mNetworkManager.getNetworkStatsUidDetail(UID_ALL) : null;
-        } catch (IllegalStateException e) {
-            Slog.w(TAG, "problem reading network stats: " + e);
-            return;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading network stats: " + e);
-            return;
-        }
+            if (pollNetwork) {
+                final NetworkStats networkSnapshot = mNetworkManager.getNetworkStatsSummary();
+                performNetworkPollLocked(networkSnapshot, currentTime);
 
-        performNetworkPollLocked(networkSnapshot, currentTime);
-
-        // persist when enough network data has occurred
-        final NetworkStats persistNetworkDelta = computeStatsDelta(
-                mLastPersistNetworkSnapshot, networkSnapshot, true);
-        if (forcePersist || persistNetworkDelta.getTotalBytes() > persistThreshold) {
-            writeNetworkStatsLocked();
-            mLastPersistNetworkSnapshot = networkSnapshot;
-        }
-
-        if (detailedPoll) {
-            performUidPollLocked(uidSnapshot, currentTime);
-
-            // persist when enough network data has occurred
-            final NetworkStats persistUidDelta = computeStatsDelta(
-                    mLastPersistUidSnapshot, uidSnapshot, true);
-            if (forcePersist || persistUidDelta.getTotalBytes() > persistThreshold) {
-                writeUidStatsLocked();
-                mLastPersistUidSnapshot = networkSnapshot;
+                // persist when enough network data has occurred
+                final NetworkStats persistNetworkDelta = computeStatsDelta(
+                        mLastPersistNetworkSnapshot, networkSnapshot, true);
+                final boolean pastThreshold = persistNetworkDelta.getTotalBytes() > threshold;
+                if (forcePersist || (persistNetwork && pastThreshold)) {
+                    writeNetworkStatsLocked();
+                    mLastPersistNetworkSnapshot = networkSnapshot;
+                }
             }
+
+            if (pollUid) {
+                final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
+                performUidPollLocked(uidSnapshot, currentTime);
+
+                // persist when enough network data has occurred
+                final NetworkStats persistUidDelta = computeStatsDelta(
+                        mLastPersistUidSnapshot, uidSnapshot, true);
+                final boolean pastThreshold = persistUidDelta.getTotalBytes() > threshold;
+                if (forcePersist || (persistUid && pastThreshold)) {
+                    writeUidStatsLocked();
+                    mLastPersistUidSnapshot = uidSnapshot;
+                }
+            }
+        } catch (IllegalStateException e) {
+            Log.wtf(TAG, "problem reading network stats", e);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
         }
 
         if (LOGV) {
@@ -722,8 +737,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             Slog.v(TAG, "performPollLocked() took " + duration + "ms");
         }
 
-        // sample stats after detailed poll
-        if (detailedPoll) {
+        // sample stats after each full poll
+        if (pollNetwork && pollUid) {
             performSample();
         }
 
@@ -785,6 +800,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             entry = delta.getValues(i, entry);
             final NetworkIdentitySet ident = mActiveIfaces.get(entry.iface);
             if (ident == null) {
+                if (entry.rxBytes > 0 || entry.rxPackets > 0 || entry.txBytes > 0
+                        || entry.txPackets > 0) {
+                    Log.w(TAG, "dropping UID delta from unknown iface: " + entry);
+                }
                 continue;
             }
 
@@ -959,7 +978,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (FileNotFoundException e) {
             // missing stats is okay, probably first boot
         } catch (IOException e) {
-            Slog.e(TAG, "problem reading network stats", e);
+            Log.wtf(TAG, "problem reading network stats", e);
         } finally {
             IoUtils.closeQuietly(in);
         }
@@ -1032,7 +1051,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (FileNotFoundException e) {
             // missing stats is okay, probably first boot
         } catch (IOException e) {
-            Slog.e(TAG, "problem reading uid stats", e);
+            Log.wtf(TAG, "problem reading uid stats", e);
         } finally {
             IoUtils.closeQuietly(in);
         }
@@ -1061,7 +1080,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             out.flush();
             mNetworkFile.finishWrite(fos);
         } catch (IOException e) {
-            Slog.w(TAG, "problem writing stats: ", e);
+            Log.wtf(TAG, "problem writing stats", e);
             if (fos != null) {
                 mNetworkFile.failWrite(fos);
             }
@@ -1115,7 +1134,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             out.flush();
             mUidFile.finishWrite(fos);
         } catch (IOException e) {
-            Slog.w(TAG, "problem writing stats: ", e);
+            Log.wtf(TAG, "problem writing stats", e);
             if (fos != null) {
                 mUidFile.failWrite(fos);
             }
@@ -1142,7 +1161,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             if (argSet.contains("poll")) {
-                performPollLocked(true, true);
+                performPollLocked(FLAG_POLL_ALL | FLAG_PERSIST_ALL | FLAG_FORCE_PERSIST);
                 pw.println("Forced poll");
                 return;
             }
@@ -1273,11 +1292,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_PERFORM_POLL: {
-                    performPoll(false, false);
-                    return true;
-                }
-                case MSG_PERFORM_POLL_DETAILED: {
-                    performPoll(true, false);
+                    final int flags = msg.arg1;
+                    performPoll(flags);
                     return true;
                 }
                 default: {
@@ -1349,7 +1365,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return getSecureLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
         }
         public long getPersistThreshold() {
-            return getSecureLong(NETSTATS_PERSIST_THRESHOLD, 512 * KB_IN_BYTES);
+            return getSecureLong(NETSTATS_PERSIST_THRESHOLD, 2 * MB_IN_BYTES);
         }
         public long getNetworkBucketDuration() {
             return getSecureLong(NETSTATS_NETWORK_BUCKET_DURATION, HOUR_IN_MILLIS);
