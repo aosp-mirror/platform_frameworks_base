@@ -724,6 +724,8 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         return;
     }
 
+    // TODO: See LayerRenderer.cpp::generateMesh() for important
+    //       information about this implementation
     if (!layer->region.isEmpty()) {
         size_t count;
         const android::Rect* rects = layer->region.getArray(&count);
