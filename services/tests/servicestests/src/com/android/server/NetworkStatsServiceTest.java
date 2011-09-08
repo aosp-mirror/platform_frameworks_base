@@ -178,6 +178,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -230,6 +231,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -320,6 +322,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectSettings(0L, HOUR_IN_MILLIS, WEEK_IN_MILLIS);
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -370,6 +373,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -450,6 +454,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -507,6 +512,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -573,6 +579,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -635,6 +642,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));

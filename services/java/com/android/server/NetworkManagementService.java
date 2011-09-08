@@ -98,6 +98,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public static final String LIMIT_GLOBAL_ALERT = "globalAlert";
 
     /** {@link #mStatsXtUid} headers. */
+    private static final String KEY_IDX = "idx";
     private static final String KEY_IFACE = "iface";
     private static final String KEY_UID = "uid_tag_int";
     private static final String KEY_COUNTER_SET = "cnt_set";
@@ -1323,17 +1324,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         // TODO: remove knownLines check once 5087722 verified
         final HashSet<String> knownLines = Sets.newHashSet();
+        // TODO: remove lastIdx check once 5270106 verified
+        int lastIdx = 0;
 
         final ArrayList<String> keys = Lists.newArrayList();
         final ArrayList<String> values = Lists.newArrayList();
         final HashMap<String, String> parsed = Maps.newHashMap();
 
         BufferedReader reader = null;
+        String line = null;
         try {
             reader = new BufferedReader(new FileReader(mStatsXtUid));
 
             // parse first line as header
-            String line = reader.readLine();
+            line = reader.readLine();
             splitLine(line, keys);
 
             // parse remaining lines
@@ -1342,32 +1346,35 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 parseLine(keys, values, parsed);
 
                 if (!knownLines.add(line)) {
-                    throw new IllegalStateException("encountered duplicate proc entry");
+                    throw new IllegalStateException("duplicate proc entry: " + line);
                 }
 
-                try {
-                    entry.iface = parsed.get(KEY_IFACE);
-                    entry.uid = getParsedInt(parsed, KEY_UID);
-                    entry.set = getParsedInt(parsed, KEY_COUNTER_SET);
-                    entry.tag = kernelToTag(parsed.get(KEY_TAG_HEX));
-                    entry.rxBytes = getParsedLong(parsed, KEY_RX_BYTES);
-                    entry.rxPackets = getParsedLong(parsed, KEY_RX_PACKETS);
-                    entry.txBytes = getParsedLong(parsed, KEY_TX_BYTES);
-                    entry.txPackets = getParsedLong(parsed, KEY_TX_PACKETS);
+                final int idx = getParsedInt(parsed, KEY_IDX);
+                if (idx > lastIdx + 1) {
+                    throw new IllegalStateException(
+                            "inconsistent idx=" + idx + " after lastIdx=" + lastIdx);
+                }
+                lastIdx = idx;
 
-                    if (limitUid == UID_ALL || limitUid == entry.uid) {
-                        stats.addValues(entry);
-                    }
-                } catch (NumberFormatException e) {
-                    Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
+                entry.iface = parsed.get(KEY_IFACE);
+                entry.uid = getParsedInt(parsed, KEY_UID);
+                entry.set = getParsedInt(parsed, KEY_COUNTER_SET);
+                entry.tag = kernelToTag(parsed.get(KEY_TAG_HEX));
+                entry.rxBytes = getParsedLong(parsed, KEY_RX_BYTES);
+                entry.rxPackets = getParsedLong(parsed, KEY_RX_PACKETS);
+                entry.txBytes = getParsedLong(parsed, KEY_TX_BYTES);
+                entry.txPackets = getParsedLong(parsed, KEY_TX_PACKETS);
+
+                if (limitUid == UID_ALL || limitUid == entry.uid) {
+                    stats.addValues(entry);
                 }
             }
         } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new IllegalStateException("problem parsing line: " + line, e);
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new IllegalStateException("problem parsing line: " + line, e);
         } catch (IOException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new IllegalStateException("problem parsing line: " + line, e);
         } finally {
             IoUtils.closeQuietly(reader);
         }
