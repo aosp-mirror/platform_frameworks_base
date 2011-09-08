@@ -5171,6 +5171,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                     cleanUpRemovedTaskLocked(r,
                             (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0);
                     return true;
+                } else {
+                    TaskRecord tr = null;
+                    int i=0;
+                    while (i < mRecentTasks.size()) {
+                        TaskRecord t = mRecentTasks.get(i);
+                        if (t.taskId == taskId) {
+                            tr = t;
+                            break;
+                        }
+                        i++;
+                    }
+                    if (tr != null) {
+                        if (tr.numActivities <= 0) {
+                            // Caller is just removing a recent task that is
+                            // not actively running.  That is easy!
+                            mRecentTasks.remove(i);
+                        } else {
+                            Slog.w(TAG, "removeTask: task " + taskId
+                                    + " does not have activities to remove, "
+                                    + " but numActivities=" + tr.numActivities
+                                    + ": " + tr);
+                        }
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
