@@ -20,8 +20,8 @@
 
 #include <binder/IPCThreadState.h>
 #include <media/AudioTrack.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/AudioPlayer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
@@ -60,7 +60,7 @@ AudioPlayer::~AudioPlayer() {
 }
 
 void AudioPlayer::setSource(const sp<MediaSource> &source) {
-    CHECK_EQ(mSource, NULL);
+    CHECK(mSource == NULL);
     mSource = source;
 }
 
@@ -466,6 +466,8 @@ int64_t AudioPlayer::getRealTimeUs() {
 }
 
 int64_t AudioPlayer::getRealTimeUsLocked() const {
+    CHECK(mStarted);
+    CHECK_NE(mSampleRate, 0);
     return -mLatencyUs + (mNumFramesPlayed * 1000000) / mSampleRate;
 }
 
