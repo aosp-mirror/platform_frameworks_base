@@ -19,6 +19,7 @@ package android.inputmethodservice;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 /***
@@ -141,5 +142,18 @@ public class ExtractEditText extends EditText {
      */
     @Override public boolean hasFocus() {
         return this.isEnabled();
+    }
+
+    /**
+     * @hide
+     */
+    @Override protected void viewClicked(InputMethodManager imm) {
+        // As an instance of this class is supposed to be owned by IMS,
+        // and it has a reference to the IMS (the current IME),
+        // we just need to call back its onViewClicked() here.
+        // It should be good to avoid unnecessary IPCs by doing this as well.
+        if (mIME != null) {
+            mIME.onViewClicked(false);
+        }
     }
 }
