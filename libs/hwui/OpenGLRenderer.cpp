@@ -63,36 +63,42 @@ struct Blender {
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
 static const Blender gBlends[] = {
-    { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrc_Mode,     GL_ONE,                  GL_ZERO },
-    { SkXfermode::kDst_Mode,     GL_ZERO,                 GL_ONE },
-    { SkXfermode::kSrcOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
-    { SkXfermode::kSrcIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
-    { SkXfermode::kDstIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
-    { SkXfermode::kSrcOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
-    { SkXfermode::kDstOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrcATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
-    { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
+    { SkXfermode::kClear_Mode,    GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kSrc_Mode,      GL_ONE,                 GL_ZERO },
+    { SkXfermode::kDst_Mode,      GL_ZERO,                GL_ONE },
+    { SkXfermode::kSrcOver_Mode,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kDstOver_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
+    { SkXfermode::kSrcIn_Mode,    GL_DST_ALPHA,           GL_ZERO },
+    { SkXfermode::kDstIn_Mode,    GL_ZERO,                GL_SRC_ALPHA },
+    { SkXfermode::kSrcOut_Mode,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
+    { SkXfermode::kDstOut_Mode,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kSrcATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kDstATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
+    { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
+    { SkXfermode::kMultiply_Mode, GL_ZERO,                GL_SRC_COLOR },
+    { SkXfermode::kScreen_Mode,   GL_ONE,                 GL_ONE_MINUS_SRC_COLOR }
 };
 
 // This array contains the swapped version of each SkXfermode. For instance
 // this array's SrcOver blending mode is actually DstOver. You can refer to
 // createLayer() for more information on the purpose of this array.
 static const Blender gBlendsSwap[] = {
-    { SkXfermode::kClear_Mode,   GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
-    { SkXfermode::kSrc_Mode,     GL_ZERO,                 GL_ONE },
-    { SkXfermode::kDst_Mode,     GL_ONE,                  GL_ZERO },
-    { SkXfermode::kSrcOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
-    { SkXfermode::kDstOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrcIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
-    { SkXfermode::kDstIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
-    { SkXfermode::kSrcOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
-    { SkXfermode::kSrcATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
-    { SkXfermode::kDstATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
+    { SkXfermode::kClear_Mode,    GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
+    { SkXfermode::kSrc_Mode,      GL_ZERO,                GL_ONE },
+    { SkXfermode::kDst_Mode,      GL_ONE,                 GL_ZERO },
+    { SkXfermode::kSrcOver_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
+    { SkXfermode::kDstOver_Mode,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kSrcIn_Mode,    GL_ZERO,                GL_SRC_ALPHA },
+    { SkXfermode::kDstIn_Mode,    GL_DST_ALPHA,           GL_ZERO },
+    { SkXfermode::kSrcOut_Mode,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kDstOut_Mode,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
+    { SkXfermode::kSrcATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
+    { SkXfermode::kDstATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
+    { SkXfermode::kMultiply_Mode, GL_DST_COLOR,           GL_ZERO },
+    { SkXfermode::kScreen_Mode,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
 };
 
 static const GLenum gTextureUnits[] = {
@@ -2489,7 +2495,7 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         ProgramDescription& description, bool swapSrcDst) {
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
     if (blend) {
-        if (mode < SkXfermode::kPlus_Mode) {
+        if (mode <= SkXfermode::kScreen_Mode) {
             if (!mCaches.blend) {
                 glEnable(GL_BLEND);
             }
@@ -2542,15 +2548,7 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
 
 void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
     if (paint) {
-        if (!mCaches.extensions.hasFramebufferFetch()) {
-            const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
-            if (!isMode) {
-                // Assume SRC_OVER
-                *mode = SkXfermode::kSrcOver_Mode;
-            }
-        } else {
-            *mode = getXfermode(paint->getXfermode());
-        }
+        *mode = getXfermode(paint->getXfermode());
 
         // Skia draws using the color's alpha channel if < 255
         // Otherwise, it uses the paint's alpha
