@@ -18,9 +18,9 @@
     android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceListItem"
+    android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:gravity="center_vertical"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
-    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
 />

@@ -33,6 +33,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:paddingLeft="6dip" />
+        android:paddingLeft="?android:attr/listPreferredItemPaddingLeft" />
 </LinearLayout>
 
