@@ -19,33 +19,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/activity_chooser_view_content"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:gravity="center"
-    style="?android:attr/actionButtonStyle"
-    android:padding="0dip">
-
-    <FrameLayout
-        android:id="@+id/default_activity_button"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:focusable="true"
-        android:addStatesFromChildren="true"
-        android:background="?android:attr/actionBarItemBackground">
-
-        <ImageView android:id="@+id/image"
-            android:layout_width="32dip"
-            android:layout_height="32dip"
-            android:layout_gravity="center"
-            android:layout_marginTop="4dip"
-            android:layout_marginBottom="4dip"
-            android:layout_marginLeft="8dip"
-            android:layout_marginRight="8dip"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true" />
-
-    </FrameLayout>
+    style="?android:attr/activityChooserViewStyle">
 
     <FrameLayout
         android:id="@+id/expand_activities_button"
@@ -60,10 +36,32 @@
             android:layout_width="32dip"
             android:layout_height="32dip"
             android:layout_gravity="center"
-            android:layout_marginTop="4dip"
-            android:layout_marginBottom="4dip"
-            android:layout_marginLeft="8dip"
-            android:layout_marginRight="8dip"
+            android:layout_marginTop="2dip"
+            android:layout_marginBottom="2dip"
+            android:layout_marginLeft="12dip"
+            android:layout_marginRight="12dip"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/default_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:focusable="true"
+        android:addStatesFromChildren="true"
+        android:background="?android:attr/actionBarItemBackground">
+
+        <ImageView android:id="@+id/image"
+            android:layout_width="32dip"
+            android:layout_height="32dip"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dip"
+            android:layout_marginBottom="2dip"
+            android:layout_marginLeft="12dip"
+            android:layout_marginRight="12dip"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true" />
 

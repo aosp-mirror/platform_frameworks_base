@@ -663,6 +663,17 @@ public class ActivityChooserModel extends DataSetObservable {
         }
     }
 
+    /**
+     * Gets the history size.
+     *
+     * @return The history size.
+     */
+    public int getHistorySize() {
+        synchronized (mInstanceLock) {
+            return mHistoricalRecords.size();
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         super.finalize();

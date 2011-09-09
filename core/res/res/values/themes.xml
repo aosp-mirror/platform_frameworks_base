@@ -269,7 +269,8 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@android:style/Widget.ListPopupWindow</item>
         <item name="popupMenuStyle">@android:style/Widget.PopupMenu</item>
-        
+        <item name="activityChooserViewStyle">@android:style/Widget.ActivityChooserView</item>
+
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
         <item name="preferenceCategoryStyle">@android:style/Preference.Category</item>
@@ -1062,6 +1063,7 @@ please see themes_device_defaults.xml.
         <item name="listPopupWindowStyle">@android:style/Widget.Holo.ListPopupWindow</item>
         <item name="popupMenuStyle">@android:style/Widget.Holo.PopupMenu</item>
         <item name="stackViewStyle">@android:style/Widget.Holo.StackView</item>
+        <item name="activityChooserViewStyle">@android:style/Widget.Holo.ActivityChooserView</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
@@ -1366,6 +1368,7 @@ please see themes_device_defaults.xml.
         <item name="listPopupWindowStyle">@android:style/Widget.Holo.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@android:style/Widget.Holo.Light.PopupMenu</item>
         <item name="stackViewStyle">@android:style/Widget.Holo.StackView</item>
+        <item name="activityChooserViewStyle">@android:style/Widget.Holo.Light.ActivityChooserView</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
