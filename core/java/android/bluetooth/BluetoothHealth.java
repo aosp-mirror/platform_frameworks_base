@@ -81,6 +81,20 @@ public final class BluetoothHealth implements BluetoothProfile {
      */
     public static final int CHANNEL_TYPE_ANY = 12;
 
+    /** @hide */
+    public static final int HEALTH_OPERATION_SUCCESS = 6000;
+    /** @hide */
+    public static final int HEALTH_OPERATION_ERROR = 6001;
+    /** @hide */
+    public static final int HEALTH_OPERATION_INVALID_ARGS = 6002;
+    /** @hide */
+    public static final int HEALTH_OPERATION_GENERIC_FAILURE = 6003;
+    /** @hide */
+    public static final int HEALTH_OPERATION_NOT_FOUND = 6004;
+    /** @hide */
+    public static final int HEALTH_OPERATION_NOT_ALLOWED = 6005;
+
+
     /**
      * Register an application configuration that acts as a Health SINK.
      * This is the configuration that will be used to communicate with health devices

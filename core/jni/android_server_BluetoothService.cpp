@@ -78,8 +78,8 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *nat);
 void onDiscoverServicesResult(DBusMessage *msg, void *user, void *nat);
 void onCreateDeviceResult(DBusMessage *msg, void *user, void *nat);
 void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *nat);
-void onConnectPanResult(DBusMessage *msg, void *user, void *n);
 void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *nat);
+void onHealthDeviceConnectionResult(DBusMessage *msg, void *user, void *nat);
 
 
 /** Get native data stored in the opaque (Java code maintained) pointer mNativeData
@@ -1450,79 +1450,70 @@ static jboolean unregisterHealthApplicationNative(JNIEnv *env, jobject object,
 }
 
 static jboolean createChannelNative(JNIEnv *env, jobject object,
-                                       jstring devicePath, jstring appPath, jstring config) {
+                                       jstring devicePath, jstring appPath, jstring config,
+                                       jint code) {
     LOGV("%s", __FUNCTION__);
-    jboolean result = JNI_FALSE;
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
 
-    if (nat) {
-        DBusError err;
-        dbus_error_init(&err);
-
+    if (nat && eventLoopNat) {
         const char *c_device_path = env->GetStringUTFChars(devicePath, NULL);
         const char *c_app_path = env->GetStringUTFChars(appPath, NULL);
         const char *c_config = env->GetStringUTFChars(config, NULL);
+        int *data = (int *) malloc(sizeof(int));
+        if (data == NULL) return JNI_FALSE;
 
-        DBusMessage *reply  = dbus_func_args(env, nat->conn,
-                                             c_device_path,
-                                             DBUS_HEALTH_DEVICE_IFACE,
-                                             "CreateChannel",
-                                             DBUS_TYPE_OBJECT_PATH, &c_app_path,
-                                             DBUS_TYPE_STRING, &c_config,
-                                             DBUS_TYPE_INVALID);
+        *data = code;
+        bool ret = dbus_func_args_async(env, nat->conn, -1, onHealthDeviceConnectionResult,
+                                        data, eventLoopNat, c_device_path,
+                                        DBUS_HEALTH_DEVICE_IFACE, "CreateChannel",
+                                        DBUS_TYPE_OBJECT_PATH, &c_app_path,
+                                        DBUS_TYPE_STRING, &c_config,
+                                        DBUS_TYPE_INVALID);
 
 
         env->ReleaseStringUTFChars(devicePath, c_device_path);
         env->ReleaseStringUTFChars(appPath, c_app_path);
         env->ReleaseStringUTFChars(config, c_config);
 
-        if (!reply) {
-            if (dbus_error_is_set(&err)) {
-                LOG_AND_FREE_DBUS_ERROR(&err);
-            }
-        } else {
-            result = JNI_TRUE;
-        }
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
-    return result;
+    return JNI_FALSE;
 }
 
 static jboolean destroyChannelNative(JNIEnv *env, jobject object, jstring devicePath,
-                                     jstring channelPath) {
+                                     jstring channelPath, jint code) {
     LOGE("%s", __FUNCTION__);
-    jboolean result = JNI_FALSE;
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
 
-    if (nat) {
-        DBusError err;
-        dbus_error_init(&err);
-
+    if (nat && eventLoopNat) {
         const char *c_device_path = env->GetStringUTFChars(devicePath, NULL);
         const char *c_channel_path = env->GetStringUTFChars(channelPath, NULL);
+        int *data = (int *) malloc(sizeof(int));
+        if (data == NULL) return JNI_FALSE;
 
-        DBusMessage *reply = dbus_func_args(env, nat->conn,
-                                            c_device_path,
-                                            DBUS_HEALTH_DEVICE_IFACE,
-                                            "DestroyChannel",
-                                            DBUS_TYPE_OBJECT_PATH, &c_channel_path,
-                                            DBUS_TYPE_INVALID);
+        *data = code;
+        bool ret = dbus_func_args_async(env, nat->conn, -1, onHealthDeviceConnectionResult,
+                                        data, eventLoopNat, c_device_path,
+                                        DBUS_HEALTH_DEVICE_IFACE, "DestroyChannel",
+                                        DBUS_TYPE_OBJECT_PATH, &c_channel_path,
+                                        DBUS_TYPE_INVALID);
 
         env->ReleaseStringUTFChars(devicePath, c_device_path);
         env->ReleaseStringUTFChars(channelPath, c_channel_path);
 
-        if (!reply) {
-            if (dbus_error_is_set(&err)) {
-                LOG_AND_FREE_DBUS_ERROR(&err);
-            }
-        } else {
-            result = JNI_TRUE;
-        }
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
-    return result;
+    return JNI_FALSE;
 }
 
 static jstring getMainChannelNative(JNIEnv *env, jobject object, jstring devicePath) {
@@ -1755,9 +1746,10 @@ static JNINativeMethod sMethods[] = {
 
     {"unregisterHealthApplicationNative", "(Ljava/lang/String;)Z",
               (void *)unregisterHealthApplicationNative},
-    {"createChannelNative", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z",
+    {"createChannelNative", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)Z",
               (void *)createChannelNative},
-    {"destroyChannelNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)destroyChannelNative},
+    {"destroyChannelNative", "(Ljava/lang/String;Ljava/lang/String;I)Z",
+              (void *)destroyChannelNative},
     {"getMainChannelNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getMainChannelNative},
     {"getChannelApplicationNative", "(Ljava/lang/String;)Ljava/lang/String;",
               (void *)getChannelApplicationNative},

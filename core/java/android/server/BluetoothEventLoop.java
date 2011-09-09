@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHealth;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
@@ -970,6 +971,22 @@ class BluetoothEventLoop {
                 BluetoothPan.STATE_DISCONNECTED;
             mBluetoothService.handlePanDeviceStateChange(device, newState,
                                                   BluetoothPan.LOCAL_PANU_ROLE);
+        }
+    }
+
+    /**
+     * Called by native code for the async response to a Connect
+     * method call to org.bluez.Health
+     *
+     * @param chanCode The internal id of the channel
+     * @param result Result code of the operation.
+     */
+    private void onHealthDeviceConnectionResult(int chanCode, int result) {
+        log ("onHealthDeviceConnectionResult " + chanCode + " " + result);
+        // Success case gets handled by Property Change signal
+        if (result != BluetoothHealth.HEALTH_OPERATION_SUCCESS) {
+            mBluetoothService.onHealthDeviceChannelConnectionError(chanCode,
+                                                 BluetoothHealth.STATE_CHANNEL_DISCONNECTED);
         }
     }
 
