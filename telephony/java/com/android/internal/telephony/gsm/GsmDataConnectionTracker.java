@@ -1681,23 +1681,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void onRoamingOff() {
         if (DBG) log("onRoamingOff");
-        // Notify data availability so APN can be enabled.
-        notifyDataAvailability(Phone.REASON_ROAMING_OFF);
 
-        setupDataOnReadyApns(Phone.REASON_ROAMING_OFF);
+        if (getDataOnRoamingEnabled() == false) {
+            notifyDataAvailability(Phone.REASON_ROAMING_OFF);
+            setupDataOnReadyApns(Phone.REASON_ROAMING_OFF);
+        } else {
+            notifyDataConnection(Phone.REASON_ROAMING_OFF);
+        }
     }
 
     @Override
     protected void onRoamingOn() {
-        // Notify data availability so APN can be enabled.
-        notifyDataAvailability(Phone.REASON_ROAMING_ON);
-
         if (getDataOnRoamingEnabled()) {
             if (DBG) log("onRoamingOn: setup data on roaming");
             setupDataOnReadyApns(Phone.REASON_ROAMING_ON);
+            notifyDataConnection(Phone.REASON_ROAMING_ON);
         } else {
             if (DBG) log("onRoamingOn: Tear down data connection on roaming.");
             cleanUpAllConnections(true, Phone.REASON_ROAMING_ON);
+            notifyDataAvailability(Phone.REASON_ROAMING_ON);
         }
     }
 

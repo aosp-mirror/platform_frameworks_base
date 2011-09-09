@@ -106,6 +106,7 @@ public interface Phone {
 
     static final String DATA_IFACE_NAME_KEY = "iface";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
+    static final String DATA_NETWORK_ROAMING_KEY = "networkRoaming";
     static final String PHONE_IN_ECM_STATE = "phoneinECMState";
 
     /**

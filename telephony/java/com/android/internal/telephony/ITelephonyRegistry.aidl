@@ -35,7 +35,7 @@ interface ITelephonyRegistry {
     void notifyDataActivity(int state);
     void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, in LinkProperties linkProperties,
-            in LinkCapabilities linkCapabilities, int networkType);
+            in LinkCapabilities linkCapabilities, int networkType, boolean roaming);
     void notifyDataConnectionFailed(String reason, String apnType);
     void notifyCellLocation(in Bundle cellLocation);
     void notifyOtaspChanged(in int otaspMode);
