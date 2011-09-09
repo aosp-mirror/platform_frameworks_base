@@ -127,6 +127,15 @@ public abstract class KeyguardViewBase extends FrameLayout {
      */
     abstract public void cleanUp();
 
+    /**
+     * These were added to support FaceLock because the KeyguardViewManager needs to tell the 
+     * LockPatternKeyguardView when to bind and and unbind with FaceLock service.  Although
+     * implemented in LockPatternKeyguardView, these are not implemented in anything else
+     * derived from KeyguardViewBase
+     */
+    abstract public void bindToFaceLock();
+    abstract public void stopAndUnbindFromFaceLock();
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (shouldEventKeepScreenOnWhileKeyguardShowing(event)) {

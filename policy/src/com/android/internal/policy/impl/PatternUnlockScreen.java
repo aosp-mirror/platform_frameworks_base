@@ -199,7 +199,11 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         setFocusableInTouchMode(true);
     }
 
-
+    // TODO(bcolonna): This is to tell FaceLock where to draw...but this covers up the wireless
+    // service text, so we will want to change the way the area is specified
+    public View getUnlockAreaView() {
+        return mLockPatternView;
+    }
 
     public void setEnableFallback(boolean state) {
         if (DEBUG) Log.d(TAG, "setEnableFallback(" + state + ")");

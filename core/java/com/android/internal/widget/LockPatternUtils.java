@@ -106,8 +106,11 @@ public class LockPatternUtils {
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
+    public static final String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
     private final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
     private final static String DISABLE_LOCKSCREEN_KEY = "lockscreen.disabled";
+    public final static String LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK
+            = "lockscreen.biometric_weak_fallback";
 
     private final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
@@ -373,6 +376,7 @@ public class LockPatternUtils {
         setLockPatternEnabled(false);
         saveLockPattern(null);
         setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        setLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
     }
 
     /**
@@ -400,6 +404,15 @@ public class LockPatternUtils {
      * @param pattern The new pattern to save.
      */
     public void saveLockPattern(List<LockPatternView.Cell> pattern) {
+        this.saveLockPattern(pattern, false);
+    }
+
+    /**
+     * Save a lock pattern.
+     * @param pattern The new pattern to save.
+     * @param isFallback Specifies if this is a fallback to biometric weak
+     */
+    public void saveLockPattern(List<LockPatternView.Cell> pattern, boolean isFallback) {
         // Compute the hash
         final byte[] hash = LockPatternUtils.patternToHash(pattern);
         try {
@@ -417,7 +430,13 @@ public class LockPatternUtils {
             if (pattern != null) {
                 keyStore.password(patternToString(pattern));
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
-                setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                if (!isFallback) {
+                    setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                } else {
+                    setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
+                    setLong(PASSWORD_TYPE_ALTERNATE_KEY,
+                            DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
                         .size(), 0, 0, 0, 0, 0, 0);
             } else {
@@ -493,6 +512,18 @@ public class LockPatternUtils {
      * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      */
     public void saveLockPassword(String password, int quality) {
+        this.saveLockPassword(password, quality, false);
+    }
+
+    /**
+     * Save a lock password.  Does not ensure that the password is as good
+     * as the requested mode, but will adjust the mode to be as good as the
+     * pattern.
+     * @param password The password to save
+     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * @param isFallback Specifies if this is a fallback to biometric weak
+     */
+    public void saveLockPassword(String password, int quality, boolean isFallback) {
         // Compute the hash
         final byte[] hash = passwordToHash(password);
         try {
@@ -515,7 +546,12 @@ public class LockPatternUtils {
                 keyStore.password(password);
 
                 int computedQuality = computePasswordQuality(password);
-                setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
+                if (!isFallback) {
+                    setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
+                } else {
+                    setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
+                    setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality));
+                }
                 if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                     int letters = 0;
                     int uppercase = 0;
@@ -590,7 +626,22 @@ public class LockPatternUtils {
      * @return stored password quality
      */
     public int getKeyguardStoredPasswordQuality() {
-        return (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        int quality =
+                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        // If the user has chosen to use weak biometric sensor, then return the backup locking
+        // method and treat biometric as a special case.
+        if (quality == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK) {
+            quality =
+                (int) getLong(PASSWORD_TYPE_ALTERNATE_KEY,
+                        DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        }
+        return quality;
+    }
+
+    public boolean usingBiometricWeak() {
+        int quality =
+                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        return quality == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
     }
 
     /**
@@ -723,6 +774,15 @@ public class LockPatternUtils {
         return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED)
                 && getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
                         == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+    }
+
+    /**
+     * @return Whether biometric weak lock is enabled.
+     */
+    public boolean isBiometricEnabled() {
+        // TODO: check if it's installed
+        return getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
+                == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
     }
 
     /**
@@ -863,7 +923,8 @@ public class LockPatternUtils {
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
         final boolean secure = isPattern && isLockPatternEnabled() && savedPatternExists()
-                || isPassword && savedPasswordExists();
+                || isPassword && savedPasswordExists()
+                || usingBiometricWeak() && isBiometricEnabled();
         return secure;
     }
 
