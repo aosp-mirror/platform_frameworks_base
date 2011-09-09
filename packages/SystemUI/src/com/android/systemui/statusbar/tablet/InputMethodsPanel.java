@@ -218,15 +218,16 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
 
     private View createInputMethodItem(
             final InputMethodInfo imi, final InputMethodSubtype subtype) {
-        CharSequence subtypeName = getSubtypeName(imi, subtype);
-        CharSequence imiName = getIMIName(imi);
-        Drawable icon = getSubtypeIcon(imi, subtype);
-        View view = View.inflate(mContext, R.layout.status_bar_input_methods_item, null);
-        ImageView subtypeIcon = (ImageView)view.findViewById(R.id.item_icon);
-        TextView itemTitle = (TextView)view.findViewById(R.id.item_title);
-        TextView itemSubtitle = (TextView)view.findViewById(R.id.item_subtitle);
-        ImageView settingsIcon = (ImageView)view.findViewById(R.id.item_settings_icon);
-        View subtypeView = view.findViewById(R.id.item_subtype);
+        final CharSequence subtypeName = subtype.overridesImplicitlyEnabledSubtype()
+                ? null : getSubtypeName(imi, subtype);
+        final CharSequence imiName = getIMIName(imi);
+        final Drawable icon = getSubtypeIcon(imi, subtype);
+        final View view = View.inflate(mContext, R.layout.status_bar_input_methods_item, null);
+        final ImageView subtypeIcon = (ImageView)view.findViewById(R.id.item_icon);
+        final TextView itemTitle = (TextView)view.findViewById(R.id.item_title);
+        final TextView itemSubtitle = (TextView)view.findViewById(R.id.item_subtitle);
+        final ImageView settingsIcon = (ImageView)view.findViewById(R.id.item_settings_icon);
+        final View subtypeView = view.findViewById(R.id.item_subtype);
         if (subtypeName == null) {
             itemTitle.setText(imiName);
             itemSubtitle.setVisibility(View.GONE);
