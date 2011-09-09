@@ -95,7 +95,6 @@ public class BluetoothService extends IBluetooth.Stub {
     private boolean mIsAirplaneSensitive;
     private boolean mIsAirplaneToggleable;
     private BluetoothAdapterStateMachine mBluetoothState;
-    private boolean mRestart = false;  // need to call enable() after disable()
     private int[] mAdapterSdpHandles;
     private ParcelUuid[] mAdapterUuids;
 
@@ -429,11 +428,6 @@ public class BluetoothService extends IBluetooth.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
-        if (mRestart) {
-            mRestart = false;
-            enable();
-        }
     }
 
     /**
@@ -456,10 +450,6 @@ public class BluetoothService extends IBluetooth.Stub {
         // the adapter property could be changed before event loop is stoped, clear it again
         mAdapterProperties.clear();
         disableNative();
-        if (mRestart) {
-            mRestart = false;
-            enable();
-        }
     }
 
     /** Bring up BT and persist BT on in settings */
@@ -498,17 +488,6 @@ public class BluetoothService extends IBluetooth.Stub {
         switchConnectable(false);
         updateSdpRecords();
         return true;
-    }
-
-    /** Forcibly restart Bluetooth if it is on */
-    /* package */ synchronized void restart() {
-        if (getBluetoothStateInternal() != BluetoothAdapter.STATE_ON) {
-            return;
-        }
-        mRestart = true;
-        if (!disable(false)) {
-            mRestart = false;
-        }
     }
 
     private final Handler mHandler = new Handler() {
