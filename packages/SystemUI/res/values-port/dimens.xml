@@ -22,9 +22,11 @@
     <!-- Padding for text descriptions -->
     <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
     <!-- Width of application label text -->
-    <dimen name="status_bar_recents_app_label_width">97dip</dimen>
+    <dimen name="status_bar_recents_app_label_width">88dip</dimen>
     <!-- Left margin of application label text -->
-    <dimen name="status_bar_recents_app_label_left_margin">8dip</dimen>
+    <dimen name="status_bar_recents_app_label_left_margin">16dip</dimen>
     <!-- Margin between recents container and glow on the right -->
     <dimen name="status_bar_recents_right_glow_margin">100dip</dimen>
+    <!-- Padding between recents items -->
+    <dimen name="status_bar_recents_item_padding">0dip</dimen>
 </resources>
