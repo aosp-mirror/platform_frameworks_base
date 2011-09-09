@@ -189,16 +189,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int STATUS_BAR_SUB_PANEL_LAYER = 14;
     static final int STATUS_BAR_LAYER = 15;
     static final int STATUS_BAR_PANEL_LAYER = 16;
-    // the navigation bar, if available, shows atop most things
-    static final int NAVIGATION_BAR_LAYER = 17;
     // the on-screen volume indicator and controller shown when the user
     // changes the device volume
-    static final int VOLUME_OVERLAY_LAYER = 18;
+    static final int VOLUME_OVERLAY_LAYER = 17;
+    // things in here CAN NOT take focus, but are shown on top of everything else.
+    static final int SYSTEM_OVERLAY_LAYER = 18;
+    // the navigation bar, if available, shows atop most things
+    static final int NAVIGATION_BAR_LAYER = 19;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 19;
-    // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 20;
+    static final int DRAG_LAYER = 20;
     static final int SECURE_SYSTEM_OVERLAY_LAYER = 21;
     static final int BOOT_PROGRESS_LAYER = 22;
     // the (mouse) pointer layer
@@ -894,10 +894,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
             lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-            lp.flags = 
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            lp.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle("PointerLocation");
             WindowManager wm = (WindowManager)
@@ -995,6 +995,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // These types of windows can't receive input events.
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+                attrs.flags &= ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 break;
         }
     }
@@ -1993,6 +1994,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     "Laying out navigation bar window: (%d,%d - %d,%d)",
                                     pf.left, pf.top, pf.right, pf.bottom));
                     }
+                } else if (attrs.type == TYPE_SECURE_SYSTEM_OVERLAY
+                        && ((fl & FLAG_FULLSCREEN) != 0)) {
+                    // Fullscreen secure system overlays get what they ask for.
+                    pf.left = df.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = mUnrestrictedScreenTop;
+                    pf.right = df.right = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                    pf.bottom = df.bottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
                 } else {
                     pf.left = df.left = cf.left = mRestrictedScreenLeft;
                     pf.top = df.top = cf.top = mRestrictedScreenTop;
