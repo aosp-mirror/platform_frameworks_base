@@ -197,10 +197,10 @@ public class KeyguardViewManager implements KeyguardWindowController {
         mScreenOn = false;
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOff();
-        }
 
-        // When screen is turned off, need to unbind from FaceLock service if we are using FaceLock
-        mKeyguardView.stopAndUnbindFromFaceLock();
+            // When screen is turned off, need to unbind from FaceLock service if using FaceLock
+            mKeyguardView.stopAndUnbindFromFaceLock();
+        }
     }
 
     public synchronized void onScreenTurnedOn() {
@@ -208,10 +208,10 @@ public class KeyguardViewManager implements KeyguardWindowController {
         mScreenOn = true;
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
-        }
 
-        // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
-        mKeyguardView.bindToFaceLock();
+            // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
+            mKeyguardView.bindToFaceLock();
+        }
     }
 
     public synchronized void verifyUnlock() {
@@ -248,9 +248,11 @@ public class KeyguardViewManager implements KeyguardWindowController {
     public synchronized void hide() {
         if (DEBUG) Log.d(TAG, "hide()");
 
-        // When view is hidden, need to unbind from FaceLock service if we are using FaceLock
-        // e.g., when device becomes unlocked
-        mKeyguardView.stopAndUnbindFromFaceLock();
+        if (mKeyguardView != null) {
+            // When view is hidden, need to unbind from FaceLock service if we are using FaceLock
+            // e.g., when device becomes unlocked
+            mKeyguardView.stopAndUnbindFromFaceLock();
+        }
 
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);
