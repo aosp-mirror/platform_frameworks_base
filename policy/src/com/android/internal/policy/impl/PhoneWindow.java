@@ -1401,7 +1401,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (event.getRepeatCount() > 0) break;
                 if (featureId < 0) break;
                 // Currently don't do anything with long press.
-                dispatcher.startTracking(event, this);
+                if (dispatcher != null) {
+                    dispatcher.startTracking(event, this);
+                }
                 return true;
             }
 
