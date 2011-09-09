@@ -44,8 +44,6 @@ import android.widget.TextView;
 public class ActionBarContextView extends AbsActionBarView implements AnimatorListener {
     private static final String TAG = "ActionBarContextView";
 
-    private int mContentHeight;
-    
     private CharSequence mTitle;
     private CharSequence mSubtitle;
 
@@ -94,15 +92,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         a.recycle();
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (mActionMenuPresenter != null) {
-            mActionMenuPresenter.onConfigurationChanged(newConfig);
-        }
-    }
-
-    public void setHeight(int height) {
+    public void setContentHeight(int height) {
         mContentHeight = height;
     }
 
