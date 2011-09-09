@@ -3337,20 +3337,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean didSomething = killPackageProcessesLocked(name, uid, -100,
                 callerWillRestart, false, doit, evenPersistent);
         
-        for (i=mMainStack.mHistory.size()-1; i>=0; i--) {
+        TaskRecord lastTask = null;
+        for (i=0; i<mMainStack.mHistory.size(); i++) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-            if (r.packageName.equals(name)
+            final boolean samePackage = r.packageName.equals(name);
+            if ((samePackage || r.task == lastTask)
                     && (r.app == null || evenPersistent || !r.app.persistent)) {
                 if (!doit) {
                     return true;
                 }
                 didSomething = true;
                 Slog.i(TAG, "  Force finishing activity " + r);
-                if (r.app != null) {
-                    r.app.removed = true;
+                if (samePackage) {
+                    if (r.app != null) {
+                        r.app.removed = true;
+                    }
+                    r.app = null;
                 }
-                r.app = null;
-                r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "uninstall");
+                lastTask = r.task;
+                if (r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
+                        null, "force-stop")) {
+                    i--;
+                }
             }
         }
 
