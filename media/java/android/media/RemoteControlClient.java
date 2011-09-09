@@ -17,7 +17,6 @@
 package android.media;
 
 import android.content.ComponentName;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -31,15 +30,14 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.lang.IllegalArgumentException;
-import java.util.HashMap;
 
 /**
- * @hide
- * CANDIDATE FOR SDK
  * RemoteControlClient enables exposing information meant to be consumed by remote controls
- * capable of displaying metadata, album art and media transport control buttons.
- * A remote control client object is associated with a media button event receiver
- * when registered through
+ * capable of displaying metadata, artwork and media transport control buttons.
+ * A remote control client object is associated with a media button event receiver. This
+ * event receiver must have been previously registered with
+ * {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)} before the
+ * RemoteControlClient can be registered through
  * {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
  */
 public class RemoteControlClient
@@ -110,7 +108,8 @@ public class RemoteControlClient
     public final static int PLAYSTATE_ERROR              = 9;
     /**
      * @hide
-     * The value of a playback state when none has been declared
+     * The value of a playback state when none has been declared.
+     * Intentionally hidden as an application shouldn't set such a playback state value.
      */
     public final static int PLAYSTATE_NONE               = 0;
 
@@ -122,7 +121,7 @@ public class RemoteControlClient
      */
     public final static int FLAG_KEY_MEDIA_PREVIOUS = 1 << 0;
     /**
-     * Flag indicating a RemoteControlClient makes use of the "rewing" media key.
+     * Flag indicating a RemoteControlClient makes use of the "rewind" media key.
      *
      * @see #setTransportControlFlags(int)
      * @see android.view.KeyEvent#KEYCODE_MEDIA_REWIND
@@ -173,7 +172,9 @@ public class RemoteControlClient
 
     /**
      * @hide
-     * The flags for when no media keys are declared supported
+     * The flags for when no media keys are declared supported.
+     * Intentionally hidden as an application shouldn't set the transport control flags
+     *     to this value.
      */
     public final static int FLAGS_KEY_MEDIA_NONE = 0;
 
@@ -184,29 +185,29 @@ public class RemoteControlClient
     public final static int FLAG_INFORMATION_REQUEST_METADATA = 1 << 0;
     /**
      * @hide
-     * FIXME doc not valid
      * Flag used to signal that the transport control buttons supported by the
-     * RemoteControlClient have changed.
+     *     RemoteControlClient are requested.
      * This can for instance happen when playback is at the end of a playlist, and the "next"
      * operation is not supported anymore.
      */
     public final static int FLAG_INFORMATION_REQUEST_KEY_MEDIA = 1 << 1;
     /**
      * @hide
-     * FIXME doc not valid
-     * Flag used to signal that the playback state of the RemoteControlClient has changed.
+     * Flag used to signal that the playback state of the RemoteControlClient is requested.
      */
     public final static int FLAG_INFORMATION_REQUEST_PLAYSTATE = 1 << 2;
     /**
      * @hide
-     * FIXME doc not valid
-     * Flag used to signal that the album art for the RemoteControlClient has changed.
+     * Flag used to signal that the album art for the RemoteControlClient is requested.
      */
     public final static int FLAG_INFORMATION_REQUEST_ALBUM_ART = 1 << 3;
 
     /**
      * Class constructor.
-     * @param mediaButtonEventReceiver the receiver for the media button events.
+     * @param mediaButtonEventReceiver The receiver for the media button events. It needs to have
+     *     been registered with {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
+     *     before this new RemoteControlClient can itself be registered with
+     *     {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
      * @see AudioManager#registerMediaButtonEventReceiver(ComponentName)
      * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
      */
@@ -227,8 +228,11 @@ public class RemoteControlClient
     /**
      * Class constructor for a remote control client whose internal event handling
      * happens on a user-provided Looper.
-     * @param mediaButtonEventReceiver the receiver for the media button events.
-     * @param looper the Looper running the event loop.
+     * @param mediaButtonEventReceiver The receiver for the media button events. It needs to have
+     *     been registered with {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
+     *     before this new RemoteControlClient can itself be registered with
+     *     {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
+     * @param looper The Looper running the event loop.
      * @see AudioManager#registerMediaButtonEventReceiver(ComponentName)
      * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
      */
@@ -257,11 +261,28 @@ public class RemoteControlClient
 
     /**
      * Class used to modify metadata in a {@link RemoteControlClient} object.
+     * Use {@link RemoteControlClient#editMetadata(boolean)} to create an instance of an editor,
+     * on which you set the metadata for the RemoteControlClient instance. Once all the information
+     * has been set, use {@link #apply()} to make it the new metadata that should be displayed
+     * for the associated client. Once the metadata has been "applied", you cannot reuse this
+     * instance of the MetadataEditor.
      */
     public class MetadataEditor {
+        /**
+         * @hide
+         */
         protected boolean mMetadataChanged;
+        /**
+         * @hide
+         */
         protected boolean mArtworkChanged;
+        /**
+         * @hide
+         */
         protected Bitmap mEditorArtwork;
+        /**
+         * @hide
+         */
         protected Bundle mEditorMetadata;
         private boolean mApplied = false;
 
@@ -277,13 +298,18 @@ public class RemoteControlClient
         /**
          * The metadata key for the content artwork / album art.
          */
-        public final static int METADATA_KEY_ARTWORK = 100;
+        public final static int BITMAP_KEY_ARTWORK = 100;
+        /**
+         * @hide
+         * TODO(jmtrivi) have lockscreen and music move to the new key name
+         */
+        public final static int METADATA_KEY_ARTWORK = BITMAP_KEY_ARTWORK;
 
         /**
          * Adds textual information to be displayed.
          * Note that none of the information added after {@link #apply()} has been called,
          * will be displayed.
-         * @param key the identifier of a the metadata field to set. Valid values are
+         * @param key The identifier of a the metadata field to set. Valid values are
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ALBUM},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_ALBUMARTIST},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
@@ -294,11 +320,11 @@ public class RemoteControlClient
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DATE},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_GENRE},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
-         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_WRITER},
-         *      .
-         * @param value the text for the given key, or {@code null} to signify there is no valid
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_WRITER}.
+         * @param value The text for the given key, or {@code null} to signify there is no valid
          *      information for the field.
-         * @return      FIXME description
+         * @return Returns a reference to the same MetadataEditor object, so you can chain put
+         *      calls together.
          */
         public synchronized MetadataEditor putString(int key, String value)
                 throws IllegalArgumentException {
@@ -315,15 +341,18 @@ public class RemoteControlClient
         }
 
         /**
-         * FIXME javadoc
+         * Adds numerical information to be displayed.
+         * Note that none of the information added after {@link #apply()} has been called,
+         * will be displayed.
          * @param key the identifier of a the metadata field to set. Valid values are
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_CD_TRACK_NUMBER},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION} (with a value
          *      expressed in milliseconds),
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
-         * @param value FIXME javadoc
-         * @return FIXME javadoc
+         * @param value The long value for the given key
+         * @return Returns a reference to the same MetadataEditor object, so you can chain put
+         *      calls together.
          * @throws IllegalArgumentException
          */
         public synchronized MetadataEditor putLong(int key, long value)
@@ -342,9 +371,11 @@ public class RemoteControlClient
 
         /**
          * Sets the album / artwork picture to be displayed on the remote control.
-         * @param key FIXME description
-         * @param bitmap the bitmap for the artwork, or null if there isn't any.
-         * @return FIXME description
+         * @param key the identifier of the bitmap to set. The only valid value is
+         *      {@link #BITMAP_KEY_ARTWORK}
+         * @param bitmap The bitmap for the artwork, or null if there isn't any.
+         * @return Returns a reference to the same MetadataEditor object, so you can chain put
+         *      calls together.
          * @throws IllegalArgumentException
          * @see android.graphics.Bitmap
          */
@@ -354,7 +385,7 @@ public class RemoteControlClient
                 Log.e(TAG, "Can't edit a previously applied MetadataEditor");
                 return this;
             }
-            if (key != METADATA_KEY_ARTWORK) {
+            if (key != BITMAP_KEY_ARTWORK) {
                 throw(new IllegalArgumentException("Invalid type 'Bitmap' for key "+ key));
             }
             if ((mArtworkExpectedWidth > 0) && (mArtworkExpectedHeight > 0)) {
@@ -369,7 +400,8 @@ public class RemoteControlClient
         }
 
         /**
-         * FIXME description
+         * Clears all the metadata that has been set since the MetadataEditor instance was
+         *     created with {@link RemoteControlClient#editMetadata(boolean)}.
          */
         public synchronized void clear() {
             if (mApplied) {
@@ -381,7 +413,10 @@ public class RemoteControlClient
         }
 
         /**
-         * FIXME description
+         * Associates all the metadata that has been set since the MetadataEditor instance was
+         *     created with {@link RemoteControlClient#editMetadata(boolean)}, or since
+         *     {@link #clear()} was called, with the RemoteControlClient. Once "applied",
+         *     this MetadataEditor cannot be reused to edit the RemoteControlClient's metadata.
          */
         public synchronized void apply() {
             if (mApplied) {
@@ -408,9 +443,10 @@ public class RemoteControlClient
     }
 
     /**
-     * FIXME description
-     * @param startEmpty
-     * @return
+     * Creates a {@link MetadataEditor}.
+     * @param startEmpty Set to false if you want the MetadataEditor to contain the metadata that
+     *     was previously applied to the RemoteControlClient, or true if it is to be created empty.
+     * @return a new MetadataEditor instance.
      */
     public MetadataEditor editMetadata(boolean startEmpty) {
         MetadataEditor editor = new MetadataEditor();
@@ -430,7 +466,7 @@ public class RemoteControlClient
 
     /**
      * Sets the current playback state.
-     * @param state the current playback state, one of the following values:
+     * @param state The current playback state, one of the following values:
      *       {@link #PLAYSTATE_STOPPED},
      *       {@link #PLAYSTATE_PAUSED},
      *       {@link #PLAYSTATE_PLAYING},
@@ -453,7 +489,7 @@ public class RemoteControlClient
 
     /**
      * Sets the flags for the media transport control buttons that this client supports.
-     * @param a combination of the following flags:
+     * @param transportControlFlags A combination of the following flags:
      *      {@link #FLAG_KEY_MEDIA_PREVIOUS},
      *      {@link #FLAG_KEY_MEDIA_REWIND},
      *      {@link #FLAG_KEY_MEDIA_PLAY},

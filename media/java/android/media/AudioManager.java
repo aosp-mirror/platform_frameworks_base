@@ -1717,12 +1717,11 @@ public class AudioManager {
 
 
     /**
-     * @hide
-     * CANDIDATE FOR SDK
      * Registers the remote control client for providing information to display on the remote
      * controls.
-     * @param rcClient the remote control client associated responsible
-     *      for providing the information to display on the remote control.
+     * @param rcClient The remote control client from which remote controls will receive
+     *      information to display.
+     * @see RemoteControlClient
      */
     public void registerRemoteControlClient(RemoteControlClient rcClient) {
         if ((rcClient == null) || (rcClient.getRcEventReceiver() == null)) {
@@ -1741,11 +1740,9 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR SDK
      * Unregisters the remote control client that was providing information to display on the
-     * remotes.
-     * @param rcClient the remote control client to unregister
+     * remote controls.
+     * @param rcClient The remote control client to unregister.
      * @see #registerRemoteControlClient(RemoteControlClient)
      */
     public void unregisterRemoteControlClient(RemoteControlClient rcClient) {

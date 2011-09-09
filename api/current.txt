@@ -10340,6 +10340,7 @@ package android.media {
     method public void playSoundEffect(int);
     method public void playSoundEffect(int, float);
     method public void registerMediaButtonEventReceiver(android.content.ComponentName);
+    method public void registerRemoteControlClient(android.media.RemoteControlClient);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public deprecated void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
@@ -10359,6 +10360,7 @@ package android.media {
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
     method public void unregisterMediaButtonEventReceiver(android.content.ComponentName);
+    method public void unregisterRemoteControlClient(android.media.RemoteControlClient);
     field public static final java.lang.String ACTION_AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
     field public static final deprecated java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
     field public static final java.lang.String ACTION_SCO_AUDIO_STATE_UPDATED = "android.media.ACTION_SCO_AUDIO_STATE_UPDATED";
@@ -10897,6 +10899,40 @@ package android.media {
     field public static final int SEEK_AVAILABLE = 4; // 0x4
     field public static final int SEEK_BACKWARD_AVAILABLE = 2; // 0x2
     field public static final int SEEK_FORWARD_AVAILABLE = 3; // 0x3
+  }
+
+  public class RemoteControlClient {
+    ctor public RemoteControlClient(android.content.ComponentName);
+    ctor public RemoteControlClient(android.content.ComponentName, android.os.Looper);
+    method public android.media.RemoteControlClient.MetadataEditor editMetadata(boolean);
+    method public void setPlaybackState(int);
+    method public void setTransportControlFlags(int);
+    field public static final int FLAG_KEY_MEDIA_FAST_FORWARD = 64; // 0x40
+    field public static final int FLAG_KEY_MEDIA_NEXT = 128; // 0x80
+    field public static final int FLAG_KEY_MEDIA_PAUSE = 16; // 0x10
+    field public static final int FLAG_KEY_MEDIA_PLAY = 4; // 0x4
+    field public static final int FLAG_KEY_MEDIA_PLAY_PAUSE = 8; // 0x8
+    field public static final int FLAG_KEY_MEDIA_PREVIOUS = 1; // 0x1
+    field public static final int FLAG_KEY_MEDIA_REWIND = 2; // 0x2
+    field public static final int FLAG_KEY_MEDIA_STOP = 32; // 0x20
+    field public static final int PLAYSTATE_BUFFERING = 8; // 0x8
+    field public static final int PLAYSTATE_ERROR = 9; // 0x9
+    field public static final int PLAYSTATE_FAST_FORWARDING = 4; // 0x4
+    field public static final int PLAYSTATE_PAUSED = 2; // 0x2
+    field public static final int PLAYSTATE_PLAYING = 3; // 0x3
+    field public static final int PLAYSTATE_REWINDING = 5; // 0x5
+    field public static final int PLAYSTATE_SKIPPING_BACKWARDS = 7; // 0x7
+    field public static final int PLAYSTATE_SKIPPING_FORWARDS = 6; // 0x6
+    field public static final int PLAYSTATE_STOPPED = 1; // 0x1
+  }
+
+  public class RemoteControlClient.MetadataEditor {
+    method public synchronized void apply();
+    method public synchronized void clear();
+    method public synchronized android.media.RemoteControlClient.MetadataEditor putBitmap(int, android.graphics.Bitmap) throws java.lang.IllegalArgumentException;
+    method public synchronized android.media.RemoteControlClient.MetadataEditor putLong(int, long) throws java.lang.IllegalArgumentException;
+    method public synchronized android.media.RemoteControlClient.MetadataEditor putString(int, java.lang.String) throws java.lang.IllegalArgumentException;
+    field public static final int BITMAP_KEY_ARTWORK = 100; // 0x64
   }
 
   public class Ringtone {
