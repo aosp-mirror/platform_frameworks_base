@@ -51,7 +51,7 @@ public class ViewPropertyAnimator {
      * The View whose properties are being animated by this class. This is set at
      * construction time.
      */
-    private View mView;
+    private final View mView;
 
     /**
      * The duration of the underlying Animator object. By default, we don't set the duration
@@ -225,6 +225,7 @@ public class ViewPropertyAnimator {
      */
     ViewPropertyAnimator(View view) {
         mView = view;
+        view.ensureTransformationInfo();
     }
 
     /**
@@ -721,36 +722,37 @@ public class ViewPropertyAnimator {
      * @param value The value to set the property to
      */
     private void setValue(int propertyConstant, float value) {
+        final View.TransformationInfo info = mView.mTransformationInfo;
         switch (propertyConstant) {
             case TRANSLATION_X:
-                mView.mTranslationX = value;
+                info.mTranslationX = value;
                 break;
             case TRANSLATION_Y:
-                mView.mTranslationY = value;
+                info.mTranslationY = value;
                 break;
             case ROTATION:
-                mView.mRotation = value;
+                info.mRotation = value;
                 break;
             case ROTATION_X:
-                mView.mRotationX = value;
+                info.mRotationX = value;
                 break;
             case ROTATION_Y:
-                mView.mRotationY = value;
+                info.mRotationY = value;
                 break;
             case SCALE_X:
-                mView.mScaleX = value;
+                info.mScaleX = value;
                 break;
             case SCALE_Y:
-                mView.mScaleY = value;
+                info.mScaleY = value;
                 break;
             case X:
-                mView.mTranslationX = value - mView.mLeft;
+                info.mTranslationX = value - mView.mLeft;
                 break;
             case Y:
-                mView.mTranslationY = value - mView.mTop;
+                info.mTranslationY = value - mView.mTop;
                 break;
             case ALPHA:
-                mView.mAlpha = value;
+                info.mAlpha = value;
                 break;
         }
     }
@@ -762,27 +764,28 @@ public class ViewPropertyAnimator {
      * @return float The value of the named property
      */
     private float getValue(int propertyConstant) {
+        final View.TransformationInfo info = mView.mTransformationInfo;
         switch (propertyConstant) {
             case TRANSLATION_X:
-                return mView.mTranslationX;
+                return info.mTranslationX;
             case TRANSLATION_Y:
-                return mView.mTranslationY;
+                return info.mTranslationY;
             case ROTATION:
-                return mView.mRotation;
+                return info.mRotation;
             case ROTATION_X:
-                return mView.mRotationX;
+                return info.mRotationX;
             case ROTATION_Y:
-                return mView.mRotationY;
+                return info.mRotationY;
             case SCALE_X:
-                return mView.mScaleX;
+                return info.mScaleX;
             case SCALE_Y:
-                return mView.mScaleY;
+                return info.mScaleY;
             case X:
-                return mView.mLeft + mView.mTranslationX;
+                return mView.mLeft + info.mTranslationX;
             case Y:
-                return mView.mTop + mView.mTranslationY;
+                return mView.mTop + info.mTranslationY;
             case ALPHA:
-                return mView.mAlpha;
+                return info.mAlpha;
         }
         return 0;
     }
@@ -861,7 +864,7 @@ public class ViewPropertyAnimator {
                 }
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
-                mView.mMatrixDirty = true;
+                mView.mTransformationInfo.mMatrixDirty = true;
                 mView.mPrivateFlags |= View.DRAWN; // force another invalidation
             }
             // invalidate(false) in all cases except if alphaHandled gets set to true

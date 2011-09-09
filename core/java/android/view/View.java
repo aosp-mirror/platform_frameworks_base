@@ -27,6 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
+import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -2001,64 +2002,133 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     @ViewDebug.ExportedProperty
     int mViewFlags;
 
-    /**
-     * The transform matrix for the View. This transform is calculated internally
-     * based on the rotation, scaleX, and scaleY properties. The identity matrix
-     * is used by default. Do *not* use this variable directly; instead call
-     * getMatrix(), which will automatically recalculate the matrix if necessary
-     * to get the correct matrix based on the latest rotation and scale properties.
-     */
-    private final Matrix mMatrix = new Matrix();
+    static class TransformationInfo {
+        /**
+         * The transform matrix for the View. This transform is calculated internally
+         * based on the rotation, scaleX, and scaleY properties. The identity matrix
+         * is used by default. Do *not* use this variable directly; instead call
+         * getMatrix(), which will automatically recalculate the matrix if necessary
+         * to get the correct matrix based on the latest rotation and scale properties.
+         */
+        private final Matrix mMatrix = new Matrix();
 
-    /**
-     * The transform matrix for the View. This transform is calculated internally
-     * based on the rotation, scaleX, and scaleY properties. The identity matrix
-     * is used by default. Do *not* use this variable directly; instead call
-     * getInverseMatrix(), which will automatically recalculate the matrix if necessary
-     * to get the correct matrix based on the latest rotation and scale properties.
-     */
-    private Matrix mInverseMatrix;
+        /**
+         * The transform matrix for the View. This transform is calculated internally
+         * based on the rotation, scaleX, and scaleY properties. The identity matrix
+         * is used by default. Do *not* use this variable directly; instead call
+         * getInverseMatrix(), which will automatically recalculate the matrix if necessary
+         * to get the correct matrix based on the latest rotation and scale properties.
+         */
+        private Matrix mInverseMatrix;
 
-    /**
-     * An internal variable that tracks whether we need to recalculate the
-     * transform matrix, based on whether the rotation or scaleX/Y properties
-     * have changed since the matrix was last calculated.
-     */
-    boolean mMatrixDirty = false;
+        /**
+         * An internal variable that tracks whether we need to recalculate the
+         * transform matrix, based on whether the rotation or scaleX/Y properties
+         * have changed since the matrix was last calculated.
+         */
+        boolean mMatrixDirty = false;
 
-    /**
-     * An internal variable that tracks whether we need to recalculate the
-     * transform matrix, based on whether the rotation or scaleX/Y properties
-     * have changed since the matrix was last calculated.
-     */
-    private boolean mInverseMatrixDirty = true;
+        /**
+         * An internal variable that tracks whether we need to recalculate the
+         * transform matrix, based on whether the rotation or scaleX/Y properties
+         * have changed since the matrix was last calculated.
+         */
+        private boolean mInverseMatrixDirty = true;
 
-    /**
-     * A variable that tracks whether we need to recalculate the
-     * transform matrix, based on whether the rotation or scaleX/Y properties
-     * have changed since the matrix was last calculated. This variable
-     * is only valid after a call to updateMatrix() or to a function that
-     * calls it such as getMatrix(), hasIdentityMatrix() and getInverseMatrix().
-     */
-    private boolean mMatrixIsIdentity = true;
+        /**
+         * A variable that tracks whether we need to recalculate the
+         * transform matrix, based on whether the rotation or scaleX/Y properties
+         * have changed since the matrix was last calculated. This variable
+         * is only valid after a call to updateMatrix() or to a function that
+         * calls it such as getMatrix(), hasIdentityMatrix() and getInverseMatrix().
+         */
+        private boolean mMatrixIsIdentity = true;
 
-    /**
-     * The Camera object is used to compute a 3D matrix when rotationX or rotationY are set.
-     */
-    private Camera mCamera = null;
+        /**
+         * The Camera object is used to compute a 3D matrix when rotationX or rotationY are set.
+         */
+        private Camera mCamera = null;
 
-    /**
-     * This matrix is used when computing the matrix for 3D rotations.
-     */
-    private Matrix matrix3D = null;
+        /**
+         * This matrix is used when computing the matrix for 3D rotations.
+         */
+        private Matrix matrix3D = null;
 
-    /**
-     * These prev values are used to recalculate a centered pivot point when necessary. The
-     * pivot point is only used in matrix operations (when rotation, scale, or translation are
-     * set), so thes values are only used then as well.
-     */
-    private int mPrevWidth = -1;
-    private int mPrevHeight = -1;
+        /**
+         * These prev values are used to recalculate a centered pivot point when necessary. The
+         * pivot point is only used in matrix operations (when rotation, scale, or translation are
+         * set), so thes values are only used then as well.
+         */
+        private int mPrevWidth = -1;
+        private int mPrevHeight = -1;
+        
+        /**
+         * The degrees rotation around the vertical axis through the pivot point.
+         */
+        @ViewDebug.ExportedProperty
+        float mRotationY = 0f;
+
+        /**
+         * The degrees rotation around the horizontal axis through the pivot point.
+         */
+        @ViewDebug.ExportedProperty
+        float mRotationX = 0f;
+
+        /**
+         * The degrees rotation around the pivot point.
+         */
+        @ViewDebug.ExportedProperty
+        float mRotation = 0f;
+
+        /**
+         * The amount of translation of the object away from its left property (post-layout).
+         */
+        @ViewDebug.ExportedProperty
+        float mTranslationX = 0f;
+
+        /**
+         * The amount of translation of the object away from its top property (post-layout).
+         */
+        @ViewDebug.ExportedProperty
+        float mTranslationY = 0f;
+
+        /**
+         * The amount of scale in the x direction around the pivot point. A
+         * value of 1 means no scaling is applied.
+         */
+        @ViewDebug.ExportedProperty
+        float mScaleX = 1f;
+
+        /**
+         * The amount of scale in the y direction around the pivot point. A
+         * value of 1 means no scaling is applied.
+         */
+        @ViewDebug.ExportedProperty
+        float mScaleY = 1f;
+
+        /**
+         * The amount of scale in the x direction around the pivot point. A
+         * value of 1 means no scaling is applied.
+         */
+        @ViewDebug.ExportedProperty
+        float mPivotX = 0f;
+
+        /**
+         * The amount of scale in the y direction around the pivot point. A
+         * value of 1 means no scaling is applied.
+         */
+        @ViewDebug.ExportedProperty
+        float mPivotY = 0f;
+
+        /**
+         * The opacity of the View. This is a value from 0 to 1, where 0 means
+         * completely transparent and 1 means completely opaque.
+         */
+        @ViewDebug.ExportedProperty
+        float mAlpha = 1f;
+    }
+
+    TransformationInfo mTransformationInfo;
 
     private boolean mLastIsOpaque;
 
@@ -2067,71 +2137,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * zero.
      */
     private static final float NONZERO_EPSILON = .001f;
-
-    /**
-     * The degrees rotation around the vertical axis through the pivot point.
-     */
-    @ViewDebug.ExportedProperty
-    float mRotationY = 0f;
-
-    /**
-     * The degrees rotation around the horizontal axis through the pivot point.
-     */
-    @ViewDebug.ExportedProperty
-    float mRotationX = 0f;
-
-    /**
-     * The degrees rotation around the pivot point.
-     */
-    @ViewDebug.ExportedProperty
-    float mRotation = 0f;
-
-    /**
-     * The amount of translation of the object away from its left property (post-layout).
-     */
-    @ViewDebug.ExportedProperty
-    float mTranslationX = 0f;
-
-    /**
-     * The amount of translation of the object away from its top property (post-layout).
-     */
-    @ViewDebug.ExportedProperty
-    float mTranslationY = 0f;
-
-    /**
-     * The amount of scale in the x direction around the pivot point. A
-     * value of 1 means no scaling is applied.
-     */
-    @ViewDebug.ExportedProperty
-    float mScaleX = 1f;
-
-    /**
-     * The amount of scale in the y direction around the pivot point. A
-     * value of 1 means no scaling is applied.
-     */
-    @ViewDebug.ExportedProperty
-    float mScaleY = 1f;
-
-    /**
-     * The amount of scale in the x direction around the pivot point. A
-     * value of 1 means no scaling is applied.
-     */
-    @ViewDebug.ExportedProperty
-    float mPivotX = 0f;
-
-    /**
-     * The amount of scale in the y direction around the pivot point. A
-     * value of 1 means no scaling is applied.
-     */
-    @ViewDebug.ExportedProperty
-    float mPivotY = 0f;
-
-    /**
-     * The opacity of the View. This is a value from 0 to 1, where 0 means
-     * completely transparent and 1 means completely opaque.
-     */
-    @ViewDebug.ExportedProperty
-    float mAlpha = 1f;
 
     /**
      * The distance in pixels from the left edge of this view's parent
@@ -6776,8 +6781,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The current transform matrix for the view
      */
     public Matrix getMatrix() {
-        updateMatrix();
-        return mMatrix;
+        if (mTransformationInfo != null) {
+            updateMatrix();
+            return mTransformationInfo.mMatrix;
+        }
+        return Matrix.IDENTITY_MATRIX;
     }
 
     /**
@@ -6797,49 +6805,63 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return True if the transform matrix is the identity matrix, false otherwise.
      */
     final boolean hasIdentityMatrix() {
-        updateMatrix();
-        return mMatrixIsIdentity;
+        if (mTransformationInfo != null) {
+            updateMatrix();
+            return mTransformationInfo.mMatrixIsIdentity;
+        }
+        return true;
+    }
+
+    void ensureTransformationInfo() {
+        if (mTransformationInfo == null) {
+            mTransformationInfo = new TransformationInfo();
+        }
     }
 
     /**
      * Recomputes the transform matrix if necessary.
      */
     private void updateMatrix() {
-        if (mMatrixDirty) {
+        final TransformationInfo info = mTransformationInfo;
+        if (info == null) {
+            return;
+        }
+        if (info.mMatrixDirty) {
             // transform-related properties have changed since the last time someone
             // asked for the matrix; recalculate it with the current values
 
             // Figure out if we need to update the pivot point
             if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
-                if ((mRight - mLeft) != mPrevWidth || (mBottom - mTop) != mPrevHeight) {
-                    mPrevWidth = mRight - mLeft;
-                    mPrevHeight = mBottom - mTop;
-                    mPivotX = mPrevWidth / 2f;
-                    mPivotY = mPrevHeight / 2f;
+                if ((mRight - mLeft) != info.mPrevWidth || (mBottom - mTop) != info.mPrevHeight) {
+                    info.mPrevWidth = mRight - mLeft;
+                    info.mPrevHeight = mBottom - mTop;
+                    info.mPivotX = info.mPrevWidth / 2f;
+                    info.mPivotY = info.mPrevHeight / 2f;
                 }
             }
-            mMatrix.reset();
-            if (!nonzero(mRotationX) && !nonzero(mRotationY)) {
-                mMatrix.setTranslate(mTranslationX, mTranslationY);
-                mMatrix.preRotate(mRotation, mPivotX, mPivotY);
-                mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+            info.mMatrix.reset();
+            if (!nonzero(info.mRotationX) && !nonzero(info.mRotationY)) {
+                info.mMatrix.setTranslate(info.mTranslationX, info.mTranslationY);
+                info.mMatrix.preRotate(info.mRotation, info.mPivotX, info.mPivotY);
+                info.mMatrix.preScale(info.mScaleX, info.mScaleY, info.mPivotX, info.mPivotY);
             } else {
-                if (mCamera == null) {
-                    mCamera = new Camera();
-                    matrix3D = new Matrix();
+                if (info.mCamera == null) {
+                    info.mCamera = new Camera();
+                    info.matrix3D = new Matrix();
                 }
-                mCamera.save();
-                mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
-                mCamera.rotate(mRotationX, mRotationY, -mRotation);
-                mCamera.getMatrix(matrix3D);
-                matrix3D.preTranslate(-mPivotX, -mPivotY);
-                matrix3D.postTranslate(mPivotX + mTranslationX, mPivotY + mTranslationY);
-                mMatrix.postConcat(matrix3D);
-                mCamera.restore();
+                info.mCamera.save();
+                info.mMatrix.preScale(info.mScaleX, info.mScaleY, info.mPivotX, info.mPivotY);
+                info.mCamera.rotate(info.mRotationX, info.mRotationY, -info.mRotation);
+                info.mCamera.getMatrix(info.matrix3D);
+                info.matrix3D.preTranslate(-info.mPivotX, -info.mPivotY);
+                info.matrix3D.postTranslate(info.mPivotX + info.mTranslationX,
+                        info.mPivotY + info.mTranslationY);
+                info.mMatrix.postConcat(info.matrix3D);
+                info.mCamera.restore();
             }
-            mMatrixDirty = false;
-            mMatrixIsIdentity = mMatrix.isIdentity();
-            mInverseMatrixDirty = true;
+            info.mMatrixDirty = false;
+            info.mMatrixIsIdentity = info.mMatrix.isIdentity();
+            info.mInverseMatrixDirty = true;
         }
     }
 
@@ -6851,15 +6873,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The inverse of the current matrix of this view.
      */
     final Matrix getInverseMatrix() {
-        updateMatrix();
-        if (mInverseMatrixDirty) {
-            if (mInverseMatrix == null) {
-                mInverseMatrix = new Matrix();
+        final TransformationInfo info = mTransformationInfo;
+        if (info != null) {
+            updateMatrix();
+            if (info.mInverseMatrixDirty) {
+                if (info.mInverseMatrix == null) {
+                    info.mInverseMatrix = new Matrix();
+                }
+                info.mMatrix.invert(info.mInverseMatrix);
+                info.mInverseMatrixDirty = false;
             }
-            mMatrix.invert(mInverseMatrix);
-            mInverseMatrixDirty = false;
+            return info.mInverseMatrix;
         }
-        return mInverseMatrix;
+        return Matrix.IDENTITY_MATRIX;
     }
 
     /**
@@ -6905,14 +6931,16 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         invalidateParentCaches();
         invalidate(false);
 
+        ensureTransformationInfo();
         final float dpi = mResources.getDisplayMetrics().densityDpi;
-        if (mCamera == null) {
-            mCamera = new Camera();
-            matrix3D = new Matrix();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mCamera == null) {
+            info.mCamera = new Camera();
+            info.matrix3D = new Matrix();
         }
 
-        mCamera.setLocation(0.0f, 0.0f, -Math.abs(distance) / dpi);
-        mMatrixDirty = true;
+        info.mCamera.setLocation(0.0f, 0.0f, -Math.abs(distance) / dpi);
+        info.mMatrixDirty = true;
 
         invalidate(false);
     }
@@ -6927,7 +6955,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The degrees of rotation.
      */
     public float getRotation() {
-        return mRotation;
+        return mTransformationInfo != null ? mTransformationInfo.mRotation : 0;
     }
 
     /**
@@ -6945,12 +6973,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_rotation
      */
     public void setRotation(float rotation) {
-        if (mRotation != rotation) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mRotation != rotation) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mRotation = rotation;
-            mMatrixDirty = true;
+            info.mRotation = rotation;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -6966,7 +6996,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The degrees of Y rotation.
      */
     public float getRotationY() {
-        return mRotationY;
+        return mTransformationInfo != null ? mTransformationInfo.mRotationY : 0;
     }
 
     /**
@@ -6989,12 +7019,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_rotationY
      */
     public void setRotationY(float rotationY) {
-        if (mRotationY != rotationY) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mRotationY != rotationY) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mRotationY = rotationY;
-            mMatrixDirty = true;
+            info.mRotationY = rotationY;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7010,7 +7042,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The degrees of X rotation.
      */
     public float getRotationX() {
-        return mRotationX;
+        return mTransformationInfo != null ? mTransformationInfo.mRotationX : 0;
     }
 
     /**
@@ -7033,12 +7065,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_rotationX
      */
     public void setRotationX(float rotationX) {
-        if (mRotationX != rotationX) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mRotationX != rotationX) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mRotationX = rotationX;
-            mMatrixDirty = true;
+            info.mRotationX = rotationX;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7055,7 +7089,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The scaling factor.
      */
     public float getScaleX() {
-        return mScaleX;
+        return mTransformationInfo != null ? mTransformationInfo.mScaleX : 1;
     }
 
     /**
@@ -7069,12 +7103,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_scaleX
      */
     public void setScaleX(float scaleX) {
-        if (mScaleX != scaleX) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mScaleX != scaleX) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mScaleX = scaleX;
-            mMatrixDirty = true;
+            info.mScaleX = scaleX;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7091,7 +7127,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The scaling factor.
      */
     public float getScaleY() {
-        return mScaleY;
+        return mTransformationInfo != null ? mTransformationInfo.mScaleY : 1;
     }
 
     /**
@@ -7105,12 +7141,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_scaleY
      */
     public void setScaleY(float scaleY) {
-        if (mScaleY != scaleY) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mScaleY != scaleY) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mScaleY = scaleY;
-            mMatrixDirty = true;
+            info.mScaleY = scaleY;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7127,7 +7165,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The x location of the pivot point.
      */
     public float getPivotX() {
-        return mPivotX;
+        return mTransformationInfo != null ? mTransformationInfo.mPivotX : 0;
     }
 
     /**
@@ -7146,13 +7184,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_transformPivotX
      */
     public void setPivotX(float pivotX) {
+        ensureTransformationInfo();
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
-        if (mPivotX != pivotX) {
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mPivotX != pivotX) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mPivotX = pivotX;
-            mMatrixDirty = true;
+            info.mPivotX = pivotX;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7169,7 +7209,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The y location of the pivot point.
      */
     public float getPivotY() {
-        return mPivotY;
+        return mTransformationInfo != null ? mTransformationInfo.mPivotY : 0;
     }
 
     /**
@@ -7187,13 +7227,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_transformPivotY
      */
     public void setPivotY(float pivotY) {
+        ensureTransformationInfo();
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
-        if (mPivotY != pivotY) {
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mPivotY != pivotY) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mPivotY = pivotY;
-            mMatrixDirty = true;
+            info.mPivotY = pivotY;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7207,7 +7249,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The opacity of the view.
      */
     public float getAlpha() {
-        return mAlpha;
+        return mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
     }
 
     /**
@@ -7226,7 +7268,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_alpha
      */
     public void setAlpha(float alpha) {
-        mAlpha = alpha;
+        ensureTransformationInfo();
+        mTransformationInfo.mAlpha = alpha;
         invalidateParentCaches();
         if (onSetAlpha((int) (alpha * 255))) {
             mPrivateFlags |= ALPHA_SET;
@@ -7248,7 +7291,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return true if the View subclass handles alpha (the return value for onSetAlpha())
      */
     boolean setAlphaNoInvalidation(float alpha) {
-        mAlpha = alpha;
+        ensureTransformationInfo();
+        mTransformationInfo.mAlpha = alpha;
         boolean subclassHandlesAlpha = onSetAlpha((int) (alpha * 255));
         if (subclassHandlesAlpha) {
             mPrivateFlags |= ALPHA_SET;
@@ -7278,7 +7322,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public final void setTop(int top) {
         if (top != mTop) {
             updateMatrix();
-            if (mMatrixIsIdentity) {
+            final boolean matrixIsIdentity = mTransformationInfo == null
+                    || mTransformationInfo.mMatrixIsIdentity;
+            if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int minTop;
                     int yLoc;
@@ -7303,10 +7349,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
-            if (!mMatrixIsIdentity) {
+            if (!matrixIsIdentity) {
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
                     // A change in dimension means an auto-centered pivot point changes, too
-                    mMatrixDirty = true;
+                    mTransformationInfo.mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
@@ -7345,7 +7391,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public final void setBottom(int bottom) {
         if (bottom != mBottom) {
             updateMatrix();
-            if (mMatrixIsIdentity) {
+            final boolean matrixIsIdentity = mTransformationInfo == null
+                    || mTransformationInfo.mMatrixIsIdentity;
+            if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int maxBottom;
                     if (bottom < mBottom) {
@@ -7367,10 +7415,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
-            if (!mMatrixIsIdentity) {
+            if (!matrixIsIdentity) {
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
                     // A change in dimension means an auto-centered pivot point changes, too
-                    mMatrixDirty = true;
+                    mTransformationInfo.mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
@@ -7400,7 +7448,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public final void setLeft(int left) {
         if (left != mLeft) {
             updateMatrix();
-            if (mMatrixIsIdentity) {
+            final boolean matrixIsIdentity = mTransformationInfo == null
+                    || mTransformationInfo.mMatrixIsIdentity;
+            if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int minLeft;
                     int xLoc;
@@ -7425,10 +7475,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
-            if (!mMatrixIsIdentity) {
+            if (!matrixIsIdentity) {
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
                     // A change in dimension means an auto-centered pivot point changes, too
-                    mMatrixDirty = true;
+                    mTransformationInfo.mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
@@ -7458,7 +7508,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public final void setRight(int right) {
         if (right != mRight) {
             updateMatrix();
-            if (mMatrixIsIdentity) {
+            final boolean matrixIsIdentity = mTransformationInfo == null
+                    || mTransformationInfo.mMatrixIsIdentity;
+            if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
                     int maxRight;
                     if (right < mRight) {
@@ -7480,10 +7532,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
-            if (!mMatrixIsIdentity) {
+            if (!matrixIsIdentity) {
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
                     // A change in dimension means an auto-centered pivot point changes, too
-                    mMatrixDirty = true;
+                    mTransformationInfo.mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(true);
@@ -7501,7 +7553,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The visual x position of this view, in pixels.
      */
     public float getX() {
-        return mLeft + mTranslationX;
+        return mLeft + (mTransformationInfo != null ? mTransformationInfo.mTranslationX : 0);
     }
 
     /**
@@ -7523,7 +7575,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The visual y position of this view, in pixels.
      */
     public float getY() {
-        return mTop + mTranslationY;
+        return mTop + (mTransformationInfo != null ? mTransformationInfo.mTranslationY : 0);
     }
 
     /**
@@ -7546,7 +7598,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The horizontal position of this view relative to its left position, in pixels.
      */
     public float getTranslationX() {
-        return mTranslationX;
+        return mTransformationInfo != null ? mTransformationInfo.mTranslationX : 0;
     }
 
     /**
@@ -7560,12 +7612,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_translationX
      */
     public void setTranslationX(float translationX) {
-        if (mTranslationX != translationX) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mTranslationX != translationX) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mTranslationX = translationX;
-            mMatrixDirty = true;
+            info.mTranslationX = translationX;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7580,7 +7634,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * in pixels.
      */
     public float getTranslationY() {
-        return mTranslationY;
+        return mTransformationInfo != null ? mTransformationInfo.mTranslationY : 0;
     }
 
     /**
@@ -7594,12 +7648,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_translationY
      */
     public void setTranslationY(float translationY) {
-        if (mTranslationY != translationY) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mTranslationY != translationY) {
             invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
-            mTranslationY = translationY;
-            mMatrixDirty = true;
+            info.mTranslationY = translationY;
+            info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
         }
@@ -7609,63 +7665,78 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public void setFastTranslationX(float x) {
-        mTranslationX = x;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mTranslationX = x;
+        info.mMatrixDirty = true;
     }
 
     /**
      * @hide
      */
     public void setFastTranslationY(float y) {
-        mTranslationY = y;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mTranslationY = y;
+        info.mMatrixDirty = true;
     }
 
     /**
      * @hide
      */
     public void setFastX(float x) {
-        mTranslationX = x - mLeft;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mTranslationX = x - mLeft;
+        info.mMatrixDirty = true;
     }
 
     /**
      * @hide
      */
     public void setFastY(float y) {
-        mTranslationY = y - mTop;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mTranslationY = y - mTop;
+        info.mMatrixDirty = true;
     }
 
     /**
      * @hide
      */
     public void setFastScaleX(float x) {
-        mScaleX = x;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mScaleX = x;
+        info.mMatrixDirty = true;
     }
 
     /**
      * @hide
      */
     public void setFastScaleY(float y) {
-        mScaleY = y;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mScaleY = y;
+        info.mMatrixDirty = true;
     }
 
     /**
      * @hide
      */
     public void setFastAlpha(float alpha) {
-        mAlpha = alpha;
+        ensureTransformationInfo();
+        mTransformationInfo.mAlpha = alpha;
     }
 
     /**
      * @hide
      */
     public void setFastRotationY(float y) {
-        mRotationY = y;
-        mMatrixDirty = true;
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        info.mRotationY = y;
+        info.mMatrixDirty = true;
     }
 
     /**
@@ -7675,12 +7746,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void getHitRect(Rect outRect) {
         updateMatrix();
-        if (mMatrixIsIdentity || mAttachInfo == null) {
+        final TransformationInfo info = mTransformationInfo;
+        if (info == null || info.mMatrixIsIdentity || mAttachInfo == null) {
             outRect.set(mLeft, mTop, mRight, mBottom);
         } else {
             final RectF tmpRect = mAttachInfo.mTmpTransformRect;
-            tmpRect.set(-mPivotX, -mPivotY, getWidth() - mPivotX, getHeight() - mPivotY);
-            mMatrix.mapRect(tmpRect);
+            tmpRect.set(-info.mPivotX, -info.mPivotY,
+                    getWidth() - info.mPivotX, getHeight() - info.mPivotY);
+            info.mMatrix.mapRect(tmpRect);
             outRect.set((int) tmpRect.left + mLeft, (int) tmpRect.top + mTop,
                     (int) tmpRect.right + mLeft, (int) tmpRect.bottom + mTop);
         }
@@ -7768,7 +7841,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
             updateMatrix();
-            if (mMatrixIsIdentity) {
+            final boolean matrixIsIdentity = mTransformationInfo == null
+                    || mTransformationInfo.mMatrixIsIdentity;
+            if (matrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -7794,7 +7869,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mTop += offset;
             mBottom += offset;
 
-            if (!mMatrixIsIdentity) {
+            if (!matrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(false);
             }
@@ -7810,7 +7885,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
             updateMatrix();
-            if (mMatrixIsIdentity) {
+            final boolean matrixIsIdentity = mTransformationInfo == null
+                    || mTransformationInfo.mMatrixIsIdentity;
+            if (matrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -7833,7 +7910,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mLeft += offset;
             mRight += offset;
 
-            if (!mMatrixIsIdentity) {
+            if (!matrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(false);
             }
@@ -8309,7 +8386,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isOpaque() {
         return (mPrivateFlags & OPAQUE_MASK) == OPAQUE_MASK &&
-                (mAlpha >= 1.0f - ViewConfiguration.ALPHA_THRESHOLD);
+                ((mTransformationInfo != null ? mTransformationInfo.mAlpha : 1)
+                        >= 1.0f - ViewConfiguration.ALPHA_THRESHOLD);
     }
 
     /**
@@ -10954,7 +11032,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (sizeChanged) {
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
                     // A change in dimension means an auto-centered pivot point changes, too
-                    mMatrixDirty = true;
+                    if (mTransformationInfo != null) {
+                        mTransformationInfo.mMatrixDirty = true;
+                    }
                 }
                 onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
             }
@@ -11747,14 +11827,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     + "two integers");
         }
 
-        location[0] = mLeft + (int) (mTranslationX + 0.5f);
-        location[1] = mTop + (int) (mTranslationY + 0.5f);
+        location[0] = mLeft;
+        location[1] = mTop;
+        if (mTransformationInfo != null) {
+            location[0] += (int) (mTransformationInfo.mTranslationX + 0.5f);
+            location[1] += (int) (mTransformationInfo.mTranslationY + 0.5f);
+        }
 
         ViewParent viewParent = mParent;
         while (viewParent instanceof View) {
             final View view = (View)viewParent;
-            location[0] += view.mLeft + (int) (view.mTranslationX + 0.5f) - view.mScrollX;
-            location[1] += view.mTop + (int) (view.mTranslationY + 0.5f) - view.mScrollY;
+            location[0] += view.mLeft - view.mScrollX;
+            location[1] += view.mTop - view.mScrollY;
+            if (view.mTransformationInfo != null) {
+                location[0] += (int) (view.mTransformationInfo.mTranslationX + 0.5f);
+                location[1] += (int) (view.mTransformationInfo.mTranslationY + 0.5f);
+            }
             viewParent = view.mParent;
         }
 
