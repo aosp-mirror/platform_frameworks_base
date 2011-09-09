@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -30,7 +28,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.NumberPicker.OnValueChangeListener;
+
+import com.android.internal.R;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -149,6 +150,8 @@ public class TimePicker extends FrameLayout {
                 onTimeChanged();
             }
         });
+        EditText hourInput = (EditText) mHourSpinner.findViewById(R.id.numberpicker_input);
+        hourInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         // divider (only for the new widget style)
         mDivider = (TextView) findViewById(R.id.divider);
@@ -184,6 +187,8 @@ public class TimePicker extends FrameLayout {
                 onTimeChanged();
             }
         });
+        EditText minuteInput = (EditText) mMinuteSpinner.findViewById(R.id.numberpicker_input);
+        minuteInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         /* Get the localized am/pm strings and use them in the spinner */
         mAmPmStrings = new DateFormatSymbols().getAmPmStrings();
@@ -214,6 +219,8 @@ public class TimePicker extends FrameLayout {
                 }
             });
         }
+        EditText amPmInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
+        amPmInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
         // update controls to initial state
         updateHourControl();
