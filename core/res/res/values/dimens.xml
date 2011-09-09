@@ -175,4 +175,7 @@
     <!-- Width of the icon in a dropdown list -->
     <dimen name="dropdownitem_icon_width">32dip</dimen>
 
+    <!-- Default width for a textview error popup -->
+    <dimen name="textview_error_popup_default_width">240dip</dimen>
+
 </resources>
