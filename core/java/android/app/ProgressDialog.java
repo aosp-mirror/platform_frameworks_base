@@ -16,7 +16,10 @@
 
 package android.app;
 
+import com.android.internal.R;
+
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,8 +31,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.android.internal.R;
 
 import java.text.NumberFormat;
 
@@ -119,6 +120,9 @@ public class ProgressDialog extends AlertDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
+        TypedArray a = mContext.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.AlertDialog,
+                com.android.internal.R.attr.alertDialogStyle, 0);
         if (mProgressStyle == STYLE_HORIZONTAL) {
             
             /* Use a separate handler to update the text views as they
@@ -149,17 +153,22 @@ public class ProgressDialog extends AlertDialog {
                     }
                 }
             };
-            View view = inflater.inflate(R.layout.alert_dialog_progress, null);
+            View view = inflater.inflate(a.getResourceId(
+                    com.android.internal.R.styleable.AlertDialog_horizontalProgressLayout,
+                    R.layout.alert_dialog_progress), null);
             mProgress = (ProgressBar) view.findViewById(R.id.progress);
             mProgressNumber = (TextView) view.findViewById(R.id.progress_number);
             mProgressPercent = (TextView) view.findViewById(R.id.progress_percent);
             setView(view);
         } else {
-            View view = inflater.inflate(R.layout.progress_dialog, null);
+            View view = inflater.inflate(a.getResourceId(
+                    com.android.internal.R.styleable.AlertDialog_progressLayout,
+                    R.layout.progress_dialog), null);
             mProgress = (ProgressBar) view.findViewById(R.id.progress);
             mMessageView = (TextView) view.findViewById(R.id.message);
             setView(view);
         }
+        a.recycle();
         if (mMax > 0) {
             setMax(mMax);
         }
