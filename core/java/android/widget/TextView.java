@@ -4050,8 +4050,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int wid = tv.getPaddingLeft() + tv.getPaddingRight();
         int ht = tv.getPaddingTop() + tv.getPaddingBottom();
 
-        int defaultWidthInPixels = (int) (DEFAULT_ERROR_POPUP_MAX_WIDTH_IN_DP *
-                getResources().getDisplayMetrics().density);
+        int defaultWidthInPixels = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.textview_error_popup_default_width);
         Layout l = new StaticLayout(text, tv.getPaint(), defaultWidthInPixels,
                                     Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
         float max = 0;
@@ -11441,6 +11441,4 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CorrectionHighlighter mCorrectionHighlighter;
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
-
-    private static final int DEFAULT_ERROR_POPUP_MAX_WIDTH_IN_DP = 240;
 }
