@@ -752,6 +752,7 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
 
     switch (actionMasked) {
     case AMOTION_EVENT_ACTION_DOWN:
+    case AMOTION_EVENT_ACTION_HOVER_ENTER:
         // Clear all pointers on down before adding the new movement.
         clear();
         break;
@@ -764,12 +765,11 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
         clearPointers(downIdBits);
         break;
     }
-    case AMOTION_EVENT_ACTION_OUTSIDE:
-    case AMOTION_EVENT_ACTION_CANCEL:
-    case AMOTION_EVENT_ACTION_SCROLL:
-    case AMOTION_EVENT_ACTION_UP:
-    case AMOTION_EVENT_ACTION_POINTER_UP:
-        // Ignore these actions because they do not convey any new information about
+    case AMOTION_EVENT_ACTION_MOVE:
+    case AMOTION_EVENT_ACTION_HOVER_MOVE:
+        break;
+    default:
+        // Ignore all other actions because they do not convey any new information about
         // pointer movement.  We also want to preserve the last known velocity of the pointers.
         // Note that ACTION_UP and ACTION_POINTER_UP always report the last known position
         // of the pointers that went up.  ACTION_POINTER_UP does include the new position of
@@ -814,68 +814,36 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
 bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const {
     const Movement& newestMovement = mMovements[mIndex];
     if (newestMovement.idBits.hasBit(id)) {
-        // Find the oldest sample that contains the pointer and that is not older than MAX_AGE.
-        nsecs_t minTime = newestMovement.eventTime - MAX_AGE;
-        uint32_t oldestIndex = mIndex;
-        uint32_t numTouches = 1;
-        do {
-            uint32_t nextOldestIndex = (oldestIndex == 0 ? HISTORY_SIZE : oldestIndex) - 1;
-            const Movement& nextOldestMovement = mMovements[nextOldestIndex];
-            if (!nextOldestMovement.idBits.hasBit(id)
-                    || nextOldestMovement.eventTime < minTime) {
-                break;
-            }
-            oldestIndex = nextOldestIndex;
-        } while (++numTouches < HISTORY_SIZE);
-
-        // Calculate an exponentially weighted moving average of the velocity estimate
-        // at different points in time measured relative to the oldest sample.
-        // This is essentially an IIR filter.  Newer samples are weighted more heavily
-        // than older samples.  Samples at equal time points are weighted more or less
-        // equally.
-        //
-        // One tricky problem is that the sample data may be poorly conditioned.
-        // Sometimes samples arrive very close together in time which can cause us to
-        // overestimate the velocity at that time point.  Most samples might be measured
-        // 16ms apart but some consecutive samples could be only 0.5sm apart because
-        // the hardware or driver reports them irregularly or in bursts.
+        const Position& newestPosition = newestMovement.getPosition(id);
         float accumVx = 0;
         float accumVy = 0;
-        uint32_t index = oldestIndex;
-        uint32_t samplesUsed = 0;
-        const Movement& oldestMovement = mMovements[oldestIndex];
-        const Position& oldestPosition =
-                oldestMovement.positions[oldestMovement.idBits.getIndexOfBit(id)];
-        nsecs_t lastDuration = 0;
+        float duration = 0;
 
-        while (numTouches-- > 1) {
-            if (++index == HISTORY_SIZE) {
-                index = 0;
-            }
+        // Iterate over movement samples in reverse time order and accumulate velocity.
+        uint32_t index = mIndex;
+        do {
+            index = (index == 0 ? HISTORY_SIZE : index) - 1;
             const Movement& movement = mMovements[index];
-            nsecs_t duration = movement.eventTime - oldestMovement.eventTime;
-
-            // If the duration between samples is small, we may significantly overestimate
-            // the velocity.  Consequently, we impose a minimum duration constraint on the
-            // samples that we include in the calculation.
-            if (duration >= MIN_DURATION) {
-                const Position& position = movement.positions[movement.idBits.getIndexOfBit(id)];
-                float scale = 1000000000.0f / duration; // one over time delta in seconds
-                float vx = (position.x - oldestPosition.x) * scale;
-                float vy = (position.y - oldestPosition.y) * scale;
-
-                accumVx = (accumVx * lastDuration + vx * duration) / (duration + lastDuration);
-                accumVy = (accumVy * lastDuration + vy * duration) / (duration + lastDuration);
-
-                lastDuration = duration;
-                samplesUsed += 1;
+            if (!movement.idBits.hasBit(id)) {
+                break;
             }
-        }
+
+            nsecs_t age = newestMovement.eventTime - movement.eventTime;
+            if (age > MAX_AGE) {
+                break;
+            }
+
+            const Position& position = movement.getPosition(id);
+            accumVx += newestPosition.x - position.x;
+            accumVy += newestPosition.y - position.y;
+            duration += age;
+        } while (index != mIndex);
 
         // Make sure we used at least one sample.
-        if (samplesUsed != 0) {
-            *outVx = accumVx;
-            *outVy = accumVy;
+        if (duration >= MIN_DURATION) {
+            float scale = 1000000000.0f / duration; // one over time delta in seconds
+            *outVx = accumVx * scale;
+            *outVy = accumVy * scale;
             return true;
         }
     }
