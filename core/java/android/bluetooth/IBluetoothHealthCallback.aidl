@@ -27,5 +27,6 @@ interface IBluetoothHealthCallback
 {
     void onHealthAppConfigurationStatusChange(in BluetoothHealthAppConfiguration config, int status);
     void onHealthChannelStateChange(in BluetoothHealthAppConfiguration config,
-        in BluetoothDevice device, int prevState, int newState, in ParcelFileDescriptor fd);
+        in BluetoothDevice device, int prevState, int newState, in
+        ParcelFileDescriptor fd, int id);
 }

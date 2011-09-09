@@ -1659,6 +1659,7 @@ static jobject getChannelFdNative(JNIEnv *env, jobject object, jstring channelPa
         if (fileDesc == NULL) {
             // FileDescriptor constructor has thrown an exception
             releaseChannelFdNative(env, object, channelPath);
+            close(fd);
             return NULL;
         }
 
@@ -1667,7 +1668,7 @@ static jobject getChannelFdNative(JNIEnv *env, jobject object, jstring channelPa
         if (parcelFileDesc == NULL) {
             // ParcelFileDescriptor constructor has thrown an exception
             releaseChannelFdNative(env, object, channelPath);
-            LOGE("---Parcel File Desc is null");
+            close(fd);
             return NULL;
         }
 

@@ -4529,6 +4529,44 @@ package android.bluetooth {
     field public static final java.lang.String VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY = "android.bluetooth.headset.intent.category.companyid";
   }
 
+  public final class BluetoothHealth implements android.bluetooth.BluetoothProfile {
+    method public boolean connectChannelToSource(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothHealthAppConfiguration);
+    method public boolean disconnectChannel(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothHealthAppConfiguration, int);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method public android.os.ParcelFileDescriptor getMainChannelFd(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothHealthAppConfiguration);
+    method public boolean registerSinkAppConfiguration(java.lang.String, int, android.bluetooth.BluetoothHealthCallback);
+    method public boolean unregisterAppConfiguration(android.bluetooth.BluetoothHealthAppConfiguration);
+    field public static final int APP_CONFIG_REGISTRATION_FAILURE = 1; // 0x1
+    field public static final int APP_CONFIG_REGISTRATION_SUCCESS = 0; // 0x0
+    field public static final int APP_CONFIG_UNREGISTRATION_FAILURE = 3; // 0x3
+    field public static final int APP_CONFIG_UNREGISTRATION_SUCCESS = 2; // 0x2
+    field public static final int CHANNEL_TYPE_RELIABLE = 10; // 0xa
+    field public static final int CHANNEL_TYPE_STREAMING = 11; // 0xb
+    field public static final int SINK_ROLE = 2; // 0x2
+    field public static final int SOURCE_ROLE = 1; // 0x1
+    field public static final int STATE_CHANNEL_CONNECTED = 2; // 0x2
+    field public static final int STATE_CHANNEL_CONNECTING = 1; // 0x1
+    field public static final int STATE_CHANNEL_DISCONNECTED = 0; // 0x0
+    field public static final int STATE_CHANNEL_DISCONNECTING = 3; // 0x3
+  }
+
+  public final class BluetoothHealthAppConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDataType();
+    method public java.lang.String getName();
+    method public int getRole();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public abstract class BluetoothHealthCallback {
+    ctor public BluetoothHealthCallback();
+    method public void onHealthAppConfigurationStatusChange(android.bluetooth.BluetoothHealthAppConfiguration, int);
+    method public void onHealthChannelStateChange(android.bluetooth.BluetoothHealthAppConfiguration, android.bluetooth.BluetoothDevice, int, int, android.os.ParcelFileDescriptor, int);
+  }
+
   public abstract interface BluetoothProfile {
     method public abstract java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public abstract int getConnectionState(android.bluetooth.BluetoothDevice);

@@ -26,7 +26,6 @@ import android.os.Parcelable;
  * that the Bluetooth Health third party application will register to communicate with the
  * remote Bluetooth health device.
  *
- * @hide
  */
 public final class BluetoothHealthAppConfiguration implements Parcelable {
     private final String mName;
@@ -39,6 +38,7 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
      *
      * @param name Friendly name associated with the application configuration
      * @param dataType Data Type of the remote Bluetooth Health device
+     * @hide
      */
     BluetoothHealthAppConfiguration(String name, int dataType) {
         mName = name;
@@ -54,6 +54,7 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
      * @param dataType Data Type of the remote Bluetooth Health device
      * @param role {@link BluetoothHealth#SOURCE_ROLE} or
      *                     {@link BluetoothHealth#SINK_ROLE}
+     * @hide
      */
     BluetoothHealthAppConfiguration(String name, int dataType, int role, int
         channelType) {
@@ -93,7 +94,6 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
             mChannelType + "]";
     }
 
-    @Override
     public int describeContents() {
         return 0;
     }
@@ -132,6 +132,7 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
      * @return One of {@link BluetoothHealth#CHANNEL_TYPE_RELIABLE} or
      *                         {@link BluetoothHealth#CHANNEL_TYPE_STREAMING} or
      *                         {@link BluetoothHealth#CHANNEL_TYPE_ANY}.
+     * @hide
      */
     public int getChannelType() {
         return mChannelType;
@@ -155,13 +156,10 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
         }
     };
 
-    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mName);
         out.writeInt(mDataType);
         out.writeInt(mRole);
         out.writeInt(mChannelType);
     }
-
-
 }
