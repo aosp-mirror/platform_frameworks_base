@@ -132,6 +132,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* User rejected to disable Wi-Fi in order to enable p2p */
     private static final int WIFI_DISABLE_USER_REJECT       =   BASE + 5;
 
+    /* Airplane mode changed */
+    private static final int AIRPLANE_MODE_CHANGED          =   BASE + 6;
+
     private final boolean mP2pSupported;
     private final String mDeviceType;
     private String mDeviceName;
@@ -168,6 +171,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         // broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         mContext.registerReceiver(new WifiStateReceiver(), filter);
 
@@ -187,6 +191,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             } else if (intent.getAction().equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
                 mWifiApState = intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
                         WifiManager.WIFI_AP_STATE_DISABLED);
+            } else if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+                mP2pStateMachine.sendMessage(AIRPLANE_MODE_CHANGED);
             }
         }
     }
@@ -352,7 +358,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.REQUEST_GROUP_INFO:
                     replyToMessage(message, WifiP2pManager.RESPONSE_GROUP_INFO, mGroup);
                     break;
-                // Ignore
+                case AIRPLANE_MODE_CHANGED:
+                    if (isAirplaneModeOn()) sendMessage(WifiP2pManager.DISABLE_P2P);
+                    break;
+                    // Ignore
                 case WIFI_DISABLE_USER_ACCEPT:
                 case WIFI_DISABLE_USER_REJECT:
                 case GROUP_NEGOTIATION_TIMED_OUT:
@@ -1264,6 +1273,18 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             notificationManager.cancel(mNotification.icon);
             mNotification = null;
         }
+    }
+
+    private boolean isAirplaneSensitive() {
+        String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_RADIOS);
+        return airplaneModeRadios == null
+            || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
+    }
+
+    private boolean isAirplaneModeOn() {
+        return isAirplaneSensitive() && Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_ON, 0) == 1;
     }
 
     }
