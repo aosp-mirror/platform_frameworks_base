@@ -723,7 +723,7 @@ class TextLine {
         float ret = 0;
 
         int contextLen = contextEnd - contextStart;
-        if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineCount != 0 || runIsRtl))) {
+        if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor != 0 || runIsRtl))) {
             int flags = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
             if (mCharsValid) {
                 ret = wp.getTextRunAdvances(mChars, start, runLen,
@@ -753,7 +753,7 @@ class TextLine {
                 wp.setColor(previousColor);
             }
 
-            if (wp.underlineCount != 0) {
+            if (wp.underlineColor != 0) {
                 // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
                 float underlineTop = y + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
 
@@ -764,11 +764,8 @@ class TextLine {
                 wp.setStyle(Paint.Style.FILL);
                 wp.setAntiAlias(true);
 
-                for (int i = 0; i < wp.underlineCount; i++) {
-                    wp.setColor(wp.underlineColors[i]);
-                    c.drawRect(x, underlineTop, x + ret, underlineTop + wp.underlineThicknesses[i],
-                            wp);
-                }
+                wp.setColor(wp.underlineColor);
+                c.drawRect(x, underlineTop, x + ret, underlineTop + wp.underlineThickness, wp);
 
                 wp.setStyle(previousStyle);
                 wp.setColor(previousColor);

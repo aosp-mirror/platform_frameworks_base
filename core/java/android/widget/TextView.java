@@ -9547,6 +9547,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
         private SuggestionAdapter mSuggestionsAdapter;
+        private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
+        private final HashMap<SuggestionSpan, Integer> mSpansLengths;
+
 
         private class CustomPopupWindow extends PopupWindow {
             public CustomPopupWindow(Context context, int defStyle) {
@@ -9572,6 +9575,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public SuggestionsPopupWindow() {
             mCursorWasVisibleBeforeSuggestions = mCursorVisible;
+            mSuggestionSpanComparator = new SuggestionSpanComparator();
+            mSpansLengths = new HashMap<SuggestionSpan, Integer>();
         }
 
         @Override
@@ -9650,6 +9655,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        private class SuggestionSpanComparator implements Comparator<SuggestionSpan> {
+            public int compare(SuggestionSpan span1, SuggestionSpan span2) {
+                final int flag1 = span1.getFlags();
+                final int flag2 = span2.getFlags();
+                if (flag1 != flag2) {
+                    // The order here should match what is used in updateDrawState
+                    final boolean easy1 = (flag1 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
+                    final boolean easy2 = (flag2 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
+                    final boolean misspelled1 = (flag1 & SuggestionSpan.FLAG_MISSPELLED) != 0;
+                    final boolean misspelled2 = (flag2 & SuggestionSpan.FLAG_MISSPELLED) != 0;
+                    if (easy1 && !misspelled1) return -1;
+                    if (easy2 && !misspelled2) return 1;
+                    if (misspelled1) return -1;
+                    if (misspelled2) return 1;
+                }
+
+                return mSpansLengths.get(span1).intValue() - mSpansLengths.get(span2).intValue();
+            }
+        }
+
         /**
          * Returns the suggestion spans that cover the current cursor position. The suggestion
          * spans are sorted according to the length of text that they are attached to.
@@ -9659,24 +9684,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             Spannable spannable = (Spannable) TextView.this.mText;
             SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
 
-            // Cache the span length for performance reason.
-            final HashMap<SuggestionSpan, Integer> spansLengths =
-                    new HashMap<SuggestionSpan, Integer>();
-
+            mSpansLengths.clear();
             for (SuggestionSpan suggestionSpan : suggestionSpans) {
                 int start = spannable.getSpanStart(suggestionSpan);
                 int end = spannable.getSpanEnd(suggestionSpan);
-                spansLengths.put(suggestionSpan, Integer.valueOf(end - start));
+                mSpansLengths.put(suggestionSpan, Integer.valueOf(end - start));
             }
 
-            // The suggestions are sorted according to the lenght of the text that they cover
-            // (shorter first)
-            Arrays.sort(suggestionSpans, new Comparator<SuggestionSpan>() {
-                public int compare(SuggestionSpan span1, SuggestionSpan span2) {
-                    return spansLengths.get(span1).intValue() - spansLengths.get(span2).intValue();
-                }
-            });
-
+            // The suggestions are sorted according to their types (easy correction first, then
+            // misspelled) and to the length of the text that they cover (shorter first).
+            Arrays.sort(suggestionSpans, mSuggestionSpanComparator);
             return suggestionSpans;
         }
 
