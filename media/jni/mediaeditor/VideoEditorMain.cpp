@@ -2328,6 +2328,10 @@ static int videoEditor_getPixelsList(
             break;
         }
         env->CallVoidMethod(callback, mid, (jint)k);
+        if (env->ExceptionCheck()) {
+            err = M4ERR_ALLOC;
+            break;
+        }
     }
 
     env->ReleaseIntArrayElements(pixelArray, m_dst32, 0);
@@ -2338,7 +2342,7 @@ static int videoEditor_getPixelsList(
         env->ReleaseStringUTFChars(path, pString);
     }
 
-    if (err != M4NO_ERROR) {
+    if (err != M4NO_ERROR && !env->ExceptionCheck()) {
         jniThrowException(env, "java/lang/RuntimeException",\
                 "ThumbnailGetPixels32 failed");
     }
