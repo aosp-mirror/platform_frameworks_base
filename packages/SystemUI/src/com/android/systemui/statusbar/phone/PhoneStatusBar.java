@@ -1174,7 +1174,6 @@ public class PhoneStatusBar extends StatusBar {
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
                     if (mRecentsPanel != null) {
-                        disable(StatusBarManager.DISABLE_BACK);
                         mRecentsPanel.setVisibility(View.VISIBLE);
                         mRecentsPanel.show(true, true);
                     }
@@ -1182,7 +1181,6 @@ public class PhoneStatusBar extends StatusBar {
                 case MSG_CLOSE_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing recents panel");
                     if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                        disable(StatusBarManager.DISABLE_NONE);
                         mRecentsPanel.show(false, true);
                     }
                     break;
