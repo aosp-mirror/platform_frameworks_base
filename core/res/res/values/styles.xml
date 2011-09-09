@@ -890,6 +890,14 @@ please see styles_device_defaults.xml.
         <item name="android:textSize">30sp</item>
     </style>
 
+    <style name="Widget.ActivityChooserView">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@android:drawable/ab_share_pack_holo_dark</item>
+        <item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:dividerPadding">6dip</item>
+    </style>
+
      <style name="TextAppearance.SuggestionHighlight">
          <item name="android:textSize">18sp</item>
          <item name="android:textColor">@android:color/suggestion_highlight_text</item>
@@ -1651,6 +1659,9 @@ please see styles_device_defaults.xml.
         <item name="android:background">@null</item>
     </style>
 
+    <style name="Widget.Holo.ActivityChooserView" parent="Widget.ActivityChooserView">
+    </style>
+
     <style name="Widget.Holo.ImageWell" parent="Widget.ImageWell">
     </style>
 
@@ -2069,6 +2080,10 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.EditText.NumberPickerInputText" parent="Widget.Holo.EditText.NumberPickerInputText">
+    </style>
+
+    <style name="Widget.Holo.Light.ActivityChooserView" parent="Widget.Holo.ActivityChooserView">
+        <item name="android:background">@android:drawable/ab_share_pack_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ImageWell" parent="Widget.ImageWell">

@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -74,6 +75,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * The content of this view.
      */
     private final LinearLayout mActivityChooserContent;
+
+    /**
+     * Stores the background drawable to allow hiding and latter showing.
+     */
+    private final Drawable mActivityChooserContentBackground;
 
     /**
      * The expand activities action button;
@@ -194,12 +200,15 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         Drawable expandActivityOverflowButtonDrawable = attributesArray.getDrawable(
                 R.styleable.ActivityChooserView_expandActivityOverflowButtonDrawable);
 
+        attributesArray.recycle();
+
         LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.activity_chooser_view, this, true);
 
         mCallbacks = new Callbacks();
 
         mActivityChooserContent = (LinearLayout) findViewById(R.id.activity_chooser_view_content);
+        mActivityChooserContentBackground = mActivityChooserContent.getBackground();
 
         mDefaultActivityButton = (FrameLayout) findViewById(R.id.default_activity_button);
         mDefaultActivityButton.setOnClickListener(mCallbacks);
@@ -217,7 +226,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             @Override
             public void onChanged() {
                 super.onChanged();
-                updateButtons();
+                updateAppearance();
             }
         });
 
@@ -352,9 +361,16 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mActivityChooserContent.measure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(mActivityChooserContent.getMeasuredWidth(),
-                mActivityChooserContent.getMeasuredHeight());
+        View child = mActivityChooserContent;
+        // If the default action is not visible we want to be as tall as the
+        // ActionBar so if this widget is used in the latter it will look as
+        // a normal action button.
+        if (mDefaultActivityButton.getVisibility() != VISIBLE) {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
+                    MeasureSpec.EXACTLY);
+        }
+        measureChild(child, widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(child.getMeasuredWidth(), child.getMeasuredHeight());
     }
 
     @Override
@@ -365,11 +381,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         } else {
             dismissPopup();
         }
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        mActivityChooserContent.onDraw(canvas);
     }
 
     public ActivityChooserModel getDataModel() {
@@ -417,21 +428,29 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     /**
      * Updates the buttons state.
      */
-    private void updateButtons() {
+    private void updateAppearance() {
+        // Expand overflow button.
+        if (mAdapter.getCount() > 0) {
+            mExpandActivityOverflowButton.setEnabled(true);
+        } else {
+            mExpandActivityOverflowButton.setEnabled(false);
+        }
+        // Default activity button.
         final int activityCount = mAdapter.getActivityCount();
-        if (activityCount > 0) {
+        final int historySize = mAdapter.getHistorySize();
+        if (activityCount > 0 && historySize > 0) {
             mDefaultActivityButton.setVisibility(VISIBLE);
-            if (mAdapter.getCount() > 0) {
-                mExpandActivityOverflowButton.setEnabled(true);
-            } else {
-                mExpandActivityOverflowButton.setEnabled(false);
-            }
             ResolveInfo activity = mAdapter.getDefaultActivity();
             PackageManager packageManager = mContext.getPackageManager();
             mDefaultActivityButtonImage.setImageDrawable(activity.loadIcon(packageManager));
         } else {
-            mDefaultActivityButton.setVisibility(View.INVISIBLE);
-            mExpandActivityOverflowButton.setEnabled(false);
+            mDefaultActivityButton.setVisibility(View.GONE);
+        }
+        // Activity chooser content.
+        if (mDefaultActivityButton.getVisibility() == VISIBLE) {
+            mActivityChooserContent.setBackgroundDrawable(mActivityChooserContentBackground);
+        } else {
+            mActivityChooserContent.setBackgroundDrawable(null);
         }
     }
 
@@ -676,6 +695,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         public int getActivityCount() {
             return mDataModel.getActivityCount();
+        }
+
+        public int getHistorySize() {
+            return mDataModel.getHistorySize();
         }
 
         public int getMaxActivityCount() {
