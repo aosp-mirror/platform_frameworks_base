@@ -386,7 +386,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     && lastReason != null)
                 reason = lastReason;
             mNetworkInfo.setDetailedState(state, reason, extraInfo);
-            Message msg = mTarget.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
+            Message msg = mTarget.obtainMessage(EVENT_STATE_CHANGED, new NetworkInfo(mNetworkInfo));
             msg.sendToTarget();
         }
     }
