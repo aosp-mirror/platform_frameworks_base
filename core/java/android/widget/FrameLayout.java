@@ -250,6 +250,27 @@ public class FrameLayout extends ViewGroup {
         return mForeground;
     }
 
+    private int getPaddingLeftWithForeground() {
+        return mForegroundInPadding ? Math.max(mPaddingLeft, mForegroundPaddingLeft) :
+            mPaddingLeft + mForegroundPaddingLeft;
+    }
+
+    private int getPaddingRightWithForeground() {
+        return mForegroundInPadding ? Math.max(mPaddingRight, mForegroundPaddingRight) :
+            mPaddingRight + mForegroundPaddingRight;
+    }
+
+    private int getPaddingTopWithForeground() {
+        return mForegroundInPadding ? Math.max(mPaddingTop, mForegroundPaddingTop) :
+            mPaddingTop + mForegroundPaddingTop;
+    }
+
+    private int getPaddingBottomWithForeground() {
+        return mForegroundInPadding ? Math.max(mPaddingBottom, mForegroundPaddingBottom) :
+            mPaddingBottom + mForegroundPaddingBottom;
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -286,8 +307,8 @@ public class FrameLayout extends ViewGroup {
         }
 
         // Account for padding too
-        maxWidth += mPaddingLeft + mPaddingRight + mForegroundPaddingLeft + mForegroundPaddingRight;
-        maxHeight += mPaddingTop + mPaddingBottom + mForegroundPaddingTop + mForegroundPaddingBottom;
+        maxWidth += getPaddingLeftWithForeground() + getPaddingRightWithForeground();
+        maxHeight += getPaddingTopWithForeground() + getPaddingBottomWithForeground();
 
         // Check against our minimum height and width
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
@@ -315,21 +336,25 @@ public class FrameLayout extends ViewGroup {
                 
                 if (lp.width == LayoutParams.MATCH_PARENT) {
                     childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth() -
-                            mPaddingLeft - mPaddingRight - lp.leftMargin - lp.rightMargin,
+                            getPaddingLeftWithForeground() - getPaddingRightWithForeground() -
+                            lp.leftMargin - lp.rightMargin,
                             MeasureSpec.EXACTLY);
                 } else {
                     childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                            mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin,
+                            getPaddingLeftWithForeground() + getPaddingRightWithForeground() +
+                            lp.leftMargin + lp.rightMargin,
                             lp.width);
                 }
                 
                 if (lp.height == LayoutParams.MATCH_PARENT) {
                     childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight() -
-                            mPaddingTop - mPaddingBottom - lp.topMargin - lp.bottomMargin,
+                            getPaddingTopWithForeground() - getPaddingBottomWithForeground() -
+                            lp.topMargin - lp.bottomMargin,
                             MeasureSpec.EXACTLY);
                 } else {
                     childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
-                            mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin,
+                            getPaddingTopWithForeground() + getPaddingBottomWithForeground() +
+                            lp.topMargin + lp.bottomMargin,
                             lp.height);
                 }
 
@@ -345,11 +370,11 @@ public class FrameLayout extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int count = getChildCount();
 
-        final int parentLeft = mPaddingLeft + mForegroundPaddingLeft;
-        final int parentRight = right - left - mPaddingRight - mForegroundPaddingRight;
+        final int parentLeft = getPaddingLeftWithForeground();
+        final int parentRight = right - left - getPaddingRightWithForeground();
 
-        final int parentTop = mPaddingTop + mForegroundPaddingTop;
-        final int parentBottom = bottom - top - mPaddingBottom - mForegroundPaddingBottom;
+        final int parentTop = getPaddingTopWithForeground();
+        final int parentBottom = bottom - top - getPaddingBottomWithForeground();
 
         mForegroundBoundsChanged = true;
         
