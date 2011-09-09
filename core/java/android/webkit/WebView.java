@@ -1050,6 +1050,10 @@ public class WebView extends AbsoluteLayout
         super(context, attrs, defStyle);
         checkThread();
 
+        if (context == null) {
+            throw new IllegalArgumentException("Invalid context argument");
+        }
+
         // Used by the chrome stack to find application paths
         JniUtil.setContext(context);
 
