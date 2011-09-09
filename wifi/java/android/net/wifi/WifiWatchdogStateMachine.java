@@ -77,15 +77,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /**
      * Low signal is defined as less than or equal to cut off
      */
-    private static final int LOW_SIGNAL_CUTOFF = 1;
+    private static final int LOW_SIGNAL_CUTOFF = 0;
 
     private static final long DEFAULT_DNS_CHECK_SHORT_INTERVAL_MS = 2 * 60 * 1000;
-    private static final long DEFAULT_DNS_CHECK_LONG_INTERVAL_MS = 30 * 60 * 1000;
+    private static final long DEFAULT_DNS_CHECK_LONG_INTERVAL_MS = 60 * 60 * 1000;
     private static final long DEFAULT_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
 
     private static final int DEFAULT_MAX_SSID_BLACKLISTS = 7;
-    private static final int DEFAULT_NUM_DNS_PINGS = 15; // Multiple pings to detect setup issues
-    private static final int DEFAULT_MIN_DNS_RESPONSES = 3;
+    private static final int DEFAULT_NUM_DNS_PINGS = 5; // Multiple pings to detect setup issues
+    private static final int DEFAULT_MIN_DNS_RESPONSES = 1;
 
     private static final int DEFAULT_DNS_PING_TIMEOUT_MS = 2000;
 
@@ -95,7 +95,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final String DEFAULT_WALLED_GARDEN_URL =
             "http://clients3.google.com/generate_204";
     private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
-    private static final int DNS_INTRATEST_PING_INTERVAL = 200; // Long delay to detect setup issues
+    private static final int DNS_INTRATEST_PING_INTERVAL_MS = 200;
+    /* With some router setups, it takes a few hunder milli-seconds before connection is active */
+    private static final int DNS_START_DELAY_MS = 1000;
 
     private static final int BASE = Protocol.BASE_WIFI_WATCHDOG;
 
@@ -677,7 +679,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             for (int i=0; i < mNumDnsPings; i++) {
                 for (int j = 0; j < numDnses; j++) {
                     idDnsMap.put(mDnsPinger.pingDnsAsync(mDnsList.get(j), mDnsPingTimeoutMs,
-                            DNS_INTRATEST_PING_INTERVAL * i), j);
+                            DNS_START_DELAY_MS + DNS_INTRATEST_PING_INTERVAL_MS * i), j);
                 }
             }
         }
