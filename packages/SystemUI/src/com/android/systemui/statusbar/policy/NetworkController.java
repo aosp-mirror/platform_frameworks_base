@@ -449,6 +449,7 @@ public class NetworkController extends BroadcastReceiver {
             case TelephonyManager.NETWORK_TYPE_HSDPA:
             case TelephonyManager.NETWORK_TYPE_HSUPA:
             case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
                 if (mHspaDataDistinguishable) {
                     mDataIconList = TelephonyIcons.DATA_H[mInetCondition];
                     mDataTypeIconId = R.drawable.stat_sys_data_connected_h;
