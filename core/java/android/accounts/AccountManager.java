@@ -197,6 +197,16 @@ public class AccountManager {
     public static final String KEY_CALLER_PID = "callerPid";
 
     /**
+     * The Android package of the caller will be set in the options bundle by the
+     * {@link AccountManager} and will be passed to the AccountManagerService and
+     * to the AccountAuthenticators. The uid of the caller will be known by the
+     * AccountManagerService as well as the AccountAuthenticators so they will be able to
+     * verify that the package is consistent with the uid (a uid might be shared by many
+     * packages).
+     */
+    public static final String KEY_ANDROID_PACKAGE_NAME = "androidPackageName";
+
+    /**
      * Boolean, if set and 'customTokens' the authenticator is responsible for
      * notifications.
      * @hide
@@ -880,7 +890,10 @@ public class AccountManager {
      * If the account is no longer present on the device, the return value is
      * authenticator-dependent.  The caller should verify the validity of the
      * account before requesting an auth token.
+     * @deprecated use {@link #getAuthToken(Account, String, android.os.Bundle,
+     * boolean, AccountManagerCallback, android.os.Handler)} instead
      */
+    @Deprecated
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final boolean notifyAuthFailure,
             AccountManagerCallback<Bundle> callback, Handler handler) {
@@ -890,6 +903,90 @@ public class AccountManager {
             public void doWork() throws RemoteException {
                 mService.getAuthToken(mResponse, account, authTokenType,
                         notifyAuthFailure, false /* expectActivityLaunch */, null /* options */);
+            }
+        }.start();
+    }
+
+    /**
+     * Gets an auth token of the specified type for a particular account,
+     * optionally raising a notification if the user must enter credentials.
+     * This method is intended for background tasks and services where the
+     * user should not be immediately interrupted with a password prompt.
+     *
+     * <p>If a previously generated auth token is cached for this account and
+     * type, then it is returned.  Otherwise, if a saved password is
+     * available, it is sent to the server to generate a new auth token.
+     * Otherwise, an {@link Intent} is returned which, when started, will
+     * prompt the user for a password.  If the notifyAuthFailure parameter is
+     * set, a status bar notification is also created with the same Intent,
+     * alerting the user that they need to enter a password at some point.
+     *
+     * <p>In that case, you may need to wait until the user responds, which
+     * could take hours or days or forever.  When the user does respond and
+     * supply a new password, the account manager will broadcast the
+     * {@link #LOGIN_ACCOUNTS_CHANGED_ACTION} Intent, which applications can
+     * use to try again.
+     *
+     * <p>If notifyAuthFailure is not set, it is the application's
+     * responsibility to launch the returned Intent at some point.
+     * Either way, the result from this call will not wait for user action.
+     *
+     * <p>Some authenticators have auth token <em>types</em>, whose value
+     * is authenticator-dependent.  Some services use different token types to
+     * access different functionality -- for example, Google uses different auth
+     * tokens to access Gmail and Google Calendar for the same account.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param account The account to fetch an auth token for
+     * @param authTokenType The auth token type, an authenticator-dependent
+     *     string token, must not be null
+     * @param options Authenticator-specific options for the request,
+     *     may be null or empty
+     * @param notifyAuthFailure True to add a notification to prompt the
+     *     user for a password if necessary, false to leave that to the caller
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *     at least the following fields on success:
+     * <ul>
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account you supplied
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * <li> {@link #KEY_AUTHTOKEN} - the auth token you wanted
+     * </ul>
+     *
+     * (Other authenticator-specific values may be returned.)  If the user
+     * must enter credentials, the returned Bundle contains only
+     * {@link #KEY_INTENT} with the {@link Intent} needed to launch a prompt.
+     *
+     * If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation is canceled for
+     *      any reason, incluidng the user canceling a credential request
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      creating a new auth token, usually because of network trouble
+     * </ul>
+     * If the account is no longer present on the device, the return value is
+     * authenticator-dependent.  The caller should verify the validity of the
+     * account before requesting an auth token.
+     */
+    public AccountManagerFuture<Bundle> getAuthToken(
+            final Account account, final String authTokenType,
+            final Bundle options, final boolean notifyAuthFailure,
+            AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
+        return new AmsTask(null, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.getAuthToken(mResponse, account, authTokenType,
+                        notifyAuthFailure, false /* expectActivityLaunch */, options);
             }
         }.start();
     }
