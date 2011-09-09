@@ -60,6 +60,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import junit.framework.Assert;
@@ -1044,6 +1046,7 @@ import junit.framework.Assert;
                 break;
         }
         setHint(null);
+        setThreshold(1);
         if (single) {
             mWebView.requestLabel(mWebView.nativeFocusCandidateFramePointer(),
                     mNodePointer);
@@ -1076,5 +1079,17 @@ import junit.framework.Assert;
 
     /* package */ void setAutoFillProfileIsSet(boolean autoFillProfileIsSet) {
         mAutoFillProfileIsSet = autoFillProfileIsSet;
+    }
+
+    static String urlForAutoCompleteData(String urlString) {
+        // Remove any fragment or query string.
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            Log.e(LOGTAG, "Unable to parse URL "+url);
+        }
+
+        return url != null ? url.getProtocol() + "://" + url.getHost() + url.getPath() : null;
     }
 }
