@@ -651,6 +651,11 @@ class ZoomManager {
             mTextWrapScale = newTextWrapScale;
             refreshZoomScale(true);
         } else if (!mInZoomOverview && willScaleTriggerZoom(getZoomOverviewScale())) {
+            // Reflow, if necessary.
+            if (mTextWrapScale > getReadingLevelScale()) {
+                mTextWrapScale = getReadingLevelScale();
+                refreshZoomScale(true);
+            }
             zoomToOverview();
         } else {
             zoomToReadingLevelOrMore();
