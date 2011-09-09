@@ -59,9 +59,8 @@ class BluetoothEventLoop {
     // from remote device when Android is in Suspend state.
     private PowerManager.WakeLock mWakeLock;
 
-    private static final int EVENT_RESTART_BLUETOOTH = 1;
-    private static final int EVENT_PAIRING_CONSENT_DELAYED_ACCEPT = 2;
-    private static final int EVENT_AGENT_CANCEL = 3;
+    private static final int EVENT_PAIRING_CONSENT_DELAYED_ACCEPT = 1;
+    private static final int EVENT_AGENT_CANCEL = 2;
 
     private static final int CREATE_DEVICE_ALREADY_EXISTS = 1;
     private static final int CREATE_DEVICE_SUCCESS = 0;
@@ -75,9 +74,6 @@ class BluetoothEventLoop {
         public void handleMessage(Message msg) {
             String address = null;
             switch (msg.what) {
-            case EVENT_RESTART_BLUETOOTH:
-                mBluetoothService.restart();
-                break;
             case EVENT_PAIRING_CONSENT_DELAYED_ACCEPT:
                 address = (String)msg.obj;
                 if (address != null) {
@@ -375,9 +371,6 @@ class BluetoothEventLoop {
         } else if (name.equals("Powered")) {
             mBluetoothState.sendMessage(BluetoothAdapterStateMachine.POWER_STATE_CHANGED,
                 propValues[1].equals("true") ? new Boolean(true) : new Boolean(false));
-            // bluetoothd has restarted, re-read all our properties.
-            // Note: bluez only sends this property change when it restarts.
-            onRestartRequired();
         } else if (name.equals("DiscoverableTimeout")) {
             adapterProperties.setProperty(name, propValues[1]);
         }
@@ -1031,14 +1024,6 @@ class BluetoothEventLoop {
         log("Health Device : devicePath: " + devicePath + ":channelPath:" + channelPath +
                 ":exists" + exists);
         mBluetoothService.onHealthDeviceChannelChanged(devicePath, channelPath, exists);
-    }
-
-    private void onRestartRequired() {
-        if (mBluetoothService.isEnabled()) {
-            Log.e(TAG, "*** A serious error occurred (did bluetoothd crash?) - " +
-                       "restarting Bluetooth ***");
-            mHandler.sendEmptyMessage(EVENT_RESTART_BLUETOOTH);
-        }
     }
 
     private static void log(String msg) {

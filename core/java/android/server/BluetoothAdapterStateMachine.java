@@ -109,6 +109,8 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     private static final int DEVICES_DISCONNECT_TIMEOUT = 104;
     // Prepare Bluetooth timeout happens
     private static final int PREPARE_BLUETOOTH_TIMEOUT = 105;
+    // Bluetooth Powerdown timeout happens
+    private static final int POWER_DOWN_TIMEOUT = 106;
 
     private Context mContext;
     private BluetoothService mBluetoothService;
@@ -128,6 +130,8 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     private static final int DEVICES_DISCONNECT_TIMEOUT_TIME = 3000;
 
     private static final int PREPARE_BLUETOOTH_TIMEOUT_TIME = 10000;
+
+    private static final int POWER_DOWN_TIMEOUT_TIME = 5000;
 
     BluetoothAdapterStateMachine(Context context, BluetoothService bluetoothService,
                                  BluetoothAdapter bluetoothAdapter) {
@@ -386,6 +390,11 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     break;
                 case USER_TURN_OFF: // ignore
                     break;
+                case POWER_STATE_CHANGED:
+                    if ((Boolean) message.obj) {
+                        recoverStateMachine(TURN_HOT, null);
+                    }
+                    break;
                 default:
                     return NOT_HANDLED;
             }
@@ -420,19 +429,43 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     }
                     break;
                 case POWER_STATE_CHANGED:
+                    removeMessages(POWER_DOWN_TIMEOUT);
                     if (!((Boolean) message.obj)) {
-                        transitionTo(mHotOff);
-                        finishSwitchingOff();
+                        if (mPublicState == BluetoothAdapter.STATE_TURNING_OFF) {
+                            transitionTo(mHotOff);
+                            finishSwitchingOff();
+                        }
+                    } else {
+                        if (mPublicState != BluetoothAdapter.STATE_TURNING_ON) {
+                            if (mContext.getResources().getBoolean
+                            (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                                recoverStateMachine(TURN_HOT, null);
+                            } else {
+                                recoverStateMachine(TURN_COLD, null);
+                            }
+                        }
                     }
                     break;
                 case ALL_DEVICES_DISCONNECTED:
                     removeMessages(DEVICES_DISCONNECT_TIMEOUT);
                     mBluetoothService.switchConnectable(false);
+                    sendMessageDelayed(POWER_DOWN_TIMEOUT, POWER_DOWN_TIMEOUT_TIME);
                     break;
                 case DEVICES_DISCONNECT_TIMEOUT:
                     sendMessage(ALL_DEVICES_DISCONNECTED);
                     // reset the hardware for error recovery
                     Log.e(TAG, "Devices failed to disconnect, reseting...");
+                    deferMessage(obtainMessage(TURN_COLD));
+                    if (mContext.getResources().getBoolean
+                        (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                        deferMessage(obtainMessage(TURN_HOT));
+                    }
+                    break;
+                case POWER_DOWN_TIMEOUT:
+                    transitionTo(mHotOff);
+                    finishSwitchingOff();
+                    // reset the hardware for error recovery
+                    Log.e(TAG, "Devices failed to power down, reseting...");
                     deferMessage(obtainMessage(TURN_COLD));
                     if (mContext.getResources().getBoolean
                         (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
@@ -501,6 +534,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                                            DEVICES_DISCONNECT_TIMEOUT_TIME);
                     } else {
                         mBluetoothService.switchConnectable(false);
+                        sendMessageDelayed(POWER_DOWN_TIMEOUT, POWER_DOWN_TIMEOUT_TIME);
                     }
 
                     // we turn all the way to PowerOff with AIRPLANE_MODE_ON
@@ -519,6 +553,12 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     break;
                 case PER_PROCESS_TURN_OFF:
                     perProcessCallback(false, (IBluetoothStateChangeCallback)message.obj);
+                    break;
+                case POWER_STATE_CHANGED:
+                    if ((Boolean) message.obj) {
+                        // reset the state machine and send it TURN_ON_CONTINUE message
+                        recoverStateMachine(USER_TURN_ON, false);
+                    }
                     break;
                 default:
                     return NOT_HANDLED;
@@ -540,7 +580,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
             if (what == PER_PROCESS_TURN_ON) {
                 isTurningOn = true;
-            } else if (what == PER_PROCESS_TURN_OFF) {
+            } else if (what == USER_TURN_OFF) {
                 isTurningOn = false;
             } else {
                 Log.e(TAG, "enter PerProcessState: wrong msg: " + what);
@@ -568,12 +608,31 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     }
                     break;
                 case POWER_STATE_CHANGED:
+                    removeMessages(POWER_DOWN_TIMEOUT);
                     if (!((Boolean) message.obj)) {
                         transitionTo(mHotOff);
                         if (!mContext.getResources().getBoolean
                             (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
                             deferMessage(obtainMessage(TURN_COLD));
                         }
+                    } else {
+                        if (!isTurningOn) {
+                            recoverStateMachine(TURN_COLD, null);
+                            for (IBluetoothStateChangeCallback c:
+                                     mBluetoothService.getApplicationStateChangeCallbacks()) {
+                                perProcessCallback(false, c);
+                                deferMessage(obtainMessage(PER_PROCESS_TURN_ON, c));
+                            }
+                        }
+                    }
+                    break;
+                case POWER_DOWN_TIMEOUT:
+                    transitionTo(mHotOff);
+                    Log.e(TAG, "Power-down timed out, resetting...");
+                    deferMessage(obtainMessage(TURN_COLD));
+                    if (mContext.getResources().getBoolean
+                        (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                        deferMessage(obtainMessage(TURN_HOT));
                     }
                     break;
                 case USER_TURN_ON:
@@ -616,10 +675,12 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     perProcessCallback(false, (IBluetoothStateChangeCallback)message.obj);
                     if (mBluetoothService.isApplicationStateChangeTrackerEmpty()) {
                         mBluetoothService.switchConnectable(false);
+                        sendMessageDelayed(POWER_DOWN_TIMEOUT, POWER_DOWN_TIMEOUT_TIME);
                     }
                     break;
                 case AIRPLANE_MODE_ON:
                     mBluetoothService.switchConnectable(false);
+                    sendMessageDelayed(POWER_DOWN_TIMEOUT, POWER_DOWN_TIMEOUT_TIME);
                     allProcessesCallback(false);
                     // we turn all the way to PowerOff with AIRPLANE_MODE_ON
                     deferMessage(obtainMessage(AIRPLANE_MODE_ON));
@@ -697,6 +758,17 @@ final class BluetoothAdapterStateMachine extends StateMachine {
         mPublicState = newState;
 
         mContext.sendBroadcast(intent, BluetoothService.BLUETOOTH_PERM);
+    }
+
+    /**
+     * bluetoothd has crashed and recovered, the adapter state machine has to
+     * reset itself and try to return to previous state
+     */
+    private void recoverStateMachine(int what, Object obj) {
+        Log.e(TAG, "Get unexpected power on event, reset with: " + what);
+        transitionTo(mHotOff);
+        deferMessage(obtainMessage(TURN_COLD));
+        deferMessage(obtainMessage(what, obj));
     }
 
     private void dump(PrintWriter pw) {
