@@ -267,6 +267,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
 
     /**
      * @return The color of the underline for that span, or 0 if there is no underline
+     *
+     * @hide
      */
     public int getUnderlineColor() {
         // The order here should match what is used in updateDrawState
