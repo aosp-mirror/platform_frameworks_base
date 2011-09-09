@@ -15,6 +15,7 @@
  */
 package com.android.internal.widget;
 
+import com.android.internal.R;
 import com.android.internal.view.menu.ActionMenuPresenter;
 import com.android.internal.view.menu.ActionMenuView;
 
@@ -23,6 +24,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +35,7 @@ public abstract class AbsActionBarView extends ViewGroup {
     protected ActionMenuView mMenuView;
     protected ActionMenuPresenter mActionMenuPresenter;
     protected ActionBarContainer mSplitView;
+    protected int mContentHeight;
 
     protected Animator mVisibilityAnim;
     protected final VisibilityAnimListener mVisAnimListener = new VisibilityAnimListener();
@@ -50,6 +54,30 @@ public abstract class AbsActionBarView extends ViewGroup {
 
     public AbsActionBarView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Action bar can change size on configuration changes.
+        // Reread the desired height from the theme-specified style.
+        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.ActionBar,
+                com.android.internal.R.attr.actionBarStyle, 0);
+        setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
+        a.recycle();
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.onConfigurationChanged(newConfig);
+        }
+    }
+
+    public void setContentHeight(int height) {
+        mContentHeight = height;
+        requestLayout();
+    }
+
+    public int getContentHeight() {
+        return mContentHeight;
     }
 
     public void setSplitView(ActionBarContainer splitView) {
