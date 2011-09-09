@@ -63,7 +63,7 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary) {
-        this(nameId, iconId, locale, mode, extraValue, false, false);
+        this(nameId, iconId, locale, mode, extraValue, isAuxiliary, false);
     }
 
     /**
