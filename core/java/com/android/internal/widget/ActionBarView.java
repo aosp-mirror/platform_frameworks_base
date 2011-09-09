@@ -84,8 +84,6 @@ public class ActionBarView extends AbsActionBarView {
 
     private static final int DEFAULT_CUSTOM_GRAVITY = Gravity.LEFT | Gravity.CENTER_VERTICAL;
     
-    private int mContentHeight;
-
     private int mNavigationMode;
     private int mDisplayOptions = -1;
     private CharSequence mTitle;
@@ -257,16 +255,6 @@ public class ActionBarView extends AbsActionBarView {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        // Action bar can change size on configuration changes.
-        // Reread the desired height from the theme-specified style.
-        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.ActionBar,
-                com.android.internal.R.attr.actionBarStyle, 0);
-        setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
-        a.recycle();
-        if (mActionMenuPresenter != null) {
-            mActionMenuPresenter.onConfigurationChanged(newConfig);
-        }
-
         mTitleView = null;
         mSubtitleView = null;
         mTitleUpView = null;
@@ -276,6 +264,13 @@ public class ActionBarView extends AbsActionBarView {
         mTitleLayout = null;
         if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
             initTitle();
+        }
+
+        if (mTabScrollView != null && mIncludeTabs) {
+            ViewGroup.LayoutParams lp = mTabScrollView.getLayoutParams();
+            lp.width = LayoutParams.WRAP_CONTENT;
+            lp.height = LayoutParams.MATCH_PARENT;
+            mTabScrollView.setAllowCollapse(true);
         }
     }
 
@@ -302,15 +297,6 @@ public class ActionBarView extends AbsActionBarView {
                 mIndeterminateProgressStyle);
         mIndeterminateProgressView.setId(R.id.progress_circular);
         addView(mIndeterminateProgressView);
-    }
-
-    public void setContentHeight(int height) {
-        mContentHeight = height;
-        requestLayout();
-    }
-
-    public int getContentHeight() {
-        return mContentHeight;
     }
 
     public void setSplitActionBar(boolean splitActionBar) {
@@ -957,7 +943,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         if (mContextView != null) {
-            mContextView.setHeight(getMeasuredHeight());
+            mContextView.setContentHeight(getMeasuredHeight());
         }
 
         if (mProgressView != null && mProgressView.getVisibility() != GONE) {
