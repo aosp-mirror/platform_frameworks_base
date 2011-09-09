@@ -817,20 +817,6 @@ void SurfaceFlinger::handleWorkList()
     mHwWorkListDirty = false;
     HWComposer& hwc(graphicPlane(0).displayHardware().getHwComposer());
     if (hwc.initCheck() == NO_ERROR) {
-
-        const DisplayHardware& hw(graphicPlane(0).displayHardware());
-        uint32_t flags = hw.getFlags();
-        if ((flags & DisplayHardware::SWAP_RECTANGLE) ||
-            (flags & DisplayHardware::BUFFER_PRESERVED))
-        {
-            // we need to redraw everything (the whole screen)
-            // NOTE: we could be more subtle here and redraw only
-            // the area which will end-up in an overlay. But since this
-            // shouldn't happen often, we invalidate everything.
-            mDirtyRegion.set(hw.bounds());
-            mInvalidRegion = mDirtyRegion;
-        }
-
         const Vector< sp<LayerBase> >& currentLayers(mVisibleLayersSortedByZ);
         const size_t count = currentLayers.size();
         hwc.createWorkList(count);
@@ -891,29 +877,26 @@ void SurfaceFlinger::handleRepaint()
     }
 
     // compose all surfaces
+    setupHardwareComposer(&mDirtyRegion);
     composeSurfaces(mDirtyRegion);
 
     // clear the dirty regions
     mDirtyRegion.clear();
 }
 
-void SurfaceFlinger::composeSurfaces(const Region& dirty)
+void SurfaceFlinger::setupHardwareComposer(Region* dirtyInOut)
 {
-    if (UNLIKELY(!mWormholeRegion.isEmpty())) {
-        // should never happen unless the window manager has a bug
-        // draw something...
-        drawWormhole();
-    }
-
-    status_t err = NO_ERROR;
-    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
-    size_t count = layers.size();
-
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     HWComposer& hwc(hw.getHwComposer());
     hwc_layer_t* const cur(hwc.getLayers());
+    if (!cur) {
+        return;
+    }
 
-    LOGE_IF(cur && hwc.getNumLayers() != count,
+    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+    size_t count = layers.size();
+
+    LOGE_IF(hwc.getNumLayers() != count,
             "HAL number of layers (%d) doesn't match surfaceflinger (%d)",
             hwc.getNumLayers(), count);
 
@@ -927,56 +910,82 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
      *  and build the transparent region of the FB
      */
     Region transparent;
-    if (cur) {
-        for (size_t i=0 ; i<count ; i++) {
-            const sp<LayerBase>& layer(layers[i]);
-            layer->setPerFrameData(&cur[i]);
-        }
-        err = hwc.prepare();
-        LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(layers[i]);
+        layer->setPerFrameData(&cur[i]);
+    }
+    status_t err = hwc.prepare();
+    LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
 
-        if (err == NO_ERROR) {
-            for (size_t i=0 ; i<count ; i++) {
-                if (cur[i].hints & HWC_HINT_CLEAR_FB) {
-                    const sp<LayerBase>& layer(layers[i]);
-                    if (layer->isOpaque()) {
-                        transparent.orSelf(layer->visibleRegionScreen);
-                    }
-                }
+    if (err == NO_ERROR) {
+        Region transparentDirty(*dirtyInOut);
+        for (size_t i=0 ; i<count ; i++) {
+            // Calculate the new transparent region and dirty region
+            // - the transparent region needs to always include the layers
+            // that moved from FB to OVERLAY, regardless of the dirty region
+            // - the dirty region needs to be expanded to include layers
+            // that moved from OVERLAY to FB.
+
+            const sp<LayerBase>& layer(layers[i]);
+            if ((cur[i].hints & HWC_HINT_CLEAR_FB) && layer->isOpaque()) {
+                transparent.orSelf(layer->visibleRegionScreen);
             }
 
-            /*
-             *  clear the area of the FB that need to be transparent
-             */
-            transparent.andSelf(dirty);
-            if (!transparent.isEmpty()) {
-                glClearColor(0,0,0,0);
-                Region::const_iterator it = transparent.begin();
-                Region::const_iterator const end = transparent.end();
-                const int32_t height = hw.getHeight();
-                while (it != end) {
-                    const Rect& r(*it++);
-                    const GLint sy = height - (r.top + r.height());
-                    glScissor(r.left, sy, r.width(), r.height());
-                    glClear(GL_COLOR_BUFFER_BIT);
-                }
+            bool isOverlay = (cur[i].compositionType != HWC_FRAMEBUFFER) &&
+                !(cur[i].flags & HWC_SKIP_LAYER);
+
+            if (!isOverlay && layer->isOverlay()) {
+                dirtyInOut->orSelf(layer->visibleRegionScreen);
+            }
+
+            if (isOverlay && !layer->isOverlay()) {
+                transparentDirty.orSelf(layer->visibleRegionScreen);
+            }
+
+            layer->setOverlay(isOverlay);
+        }
+
+        /*
+         *  clear the area of the FB that need to be transparent
+         */
+        transparent.andSelf(transparentDirty);
+        if (!transparent.isEmpty()) {
+            glClearColor(0,0,0,0);
+            Region::const_iterator it = transparent.begin();
+            Region::const_iterator const end = transparent.end();
+            const int32_t height = hw.getHeight();
+            while (it != end) {
+                const Rect& r(*it++);
+                const GLint sy = height - (r.top + r.height());
+                glScissor(r.left, sy, r.width(), r.height());
+                glClear(GL_COLOR_BUFFER_BIT);
             }
         }
     }
+}
 
+void SurfaceFlinger::composeSurfaces(const Region& dirty)
+{
+    if (UNLIKELY(!mWormholeRegion.isEmpty())) {
+        // should never happen unless the window manager has a bug
+        // draw something...
+        drawWormhole();
+    }
+
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    HWComposer& hwc(hw.getHwComposer());
+    hwc_layer_t* const cur(hwc.getLayers());
 
     /*
      * and then, render the layers targeted at the framebuffer
      */
+    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+    size_t count = layers.size();
     for (size_t i=0 ; i<count ; i++) {
-        if (cur) {
-            if ((cur[i].compositionType != HWC_FRAMEBUFFER) &&
+        if (cur && (cur[i].compositionType != HWC_FRAMEBUFFER) &&
                 !(cur[i].flags & HWC_SKIP_LAYER)) {
-                // skip layers handled by the HAL
-                continue;
-            }
+            continue;
         }
-
         const sp<LayerBase>& layer(layers[i]);
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
         if (!clip.isEmpty()) {
