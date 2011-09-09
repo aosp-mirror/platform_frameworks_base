@@ -1540,6 +1540,9 @@ please see themes_device_defaults.xml.
         
         <item name="textAppearance">@android:style/TextAppearance.Holo</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
+
+        <item name="listPreferredItemPaddingLeft">16dip</item>
+        <item name="listPreferredItemPaddingRight">16dip</item>
     </style>
 
     <!-- Variation of Theme.Holo.Dialog that has a nice minumum width for
@@ -1629,6 +1632,9 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
+
+        <item name="listPreferredItemPaddingLeft">16dip</item>
+        <item name="listPreferredItemPaddingRight">16dip</item>
     </style>
 
     <!-- Variation of Theme.Holo.Light.Dialog that has a nice minumum width for
