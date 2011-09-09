@@ -1798,6 +1798,14 @@
   <public type="attr" name="textAppearanceListItem" />
   <public type="attr" name="textAppearanceListItemSmall" />
 
+  <public type="attr" name="targetDescriptions" />
+  <public type="attr" name="directionDescriptions" />
+
+  <public type="attr" name="overridesImplicitlyEnabledSubtype" />
+
+  <public type="attr" name="listPreferredItemPaddingLeft" />
+  <public type="attr" name="listPreferredItemPaddingRight" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
 
   <public type="style" name="Theme.Holo.Light.DarkActionBar" />
@@ -2007,8 +2015,4 @@
   <public type="color" name="holo_purple" />
   <public type="color" name="holo_blue_bright" />
 
-  <public type="attr" name="targetDescriptions" />
-  <public type="attr" name="directionDescriptions" />
-
-  <public type="attr" name="overridesImplicitlyEnabledSubtype" />
 </resources>
