@@ -18,7 +18,6 @@ package com.android.nfc_extras;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.nfc.ApduList;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
@@ -68,7 +67,11 @@ public final class NfcAdapterExtras {
 
     /** get service handles */
     private static void initService() {
-        sService = sAdapter.getNfcAdapterExtrasInterface();
+        final INfcAdapterExtras service = sAdapter.getNfcAdapterExtrasInterface();
+        if (service != null) {
+            // Leave stale rather than receive a null value.
+            sService = service;
+        }
     }
 
     /**
@@ -85,18 +88,19 @@ public final class NfcAdapterExtras {
             if (sSingleton == null) {
                 try {
                     sAdapter = adapter;
-                    sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
                     sSingleton = new NfcAdapterExtras();
                     sEmbeddedEe = new NfcExecutionEnvironment(sSingleton);
+                    sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
                     sRouteOnWhenScreenOn = new CardEmulationRoute(
                             CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON, sEmbeddedEe);
                     initService();
                 } finally {
-                    if (sSingleton == null) {
-                        sService = null;
-                        sEmbeddedEe = null;
-                        sRouteOff = null;
+                    if (sService == null) {
                         sRouteOnWhenScreenOn = null;
+                        sRouteOff = null;
+                        sEmbeddedEe = null;
+                        sSingleton = null;
+                        sAdapter = null;
                     }
                 }
             }
@@ -208,17 +212,18 @@ public final class NfcAdapterExtras {
         return sEmbeddedEe;
     }
 
-    public void registerTearDownApdus(String packageName, ApduList apdus) {
+    /**
+     * Authenticate the client application.
+     *
+     * Some implementations of NFC Adapter Extras may require applications
+     * to authenticate with a token, before using other methods.
+     *
+     * @param a implementation specific token
+     * @throws a {@link java.lang.SecurityException} if authentication failed
+     */
+    public void authenticate(byte[] token) {
         try {
-            sService.registerTearDownApdus(packageName, apdus);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
-    }
-
-    public void unregisterTearDownApdus(String packageName) {
-        try {
-            sService.unregisterTearDownApdus(packageName);
+            sService.authenticate(token);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
