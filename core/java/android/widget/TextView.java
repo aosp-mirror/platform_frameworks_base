@@ -3726,19 +3726,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // instead turning this into the normal enter key codes that an
             // app may be expecting.
             if (actionCode == EditorInfo.IME_ACTION_NEXT) {
-                View v = focusSearch(FOCUS_DOWN);
+                View v = focusSearch(FOCUS_FORWARD);
                 if (v != null) {
-                    if (!v.requestFocus(FOCUS_DOWN)) {
+                    if (!v.requestFocus(FOCUS_FORWARD)) {
                         throw new IllegalStateException("focus search returned a view " +
                                 "that wasn't able to take focus!");
                     }
                 }
                 return;
-                
+
             } else if (actionCode == EditorInfo.IME_ACTION_PREVIOUS) {
-                View v = focusSearch(FOCUS_UP);
+                View v = focusSearch(FOCUS_BACKWARD);
                 if (v != null) {
-                    if (!v.requestFocus(FOCUS_UP)) {
+                    if (!v.requestFocus(FOCUS_BACKWARD)) {
                         throw new IllegalStateException("focus search returned a view " +
                                 "that wasn't able to take focus!");
                     }
@@ -3750,10 +3750,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (imm != null && imm.isActive(this)) {
                     imm.hideSoftInputFromWindow(getWindowToken(), 0);
                 }
+                clearFocus();
                 return;
             }
         }
-        
+
         Handler h = getHandler();
         if (h != null) {
             long eventTime = SystemClock.uptimeMillis();

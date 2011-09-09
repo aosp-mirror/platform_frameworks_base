@@ -31,6 +31,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.NumberPicker.OnValueChangeListener;
 
 import com.android.internal.R;
@@ -81,9 +82,9 @@ public class DatePicker extends FrameLayout {
 
     private static final boolean DEFAULT_ENABLED_STATE = true;
 
-    private final NumberPicker mDaySpinner;
-
     private final LinearLayout mSpinners;
+
+    private final NumberPicker mDaySpinner;
 
     private final NumberPicker mMonthSpinner;
 
@@ -481,16 +482,20 @@ public class DatePicker extends FrameLayout {
     private void reorderSpinners() {
         mSpinners.removeAllViews();
         char[] order = DateFormat.getDateFormatOrder(getContext());
-        for (int i = 0; i < order.length; i++) {
+        final int spinnerCount = order.length;
+        for (int i = 0; i < spinnerCount; i++) {
             switch (order[i]) {
                 case DateFormat.DATE:
                     mSpinners.addView(mDaySpinner);
+                    setImeOptions(mDaySpinner, spinnerCount, i);
                     break;
                 case DateFormat.MONTH:
                     mSpinners.addView(mMonthSpinner);
+                    setImeOptions(mMonthSpinner, spinnerCount, i);
                     break;
                 case DateFormat.YEAR:
                     mSpinners.addView(mYearSpinner);
+                    setImeOptions(mYearSpinner, spinnerCount, i);
                     break;
                 default:
                     throw new IllegalArgumentException();
@@ -669,6 +674,42 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
+     * Sets the IME options for a spinner based on its ordering.
+     *
+     * @param spinner The spinner.
+     * @param spinnerCount The total spinner count.
+     * @param spinnerIndex The index of the given spinner.
+     */
+    private void setImeOptions(NumberPicker spinner, int spinnerCount, int spinnerIndex) {
+        final int imeOptions;
+        if (spinnerIndex < spinnerCount - 1) {
+            imeOptions = EditorInfo.IME_ACTION_NEXT;
+        } else {
+            imeOptions = EditorInfo.IME_ACTION_DONE;
+        }
+        TextView input = (TextView) spinner.findViewById(R.id.numberpicker_input);
+        input.setImeOptions(imeOptions);
+    }
+
+    private void setContentDescriptions() {
+        // Day
+        String text = mContext.getString(R.string.date_picker_increment_day_button);
+        mDaySpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_day_button);
+        mDaySpinner.findViewById(R.id.decrement).setContentDescription(text);
+        // Month
+        text = mContext.getString(R.string.date_picker_increment_month_button);
+        mMonthSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_month_button);
+        mMonthSpinner.findViewById(R.id.decrement).setContentDescription(text);
+        // Year
+        text = mContext.getString(R.string.date_picker_increment_year_button);
+        mYearSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_year_button);
+        mYearSpinner.findViewById(R.id.decrement).setContentDescription(text);
+    }
+
+    /**
      * Class for managing state storing/restoring.
      */
     private static class SavedState extends BaseSavedState {
@@ -719,23 +760,5 @@ public class DatePicker extends FrameLayout {
                 return new SavedState[size];
             }
         };
-    }
-
-    private void setContentDescriptions() {
-        // Day
-        String text = mContext.getString(R.string.date_picker_increment_day_button);
-        mDaySpinner.findViewById(R.id.increment).setContentDescription(text);
-        text = mContext.getString(R.string.date_picker_decrement_day_button);
-        mDaySpinner.findViewById(R.id.decrement).setContentDescription(text);
-        // Month
-        text = mContext.getString(R.string.date_picker_increment_month_button);
-        mMonthSpinner.findViewById(R.id.increment).setContentDescription(text);
-        text = mContext.getString(R.string.date_picker_decrement_month_button);
-        mMonthSpinner.findViewById(R.id.decrement).setContentDescription(text);
-        // Year
-        text = mContext.getString(R.string.date_picker_increment_year_button);
-        mYearSpinner.findViewById(R.id.increment).setContentDescription(text);
-        text = mContext.getString(R.string.date_picker_decrement_year_button);
-        mYearSpinner.findViewById(R.id.decrement).setContentDescription(text);
     }
 }
