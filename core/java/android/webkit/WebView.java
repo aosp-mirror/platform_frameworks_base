@@ -4826,7 +4826,7 @@ public class WebView extends AbsoluteLayout
         public RequestFormData(String name, String url, Message msg,
                 boolean autoFillable, boolean autoComplete) {
             mName = name;
-            mUrl = url;
+            mUrl = WebTextView.urlForAutoCompleteData(url);
             mUpdateMessage = msg;
             mAutoFillable = autoFillable;
             mAutoComplete = autoComplete;

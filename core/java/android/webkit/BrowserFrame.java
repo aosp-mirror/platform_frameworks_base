@@ -422,9 +422,9 @@ class BrowserFrame extends Handler {
             final WebHistoryItem h = mCallbackProxy.getBackForwardList()
                     .getCurrentItem();
             if (h != null) {
-                String currentUrl = h.getUrl();
-                if (currentUrl != null) {
-                    mDatabase.setFormData(currentUrl, data);
+                String url = WebTextView.urlForAutoCompleteData(h.getUrl());
+                if (url != null) {
+                    mDatabase.setFormData(url, data);
                 }
             }
         }
