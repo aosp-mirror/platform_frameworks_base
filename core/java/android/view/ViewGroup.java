@@ -34,6 +34,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View.AccessibilityDelegate;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
@@ -606,6 +607,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Called when a child has requested sending an {@link AccessibilityEvent} and
      * gives an opportunity to its parent to augment the event.
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#onRequestSendAccessibilityEvent(ViewGroup, View, AccessibilityEvent)}
+     * is responsible for handling this call.
+     * </p>
      *
      * @param child The child which requests sending the event.
      * @param event The event to be sent.
@@ -614,6 +621,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #requestSendAccessibilityEvent(View, AccessibilityEvent)
      */
     public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        if (mAccessibilityDelegate != null) {
+            return mAccessibilityDelegate.onRequestSendAccessibilityEvent(this, child, event);
+        } else {
+            return onRequestSendAccessibilityEventInternal(child, event);
+        }
+    }
+
+    /**
+     * @see #onRequestSendAccessibilityEvent(View, AccessibilityEvent)
+     *
+     * Note: Called from the default {@link View.AccessibilityDelegate}.
+     */
+    boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
         return true;
     }
 
@@ -2142,9 +2162,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         // We first get a chance to populate the event.
-        onPopulateAccessibilityEvent(event);
+        super.dispatchPopulateAccessibilityEventInternal(event);
         // Let our children have a shot in populating the event.
         for (int i = 0, count = getChildCount(); i < count; i++) {
             View child = getChildAt(i);
@@ -2159,8 +2179,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         // If the view is not the topmost one in the view hierarchy and it is
         // marked as the logical root of a view hierarchy, do not go any deeper.
         if ((!(getParent() instanceof ViewRootImpl)) && (mPrivateFlags & IS_ROOT_NAMESPACE) != 0) {

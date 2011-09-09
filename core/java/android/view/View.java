@@ -2545,6 +2545,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     private boolean mSendingHoverAccessibilityEvents;
 
     /**
+     * Delegate for injecting accessiblity functionality.
+     */
+    AccessibilityDelegate mAccessibilityDelegate;
+
+    /**
      * Text direction is inherited thru {@link ViewGroup}
      * @hide
      */
@@ -3761,14 +3766,34 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * and last calls
      * {@link ViewParent#requestSendAccessibilityEvent(View, AccessibilityEvent)}
      * on its parent to resuest sending of the event to interested parties.
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#sendAccessibilityEvent(View, int)} is
+     * responsible for handling this call.
+     * </p>
      *
      * @param eventType The type of the event to send.
      *
      * @see #onInitializeAccessibilityEvent(AccessibilityEvent)
      * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
      * @see ViewParent#requestSendAccessibilityEvent(View, AccessibilityEvent)
+     * @see AccessibilityDelegate
      */
     public void sendAccessibilityEvent(int eventType) {
+        if (mAccessibilityDelegate != null) {
+            mAccessibilityDelegate.sendAccessibilityEvent(this, eventType);
+        } else {
+            sendAccessibilityEventInternal(eventType);
+        }
+    }
+
+    /**
+     * @see #sendAccessibilityEvent(int)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     */
+    void sendAccessibilityEventInternal(int eventType) {
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
             sendAccessibilityEventUnchecked(AccessibilityEvent.obtain(eventType));
         }
@@ -3777,13 +3802,32 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * This method behaves exactly as {@link #sendAccessibilityEvent(int)} but
      * takes as an argument an empty {@link AccessibilityEvent} and does not
-     * perfrom a check whether accessibility is enabled.
+     * perform a check whether accessibility is enabled.
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#sendAccessibilityEventUnchecked(View, AccessibilityEvent)}
+     * is responsible for handling this call.
+     * </p>
      *
      * @param event The event to send.
      *
      * @see #sendAccessibilityEvent(int)
      */
     public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
+        if (mAccessibilityDelegate != null) {
+           mAccessibilityDelegate.sendAccessibilityEventUnchecked(this, event);
+        } else {
+            sendAccessibilityEventUncheckedInternal(event);
+        }
+    }
+
+    /**
+     * @see #sendAccessibilityEventUnchecked(AccessibilityEvent)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     */
+    void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
         if (!isShown()) {
             return;
         }
@@ -3798,18 +3842,36 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * to its children for adding their text content to the event. Note that the
      * event text is populated in a separate dispatch path since we add to the
      * event not only the text of the source but also the text of all its descendants.
-     * </p>
      * A typical implementation will call
      * {@link #onPopulateAccessibilityEvent(AccessibilityEvent)} on the this view
      * and then call the {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
      * on each child. Override this method if custom population of the event text
      * content is required.
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#dispatchPopulateAccessibilityEvent(View, AccessibilityEvent)}
+     * is responsible for handling this call.
+     * </p>
      *
      * @param event The event.
      *
      * @return True if the event population was completed.
      */
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (mAccessibilityDelegate != null) {
+            return mAccessibilityDelegate.dispatchPopulateAccessibilityEvent(this, event);
+        } else {
+            return dispatchPopulateAccessibilityEventInternal(event);
+        }
+    }
+
+    /**
+     * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     */
+    boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         onPopulateAccessibilityEvent(event);
         return false;
     }
@@ -3832,6 +3894,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *     event.getText().add(selectedDateUtterance);
      * }
      * </code></pre></p>
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#onPopulateAccessibilityEvent(View, AccessibilityEvent)}
+     * is responsible for handling this call.
+     * </p>
      *
      * @param event The accessibility event which to populate.
      *
@@ -3839,13 +3907,27 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
      */
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (mAccessibilityDelegate != null) {
+            mAccessibilityDelegate.onPopulateAccessibilityEvent(this, event);
+        } else {
+            onPopulateAccessibilityEventInternal(event);
+        }
     }
 
     /**
-     * Initializes an {@link AccessibilityEvent} with information about the
-     * the type of the event and this View which is the event source. In other
-     * words, the source of an accessibility event is the view whose state
-     * change triggered firing the event.
+     * @see #onPopulateAccessibilityEvent(AccessibilityEvent)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     */
+    void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+
+    }
+
+    /**
+     * Initializes an {@link AccessibilityEvent} with information about
+     * this View which is the event source. In other words, the source of
+     * an accessibility event is the view whose state change triggered firing
+     * the event.
      * <p>
      * Example: Setting the password property of an event in addition
      *          to properties set by the super implementation.
@@ -3855,12 +3937,32 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *    event.setPassword(true);
      * }
      * </code></pre></p>
-     * @param event The event to initialeze.
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#onInitializeAccessibilityEvent(View, AccessibilityEvent)}
+     * is responsible for handling this call.
+     * </p>
+     *
+     * @param event The event to initialize.
      *
      * @see #sendAccessibilityEvent(int)
      * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
      */
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        if (mAccessibilityDelegate != null) {
+            mAccessibilityDelegate.onInitializeAccessibilityEvent(this, event);
+        } else {
+            onInitializeAccessibilityEventInternal(event);
+        }
+    }
+
+    /**
+     * @see #onInitializeAccessibilityEvent(AccessibilityEvent)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     */
+    void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         event.setSource(this);
         event.setClassName(getClass().getName());
         event.setPackageName(getContext().getPackageName());
@@ -3929,9 +4031,29 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Subclasses should override this method, call the super implementation,
      * and set additional attributes.
      * </p>
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#onInitializeAccessibilityNodeInfo(View, AccessibilityNodeInfo)}
+     * is responsible for handling this call.
+     * </p>
+     *
      * @param info The instance to initialize.
      */
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        if (mAccessibilityDelegate != null) {
+            mAccessibilityDelegate.onInitializeAccessibilityNodeInfo(this, info);
+        } else {
+            onInitializeAccessibilityNodeInfoInternal(info);
+        }
+    }
+
+    /**
+     * @see #onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     */
+    void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         Rect bounds = mAttachInfo.mTmpInvalRect;
         getDrawingRect(bounds);
         info.setBoundsInParent(bounds);
@@ -3972,6 +4094,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 info.addAction(AccessibilityNodeInfo.ACTION_FOCUS);
             }
         }
+    }
+
+    /**
+     * Sets a delegate for implementing accessibility support via compositon as
+     * opposed to inheritance. The delegate's primary use is for implementing
+     * backwards compatible widgets. For more details see {@link AccessibilityDelegate}.
+     *
+     * @param delegate The delegate instance.
+     *
+     * @see AccessibilityDelegate
+     */
+    public void setAccessibilityDelegate(AccessibilityDelegate delegate) {
+        mAccessibilityDelegate = delegate;
     }
 
     /**
@@ -10098,7 +10233,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Setting a solid background color for the drawing cache's bitmaps will improve
-     * perfromance and memory usage. Note, though that this should only be used if this
+     * performance and memory usage. Note, though that this should only be used if this
      * view will always be drawn on top of a solid color.
      *
      * @param color The background color to use for the drawing cache's bitmap
@@ -14311,6 +14446,207 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         public void run() {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
             mIsPending = false;
+        }
+    }
+
+    /**
+     * <p>
+     * This class represents a delegate that can be registered in a {@link View}
+     * to enhance accessibility support via composition rather via inheritance.
+     * It is specifically targeted to widget developers that extend basic View
+     * classes i.e. classes in package android.view, that would like their
+     * applications to be backwards compatible.
+     * </p>
+     * <p>
+     * A scenario in which a developer would like to use an accessibility delegate
+     * is overriding a method introduced in a later API version then the minimal API
+     * version supported by the application. For example, the method
+     * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} is not available
+     * in API version 4 when the accessibility APIs were first introduced. If a
+     * developer would like his application to run on API version 4 devices (assuming
+     * all other APIs used by the application are version 4 or lower) and take advantage
+     * of this method, instead of overriding the method which would break the application's
+     * backwards compatibility, he can override the corresponding method in this
+     * delegate and register the delegate in the target View if the API version of
+     * the system is high enough i.e. the API version is same or higher to the API
+     * version that introduced
+     * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)}.
+     * </p>
+     * <p>
+     * Here is an example implementation:
+     * </p>
+     * <code><pre><p>
+     * if (Build.VERSION.SDK_INT >= 14) {
+     *     // If the API version is equal of higher than the version in
+     *     // which onInitializeAccessibilityNodeInfo was introduced we
+     *     // register a delegate with a customized implementation.
+     *     View view = findViewById(R.id.view_id);
+     *     view.setAccessibilityDelegate(new AccessibilityDelegate() {
+     *         public void onInitializeAccessibilityNodeInfo(View host,
+     *                 AccessibilityNodeInfo info) {
+     *             // Let the default implementation populate the info.
+     *             super.onInitializeAccessibilityNodeInfo(host, info);
+     *             // Set some other information.
+     *             info.setEnabled(host.isEnabled());
+     *         }
+     *     });
+     * }
+     * </code></pre></p>
+     * <p>
+     * This delegate contains methods that correspond to the accessibility methods
+     * in View. If a delegate has been specified the implementation in View hands
+     * off handling to the corresponding method in this delegate. The default
+     * implementation the delegate methods behaves exactly as the corresponding
+     * method in View for the case of no accessibility delegate been set. Hence,
+     * to customize the behavior of a View method, clients can override only the
+     * corresponding delegate method without altering the behavior of the rest
+     * accessibility related methods of the host view.
+     * </p>
+     */
+    public static class AccessibilityDelegate {
+
+        /**
+         * Sends an accessibility event of the given type. If accessibility is not
+         * enabled this method has no effect.
+         * <p>
+         * The default implementation behaves as {@link View#sendAccessibilityEvent(int)
+         *  View#sendAccessibilityEvent(int)} for the case of no accessibility delegate
+         * been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param eventType The type of the event to send.
+         *
+         * @see View#sendAccessibilityEvent(int) View#sendAccessibilityEvent(int)
+         */
+        public void sendAccessibilityEvent(View host, int eventType) {
+            host.sendAccessibilityEventInternal(eventType);
+        }
+
+        /**
+         * Sends an accessibility event. This method behaves exactly as
+         * {@link #sendAccessibilityEvent(View, int)} but takes as an argument an
+         * empty {@link AccessibilityEvent} and does not perform a check whether
+         * accessibility is enabled.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#sendAccessibilityEventUnchecked(AccessibilityEvent)
+         *  View#sendAccessibilityEventUnchecked(AccessibilityEvent)} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param event The event to send.
+         *
+         * @see View#sendAccessibilityEventUnchecked(AccessibilityEvent)
+         *      View#sendAccessibilityEventUnchecked(AccessibilityEvent)
+         */
+        public void sendAccessibilityEventUnchecked(View host, AccessibilityEvent event) {
+            host.sendAccessibilityEventUncheckedInternal(event);
+        }
+
+        /**
+         * Dispatches an {@link AccessibilityEvent} to the host {@link View} first and then
+         * to its children for adding their text content to the event.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+         *  View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param event The event.
+         * @return True if the event population was completed.
+         *
+         * @see View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+         *      View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+         */
+        public boolean dispatchPopulateAccessibilityEvent(View host, AccessibilityEvent event) {
+            return host.dispatchPopulateAccessibilityEventInternal(event);
+        }
+
+        /**
+         * Gives a chance to the host View to populate the accessibility event with its
+         * text content.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#onPopulateAccessibilityEvent(AccessibilityEvent)
+         *  View#onPopulateAccessibilityEvent(AccessibilityEvent)} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param event The accessibility event which to populate.
+         *
+         * @see View#onPopulateAccessibilityEvent(AccessibilityEvent)
+         *      View#onPopulateAccessibilityEvent(AccessibilityEvent)
+         */
+        public void onPopulateAccessibilityEvent(View host, AccessibilityEvent event) {
+            host.onPopulateAccessibilityEventInternal(event);
+        }
+
+        /**
+         * Initializes an {@link AccessibilityEvent} with information about the
+         * the host View which is the event source.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#onInitializeAccessibilityEvent(AccessibilityEvent)
+         *  View#onInitializeAccessibilityEvent(AccessibilityEvent)} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param event The event to initialize.
+         *
+         * @see View#onInitializeAccessibilityEvent(AccessibilityEvent)
+         *      View#onInitializeAccessibilityEvent(AccessibilityEvent)
+         */
+        public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
+            host.onInitializeAccessibilityEventInternal(event);
+        }
+
+        /**
+         * Initializes an {@link AccessibilityNodeInfo} with information about the host view.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
+         *  View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param info The instance to initialize.
+         *
+         * @see View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
+         *      View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
+         */
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            host.onInitializeAccessibilityNodeInfoInternal(info);
+        }
+
+        /**
+         * Called when a child of the host View has requested sending an
+         * {@link AccessibilityEvent} and gives an opportunity to the parent (the host)
+         * to augment the event.
+         * <p>
+         * The default implementation behaves as
+         * {@link ViewGroup#onRequestSendAccessibilityEvent(View, AccessibilityEvent)
+         *  ViewGroup#onRequestSendAccessibilityEvent(View, AccessibilityEvent)} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param child The child which requests sending the event.
+         * @param event The event to be sent.
+         * @return True if the event should be sent
+         *
+         * @see ViewGroup#onRequestSendAccessibilityEvent(View, AccessibilityEvent)
+         *      ViewGroup#onRequestSendAccessibilityEvent(View, AccessibilityEvent)
+         */
+        public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
+                AccessibilityEvent event) {
+            return host.onRequestSendAccessibilityEventInternal(child, event);
         }
     }
 }
