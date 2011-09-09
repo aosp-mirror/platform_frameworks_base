@@ -264,4 +264,14 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
             tp.setUnderlineText(mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
         }
     }
+
+    /**
+     * @return The color of the underline for that span, or 0 if there is no underline
+     */
+    public int getUnderlineColor() {
+        // The order here should match what is used in updateDrawState
+        if ((mFlags & FLAG_MISSPELLED) != 0) return mMisspelledUnderlineColor;
+        if ((mFlags & FLAG_EASY_CORRECT) != 0) return mEasyCorrectUnderlineColor;
+        return 0;
+    }
 }

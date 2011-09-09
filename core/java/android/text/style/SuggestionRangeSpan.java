@@ -28,15 +28,11 @@ import android.text.TextUtils;
  * @hide
  */
 public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpan {
-    private final int mBackgroundColor;
+    private int mBackgroundColor;
 
-    @Override
-    public void updateDrawState(TextPaint tp) {
-        tp.bgColor = mBackgroundColor;
-    }
-
-    public SuggestionRangeSpan(int color) {
-        mBackgroundColor = color;
+    public SuggestionRangeSpan() {
+        // 0 is a fully transparent black. Has to be set using #setBackgroundColor
+        mBackgroundColor = 0;
     }
 
     public SuggestionRangeSpan(Parcel src) {
@@ -56,5 +52,14 @@ public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpa
     @Override
     public int getSpanTypeId() {
         return TextUtils.SUGGESTION_RANGE_SPAN;
+    }
+
+    public void setBackgroundColor(int backgroundColor) {
+        mBackgroundColor = backgroundColor;
+    }
+
+    @Override
+    public void updateDrawState(TextPaint tp) {
+        tp.bgColor = mBackgroundColor;
     }
 }
