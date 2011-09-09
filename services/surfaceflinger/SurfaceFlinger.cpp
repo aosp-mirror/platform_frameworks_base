@@ -1606,7 +1606,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 hwc.initCheck()==NO_ERROR ? "present" : "not present",
                 (mDebugDisableHWC || mDebugRegion) ? "disabled" : "enabled");
         result.append(buffer);
-        hwc.dump(result, buffer, SIZE);
+        hwc.dump(result, buffer, SIZE, mVisibleLayersSortedByZ);
 
         /*
          * Dump gralloc state

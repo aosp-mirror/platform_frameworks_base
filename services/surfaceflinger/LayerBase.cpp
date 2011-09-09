@@ -480,12 +480,13 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 {
     const Layer::State& s(drawingState());
     snprintf(buffer, SIZE,
-            "+ %s %p\n"
+            "+ %s %p (%s)\n"
             "      "
             "z=%9d, pos=(%g,%g), size=(%4d,%4d), "
             "isOpaque=%1d, needsDithering=%1d, invalidate=%1d, "
             "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
-            getTypeId(), this, s.z, s.transform.tx(), s.transform.ty(), s.w, s.h,
+            getTypeId(), this, getName().string(),
+            s.z, s.transform.tx(), s.transform.ty(), s.w, s.h,
             isOpaque(), needsDithering(), contentDirty,
             s.alpha, s.flags,
             s.transform[0][0], s.transform[0][1],
@@ -561,9 +562,7 @@ void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
 
     sp<Client> client(mClientRef.promote());
     snprintf(buffer, SIZE,
-            "      name=%s\n"
             "      client=%p, identity=%u\n",
-            getName().string(),
             client.get(), getIdentity());
 
     result.append(buffer);

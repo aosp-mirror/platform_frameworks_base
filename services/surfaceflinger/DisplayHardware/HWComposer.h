@@ -25,12 +25,14 @@
 #include <hardware/hwcomposer.h>
 
 #include <utils/StrongPointer.h>
+#include <utils/Vector.h>
 
 namespace android {
 // ---------------------------------------------------------------------------
 
 class String8;
 class SurfaceFlinger;
+class LayerBase;
 
 class HWComposer
 {
@@ -63,7 +65,8 @@ public:
     hwc_layer_t* getLayers() const;
 
     // for debugging
-    void dump(String8& out, char* scratch, size_t SIZE) const;
+    void dump(String8& out, char* scratch, size_t SIZE,
+            const Vector< sp<LayerBase> >& visibleLayersSortedByZ) const;
 
 private:
     struct cb_context {
