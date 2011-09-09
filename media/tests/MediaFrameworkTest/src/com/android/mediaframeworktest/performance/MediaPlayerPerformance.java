@@ -365,16 +365,6 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         assertTrue("H264 playback memory test", memoryResult);
     }
 
-    private int getMaxFrameRateForVideoEncoder(int codec) {
-        int frameRate = -1;
-        for (VideoEncoderCap cap: videoEncoders) {
-            if (cap.mCodec == MediaRecorder.VideoEncoder.H263) {
-                frameRate = cap.mMaxFrameRate;
-            }
-        }
-        return frameRate;
-    }
-
     // Test case 4: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testH263RecordVideoOnlyMemoryUsage() throws Exception {
@@ -384,7 +374,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         File videoH263RecordOnlyMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(videoH263RecordOnlyMemoryOut, true));
         output.write("H263 video record only\n");
-        int frameRate = getMaxFrameRateForVideoEncoder(MediaRecorder.VideoEncoder.H263);
+        int frameRate = MediaProfileReader.getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.H263);
         assertTrue("H263 video recording frame rate", frameRate != -1);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             assertTrue(stressVideoRecord(frameRate, 352, 288, MediaRecorder.VideoEncoder.H263,
@@ -406,7 +396,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         File videoMp4RecordOnlyMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(videoMp4RecordOnlyMemoryOut, true));
         output.write("MPEG4 video record only\n");
-        int frameRate = getMaxFrameRateForVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+        int frameRate = MediaProfileReader.getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.MPEG_4_SP);
         assertTrue("MPEG4 video recording frame rate", frameRate != -1);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             assertTrue(stressVideoRecord(frameRate, 352, 288, MediaRecorder.VideoEncoder.MPEG_4_SP,
@@ -428,7 +418,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
 
         File videoRecordAudioMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(videoRecordAudioMemoryOut, true));
-        int frameRate = getMaxFrameRateForVideoEncoder(MediaRecorder.VideoEncoder.H263);
+        int frameRate = MediaProfileReader.getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.H263);
         assertTrue("H263 video recording frame rate", frameRate != -1);
         output.write("Audio and h263 video record\n");
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
