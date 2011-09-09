@@ -41,9 +41,10 @@ public class SwipeHelper {
     public static final int Y = 1;
 
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
-    private int MAX_ESCAPE_ANIMATION_DURATION = 500; // ms
-    private int MAX_DISMISS_VELOCITY = 1000; // dp/sec
-    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 250; // ms
+    private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
+    private int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
+    private int MAX_DISMISS_VELOCITY = 2000; // dp/sec
+    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
 
     public static float ALPHA_FADE_START = 0f; // fraction of thumbnail width
                                                  // where fade starts
@@ -126,7 +127,10 @@ public class SwipeHelper {
         } else if (pos < viewSize * (1.0f - ALPHA_FADE_START)) {
             result = 1.0f + (viewSize * ALPHA_FADE_START + pos) / fadeSize;
         }
-        return result;
+        // Make .03 alpha the minimum so you always see the item a bit-- slightly below
+        // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
+        // a bit jarring
+        return Math.max(0.03f, result);
     }
 
     // invalidate the view's own bounds all the way up the view hierarchy
@@ -212,7 +216,10 @@ public class SwipeHelper {
             duration = Math.min(duration,
                                 (int) (Math.abs(newPos - getTranslation(animView)) * 1000f / Math
                                         .abs(velocity)));
+        } else {
+            duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
         }
+
         ObjectAnimator anim = createTranslationAnimation(animView, newPos);
         anim.setInterpolator(new LinearInterpolator());
         anim.setDuration(duration);

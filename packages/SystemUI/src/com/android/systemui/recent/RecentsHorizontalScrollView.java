@@ -44,15 +44,6 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     private SwipeHelper mSwipeHelper;
     private RecentsScrollViewPerformanceHelper mPerformanceHelper;
 
-    private OnLongClickListener mOnLongClick = new OnLongClickListener() {
-        public boolean onLongClick(View v) {
-            final View anchorView = v.findViewById(R.id.app_description);
-            final View thumbnailView = v.findViewById(R.id.app_thumbnail);
-            mCallback.handleLongPress(v, anchorView, thumbnailView);
-            return true;
-        }
-    };
-
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
         float densityScale = getResources().getDisplayMetrics().density;
@@ -69,8 +60,6 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         mLinearLayout.removeAllViews();
         for (int i = 0; i < mAdapter.getCount(); i++) {
             final View view = mAdapter.getView(i, null, mLinearLayout);
-            view.setLongClickable(true);
-            view.setOnLongClickListener(mOnLongClick);
 
             if (mPerformanceHelper != null) {
                 mPerformanceHelper.addViewCallback(view);
@@ -81,18 +70,30 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                     mCallback.dismiss();
                 }
             });
+            // We don't want a click sound when we dimiss recents
+            view.setSoundEffectsEnabled(false);
 
             OnClickListener launchAppListener = new OnClickListener() {
                 public void onClick(View v) {
                     mCallback.handleOnClick(view);
                 }
             };
+            OnLongClickListener longClickListener = new OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    final View anchorView = view.findViewById(R.id.app_description);
+                    final View thumbnailView = view.findViewById(R.id.app_thumbnail);
+                    mCallback.handleLongPress(view, anchorView, thumbnailView);
+                    return true;
+                }
+            };
             final View thumbnail = view.findViewById(R.id.app_thumbnail);
             thumbnail.setClickable(true);
             thumbnail.setOnClickListener(launchAppListener);
+            thumbnail.setOnLongClickListener(longClickListener);
             final View appTitle = view.findViewById(R.id.app_label);
             appTitle.setClickable(true);
             appTitle.setOnClickListener(launchAppListener);
+            appTitle.setOnLongClickListener(longClickListener);
             mLinearLayout.addView(view);
         }
         // Scroll to end after layout.

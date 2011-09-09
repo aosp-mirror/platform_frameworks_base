@@ -186,12 +186,6 @@ public class RecentsPanelView extends RelativeLayout
                 holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
                 holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
 
-		/*                StateListDrawable thumbnailForegroundDrawable = new StateListDrawable();
-                thumbnailForegroundDrawable.addState(new int[] { android.R.attr.state_pressed },
-                        mPressedDrawable);
-                thumbnailForegroundDrawable.addState(new int[] { android.R.attr.state_selected },
-                        mPressedDrawable);
-			((FrameLayout)holder.thumbnailView).setForeground(thumbnailForegroundDrawable);*/
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
