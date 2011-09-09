@@ -50,7 +50,7 @@ namespace android {
 
 // Treat time out as an error if we have not received any output
 // buffers after 3 seconds.
-const static int64_t kBufferFilledEventTimeOutUs = 3000000000LL;
+const static int64_t kBufferFilledEventTimeOutNs = 3000000000LL;
 
 struct CodecInfo {
     const char *mime;
@@ -2325,9 +2325,14 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
         {
             CODEC_LOGV("OMX_EventPortSettingsChanged(port=%ld, data2=0x%08lx)",
                        data1, data2);
-            CHECK(mFilledBuffers.empty());
 
             if (data2 == 0 || data2 == OMX_IndexParamPortDefinition) {
+                // There is no need to check whether mFilledBuffers is empty or not
+                // when the OMX_EventPortSettingsChanged is not meant for reallocating
+                // the output buffers.
+                if (data1 == kPortIndexOutput) {
+                    CHECK(mFilledBuffers.empty());
+                }
                 onPortSettingsChanged(data1);
             } else if (data1 == kPortIndexOutput &&
                         (data2 == OMX_IndexConfigCommonOutputCrop ||
@@ -3220,7 +3225,7 @@ status_t OMXCodec::waitForBufferFilled_l() {
         // for video encoding.
         return mBufferFilled.wait(mLock);
     }
-    status_t err = mBufferFilled.waitRelative(mLock, kBufferFilledEventTimeOutUs);
+    status_t err = mBufferFilled.waitRelative(mLock, kBufferFilledEventTimeOutNs);
     if (err != OK) {
         CODEC_LOGE("Timed out waiting for output buffers: %d/%d",
             countBuffersWeOwn(mPortBuffers[kPortIndexInput]),
