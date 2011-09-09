@@ -9901,6 +9901,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     suggestionSpansFlags[i]);
                         }
                     }
+                    
+                    // Move cursor at the end of the replacement word
+                    Selection.setSelection(editable, spanEnd + lengthDifference);
                 }
             }
             hide();
