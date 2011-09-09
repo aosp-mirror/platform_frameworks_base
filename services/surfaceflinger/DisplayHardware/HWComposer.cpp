@@ -22,6 +22,7 @@
 
 #include <utils/Errors.h>
 #include <utils/String8.h>
+#include <utils/Vector.h>
 
 #include <hardware/hardware.h>
 
@@ -29,6 +30,7 @@
 
 #include <EGL/egl.h>
 
+#include "LayerBase.h"
 #include "HWComposer.h"
 #include "SurfaceFlinger.h"
 
@@ -133,7 +135,8 @@ hwc_layer_t* HWComposer::getLayers() const {
     return mList ? mList->hwLayers : 0;
 }
 
-void HWComposer::dump(String8& result, char* buffer, size_t SIZE) const {
+void HWComposer::dump(String8& result, char* buffer, size_t SIZE,
+        const Vector< sp<LayerBase> >& visibleLayersSortedByZ) const {
     if (mHwc && mList) {
         result.append("Hardware Composer state:\n");
 
@@ -143,11 +146,12 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE) const {
 
         for (size_t i=0 ; i<mList->numHwLayers ; i++) {
             const hwc_layer_t& l(mList->hwLayers[i]);
-            snprintf(buffer, SIZE, "  %8s | %08x | %08x | %02x | %04x | [%5d,%5d,%5d,%5d] |  [%5d,%5d,%5d,%5d]\n",
+            snprintf(buffer, SIZE, "  %8s | %08x | %08x | %02x | %04x | [%5d,%5d,%5d,%5d] |  [%5d,%5d,%5d,%5d] %s\n",
                     l.compositionType ? "OVERLAY" : "FB",
                     l.hints, l.flags, l.transform, l.blending,
                     l.sourceCrop.left, l.sourceCrop.top, l.sourceCrop.right, l.sourceCrop.bottom,
-                    l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom);
+                    l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
+                    visibleLayersSortedByZ[i]->getName().string());
             result.append(buffer);
         }
 
