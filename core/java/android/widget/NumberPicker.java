@@ -33,7 +33,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Align;
 import android.graphics.drawable.Drawable;
-import android.os.SystemClock;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -517,7 +516,10 @@ public class NumberPicker extends LinearLayout {
         mInputText = (EditText) findViewById(R.id.numberpicker_input);
         mInputText.setOnFocusChangeListener(new OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
+                if (hasFocus) {
+                    mInputText.selectAll();
+                } else {
+                    mInputText.setSelection(0, 0);
                     validateInputTextView(v);
                 }
             }
@@ -687,7 +689,6 @@ public class NumberPicker extends LinearLayout {
                     InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
                             Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(mInputText, 0);
-                    mInputText.setSelection(0, mInputText.getText().length());
                     return true;
                 }
                 VelocityTracker velocityTracker = mVelocityTracker;
