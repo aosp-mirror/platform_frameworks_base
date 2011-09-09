@@ -62,12 +62,17 @@ protected:
 private:
     // current locale (like "ja_JP"), created/destroyed with strdup()/free()
     char *mLocale;
+    char *mSkipList;
+    int *mSkipIndex;
 
     MediaScanResult doProcessDirectory(
             char *path, int pathRemaining, MediaScannerClient &client, bool noMedia);
     MediaScanResult doProcessDirectoryEntry(
             char *path, int pathRemaining, MediaScannerClient &client, bool noMedia,
             struct dirent* entry, char* fileSpot);
+    void loadSkipList();
+    bool shouldSkipDirectory(char *path);
+
 
     MediaScanner(const MediaScanner &);
     MediaScanner &operator=(const MediaScanner &);
@@ -103,4 +108,3 @@ protected:
 }; // namespace android
 
 #endif // MEDIASCANNER_H
-
