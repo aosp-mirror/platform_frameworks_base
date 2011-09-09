@@ -9564,8 +9564,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 TextView.this.getPositionListener().removeSubscriber(SuggestionsPopupWindow.this);
 
-                if ((mText instanceof Editable) && mSuggestionRangeSpan != null) {
-                    ((Editable) mText).removeSpan(mSuggestionRangeSpan);
+                if ((mText instanceof Spannable)) {
+                    ((Spannable) mText).removeSpan(mSuggestionRangeSpan);
                 }
 
                 setCursorVisible(mCursorWasVisibleBeforeSuggestions);
@@ -9749,7 +9749,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private boolean updateSuggestions() {
-            Spannable spannable = (Spannable)TextView.this.mText;
+            Spannable spannable = (Spannable) TextView.this.mText;
             SuggestionSpan[] suggestionSpans = getSuggestionSpans();
 
             final int nbSpans = suggestionSpans.length;
@@ -9759,6 +9759,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int spanUnionEnd = 0;
 
             SuggestionSpan misspelledSpan = null;
+            int underlineColor = 0;
 
             for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
                 SuggestionSpan suggestionSpan = suggestionSpans[spanIndex];
@@ -9770,6 +9771,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if ((suggestionSpan.getFlags() & SuggestionSpan.FLAG_MISSPELLED) != 0) {
                     misspelledSpan = suggestionSpan;
                 }
+
+                // The first span dictates the background color of the highlighted text
+                if (spanIndex == 0) underlineColor = suggestionSpan.getUnderlineColor();
 
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
@@ -9813,9 +9817,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (mNumberOfSuggestions == 0) return false;
 
-            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan =
-                    new SuggestionRangeSpan(mHighlightColor);
-            ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
+            if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
+            if (underlineColor == 0) {
+                // Fallback on the default highlight color when the first span does not provide one
+                mSuggestionRangeSpan.setBackgroundColor(mHighlightColor);
+            } else {
+                final float BACKGROUND_TRANSPARENCY = 0.3f;
+                final int newAlpha = (int) (Color.alpha(underlineColor) * BACKGROUND_TRANSPARENCY);
+                mSuggestionRangeSpan.setBackgroundColor(
+                        (underlineColor & 0x00FFFFFF) + (newAlpha << 24));
+            }
+            spannable.setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             mSuggestionsAdapter.notifyDataSetChanged();
