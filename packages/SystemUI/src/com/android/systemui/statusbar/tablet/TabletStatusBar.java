@@ -437,6 +437,13 @@ public class TabletStatusBar extends StatusBar implements
 
         sb.setHandler(mHandler);
 
+        // Sanity-check that someone hasn't set up the config wrong and asked for a navigation bar
+        // on a tablet that has only the system bar
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar)) {
+            throw new RuntimeException("Tablet device cannot show navigation bar and system bar");
+        }
+
         mBarContents = (ViewGroup) sb.findViewById(R.id.bar_contents);
         // layout transitions for the status bar's contents
         mBarContentsLayoutTransition = new LayoutTransition();
