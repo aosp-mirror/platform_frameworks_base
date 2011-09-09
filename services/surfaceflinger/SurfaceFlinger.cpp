@@ -876,21 +876,24 @@ void SurfaceFlinger::handleRepaint()
         }
     }
 
-    // compose all surfaces
-    setupHardwareComposer(&mDirtyRegion);
+    Region expandDirty = setupHardwareComposer(mDirtyRegion);
+    mDirtyRegion.orSelf(expandDirty);
+    mInvalidRegion.orSelf(mDirtyRegion);
     composeSurfaces(mDirtyRegion);
 
     // clear the dirty regions
     mDirtyRegion.clear();
 }
 
-void SurfaceFlinger::setupHardwareComposer(Region* dirtyInOut)
+Region SurfaceFlinger::setupHardwareComposer(const Region& dirty)
 {
+    Region dirtyOut(dirty);
+
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     HWComposer& hwc(hw.getHwComposer());
     hwc_layer_t* const cur(hwc.getLayers());
     if (!cur) {
-        return;
+        return dirtyOut;
     }
 
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
@@ -909,7 +912,6 @@ void SurfaceFlinger::setupHardwareComposer(Region* dirtyInOut)
      *  update the per-frame h/w composer data for each layer
      *  and build the transparent region of the FB
      */
-    Region transparent;
     for (size_t i=0 ; i<count ; i++) {
         const sp<LayerBase>& layer(layers[i]);
         layer->setPerFrameData(&cur[i]);
@@ -918,13 +920,25 @@ void SurfaceFlinger::setupHardwareComposer(Region* dirtyInOut)
     LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
 
     if (err == NO_ERROR) {
-        Region transparentDirty(*dirtyInOut);
+        Region transparent;
         for (size_t i=0 ; i<count ; i++) {
-            // Calculate the new transparent region and dirty region
-            // - the transparent region needs to always include the layers
-            // that moved from FB to OVERLAY, regardless of the dirty region
-            // - the dirty region needs to be expanded to include layers
-            // that moved from OVERLAY to FB.
+            // what's happening here is tricky.
+            // we want to clear all the layers with the CLEAR_FB flags
+            // that are opaque.
+            // however, since some GPU have are efficient at preserving
+            // the backbuffer, we want to take advantage of that so we do the
+            // clear only in the dirty region (other areas will be preserved
+            // on those GPUs).
+            //   NOTE: on non backbuffer preserving GPU, the dirty region
+            //   has already been expanded as needed, so the code is correct
+            //   there too.
+            // However, the content of the framebuffer cannot be trusted when
+            // we switch to/from FB/OVERLAY, in which case we need to
+            // expand the dirty region to those areas too.
+            //
+            // Also we want to make sure to not clear areas that belong to
+            // layers above that won't redraw (we would just erasing them),
+            // that is, we can't erase anything outside the dirty region.
 
             const sp<LayerBase>& layer(layers[i]);
             if ((cur[i].hints & HWC_HINT_CLEAR_FB) && layer->isOpaque()) {
@@ -934,21 +948,21 @@ void SurfaceFlinger::setupHardwareComposer(Region* dirtyInOut)
             bool isOverlay = (cur[i].compositionType != HWC_FRAMEBUFFER) &&
                 !(cur[i].flags & HWC_SKIP_LAYER);
 
-            if (!isOverlay && layer->isOverlay()) {
-                dirtyInOut->orSelf(layer->visibleRegionScreen);
+            if (isOverlay != layer->isOverlay()) {
+                // we transitioned to/from overlay, so add this layer
+                // to the dirty region so the framebuffer can be either
+                // cleared or redrawn.
+                dirtyOut.orSelf(layer->visibleRegionScreen);
             }
-
-            if (isOverlay && !layer->isOverlay()) {
-                transparentDirty.orSelf(layer->visibleRegionScreen);
-            }
-
             layer->setOverlay(isOverlay);
         }
+
 
         /*
          *  clear the area of the FB that need to be transparent
          */
-        transparent.andSelf(transparentDirty);
+        // don't erase stuff outside the dirty region
+        transparent.andSelf(dirtyOut);
         if (!transparent.isEmpty()) {
             glClearColor(0,0,0,0);
             Region::const_iterator it = transparent.begin();
@@ -962,6 +976,7 @@ void SurfaceFlinger::setupHardwareComposer(Region* dirtyInOut)
             }
         }
     }
+    return dirtyOut;
 }
 
 void SurfaceFlinger::composeSurfaces(const Region& dirty)

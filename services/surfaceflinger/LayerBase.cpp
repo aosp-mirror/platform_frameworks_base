@@ -43,7 +43,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       sequence(uint32_t(android_atomic_inc(&sSequence))),
       mFlinger(flinger), mFiltering(false),
-      mNeedsFiltering(false),
+      mNeedsFiltering(false), mInOverlay(false),
       mOrientation(0),
       mTransactionFlags(0),
       mPremultipliedAlpha(true), mName("unnamed"), mDebug(false),
