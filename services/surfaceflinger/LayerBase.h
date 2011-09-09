@@ -109,8 +109,10 @@ public:
     virtual const char* getTypeId() const { return "LayerBase"; }
 
     virtual void setGeometry(hwc_layer_t* hwcl);
-
     virtual void setPerFrameData(hwc_layer_t* hwcl);
+            void setOverlay(bool inOverlay);
+            bool isOverlay() const;
+
 
     /**
      * draw - performs some global clipping optimizations
@@ -241,6 +243,11 @@ private:
                 // cached during validateVisibility()
                 // Whether filtering is needed b/c of the drawingstate
                 bool            mNeedsFiltering;
+
+                // this layer is currently handled by the hwc. this is
+                // updated at composition time, always frmo the composition
+                // thread.
+                bool            mInOverlay;
 
 protected:
                 // cached during validateVisibility()

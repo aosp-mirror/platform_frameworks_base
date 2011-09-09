@@ -344,6 +344,14 @@ void LayerBase::setPerFrameData(hwc_layer_t* hwcl) {
     hwcl->handle = NULL;
 }
 
+void LayerBase::setOverlay(bool inOverlay) {
+    mInOverlay = inOverlay;
+}
+
+bool LayerBase::isOverlay() const {
+    return mInOverlay;
+}
+
 void LayerBase::setFiltering(bool filtering)
 {
     mFiltering = filtering;
