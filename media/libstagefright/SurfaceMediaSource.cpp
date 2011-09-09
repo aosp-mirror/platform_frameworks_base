@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// #define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "SurfaceMediaSource"
 
 #include <media/stagefright/SurfaceMediaSource.h>
@@ -458,6 +458,10 @@ status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
     LOGV("queueBuffer");
 
     Mutex::Autolock lock(mMutex);
+    *outWidth = mDefaultWidth;
+    *outHeight = mDefaultHeight;
+    *outTransform = 0;
+
     if (bufIndex < 0 || bufIndex >= mBufferCount) {
         LOGE("queueBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, bufIndex);
@@ -518,9 +522,6 @@ status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
     // buffer is available
     onFrameReceivedLocked();
 
-    *outWidth = mDefaultWidth;
-    *outHeight = mDefaultHeight;
-    *outTransform = 0;
 
     return OK;
 }
