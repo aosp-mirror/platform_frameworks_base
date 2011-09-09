@@ -2255,6 +2255,14 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
+    /*package*/ void onHealthDeviceChannelConnectionError(int channelCode,
+            int newState) {
+        synchronized(mBluetoothHealthProfileHandler) {
+            mBluetoothHealthProfileHandler.onHealthDeviceChannelConnectionError(channelCode,
+                                                                                newState);
+        }
+    }
+
     public int getHealthDeviceConnectionState(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
                 "Need BLUETOOTH permission");
@@ -2785,8 +2793,9 @@ public class BluetoothService extends IBluetooth.Stub {
             String channelType);
     native String registerHealthApplicationNative(int dataType, String role, String name);
     native boolean unregisterHealthApplicationNative(String path);
-    native boolean createChannelNative(String devicePath, String appPath, String channelType);
-    native boolean destroyChannelNative(String devicePath, String channelpath);
+    native boolean createChannelNative(String devicePath, String appPath, String channelType,
+                                       int code);
+    native boolean destroyChannelNative(String devicePath, String channelpath, int code);
     native String getMainChannelNative(String path);
     native String getChannelApplicationNative(String channelPath);
     native ParcelFileDescriptor getChannelFdNative(String channelPath);

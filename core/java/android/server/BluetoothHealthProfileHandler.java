@@ -84,7 +84,6 @@ final class BluetoothHealthProfileHandler {
             result = 31 * result + (mChannelPath == null ? 0 : mChannelPath.hashCode());
             result = 31 * result + mDevice.hashCode();
             result = 31 * result + mConfig.hashCode();
-            result = 31 * result + mState;
             result = 31 * result + mChannelType;
             return result;
         }
@@ -152,7 +151,7 @@ final class BluetoothHealthProfileHandler {
                 String channelType = getStringChannelType(chan.mChannelType);
 
                 if (!mBluetoothService.createChannelNative(deviceObjectPath, configPath,
-                          channelType)) {
+                          channelType, chan.hashCode())) {
                     int prevState = chan.mState;
                     int state = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
                     callHealthChannelCallback(chan.mConfig, chan.mDevice, prevState, state, null,
@@ -258,7 +257,7 @@ final class BluetoothHealthProfileHandler {
 
     boolean disconnectChannel(BluetoothDevice device,
             BluetoothHealthAppConfiguration config, int id) {
-        HealthChannel chan = findChannelById(device, config, id);
+        HealthChannel chan = findChannelById(id);
         if (chan == null) {
           return false;
         }
@@ -273,7 +272,8 @@ final class BluetoothHealthProfileHandler {
         callHealthChannelCallback(config, device, prevState, chan.mState,
                 null, chan.hashCode());
 
-        if (!mBluetoothService.destroyChannelNative(deviceObjectPath, chan.mChannelPath)) {
+        if (!mBluetoothService.destroyChannelNative(deviceObjectPath, chan.mChannelPath,
+                                                    chan.hashCode())) {
             prevState = chan.mState;
             chan.mState = BluetoothHealth.STATE_CHANNEL_CONNECTED;
             callHealthChannelCallback(config, device, prevState, chan.mState,
@@ -284,8 +284,7 @@ final class BluetoothHealthProfileHandler {
         }
     }
 
-    private HealthChannel findChannelById(BluetoothDevice device,
-            BluetoothHealthAppConfiguration config, int id) {
+    private HealthChannel findChannelById(int id) {
         for (HealthChannel chan : mHealthChannels) {
             if (chan.hashCode() == id) return chan;
         }
@@ -384,6 +383,15 @@ final class BluetoothHealthProfileHandler {
         }
     }
 
+    /*package*/ void onHealthDeviceChannelConnectionError(int chanCode,
+                                                          int state) {
+        HealthChannel channel = findChannelById(chanCode);
+        if (channel == null) errorLog("No record of this channel:" + chanCode);
+
+        callHealthChannelCallback(channel.mConfig, channel.mDevice, channel.mState, state, null,
+                chanCode);
+    }
+
     private BluetoothHealthAppConfiguration findHealthApplication(
             BluetoothDevice device, String channelPath) {
         BluetoothHealthAppConfiguration config = null;
@@ -424,9 +432,19 @@ final class BluetoothHealthProfileHandler {
         config = findHealthApplication(device, channelPath);
 
         if (exists) {
+            channel = findConnectingChannel(device, config);
+            if (channel == null) {
+               channel = new HealthChannel(device, config, null, false,
+                       channelPath);
+               channel.mState = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
+               mHealthChannels.add(channel);
+            }
+            channel.mChannelPath = channelPath;
+
             fd = mBluetoothService.getChannelFdNative(channelPath);
             if (fd == null) {
                 errorLog("Error obtaining fd for channel:" + channelPath);
+                disconnectChannel(device, config, channel.hashCode());
                 return;
             }
             boolean mainChannel =
@@ -440,18 +458,10 @@ final class BluetoothHealthProfileHandler {
                 }
                 if (mainChannelPath.equals(channelPath)) mainChannel = true;
             }
-            channel = findConnectingChannel(device, config);
-            if (channel != null) {
-               channel.mChannelFd = fd;
-               channel.mMainChannel = mainChannel;
-               channel.mChannelPath = channelPath;
-               prevState = channel.mState;
-            } else {
-               channel = new HealthChannel(device, config, fd, mainChannel,
-                       channelPath);
-               mHealthChannels.add(channel);
-               prevState = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
-            }
+
+            channel.mChannelFd = fd;
+            channel.mMainChannel = mainChannel;
+            prevState = channel.mState;
             state = BluetoothHealth.STATE_CHANNEL_CONNECTED;
         } else {
             channel = findChannelByPath(device, channelPath);

@@ -74,6 +74,7 @@ static jmethodID method_onPanDevicePropertyChanged;
 static jmethodID method_onPanDeviceConnectionResult;
 static jmethodID method_onHealthDevicePropertyChanged;
 static jmethodID method_onHealthDeviceChannelChanged;
+static jmethodID method_onHealthDeviceConnectionResult;
 
 typedef event_loop_native_data_t native_data_t;
 
@@ -141,6 +142,9 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                "(Ljava/lang/String;[Ljava/lang/String;)V");
     method_onPanDeviceConnectionResult = env->GetMethodID(clazz, "onPanDeviceConnectionResult",
                                                "(Ljava/lang/String;I)V");
+    method_onHealthDeviceConnectionResult = env->GetMethodID(clazz,
+                                                             "onHealthDeviceConnectionResult",
+                                                             "(II)V");
     method_onHealthDevicePropertyChanged = env->GetMethodID(clazz, "onHealthDevicePropertyChanged",
                                                "(Ljava/lang/String;[Ljava/lang/String;)V");
     method_onHealthDeviceChannelChanged = env->GetMethodID(clazz, "onHealthDeviceChannelChanged",
@@ -1533,6 +1537,39 @@ void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
     free(user);
 }
 
+void onHealthDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
+    LOGV("%s", __FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+    jint result = HEALTH_OPERATION_SUCCESS;
+    if (dbus_set_error_from_message(&err, msg)) {
+        if (!strcmp(err.name, BLUEZ_ERROR_IFC ".InvalidArgs")) {
+            result = HEALTH_OPERATION_INVALID_ARGS;
+        } else if (!strcmp(err.name, BLUEZ_ERROR_IFC ".HealthError")) {
+            result = HEALTH_OPERATION_ERROR;
+        } else if (!strcmp(err.name, BLUEZ_ERROR_IFC ".NotFound")) {
+            result = HEALTH_OPERATION_NOT_FOUND;
+        } else if (!strcmp(err.name, BLUEZ_ERROR_IFC ".NotAllowed")) {
+            result = HEALTH_OPERATION_NOT_ALLOWED;
+        } else {
+            result = HEALTH_OPERATION_GENERIC_FAILURE;
+        }
+        LOG_AND_FREE_DBUS_ERROR(&err);
+    }
+
+    LOGV("... Health Device Code = %d, result = %d", code, result);
+    jint code = *(int *) user;
+    env->CallVoidMethod(nat->me,
+                        method_onHealthDeviceConnectionResult,
+                        code,
+                        result);
+    free(user);
+}
 #endif
 
 static JNINativeMethod sMethods[] = {
