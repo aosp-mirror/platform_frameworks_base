@@ -107,25 +107,18 @@ class WiredAccessoryObserver extends UEventObserver {
     private synchronized final void updateState(String name, int state)
     {
         if (name.equals("usb_audio")) {
-            if (state == 1) {
-                switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                 BIT_USB_HEADSET_DGTL|BIT_HDMI_AUDIO)) |
-                               (state << 2));
-            } else if (state == 2) {
-                switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                 BIT_USB_HEADSET_ANLG|BIT_HDMI_AUDIO)) |
-                               (state << 3));
-            } else switchState = (mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|BIT_HDMI_AUDIO));
-        }
-        else if (name.equals("hdmi")) {
+            switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|BIT_HDMI_AUDIO)) |
+                           ((state == 1) ? BIT_USB_HEADSET_ANLG :
+                                         ((state == 2) ? BIT_USB_HEADSET_DGTL : 0)));
+        } else if (name.equals("hdmi")) {
             switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
                                              BIT_USB_HEADSET_DGTL|BIT_USB_HEADSET_ANLG)) |
-                           (state << 4));
-        }
-        else {
+                           ((state == 1) ? BIT_HDMI_AUDIO : 0));
+        } else {
             switchState = ((mHeadsetState & (BIT_HDMI_AUDIO|BIT_USB_HEADSET_ANLG|
                                              BIT_USB_HEADSET_DGTL)) |
-                           state);
+                            ((state == 1) ? BIT_HEADSET :
+                                          ((state == 2) ? BIT_HEADSET_NO_MIC : 0)));
         }
         update(name, switchState);
     }
