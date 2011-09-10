@@ -104,6 +104,7 @@ public final class AccessibilityInteractionClient
     public void setSameThreadMessage(Message message) {
         synchronized (mInstanceLock) {
             mSameThreadMessage = message;
+            mInstanceLock.notifyAll();
         }
     }
 
@@ -125,7 +126,6 @@ public final class AccessibilityInteractionClient
                     Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
-                handleSameThreadMessageIfNeeded();
                 AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                         interactionId);
                 finalizeAccessibilityNodeInfo(info, connection, windowScale);
@@ -142,7 +142,7 @@ public final class AccessibilityInteractionClient
      * in the currently active window and starts from the root View in the window.
      *
      * @param connection A connection for interacting with the system.
-     * @param id The id of the node.
+     * @param viewId The id of the view.
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(
@@ -153,7 +153,6 @@ public final class AccessibilityInteractionClient
                     viewId, interactionId, this, Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
-                handleSameThreadMessageIfNeeded();
                 AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                         interactionId);
                 finalizeAccessibilityNodeInfo(info, connection, windowScale);
@@ -182,7 +181,6 @@ public final class AccessibilityInteractionClient
                     text, interactionId, this, Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
-                handleSameThreadMessageIfNeeded();
                 List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                         interactionId);
                 finalizeAccessibilityNodeInfos(infos, connection, windowScale);
@@ -217,7 +215,6 @@ public final class AccessibilityInteractionClient
                     Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
-                handleSameThreadMessageIfNeeded();
                 List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                         interactionId);
                 finalizeAccessibilityNodeInfos(infos, connection, windowScale);
@@ -246,7 +243,6 @@ public final class AccessibilityInteractionClient
                     accessibilityWindowId, accessibilityViewId, action, interactionId, this,
                     Thread.currentThread().getId());
             if (success) {
-                handleSameThreadMessageIfNeeded();
                 return getPerformAccessibilityActionResult(interactionId);
             }
         } catch (RemoteException re) {
@@ -363,6 +359,11 @@ public final class AccessibilityInteractionClient
         final long startTimeMillis = SystemClock.uptimeMillis();
         while (true) {
             try {
+                Message sameProcessMessage = getSameProcessMessageAndClear();
+                if (sameProcessMessage != null) {
+                    sameProcessMessage.getTarget().handleMessage(sameProcessMessage);
+                }
+
                 if (mInteractionId == interactionId) {
                     return true;
                 }
@@ -399,17 +400,6 @@ public final class AccessibilityInteractionClient
         info.getBoundsInScreen(bounds);
         bounds.scale(scale);
         info.setBoundsInScreen(bounds);
-    }
-
-    /**
-     * Handles the message stored if the interacted and interacting
-     * threads are the same otherwise this is a NOP.
-     */
-    private void handleSameThreadMessageIfNeeded() {
-        Message sameProcessMessage = getSameProcessMessageAndClear();
-        if (sameProcessMessage != null) {
-            sameProcessMessage.getTarget().handleMessage(sameProcessMessage);
-        }
     }
 
     /**
