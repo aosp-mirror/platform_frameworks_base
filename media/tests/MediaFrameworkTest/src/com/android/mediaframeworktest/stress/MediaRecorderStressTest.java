@@ -205,7 +205,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
                 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setOutputFile(filename);
-                mRecorder.setVideoFrameRate(20);
+                mRecorder.setVideoFrameRate(MediaRecorderStressTestRunner.mFrameRate);
                 mRecorder.setVideoSize(176,144);
                 Log.v(TAG, "setEncoder");
                 mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
@@ -269,7 +269,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
                 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setOutputFile(filename);
-                mRecorder.setVideoFrameRate(20);
+                mRecorder.setVideoFrameRate(MediaRecorderStressTestRunner.mFrameRate);
                 mRecorder.setVideoSize(176,144);
                 Log.v(TAG, "Media recorder setEncoder");
                 mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
