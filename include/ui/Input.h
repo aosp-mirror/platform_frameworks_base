@@ -660,15 +660,19 @@ private:
     static const uint32_t HISTORY_SIZE = 10;
 
     // Oldest sample to consider when calculating the velocity.
-    static const nsecs_t MAX_AGE = 200 * 1000000; // 200 ms
+    static const nsecs_t MAX_AGE = 100 * 1000000; // 100 ms
 
     // The minimum duration between samples when estimating velocity.
-    static const nsecs_t MIN_DURATION = 10 * 1000000; // 10 ms
+    static const nsecs_t MIN_DURATION = 5 * 1000000; // 5 ms
 
     struct Movement {
         nsecs_t eventTime;
         BitSet32 idBits;
         Position positions[MAX_POINTERS];
+
+        inline const Position& getPosition(uint32_t id) const {
+            return positions[idBits.getIndexOfBit(id)];
+        }
     };
 
     uint32_t mIndex;
