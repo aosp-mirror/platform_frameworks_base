@@ -1551,6 +1551,8 @@
         <attr name="multiChoiceItemLayout" format="reference" />
         <attr name="singleChoiceItemLayout" format="reference" />
         <attr name="listItemLayout" format="reference" />
+        <attr name="progressLayout" format="reference" />
+        <attr name="horizontalProgressLayout" format="reference" />
     </declare-styleable>
 
     <!-- Fragment animation class attributes. -->
