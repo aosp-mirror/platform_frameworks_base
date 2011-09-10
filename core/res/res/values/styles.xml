@@ -61,6 +61,8 @@ please see styles_device_defaults.xml.
         <item name="bottomBright">@android:drawable/popup_bottom_bright</item>
         <item name="bottomMedium">@android:drawable/popup_bottom_medium</item>
         <item name="centerMedium">@android:drawable/popup_center_medium</item>
+        <item name="progressLayout">@android:layout/progress_dialog</item>
+        <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress</item>
     </style>
 
     <style name="Widget.PreferenceFrameLayout">
@@ -2350,6 +2352,8 @@ please see styles_device_defaults.xml.
         <item name="centerMedium">@android:drawable/dialog_middle_holo_dark</item>
         <item name="layout">@android:layout/alert_dialog_holo</item>
         <item name="listLayout">@android:layout/select_dialog_holo</item>
+        <item name="progressLayout">@android:layout/progress_dialog_holo</item>
+        <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress_holo</item>
         <item name="listItemLayout">@android:layout/select_dialog_item_holo</item>
         <item name="multiChoiceItemLayout">@android:layout/select_dialog_multichoice_holo</item>
         <item name="singleChoiceItemLayout">@android:layout/select_dialog_singlechoice_holo</item>
