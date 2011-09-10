@@ -370,7 +370,7 @@ package android {
     field public static final int dialogTitle = 16843250; // 0x10101f2
     field public static final int digits = 16843110; // 0x1010166
     field public static final int direction = 16843217; // 0x10101d1
-    field public static final int directionDescriptions = 16843696; // 0x10103b0
+    field public static final int directionDescriptions = 16843695; // 0x10103af
     field public static final int directionPriority = 16843218; // 0x10101d2
     field public static final int disableDependentsState = 16843249; // 0x10101f1
     field public static final int disabledAlpha = 16842803; // 0x1010033
@@ -711,7 +711,7 @@ package android {
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
-    field public static final int overridesImplicitlyEnabledSubtype = 16843697; // 0x10103b1
+    field public static final int overridesImplicitlyEnabledSubtype = 16843696; // 0x10103b0
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
@@ -790,7 +790,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int required = 16843406; // 0x101028e
-    field public static final int requiresFadingEdge = 16843694; // 0x10103ae
+    field public static final int requiresFadingEdge = 16843699; // 0x10103b3
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
@@ -943,7 +943,7 @@ package android {
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
     field public static final int targetClass = 16842799; // 0x101002f
-    field public static final int targetDescriptions = 16843695; // 0x10103af
+    field public static final int targetDescriptions = 16843694; // 0x10103ae
     field public static final int targetDrawables = 16843654; // 0x1010386
     field public static final int targetPackage = 16842785; // 0x1010021
     field public static final int targetSdkVersion = 16843376; // 0x1010270
