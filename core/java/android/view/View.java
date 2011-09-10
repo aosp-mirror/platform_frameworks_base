@@ -69,6 +69,8 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
 
+import static android.os.Build.VERSION_CODES.*;
+
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
@@ -585,7 +587,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_drawingCacheQuality
  * @attr ref android.R.styleable#View_duplicateParentState
  * @attr ref android.R.styleable#View_id
- * @attr ref android.R.styleable#View_fadingEdge
+ * @attr ref android.R.styleable#View_requiresFadingEdge
  * @attr ref android.R.styleable#View_fadingEdgeLength
  * @attr ref android.R.styleable#View_filterTouchesWhenObscured
  * @attr ref android.R.styleable#View_fitsSystemWindows
@@ -2895,6 +2897,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     }
                     break;
                 case R.styleable.View_fadingEdge:
+                    if (context.getApplicationInfo().targetSdkVersion >= ICE_CREAM_SANDWICH) {
+                        // Ignore the attribute starting with ICS
+                        break;
+                    }
+                    // With builds < ICS, fall through and apply fading edges
+                case R.styleable.View_requiresFadingEdge:
                     final int fadingEdge = a.getInt(attr, FADING_EDGE_NONE);
                     if (fadingEdge != FADING_EDGE_NONE) {
                         viewFlagValues |= fadingEdge;
@@ -8642,7 +8650,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         otherwise
      *
      * @see #setHorizontalFadingEdgeEnabled(boolean)
-     * @attr ref android.R.styleable#View_fadingEdge
+     * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public boolean isHorizontalFadingEdgeEnabled() {
         return (mViewFlags & FADING_EDGE_HORIZONTAL) == FADING_EDGE_HORIZONTAL;
@@ -8657,7 +8665,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *                                    horizontally
      *
      * @see #isHorizontalFadingEdgeEnabled()
-     * @attr ref android.R.styleable#View_fadingEdge
+     * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public void setHorizontalFadingEdgeEnabled(boolean horizontalFadingEdgeEnabled) {
         if (isHorizontalFadingEdgeEnabled() != horizontalFadingEdgeEnabled) {
@@ -8677,7 +8685,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         otherwise
      *
      * @see #setVerticalFadingEdgeEnabled(boolean)
-     * @attr ref android.R.styleable#View_fadingEdge
+     * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public boolean isVerticalFadingEdgeEnabled() {
         return (mViewFlags & FADING_EDGE_VERTICAL) == FADING_EDGE_VERTICAL;
@@ -8692,7 +8700,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *                                  vertically
      *
      * @see #isVerticalFadingEdgeEnabled()
-     * @attr ref android.R.styleable#View_fadingEdge
+     * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public void setVerticalFadingEdgeEnabled(boolean verticalFadingEdgeEnabled) {
         if (isVerticalFadingEdgeEnabled() != verticalFadingEdgeEnabled) {

@@ -1804,8 +1804,23 @@
         <!-- Defines whether the vertical scrollbar track should always be drawn. -->
         <attr name="scrollbarAlwaysDrawVerticalTrack" format="boolean" />
 
-        <!-- Defines which edges should be fadeded on scrolling. -->
+        <!-- {@deprecated This attribute is deprecated and will be ignored as of
+             API level {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}.
+             Using fading edges may introduce noticeable performance
+             degradations and should be used only when required by the application's
+             visual design. To request fading edges with API level
+             {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and above,
+             use the <code>requiresFadingEdge</code> attribute instead.} -->
         <attr name="fadingEdge">
+            <!-- No edge is faded. -->
+            <flag name="none" value="0x00000000" />
+            <!-- Fades horizontal edges only. -->
+            <flag name="horizontal" value="0x00001000" />
+            <!-- Fades vertical edges only. -->
+            <flag name="vertical" value="0x00002000" />
+        </attr>
+        <!-- Defines which edges should be faded on scrolling. -->
+        <attr name="requiresFadingEdge">
             <!-- No edge is faded. -->
             <flag name="none" value="0x00000000" />
             <!-- Fades horizontal edges only. -->
