@@ -1745,20 +1745,6 @@
   <public type="attr" name="accessibilityFlags" />
   <public type="attr" name="canRetrieveWindowContent" />
 
-  <public type="attr" name="targetDrawables" />
-  <public type="attr" name="handleDrawable" />
-  <public type="attr" name="leftChevronDrawable" />
-  <public type="attr" name="rightChevronDrawable" />
-  <public type="attr" name="topChevronDrawable" />
-  <public type="attr" name="bottomChevronDrawable" />
-  <public type="attr" name="waveDrawable" />
-  <public type="attr" name="outerRadius" />
-  <public type="attr" name="hitRadius" />
-  <public type="attr" name="vibrationDuration" />
-  <public type="attr" name="snapMargin" />
-  <public type="attr" name="feedbackCount" />
-  <public type="attr" name="verticalOffset" />
-  <public type="attr" name="horizontalOffset" />
   <public type="attr" name="listPreferredItemHeightLarge" />
   <public type="attr" name="listPreferredItemHeightSmall" />
 
