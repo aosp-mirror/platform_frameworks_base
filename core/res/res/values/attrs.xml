@@ -3949,10 +3949,6 @@
     <!-- ========================== -->
     <eat-comment />
 
-    <declare-styleable name="AnimationSet">
-        <attr name="shareInterpolator" format="boolean" />
-    </declare-styleable>
-
     <declare-styleable name="Animation">
         <!-- Defines the interpolator used to smooth the animation movement in time. -->
         <attr name="interpolator" />
@@ -4000,6 +3996,15 @@
         <!-- Special option for window animations: if this window is on top
              of a wallpaper, don't animate the wallpaper with it. -->
         <attr name="detachWallpaper" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="AnimationSet">
+        <attr name="shareInterpolator" format="boolean" />
+        <attr name="fillBefore" />
+        <attr name="fillAfter" />
+        <attr name="duration" />
+        <attr name="startOffset" />
+        <attr name="repeatMode" />
     </declare-styleable>
 
     <declare-styleable name="RotateAnimation">

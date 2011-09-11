@@ -778,7 +778,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // The window manager only throws security exceptions, so let's
             // log all others.
             if (!(e instanceof SecurityException)) {
-                Slog.e(TAG, "Window Manager Crash", e);
+                Log.wtf(TAG, "Window Manager Crash", e);
             }
             throw e;
         }
@@ -7102,7 +7102,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         } catch (RuntimeException e) {
-            Slog.e(TAG, "Unhandled exception while force removing for memory", e);
+            Log.wtf(TAG, "Unhandled exception while force removing for memory", e);
         }
         
         try {
@@ -7137,7 +7137,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } catch (RuntimeException e) {
             mInLayout = false;
-            Slog.e(TAG, "Unhandled exception while layout out windows", e);
+            Log.wtf(TAG, "Unhandled exception while laying out windows", e);
         }
     }
 
@@ -8403,7 +8403,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         } catch (RuntimeException e) {
-            Slog.e(TAG, "Unhandled exception in Window Manager", e);
+            Log.wtf(TAG, "Unhandled exception in Window Manager", e);
         }
 
         Surface.closeTransaction();
@@ -9185,7 +9185,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windows == null || windows.contains(w)) {
                 pw.print("  Window #"); pw.print(i); pw.print(' ');
                         pw.print(w); pw.println(":");
-                w.dump(pw, "    ", dumpAll);
+                w.dump(pw, "    ", dumpAll || windows != null);
             }
         }
         if (mInputMethodDialogs.size() > 0) {
