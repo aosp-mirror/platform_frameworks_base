@@ -705,6 +705,8 @@
 
         <!-- Default style for PreferenceScreen. -->
         <attr name="preferenceScreenStyle" format="reference" />
+        <!-- Default style for Headers pane in PreferenceActivity. -->
+        <attr name="preferenceFragmentStyle" format="reference" />
         <!-- Default style for PreferenceCategory. -->
         <attr name="preferenceCategoryStyle" format="reference" />
         <!-- Default style for Preference. -->
