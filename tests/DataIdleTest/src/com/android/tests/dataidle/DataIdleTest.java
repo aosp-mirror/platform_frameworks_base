@@ -76,7 +76,7 @@ public class DataIdleTest extends InstrumentationTestCase {
                     Long.MAX_VALUE, false);
             reportStats(stats);
         } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Failed to fetch network stats for wifi.");
+            Log.w(LOG_TAG, "Failed to fetch network stats.");
         }
     }
 
@@ -85,16 +85,22 @@ public class DataIdleTest extends InstrumentationTestCase {
      * @param stats {@link NetworkorStats} to print
      */
     void reportStats(NetworkStats stats) {
+        Bundle result = new Bundle();
+        long rxBytes = 0;
+        long txBytes = 0;
         for (int i = 0; i < stats.size(); ++i) {
+            // Label will be iface_uid_tag_set
             Entry  statsEntry = stats.getValues(i, null);
-            Bundle result = new Bundle();
-            result.putInt("uid", statsEntry.uid);
-            result.putInt("tag", statsEntry.tag);
-            result.putInt("set", statsEntry.set);
-            result.putString("iface", statsEntry.iface);
-            result.putLong("rxBytes", statsEntry.rxBytes);
-            result.putLong("txBytes", statsEntry.txBytes);
-            getInstrumentation().sendStatus(INSTRUMENTATION_IN_PROGRESS, result);
+            String labelTemplate = String.format("%s_%d_%d_%d", statsEntry.iface, statsEntry.uid,
+                    statsEntry.tag, statsEntry.set) + "_%s";
+            result.putLong(String.format(labelTemplate, "rxBytes"), statsEntry.rxBytes);
+            result.putLong(String.format(labelTemplate, "txBytes"), statsEntry.txBytes);
+            rxBytes += statsEntry.rxBytes;
+            txBytes += statsEntry.txBytes;
         }
+        result.putLong("Total rxBytes", rxBytes);
+        result.putLong("Total txBytes", txBytes);
+        getInstrumentation().sendStatus(INSTRUMENTATION_IN_PROGRESS, result);
+
     }
 }
