@@ -34,6 +34,7 @@ struct SurfaceTexture {
     GLenum getCurrentTextureTarget() const { return 0; }
     void setBufferCount(int bufferCount) {}
     sp<GraphicBuffer> getCurrentBuffer() const { return NULL; }
+    int64_t getTimestamp() { return 0; }
 };
 
 static sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz)
