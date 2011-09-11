@@ -784,7 +784,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int required = 16843406; // 0x101028e
-    field public static final int requiresFadingEdge = 16843699; // 0x10103b3
+    field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
