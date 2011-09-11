@@ -152,7 +152,8 @@ public class ExternalStorageFormatter extends Service
                     Environment.getExternalStorageDirectory().toString() :
                     mStorageVolume.getPath();
             try {
-                mountService.unmountVolume(extStoragePath, true);
+                // Remove encryption mapping if this is an unmount for a factory reset.
+                mountService.unmountVolume(extStoragePath, true, mFactoryReset);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with mount service", e);
             }

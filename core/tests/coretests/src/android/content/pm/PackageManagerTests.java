@@ -1057,7 +1057,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized(observer) {
-                getMs().unmountVolume(path, true);
+                getMs().unmountVolume(path, true, false);
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
                     observer.wait(WAIT_TIME_INCR);
