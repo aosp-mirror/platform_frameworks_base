@@ -8193,6 +8193,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 (mPrivateFlags & INVALIDATED) != INVALIDATED) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
             mPrivateFlags |= INVALIDATED;
+            mPrivateFlags |= DIRTY;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
             //noinspection PointlessBooleanExpression,ConstantConditions
@@ -8239,6 +8240,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 (mPrivateFlags & INVALIDATED) != INVALIDATED) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
             mPrivateFlags |= INVALIDATED;
+            mPrivateFlags |= DIRTY;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
             //noinspection PointlessBooleanExpression,ConstantConditions
@@ -8294,6 +8296,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 (mPrivateFlags & INVALIDATED) != INVALIDATED || isOpaque() != mLastIsOpaque) {
             mLastIsOpaque = isOpaque();
             mPrivateFlags &= ~DRAWN;
+            mPrivateFlags |= DIRTY;
             if (invalidateCache) {
                 mPrivateFlags |= INVALIDATED;
                 mPrivateFlags &= ~DRAWING_CACHE_VALID;
@@ -8334,6 +8337,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 ((View) mParent).mPrivateFlags |= INVALIDATED;
             }
             mPrivateFlags &= ~DRAWN;
+            mPrivateFlags |= DIRTY;
             mPrivateFlags |= INVALIDATED;
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
             if (mParent != null && mAttachInfo != null) {
