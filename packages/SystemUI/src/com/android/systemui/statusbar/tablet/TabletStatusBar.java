@@ -24,6 +24,7 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.StatusBarManager;
@@ -1318,10 +1319,15 @@ public class TabletStatusBar extends StatusBar implements
                         new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
                 try {
                     mIntent.send(mContext, 0, overlay);
+
                 } catch (PendingIntent.CanceledException e) {
                     // the stack trace isn't very helpful here.  Just log the exception message.
                     Slog.w(TAG, "Sending contentIntent failed: " + e);
                 }
+
+                KeyguardManager kgm =
+                    (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+                if (kgm != null) kgm.exitKeyguardSecurely(null);
             }
 
             try {
