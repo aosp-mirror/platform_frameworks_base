@@ -35,12 +35,11 @@
             android:layout_height="match_parent">
 
             <ListView android:id="@android:id/list"
+                style="?attr/preferenceFragmentStyle"
                 android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1"
                 android:drawSelectorOnTop="false"
-                android:paddingLeft="@dimen/preference_fragment_padding_side"
-                android:paddingRight="@dimen/preference_fragment_padding_side"
                 android:scrollbarStyle="@integer/preference_fragment_scrollbarStyle"
                 android:cacheColorHint="@android:color/transparent"
                 android:listPreferredItemHeight="48dp"

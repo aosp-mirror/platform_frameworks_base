@@ -275,6 +275,7 @@ please see themes_device_defaults.xml.
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment</item>
         <item name="preferenceCategoryStyle">@android:style/Preference.Category</item>
         <item name="preferenceStyle">@android:style/Preference</item>
         <item name="preferenceInformationStyle">@android:style/Preference.Information</item>
@@ -1071,6 +1072,7 @@ please see themes_device_defaults.xml.
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment.Holo</item>
         <item name="preferenceCategoryStyle">@android:style/Preference.Holo.Category</item>
         <item name="preferenceStyle">@android:style/Preference.Holo</item>
         <item name="preferenceInformationStyle">@android:style/Preference.Holo.Information</item>
@@ -1378,6 +1380,7 @@ please see themes_device_defaults.xml.
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment.Holo</item>
         <item name="preferenceCategoryStyle">@android:style/Preference.Holo.Category</item>
         <item name="preferenceStyle">@android:style/Preference.Holo</item>
         <item name="preferenceInformationStyle">@android:style/Preference.Holo.Information</item>
