@@ -89,19 +89,19 @@ public class AnimationSet extends Animation {
 
         if (context.getApplicationInfo().targetSdkVersion >=
                 Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            if (a.hasValue(com.android.internal.R.styleable.Animation_duration)) {
+            if (a.hasValue(com.android.internal.R.styleable.AnimationSet_duration)) {
                 mFlags |= PROPERTY_DURATION_MASK;
             }
-            if (a.hasValue(com.android.internal.R.styleable.Animation_fillBefore)) {
+            if (a.hasValue(com.android.internal.R.styleable.AnimationSet_fillBefore)) {
                 mFlags |= PROPERTY_FILL_BEFORE_MASK;
             }
-            if (a.hasValue(com.android.internal.R.styleable.Animation_fillAfter)) {
+            if (a.hasValue(com.android.internal.R.styleable.AnimationSet_fillAfter)) {
                 mFlags |= PROPERTY_FILL_AFTER_MASK;
             }
-            if (a.hasValue(com.android.internal.R.styleable.Animation_repeatMode)) {
+            if (a.hasValue(com.android.internal.R.styleable.AnimationSet_repeatMode)) {
                 mFlags |= PROPERTY_REPEAT_MODE_MASK;
             }
-            if (a.hasValue(com.android.internal.R.styleable.Animation_startOffset)) {
+            if (a.hasValue(com.android.internal.R.styleable.AnimationSet_startOffset)) {
                 mFlags |= PROPERTY_START_OFFSET_MASK;
             }
         }

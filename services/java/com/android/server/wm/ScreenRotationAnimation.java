@@ -304,8 +304,12 @@ class ScreenRotationAnimation {
         }
 
         if (!mStarted) {
-            mEnterAnimation.setStartTime(now);
-            mExitAnimation.setStartTime(now);
+            if (mEnterAnimation != null) {
+                mEnterAnimation.setStartTime(now);
+            }
+            if (mExitAnimation != null) {
+                mExitAnimation.setStartTime(now);
+            }
             mStarted = true;
         }
 
