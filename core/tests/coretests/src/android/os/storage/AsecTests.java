@@ -421,7 +421,7 @@ public class AsecTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized(observer) {
-                getMs().unmountVolume(path, false);
+                getMs().unmountVolume(path, false, false);
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
                     observer.wait(WAIT_TIME_INCR);
@@ -486,7 +486,7 @@ public class AsecTests extends AndroidTestCase {
             // Wait on observer
             synchronized(observer) {
                 for (int i = 0; i < 5; i++) {
-                    getMs().unmountVolume(path, false);
+                    getMs().unmountVolume(path, false, false);
                 }
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {

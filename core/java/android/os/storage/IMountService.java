@@ -169,13 +169,15 @@ public interface IMountService extends IInterface {
              * is an asynchronous operation. Applications should register
              * StorageEventListener for storage related status changes.
              */
-            public void unmountVolume(String mountPoint, boolean force) throws RemoteException {
+            public void unmountVolume(String mountPoint, boolean force, boolean removeEncryption)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeString(mountPoint);
                     _data.writeInt((force ? 1 : 0));
+                    _data.writeInt((removeEncryption ? 1 : 0));
                     mRemote.transact(Stub.TRANSACTION_unmountVolume, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -842,9 +844,9 @@ public interface IMountService extends IInterface {
                     data.enforceInterface(DESCRIPTOR);
                     String mountPoint;
                     mountPoint = data.readString();
-                    boolean force;
-                    force = 0 != data.readInt();
-                    unmountVolume(mountPoint, force);
+                    boolean force = 0 != data.readInt();
+                    boolean removeEncrypt = 0 != data.readInt();
+                    unmountVolume(mountPoint, force, removeEncrypt);
                     reply.writeNoException();
                     return true;
                 }
@@ -1234,8 +1236,14 @@ public interface IMountService extends IInterface {
      * Safely unmount external storage at given mount point. The unmount is an
      * asynchronous operation. Applications should register StorageEventListener
      * for storage related status changes.
+     * @param mountPoint the mount point
+     * @param force whether or not to forcefully unmount it (e.g. even if programs are using this
+     *     data currently)
+     * @param removeEncryption whether or not encryption mapping should be removed from the volume.
+     *     This value implies {@code force}.
      */
-    public void unmountVolume(String mountPoint, boolean force) throws RemoteException;
+    public void unmountVolume(String mountPoint, boolean force, boolean removeEncryption)
+            throws RemoteException;
 
     /**
      * Unregisters an IMountServiceListener
