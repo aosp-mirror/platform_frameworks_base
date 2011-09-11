@@ -910,7 +910,12 @@ please see styles_device_defaults.xml.
     <style name="Preference">
         <item name="android:layout">@android:layout/preference</item>
     </style>
-    
+
+    <style name="PreferenceFragment">
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+    </style>
+
     <style name="Preference.Information">
         <item name="android:layout">@android:layout/preference_information</item>
         <item name="android:enabled">false</item>
@@ -959,6 +964,11 @@ please see styles_device_defaults.xml.
 
     <style name="Preference.Holo">
         <item name="android:layout">@android:layout/preference_holo</item>
+    </style>
+
+    <style name="PreferenceFragment.Holo">
+        <item name="android:paddingLeft">@dimen/preference_fragment_padding_side</item>
+        <item name="android:paddingRight">@dimen/preference_fragment_padding_side</item>
     </style>
 
     <style name="Preference.Holo.Information">

@@ -50,6 +50,9 @@
 
     <!-- Preference activity, vertical padding for the header list -->
     <dimen name="preference_screen_header_vertical_padding">32dp</dimen>
+    <dimen name="preference_screen_side_margin">0dp</dimen>
+    <!-- Compensate for double margin : preference_screen_side_margin + 4 (frame background shadow) = -preference_screen_side_margin_negative -->
+    <dimen name="preference_screen_side_margin_negative">-4dp</dimen>
 
 </resources>
 
