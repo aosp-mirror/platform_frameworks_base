@@ -164,6 +164,8 @@ private:
 
     void sendFormatChange();
 
+    void signalError(OMX_ERRORTYPE error = OMX_ErrorUndefined);
+
     DISALLOW_EVIL_CONSTRUCTORS(ACodec);
 };
 
