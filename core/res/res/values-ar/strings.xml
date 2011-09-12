@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"كود PIN غير صحيح!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"لإلغاء التأمين، اضغط على \"القائمة\" ثم على 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"رقم الطوارئ"</string>
-    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(ليس هناك خدمة)"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"لا تتوفر خدمة"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"الشاشة مؤمّنة."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"اضغط على \"القائمة\" لإلغاء التأمين أو إجراء اتصال بالطوارئ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
@@ -650,8 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"صحيح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"عذرًا، حاول مرة أخرى"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"عذرًا، أعد المحاولة"</string>
-    <!-- no translation found for lockscreen_plugged_in (8057762828355572315) -->
-    <skip />
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"جارٍ الشحن، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"تم الشحن."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"توصيل جهاز الشحن."</string>
@@ -855,12 +854,12 @@
     <string name="cut" msgid="3092569408438626261">"قص"</string>
     <string name="copy" msgid="2681946229533511987">"نسخ"</string>
     <string name="paste" msgid="5629880836805036433">"لصق"</string>
-    <!-- outdated translation 8333608224471746584 -->     <string name="replace" msgid="5781686059063148930">"استبدال"</string>
-    <!-- no translation found for delete (6098684844021697789) -->
-    <skip />
+    <string name="replace" msgid="5781686059063148930">"استبدال???"</string>
+    <string name="delete" msgid="6098684844021697789">"حذف"</string>
     <string name="copyUrl" msgid="2538211579596067402">"نسخ عنوان URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"تحديد نص..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"تحديد النص"</string>
+    <string name="addToDictionary" msgid="2839899368418071843">"+ إضافة إلى القاموس"</string>
     <string name="inputMethod" msgid="1653630062304567879">"طريقة الإرسال"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"المساحة منخفضة"</string>
@@ -940,13 +939,17 @@
     <item quantity="other" msgid="7915895323644292768">"هناك شبكات Wi-Fi مفتوحة متاحة"</item>
   </plurals>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"تعذر الاتصال بـ Wi-Fi"</string>
-    <!-- outdated translation 2517058131278770509 -->     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" تحتوي على اتصال إنترنت ضعيف."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" تحتوي على اتصال إنترنت ضعيف."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"اتصال Wi-Fi مباشر"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"ابدأ تشغيل اتصال Wi-Fi المباشر. يؤدي ذلك إلى إيقاف تشغيل عميل/نقطة اتصال Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"تعذر بدء اتصال Wi-Fi مباشر"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. انقر على \"موافق\" للقبول."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. أدخل رقم التعريف الشخصي للبدء."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"يجب إدخال رقم التعريف الشخصي لـ WPS‏ <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> في الجهاز النظير <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> حتى يبدأ إعداد الاتصال."</string>
+    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"تطبيق غير معروف"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"إرسال رسائل قصيرة SMS"</string>
@@ -1109,34 +1112,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"حدد حسابًا."</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"زيادة"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"تناقص"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> انقر مع الاستمرار."</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"مرر لأعلى للزيادة ولأسفل للإنقاص."</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"زيادة دقيقة"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"إنقاص دقيقة"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"زيادة ساعة"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"إنقاص ساعة"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"تعيين المساء"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"تعيين الصباح"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"زيادة شهر"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"إنقاص شهر"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"زيادة يوم"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"إنقاص يوم"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"زيادة عام"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"إنقاص عام"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"تم التحديد"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"لم يتم التحديد"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"محدد"</string>
@@ -1152,24 +1141,15 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغيير الوضع"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"العالي"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
-    <skip />
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
-    <!-- no translation found for description_target_unlock (2228524900439801453) -->
-    <skip />
-    <!-- no translation found for description_target_camera (969071997552486814) -->
-    <skip />
-    <!-- no translation found for description_target_silent (893551287746522182) -->
-    <skip />
-    <!-- no translation found for description_target_soundon (30052466675500172) -->
-    <skip />
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"مقبض التمرير. انقر وامسك."</string>
+    <string name="description_direction_up" msgid="1983114130441878529">"أعلى إلى <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"أسفل إلى <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"يسارًا إلى <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"يمينًا إلى <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"إلغاء تأمين"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"الكاميرا"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"صامت"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"تشغيل الصوت"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"سماعة رأس مطلوبة لسماع المفاتيح أثناء كتابة كلمة مرور."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"التنقل إلى الشاشة الرئيسية"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"التنقل إلى أعلى"</string>
