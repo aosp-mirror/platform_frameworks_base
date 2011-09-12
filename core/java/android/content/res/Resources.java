@@ -72,6 +72,7 @@ public class Resources {
     static final String TAG = "Resources";
     private static final boolean DEBUG_LOAD = false;
     private static final boolean DEBUG_CONFIG = false;
+    private static final boolean DEBUG_ATTRIBUTES_CACHE = false;
     private static final boolean TRACE_FOR_PRELOAD = false;
     private static final boolean TRACE_FOR_MISS_PRELOAD = false;
 
@@ -104,6 +105,7 @@ public class Resources {
     private boolean mPreloading;
 
     /*package*/ TypedArray mCachedStyledAttributes = null;
+    RuntimeException mLastRetrievedAttrs = null;
 
     private int mLastCachedXmlBlockIndex = -1;
     private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
@@ -2167,6 +2169,10 @@ public class Resources {
             TypedArray attrs = mCachedStyledAttributes;
             if (attrs != null) {
                 mCachedStyledAttributes = null;
+                if (DEBUG_ATTRIBUTES_CACHE) {
+                    mLastRetrievedAttrs = new RuntimeException("here");
+                    mLastRetrievedAttrs.fillInStackTrace();
+                }
 
                 attrs.mLength = len;
                 int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
@@ -2176,6 +2182,15 @@ public class Resources {
                 attrs.mData = new int[fullLen];
                 attrs.mIndices = new int[1+len];
                 return attrs;
+            }
+            if (DEBUG_ATTRIBUTES_CACHE) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                if (mLastRetrievedAttrs != null) {
+                    Log.i(TAG, "Allocated new TypedArray of " + len + " in " + this, here);
+                    Log.i(TAG, "Last retrieved attributes here", mLastRetrievedAttrs);
+                }
+                mLastRetrievedAttrs = here;
             }
             return new TypedArray(this,
                     new int[len*AssetManager.STYLE_NUM_ENTRIES],

@@ -27,7 +27,6 @@ import android.graphics.Canvas;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -2272,8 +2271,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     int mOldHeightMeasureSpec = Integer.MIN_VALUE;
 
-    private Resources mResources = null;
-
     private Drawable mBGDrawable;
 
     private int mBackgroundResource;
@@ -2335,6 +2332,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@hide}
      */
     protected Context mContext;
+
+    private final Resources mResources;
 
     private ScrollabilityCache mScrollCache;
 
@@ -3017,6 +3016,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
         }
 
+        a.recycle();
+
         setOverScrollMode(overScrollMode);
 
         if (background != null) {
@@ -3074,14 +3075,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         computeOpaqueFlags();
-
-        a.recycle();
     }
 
     /**
      * Non-public constructor for use in testing
      */
     View() {
+        mResources = null;
     }
 
     /**
