@@ -33,6 +33,7 @@ class TimedAudioTrack;
 class AAH_DecoderPump : public MediaSource {
   public:
     explicit AAH_DecoderPump(OMXClient& omx);
+    status_t initCheck();
 
     status_t queueForDecode(MediaBuffer* buf);
 
@@ -79,7 +80,7 @@ class AAH_DecoderPump : public MediaSource {
     OMXClient&          omx_;
     Mutex               init_lock_;
 
-    ThreadWrapper       thread_;
+    sp<ThreadWrapper>   thread_;
     Condition           thread_cond_;
     Mutex               thread_lock_;
     status_t            thread_status_;

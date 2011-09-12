@@ -42,6 +42,9 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     if (decoder_ == NULL) {
         LOGE("%s failed to allocate decoder pump!", __PRETTY_FUNCTION__);
     }
+    if (OK != decoder_->initCheck()) {
+        LOGE("%s failed to initialize decoder pump!", __PRETTY_FUNCTION__);
+    }
 
     // cleanupBufferInProgress will reset most of the internal state variables.
     // Just need to make sure that buffer_in_progress_ is NULL before calling.
