@@ -29,6 +29,7 @@ import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.MathUtils;
 
 import java.io.CharArrayWriter;
 import java.io.DataInputStream;
@@ -207,6 +208,34 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     /**
+     * Return index of bucket that contains or is immediately before the
+     * requested time.
+     */
+    public int getIndexBefore(long time) {
+        int index = Arrays.binarySearch(bucketStart, 0, bucketCount, time);
+        if (index < 0) {
+            index = (~index) - 1;
+        } else {
+            index -= 1;
+        }
+        return MathUtils.constrain(index, 0, bucketCount - 1);
+    }
+
+    /**
+     * Return index of bucket that contains or is immediately after the
+     * requested time.
+     */
+    public int getIndexAfter(long time) {
+        int index = Arrays.binarySearch(bucketStart, 0, bucketCount, time);
+        if (index < 0) {
+            index = ~index;
+        } else {
+            index += 1;
+        }
+        return MathUtils.constrain(index, 0, bucketCount - 1);
+    }
+
+    /**
      * Return specific stats entry.
      */
     public Entry getValues(int i, Entry recycle) {
@@ -247,7 +276,8 @@ public class NetworkStatsHistory implements Parcelable {
 
         // distribute data usage into buckets
         long duration = end - start;
-        for (int i = bucketCount - 1; i >= 0; i--) {
+        final int startIndex = getIndexAfter(end);
+        for (int i = startIndex; i >= 0; i--) {
             final long curStart = bucketStart[i];
             final long curEnd = curStart + bucketDuration;
 
@@ -406,7 +436,8 @@ public class NetworkStatsHistory implements Parcelable {
         entry.txPackets = txPackets != null ? 0 : UNKNOWN;
         entry.operations = operations != null ? 0 : UNKNOWN;
 
-        for (int i = bucketCount - 1; i >= 0; i--) {
+        final int startIndex = getIndexAfter(end);
+        for (int i = startIndex; i >= 0; i--) {
             final long curStart = bucketStart[i];
             final long curEnd = curStart + bucketDuration;
 
@@ -417,8 +448,14 @@ public class NetworkStatsHistory implements Parcelable {
 
             // include full value for active buckets, otherwise only fractional
             final boolean activeBucket = curStart < now && curEnd > now;
-            final long overlap = activeBucket ? bucketDuration
-                    : Math.min(curEnd, end) - Math.max(curStart, start);
+            final long overlap;
+            if (activeBucket) {
+                overlap = bucketDuration;
+            } else {
+                final long overlapEnd = curEnd < end ? curEnd : end;
+                final long overlapStart = curStart > start ? curStart : start;
+                overlap = overlapEnd - overlapStart;
+            }
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
