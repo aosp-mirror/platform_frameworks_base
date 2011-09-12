@@ -2107,6 +2107,10 @@ public final class WebViewCore {
         }
     }
 
+    static boolean isUpdatePicturePaused(WebViewCore core) {
+        return core != null ? core.mDrawIsPaused : false;
+    }
+
     //////////////////////////////////////////////////////////////////////////
 
     private void restoreState(int index) {

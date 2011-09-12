@@ -908,6 +908,9 @@ public class WebView extends AbsoluteLayout
     // used for serializing asynchronously handled touch events.
     private final TouchEventQueue mTouchEventQueue = new TouchEventQueue();
 
+    // Used to track whether picture updating was paused due to a window focus change.
+    private boolean mPictureUpdatePausedForFocusChange = false;
+
     // Used to notify listeners of a new picture.
     private PictureListener mPictureListener;
     /**
@@ -5570,8 +5573,20 @@ public class WebView extends AbsoluteLayout
         setActive(hasWindowFocus);
         if (hasWindowFocus) {
             JWebCoreJavaBridge.setActiveWebView(this);
+            if (mPictureUpdatePausedForFocusChange) {
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
+                nativeSetIsScrolling(false);
+                mPictureUpdatePausedForFocusChange = false;
+            }
         } else {
             JWebCoreJavaBridge.removeActiveWebView(this);
+            final WebSettings settings = getSettings();
+            if (settings != null && settings.enableSmoothTransition() &&
+                    mWebViewCore != null && !WebViewCore.isUpdatePicturePaused(mWebViewCore)) {
+                WebViewCore.pauseUpdatePicture(mWebViewCore);
+                nativeSetIsScrolling(true);
+                mPictureUpdatePausedForFocusChange = true;
+            }
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
