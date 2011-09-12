@@ -1131,6 +1131,13 @@ void ACodec::sendFormatChange() {
     mSentFormat = true;
 }
 
+void ACodec::signalError(OMX_ERRORTYPE error) {
+    sp<AMessage> notify = mNotify->dup();
+    notify->setInt32("what", ACodec::kWhatError);
+    notify->setInt32("omx-error", error);
+    notify->post();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 ACodec::BaseState::BaseState(ACodec *codec, const sp<AState> &parentState)
@@ -1252,10 +1259,7 @@ bool ACodec::BaseState::onOMXEvent(
 
     LOGE("[%s] ERROR(0x%08lx)", mCodec->mComponentName.c_str(), data1);
 
-    sp<AMessage> notify = mCodec->mNotify->dup();
-    notify->setInt32("what", ACodec::kWhatError);
-    notify->setInt32("omx-error", data1);
-    notify->post();
+    mCodec->signalError((OMX_ERRORTYPE)data1);
 
     return true;
 }
@@ -1548,12 +1552,14 @@ void ACodec::BaseState::onOutputBufferDrained(const sp<AMessage> &msg) {
             && msg->findInt32("render", &render) && render != 0) {
         // The client wants this buffer to be rendered.
 
-        CHECK_EQ(mCodec->mNativeWindow->queueBuffer(
+        if (mCodec->mNativeWindow->queueBuffer(
                     mCodec->mNativeWindow.get(),
-                    info->mGraphicBuffer.get()),
-                 0);
-
-        info->mStatus = BufferInfo::OWNED_BY_NATIVE_WINDOW;
+                    info->mGraphicBuffer.get()) == OK) {
+            info->mStatus = BufferInfo::OWNED_BY_NATIVE_WINDOW;
+        } else {
+            mCodec->signalError();
+            info->mStatus = BufferInfo::OWNED_BY_US;
+        }
     } else {
         info->mStatus = BufferInfo::OWNED_BY_US;
     }
@@ -1692,11 +1698,7 @@ void ACodec::UninitializedState::onSetup(
     if (node == NULL) {
         LOGE("Unable to instantiate a decoder for type '%s'.", mime.c_str());
 
-        sp<AMessage> notify = mCodec->mNotify->dup();
-        notify->setInt32("what", ACodec::kWhatError);
-        notify->setInt32("omx-error", OMX_ErrorComponentNotFound);
-        notify->post();
-
+        mCodec->signalError(OMX_ErrorComponentNotFound);
         return;
     }
 
@@ -1744,10 +1746,7 @@ void ACodec::LoadedToIdleState::stateEntered() {
              "(error 0x%08x)",
              err);
 
-        sp<AMessage> notify = mCodec->mNotify->dup();
-        notify->setInt32("what", ACodec::kWhatError);
-        notify->setInt32("omx-error", OMX_ErrorUndefined);
-        notify->post();
+        mCodec->signalError();
     }
 }
 
@@ -2063,10 +2062,7 @@ bool ACodec::OutputPortSettingsChangedState::onOMXEvent(
                          "port reconfiguration (error 0x%08x)",
                          err);
 
-                    sp<AMessage> notify = mCodec->mNotify->dup();
-                    notify->setInt32("what", ACodec::kWhatError);
-                    notify->setInt32("omx-error", OMX_ErrorUndefined);
-                    notify->post();
+                    mCodec->signalError();
                 }
 
                 return true;
