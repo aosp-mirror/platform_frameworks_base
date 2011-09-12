@@ -489,6 +489,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
         // this class fires events only when tabs are focused or selected
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && isFocused()) {
+            event.recycle();
             return;
         }
         super.sendAccessibilityEventUnchecked(event);
