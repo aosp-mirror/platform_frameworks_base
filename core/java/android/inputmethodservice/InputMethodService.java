@@ -687,6 +687,10 @@ public class InputMethodService extends AbstractInputMethodService {
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
         if (mWindowAdded) {
+            // Disable exit animation for the current IME window
+            // to avoid the race condition between the exit and enter animations
+            // when the current IME is being switched to another one.
+            mWindow.getWindow().setWindowAnimations(0);
             mWindow.dismiss();
         }
     }
