@@ -2614,4 +2614,14 @@ public abstract class PackageManager {
     public static int getAppId(int uid) {
         return uid % PER_USER_RANGE;
     }
+
+    /**
+     * Returns the device identity that verifiers can use to associate their
+     * scheme to a particular device. This should not be used by anything other
+     * than a package verifier.
+     *
+     * @return identity that uniquely identifies current device
+     * @hide
+     */
+    public abstract VerifierDeviceIdentity getVerifierDeviceIdentity();
 }

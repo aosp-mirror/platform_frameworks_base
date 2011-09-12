@@ -38,6 +38,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
 import android.content.IntentSender;
 
@@ -359,4 +360,6 @@ interface IPackageManager {
             in ManifestDigest manifestDigest);
 
     void verifyPendingInstall(int id, boolean verified, in String message);
+
+    VerifierDeviceIdentity getVerifierDeviceIdentity();
 }
