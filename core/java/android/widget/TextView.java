@@ -3102,6 +3102,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             text = "";
         }
 
+        // If suggestions are not enabled, remove the suggestion spans from the text
+        if (!isSuggestionsEnabled()) {
+            text = removeSuggestionSpans(text);
+        }
+
         if (!mUserSetTextScaleX) mTextPaint.setTextScaleX(1.0f);
 
         if (text instanceof Spanned &&
@@ -3503,6 +3508,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             applySingleLine(singleLine, !isPassword, true);
         }
         
+        if (!isSuggestionsEnabled()) {
+            mText = removeSuggestionSpans(mText);
+        }
+
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null) imm.restartInput(this);
     }
@@ -9923,9 +9932,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    void showSuggestions() {
-        if (!isSuggestionsEnabled() || !isTextEditable()) return;
+    /**
+     * Removes the suggestion spans.
+     */
+    CharSequence removeSuggestionSpans(CharSequence text) {
+       if (text instanceof Spanned) {
+           Spannable spannable;
+           if (text instanceof Spannable) {
+               spannable = (Spannable) text;
+           } else {
+               spannable = new SpannableString(text);
+               text = spannable;
+           }
 
+           SuggestionSpan[] spans = spannable.getSpans(0, text.length(), SuggestionSpan.class);
+           for (int i = 0; i < spans.length; i++) {
+               spannable.removeSpan(spans[i]);
+           }
+       }
+       return text;
+    }
+
+    void showSuggestions() {
         if (mSuggestionsPopupWindow == null) {
             mSuggestionsPopupWindow = new SuggestionsPopupWindow();
         }
