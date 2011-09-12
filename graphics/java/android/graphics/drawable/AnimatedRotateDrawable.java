@@ -79,7 +79,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         float px = st.mPivotXRel ? (w * st.mPivotX) : st.mPivotX;
         float py = st.mPivotYRel ? (h * st.mPivotY) : st.mPivotY;
 
-        canvas.rotate(mCurrentDegrees, px, py);
+        canvas.rotate(mCurrentDegrees, px + bounds.left, py + bounds.top);
 
         drawable.draw(canvas);
 
