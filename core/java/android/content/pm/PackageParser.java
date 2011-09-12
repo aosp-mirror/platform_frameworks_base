@@ -92,6 +92,7 @@ public class PackageParser {
 
     private String mArchiveSourcePath;
     private String[] mSeparateProcesses;
+    private boolean mOnlyCoreApps;
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String SDK_CODENAME = "REL".equals(Build.VERSION.CODENAME)
             ? null : Build.VERSION.CODENAME;
@@ -178,6 +179,10 @@ public class PackageParser {
 
     public void setSeparateProcesses(String[] procs) {
         mSeparateProcesses = procs;
+    }
+
+    public void setOnlyCoreApps(boolean onlyCoreApps) {
+        mOnlyCoreApps = onlyCoreApps;
     }
 
     private static final boolean isPackageFilename(String name) {
@@ -433,18 +438,22 @@ public class PackageParser {
 
 
         if (pkg == null) {
-            if (errorException != null) {
-                Slog.w(TAG, mArchiveSourcePath, errorException);
-            } else {
-                Slog.w(TAG, mArchiveSourcePath + " (at "
-                        + parser.getPositionDescription()
-                        + "): " + errorText[0]);
+            // If we are only parsing core apps, then a null with INSTALL_SUCCEEDED
+            // just means to skip this app so don't make a fuss about it.
+            if (!mOnlyCoreApps || mParseError != PackageManager.INSTALL_SUCCEEDED) {
+                if (errorException != null) {
+                    Slog.w(TAG, mArchiveSourcePath, errorException);
+                } else {
+                    Slog.w(TAG, mArchiveSourcePath + " (at "
+                            + parser.getPositionDescription()
+                            + "): " + errorText[0]);
+                }
+                if (mParseError == PackageManager.INSTALL_SUCCEEDED) {
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                }
             }
             parser.close();
             assmgr.close();
-            if (mParseError == PackageManager.INSTALL_SUCCEEDED) {
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-            }
             return null;
         }
 
@@ -781,6 +790,14 @@ public class PackageParser {
             return null;
         }
         int type;
+
+        if (mOnlyCoreApps) {
+            boolean core = attrs.getAttributeBooleanValue(null, "coreApp", false);
+            if (!core) {
+                mParseError = PackageManager.INSTALL_SUCCEEDED;
+                return null;
+            }
+        }
 
         final Package pkg = new Package(pkgName);
         boolean foundApp = false;

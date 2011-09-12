@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.systemui"
+        coreApp="true"
         android:sharedUserId="android.uid.system"
         android:process="system"
         >

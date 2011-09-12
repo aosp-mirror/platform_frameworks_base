@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.defcontainer">
+        package="com.android.defcontainer" coreApp="true">
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER"/>
     <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS"/>
     <uses-permission android:name="android.permission.ASEC_ACCESS"/>
