@@ -1458,9 +1458,10 @@ public class PhoneStatusBar extends StatusBar {
             Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
                 + mDisabled);
         } else if (CHATTY) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() != MotionEvent.ACTION_MOVE) {
                 Slog.d(TAG, String.format(
-                            "panel: ACTION_DOWN at (%f, %f) mDisabled=0x%08x",
+                            "panel: %s at (%f, %f) mDisabled=0x%08x",
+                            MotionEvent.actionToString(event.getAction()),
                             event.getRawX(), event.getRawY(), mDisabled));
             }
         }
@@ -1472,9 +1473,8 @@ public class PhoneStatusBar extends StatusBar {
         final int action = event.getAction();
         final int statusBarSize = mStatusBarView.getHeight();
         final int hitSize = statusBarSize*2;
+        final int y = (int)event.getRawY();
         if (action == MotionEvent.ACTION_DOWN) {
-            final int y = (int)event.getRawY();
-
             if (!mExpanded) {
                 mViewDelta = statusBarSize - y;
             } else {
@@ -1498,7 +1498,6 @@ public class PhoneStatusBar extends StatusBar {
             trackMovement(event);
             final int minY = statusBarSize + mCloseView.getHeight();
             if (action == MotionEvent.ACTION_MOVE) {
-                int y = (int)event.getRawY();
                 if (mAnimatingReveal && y < minY) {
                     // nothing
                 } else  {
@@ -1533,7 +1532,7 @@ public class PhoneStatusBar extends StatusBar {
                         vel));
                 }
 
-                performFling((int)event.getRawY(), vel, false);
+                performFling(y + mViewDelta, vel, false);
             }
 
         }
