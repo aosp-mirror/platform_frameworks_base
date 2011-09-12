@@ -60,7 +60,6 @@ public class NavigationBarView extends LinearLayout {
     boolean mVertical;
 
     boolean mHidden, mLowProfile;
-    boolean mEnabled = true;
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -93,11 +92,6 @@ public class NavigationBarView extends LinearLayout {
         mVertical = false;
     }
 
-    public void setEnabled(final boolean enable) {
-        mEnabled = enable;
-        mCurrentView.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
-    }
-
     View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent ev) {
@@ -115,6 +109,16 @@ public class NavigationBarView extends LinearLayout {
             return false;
         }
     };
+
+    public void setNavigationVisibility(int disabledFlags) {
+        boolean disableNavigation = ((disabledFlags & View.STATUS_BAR_DISABLE_NAVIGATION) != 0);
+        boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
+
+        getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
+        getHomeButton()   .setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
+        getRecentsButton().setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
+        getMenuButton()   .setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
+    }
 
     public void setLowProfile(final boolean lightsOut) {
         setLowProfile(lightsOut, true);

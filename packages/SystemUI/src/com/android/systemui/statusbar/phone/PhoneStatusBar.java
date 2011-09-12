@@ -297,7 +297,7 @@ public class PhoneStatusBar extends StatusBar {
                 mNavigationBarView = 
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
-                mNavigationBarView.setEnabled((mDisabled & StatusBarManager.DISABLE_NAVIGATION) == 0);
+                setNavigationVisibility(mDisabled);
 
                 sb.setOnSystemUiVisibilityChangeListener(
                     new View.OnSystemUiVisibilityChangeListener() {
@@ -1129,15 +1129,7 @@ public class PhoneStatusBar extends StatusBar {
         Slog.i(TAG, "DISABLE_NAVIGATION: " + (disableNavigation ? "yes" : "no"));
 
         if (mNavigationBarView != null) {
-            if (disableNavigation && disableBack) {
-                mNavigationBarView.setEnabled(false);
-            } else {
-                mNavigationBarView.getBackButton().setEnabled(!disableBack);
-                mNavigationBarView.getHomeButton().setEnabled(!disableNavigation);
-                mNavigationBarView.getRecentsButton().setEnabled(!disableNavigation);
-
-                mNavigationBarView.setEnabled(true);
-            }
+            mNavigationBarView.setNavigationVisibility(visibility);
         }
 
         if (disableNavigation) {

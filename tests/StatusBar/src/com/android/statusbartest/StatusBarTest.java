@@ -114,7 +114,7 @@ public class StatusBarTest extends TestActivity
 //                v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 //            }
 //        },
-        new Test("DISABLE_NAVIGATION") {
+        new Test("systemUiVisibility: STATUS_BAR_DISABLE_NAVIGATION") {
             public void run() {
                 mListView.setSystemUiVisibility(View.STATUS_BAR_DISABLE_NAVIGATION);
             }
@@ -230,6 +230,11 @@ public class StatusBarTest extends TestActivity
         new Test("Disable Navigation") {
             public void run() {
                 mStatusBarManager.disable(StatusBarManager.DISABLE_NAVIGATION);
+            }
+        },
+        new Test("Disable Back") {
+            public void run() {
+                mStatusBarManager.disable(StatusBarManager.DISABLE_BACK);
             }
         },
         new Test("Disable Clock") {
