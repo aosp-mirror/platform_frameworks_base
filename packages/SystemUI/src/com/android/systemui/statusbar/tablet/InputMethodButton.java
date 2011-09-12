@@ -102,7 +102,9 @@ public class InputMethodButton extends ImageView {
             return true;
         } else if (nonAuxCount == 1 && auxCount == 1) {
             if (nonAuxSubtype != null && auxSubtype != null
-                    && nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
+                    && (nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
+                            || auxSubtype.overridesImplicitlyEnabledSubtype()
+                            || nonAuxSubtype.overridesImplicitlyEnabledSubtype())
                     && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
                 return false;
             }
