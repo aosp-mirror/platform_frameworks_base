@@ -53,19 +53,22 @@ class DimSurface {
     void show(int dw, int dh, int layer, int color) {
         if (!mDimShown) {
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
-                    dw + "x" + dh + ")");
+                    dw + "x" + dh + " layer=" + layer + ")");
             mDimShown = true;
             try {
                 mLastDimWidth = dw;
                 mLastDimHeight = dh;
                 mDimSurface.setPosition(0, 0);
                 mDimSurface.setSize(dw, dh);
+                mDimSurface.setLayer(layer);
                 mDimSurface.show();
             } catch (RuntimeException e) {
                 Slog.w(WindowManagerService.TAG, "Failure showing dim surface", e);
             }
         } else if (mLastDimWidth != dw || mLastDimHeight != dh || mDimColor != color
                 || mLayer != layer) {
+            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM " + mDimSurface + ": pos=(0,0) (" +
+                    dw + "x" + dh + " layer=" + layer + ")");
             mLastDimWidth = dw;
             mLastDimHeight = dh;
             mLayer = layer;
@@ -80,6 +83,7 @@ class DimSurface {
         if (mDimShown) {
             mDimShown = false;
             try {
+                if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  HIDE " + mDimSurface);
                 mDimSurface.hide();
             } catch (RuntimeException e) {
                 Slog.w(WindowManagerService.TAG, "Illegal argument exception hiding dim surface");
