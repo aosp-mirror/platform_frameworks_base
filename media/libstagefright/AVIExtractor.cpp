@@ -911,7 +911,11 @@ bool SniffAVI(
 
     if (!memcmp(tmp, "RIFF", 4) && !memcmp(&tmp[8], "AVI ", 4)) {
         mimeType->setTo(MEDIA_MIMETYPE_CONTAINER_AVI);
-        *confidence = 0.2;
+
+        // Just a tad over the mp3 extractor's confidence, since
+        // these .avi files may contain .mp3 content that otherwise would
+        // mistakenly lead to us identifying the entire file as a .mp3 file.
+        *confidence = 0.21;
 
         return true;
     }
