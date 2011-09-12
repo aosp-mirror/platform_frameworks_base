@@ -1747,12 +1747,7 @@ public class TabletStatusBar extends StatusBar implements
                     }
                 });
         } else {
-            if ((sbn.notification.flags & Notification.FLAG_ONGOING_EVENT) == 0) {
-                vetoButton.setVisibility(View.INVISIBLE);
-                vetoButton.setContentDescription("VETO");
-            } else {
-                vetoButton.setVisibility(View.GONE);
-            }
+            vetoButton.setVisibility(View.GONE);
         }
         vetoButton.setContentDescription(mContext.getString(
                 R.string.accessibility_remove_notification));
