@@ -16,14 +16,10 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
 import android.view.InputDevice;
@@ -569,16 +565,18 @@ public class HorizontalScrollView extends FrameLayout {
                     final int oldX = mScrollX;
                     final int oldY = mScrollY;
                     final int range = getScrollRange();
-                    if (overScrollBy(deltaX, 0, mScrollX, 0, range, 0,
+                    final int overscrollMode = getOverScrollMode();
+                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+
+                    if (canOverscroll && overScrollBy(deltaX, 0, mScrollX, 0, range, 0,
                             mOverscrollDistance, 0, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                    final int overscrollMode = getOverScrollMode();
-                    if (overscrollMode == OVER_SCROLL_ALWAYS ||
-                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    if (canOverscroll) {
                         final int pulledToX = oldX + deltaX;
                         if (pulledToX < 0) {
                             mEdgeGlowLeft.onPull((float) deltaX / getWidth());
@@ -604,11 +602,15 @@ public class HorizontalScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
 
-                    if (getChildCount() > 0) {
+                    final int right = getScrollRange();
+                    final int overscrollMode = getOverScrollMode();
+                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && right > 0);
+
+                    if (getChildCount() > 0 && canOverscroll) {
                         if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
                             fling(-initialVelocity);
                         } else {
-                            final int right = getScrollRange();
                             if (mScroller.springBack(mScrollX, mScrollY, 0, right, 0, 0)) {
                                 invalidate();
                             }
@@ -1187,14 +1189,16 @@ public class HorizontalScrollView extends FrameLayout {
             int y = mScroller.getCurrY();
 
             if (oldX != x || oldY != y) {
-                overScrollBy(x - oldX, y - oldY, oldX, oldY, getScrollRange(), 0,
+                final int range = getScrollRange();
+                final int overscrollMode = getOverScrollMode();
+                final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                        (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+
+                overScrollBy(x - oldX, y - oldY, oldX, oldY, range, 0,
                         mOverflingDistance, 0, false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                final int range = getScrollRange();
-                final int overscrollMode = getOverScrollMode();
-                if (overscrollMode == OVER_SCROLL_ALWAYS ||
-                        (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                if (canOverscroll) {
                     if (x < 0 && oldX >= 0) {
                         mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
                     } else if (x > range && oldX <= range) {
@@ -1202,6 +1206,7 @@ public class HorizontalScrollView extends FrameLayout {
                     }
                 }
             }
+
             awakenScrollBars();
 
             // Keep on drawing until the animation has finished.
