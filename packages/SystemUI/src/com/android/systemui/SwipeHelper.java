@@ -186,6 +186,7 @@ public class SwipeHelper {
                 }
                 break;
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
                 mDragging = false;
                 mCurrView = null;
                 mCurrAnimView = null;
