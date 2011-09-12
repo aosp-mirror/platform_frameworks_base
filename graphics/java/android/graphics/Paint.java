@@ -20,7 +20,6 @@ import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 
 /**
  * The Paint class holds the style and color information about how to draw
@@ -344,8 +343,10 @@ public class Paint {
     public Paint(int flags) {
         mNativePaint = native_init();
         setFlags(flags | DEFAULT_PAINT_FLAGS);
-        setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
-                ? HINTING_OFF : HINTING_ON);
+        // TODO: Turning off hinting has undesirable side effects, we need to
+        //       revisit hinting once we add support for subpixel positioning
+        // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
+        //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
     }
 
@@ -365,8 +366,10 @@ public class Paint {
     public void reset() {
         native_reset(mNativePaint);
         setFlags(DEFAULT_PAINT_FLAGS);
-        setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
-                ? HINTING_OFF : HINTING_ON);
+        // TODO: Turning off hinting has undesirable side effects, we need to
+        //       revisit hinting once we add support for subpixel positioning
+        // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
+        //        ? HINTING_OFF : HINTING_ON);
         mHasCompatScaling = false;
         mCompatScaling = mInvCompatScaling = 1;
         mBidiFlags = BIDI_DEFAULT_LTR;
