@@ -218,8 +218,12 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
 
     private View createInputMethodItem(
             final InputMethodInfo imi, final InputMethodSubtype subtype) {
-        final CharSequence subtypeName = subtype.overridesImplicitlyEnabledSubtype()
-                ? null : getSubtypeName(imi, subtype);
+        final CharSequence subtypeName;
+        if (subtype == null || subtype.overridesImplicitlyEnabledSubtype()) {
+            subtypeName = null;
+        } else {
+            subtypeName = getSubtypeName(imi, subtype);
+        }
         final CharSequence imiName = getIMIName(imi);
         final Drawable icon = getSubtypeIcon(imi, subtype);
         final View view = View.inflate(mContext, R.layout.status_bar_input_methods_item, null);
