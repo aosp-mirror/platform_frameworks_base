@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"پاک کردن"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"مزاحم نشوید"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"نمایش اعلان ها"</string>
-    <!-- outdated translation 6561944127804037619 -->     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"حذف"</string>
-    <!-- outdated translation 4906947311448880529 -->     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"بازرسی"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"حذف از لیست"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"اطلاعات برنامه"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"اعلانی موجود نیست"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"در حال انجام"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"اعلان ها"</string>

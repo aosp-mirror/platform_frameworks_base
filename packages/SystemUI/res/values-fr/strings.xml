@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Ne pas déranger"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Afficher les notifications"</string>
-    <!-- outdated translation 6561944127804037619 -->     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer"</string>
-    <!-- outdated translation 4906947311448880529 -->     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Inspecter"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer de la liste"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informations sur l\'application"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
@@ -117,7 +117,7 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonnerie en mode silencieux"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Données 2G-3G désactivées"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Données 4G désactivées"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Service Internet mobile désactivé"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Données mobiles désactivées"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Données désactivées"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Vous avez atteint la limite d\'utilisation de données spécifiée."\n\n"L\'utilisation supplémentaire de données peut entraîner la facturation de frais par votre opérateur."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Réactiver connexion données"</string>

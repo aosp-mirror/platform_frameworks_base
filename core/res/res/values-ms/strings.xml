@@ -444,7 +444,7 @@
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"akses penuh Internet"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Membenarkan aplikasi membuat soket rangkaian."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"mengubah/memintas tetapan dan lalu lintas rangkaian"</string>
-    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Membenarkan sesuatu aplikasi untuk menukar tetapan rangkaian dan untuk memintas dan memeriksa semua trafik rangkaian, contohnya untuk menukar proksi dan port mana-mana APN. Aplikasi berniat jahat boleh mengawasi, mengubah hala, atau mengubah suai paket rangkaian tanpa pengetahuan anda."</string>
+    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Membenarkan sesuatu aplikasi untuk menukar tetapan rangkaian dan untuk memintas dan memeriksa semua lalu lintas rangkaian, contohnya untuk menukar proksi dan port mana-mana APN. Aplikasi berniat jahat boleh mengawasi, mengubah hala atau mengubah suai paket rangkaian tanpa pengetahuan anda."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"tukar kesambungan rangkaian"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Membenarkan aplikasi menukar keadaan kesambungan rangkaian."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Tukar kesambungan bertambat"</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Kod PIN salah!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Untuk membuka kunci, tekan Menu, kemudian 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nombor kecemasan"</string>
-    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Tiada perkhidmatan)"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Tiada perkhidmatan."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skrin dikunci."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tekan Menu untuk menyahsekat atau membuat panggilan kecemasan."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tekan Menu untuk membuka kunci."</string>
@@ -674,7 +674,7 @@
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Cuba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> saat."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Buka kunci akaun"</string>
@@ -855,11 +855,11 @@
     <string name="copy" msgid="2681946229533511987">"Salin"</string>
     <string name="paste" msgid="5629880836805036433">"Tampal"</string>
     <string name="replace" msgid="5781686059063148930">"Ganti???"</string>
-    <!-- no translation found for delete (6098684844021697789) -->
-    <skip />
+    <string name="delete" msgid="6098684844021697789">"Padam"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
+    <string name="addToDictionary" msgid="2839899368418071843">"+ tambah ke kamus"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Kekurangan ruang"</string>
@@ -899,8 +899,8 @@
     <string name="smv_application" msgid="295583804361236288">"Aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="android_upgrading_title" msgid="378740715658358071">"Android sedang menaik taraf..."</string>
-    <string name="android_upgrading_apk" msgid="274409861603566003">"Mengoptimumkan aplikasi <xliff:g id="NUMBER_0">%1$d</xliff:g> <xliff:g id="NUMBER_1">%2$d</xliff:g> ."</string>
-    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Memulakan aplikasi"</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Mengoptimumkan aplikasi <xliff:g id="NUMBER_0">%1$d</xliff:g> daripada <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Memulakan aplikasi."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"But akhir."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> dijalankan"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Pilih untuk bertukar kepada aplikasi"</string>
@@ -946,6 +946,10 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK untuk menerima."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Masukkan pin untuk meneruskan."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pin WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> perlu dimasukkan pada peranti rakan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> untuk penyediaan sambungan untuk meneruskan"</string>
+    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplikasi tidak dikenali"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
@@ -1083,8 +1087,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Menyahlekap kad SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Memadamkan storan USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Memadamkan kad SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Tidak dapat memadam storan USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Tidak dapat memadam kad SD."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Tidak dapat memadamkan storan USB."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"Tidak dapat memadamkan kad SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Kad SD telah dikeluarkan sebelum dinyahlekap."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Storan USB sedang disemak buat masa ini."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Kad SD sedang disemak buat masa ini."</string>
@@ -1108,34 +1112,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Pilih akaun"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Kenaikan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Penyusutan"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> ketik dan tahan."</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Luncurkan ke atas untuk kenaikan dan ke bawah untuk penyusutan."</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minit kenaikan"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minit penyusutan"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Jam kenaikan"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Jam penyusutan"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Tetapkan PM"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Tetapkan AM"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Bulan kenaikan"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Bulan penyusutan"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Hari kenaikan"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Hari penyusutan"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Tahun kenaikan"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Tahun penyusutan"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"ditandakan"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"tidak ditandakan"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"dipilih"</string>
@@ -1151,24 +1141,15 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Perubahan mod"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Masuk"</string>
-    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
-    <skip />
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
-    <!-- no translation found for description_target_unlock (2228524900439801453) -->
-    <skip />
-    <!-- no translation found for description_target_camera (969071997552486814) -->
-    <skip />
-    <!-- no translation found for description_target_silent (893551287746522182) -->
-    <skip />
-    <!-- no translation found for description_target_soundon (30052466675500172) -->
-    <skip />
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Pemegang gelongsor. Ketik dan tahan."</string>
+    <string name="description_direction_up" msgid="1983114130441878529">"Atas untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"Bawah untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"Kiri untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"Kanan untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Buka kunci"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Senyap"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Bunyi dihidupkan"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Kekunci. Set kepala diperlukan untuk mendengar kekunci semasa menaip kata laluan."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi laman utama"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi ke atas"</string>
@@ -1182,7 +1163,7 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Data 2G-3G dilumpuhkan"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data 4G dilumpuhkan"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data mudah alih dilumpuhkan"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Data Wi-Fi dinyahdayakan"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Data Wi-Fi dilumpuhkan"</string>
     <string name="data_usage_limit_body" msgid="4313857592916426843">"Sentuh untuk mendayakan"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Melebihi had data 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Melebihi had data 4G"</string>

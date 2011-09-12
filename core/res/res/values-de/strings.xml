@@ -141,7 +141,7 @@
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon wird heruntergefahren."</string>
     <string name="shutdown_confirm_question" msgid="6656441286856415014">"Möchten Sie das Gerät herunterfahren?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Zuletzt verwendet"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Keine zuletzt verwendeten Anwendungen"</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Keine zuletzt verwendeten Apps"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet-Optionen"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoptionen"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Display-Sperre"</string>
@@ -205,13 +205,13 @@
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Ermöglicht einer App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP-Nachrichten empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ermöglicht der App, WAP-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Apps können Ihre Nachrichten möglicherweise überwachen oder löschen, bevor sie angezeigt werden."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"laufende Anwendungen abrufen"</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"laufende Apps abrufen"</string>
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Ermöglicht der App, Informationen zu aktuellen und kürzlich ausführten Aufgaben abzurufen. Schädliche Anwendungen können so eventuell geheime Informationen zu anderen Anwendungen entdecken."</string>
-    <string name="permlab_reorderTasks" msgid="5669588525059921549">"Laufende Anwendungen neu ordnen"</string>
+    <string name="permlab_reorderTasks" msgid="5669588525059921549">"Laufende Apps neu ordnen"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ermöglicht einer App, Aufgaben in den Vorder- und Hintergrund zu verschieben. Schädliche Anwendungen können so ohne Ihr Zutun eine Anzeige im Vordergrund erzwingen."</string>
     <string name="permlab_removeTasks" msgid="4802740047161700683">"Aktive Apps beenden"</string>
     <string name="permdesc_removeTasks" msgid="2000332928514575461">"Ermöglicht einer App das Entfernen von Aufgaben und Beenden der entsprechenden Apps. Schädliche Apps können das Verhalten anderer Apps stören."</string>
-    <string name="permlab_setDebugApp" msgid="4339730312925176742">"Fehlerbeseitigung für Anwendung aktivieren"</string>
+    <string name="permlab_setDebugApp" msgid="4339730312925176742">"Fehlerbeseitigung für App aktivieren"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ermöglicht einer App, die Fehlerbeseitigung für eine andere Anwendung zu aktivieren. Schädliche Anwendungen können so andere Anwendungen löschen."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI-Einstellungen ändern"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Ermöglicht einer App, die aktuelle Konfiguration zu ändern, etwa das Gebietsschema oder die Schriftgröße"</string>
@@ -221,7 +221,7 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Ermöglicht einer App, Hintergrundprozesse anderer Anwendungen auch bei ausreichendem Speicher zu beenden."</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"Beenden anderer Anwendungen erzwingen"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Ermöglicht einer App, das Beenden anderer Anwendungen zu erzwingen"</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"Schließen von Anwendung erzwingen"</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"Schließen der App erzwingen"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Ermöglicht einer App, alle Aktivitäten, die im Vordergrund ablaufen, zu beenden und in den Hintergrund zu schieben. Sollte nicht für normale Anwendungen benötigt werden."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"Systeminternen Status abrufen"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Ermöglicht einer App, den internen Status des Systems abzurufen. Schädliche Apps rufen hierbei möglicherweise eine Vielzahl an privaten und geschützten Daten ab, die Sie in der Regel nicht benötigen würden."</string>
@@ -231,7 +231,7 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Versetzt den Aktivitätsmanager in einen heruntergefahrenen Zustand. Führt kein vollständiges Herunterfahren aus."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"Anwendungswechsel verhindern"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hindert den Nutzer daran, zu einer anderen Anwendung zu wechseln"</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"Start von Anwendungen überwachen und steuern"</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"Start von Apps überwachen und steuern"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Ermöglicht der App, den Start von Systemaktivitäten zu überwachen und zu steuern. Schädliche Anwendungen können so das gesamte System beeinträchtigen. Diese Berechtigung wird nur zu Entwicklungszwecken und nie für die normale Nutzung benötigt."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Broadcast ohne Paket senden"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Ermöglicht einer App, eine Benachrichtigung zur Entfernung eines Anwendungspakets zu senden. Schädliche Anwendungen können so laufende Anwendungen beenden."</string>
@@ -241,7 +241,7 @@
     <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Ermöglicht einer App, eine Benachrichtigung zu senden, dass eine WAP PUSH-Nachricht empfangen wurde. Schädliche Anwendungen könnten diese Option verwenden, um den Erhalt von MMS-Mitteilungen zu erzwingen, oder um unbemerkt den Inhalt einer beliebigen Webseite durch schädliche Inhalte zu ersetzen."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"Anzahl der laufenden Prozesse beschränken"</string>
     <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Ermöglicht einer App, die maximale Anzahl an laufenden Prozessen zu steuern. Wird nicht für normale Anwendungen benötigt."</string>
-    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"alle Anwendungen im Hintergrund schließen"</string>
+    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"alle Apps im Hintergrund schließen"</string>
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Überlässt einer Anwendung die Entscheidung, ob Aktivitäten beendet werden, sobald Sie in den Hintergrund rücken. Wird nicht für normale Anwendungen benötigt."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"Akku-Daten ändern"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Ermöglicht die Änderung von gesammelten Akku-Daten. Nicht für normale Apps vorgesehen."</string>
@@ -278,21 +278,21 @@
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Ermöglicht der App, die Bildschirmdrehung jederzeit zu ändern. Sollte nicht für normale Anwendungen benötigt werden."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Zeigergeschwindigkeit ändern"</string>
     <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Ermöglicht einer App, jederzeit die Geschwindigkeit des Maus- bzw. Touchpad-Zeigers zu ändern. Sollte für normale Apps nicht benötigt werden."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linux-Signale an Anwendungen senden"</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linux-Signale an Apps senden"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Ermöglicht der App, das Senden des gelieferten Signals an alle anhaltenden Prozesse zu fordern"</string>
-    <string name="permlab_persistentActivity" msgid="8659652042401085862">"Anwendungen permanent ausführen"</string>
+    <string name="permlab_persistentActivity" msgid="8659652042401085862">"Apps permanent ausführen"</string>
     <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Ermöglicht einer App, eigene Komponenten persistent zu machen, damit das System diese nicht für andere Anwendungen nutzen kann"</string>
-    <string name="permlab_deletePackages" msgid="3343439331576348805">"Anwendungen löschen"</string>
+    <string name="permlab_deletePackages" msgid="3343439331576348805">"Apps löschen"</string>
     <string name="permdesc_deletePackages" msgid="3634943677518723314">"Ermöglicht einer App, Android-Pakete zu löschen. Schädliche Anwendungen können so wichtige Anwendungen löschen."</string>
-    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"Daten anderer Anwendungen löschen"</string>
+    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"Daten anderer Apps löschen"</string>
     <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Ermöglicht einer App das Löschen von Nutzerdaten"</string>
-    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"Caches anderer Anwendungen löschen"</string>
+    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"Caches anderer Apps löschen"</string>
     <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Ermöglicht einer App, Cache-Dateien zu löschen"</string>
-    <string name="permlab_getPackageSize" msgid="4799785352306641460">"Speicherplatz der Anwendung abrufen"</string>
+    <string name="permlab_getPackageSize" msgid="4799785352306641460">"Speicherplatz der App abrufen"</string>
     <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Ermöglicht einer App, ihre Code-, Daten- und Cache-Größe abzurufen"</string>
-    <string name="permlab_installPackages" msgid="335800214119051089">"Anwendungen direkt installieren"</string>
+    <string name="permlab_installPackages" msgid="335800214119051089">"Apps direkt installieren"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Ermöglicht einer App, neue oder aktualisierte Android-Pakete zu installieren. Schädliche Anwendungen können so neue Anwendungen mit beliebig umfangreichen Berechtigungen hinzufügen."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"Alle Cache-Daten der Anwendung löschen"</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"Alle Cache-Daten der App löschen"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Ermöglicht einer App, Tablet-Speicher durch das Löschen von Dateien im Cache-Verzeichnis der Anwendung freizugeben. Der Zugriff beschränkt sich in der Regel auf Systemprozesse."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Ermöglicht einer App, Telefonspeicher durch das Löschen von Dateien im Cache-Verzeichnis der Anwendung freizugeben. Der Zugriff beschränkt sich in der Regel auf Systemprozesse."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Anwendungsressourcen verschieben"</string>
@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Falscher PIN-Code!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Drücken Sie zum Entsperren die Menütaste und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Notrufnummer"</string>
-    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(kein Dienst)"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Kein Dienst"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Display gesperrt"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Drücken Sie die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Zum Entsperren die Menütaste drücken"</string>
@@ -650,7 +650,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Bitte versuchen Sie es erneut."</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Bitte versuchen Sie es erneut."</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Wird geladen (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Wird geladen... (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Aufgeladen"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Bitte Ladegerät anschließen"</string>
@@ -854,12 +854,12 @@
     <string name="cut" msgid="3092569408438626261">"Ausschneiden"</string>
     <string name="copy" msgid="2681946229533511987">"Kopieren"</string>
     <string name="paste" msgid="5629880836805036433">"Einfügen"</string>
-    <string name="replace" msgid="5781686059063148930">"Ersetzen???"</string>
-    <!-- no translation found for delete (6098684844021697789) -->
-    <skip />
+    <string name="replace" msgid="5781686059063148930">"Ersetzen..."</string>
+    <string name="delete" msgid="6098684844021697789">"Löschen"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL kopieren"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Text auswählen..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Textauswahl"</string>
+    <string name="addToDictionary" msgid="2839899368418071843">"Zum Wörterbuch hinzufügen"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Geringer Speicher"</string>
@@ -875,9 +875,9 @@
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden"</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Standardeinstellung zurücksetzen unter \"Einstellungen &gt; Anwendungen &gt; Anwendungen verwalten\""</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Standardeinstellung zurücksetzen unter \"Einstellungen &gt; Apps &gt; Apps verwalten\""</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Aktion auswählen"</string>
-    <string name="chooseUsbActivity" msgid="7892597146032121735">"Anwendung für das USB-Gerät auswählen"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"App für das USB-Gerät auswählen"</string>
     <string name="noApplications" msgid="1691104391758345586">"Diese Aktion kann von keiner Anwendung ausgeführt werden."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"Leider wurde <xliff:g id="APPLICATION">%1$s</xliff:g> beendet."</string>
@@ -890,7 +890,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Bericht"</string>
     <string name="wait" msgid="7147118217226317732">"Warten"</string>
-    <string name="launch_warning_title" msgid="8323761616052121936">"Anwendung umgeleitet"</string>
+    <string name="launch_warning_title" msgid="8323761616052121936">"App umgeleitet"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird jetzt ausgeführt."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> wurde ursprünglich gestartet."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skalieren"</string>
@@ -903,13 +903,13 @@
     <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Apps werden gestartet."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Start wird abgeschlossen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Zum Wechseln in die Anwendung auswählen"</string>
-    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Anwendung wechseln?"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Zum Wechseln in die App auswählen"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Apps wechseln?"</string>
     <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Es läuft gerade eine andere Anwendung, die vor dem Start einer neuen beendet werden muss."</string>
     <string name="old_app_action" msgid="493129172238566282">"Zu <xliff:g id="OLD_APP">%1$s</xliff:g> zurückkehren"</string>
-    <string name="old_app_description" msgid="942967900237208466">"Die neue Anwendung nicht starten"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Neue App nicht starten"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
-    <string name="new_app_description" msgid="6830398339826789493">"Anwendung beenden, ohne zu speichern"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"App beenden, ohne zu speichern"</string>
     <string name="sendText" msgid="5132506121645618310">"Aktion für Text auswählen"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Klingeltonlautstärke"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medienlautstärke"</string>
@@ -946,8 +946,12 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Anfrage für Wi-Fi Direct-Verbindungseinrichtung von <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klicken Sie auf \"OK\", um sie zu akzeptieren."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Anfrage für Wi-Fi Direct-Verbindungseinrichtung von <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Geben Sie zum Fortfahren die PIN ein."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Die WPS-PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> muss auf dem Peer-Gerät <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> eingegeben werden, damit die Verbindungseinrichtung fortgesetzt werden kann."</string>
+    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Unbekannte Anwendung"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Unbekannte App"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Es werden eine große Anzahl an Kurznachrichten versendet. Wählen Sie \"OK\", um fortzufahren, oder drücken Sie auf \"Abbrechen\", um den Sendevorgang zu beenden."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
@@ -1108,34 +1112,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Konto auswählen"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Erhöhen"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Verringern"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> tippen und halten"</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Zum Erhöhen nach oben und zum Verringern nach unten ziehen"</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minute erhöhen"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minute verringern"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Stunde erhöhen"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Stunde verringern"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Zeit festlegen"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen (Vormittag)"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Monat erhöhen"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Monat verringern"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Tag erhöhen"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Tag verringern"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Jahr erhöhen"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Jahr verringern"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"Aktiviert"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"Nicht aktiviert"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"Ausgewählt"</string>
@@ -1151,24 +1141,15 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
-    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
-    <skip />
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
-    <!-- no translation found for description_target_unlock (2228524900439801453) -->
-    <skip />
-    <!-- no translation found for description_target_camera (969071997552486814) -->
-    <skip />
-    <!-- no translation found for description_target_silent (893551287746522182) -->
-    <skip />
-    <!-- no translation found for description_target_soundon (30052466675500172) -->
-    <skip />
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Schieberegler: Tippen und halten"</string>
+    <string name="description_direction_up" msgid="1983114130441878529">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben"</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach unten"</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach links"</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach rechts"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Entsperren"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Lautlos"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Ton ein"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Zum Hören der Tasten bei der Eingabe eines Passworts ist ein Headset erforderlich."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Zur Startseite navigieren"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Nach oben navigieren"</string>
