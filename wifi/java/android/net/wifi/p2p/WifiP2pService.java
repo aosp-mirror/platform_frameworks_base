@@ -61,6 +61,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.android.internal.R;
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
@@ -134,6 +135,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     /* Airplane mode changed */
     private static final int AIRPLANE_MODE_CHANGED          =   BASE + 6;
+    /* Emergency callback mode */
+    private static final int EMERGENCY_CALLBACK_MODE        =   BASE + 7;
 
     private final boolean mP2pSupported;
     private final String mDeviceType;
@@ -172,6 +175,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         mContext.registerReceiver(new WifiStateReceiver(), filter);
 
@@ -185,14 +189,19 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private class WifiStateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+            String action = intent.getAction();
+            if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                         WifiManager.WIFI_STATE_DISABLED);
-            } else if (intent.getAction().equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
+            } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
                 mWifiApState = intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
                         WifiManager.WIFI_AP_STATE_DISABLED);
-            } else if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+            } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
                 mP2pStateMachine.sendMessage(AIRPLANE_MODE_CHANGED);
+            } else if (action.equals(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
+                if (intent.getBooleanExtra("phoneinECMState", false) == true) {
+                    mP2pStateMachine.sendMessage(EMERGENCY_CALLBACK_MODE);
+                }
             }
         }
     }
@@ -360,6 +369,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case AIRPLANE_MODE_CHANGED:
                     if (isAirplaneModeOn()) sendMessage(WifiP2pManager.DISABLE_P2P);
+                    break;
+                case EMERGENCY_CALLBACK_MODE:
+                    sendMessage(WifiP2pManager.DISABLE_P2P);
                     break;
                     // Ignore
                 case WIFI_DISABLE_USER_ACCEPT:
