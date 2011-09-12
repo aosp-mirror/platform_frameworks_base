@@ -37,17 +37,26 @@ namespace android {
 
 AAH_DecoderPump::AAH_DecoderPump(OMXClient& omx)
     : omx_(omx)
-    , thread_(this)
     , thread_status_(OK)
     , renderer_(NULL)
     , last_queued_pts_valid_(false)
     , last_queued_pts_(0)
     , last_ts_transform_valid_(false)
     , last_volume_(0xFF) {
+    thread_ = new ThreadWrapper(this);
 }
 
 AAH_DecoderPump::~AAH_DecoderPump() {
     shutdown();
+}
+
+status_t AAH_DecoderPump::initCheck() {
+    if (thread_ == NULL) {
+        LOGE("Failed to allocate thread");
+        return NO_MEMORY;
+    }
+
+    return OK;
 }
 
 status_t AAH_DecoderPump::queueForDecode(MediaBuffer* buf) {
@@ -281,7 +290,7 @@ void* AAH_DecoderPump::workThread() {
         return NULL;
     }
 
-    while (!thread_.exitPending()) {
+    while (!thread_->exitPending()) {
         status_t res;
         MediaBuffer* bufOut = NULL;
 
@@ -365,7 +374,7 @@ status_t AAH_DecoderPump::init(sp<MetaData> params) {
 
     // Fire up the pump thread.  It will take care of starting and stopping the
     // decoder.
-    ret_val = thread_.run("aah_decode_pump", ANDROID_PRIORITY_AUDIO);
+    ret_val = thread_->run("aah_decode_pump", ANDROID_PRIORITY_AUDIO);
     if (OK != ret_val) {
         LOGE("Failed to start work thread in %s (res = %d)",
                 __PRETTY_FUNCTION__, ret_val);
@@ -387,9 +396,9 @@ status_t AAH_DecoderPump::shutdown() {
 }
 
 status_t AAH_DecoderPump::shutdown_l() {
-    thread_.requestExit();
+    thread_->requestExit();
     thread_cond_.signal();
-    thread_.requestExitAndWait();
+    thread_->requestExitAndWait();
 
     MBQueue::iterator I;
     for (I = in_queue_.begin(); I != in_queue_.end(); ++I) {
@@ -417,12 +426,12 @@ status_t AAH_DecoderPump::read(MediaBuffer **buffer,
 
     // While its not time to shut down, and we have no data to process, wait.
     AutoMutex lock(&thread_lock_);
-    while (!thread_.exitPending() && in_queue_.empty())
+    while (!thread_->exitPending() && in_queue_.empty())
         thread_cond_.wait(thread_lock_);
 
     // At this point, if its not time to shutdown then we must have something to
     // process.  Go ahead and pop the front of the queue for processing.
-    if (!thread_.exitPending()) {
+    if (!thread_->exitPending()) {
         CHECK(!in_queue_.empty());
 
         *buffer = *(in_queue_.begin());
