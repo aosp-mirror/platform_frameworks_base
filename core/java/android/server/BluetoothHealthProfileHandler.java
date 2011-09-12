@@ -77,16 +77,6 @@ final class BluetoothHealthProfileHandler {
              mConfig = config;
              mState = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
         }
-
-        @Override
-        public int hashCode() {
-            int result = 17;
-            result = 31 * result + (mChannelPath == null ? 0 : mChannelPath.hashCode());
-            result = 31 * result + mDevice.hashCode();
-            result = 31 * result + mConfig.hashCode();
-            result = 31 * result + mChannelType;
-            return result;
-        }
     }
 
     private final Handler mHandler = new Handler() {
