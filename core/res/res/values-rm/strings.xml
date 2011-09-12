@@ -975,6 +975,10 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copiar l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Selecziunar text…"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecziun da text"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (2839899368418071843) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Metoda d\'endataziun"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acziuns da text"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Pauca capacitad da memorisar"</string>
@@ -1090,6 +1094,10 @@
     <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
     <skip />
     <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
     <skip />
     <string name="select_character" msgid="3365550120617701745">"Inserir in caracter"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Applicaziun nunenconuschenta"</string>

@@ -859,6 +859,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copy URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Select text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Text selection"</string>
+    <string name="addToDictionary" msgid="2839899368418071843">"+ add to dictionary"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Input method"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Text actions"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Low on space"</string>
@@ -945,6 +946,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct connection setup request from <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Click OK to accept."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct connection setup request from <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Enter PIN to proceed."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS pin <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> needs to be entered on the peer device <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> for connection setup to proceed"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct is on"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Touch for settings"</string>
     <string name="select_character" msgid="3365550120617701745">"Insert character"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Unknown application"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sending SMS messages"</string>
@@ -1038,8 +1041,8 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Done"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Prev"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Execute"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Dial number"\n", using <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Create contact"\n", using <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Dial number"\n" using <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Create contact"\n" using <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"The following one or more applications request permission to access your account, now and in the future."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Do you want to allow this request?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Access Request"</string>
@@ -1107,34 +1110,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Select an account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Increment"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decrement"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> tap and hold."</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Slide up to increment and down to decrease."</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Increment minute"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Decrement minute"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Increment hour"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Decrement hour"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Set p.m."</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Set a.m."</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Increment month"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Decrement month"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Increment day"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Decrement day"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Increment year"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Decrement year"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"ticked"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"not ticked"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"selected"</string>
@@ -1151,14 +1140,10 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Sliding handle. Tap and hold."</string>
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
+    <string name="description_direction_up" msgid="1983114130441878529">"Up for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"Down for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"Left for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"Right for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Unlock"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silent"</string>

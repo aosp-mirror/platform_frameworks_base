@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"محو"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"عدم الإزعاج"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"إظهار التنبيهات"</string>
-    <!-- outdated translation 6561944127804037619 -->     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"إزالة"</string>
-    <!-- outdated translation 4906947311448880529 -->     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"فحص"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"إزالة من القائمة"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"معلومات التطبيق"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي تنبيهات"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"التنبيهات"</string>
@@ -59,7 +59,7 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"تكبير/تصغير التوافق"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"عند تصميم تطبيق لشاشة أصغر، سيظهر عنصر تحكم في التكبير/التصغير بجوار الساعة."</string>
-    <string name="screenshot_saving_toast" msgid="8592630119048713208">"تم حفظ لقطة الشاشة إلى المعرض."</string>
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"تم حفظ لقطة الشاشة في معرض الصور."</string>
     <string name="screenshot_failed_toast" msgid="1990979819772906912">"تعذر حفظ لقطة الشاشة. قد يكون التخزين الخارجي قيد الاستخدام."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"خيارات نقل الملفات عبر USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"تحميل كمشغل وسائط (MTP)"</string>

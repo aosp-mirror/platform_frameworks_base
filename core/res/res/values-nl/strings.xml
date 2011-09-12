@@ -640,7 +640,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Onjuiste PIN-code!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Druk op \'Menu\' en vervolgens op 0 om te ontgrendelen."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Alarmnummer"</string>
-    <!-- outdated translation 8812714795156374435 -->     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"(Geen service)"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Geen service"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Scherm vergrendeld."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Druk op \'Menu\' om te ontgrendelen of noodoproep te plaatsen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Druk op \'Menu\' om te ontgrendelen."</string>
@@ -855,11 +855,11 @@
     <string name="copy" msgid="2681946229533511987">"Kopiëren"</string>
     <string name="paste" msgid="5629880836805036433">"Plakken"</string>
     <string name="replace" msgid="5781686059063148930">"Vervangen..."</string>
-    <!-- no translation found for delete (6098684844021697789) -->
-    <skip />
+    <string name="delete" msgid="6098684844021697789">"Verwijderen"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL kopiëren"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Tekst selecteren..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Tekstselectie"</string>
+    <string name="addToDictionary" msgid="2839899368418071843">"+ toev. aan woordenboek"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Invoermethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstacties"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Weinig ruimte"</string>
@@ -946,6 +946,10 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Configuratieverzoek voor verbinding met Wi-Fi Direct van <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik op \'OK\' om te accepteren."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Configuratieverzoek van <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> voor verbinding met Wi-Fi Direct. Geef de pincode op om door te gaan."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS-pincode <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> moet worden ingevoerd op peerapparaat <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>, zodat het instellen van de verbinding kan worden voortgezet"</string>
+    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Onbekende app"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
@@ -1108,34 +1112,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Selecteer een account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Hoger"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Lager"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Tik <xliff:g id="VALUE">%s</xliff:g> keer en blijf aanraken."</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Schuif omhoog om te verhogen en omlaag om te verlagen."</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minuten verhogen"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minuten verlagen"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Uren verhogen"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Uren verlagen"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PM instellen"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AM instellen"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Maand verhogen"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Maand verlagen"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Dag verhogen"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Dag verlagen"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Jaar verhogen"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Jaar verlagen"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"aangevinkt"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"niet aangevinkt"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"geselecteerd"</string>
@@ -1151,24 +1141,15 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modus wijzigen"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
-    <skip />
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
-    <!-- no translation found for description_target_unlock (2228524900439801453) -->
-    <skip />
-    <!-- no translation found for description_target_camera (969071997552486814) -->
-    <skip />
-    <!-- no translation found for description_target_silent (893551287746522182) -->
-    <skip />
-    <!-- no translation found for description_target_soundon (30052466675500172) -->
-    <skip />
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Schuifgreep. Tikken en blijven aanraken."</string>
+    <string name="description_direction_up" msgid="1983114130441878529">"Omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"Omlaag voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"Links voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"Rechts voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Ontgrendelen"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Stil"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Geluid aan"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Toetsaanslag. Headset vereist om toetsaanslagen te kunnen horen bij het typen van een wachtwoord."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigeren naar startpositie"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Omhoog navigeren"</string>

@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Não incomodar"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificações"</string>
-    <!-- outdated translation 6561944127804037619 -->     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover"</string>
-    <!-- outdated translation 4906947311448880529 -->     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Inspecionar"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações da aplicação"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em curso"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
@@ -110,7 +110,7 @@
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Remover notificação."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ativado."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Adquirir GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter ativado."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Teletipo ativado."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Campainha em vibração."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Campainha em silêncio."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Os dados 2G-3G estão desativados"</string>

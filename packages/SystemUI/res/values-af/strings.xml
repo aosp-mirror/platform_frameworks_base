@@ -23,10 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Maak skoon"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Moenie steur nie"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Wys kennisgewings"</string>
-    <!-- no translation found for status_bar_recent_remove_item_title (6026395868129852968) -->
-    <skip />
-    <!-- no translation found for status_bar_recent_inspect_item_title (7793624864528818569) -->
-    <skip />
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Verwyder uit lys"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Program Info"</string>
     <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
     <skip />
     <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->

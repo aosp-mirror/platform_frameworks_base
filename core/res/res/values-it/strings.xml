@@ -859,6 +859,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copia URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleziona testo..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selezione testo"</string>
+    <string name="addToDictionary" msgid="2839899368418071843">"+ aggiungi al dizionario"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Spazio in esaurimento"</string>
@@ -945,6 +946,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Richiesta di configurazione della connessione Wi-Fi Direct da <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Fai clic su OK per accettare."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Richiesta di configurazione della connessione Wi-Fi Direct da <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Inserisci il PIN per continuare."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Per la continuazione della configurazione della connessione è necessario inserire un codice PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> sul dispositivo peer <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct è attivo"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tocca per le impostazioni"</string>
     <string name="select_character" msgid="3365550120617701745">"Inserisci carattere"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Applicazione sconosciuta"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Invio SMS"</string>
@@ -1107,34 +1110,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleziona un account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumenta"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuisci"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Tocca e tieni premuto il numero <xliff:g id="VALUE">%s</xliff:g>."</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Scorri verso l\'alto per aumentare il valore e verso il basso per diminuirlo."</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Aumenta minuto"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Diminuisci minuto"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Aumenta ora"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Diminuisci ora"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Imposta PM"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Imposta AM"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Aumenta mese"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Diminuisci mese"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Aumenta giorno"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Diminuisci giorno"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Aumenta anno"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Diminuisci anno"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"selezionata"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"non selezionato"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"selezionato"</string>
@@ -1151,14 +1140,10 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maiuscolo"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invio"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Maniglia scorrevole. Tocca e tieni premuto."</string>
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
+    <string name="description_direction_up" msgid="1983114130441878529">"Su per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"Giù per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"A sinistra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"A destra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Sblocca"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Fotocamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silenzioso"</string>

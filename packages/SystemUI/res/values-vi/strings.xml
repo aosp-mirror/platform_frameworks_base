@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xoá"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Không làm phiền"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Hiển thị thông báo"</string>
-    <!-- outdated translation 6561944127804037619 -->     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Xóa"</string>
-    <!-- outdated translation 4906947311448880529 -->     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Kiểm tra"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Xóa khỏi danh sách"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Thông tin về ứng dụng"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Không có thông báo nào"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Đang diễn ra"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Thông báo"</string>
