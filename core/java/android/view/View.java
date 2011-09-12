@@ -13174,6 +13174,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         shadowSize.x, shadowSize.y,
                         shadowTouchPoint.x, shadowTouchPoint.y, data);
                 if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
+
+                // Off and running!  Release our local surface instance; the drag
+                // shadow surface is now managed by the system process.
+                surface.release();
             }
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
