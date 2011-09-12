@@ -1469,9 +1469,10 @@ public class PhoneStatusBar extends StatusBar {
             return false;
         }
 
+        final int action = event.getAction();
         final int statusBarSize = mStatusBarView.getHeight();
         final int hitSize = statusBarSize*2;
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (action == MotionEvent.ACTION_DOWN) {
             final int y = (int)event.getRawY();
 
             if (!mExpanded) {
@@ -1496,7 +1497,7 @@ public class PhoneStatusBar extends StatusBar {
         } else if (mTracking) {
             mVelocityTracker.addMovement(event);
             final int minY = statusBarSize + mCloseView.getHeight();
-            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            if (action == MotionEvent.ACTION_MOVE) {
                 int y = (int)event.getRawY();
                 if (mAnimatingReveal && y < minY) {
                     // nothing
@@ -1504,7 +1505,8 @@ public class PhoneStatusBar extends StatusBar {
                     mAnimatingReveal = false;
                     updateExpandedViewPos(y + mViewDelta);
                 }
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            } else if (action == MotionEvent.ACTION_UP
+                    || action == MotionEvent.ACTION_CANCEL) {
                 mVelocityTracker.computeCurrentVelocity(1000);
 
                 float yVel = mVelocityTracker.getYVelocity();
