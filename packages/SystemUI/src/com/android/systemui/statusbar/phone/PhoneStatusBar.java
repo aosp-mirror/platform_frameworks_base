@@ -760,12 +760,10 @@ public class PhoneStatusBar extends StatusBar {
                     }
                 });
         } else {
-            if ((notification.notification.flags & Notification.FLAG_ONGOING_EVENT) == 0) {
-                vetoButton.setVisibility(View.INVISIBLE);
-            } else {
-                vetoButton.setVisibility(View.GONE);
-            }
+            vetoButton.setVisibility(View.GONE);
         }
+        vetoButton.setContentDescription(mContext.getString(
+                R.string.accessibility_remove_notification));
 
         // the large icon
         ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
@@ -957,12 +955,7 @@ public class PhoneStatusBar extends StatusBar {
                     }
                 });
         } else {
-            if ((sbn.notification.flags & Notification.FLAG_ONGOING_EVENT) == 0) {
-                vetoButton.setVisibility(View.INVISIBLE);
-                vetoButton.setContentDescription("VETO");
-            } else {
-                vetoButton.setVisibility(View.GONE);
-            }
+            vetoButton.setVisibility(View.GONE);
         }
         vetoButton.setContentDescription(mContext.getString(
                 R.string.accessibility_remove_notification));
