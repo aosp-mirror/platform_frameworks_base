@@ -69,6 +69,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
 import com.android.server.am.BatteryStatsService;
 import com.android.internal.R;
@@ -96,6 +97,7 @@ public class WifiService extends IWifiManager.Stub {
     private static final int IDLE_REQUEST = 0;
     private boolean mScreenOff;
     private boolean mDeviceIdle;
+    private boolean mEmergencyCallbackMode = false;
     private int mPluggedType;
 
     /* Chipset supports background scan */
@@ -996,6 +998,9 @@ public class WifiService extends IWifiManager.Stub {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                         BluetoothAdapter.STATE_DISCONNECTED);
                 mWifiStateMachine.sendBluetoothAdapterStateChange(state);
+            } else if (action.equals(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
+                mEmergencyCallbackMode = intent.getBooleanExtra("phoneinECMState", false);
+                updateWifiState();
             }
         }
 
@@ -1057,7 +1062,13 @@ public class WifiService extends IWifiManager.Stub {
     private void updateWifiState() {
         boolean lockHeld = mLocks.hasLocks();
         int strongestLockMode = WifiManager.WIFI_MODE_FULL;
-        boolean wifiShouldBeStarted = !mDeviceIdle || lockHeld;
+        boolean wifiShouldBeStarted;
+
+        if (mEmergencyCallbackMode) {
+            wifiShouldBeStarted = false;
+        } else {
+            wifiShouldBeStarted = !mDeviceIdle || lockHeld;
+        }
 
         if (lockHeld) {
             strongestLockMode = mLocks.getStrongestLockMode();
@@ -1097,6 +1108,7 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
         intentFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+        intentFilter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
 
