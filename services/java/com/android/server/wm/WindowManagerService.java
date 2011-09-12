@@ -7464,9 +7464,12 @@ public class WindowManagerService extends IWindowManager.Stub
                                     windowDetachedWallpaper = w;
                                 }
                                 if (w.mAnimation.getBackgroundColor() != 0) {
-                                    windowAnimationBackground = w;
-                                    windowAnimationBackgroundColor =
-                                            w.mAnimation.getBackgroundColor();
+                                    if (windowAnimationBackground == null || w.mAnimLayer <
+                                            windowAnimationBackground.mAnimLayer) {
+                                        windowAnimationBackground = w;
+                                        windowAnimationBackgroundColor =
+                                                w.mAnimation.getBackgroundColor();
+                                    }
                                 }
                             }
                             animating = true;
@@ -7475,14 +7478,18 @@ public class WindowManagerService extends IWindowManager.Stub
                         // If this window's app token is running a detached wallpaper
                         // animation, make a note so we can ensure the wallpaper is
                         // displayed behind it.
-                        if (w.mAppToken != null && w.mAppToken.animation != null) {
+                        if (w.mAppToken != null && w.mAppToken.animation != null
+                                && w.mAppToken.animating) {
                             if (w.mAppToken.animation.getDetachWallpaper()) {
                                 windowDetachedWallpaper = w;
                             }
                             if (w.mAppToken.animation.getBackgroundColor() != 0) {
-                                windowAnimationBackground = w;
-                                windowAnimationBackgroundColor =
-                                        w.mAppToken.animation.getBackgroundColor();
+                                if (windowAnimationBackground == null || w.mAnimLayer <
+                                        windowAnimationBackground.mAnimLayer) {
+                                    windowAnimationBackground = w;
+                                    windowAnimationBackgroundColor =
+                                            w.mAppToken.animation.getBackgroundColor();
+                                }
                             }
                         }
 
