@@ -1491,11 +1491,11 @@ public class PhoneStatusBar extends StatusBar {
                 final int edgeBorder = mEdgeBorder;
                 if (x >= edgeBorder && x < mDisplayMetrics.widthPixels - edgeBorder) {
                     prepareTracking(y, !mExpanded);// opening if we're not already fully visible
-                    mVelocityTracker.addMovement(event);
+                    trackMovement(event);
                 }
             }
         } else if (mTracking) {
-            mVelocityTracker.addMovement(event);
+            trackMovement(event);
             final int minY = statusBarSize + mCloseView.getHeight();
             if (action == MotionEvent.ACTION_MOVE) {
                 int y = (int)event.getRawY();
@@ -1538,6 +1538,16 @@ public class PhoneStatusBar extends StatusBar {
 
         }
         return false;
+    }
+
+    private void trackMovement(MotionEvent event) {
+        // Add movement to velocity tracker using raw screen X and Y coordinates instead
+        // of window coordinates because the window frame may be moving at the same time.
+        float deltaX = event.getRawX() - event.getX();
+        float deltaY = event.getRawY() - event.getY();
+        event.offsetLocation(deltaX, deltaY);
+        mVelocityTracker.addMovement(event);
+        event.offsetLocation(-deltaX, -deltaY);
     }
 
     @Override // CommandQueue
