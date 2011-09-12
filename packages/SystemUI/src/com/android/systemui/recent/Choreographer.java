@@ -121,6 +121,7 @@ import android.view.View;
         createAnimation(appearing);
 
         mContentView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        mContentView.buildLayer();
         mContentAnim.start();
 
         mVisible = appearing;
