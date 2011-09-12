@@ -497,10 +497,14 @@ class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_RUN_FULL_BACKUP:
             {
+                // TODO: refactor full backup to be a looper-based state machine
+                // similar to normal backup/restore.
                 FullBackupParams params = (FullBackupParams)msg.obj;
-                (new PerformFullBackupTask(params.fd, params.observer, params.includeApks,
+                PerformFullBackupTask task = new PerformFullBackupTask(params.fd,
+                        params.observer, params.includeApks,
                         params.includeShared, params.curPassword, params.encryptPassword,
-                        params.allApps, params.packages, params.latch)).run();
+                        params.allApps, params.packages, params.latch);
+                (new Thread(task)).start();
                 break;
             }
 
@@ -519,9 +523,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_RUN_FULL_RESTORE:
             {
+                // TODO: refactor full restore to be a looper-based state machine
+                // similar to normal backup/restore.
                 FullRestoreParams params = (FullRestoreParams)msg.obj;
-                (new PerformFullRestoreTask(params.fd, params.curPassword, params.encryptPassword,
-                        params.observer, params.latch)).run();
+                PerformFullRestoreTask task = new PerformFullRestoreTask(params.fd,
+                        params.curPassword, params.encryptPassword,
+                        params.observer, params.latch);
+                (new Thread(task)).start();
                 break;
             }
 
