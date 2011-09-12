@@ -148,7 +148,8 @@ class ServerThread extends Thread {
 
             Slog.i(TAG, "Package Manager");
             pm = PackageManagerService.main(context,
-                    factoryTest != SystemServer.FACTORY_TEST_OFF);
+                    factoryTest != SystemServer.FACTORY_TEST_OFF,
+                    false);
 
             ActivityManagerService.setSystemProcess();
 

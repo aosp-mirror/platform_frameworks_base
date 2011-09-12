@@ -221,6 +221,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final Context mContext;
     final boolean mFactoryTest;
+    final boolean mOnlyCore;
     final boolean mNoDexOpt;
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
@@ -809,8 +810,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
     }
 
-    public static final IPackageManager main(Context context, boolean factoryTest) {
-        PackageManagerService m = new PackageManagerService(context, factoryTest);
+    public static final IPackageManager main(Context context, boolean factoryTest,
+            boolean onlyCore) {
+        PackageManagerService m = new PackageManagerService(context, factoryTest, onlyCore);
         ServiceManager.addService("package", m);
         return m;
     }
@@ -837,7 +839,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
-    public PackageManagerService(Context context, boolean factoryTest) {
+    public PackageManagerService(Context context, boolean factoryTest, boolean onlyCore) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
 
@@ -847,6 +849,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         mContext = context;
         mFactoryTest = factoryTest;
+        mOnlyCore = onlyCore;
         mNoDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
         mSettings = new Settings();
@@ -1051,18 +1054,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.moveFiles();
 
             // Prune any system packages that no longer exist.
-            Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
-            while (psit.hasNext()) {
-                PackageSetting ps = psit.next();
-                if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0
-                        && !mPackages.containsKey(ps.name)
-                        && !mSettings.mDisabledSysPackages.containsKey(ps.name)) {
-                    psit.remove();
-                    String msg = "System package " + ps.name
-                            + " no longer exists; wiping its data";
-                    reportSettingsProblem(Log.WARN, msg);
-                    mInstaller.remove(ps.name, 0);
-                    mUserManager.removePackageForAllUsers(ps.name);
+            if (!mOnlyCore) {
+                Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
+                while (psit.hasNext()) {
+                    PackageSetting ps = psit.next();
+                    if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0
+                            && !mPackages.containsKey(ps.name)
+                            && !mSettings.mDisabledSysPackages.containsKey(ps.name)) {
+                        psit.remove();
+                        String msg = "System package " + ps.name
+                                + " no longer exists; wiping its data";
+                        reportSettingsProblem(Log.WARN, msg);
+                        mInstaller.remove(ps.name, 0);
+                        mUserManager.removePackageForAllUsers(ps.name);
+                    }
                 }
             }
             
@@ -1077,18 +1082,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             //delete tmp files
             deleteTempPackageFiles();
 
-            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
-                    SystemClock.uptimeMillis());
-            mAppInstallObserver = new AppDirObserver(
-                mAppInstallDir.getPath(), OBSERVER_EVENTS, false);
-            mAppInstallObserver.startWatching();
-            scanDirLI(mAppInstallDir, 0, scanMode, 0);
-
-            mDrmAppInstallObserver = new AppDirObserver(
-                mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
-            mDrmAppInstallObserver.startWatching();
-            scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
-                    scanMode, 0);
+            if (!mOnlyCore) {
+                EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
+                        SystemClock.uptimeMillis());
+                mAppInstallObserver = new AppDirObserver(
+                    mAppInstallDir.getPath(), OBSERVER_EVENTS, false);
+                mAppInstallObserver.startWatching();
+                scanDirLI(mAppInstallDir, 0, scanMode, 0);
+    
+                mDrmAppInstallObserver = new AppDirObserver(
+                    mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
+                mDrmAppInstallObserver.startWatching();
+                scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
+                        scanMode, 0);
+            } else {
+                mAppInstallObserver = null;
+                mDrmAppInstallObserver = null;
+            }
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -2749,6 +2759,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser(scanPath);
         pp.setSeparateProcesses(mSeparateProcesses);
+        pp.setOnlyCoreApps(mOnlyCore);
         final PackageParser.Package pkg = pp.parsePackage(scanFile,
                 scanPath, mMetrics, parseFlags);
         if (pkg == null) {
@@ -4044,7 +4055,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + " info=" + bp.pendingInfo);
                 if (bp.packageSetting == null && bp.pendingInfo != null) {
                     final BasePermission tree = findPermissionTreeLP(bp.name);
-                    if (tree != null) {
+                    if (tree != null && tree.perm != null) {
                         bp.packageSetting = tree.packageSetting;
                         bp.perm = new PackageParser.Permission(tree.perm.owner,
                                 new PermissionInfo(bp.pendingInfo));
