@@ -407,6 +407,54 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertEquals(Long.MAX_VALUE - 40, performVarLong(Long.MAX_VALUE - 40));
     }
 
+    public void testIndexBeforeAfter() throws Exception {
+        final long BUCKET_SIZE = HOUR_IN_MILLIS;
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
+
+        final long FIRST_START = TEST_START;
+        final long FIRST_END = FIRST_START + (2 * HOUR_IN_MILLIS);
+        final long SECOND_START = TEST_START + WEEK_IN_MILLIS;
+        final long SECOND_END = SECOND_START + HOUR_IN_MILLIS;
+        final long THIRD_START = TEST_START + (2 * WEEK_IN_MILLIS);
+        final long THIRD_END = THIRD_START + (2 * HOUR_IN_MILLIS);
+
+        stats.recordData(FIRST_START, FIRST_END,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+        stats.recordData(SECOND_START, SECOND_END,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+        stats.recordData(THIRD_START, THIRD_END,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+
+        // should have buckets: 2+1+2
+        assertEquals(5, stats.size());
+
+        assertIndexBeforeAfter(stats, 0, 0, Long.MIN_VALUE);
+        assertIndexBeforeAfter(stats, 0, 1, FIRST_START);
+        assertIndexBeforeAfter(stats, 0, 1, FIRST_START + MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 0, 2, FIRST_START + HOUR_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 1, 2, FIRST_START + HOUR_IN_MILLIS + MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 1, 2, FIRST_END - MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 1, 2, FIRST_END);
+        assertIndexBeforeAfter(stats, 1, 2, FIRST_END + MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 1, 2, SECOND_START - MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 1, 3, SECOND_START);
+        assertIndexBeforeAfter(stats, 2, 3, SECOND_END);
+        assertIndexBeforeAfter(stats, 2, 3, SECOND_END + MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 2, 3, THIRD_START - MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 2, 4, THIRD_START);
+        assertIndexBeforeAfter(stats, 3, 4, THIRD_START + MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 3, 4, THIRD_START + HOUR_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 4, 4, THIRD_END);
+        assertIndexBeforeAfter(stats, 4, 4, THIRD_END + MINUTE_IN_MILLIS);
+        assertIndexBeforeAfter(stats, 4, 4, Long.MAX_VALUE);
+    }
+
+    private static void assertIndexBeforeAfter(
+            NetworkStatsHistory stats, int before, int after, long time) {
+        assertEquals("unexpected before", before, stats.getIndexBefore(time));
+        assertEquals("unexpected after", after, stats.getIndexAfter(time));
+    }
+
     private static long performVarLong(long before) throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         writeVarLong(new DataOutputStream(out), before);
