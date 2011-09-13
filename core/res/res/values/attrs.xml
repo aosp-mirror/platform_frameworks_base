@@ -3177,6 +3177,10 @@
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" />
     </declare-styleable>
+    <declare-styleable name="TextViewAppearance">
+        <!-- Base text color, typeface, size, and style. -->
+        <attr name="textAppearance" />
+    </declare-styleable>
     <declare-styleable name="SuggestionSpan">
         <attr name="textUnderlineColor" />
         <attr name="textUnderlineThickness" />

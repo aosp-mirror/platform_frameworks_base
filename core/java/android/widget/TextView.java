@@ -461,10 +461,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mMovement = getDefaultMovementMethod();
         mTransformation = null;
 
-        TypedArray a =
-            context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.TextView, defStyle, 0);
-
         int textColorHighlight = 0;
         ColorStateList textColor = null;
         ColorStateList textColorHint = null;
@@ -474,18 +470,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int styleIndex = -1;
         boolean allCaps = false;
 
+        final Resources.Theme theme = context.getTheme();
+
         /*
          * Look the appearance up without checking first if it exists because
          * almost every TextView has one and it greatly simplifies the logic
          * to be able to parse the appearance first and then let specific tags
          * for this View override it.
          */
+        TypedArray a = theme.obtainStyledAttributes(
+                    attrs, com.android.internal.R.styleable.TextViewAppearance, defStyle, 0);
         TypedArray appearance = null;
-        int ap = a.getResourceId(com.android.internal.R.styleable.TextView_textAppearance, -1);
+        int ap = a.getResourceId(
+                com.android.internal.R.styleable.TextViewAppearance_textAppearance, -1);
+        a.recycle();
         if (ap != -1) {
-            appearance = context.obtainStyledAttributes(ap,
-                                com.android.internal.R.styleable.
-                                TextAppearance);
+            appearance = theme.obtainStyledAttributes(
+                    ap, com.android.internal.R.styleable.TextAppearance);
         }
         if (appearance != null) {
             int n = appearance.getIndexCount();
@@ -551,6 +552,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float dx = 0, dy = 0, r = 0;
         boolean password = false;
         int inputType = EditorInfo.TYPE_NULL;
+
+        a = theme.obtainStyledAttributes(
+                    attrs, com.android.internal.R.styleable.TextView, defStyle, 0);
 
         int n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
