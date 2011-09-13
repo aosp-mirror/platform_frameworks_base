@@ -756,24 +756,36 @@ public class LockPatternUtils {
     }
 
     /**
-     * @return Whether the lock password is enabled.
+     * @return Whether the lock password is enabled, or if it is set as a backup for biometric weak
      */
     public boolean isLockPasswordEnabled() {
         long mode = getLong(PASSWORD_TYPE_KEY, 0);
-        return savedPasswordExists() &&
-                (mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
-                        || mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                        || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
-                        || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+        long backupMode = getLong(PASSWORD_TYPE_ALTERNATE_KEY, 0);
+        final boolean passwordEnabled = mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+        final boolean backupEnabled = backupMode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
+                || backupMode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+                || backupMode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
+                || backupMode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+
+        return savedPasswordExists() && (passwordEnabled ||
+                (isBiometricEnabled() && backupEnabled));
     }
 
     /**
-     * @return Whether the lock pattern is enabled.
+     * @return Whether the lock pattern is enabled, or if it is set as a backup for biometric weak
      */
     public boolean isLockPatternEnabled() {
+        final boolean backupEnabled =
+                getLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
+                == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+
         return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED)
-                && getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
-                        == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+                && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
+                        == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING ||
+                        (isBiometricEnabled() && backupEnabled));
     }
 
     /**
@@ -923,8 +935,7 @@ public class LockPatternUtils {
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
         final boolean secure = isPattern && isLockPatternEnabled() && savedPatternExists()
-                || isPassword && savedPasswordExists()
-                || usingBiometricWeak() && isBiometricEnabled();
+                || isPassword && savedPasswordExists();
         return secure;
     }
 
