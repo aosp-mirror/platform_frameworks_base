@@ -442,6 +442,7 @@ public final class SipService extends ISipService.Stub {
 
             if (wasConnected) {
                 mLocalIp = null;
+                stopPortMappingMeasurement();
                 for (SipSessionGroupExt group : mSipGroups.values()) {
                     group.onConnectivityChanged(false);
                 }
@@ -457,7 +458,6 @@ public final class SipService extends ISipService.Stub {
                 if (isWifi && (mWifiLock != null)) stopWifiScanner();
             } else {
                 mMyWakeLock.reset(); // in case there's a leak
-                stopPortMappingMeasurement();
                 if (isWifi && (mWifiLock != null)) startWifiScanner();
             }
         } catch (SipException e) {
@@ -784,52 +784,50 @@ public final class SipService extends ISipService.Stub {
         private static final int PASS_THRESHOLD = 10;
         private static final int MAX_RETRY_COUNT = 5;
         private static final int NAT_MEASUREMENT_RETRY_INTERVAL = 120; // in seconds
+        private SipProfile mLocalProfile;
         private SipSessionGroupExt mGroup;
         private SipSessionGroup.SipSessionImpl mSession;
         private int mMinInterval;
         private int mMaxInterval;
         private int mInterval;
-        private int mPassCount = 0;
+        private int mPassCount;
 
         public IntervalMeasurementProcess(SipProfile localProfile,
                 int minInterval, int maxInterval) {
             mMaxInterval = maxInterval;
             mMinInterval = minInterval;
-            mInterval = (maxInterval + minInterval) / 2;
-
-            // Don't start measurement if the interval is too small
-            if (mInterval < DEFAULT_KEEPALIVE_INTERVAL) {
-                Log.w(TAG, "interval is too small; measurement aborted; "
-                        + "maxInterval=" + mMaxInterval);
-                return;
-            } else if (checkTermination()) {
-                Log.w(TAG, "interval is too small; measurement aborted; "
-                        + "interval=[" + mMinInterval + "," + mMaxInterval
-                        + "]");
-                return;
-            }
-
-            try {
-                mGroup =  new SipSessionGroupExt(localProfile, null, null);
-                // TODO: remove this line once SipWakeupTimer can better handle
-                // variety of timeout values
-                mGroup.setWakeupTimer(new SipWakeupTimer(mContext, mExecutor));
-            } catch (Exception e) {
-                Log.w(TAG, "start interval measurement error: " + e);
-            }
+            mLocalProfile = localProfile;
         }
 
         public void start() {
             synchronized (SipService.this) {
-                Log.d(TAG, "start measurement w interval=" + mInterval);
-                if (mSession == null) {
+                if (mSession != null) {
+                    return;
+                }
+
+                mInterval = (mMaxInterval + mMinInterval) / 2;
+                mPassCount = 0;
+
+                // Don't start measurement if the interval is too small
+                if (mInterval < DEFAULT_KEEPALIVE_INTERVAL || checkTermination()) {
+                    Log.w(TAG, "measurement aborted; interval=[" +
+                            mMinInterval + "," + mMaxInterval + "]");
+                    return;
+                }
+
+                try {
+                    Log.d(TAG, "start measurement w interval=" + mInterval);
+
+                    mGroup = new SipSessionGroupExt(mLocalProfile, null, null);
+                    // TODO: remove this line once SipWakeupTimer can better handle
+                    // variety of timeout values
+                    mGroup.setWakeupTimer(new SipWakeupTimer(mContext, mExecutor));
+
                     mSession = (SipSessionGroup.SipSessionImpl)
                             mGroup.createSession(null);
-                }
-                try {
                     mSession.startKeepAliveProcess(mInterval, this);
-                } catch (SipException e) {
-                    Log.e(TAG, "start()", e);
+                } catch (Throwable t) {
+                    onError(SipErrorCode.CLIENT_ERROR, t.toString());
                 }
             }
         }
@@ -839,6 +837,10 @@ public final class SipService extends ISipService.Stub {
                 if (mSession != null) {
                     mSession.stopKeepAliveProcess();
                     mSession = null;
+                }
+                if (mGroup != null) {
+                    mGroup.close();
+                    mGroup = null;
                 }
                 mTimer.cancel(this);
             }
