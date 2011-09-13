@@ -26,6 +26,9 @@
 
 namespace android {
 
+// static
+const int64_t NuPlayer::Renderer::kMinPositionUpdateDelayUs = 100000ll;
+
 NuPlayer::Renderer::Renderer(
         const sp<MediaPlayerBase::AudioSink> &sink,
         const sp<AMessage> &notify)
@@ -43,7 +46,8 @@ NuPlayer::Renderer::Renderer(
       mHasAudio(false),
       mHasVideo(false),
       mSyncQueues(false),
-      mPaused(false) {
+      mPaused(false),
+      mLastPositionUpdateUs(-1ll) {
 }
 
 NuPlayer::Renderer::~Renderer() {
@@ -190,7 +194,7 @@ void NuPlayer::Renderer::postDrainAudioQueue() {
     mDrainAudioQueuePending = true;
     sp<AMessage> msg = new AMessage(kWhatDrainAudioQueue, id());
     msg->setInt32("generation", mAudioQueueGeneration);
-    msg->post(10000);
+    msg->post();
 }
 
 void NuPlayer::Renderer::signalAudioSinkChanged() {
@@ -198,7 +202,6 @@ void NuPlayer::Renderer::signalAudioSinkChanged() {
 }
 
 void NuPlayer::Renderer::onDrainAudioQueue() {
-
     for (;;) {
         if (mAudioQueue.empty()) {
             break;
@@ -562,6 +565,13 @@ void NuPlayer::Renderer::notifyPosition() {
     }
 
     int64_t nowUs = ALooper::GetNowUs();
+
+    if (mLastPositionUpdateUs >= 0
+            && nowUs < mLastPositionUpdateUs + kMinPositionUpdateDelayUs) {
+        return;
+    }
+    mLastPositionUpdateUs = nowUs;
+
     int64_t positionUs = (nowUs - mAnchorTimeRealUs) + mAnchorTimeMediaUs;
 
     sp<AMessage> notify = mNotify->dup();
