@@ -117,14 +117,12 @@ status_t AVIExtractor::AVISource::read(
         }
     }
 
-    int64_t timeUs =
-        (mSampleIndex * 1000000ll * mTrack.mRate) / mTrack.mScale;
-
     off64_t offset;
     size_t size;
     bool isKey;
+    int64_t timeUs;
     status_t err = mExtractor->getSampleInfo(
-            mTrackIndex, mSampleIndex, &offset, &size, &isKey);
+            mTrackIndex, mSampleIndex, &offset, &size, &isKey, &timeUs);
 
     ++mSampleIndex;
 
@@ -396,6 +394,8 @@ status_t AVIExtractor::parseStreamHeader(off64_t offset, size_t size) {
     uint32_t rate = U32LE_AT(&data[20]);
     uint32_t scale = U32LE_AT(&data[24]);
 
+    uint32_t sampleSize = U32LE_AT(&data[44]);
+
     const char *mime = NULL;
     Track::Kind kind = Track::OTHER;
 
@@ -427,6 +427,7 @@ status_t AVIExtractor::parseStreamHeader(off64_t offset, size_t size) {
     track->mMeta = meta;
     track->mRate = rate;
     track->mScale = scale;
+    track->mBytesPerSample = sampleSize;
     track->mKind = kind;
     track->mNumSyncSamples = 0;
     track->mThumbnailSampleSize = 0;
@@ -612,11 +613,12 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
         off64_t offset;
         size_t size;
         bool isKey;
-        status_t err = getSampleInfo(0, 0, &offset, &size, &isKey);
+        int64_t timeUs;
+        status_t err = getSampleInfo(0, 0, &offset, &size, &isKey, &timeUs);
 
         if (err != OK) {
             mOffsetsAreAbsolute = !mOffsetsAreAbsolute;
-            err = getSampleInfo(0, 0, &offset, &size, &isKey);
+            err = getSampleInfo(0, 0, &offset, &size, &isKey, &timeUs);
 
             if (err != OK) {
                 return err;
@@ -630,8 +632,9 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
     for (size_t i = 0; i < mTracks.size(); ++i) {
         Track *track = &mTracks.editItemAt(i);
 
-        int64_t durationUs =
-            (track->mSamples.size() * 1000000ll * track->mRate) / track->mScale;
+        int64_t durationUs;
+        CHECK_EQ((status_t)OK,
+                 getSampleTime(i, track->mSamples.size() - 1, &durationUs));
 
         LOGV("track %d duration = %.2f secs", i, durationUs / 1E6);
 
@@ -645,9 +648,10 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
 
         if (!strncasecmp("video/", mime.c_str(), 6)
                 && track->mThumbnailSampleIndex >= 0) {
-            int64_t thumbnailTimeUs =
-                (track->mThumbnailSampleIndex * 1000000ll * track->mRate)
-                    / track->mScale;
+            int64_t thumbnailTimeUs;
+            CHECK_EQ((status_t)OK,
+                     getSampleTime(i, track->mThumbnailSampleIndex,
+                                   &thumbnailTimeUs));
 
             track->mMeta->setInt64(kKeyThumbnailTime, thumbnailTimeUs);
 
@@ -658,6 +662,21 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
                     return err;
                 }
             }
+        }
+
+        if (track->mBytesPerSample != 0) {
+            // Assume all chunks are the same size for now.
+
+            off64_t offset;
+            size_t size;
+            bool isKey;
+            int64_t sampleTimeUs;
+            CHECK_EQ((status_t)OK,
+                     getSampleInfo(
+                         i, 0,
+                         &offset, &size, &isKey, &sampleTimeUs));
+
+            track->mRate *= size / track->mBytesPerSample;
         }
     }
 
@@ -720,7 +739,9 @@ status_t AVIExtractor::addMPEG4CodecSpecificData(size_t trackIndex) {
     off64_t offset;
     size_t size;
     bool isKey;
-    status_t err = getSampleInfo(trackIndex, 0, &offset, &size, &isKey);
+    int64_t timeUs;
+    status_t err =
+        getSampleInfo(trackIndex, 0, &offset, &size, &isKey, &timeUs);
 
     if (err != OK) {
         return err;
@@ -762,7 +783,8 @@ status_t AVIExtractor::addMPEG4CodecSpecificData(size_t trackIndex) {
 
 status_t AVIExtractor::getSampleInfo(
         size_t trackIndex, size_t sampleIndex,
-        off64_t *offset, size_t *size, bool *isKey) {
+        off64_t *offset, size_t *size, bool *isKey,
+        int64_t *sampleTimeUs) {
     if (trackIndex >= mTracks.size()) {
         return -ERANGE;
     }
@@ -801,7 +823,18 @@ status_t AVIExtractor::getSampleInfo(
 
     *isKey = info.mIsKey;
 
+    *sampleTimeUs = (sampleIndex * 1000000ll * track.mRate) / track.mScale;
+
     return OK;
+}
+
+status_t AVIExtractor::getSampleTime(
+        size_t trackIndex, size_t sampleIndex, int64_t *sampleTimeUs) {
+    off64_t offset;
+    size_t size;
+    bool isKey;
+    return getSampleInfo(
+            trackIndex, sampleIndex, &offset, &size, &isKey, sampleTimeUs);
 }
 
 status_t AVIExtractor::getSampleIndexAtTime(
