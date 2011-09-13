@@ -254,7 +254,9 @@ public class CallerInfo {
         // Change the callerInfo number ONLY if it is an emergency number
         // or if it is the voicemail number.  If it is either, take a
         // shortcut and skip the query.
-        if (PhoneNumberUtils.isEmergencyNumber(number)) {
+        Locale locale = context.getResources().getConfiguration().locale;
+        String countryIso = getCurrentCountryIso(context, locale);
+        if (PhoneNumberUtils.isEmergencyNumber(number, countryIso)) {
             return new CallerInfo().markAsEmergency(context);
         } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
             return new CallerInfo().markAsVoiceMail();
@@ -514,18 +516,8 @@ public class CallerInfo {
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
         PhoneNumberOfflineGeocoder geocoder = PhoneNumberOfflineGeocoder.getInstance();
 
-        String countryIso;
         Locale locale = context.getResources().getConfiguration().locale;
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-                Context.COUNTRY_DETECTOR);
-        if (detector != null) {
-            countryIso = detector.detectCountry().getCountryIso();
-        } else {
-            countryIso = locale.getCountry();
-            Log.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
-                  + countryIso);
-        }
-
+        String countryIso = getCurrentCountryIso(context, locale);
         PhoneNumber pn = null;
         try {
             if (VDBG) Log.v(TAG, "parsing '" + number
@@ -543,6 +535,24 @@ public class CallerInfo {
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return The ISO 3166-1 two letters country code of the country the user
+     *         is in.
+     */
+    private static String getCurrentCountryIso(Context context, Locale locale) {
+      String countryIso;
+      CountryDetector detector = (CountryDetector) context.getSystemService(
+          Context.COUNTRY_DETECTOR);
+      if (detector != null) {
+        countryIso = detector.detectCountry().getCountryIso();
+      } else {
+        countryIso = locale.getCountry();
+        Log.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
+              + countryIso);
+      }
+      return countryIso;
     }
 
     /**
