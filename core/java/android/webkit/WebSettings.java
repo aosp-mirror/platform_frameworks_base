@@ -643,10 +643,10 @@ public class WebSettings {
 
     /**
      * Set whether the WebView will enable smooth transition while panning or
-     * zooming. If it is true, WebView will choose a solution to maximize the
-     * performance. e.g. the WebView's content may not be updated during the
-     * transition. If it is false, WebView will keep its fidelity. The default
-     * value is false.
+     * zooming or while the window hosting the WebView does not have focus.
+     * If it is true, WebView will choose a solution to maximize the performance.
+     * e.g. the WebView's content may not be updated during the transition.
+     * If it is false, WebView will keep its fidelity. The default value is false.
      */
     public void setEnableSmoothTransition(boolean enable) {
         mEnableSmoothTransition = enable;
