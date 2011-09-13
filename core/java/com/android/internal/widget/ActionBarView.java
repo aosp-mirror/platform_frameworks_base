@@ -268,8 +268,10 @@ public class ActionBarView extends AbsActionBarView {
 
         if (mTabScrollView != null && mIncludeTabs) {
             ViewGroup.LayoutParams lp = mTabScrollView.getLayoutParams();
-            lp.width = LayoutParams.WRAP_CONTENT;
-            lp.height = LayoutParams.MATCH_PARENT;
+            if (lp != null) {
+                lp.width = LayoutParams.WRAP_CONTENT;
+                lp.height = LayoutParams.MATCH_PARENT;
+            }
             mTabScrollView.setAllowCollapse(true);
         }
     }
