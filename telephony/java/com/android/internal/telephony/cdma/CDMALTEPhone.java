@@ -141,6 +141,11 @@ public class CDMALTEPhone extends CDMAPhone {
     }
 
     @Override
+    public String getMsisdn() {
+        return mIccRecords.getMsisdnNumber();
+    }
+
+    @Override
     public void requestIsimAuthentication(String nonce, Message result) {
         mCM.requestIsimAuthentication(nonce, result);
     }
