@@ -20,6 +20,8 @@
 #include <rs_hal.h>
 #include <EGL/egl.h>
 
+#define RSD_CALL_GL(x, ...) rsc->setWatchdogGL(#x, __LINE__, __FILE__); x(__VA_ARGS__); rsc->setWatchdogGL(NULL, 0, NULL)
+
 class RsdShaderCache;
 class RsdVertexArrayState;
 class RsdFrameBufferObj;
@@ -71,7 +73,6 @@ typedef struct RsdGLRec {
     RsdVertexArrayState *vertexArrayState;
     RsdFrameBufferObj *currentFrameBuffer;
 } RsdGL;
-
 
 
 bool rsdGLInit(const android::renderscript::Context *rsc);

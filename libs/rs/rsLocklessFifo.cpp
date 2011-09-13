@@ -22,6 +22,9 @@ using namespace android;
 using namespace android::renderscript;
 
 LocklessCommandFifo::LocklessCommandFifo() : mBuffer(0), mInitialized(false) {
+    mTimeoutCallback = NULL;
+    mTimeoutCallbackData = NULL;
+    mTimeoutWait = 0;
 }
 
 LocklessCommandFifo::~LocklessCommandFifo() {
@@ -125,9 +128,19 @@ void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes) {
 void LocklessCommandFifo::flush() {
     //dumpState("flush 1");
     while (mPut != mGet) {
-        mSignalToControl.wait();
+        while (!mSignalToControl.wait(mTimeoutWait)) {
+            if (mTimeoutCallback) {
+                mTimeoutCallback(mTimeoutCallbackData);
+            }
+        }
     }
     //dumpState("flush 2");
+}
+
+void LocklessCommandFifo::setTimoutCallback(void (*cbk)(void *), void *data, uint64_t timeout) {
+    mTimeoutCallback = cbk;
+    mTimeoutCallbackData = data;
+    mTimeoutWait = timeout;
 }
 
 bool LocklessCommandFifo::wait(uint64_t timeout) {

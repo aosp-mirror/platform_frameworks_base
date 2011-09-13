@@ -178,22 +178,22 @@ bool RsdShader::loadShader(const Context *rsc) {
 
     if (mShaderID) {
         const char * ss = mShader.string();
-        glShaderSource(mShaderID, 1, &ss, NULL);
-        glCompileShader(mShaderID);
+        RSD_CALL_GL(glShaderSource, mShaderID, 1, &ss, NULL);
+        RSD_CALL_GL(glCompileShader, mShaderID);
 
         GLint compiled = 0;
-        glGetShaderiv(mShaderID, GL_COMPILE_STATUS, &compiled);
+        RSD_CALL_GL(glGetShaderiv, mShaderID, GL_COMPILE_STATUS, &compiled);
         if (!compiled) {
             GLint infoLen = 0;
-            glGetShaderiv(mShaderID, GL_INFO_LOG_LENGTH, &infoLen);
+            RSD_CALL_GL(glGetShaderiv, mShaderID, GL_INFO_LOG_LENGTH, &infoLen);
             if (infoLen) {
                 char* buf = (char*) malloc(infoLen);
                 if (buf) {
-                    glGetShaderInfoLog(mShaderID, infoLen, NULL, buf);
+                    RSD_CALL_GL(glGetShaderInfoLog, mShaderID, infoLen, NULL, buf);
                     LOGE("Could not compile shader \n%s\n", buf);
                     free(buf);
                 }
-                glDeleteShader(mShaderID);
+                RSD_CALL_GL(glDeleteShader, mShaderID);
                 mShaderID = 0;
                 rsc->setError(RS_ERROR_BAD_SHADER, "Error returned from GL driver loading shader text,");
                 return false;
@@ -297,24 +297,24 @@ void RsdShader::setUniform(const Context *rsc, const Element *field, const float
                          int32_t slot, uint32_t arraySize ) {
     RsDataType dataType = field->getType();
     if (dataType == RS_TYPE_MATRIX_4X4) {
-        glUniformMatrix4fv(slot, arraySize, GL_FALSE, fd);
+        RSD_CALL_GL(glUniformMatrix4fv, slot, arraySize, GL_FALSE, fd);
     } else if (dataType == RS_TYPE_MATRIX_3X3) {
-        glUniformMatrix3fv(slot, arraySize, GL_FALSE, fd);
+        RSD_CALL_GL(glUniformMatrix3fv, slot, arraySize, GL_FALSE, fd);
     } else if (dataType == RS_TYPE_MATRIX_2X2) {
-        glUniformMatrix2fv(slot, arraySize, GL_FALSE, fd);
+        RSD_CALL_GL(glUniformMatrix2fv, slot, arraySize, GL_FALSE, fd);
     } else {
         switch (field->getComponent().getVectorSize()) {
         case 1:
-            glUniform1fv(slot, arraySize, fd);
+            RSD_CALL_GL(glUniform1fv, slot, arraySize, fd);
             break;
         case 2:
-            glUniform2fv(slot, arraySize, fd);
+            RSD_CALL_GL(glUniform2fv, slot, arraySize, fd);
             break;
         case 3:
-            glUniform3fv(slot, arraySize, fd);
+            RSD_CALL_GL(glUniform3fv, slot, arraySize, fd);
             break;
         case 4:
-            glUniform4fv(slot, arraySize, fd);
+            RSD_CALL_GL(glUniform4fv, slot, arraySize, fd);
             break;
         default:
             rsAssert(0);
@@ -351,37 +351,44 @@ void RsdShader::setupSampler(const Context *rsc, const Sampler *s, const Allocat
         if (tex->getHasGraphicsMipmaps() &&
             (dc->gl.gl.GL_NV_texture_npot_2D_mipmap || dc->gl.gl.GL_IMG_texture_npot)) {
             if (dc->gl.gl.GL_NV_texture_npot_2D_mipmap) {
-                glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[s->mHal.state.minFilter]);
+                RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
+                            trans[s->mHal.state.minFilter]);
             } else {
                 switch (trans[s->mHal.state.minFilter]) {
                 case GL_LINEAR_MIPMAP_LINEAR:
-                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+                    RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
+                                GL_LINEAR_MIPMAP_NEAREST);
                     break;
                 default:
-                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[s->mHal.state.minFilter]);
+                    RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
+                                trans[s->mHal.state.minFilter]);
                     break;
                 }
             }
         } else {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[s->mHal.state.minFilter]);
+            RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
+                        transNP[s->mHal.state.minFilter]);
         }
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, transNP[s->mHal.state.magFilter]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_S, transNP[s->mHal.state.wrapS]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_T, transNP[s->mHal.state.wrapT]);
+        RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MAG_FILTER,
+                    transNP[s->mHal.state.magFilter]);
+        RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_WRAP_S, transNP[s->mHal.state.wrapS]);
+        RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_WRAP_T, transNP[s->mHal.state.wrapT]);
     } else {
         if (tex->getHasGraphicsMipmaps()) {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[s->mHal.state.minFilter]);
+            RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
+                        trans[s->mHal.state.minFilter]);
         } else {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[s->mHal.state.minFilter]);
+            RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
+                        transNP[s->mHal.state.minFilter]);
         }
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, trans[s->mHal.state.magFilter]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_S, trans[s->mHal.state.wrapS]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_T, trans[s->mHal.state.wrapT]);
+        RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MAG_FILTER, trans[s->mHal.state.magFilter]);
+        RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_WRAP_S, trans[s->mHal.state.wrapS]);
+        RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_WRAP_T, trans[s->mHal.state.wrapT]);
     }
 
     float anisoValue = rsMin(dc->gl.gl.EXT_texture_max_aniso, s->mHal.state.aniso);
     if (dc->gl.gl.EXT_texture_max_aniso > 1.0f) {
-        glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
+        RSD_CALL_GL(glTexParameterf, target, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
     }
 
     rsdGLCheckError(rsc, "Sampler::setup tex env");
@@ -404,12 +411,12 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
     }
 
     for (uint32_t ct=0; ct < numTexturesToBind; ct++) {
-        glActiveTexture(GL_TEXTURE0 + ct);
-        glUniform1i(sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
+        RSD_CALL_GL(glActiveTexture, GL_TEXTURE0 + ct);
+        RSD_CALL_GL(glUniform1i, sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
 
         if (!mRSProgram->mHal.state.textures[ct].get()) {
             // if nothing is bound, reset to default GL texture
-            glBindTexture(mTextureTargets[ct], 0);
+            RSD_CALL_GL(glBindTexture, mTextureTargets[ct], 0);
             continue;
         }
 
@@ -418,21 +425,22 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
             LOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
         }
-        glBindTexture(drvTex->glTarget, drvTex->textureID);
+        RSD_CALL_GL(glBindTexture, drvTex->glTarget, drvTex->textureID);
         rsdGLCheckError(rsc, "ProgramFragment::setup tex bind");
         if (mRSProgram->mHal.state.samplers[ct].get()) {
-            setupSampler(rsc, mRSProgram->mHal.state.samplers[ct].get(), mRSProgram->mHal.state.textures[ct].get());
+            setupSampler(rsc, mRSProgram->mHal.state.samplers[ct].get(),
+                         mRSProgram->mHal.state.textures[ct].get());
         } else {
-            glTexParameteri(drvTex->glTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(drvTex->glTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(drvTex->glTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(drvTex->glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            RSD_CALL_GL(glTexParameteri, drvTex->glTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            RSD_CALL_GL(glTexParameteri, drvTex->glTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            RSD_CALL_GL(glTexParameteri, drvTex->glTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            RSD_CALL_GL(glTexParameteri, drvTex->glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             rsdGLCheckError(rsc, "ProgramFragment::setup tex env");
         }
         rsdGLCheckError(rsc, "ProgramFragment::setup uniforms");
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    RSD_CALL_GL(glActiveTexture, GL_TEXTURE0);
     mDirty = false;
     rsdGLCheckError(rsc, "ProgramFragment::setup");
 }
@@ -442,7 +450,8 @@ void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool 
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
         Allocation *alloc = mRSProgram->mHal.state.constants[ct].get();
         if (!alloc) {
-            LOGE("Attempting to set constants on shader id %u, but alloc at slot %u is not set", (uint32_t)this, ct);
+            LOGE("Attempting to set constants on shader id %u, but alloc at slot %u is not set",
+                 (uint32_t)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "No constant allocation bound");
             continue;
         }
@@ -470,7 +479,8 @@ void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool 
                 arraySize = sc->fragUniformSize(uidx);
             }
             if (rsc->props.mLogShadersUniforms) {
-                LOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s", slot, offset, ct, field, uidx, fieldName);
+                LOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s",
+                     slot, offset, ct, field, uidx, fieldName);
             }
             uidx ++;
             if (slot < 0) {
@@ -528,7 +538,8 @@ void RsdShader::initAttribAndUniformArray() {
     }
 }
 
-void RsdShader::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix) {
+void RsdShader::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths,
+                                   uint32_t *count, const char *prefix) {
     rsAssert(e->getFieldCount());
     for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
         const Element *ce = e->getField(ct);

@@ -17,6 +17,7 @@
 
 #include "rsdFrameBufferObj.h"
 #include "rsdAllocation.h"
+#include "rsdGL.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -124,9 +125,9 @@ void RsdFrameBufferObj::setActive(const Context *rsc) {
     bool framebuffer = renderToFramebuffer();
     if (!framebuffer) {
         if(mFBOId == 0) {
-            glGenFramebuffers(1, &mFBOId);
+            RSD_CALL_GL(glGenFramebuffers, 1, &mFBOId);
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, mFBOId);
+        RSD_CALL_GL(glBindFramebuffer, GL_FRAMEBUFFER, mFBOId);
 
         if (mDirty) {
             setDepthAttachment();
@@ -134,10 +135,10 @@ void RsdFrameBufferObj::setActive(const Context *rsc) {
             mDirty = false;
         }
 
-        glViewport(0, 0, mWidth, mHeight);
+        RSD_CALL_GL(glViewport, 0, 0, mWidth, mHeight);
         checkError(rsc);
     } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, rsc->getWidth(), rsc->getHeight());
+        RSD_CALL_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+        RSD_CALL_GL(glViewport, 0, 0, rsc->getWidth(), rsc->getHeight());
     }
 }

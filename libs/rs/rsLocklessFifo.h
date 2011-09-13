@@ -34,6 +34,7 @@ class LocklessCommandFifo {
 public:
     bool init(uint32_t size);
     void shutdown();
+    void setTimoutCallback(void (*)(void *), void *, uint64_t timeout);
 
     void printDebugData() const;
 
@@ -71,6 +72,10 @@ public:
 
 private:
     void dumpState(const char *) const;
+
+    void (*mTimeoutCallback)(void *);
+    void * mTimeoutCallbackData;
+    uint64_t mTimeoutWait;
 };
 
 

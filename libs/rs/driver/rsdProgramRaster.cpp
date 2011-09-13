@@ -32,18 +32,18 @@ bool rsdProgramRasterInit(const Context *, const ProgramRaster *) {
     return true;
 }
 
-void rsdProgramRasterSetActive(const Context *, const ProgramRaster *pr) {
+void rsdProgramRasterSetActive(const Context *rsc, const ProgramRaster *pr) {
     switch (pr->mHal.state.cull) {
         case RS_CULL_BACK:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
+            RSD_CALL_GL(glEnable, GL_CULL_FACE);
+            RSD_CALL_GL(glCullFace, GL_BACK);
             break;
         case RS_CULL_FRONT:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
+            RSD_CALL_GL(glEnable, GL_CULL_FACE);
+            RSD_CALL_GL(glCullFace, GL_FRONT);
             break;
         case RS_CULL_NONE:
-            glDisable(GL_CULL_FACE);
+            RSD_CALL_GL(glDisable, GL_CULL_FACE);
             break;
     }
 
