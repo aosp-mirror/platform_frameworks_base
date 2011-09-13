@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 /**
@@ -230,5 +231,11 @@ public class CheckedTextView extends TextView implements Checkable {
         } else {
             event.getText().add(mContext.getString(R.string.radiobutton_not_selected));
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setChecked(mChecked);
     }
 }
