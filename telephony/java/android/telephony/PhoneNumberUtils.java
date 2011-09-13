@@ -1547,6 +1547,32 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Checks if a given number is an emergency number for a specific country.
+     *
+     * @param number the number to look up.
+     * @param defaultCountryIso the specific country which the number should be checked against
+     * @return if the number is an emergency number for the specific country, then return true,
+     * otherwise false
+     * @hide
+     */
+    public static boolean isEmergencyNumber(String number, String defaultCountryIso) {
+      PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+      try {
+        PhoneNumber pn = util.parse(number, defaultCountryIso);
+        // libphonenumber guarantees short numbers such as emergency numbers are classified as
+        // invalid. Therefore, if the number passes the validation test, we believe it is not an
+        // emergency number.
+        // TODO: Compare against a list of country-specific known emergency numbers instead, once
+        // that has been collected.
+        if (util.isValidNumber(pn)) {
+          return false;
+        }
+      } catch (NumberParseException e) {
+      }
+      return isEmergencyNumber(number);
+    }
+
+    /**
      * isVoiceMailNumber: checks a given number against the voicemail
      *   number provided by the RIL and SIM card. The caller must have
      *   the READ_PHONE_STATE credential.
