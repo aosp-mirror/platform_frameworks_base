@@ -286,7 +286,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
-    
+
+    boolean mHeadless;
     boolean mSafeMode;
     WindowState mStatusBar = null;
     boolean mStatusBarCanHide;
@@ -783,7 +784,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mPowerManager = powerManager;
-        if ("0".equals(SystemProperties.get("ro.config.headless", "0"))) {
+        mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
+        if (!mHeadless) {
             // don't create KeyguardViewMediator if headless
             mKeyguardMediator = new KeyguardViewMediator(context, this, powerManager);
         }
@@ -2584,7 +2586,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
         // do nothing if headless
-        if (mKeyguardMediator == null) return;
+        if (mHeadless) return;
 
         // lid changed state
         mLidOpen = lidOpen ? LID_OPEN : LID_CLOSED;
@@ -2817,7 +2819,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         //        the device some other way (which is why we have an exemption here for injected
         //        events).
         int result;
-        if (isScreenOn || (isInjected && !isWakeKey)) {
+        if ((isScreenOn && !mHeadless) || (isInjected && !isWakeKey)) {
             // When the screen is on or if the key is injected pass the key to the application.
             result = ACTION_PASS_TO_USER;
         } else {
