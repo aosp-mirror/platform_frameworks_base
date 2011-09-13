@@ -158,7 +158,7 @@ void rsrDrawQuadTexCoords(Context *rsc, Script *sc,
     RsdVertexArray va(attribs, 2);
     va.setup(rsc);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    RSD_CALL_GL(glDrawArrays, GL_TRIANGLE_FAN, 0, 4);
 }
 
 void rsrDrawQuad(Context *rsc, Script *sc,
@@ -245,7 +245,7 @@ void rsrColor(Context *rsc, Script *sc, float r, float g, float b, float a) {
 }
 
 void rsrFinish(Context *rsc, Script *sc) {
-    glFinish();
+    RSD_CALL_GL(glFinish);
 }
 
 
@@ -253,16 +253,16 @@ void rsrClearColor(Context *rsc, Script *sc, float r, float g, float b, float a)
     rsc->mFBOCache.setup(rsc);
     rsc->setupProgramStore();
 
-    glClearColor(r, g, b, a);
-    glClear(GL_COLOR_BUFFER_BIT);
+    RSD_CALL_GL(glClearColor, r, g, b, a);
+    RSD_CALL_GL(glClear, GL_COLOR_BUFFER_BIT);
 }
 
 void rsrClearDepth(Context *rsc, Script *sc, float v) {
     rsc->mFBOCache.setup(rsc);
     rsc->setupProgramStore();
 
-    glClearDepthf(v);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    RSD_CALL_GL(glClearDepthf, v);
+    RSD_CALL_GL(glClear, GL_DEPTH_BUFFER_BIT);
 }
 
 uint32_t rsrGetWidth(Context *rsc, Script *sc) {

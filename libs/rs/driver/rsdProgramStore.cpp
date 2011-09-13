@@ -156,29 +156,29 @@ error:
 void rsdProgramStoreSetActive(const Context *rsc, const ProgramStore *ps) {
     DrvProgramStore *drv = (DrvProgramStore *)ps->mHal.drv;
 
-    glColorMask(ps->mHal.state.colorRWriteEnable,
+    RSD_CALL_GL(glColorMask, ps->mHal.state.colorRWriteEnable,
                 ps->mHal.state.colorGWriteEnable,
                 ps->mHal.state.colorBWriteEnable,
                 ps->mHal.state.colorAWriteEnable);
 
     if (drv->blendEnable) {
-        glEnable(GL_BLEND);
-        glBlendFunc(drv->blendSrc, drv->blendDst);
+        RSD_CALL_GL(glEnable, GL_BLEND);
+        RSD_CALL_GL(glBlendFunc, drv->blendSrc, drv->blendDst);
     } else {
-        glDisable(GL_BLEND);
+        RSD_CALL_GL(glDisable, GL_BLEND);
     }
 
     if (rsc->mUserSurfaceConfig.depthMin > 0) {
-        glDepthMask(ps->mHal.state.depthWriteEnable);
+        RSD_CALL_GL(glDepthMask, ps->mHal.state.depthWriteEnable);
         if (drv->depthTestEnable || ps->mHal.state.depthWriteEnable) {
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(drv->depthFunc);
+            RSD_CALL_GL(glEnable, GL_DEPTH_TEST);
+            RSD_CALL_GL(glDepthFunc, drv->depthFunc);
         } else {
-            glDisable(GL_DEPTH_TEST);
+            RSD_CALL_GL(glDisable, GL_DEPTH_TEST);
         }
     } else {
-        glDepthMask(false);
-        glDisable(GL_DEPTH_TEST);
+        RSD_CALL_GL(glDepthMask, false);
+        RSD_CALL_GL(glDisable, GL_DEPTH_TEST);
     }
 
     /*
@@ -190,9 +190,9 @@ void rsdProgramStoreSetActive(const Context *rsc, const ProgramStore *ps) {
     */
 
     if (ps->mHal.state.ditherEnable) {
-        glEnable(GL_DITHER);
+        RSD_CALL_GL(glEnable, GL_DITHER);
     } else {
-        glDisable(GL_DITHER);
+        RSD_CALL_GL(glDisable, GL_DITHER);
     }
 }
 

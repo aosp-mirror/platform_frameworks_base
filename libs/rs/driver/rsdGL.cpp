@@ -135,18 +135,19 @@ void rsdGLShutdown(const Context *rsc) {
     LOGV("%p, deinitEGL", rsc);
 
     if (dc->gl.egl.context != EGL_NO_CONTEXT) {
-        eglMakeCurrent(dc->gl.egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        eglDestroySurface(dc->gl.egl.display, dc->gl.egl.surfaceDefault);
+        RSD_CALL_GL(eglMakeCurrent, dc->gl.egl.display,
+                    EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        RSD_CALL_GL(eglDestroySurface, dc->gl.egl.display, dc->gl.egl.surfaceDefault);
         if (dc->gl.egl.surface != EGL_NO_SURFACE) {
-            eglDestroySurface(dc->gl.egl.display, dc->gl.egl.surface);
+            RSD_CALL_GL(eglDestroySurface, dc->gl.egl.display, dc->gl.egl.surface);
         }
-        eglDestroyContext(dc->gl.egl.display, dc->gl.egl.context);
+        RSD_CALL_GL(eglDestroyContext, dc->gl.egl.display, dc->gl.egl.context);
         checkEglError("eglDestroyContext");
     }
 
     gGLContextCount--;
     if (!gGLContextCount) {
-        eglTerminate(dc->gl.egl.display);
+        RSD_CALL_GL(eglTerminate, dc->gl.egl.display);
     }
 }
 
@@ -202,21 +203,25 @@ bool rsdGLInit(const Context *rsc) {
     rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
     LOGV("%p initEGL start", rsc);
+    rsc->setWatchdogGL("eglGetDisplay", __LINE__, __FILE__);
     dc->gl.egl.display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     checkEglError("eglGetDisplay");
 
-    eglInitialize(dc->gl.egl.display, &dc->gl.egl.majorVersion, &dc->gl.egl.minorVersion);
+    RSD_CALL_GL(eglInitialize, dc->gl.egl.display,
+                &dc->gl.egl.majorVersion, &dc->gl.egl.minorVersion);
     checkEglError("eglInitialize");
 
     EGLBoolean ret;
 
     EGLint numConfigs = -1, n = 0;
+    rsc->setWatchdogGL("eglChooseConfig", __LINE__, __FILE__);
     ret = eglChooseConfig(dc->gl.egl.display, configAttribs, 0, 0, &numConfigs);
     checkEglError("eglGetConfigs", ret);
 
     if (numConfigs) {
         EGLConfig* const configs = new EGLConfig[numConfigs];
 
+        rsc->setWatchdogGL("eglChooseConfig", __LINE__, __FILE__);
         ret = eglChooseConfig(dc->gl.egl.display,
                 configAttribs, configs, numConfigs, &n);
         if (!ret || !n) {
@@ -261,32 +266,38 @@ bool rsdGLInit(const Context *rsc) {
     }
     //}
 
+    rsc->setWatchdogGL("eglCreateContext", __LINE__, __FILE__);
     dc->gl.egl.context = eglCreateContext(dc->gl.egl.display, dc->gl.egl.config,
                                           EGL_NO_CONTEXT, context_attribs2);
     checkEglError("eglCreateContext");
     if (dc->gl.egl.context == EGL_NO_CONTEXT) {
         LOGE("%p, eglCreateContext returned EGL_NO_CONTEXT", rsc);
+        rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
     }
     gGLContextCount++;
 
 
     EGLint pbuffer_attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+    rsc->setWatchdogGL("eglCreatePbufferSurface", __LINE__, __FILE__);
     dc->gl.egl.surfaceDefault = eglCreatePbufferSurface(dc->gl.egl.display, dc->gl.egl.config,
                                                         pbuffer_attribs);
     checkEglError("eglCreatePbufferSurface");
     if (dc->gl.egl.surfaceDefault == EGL_NO_SURFACE) {
         LOGE("eglCreatePbufferSurface returned EGL_NO_SURFACE");
         rsdGLShutdown(rsc);
+        rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
     }
 
+    rsc->setWatchdogGL("eglMakeCurrent", __LINE__, __FILE__);
     ret = eglMakeCurrent(dc->gl.egl.display, dc->gl.egl.surfaceDefault,
                          dc->gl.egl.surfaceDefault, dc->gl.egl.context);
     if (ret == EGL_FALSE) {
         LOGE("eglMakeCurrent returned EGL_FALSE");
         checkEglError("eglMakeCurrent", ret);
         rsdGLShutdown(rsc);
+        rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
     }
 
@@ -314,6 +325,7 @@ bool rsdGLInit(const Context *rsc) {
     if (!verptr) {
         LOGE("Error, OpenGL ES Lite not supported");
         rsdGLShutdown(rsc);
+        rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
     } else {
         sscanf(verptr, " %i.%i", &dc->gl.gl.majorVersion, &dc->gl.gl.minorVersion);
@@ -352,6 +364,7 @@ bool rsdGLInit(const Context *rsc) {
     dc->gl.currentFrameBuffer = NULL;
 
     LOGV("initGLThread end %p", rsc);
+    rsc->setWatchdogGL(NULL, 0, NULL);
     return true;
 }
 
@@ -363,10 +376,12 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow 
     // WAR: Some drivers fail to handle 0 size surfaces correcntly.
     // Use the pbuffer to avoid this pitfall.
     if ((dc->gl.egl.surface != NULL) || (w == 0) || (h == 0)) {
+        rsc->setWatchdogGL("eglMakeCurrent", __LINE__, __FILE__);
         ret = eglMakeCurrent(dc->gl.egl.display, dc->gl.egl.surfaceDefault,
                              dc->gl.egl.surfaceDefault, dc->gl.egl.context);
         checkEglError("eglMakeCurrent", ret);
 
+        rsc->setWatchdogGL("eglDestroySurface", __LINE__, __FILE__);
         ret = eglDestroySurface(dc->gl.egl.display, dc->gl.egl.surface);
         checkEglError("eglDestroySurface", ret);
 
@@ -385,6 +400,7 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow 
         dc->gl.width = w;
         dc->gl.height = h;
 
+        rsc->setWatchdogGL("eglCreateWindowSurface", __LINE__, __FILE__);
         dc->gl.egl.surface = eglCreateWindowSurface(dc->gl.egl.display, dc->gl.egl.config,
                                                     dc->gl.wndSurface, NULL);
         checkEglError("eglCreateWindowSurface");
@@ -392,16 +408,18 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow 
             LOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
         }
 
+        rsc->setWatchdogGL("eglMakeCurrent", __LINE__, __FILE__);
         ret = eglMakeCurrent(dc->gl.egl.display, dc->gl.egl.surface,
                              dc->gl.egl.surface, dc->gl.egl.context);
         checkEglError("eglMakeCurrent", ret);
     }
+    rsc->setWatchdogGL(NULL, 0, NULL);
     return true;
 }
 
 void rsdGLSwap(const android::renderscript::Context *rsc) {
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
-    eglSwapBuffers(dc->gl.egl.display, dc->gl.egl.surface);
+    RSD_CALL_GL(eglSwapBuffers, dc->gl.egl.display, dc->gl.egl.surface);
 }
 
 void rsdGLCheckError(const android::renderscript::Context *rsc,

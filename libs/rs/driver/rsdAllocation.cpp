@@ -73,27 +73,27 @@ GLenum rsdKindToGLFormat(RsDataKind k) {
 }
 
 
-static void Update2DTexture(const Allocation *alloc, const void *ptr, uint32_t xoff, uint32_t yoff,
-                     uint32_t lod, RsAllocationCubemapFace face,
-                     uint32_t w, uint32_t h) {
+static void Update2DTexture(const Context *rsc, const Allocation *alloc, const void *ptr,
+                            uint32_t xoff, uint32_t yoff, uint32_t lod,
+                            RsAllocationCubemapFace face, uint32_t w, uint32_t h) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
     rsAssert(drv->textureID);
-    glBindTexture(drv->glTarget, drv->textureID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    RSD_CALL_GL(glBindTexture, drv->glTarget, drv->textureID);
+    RSD_CALL_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 1);
     GLenum t = GL_TEXTURE_2D;
     if (alloc->mHal.state.hasFaces) {
         t = gFaceOrder[face];
     }
-    glTexSubImage2D(t, lod, xoff, yoff, w, h, drv->glFormat, drv->glType, ptr);
+    RSD_CALL_GL(glTexSubImage2D, t, lod, xoff, yoff, w, h, drv->glFormat, drv->glType, ptr);
 }
 
 
 static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool isFirstUpload) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
-    glBindTexture(drv->glTarget, drv->textureID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    RSD_CALL_GL(glBindTexture, drv->glTarget, drv->textureID);
+    RSD_CALL_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 1);
 
     uint32_t faceCount = 1;
     if (alloc->mHal.state.hasFaces) {
@@ -112,12 +112,12 @@ static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool is
             }
 
             if (isFirstUpload) {
-                glTexImage2D(t, lod, drv->glFormat,
+                RSD_CALL_GL(glTexImage2D, t, lod, drv->glFormat,
                              alloc->mHal.state.type->getLODDimX(lod),
                              alloc->mHal.state.type->getLODDimY(lod),
                              0, drv->glFormat, drv->glType, p);
             } else {
-                glTexSubImage2D(t, lod, 0, 0,
+                RSD_CALL_GL(glTexSubImage2D, t, lod, 0, 0,
                                 alloc->mHal.state.type->getLODDimX(lod),
                                 alloc->mHal.state.type->getLODDimY(lod),
                                 drv->glFormat, drv->glType, p);
@@ -126,7 +126,7 @@ static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool is
     }
 
     if (alloc->mHal.state.mipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
-        glGenerateMipmap(drv->glTarget);
+        RSD_CALL_GL(glGenerateMipmap, drv->glTarget);
     }
     rsdGLCheckError(rsc, "Upload2DTexture");
 }
@@ -145,7 +145,7 @@ static void UploadToTexture(const Context *rsc, const Allocation *alloc) {
     bool isFirstUpload = false;
 
     if (!drv->textureID) {
-        glGenTextures(1, &drv->textureID);
+        RSD_CALL_GL(glGenTextures, 1, &drv->textureID);
         isFirstUpload = true;
     }
 
@@ -168,7 +168,7 @@ static void AllocateRenderTarget(const Context *rsc, const Allocation *alloc) {
     }
 
     if (!drv->renderTargetID) {
-        glGenRenderbuffers(1, &drv->renderTargetID);
+        RSD_CALL_GL(glGenRenderbuffers, 1, &drv->renderTargetID);
 
         if (!drv->renderTargetID) {
             // This should generally not happen
@@ -176,8 +176,8 @@ static void AllocateRenderTarget(const Context *rsc, const Allocation *alloc) {
             rsc->dumpDebug();
             return;
         }
-        glBindRenderbuffer(GL_RENDERBUFFER, drv->renderTargetID);
-        glRenderbufferStorage(GL_RENDERBUFFER, drv->glFormat,
+        RSD_CALL_GL(glBindRenderbuffer, GL_RENDERBUFFER, drv->renderTargetID);
+        RSD_CALL_GL(glRenderbufferStorage, GL_RENDERBUFFER, drv->glFormat,
                               alloc->mHal.state.dimensionX, alloc->mHal.state.dimensionY);
     }
     rsdGLCheckError(rsc, "AllocateRenderTarget");
@@ -192,17 +192,17 @@ static void UploadToBufferObject(const Context *rsc, const Allocation *alloc) {
     //alloc->mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
 
     if (!drv->bufferID) {
-        glGenBuffers(1, &drv->bufferID);
+        RSD_CALL_GL(glGenBuffers, 1, &drv->bufferID);
     }
     if (!drv->bufferID) {
         LOGE("Upload to buffer object failed");
         drv->uploadDeferred = true;
         return;
     }
-    glBindBuffer(drv->glTarget, drv->bufferID);
-    glBufferData(drv->glTarget, alloc->mHal.state.type->getSizeBytes(),
+    RSD_CALL_GL(glBindBuffer, drv->glTarget, drv->bufferID);
+    RSD_CALL_GL(glBufferData, drv->glTarget, alloc->mHal.state.type->getSizeBytes(),
                  drv->mallocPtr, GL_DYNAMIC_DRAW);
-    glBindBuffer(drv->glTarget, 0);
+    RSD_CALL_GL(glBindBuffer, drv->glTarget, 0);
     rsdGLCheckError(rsc, "UploadToBufferObject");
 }
 
@@ -261,11 +261,11 @@ void rsdAllocationDestroy(const Context *rsc, Allocation *alloc) {
         //mBufferID = 0;
     }
     if (drv->textureID) {
-        glDeleteTextures(1, &drv->textureID);
+        RSD_CALL_GL(glDeleteTextures, 1, &drv->textureID);
         drv->textureID = 0;
     }
     if (drv->renderTargetID) {
-        glDeleteRenderbuffers(1, &drv->renderTargetID);
+        RSD_CALL_GL(glDeleteRenderbuffers, 1, &drv->renderTargetID);
         drv->renderTargetID = 0;
     }
 
@@ -323,7 +323,7 @@ static void rsdAllocationSyncFromFBO(const Context *rsc, const Allocation *alloc
     drv->readBackFBO->setActive(rsc);
 
     // Do the readback
-    glReadPixels(0, 0, alloc->getType()->getDimX(), alloc->getType()->getDimY(),
+    RSD_CALL_GL(glReadPixels, 0, 0, alloc->getType()->getDimX(), alloc->getType()->getDimY(),
                  drv->glFormat, drv->glType, alloc->getPtr());
 
     // Revert framebuffer to its original
@@ -414,7 +414,7 @@ void rsdAllocationData2D(const Context *rsc, const Allocation *alloc,
         }
         drv->uploadDeferred = true;
     } else {
-        Update2DTexture(alloc, data, xoff, yoff, lod, face, w, h);
+        Update2DTexture(rsc, alloc, data, xoff, yoff, lod, face, w, h);
     }
 }
 
