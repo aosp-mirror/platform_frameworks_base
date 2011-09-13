@@ -108,7 +108,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     /**
      * @param context Context for the application
      * @param locale locale Locale of the suggestions
-     * @param suggestions Suggestions for the string under the span
+     * @param suggestions Suggestions for the string under the span. Only the first up to
+     * {@link SuggestionSpan#SUGGESTIONS_MAX_SIZE} will be considered.
      * @param flags Additional flags indicating how this span is handled in TextView
      * @param notificationTargetClass if not null, this class will get notified when the user
      * selects one of the suggestions.
@@ -258,10 +259,16 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
 
     @Override
     public void updateDrawState(TextPaint tp) {
-        if ((mFlags & FLAG_MISSPELLED) != 0) {
-            tp.setUnderlineText(mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
-        } else if ((mFlags & FLAG_EASY_CORRECT) != 0) {
-            tp.setUnderlineText(mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
+        final boolean misspelled = (mFlags & FLAG_MISSPELLED) != 0;
+        final boolean easy = (mFlags & FLAG_EASY_CORRECT) != 0;
+        if (easy) {
+            if (!misspelled) {
+                tp.setUnderlineText(mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
+            } else if (tp.underlineColor == 0) {
+                // Spans are rendered in an arbitrary order. Since misspelled is less prioritary
+                // than just easy, do not apply misspelled if an easy (or a mispelled) has been set
+                tp.setUnderlineText(mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
+            }
         }
     }
 
@@ -272,8 +279,15 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      */
     public int getUnderlineColor() {
         // The order here should match what is used in updateDrawState
-        if ((mFlags & FLAG_MISSPELLED) != 0) return mMisspelledUnderlineColor;
-        if ((mFlags & FLAG_EASY_CORRECT) != 0) return mEasyCorrectUnderlineColor;
+        final boolean misspelled = (mFlags & FLAG_MISSPELLED) != 0;
+        final boolean easy = (mFlags & FLAG_EASY_CORRECT) != 0;
+        if (easy) {
+            if (!misspelled) {
+                return mEasyCorrectUnderlineColor;
+            } else {
+                return mMisspelledUnderlineColor;
+            }
+        }
         return 0;
     }
 }
