@@ -19,7 +19,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="3mm"
-        android:stretchColumns="0,1">
+        android:stretchColumns="0,1"
+        android:shrinkColumns="1">
 
     <TableRow>
         <TextView android:text="@string/session" style="@style/label"/>

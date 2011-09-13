@@ -24,7 +24,7 @@
 
     <style name="label">
         <item name="android:gravity">center_vertical|right</item>
-        <item name="android:paddingRight">5mm</item>
+        <item name="android:paddingRight">2mm</item>
         <item name="android:textSize">16sp</item>
     </style>
 
