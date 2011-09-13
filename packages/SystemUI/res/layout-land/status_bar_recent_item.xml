@@ -42,6 +42,7 @@
             <ImageView android:id="@+id/app_thumbnail_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="invisible"
             />
         </FrameLayout>
 
@@ -71,6 +72,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:visibility="invisible"
+            android:textColor="@color/status_bar_recents_app_label_color"
         />
 
         <TextView android:id="@+id/app_description"
