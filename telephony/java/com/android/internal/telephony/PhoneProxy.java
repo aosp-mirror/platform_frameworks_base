@@ -686,6 +686,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getMeid();
     }
 
+    public String getMsisdn() {
+        return mActivePhone.getMsisdn();
+    }
+
     public String getImei() {
         return mActivePhone.getImei();
     }

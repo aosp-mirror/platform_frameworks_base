@@ -932,7 +932,8 @@ public interface Phone {
     boolean getCallForwardingIndicator();
 
     /**
-     * Get the line 1 phone number (MSISDN).<p>
+     * Get the line 1 phone number (MSISDN). For CDMA phones, the MDN is returned
+     * and {@link #getMsisdn()} will return the MSISDN on CDMA/LTE phones.<p>
      *
      * @return phone number. May return null if not
      * available or the SIM is not ready
@@ -1430,6 +1431,13 @@ public interface Phone {
      * Retrieves MEID for CDMA phones.
      */
     String getMeid();
+
+    /**
+     * Retrieves the MSISDN from the UICC. For GSM/UMTS phones, this is equivalent to
+     * {@link #getLine1Number()}. For CDMA phones, {@link #getLine1Number()} returns
+     * the MDN, so this method is provided to return the MSISDN on CDMA/LTE phones.
+     */
+    String getMsisdn();
 
     /**
      * Retrieves IMEI for phones. Returns null if IMEI is not set.

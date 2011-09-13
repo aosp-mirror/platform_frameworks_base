@@ -877,6 +877,11 @@ public class GSMPhone extends PhoneBase {
         return mIccRecords.getMsisdnNumber();
     }
 
+    @Override
+    public String getMsisdn() {
+        return mIccRecords.getMsisdnNumber();
+    }
+
     public String getLine1AlphaTag() {
         return mIccRecords.getMsisdnAlphaTag();
     }

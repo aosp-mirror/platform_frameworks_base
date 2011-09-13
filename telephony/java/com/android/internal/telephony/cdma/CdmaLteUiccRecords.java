@@ -19,6 +19,7 @@ import android.os.AsyncResult;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccCardApplication.AppType;
 import com.android.internal.telephony.IccFileHandler;
@@ -274,6 +275,10 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
         iccFh.loadEFTransparent(EF_PL,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfPlLoaded()));
+        recordsToLoad++;
+
+        new AdnRecordLoader(phone).loadFromEF(EF_MSISDN, EF_EXT1, 1,
+                obtainMessage(EVENT_GET_MSISDN_DONE));
         recordsToLoad++;
 
         iccFh.loadEFTransparent(EF_CSIM_LI,

@@ -127,7 +127,7 @@ public class SIMRecords extends IccRecords {
     private static final int EVENT_GET_MWIS_DONE = 7;
     private static final int EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE = 8;
     protected static final int EVENT_GET_AD_DONE = 9; // Admin data on SIM
-    private static final int EVENT_GET_MSISDN_DONE = 10;
+    protected static final int EVENT_GET_MSISDN_DONE = 10;
     private static final int EVENT_GET_CPHS_MAILBOX_DONE = 11;
     private static final int EVENT_GET_SPN_DONE = 12;
     private static final int EVENT_GET_SPDI_DONE = 13;
