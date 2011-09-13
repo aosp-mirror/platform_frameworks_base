@@ -3774,6 +3774,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 // Fall through
             case TOUCH_MODE_FLING: {
+                if (mDataChanged) {
+                    layoutChildren();
+                }
+
                 if (mItemCount == 0 || getChildCount() == 0) {
                     endFling();
                     return;
