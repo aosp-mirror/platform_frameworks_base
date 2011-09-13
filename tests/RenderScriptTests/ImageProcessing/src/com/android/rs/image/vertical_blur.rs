@@ -55,27 +55,20 @@ void setGamma(float g) {
     gamma = (float3)g;
 }
 
-//sliao
-extern uchar3 __attribute__((overloadable)) convert2uchar3(float3 xyz);
-
-void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32_t y) {
-    uchar4 *output = (uchar4 *)v_out;
+void root(uchar4 *out, const void *usrData, uint32_t x, uint32_t y) {
     const FilterStruct *fs = (const FilterStruct *)usrData;
-    const float4 *input = (const float4 *)rsGetElementAt(fs->ain, x, 0);
-
     float3 blurredPixel = 0;
     const float *gPtr = fs->gaussian;
     if ((y > fs->radius) && (y < (fs->height - fs->radius))) {
-        const float4 *i = input + ((y - fs->radius) * fs->width);
         for (int r = -fs->radius; r <= fs->radius; r ++) {
+            const float4 *i = (const float4 *)rsGetElementAt(fs->ain, x, y + r);
             blurredPixel += i->xyz * gPtr[0];
             gPtr++;
-            i += fs->width;
         }
     } else {
         for (int r = -fs->radius; r <= fs->radius; r ++) {
             int validH = rsClamp((int)y + r, (int)0, (int)(fs->height - 1));
-            const float4 *i = input + validH * fs->width;
+            const float4 *i = (const float4 *)rsGetElementAt(fs->ain, x, validH);
             blurredPixel += i->xyz * gPtr[0];
             gPtr++;
         }
@@ -87,7 +80,7 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
         temp = pow(temp, (float3)gamma);
     temp = clamp(temp * outWMinOutB + outBlack, 0.f, 255.f);
 
-    output->xyz = convert_uchar3(temp);
+    out->xyz = convert_uchar3(temp);
     //output->w = input->w;
 }
 
