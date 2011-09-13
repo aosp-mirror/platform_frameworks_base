@@ -164,11 +164,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     final W mWindow;
 
+    final int mTargetSdkVersion;
+
     View mView;
     View mFocusedView;
     View mRealFocusedView;  // this is not set to null in touch mode
     int mViewVisibility;
     boolean mAppVisible = true;
+    int mOrigWindowType = -1;
 
     // Set to true if the owner of this window is in the stopped state,
     // so the window should no longer be active.
@@ -331,6 +334,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         mVisRect = new Rect();
         mWinFrame = new Rect();
         mWindow = new W(this);
+        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         mInputMethodCallback = new InputMethodCallback(this);
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
@@ -461,6 +465,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     mInputChannel = new InputChannel();
                 }
                 try {
+                    mOrigWindowType = mWindowAttributes.type;
                     res = sWindowSession.add(mWindow, mWindowAttributes,
                             getHostVisibility(), mAttachInfo.mContentInsets,
                             mInputChannel);
@@ -3481,6 +3486,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
         mPendingConfiguration.seq = 0;
         //Log.d(TAG, ">>>>>> CALLING relayout");
+        if (params != null && mOrigWindowType != params.type) {
+            // For compatibility with old apps, don't crash here.
+            if (mTargetSdkVersion < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                Slog.w(TAG, "Window type can not be changed after "
+                        + "the window is added; ignoring change of " + mView);
+                params.type = mOrigWindowType;
+            }
+        }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
