@@ -86,7 +86,9 @@ uint32_t Context::runScript(Script *s) {
 uint32_t Context::runRootScript() {
     timerSet(RS_TIMER_SCRIPT);
     mStateFragmentStore.mLast.clear();
+    watchdog.inRoot = true;
     uint32_t ret = runScript(mRootScript.get());
+    watchdog.inRoot = false;
 
     return ret;
 }
@@ -317,6 +319,13 @@ void Context::destroyWorkerThreadResources() {
     mExit = true;
 }
 
+void Context::printWatchdogInfo(void *ctx) {
+    Context *rsc = (Context *)ctx;
+    LOGE("RS watchdog timeout: %i  %s  line %i %s", rsc->watchdog.inRoot,
+         rsc->watchdog.command, rsc->watchdog.line, rsc->watchdog.file);
+}
+
+
 void Context::setPriority(int32_t p) {
     // Note: If we put this in the proper "background" policy
     // the wallpapers can become completly unresponsive at times.
@@ -368,6 +377,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     pthread_mutex_lock(&gInitMutex);
 
     mIO.init();
+    mIO.setTimoutCallback(printWatchdogInfo, this, 2e9);
 
     dev->addContext(this);
     mDev = dev;

@@ -130,7 +130,8 @@ bool RsdMeshObj::init() {
     return true;
 }
 
-void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, uint32_t start, uint32_t len) const {
+void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
+                                      uint32_t start, uint32_t len) const {
     if (len < 1 || primIndex >= mRSMesh->mHal.state.primitivesCount || mAttribCount == 0) {
         LOGE("Invalid mesh or parameters");
         return;
@@ -171,14 +172,16 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
         }
 
         if (drvAlloc->bufferID) {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drvAlloc->bufferID);
-            glDrawElements(mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT, (uint16_t *)(start * 2));
+            RSD_CALL_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, drvAlloc->bufferID);
+            RSD_CALL_GL(glDrawElements, mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT,
+                        (uint16_t *)(start * 2));
         } else {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-            glDrawElements(mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT, drvAlloc->mallocPtr);
+            RSD_CALL_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
+            RSD_CALL_GL(glDrawElements, mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT,
+                        drvAlloc->mallocPtr);
         }
     } else {
-        glDrawArrays(mGLPrimitives[primIndex], start, len);
+        RSD_CALL_GL(glDrawArrays, mGLPrimitives[primIndex], start, len);
     }
 
     rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange");

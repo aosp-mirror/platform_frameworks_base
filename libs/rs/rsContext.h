@@ -191,6 +191,19 @@ public:
         bool mLogVisual;
     } props;
 
+    mutable struct {
+        bool inRoot;
+        const char *command;
+        const char *file;
+        uint32_t line;
+    } watchdog;
+    static void printWatchdogInfo(void *ctx);
+    void setWatchdogGL(const char *cmd, uint32_t line, const char *file) const {
+        watchdog.command = cmd;
+        watchdog.file = file;
+        watchdog.line = line;
+    }
+
     void dumpDebug() const;
     void setError(RsError e, const char *msg = NULL) const;
 

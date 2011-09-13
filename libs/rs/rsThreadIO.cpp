@@ -112,6 +112,10 @@ void ThreadIO::coreGetReturn(void *data, size_t dataLen) {
     memcpy(data, &mToCoreRet, dataLen);
 }
 
+void ThreadIO::setTimoutCallback(void (*cb)(void *), void *dat, uint64_t timeout) {
+    mToCore.setTimoutCallback(cb, dat, timeout);
+}
+
 
 bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand, uint64_t timeToWait) {
     bool ret = false;

@@ -39,6 +39,7 @@ public:
     // Returns true if any commands were processed.
     bool playCoreCommands(Context *con, bool waitForCommand, uint64_t timeToWait);
 
+    void setTimoutCallback(void (*)(void *), void *, uint64_t timeout);
     //LocklessCommandFifo mToCore;
 
 
