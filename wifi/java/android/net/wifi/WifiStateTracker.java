@@ -162,7 +162,7 @@ public class WifiStateTracker implements NetworkStateTracker {
      * Fetch NetworkInfo for the network
      */
     public NetworkInfo getNetworkInfo() {
-        return mNetworkInfo;
+        return new NetworkInfo(mNetworkInfo);
     }
 
     /**
@@ -242,7 +242,8 @@ public class WifiStateTracker implements NetworkStateTracker {
                 } else {
                     mLastState = state;
                 }
-                Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
+                Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED,
+                        new NetworkInfo(mNetworkInfo));
                 msg.sendToTarget();
             } else if (intent.getAction().equals(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION)) {
                 mLinkProperties = (LinkProperties) intent.getParcelableExtra(
