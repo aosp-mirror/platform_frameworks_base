@@ -486,6 +486,7 @@ private:
     int                     mSessionId;
     int                     mAuxEffectId;
     Mutex                   mLock;
+    status_t                mRestoreStatus;
 };
 
 
