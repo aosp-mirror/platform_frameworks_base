@@ -1124,6 +1124,11 @@ public abstract class PhoneBase extends Handler implements Phone {
         Log.e(LOG_TAG, "requestIsimAuthentication() is only supported on LTE devices");
     }
 
+    public String getMsisdn() {
+        logUnexpectedGsmMethodCall("getMsisdn");
+        return null;
+    }
+
     /**
      * Common error logger method for unexpected calls to CDMA-only methods.
      */
