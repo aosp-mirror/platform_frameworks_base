@@ -39,6 +39,8 @@ import java.util.TimeZone;
 
    The caller is expected to know the type of the metadata and call
    the right get* method to fetch its value.
+   
+   @hide
  */
 public class Metadata
 {
