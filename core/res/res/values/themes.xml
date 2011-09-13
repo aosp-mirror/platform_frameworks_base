@@ -616,6 +616,9 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceLargeInverse">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceMediumInverse">@android:style/TextAppearance.Medium.Inverse</item>
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
+
+        <item name="listPreferredItemPaddingLeft">10dip</item>
+        <item name="listPreferredItemPaddingRight">10dip</item>
     </style>
 
     <!-- Variation of Theme.Dialog that does not include a frame (or background).
@@ -640,6 +643,8 @@ please see themes_device_defaults.xml.
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowContentOverlay">@null</item>
         <item name="itemTextAppearance">@android:style/TextAppearance.Large.Inverse</item>
+        <item name="textAppearanceListItem">@android:style/TextAppearance.Large.Inverse</item>
+        <item name="textAppearanceListItemSmall">@android:style/TextAppearance.Large.Inverse</item>
     </style>
     
     <!-- Default dark theme for panel windows.  This removes all extraneous
