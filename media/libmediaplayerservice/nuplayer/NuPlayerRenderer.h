@@ -74,6 +74,8 @@ private:
         status_t mFinalResult;
     };
 
+    static const int64_t kMinPositionUpdateDelayUs;
+
     sp<MediaPlayerBase::AudioSink> mAudioSink;
     sp<AMessage> mNotify;
     List<QueueEntry> mAudioQueue;
@@ -97,6 +99,8 @@ private:
     bool mSyncQueues;
 
     bool mPaused;
+
+    int64_t mLastPositionUpdateUs;
 
     void onDrainAudioQueue();
     void postDrainAudioQueue();
