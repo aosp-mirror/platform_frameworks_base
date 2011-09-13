@@ -189,6 +189,7 @@ public class AccountManager {
     public static final String KEY_ERROR_CODE = "errorCode";
     public static final String KEY_ERROR_MESSAGE = "errorMessage";
     public static final String KEY_USERDATA = "userdata";
+
     /**
      * Authenticators using 'customTokens' option will also get the UID of the
      * caller
@@ -814,11 +815,13 @@ public class AccountManager {
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
+        final Bundle optionsIn = options == null ? new Bundle() : options;
+        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.getAuthToken(mResponse, account, authTokenType,
                         false /* notifyOnAuthFailure */, true /* expectActivityLaunch */,
-                        options);
+                        optionsIn);
             }
         }.start();
     }
@@ -895,16 +898,11 @@ public class AccountManager {
      */
     @Deprecated
     public AccountManagerFuture<Bundle> getAuthToken(
-            final Account account, final String authTokenType, final boolean notifyAuthFailure,
+            final Account account, final String authTokenType, 
+            final boolean notifyAuthFailure,
             AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (account == null) throw new IllegalArgumentException("account is null");
-        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        return new AmsTask(null, handler, callback) {
-            public void doWork() throws RemoteException {
-                mService.getAuthToken(mResponse, account, authTokenType,
-                        notifyAuthFailure, false /* expectActivityLaunch */, null /* options */);
-            }
-        }.start();
+        return getAuthToken(account, authTokenType, null, notifyAuthFailure, callback, 
+                handler);
     }
 
     /**
@@ -978,15 +976,18 @@ public class AccountManager {
      * account before requesting an auth token.
      */
     public AccountManagerFuture<Bundle> getAuthToken(
-            final Account account, final String authTokenType,
-            final Bundle options, final boolean notifyAuthFailure,
+            final Account account, final String authTokenType, final Bundle options,
+            final boolean notifyAuthFailure,
             AccountManagerCallback<Bundle> callback, Handler handler) {
+
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
+        final Bundle optionsIn = options == null ? new Bundle() : options;
+        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
         return new AmsTask(null, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.getAuthToken(mResponse, account, authTokenType,
-                        notifyAuthFailure, false /* expectActivityLaunch */, options);
+                        notifyAuthFailure, false /* expectActivityLaunch */, optionsIn);
             }
         }.start();
     }
@@ -1044,10 +1045,14 @@ public class AccountManager {
             final Bundle addAccountOptions,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
+        final Bundle options = (addAccountOptions == null) ? new Bundle() :
+            addAccountOptions;
+        options.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.addAcount(mResponse, accountType, authTokenType,
-                        requiredFeatures, activity != null, addAccountOptions);
+                        requiredFeatures, activity != null, options);
             }
         }.start();
     }
