@@ -163,20 +163,20 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                 // Update timing information for statistics
                 value->setElapsedTime(endTime - startTime);
 
-                LOGD("CACHE MISS: Added entry for text='%s' with start=%d, count=%d, "
+                LOGD("CACHE MISS: Added entry with start=%d, count=%d, "
                         "contextCount=%d, entry size %d bytes, remaining space %d bytes"
-                        " - Compute time in nanos: %d",
-                        String8(text, contextCount).string(), start, count, contextCount,
-                        size, mMaxSize - mSize, value->getElapsedTime());
+                        " - Compute time in nanos: %d - Text='%s' ",
+                        start, count, contextCount, size, mMaxSize - mSize, value->getElapsedTime(),
+                        String8(text, contextCount).string());
             }
         } else {
             if (mDebugEnabled) {
                 LOGD("CACHE MISS: Calculated but not storing entry because it is too big "
-                        "for text='%s' with start=%d, count=%d, contextCount=%d, "
+                        "with start=%d, count=%d, contextCount=%d, "
                         "entry size %d bytes, remaining space %d bytes"
-                        " - Compute time in nanos: %lld",
-                        String8(text, contextCount).string(), start, count, contextCount,
-                        size, mMaxSize - mSize, endTime);
+                        " - Compute time in nanos: %lld - Text='%s'",
+                        start, count, contextCount, size, mMaxSize - mSize, endTime,
+                        String8(text, contextCount).string());
             }
             value.clear();
         }
@@ -190,12 +190,12 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             if (value->getElapsedTime() > 0) {
                 float deltaPercent = 100 * ((value->getElapsedTime() - elapsedTimeThruCacheGet)
                         / ((float)value->getElapsedTime()));
-                LOGD("CACHE HIT #%d for text='%s' with start=%d, count=%d, contextCount=%d "
+                LOGD("CACHE HIT #%d with start=%d, count=%d, contextCount=%d "
                         "- Compute time in nanos: %d - "
-                        "Cache get time in nanos: %lld - Gain in percent: %2.2f",
-                        mCacheHitCount, String8(text, contextCount).string(), start, count,
-                        contextCount,
-                        value->getElapsedTime(), elapsedTimeThruCacheGet, deltaPercent);
+                        "Cache get time in nanos: %lld - Gain in percent: %2.2f - Text='%s' ",
+                        mCacheHitCount, start, count, contextCount,
+                        value->getElapsedTime(), elapsedTimeThruCacheGet, deltaPercent,
+                        String8(text, contextCount).string());
             }
             if (mCacheHitCount % DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL == 0) {
                 dumpCacheStats();
