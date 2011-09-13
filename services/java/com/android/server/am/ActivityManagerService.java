@@ -3895,7 +3895,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             booting = mBooting;
             mBooting = false;
-            enableScreen = !mBooted && !mHeadless;
+            enableScreen = !mBooted;
             mBooted = true;
         }
         

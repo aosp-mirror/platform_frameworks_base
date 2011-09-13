@@ -4774,7 +4774,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void performBootTimeout() {
         synchronized(mWindowMap) {
-            if (mDisplayEnabled) {
+            if (mDisplayEnabled || mHeadless) {
                 return;
             }
             Slog.w(TAG, "***** BOOT TIMEOUT: forcing display enabled");
