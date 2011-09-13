@@ -23031,6 +23031,7 @@ package android.view {
     method public void scrollTo(int, int);
     method public void sendAccessibilityEvent(int);
     method public void sendAccessibilityEventUnchecked(android.view.accessibility.AccessibilityEvent);
+    method public void setAccessibilityDelegate(android.view.View.AccessibilityDelegate);
     method public void setActivated(boolean);
     method public void setAlpha(float);
     method public void setAnimation(android.view.animation.Animation);
@@ -23205,6 +23206,17 @@ package android.view {
     field protected static final int[] WINDOW_FOCUSED_STATE_SET;
     field public static android.util.Property X;
     field public static android.util.Property Y;
+  }
+
+  public static class View.AccessibilityDelegate {
+    ctor public View.AccessibilityDelegate();
+    method public boolean dispatchPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public void onInitializeAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public void onInitializeAccessibilityNodeInfo(android.view.View, android.view.accessibility.AccessibilityNodeInfo);
+    method public void onPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public boolean onRequestSendAccessibilityEvent(android.view.ViewGroup, android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public void sendAccessibilityEvent(android.view.View, int);
+    method public void sendAccessibilityEventUnchecked(android.view.View, android.view.accessibility.AccessibilityEvent);
   }
 
   public static class View.BaseSavedState extends android.view.AbsSavedState {

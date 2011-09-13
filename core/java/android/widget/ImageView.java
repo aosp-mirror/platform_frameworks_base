@@ -212,6 +212,7 @@ public class ImageView extends View {
 
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
         CharSequence contentDescription = getContentDescription();
         if (!TextUtils.isEmpty(contentDescription)) {
             event.getText().add(contentDescription);

@@ -896,6 +896,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
         // We send selection events only from AdapterView to avoid
         // generation of such event for each child.
         getSelectedView().dispatchPopulateAccessibilityEvent(event);
