@@ -35,8 +35,8 @@
 
     <string name="session">Session:</string>
     <string name="duration">Duration:</string>
-    <string name="data_transmitted">Data Transmitted:</string>
-    <string name="data_received">Data Received:</string>
+    <string name="data_transmitted">Sent:</string>
+    <string name="data_received">Received:</string>
 
     <string name="blank_value">--</string>
     <string name="data_value_format">
