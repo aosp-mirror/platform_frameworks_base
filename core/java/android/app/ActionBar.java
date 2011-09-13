@@ -915,6 +915,7 @@ public abstract class ActionBar {
                     com.android.internal.R.styleable.ActionBar_LayoutParams);
             gravity = a.getInt(
                     com.android.internal.R.styleable.ActionBar_LayoutParams_layout_gravity, -1);
+            a.recycle();
         }
 
         public LayoutParams(int width, int height) {

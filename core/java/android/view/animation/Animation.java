@@ -232,11 +232,6 @@ public abstract class Animation implements Cloneable {
         setFillBefore(a.getBoolean(com.android.internal.R.styleable.Animation_fillBefore, mFillBefore));
         setFillAfter(a.getBoolean(com.android.internal.R.styleable.Animation_fillAfter, mFillAfter));
 
-        final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
-        if (resID > 0) {
-            setInterpolator(context, resID);
-        }
-
         setRepeatCount(a.getInt(com.android.internal.R.styleable.Animation_repeatCount, mRepeatCount));
         setRepeatMode(a.getInt(com.android.internal.R.styleable.Animation_repeatMode, RESTART));
 
@@ -245,10 +240,16 @@ public abstract class Animation implements Cloneable {
         setBackgroundColor(a.getInt(com.android.internal.R.styleable.Animation_background, 0));
 
         setDetachWallpaper(a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
-        
-        ensureInterpolator();
+
+        final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
         a.recycle();
+
+        if (resID > 0) {
+            setInterpolator(context, resID);
+        }
+
+        ensureInterpolator();
     }
 
     @Override
