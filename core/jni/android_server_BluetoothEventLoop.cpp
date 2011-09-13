@@ -1562,8 +1562,8 @@ void onHealthDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
         LOG_AND_FREE_DBUS_ERROR(&err);
     }
 
-    LOGV("... Health Device Code = %d, result = %d", code, result);
     jint code = *(int *) user;
+    LOGV("... Health Device Code = %d, result = %d", code, result);
     env->CallVoidMethod(nat->me,
                         method_onHealthDeviceConnectionResult,
                         code,
