@@ -27,7 +27,8 @@ parent.link=manifest-intro.html
 
 <dt>can contain:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
-<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code></dd>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></code></dd>
 
 <dt>description:</dt>
 <dd>Declares a content provider &mdash; a subclass of 
@@ -252,7 +253,7 @@ See also the <code><a href="#prmsn">permission</a></code> and
 <dt><a name="sync"></a>{@code android:syncable}</dt>
 <dd>Whether or not the data under the content provider's control 
 is to be synchronized with data on a server &mdash; "{@code true}" 
-if it is to be synchronized, and "{@ code false}" if not.</dd>
+if it is to be synchronized, and "{@code false}" if not.</dd>
 
 <dt><a name="wprmsn"></a>{@code android:writePermission}</dt>
 <dd>A permission that clients must have to make changes to the data 
