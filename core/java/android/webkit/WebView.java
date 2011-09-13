@@ -5573,7 +5573,7 @@ public class WebView extends AbsoluteLayout
         setActive(hasWindowFocus);
         if (hasWindowFocus) {
             JWebCoreJavaBridge.setActiveWebView(this);
-            if (mPictureUpdatePausedForFocusChange) {
+            if (mPictureUpdatePausedForFocusChange && mNativeClass != 0) {
                 WebViewCore.resumeUpdatePicture(mWebViewCore);
                 nativeSetIsScrolling(false);
                 mPictureUpdatePausedForFocusChange = false;
@@ -5581,7 +5581,7 @@ public class WebView extends AbsoluteLayout
         } else {
             JWebCoreJavaBridge.removeActiveWebView(this);
             final WebSettings settings = getSettings();
-            if (settings != null && settings.enableSmoothTransition() &&
+            if (settings != null && settings.enableSmoothTransition() && mNativeClass != 0 &&
                     mWebViewCore != null && !WebViewCore.isUpdatePicturePaused(mWebViewCore)) {
                 WebViewCore.pauseUpdatePicture(mWebViewCore);
                 nativeSetIsScrolling(true);
