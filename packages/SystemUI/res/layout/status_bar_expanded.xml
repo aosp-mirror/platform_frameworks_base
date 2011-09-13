@@ -32,6 +32,7 @@
         android:paddingTop="3dp"
         android:paddingBottom="5dp"
         android:paddingRight="3dp"
+        android:background="@drawable/notification_header_bg"
         >
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
             android:textAppearance="@style/TextAppearance.StatusBar.Clock"
@@ -104,12 +105,25 @@
             android:fadingEdge="none"
             android:overScrollMode="ifContentScrolls"
             >
-            <com.android.systemui.statusbar.policy.NotificationRowLayout
-                android:id="@+id/latestItems"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                systemui:rowHeight="@dimen/notification_height"
+                android:orientation="vertical"
+                >
+                <com.android.systemui.statusbar.policy.NotificationRowLayout
+                    android:id="@+id/latestItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    systemui:rowHeight="@dimen/notification_height"
+                    android:background="@color/notification_list_shadow_top"
+                    />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:src="@drawable/notification_list_shadow"
+                    android:scaleType="fitXY"
                 />
+            </LinearLayout>
         </ScrollView>
 
         <ImageView
