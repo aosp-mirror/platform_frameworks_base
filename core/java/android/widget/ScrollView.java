@@ -19,11 +19,9 @@ package android.widget;
 import com.android.internal.R;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
@@ -581,16 +579,18 @@ public class ScrollView extends FrameLayout {
                     final int oldX = mScrollX;
                     final int oldY = mScrollY;
                     final int range = getScrollRange();
-                    if (overScrollBy(0, deltaY, 0, mScrollY, 0, range,
-                            0, mOverscrollDistance, true)) {
+                    final int overscrollMode = getOverScrollMode();
+                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+
+                    if (canOverscroll && overScrollBy(0, deltaY, 0, mScrollY,
+                            0, range, 0, mOverscrollDistance, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                    final int overscrollMode = getOverScrollMode();
-                    if (overscrollMode == OVER_SCROLL_ALWAYS ||
-                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
                         if (pulledToY < 0) {
                             mEdgeGlowTop.onPull((float) deltaY / getHeight());
@@ -616,11 +616,15 @@ public class ScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                    if (getChildCount() > 0) {
+                    final int bottom = getScrollRange();
+                    final int overscrollMode = getOverScrollMode();
+                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && bottom > 0);
+
+                    if (getChildCount() > 0 && canOverscroll) {
                         if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
                             fling(-initialVelocity);
                         } else {
-                            final int bottom = getScrollRange();
                             if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, bottom)) {
                                 invalidate();
                             }
@@ -1193,14 +1197,16 @@ public class ScrollView extends FrameLayout {
             int y = mScroller.getCurrY();
 
             if (oldX != x || oldY != y) {
-                overScrollBy(x - oldX, y - oldY, oldX, oldY, 0, getScrollRange(),
+                final int range = getScrollRange();
+                final int overscrollMode = getOverScrollMode();
+                final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
+                        (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+
+                overScrollBy(x - oldX, y - oldY, oldX, oldY, 0, range,
                         0, mOverflingDistance, false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                final int range = getScrollRange();
-                final int overscrollMode = getOverScrollMode();
-                if (overscrollMode == OVER_SCROLL_ALWAYS ||
-                        (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                if (canOverscroll) {
                     if (y < 0 && oldY >= 0) {
                         mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
                     } else if (y > range && oldY <= range) {
@@ -1208,6 +1214,7 @@ public class ScrollView extends FrameLayout {
                     }
                 }
             }
+
             awakenScrollBars();
 
             // Keep on drawing until the animation has finished.
