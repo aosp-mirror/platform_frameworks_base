@@ -54,6 +54,11 @@ private:
         uint32_t mRate;
         uint32_t mScale;
 
+        // If bytes per sample == 0, each chunk represents a single sample,
+        // otherwise each chunk should me a multiple of bytes-per-sample in
+        // size.
+        uint32_t mBytesPerSample;
+
         enum Kind {
             AUDIO,
             VIDEO,
@@ -84,7 +89,11 @@ private:
 
     status_t getSampleInfo(
             size_t trackIndex, size_t sampleIndex,
-            off64_t *offset, size_t *size, bool *isKey);
+            off64_t *offset, size_t *size, bool *isKey,
+            int64_t *sampleTimeUs);
+
+    status_t getSampleTime(
+            size_t trackIndex, size_t sampleIndex, int64_t *sampleTimeUs);
 
     status_t getSampleIndexAtTime(
             size_t trackIndex,
