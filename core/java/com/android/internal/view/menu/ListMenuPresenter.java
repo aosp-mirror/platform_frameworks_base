@@ -62,6 +62,7 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
     public ListMenuPresenter(Context context, int itemLayoutRes) {
         this(itemLayoutRes, 0);
         mContext = context;
+        mInflater = LayoutInflater.from(mContext);
     }
 
     /**
@@ -78,10 +79,13 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
     public void initForMenu(Context context, MenuBuilder menu) {
         if (mThemeRes != 0) {
             mContext = new ContextThemeWrapper(context, mThemeRes);
+            mInflater = LayoutInflater.from(mContext);
         } else if (mContext != null) {
             mContext = context;
+            if (mInflater == null) {
+                mInflater = LayoutInflater.from(mContext);
+            }
         }
-        mInflater = LayoutInflater.from(mContext);
         mMenu = menu;
     }
 
