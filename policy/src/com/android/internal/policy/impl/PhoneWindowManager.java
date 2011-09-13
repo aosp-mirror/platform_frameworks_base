@@ -629,15 +629,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
     }
 
-    /**
-     * When a home-key longpress expires, close other system windows and launch the recent apps
-     */
-    Runnable mHomeLongPress = new Runnable() {
-        public void run() {
-            handleLongPressOnHome();
-        }
-    };
-
     private void handleLongPressOnHome() {
         // We can't initialize this in init() since the configuration hasn't been loaded yet.
         if (mLongPressOnHomeBehavior < 0) {
@@ -1418,11 +1409,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // it handle it, because that gives us the correct 5 second
         // timeout.
         if (keyCode == KeyEvent.KEYCODE_HOME) {
-            // Clear a pending HOME longpress if the user releases Home
-            if (!down) {
-                mHandler.removeCallbacks(mHomeLongPress);
-            }
-
             // If we have released the home key, and didn't do anything else
             // while it was pressed, then it is time to go home!
             if (mHomePressed && !down) {
@@ -1470,12 +1456,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-            
-            if (down && repeatCount == 0) {
-                if (!keyguardOn) {
-                    mHandler.postDelayed(mHomeLongPress, ViewConfiguration.getGlobalActionKeyTimeout());
+
+            if (down) {
+                if (repeatCount == 0) {
+                    mHomePressed = true;
+                } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                    if (!keyguardOn) {
+                        handleLongPressOnHome();
+                    }
                 }
-                mHomePressed = true;
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_MENU) {
@@ -2518,7 +2507,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                   + " screenIsOn=" + isScreenOn + " keyguardActive=" + keyguardActive);
         }
 
-        if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0) {
+        if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
+                && event.getRepeatCount() == 0) {
             performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
         }
 
