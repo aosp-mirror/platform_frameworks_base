@@ -1647,11 +1647,10 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.wifi.p2p.WifiP2pManager} for handling management of
-     * Wi-Fi p2p.
+     * Wi-Fi peer-to-peer connections.
      *
      * @see #getSystemService
      * @see android.net.wifi.p2p.WifiP2pManager
-     * @hide
      */
     public static final String WIFI_P2P_SERVICE = "wifip2p";
 

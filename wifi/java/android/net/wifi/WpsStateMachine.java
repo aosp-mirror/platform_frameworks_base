@@ -53,7 +53,7 @@ class WpsStateMachine extends StateMachine {
 
     private WifiStateMachine mWifiStateMachine;
 
-    private Wps mWpsConfig;
+    private WpsInfo mWpsInfo;
 
     private Context mContext;
     AsyncChannel mReplyChannel = new AsyncChannel();
@@ -90,20 +90,20 @@ class WpsStateMachine extends StateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            Wps wpsConfig;
+            WpsInfo wpsConfig;
             switch (message.what) {
                 case WifiStateMachine.CMD_START_WPS:
-                    mWpsConfig = (Wps) message.obj;
+                    mWpsInfo = (WpsInfo) message.obj;
                     WpsResult result;
-                    switch (mWpsConfig.setup) {
-                        case PBC:
-                            result = WifiConfigStore.startWpsPbc(mWpsConfig);
+                    switch (mWpsInfo.setup) {
+                        case WpsInfo.PBC:
+                            result = WifiConfigStore.startWpsPbc(mWpsInfo);
                             break;
-                        case KEYPAD:
-                            result = WifiConfigStore.startWpsWithPinFromAccessPoint(mWpsConfig);
+                        case WpsInfo.KEYPAD:
+                            result = WifiConfigStore.startWpsWithPinFromAccessPoint(mWpsInfo);
                             break;
-                        case DISPLAY:
-                            result = WifiConfigStore.startWpsWithPinFromDevice(mWpsConfig);
+                        case WpsInfo.DISPLAY:
+                            result = WifiConfigStore.startWpsWithPinFromDevice(mWpsInfo);
                             break;
                         default:
                             result = new WpsResult(Status.FAILURE);
@@ -114,7 +114,7 @@ class WpsStateMachine extends StateMachine {
                     if (result.status == Status.SUCCESS) {
                         transitionTo(mActiveState);
                     } else {
-                        Log.e(TAG, "Failed to start WPS with config " + mWpsConfig.toString());
+                        Log.e(TAG, "Failed to start WPS with config " + mWpsInfo.toString());
                     }
                     break;
                 case WifiStateMachine.CMD_RESET_WPS_STATE:
@@ -154,7 +154,7 @@ class WpsStateMachine extends StateMachine {
                             WifiConfigStore.enableAllNetworks();
                             WifiConfigStore.loadConfiguredNetworks();
                             WifiConfigStore.updateIpAndProxyFromWpsConfig(
-                                    stateChangeResult.networkId, mWpsConfig);
+                                    stateChangeResult.networkId, mWpsInfo);
                             mWifiStateMachine.sendMessage(WifiStateMachine.WPS_COMPLETED_EVENT);
                             transitionTo(mInactiveState);
                             break;

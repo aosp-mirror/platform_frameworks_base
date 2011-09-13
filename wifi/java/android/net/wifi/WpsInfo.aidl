@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, The Android Open Source Project
+ * Copyright (c) 2011, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,4 +16,4 @@
 
 package android.net.wifi;
 
-parcelable Wps;
+parcelable WpsInfo;

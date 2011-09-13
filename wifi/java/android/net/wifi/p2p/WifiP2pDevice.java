@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 /**
  * A class representing a Wi-Fi p2p device
- * @hide
  *
  * {@see WifiP2pManager}
  */
@@ -109,18 +108,16 @@ public class WifiP2pDevice implements Parcelable {
      */
     public int groupCapability;
 
+    public static final int CONNECTED   = 0;
+    public static final int INVITED     = 1;
+    public static final int FAILED      = 2;
+    public static final int AVAILABLE   = 3;
+    public static final int UNAVAILABLE = 4;
+
     /** Device connection status */
-    public enum Status {
-        CONNECTED,
-        INVITED,
-        FAILED,
-        AVAILABLE,
-        UNAVAILABLE,
-    }
+    public int status = UNAVAILABLE;
 
-    public Status status = Status.UNAVAILABLE;
-
-    WifiP2pDevice() {
+    public WifiP2pDevice() {
     }
 
     /**
@@ -197,7 +194,7 @@ public class WifiP2pDevice implements Parcelable {
         }
 
         if (tokens[0].startsWith("P2P-DEVICE-FOUND")) {
-            status = Status.AVAILABLE;
+            status = AVAILABLE;
         }
     }
 
@@ -227,7 +224,6 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     @Override
-    /** @hide */
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof WifiP2pDevice)) return false;
@@ -239,7 +235,6 @@ public class WifiP2pDevice implements Parcelable {
         return other.deviceAddress.equals(deviceAddress);
     }
 
-    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Device: ").append(deviceName);
@@ -254,12 +249,12 @@ public class WifiP2pDevice implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /** copy constructor {@hide} */
+    /** copy constructor */
     public WifiP2pDevice(WifiP2pDevice source) {
         if (source != null) {
             deviceName = source.deviceName;
@@ -274,7 +269,7 @@ public class WifiP2pDevice implements Parcelable {
         }
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(deviceName);
         dest.writeString(deviceAddress);
@@ -284,10 +279,10 @@ public class WifiP2pDevice implements Parcelable {
         dest.writeInt(wpsConfigMethodsSupported);
         dest.writeInt(deviceCapability);
         dest.writeInt(groupCapability);
-        dest.writeString(status.name());
+        dest.writeInt(status);
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public static final Creator<WifiP2pDevice> CREATOR =
         new Creator<WifiP2pDevice>() {
             public WifiP2pDevice createFromParcel(Parcel in) {
@@ -300,7 +295,7 @@ public class WifiP2pDevice implements Parcelable {
                 device.wpsConfigMethodsSupported = in.readInt();
                 device.deviceCapability = in.readInt();
                 device.groupCapability = in.readInt();
-                device.status = Status.valueOf(in.readString());
+                device.status = in.readInt();
                 return device;
             }
 

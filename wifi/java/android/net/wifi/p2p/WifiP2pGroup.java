@@ -26,7 +26,6 @@ import java.util.Collections;
 
 /**
  * A class representing a Wi-Fi P2p group
- * @hide
  *
  * {@see WifiP2pManager}
  */
@@ -49,7 +48,7 @@ public class WifiP2pGroup implements Parcelable {
 
     private String mInterface;
 
-    WifiP2pGroup() {
+    public WifiP2pGroup() {
     }
 
     /**
@@ -202,7 +201,6 @@ public class WifiP2pGroup implements Parcelable {
         return mInterface;
     }
 
-    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("network: ").append(mNetworkName);
@@ -215,19 +213,24 @@ public class WifiP2pGroup implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /** copy constructor {@hide} */
-    // TODO: implement
+    /** copy constructor */
     public WifiP2pGroup(WifiP2pGroup source) {
         if (source != null) {
-       }
+            mNetworkName = source.getNetworkName();
+            mOwner = new WifiP2pDevice(source.getOwner());
+            mIsGroupOwner = source.mIsGroupOwner;
+            for (WifiP2pDevice d : source.getClientList()) mClients.add(d);
+            mPassphrase = source.getPassphrase();
+            mInterface = source.getInterface();
+        }
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mNetworkName);
         dest.writeParcelable(mOwner, flags);
@@ -240,7 +243,7 @@ public class WifiP2pGroup implements Parcelable {
         dest.writeString(mInterface);
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public static final Creator<WifiP2pGroup> CREATOR =
         new Creator<WifiP2pGroup>() {
             public WifiP2pGroup createFromParcel(Parcel in) {

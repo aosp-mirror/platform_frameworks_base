@@ -16,14 +16,12 @@
 
 package android.net.wifi.p2p;
 
-import android.net.wifi.Wps;
-import android.net.wifi.Wps.Setup;
+import android.net.wifi.WpsInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
 
 /**
  * A class representing a Wi-Fi P2p configuration for setting up a connection
- * @hide
  *
  * {@see WifiP2pManager}
  */
@@ -37,7 +35,7 @@ public class WifiP2pConfig implements Parcelable {
     /**
      * Wi-Fi Protected Setup information
      */
-    public Wps wps;
+    public WpsInfo wps;
 
     /**
      * This is an integer value between 0 and 15 where 0 indicates the least
@@ -63,8 +61,8 @@ public class WifiP2pConfig implements Parcelable {
 
     public WifiP2pConfig() {
         //set defaults
-        wps = new Wps();
-        wps.setup = Setup.PBC;
+        wps = new WpsInfo();
+        wps.setup = WpsInfo.PBC;
     }
 
     /** P2P-GO-NEG-REQUEST 42:fc:89:a8:96:09 dev_passwd_id=4 {@hide}*/
@@ -76,7 +74,7 @@ public class WifiP2pConfig implements Parcelable {
         }
 
         deviceAddress = tokens[1];
-        wps = new Wps();
+        wps = new WpsInfo();
 
         if (tokens.length > 2) {
             String[] nameVal = tokens[2].split("=");
@@ -89,25 +87,24 @@ public class WifiP2pConfig implements Parcelable {
             //As defined in wps/wps_defs.h
             switch (devPasswdId) {
                 case 0x00:
-                    wps.setup = Setup.LABEL;
+                    wps.setup = WpsInfo.LABEL;
                     break;
                 case 0x01:
-                    wps.setup = Setup.KEYPAD;
+                    wps.setup = WpsInfo.KEYPAD;
                     break;
                 case 0x04:
-                    wps.setup = Setup.PBC;
+                    wps.setup = WpsInfo.PBC;
                     break;
                 case 0x05:
-                    wps.setup = Setup.DISPLAY;
+                    wps.setup = WpsInfo.DISPLAY;
                     break;
                 default:
-                    wps.setup = Setup.PBC;
+                    wps.setup = WpsInfo.PBC;
                     break;
             }
         }
     }
 
-    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("\n address: ").append(deviceAddress);
@@ -117,19 +114,22 @@ public class WifiP2pConfig implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /** copy constructor {@hide} */
+    /** copy constructor */
     public WifiP2pConfig(WifiP2pConfig source) {
         if (source != null) {
-            //TODO: implement
-       }
+            deviceAddress = source.deviceAddress;
+            wps = new WpsInfo(source.wps);
+            groupOwnerIntent = source.groupOwnerIntent;
+            persist = source.persist;
+        }
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(deviceAddress);
         dest.writeParcelable(wps, flags);
@@ -137,13 +137,13 @@ public class WifiP2pConfig implements Parcelable {
         dest.writeString(persist.name());
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public static final Creator<WifiP2pConfig> CREATOR =
         new Creator<WifiP2pConfig>() {
             public WifiP2pConfig createFromParcel(Parcel in) {
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = in.readString();
-                config.wps = (Wps) in.readParcelable(null);
+                config.wps = (WpsInfo) in.readParcelable(null);
                 config.groupOwnerIntent = in.readInt();
                 config.persist = Persist.valueOf(in.readString());
                 return config;

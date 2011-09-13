@@ -18,8 +18,6 @@ package android.net.wifi;
 
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.Wps;
-import android.net.wifi.WpsResult;
 import android.net.wifi.ScanResult;
 import android.net.DhcpInfo;
 

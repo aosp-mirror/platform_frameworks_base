@@ -24,6 +24,7 @@ import android.net.IConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -34,36 +35,44 @@ import android.util.Log;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
+import java.util.HashMap;
+
 /**
  * This class provides the API for managing Wi-Fi peer-to-peer connectivity. This lets an
  * application discover available peers, setup connection to peers and query for the list of peers.
  * When a p2p connection is formed over wifi, the device continues to maintain the uplink
  * connection over mobile or any other available network for internet connectivity on the device.
  *
- * <p> The API is asynchronous and response to a request from an application is sent in the form
- * of a {@link android.os.Message} on a {@link android.os.Handler} that needs to be initialized
- * by the application right at the beginning before any p2p operations are performed via
- * {@link #initialize}.
+ * <p> The API is asynchronous and responses to requests from an application are on listener
+ * callbacks provided by the application. The application needs to do an initialization with
+ * {@link #initialize} before doing any p2p operation.
  *
- * <p> An application can request for the current list of peers using {@link #requestPeers}. The
- * {@link #RESPONSE_PEERS} message on the handler indicates that the peer list is available.
- * Use {@link #peersInResponse} to extract the peer device list upon the receiving the
- * {@link #RESPONSE_PEERS} message.
+ * <p> Application actions {@link #discoverPeers}, {@link #connect}, {@link #cancelConnect},
+ * {@link #createGroup} and {@link #removeGroup} need a {@link ActionListener} instance for
+ * receiving callbacks {@link ActionListener#onSuccess} or {@link ActionListener#onFailure}.
+ * Action callbacks indicate whether the initiation of the action was a success or a failure.
+ * Upon failure, the reason of failure can be one of {@link #ERROR}, {@link #P2P_UNSUPPORTED}
+ * or {@link #BUSY}.
  *
- * <p> If an application needs to initiate a discovery, use {@link #discoverPeers} and listen
- * to {@link #WIFI_P2P_PEERS_CHANGED_ACTION} intent action to initiate a request to fetch
- * list of peers with {@link #requestPeers}. An initiated discovery request from an application
- * stays active until the device starts connecting to a peer or forms a p2p group.
+ * <p> An application can initiate discovery of peers with {@link #discoverPeers}. An initiated
+ * discovery request from an application stays active until the device starts connecting to a peer
+ * or forms a p2p group. The {@link ActionListener} callbacks provide feedback on whether the
+ * discovery initiation was successful or failure. Additionally, applications can listen
+ * to {@link #WIFI_P2P_PEERS_CHANGED_ACTION} intent action to know when the peer list changes.
+ *
+ * <p> When the peer list change intent {@link #WIFI_P2P_PEERS_CHANGED_ACTION} is received
+ * or when an application needs to fetch the current list of peers, it can request the list
+ * of peers with {@link #requestPeers}. When the peer list is available
+ * {@link PeerListListener#onPeersAvailable} is called with the device list.
  *
  * <p> An application can initiate a connection request to a peer through {@link #connect}. See
  * {@link WifiP2pConfig} for details on setting up the configuration. For communication with legacy
  * Wi-Fi devices that do not support p2p, an app can create a group using {@link #createGroup}
  * which creates an access point whose details can be fetched with {@link #requestGroupInfo}.
- *
+*
  * <p> After a successful group formation through {@link #createGroup} or through {@link #connect},
- * use {@link #requestConnectionInfo} to fetch the connection details. Connection information
- * can be obtained with {@link #connectionInfoInResponse} on a {@link #RESPONSE_CONNECTION_INFO}
- * message. The connection info {@link WifiP2pInfo} contains the address of the group owner
+ * use {@link #requestConnectionInfo} to fetch the connection details. The connection info
+ * {@link WifiP2pInfo} contains the address of the group owner
  * {@link WifiP2pInfo#groupOwnerAddress} and a flag {@link WifiP2pInfo#isGroupOwner} to indicate
  * if the current device is a p2p group owner. A p2p client can thus communicate with
  * the p2p group owner through a socket connection.
@@ -85,10 +94,10 @@ import com.android.internal.util.Protocol;
  * {@see WifiP2pGroup}
  * {@see WifiP2pDevice}
  * {@see WifiP2pDeviceList}
- * {@see android.net.wifi.Wps}
- * @hide
+ * {@see android.net.wifi.WpsInfo}
  */
 public class WifiP2pManager {
+    private static final String TAG = "WifiP2pManager";
     /**
      * Broadcast intent action to indicate whether Wi-Fi p2p is enabled or disabled. An
      * extra {@link #EXTRA_WIFI_STATE} provides the state information as int.
@@ -97,7 +106,7 @@ public class WifiP2pManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_P2P_STATE_CHANGED_ACTION =
-        "android.net.wifi.P2P_STATE_CHANGED";
+        "android.net.wifi.p2p.STATE_CHANGED";
 
     /**
      * The lookup key for an int that indicates whether Wi-Fi p2p is enabled or disabled.
@@ -133,7 +142,7 @@ public class WifiP2pManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_P2P_CONNECTION_CHANGED_ACTION =
-        "android.net.wifi.CONNECTION_STATE_CHANGE";
+        "android.net.wifi.p2p.CONNECTION_STATE_CHANGE";
 
     /**
      * The lookup key for a {@link android.net.wifi.p2p.WifiP2pInfo} object
@@ -170,26 +179,22 @@ public class WifiP2pManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_P2P_PEERS_CHANGED_ACTION =
-        "android.net.wifi.PEERS_CHANGED";
+        "android.net.wifi.p2p.PEERS_CHANGED";
 
     /**
-     * Activity Action: Pick a Wi-Fi p2p network to connect to.
-     * <p>Input: Nothing.
-     * <p>Output: Nothing.
-     * @hide
+     * Broadcast intent action indicating that this device details have changed.
      */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_PICK_WIFI_P2P_NETWORK =
-        "android.net.wifi.PICK_WIFI_P2P_NETWORK";
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String WIFI_P2P_THIS_DEVICE_CHANGED_ACTION =
+        "android.net.wifi.p2p.THIS_DEVICE_CHANGED";
+
+    /**
+     * The lookup key for a {@link android.net.wifi.p2p.WifiP2pDevice} object
+     * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_WIFI_P2P_DEVICE = "wifiP2pDevice";
 
     IWifiP2pManager mService;
-
-    /**
-     * Message {@link android.os.Message#what} sent on the application handler specified
-     * at {@link #initialize} indicating the asynchronous channel has disconnected. An
-     * application could choose to reconnect with {@link #initialize}
-     */
-    public static final int HANDLER_DISCONNECTION = AsyncChannel.CMD_CHANNEL_DISCONNECTED;
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_MANAGER;
 
@@ -209,150 +214,59 @@ public class WifiP2pManager {
 
     /** @hide */
     public static final int DISCOVER_PEERS                          = BASE + 7;
-
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #discoverPeers}
-     * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
-     * or {@link #BUSY}
-     */
+    /** @hide */
     public static final int DISCOVER_PEERS_FAILED                   = BASE + 8;
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #discoverPeers}
-     * operation succeeded.
-     * <p> The application can register for {@link #WIFI_P2P_PEERS_CHANGED_ACTION} intent
-     * to listen for changes in the peer list as a result of the discovery process.
-     */
+    /** @hide */
     public static final int DISCOVER_PEERS_SUCCEEDED                = BASE + 9;
 
     /** @hide */
     public static final int CONNECT                                 = BASE + 10;
-
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #connect}
-     * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
-     * or {@link #BUSY}
-     */
+    /** @hide */
     public static final int CONNECT_FAILED                          = BASE + 11;
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #connect}
-     * operation succeeded.
-     * <p> The application can register for {@link #WIFI_P2P_CONNECTION_CHANGED_ACTION} intent
-     * to listen for connectivity change as a result of the connect operation
-     */
+    /** @hide */
     public static final int CONNECT_SUCCEEDED                       = BASE + 12;
 
     /** @hide */
-    public static final int CREATE_GROUP                            = BASE + 13;
-
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #createGroup}
-     * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
-     * or {@link #BUSY}
-     */
-    public static final int CREATE_GROUP_FAILED                     = BASE + 14;
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #createGroup}
-     * operation succeeded.
-     * <p> The application can request the group details with {@link #requestGroupInfo}
-     */
-    public static final int CREATE_GROUP_SUCCEEDED                  = BASE + 15;
+    public static final int CANCEL_CONNECT                          = BASE + 13;
+    /** @hide */
+    public static final int CANCEL_CONNECT_FAILED                   = BASE + 14;
+    /** @hide */
+    public static final int CANCEL_CONNECT_SUCCEEDED                = BASE + 15;
 
     /** @hide */
-    public static final int REMOVE_GROUP                            = BASE + 16;
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #removeGroup}
-     * operation failed.
-     * <p> The reason for failure could be one of {@link #P2P_UNSUPPORTED}, {@link #ERROR}
-     * or {@link #BUSY}
-     */
-    public static final int REMOVE_GROUP_FAILED                     = BASE + 17;
-    /**
-     * Message {@link android.os.Message#what} value indicating that the {@link #removeGroup}
-     * operation succeeded.
-     */
-    public static final int REMOVE_GROUP_SUCCEEDED                  = BASE + 18;
-
-    /**
-     * Supported {@link android.os.Message#arg1} value on the following response messages:
-     * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
-     * and {@link #REMOVE_GROUP_FAILED}
-     *
-     * <p> This indicates that the operation failed due to an internal error
-     */
-    public static final int ERROR               = 0;
-
-    /**
-     * Supported {@link android.os.Message#arg1} value on the following response messages:
-     * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
-     * and {@link #REMOVE_GROUP_FAILED}
-     *
-     * <p> This indicates that the operation failed because p2p is unsupported on the
-     * device
-     */
-    public static final int P2P_UNSUPPORTED     = 1;
-
-    /**
-     * Supported {@link android.os.Message#arg1} value on the following response messages:
-     * {@link #DISCOVER_PEERS_FAILED}, {@link #CONNECT_FAILED}, {@link #CREATE_GROUP_FAILED}
-     * and {@link #REMOVE_GROUP_FAILED}
-     *
-     * <p> This indicates that the operation failed because the framework is busy and
-     * unable to service the request
-     */
-    public static final int BUSY                = 2;
+    public static final int CREATE_GROUP                            = BASE + 16;
+    /** @hide */
+    public static final int CREATE_GROUP_FAILED                     = BASE + 17;
+    /** @hide */
+    public static final int CREATE_GROUP_SUCCEEDED                  = BASE + 18;
 
     /** @hide */
-    public static final int REQUEST_PEERS                           = BASE + 19;
-    /**
-     * Message {@link android.os.Message#what} delivered on the application hander
-     * in response to a {@link #requestPeers} call from the application.
-     *
-     * <p> Extract a {@link WifiP2pDeviceList} object by calling {@link #peersInResponse}
-     * on the message object
-     */
-    public static final int RESPONSE_PEERS                          = BASE + 20;
+    public static final int REMOVE_GROUP                            = BASE + 19;
+    /** @hide */
+    public static final int REMOVE_GROUP_FAILED                     = BASE + 20;
+    /** @hide */
+    public static final int REMOVE_GROUP_SUCCEEDED                  = BASE + 21;
 
     /** @hide */
-    public static final int REQUEST_CONNECTION_INFO                 = BASE + 21;
-
-    /**
-     * Message {@link android.os.Message#what} delivered on the application hander
-     * in response to a {@link #requestConnectionInfo} call from the application.
-     *
-     * <p> Extract a {@link WifiP2pInfo} object by calling {@link #connectionInfoInResponse}
-     * on the message object
-     */
-    public static final int RESPONSE_CONNECTION_INFO                = BASE + 22;
+    public static final int REQUEST_PEERS                           = BASE + 22;
+    /** @hide */
+    public static final int RESPONSE_PEERS                          = BASE + 23;
 
     /** @hide */
-    public static final int REQUEST_GROUP_INFO                      = BASE + 23;
-
-    /**
-     * Message {@link android.os.Message#what} delivered on the application hander
-     * in response to a {@link #requestGroupInfo} call from the application.
-     *
-     * <p> Extract a {@link WifiP2pGroup} object by calling {@link #groupInfoInResponse}
-     * on the message object
-     */
-
-    public static final int RESPONSE_GROUP_INFO                     = BASE + 24;
+    public static final int REQUEST_CONNECTION_INFO                 = BASE + 24;
+    /** @hide */
+    public static final int RESPONSE_CONNECTION_INFO                = BASE + 25;
 
     /** @hide */
-    public static final int WPS_PBC                                 = BASE + 25;
+    public static final int REQUEST_GROUP_INFO                      = BASE + 26;
     /** @hide */
-    public static final int WPS_PIN                                 = BASE + 26;
-    /** @hide */
-    public static final int WPS_PIN_AVAILABLE                       = BASE + 27;
+    public static final int RESPONSE_GROUP_INFO                     = BASE + 27;
 
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#WIFI_P2P_SERVICE Context.WIFI_P2P_SERVICE}.
      * @param service the Binder interface
-     * @param handler target for messages
      * @hide - hide this because it takes in a parameter of type IWifiP2pManager, which
      * is a system private class.
      */
@@ -361,38 +275,182 @@ public class WifiP2pManager {
     }
 
     /**
-     * A channel that connects the application handler to the Wifi framework.
-     * Most p2p operations require a Channel as an argument. An instance of Channel is obtained
-     * by doing a call on {@link #initialize}
+     * Passed with {@link ActionListener#onFailure}.
+     * Indicates that the operation failed due to an internal error.
      */
-    public class Channel {
-        Channel(AsyncChannel c) {
-            mAsyncChannel = c;
-        }
-        AsyncChannel mAsyncChannel;
+    public static final int ERROR               = 0;
+
+    /**
+     * Passed with {@link ActionListener#onFailure}.
+     * Indicates that the operation failed because p2p is unsupported on the device.
+     */
+    public static final int P2P_UNSUPPORTED     = 1;
+
+    /**
+     * Passed with {@link ActionListener#onFailure}.
+     * Indicates that the operation failed because the framework is busy and
+     * unable to service the request
+     */
+    public static final int BUSY                = 2;
+
+    /** Interface for callback invocation when framework channel is lost */
+    public interface ChannelListener {
+        /**
+         * The channel to the framework has been disconnected.
+         * Application could try re-initializing using {@link #initialize}
+         */
+        public void onChannelDisconnected();
+    }
+
+    /** Interface for callback invocation on an application action */
+    public interface ActionListener {
+        /** The operation succeeded */
+        public void onSuccess();
+        /**
+         * The operation failed
+         * @param reason The reason for failure could be one of {@link #P2P_UNSUPPORTED},
+         * {@link #ERROR} or {@link #BUSY}
+         */
+        public void onFailure(int reason);
+    }
+
+    /** Interface for callback invocation when peer list is available */
+    public interface PeerListListener {
+        /**
+         * The requested peer list is available
+         * @param peers List of available peers
+         */
+        public void onPeersAvailable(WifiP2pDeviceList peers);
+    }
+
+    /** Interface for callback invocation when connection info is available */
+    public interface ConnectionInfoListener {
+        /**
+         * The requested connection info is available
+         * @param info Wi-Fi p2p connection info
+         */
+        public void onConnectionInfoAvailable(WifiP2pInfo info);
+    }
+
+    /** Interface for callback invocation when group info is available */
+    public interface GroupInfoListener {
+        /**
+         * The requested p2p group info is available
+         * @param group Wi-Fi p2p group info
+         */
+        public void onGroupInfoAvailable(WifiP2pGroup group);
     }
 
     /**
-     * Registers the application handler with the Wi-Fi framework. This function
+     * A channel that connects the application to the Wifi p2p framework.
+     * Most p2p operations require a Channel as an argument. An instance of Channel is obtained
+     * by doing a call on {@link #initialize}
+     */
+    public static class Channel {
+        Channel(Looper looper, ChannelListener l) {
+            mAsyncChannel = new AsyncChannel();
+            mHandler = new P2pHandler(looper);
+            mChannelListener = l;
+        }
+        private ChannelListener mChannelListener;
+        private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
+        private Object mListenerMapLock = new Object();
+        private int mListenerKey = 0;
+
+        AsyncChannel mAsyncChannel;
+        P2pHandler mHandler;
+        class P2pHandler extends Handler {
+            P2pHandler(Looper looper) {
+                super(looper);
+            }
+
+            @Override
+            public void handleMessage(Message message) {
+                Object listener = getListener(message.arg2);
+                switch (message.what) {
+                    case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
+                        if (mChannelListener != null) {
+                            mChannelListener.onChannelDisconnected();
+                            mChannelListener = null;
+                        }
+                        break;
+                    /* ActionListeners grouped together */
+                    case WifiP2pManager.DISCOVER_PEERS_FAILED:
+                    case WifiP2pManager.CONNECT_FAILED:
+                    case WifiP2pManager.CANCEL_CONNECT_FAILED:
+                    case WifiP2pManager.CREATE_GROUP_FAILED:
+                    case WifiP2pManager.REMOVE_GROUP_FAILED:
+                        if (listener != null) {
+                            ((ActionListener) listener).onFailure(message.arg1);
+                        }
+                        break;
+                    /* ActionListeners grouped together */
+                    case WifiP2pManager.DISCOVER_PEERS_SUCCEEDED:
+                    case WifiP2pManager.CONNECT_SUCCEEDED:
+                    case WifiP2pManager.CANCEL_CONNECT_SUCCEEDED:
+                    case WifiP2pManager.CREATE_GROUP_SUCCEEDED:
+                    case WifiP2pManager.REMOVE_GROUP_SUCCEEDED:
+                        if (listener != null) {
+                            ((ActionListener) listener).onSuccess();
+                        }
+                        break;
+                    case WifiP2pManager.RESPONSE_PEERS:
+                        WifiP2pDeviceList peers = (WifiP2pDeviceList) message.obj;
+                        if (listener != null) {
+                            ((PeerListListener) listener).onPeersAvailable(peers);
+                        }
+                        break;
+                    case WifiP2pManager.RESPONSE_CONNECTION_INFO:
+                        WifiP2pInfo wifiP2pInfo = (WifiP2pInfo) message.obj;
+                        if (listener != null) {
+                            ((ConnectionInfoListener) listener).onConnectionInfoAvailable(wifiP2pInfo);
+                        }
+                        break;
+                    case WifiP2pManager.RESPONSE_GROUP_INFO:
+                        WifiP2pGroup group = (WifiP2pGroup) message.obj;
+                        if (listener != null) {
+                            ((GroupInfoListener) listener).onGroupInfoAvailable(group);
+                        }
+                        break;
+                   default:
+                        Log.d(TAG, "Ignored " + message);
+                        break;
+                }
+            }
+        }
+
+        int putListener(Object listener) {
+            if (listener == null) return 0;
+            int key;
+            synchronized (mListenerMapLock) {
+                key = mListenerKey++;
+                mListenerMap.put(key, listener);
+            }
+            return key;
+        }
+
+        Object getListener(int key) {
+            synchronized (mListenerMapLock) {
+                return mListenerMap.remove(key);
+            }
+        }
+    }
+
+    /**
+     * Registers the application with the Wi-Fi framework. This function
      * must be the first to be called before any p2p operations are performed.
      *
-     * <p class="note"><strong>Note:</strong>
-     * The handler registered with the framework should only handle messages
-     * with {@link android.os.Message#what} values defined in this file. Adding application
-     * specific private {@link android.os.Message#what} types should be done on a seperate handler
-     *
      * @param srcContext is the context of the source
-     * @param srcHandler is the handler on which the source will receive message responses
-     * asynchronously
+     * @param srcLooper is the Looper on which the callbacks are receivied
+     * @param listener for callback at loss of framework communication. Can be null.
      * @return Channel instance that is necessary for performing any further p2p operations
      */
-    public Channel initialize(Context srcContext, Handler srcHandler) {
+    public Channel initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
         Messenger messenger = getMessenger();
         if (messenger == null) return null;
 
-        AsyncChannel asyncChannel = new AsyncChannel();
-        Channel c = new Channel(asyncChannel);
-        if (asyncChannel.connectSync(srcContext, srcHandler, messenger)
+        Channel c = new Channel(srcLooper, listener);
+        if (c.mAsyncChannel.connectSync(srcContext, c.mHandler, messenger)
                 == AsyncChannel.STATUS_SUCCESSFUL) {
             return c;
         } else {
@@ -425,30 +483,32 @@ public class WifiP2pManager {
      * for the purpose of establishing a connection.
      *
      * <p> The function call immediately returns after sending a discovery request
-     * to the framework. The application handler is notified of a success or failure to initiate
-     * discovery with {@link #DISCOVER_PEERS_SUCCEEDED} or {@link #DISCOVER_PEERS_FAILED}.
+     * to the framework. The application is notified of a success or failure to initiate
+     * discovery through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
      *
      * <p> The discovery remains active until a connection is initiated or
      * a p2p group is formed. Register for {@link #WIFI_P2P_PEERS_CHANGED_ACTION} intent to
      * determine when the framework notifies of a change as peers are discovered.
      *
      * <p> Upon receiving a {@link #WIFI_P2P_PEERS_CHANGED_ACTION} intent, an application
-     * can request for the list of peers using {@link #requestPeers} which will deliver a
-     * {@link #RESPONSE_PEERS} message on the application handler. The application can then
-     * extract a {@link WifiP2pDeviceList} object by calling {@link #peersInResponse}
-     * on the message.
+     * can request for the list of peers using {@link #requestPeers}.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callbacks on success or failure. Can be null.
      */
-    public void discoverPeers(Channel c) {
+    public void discoverPeers(Channel c, ActionListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(DISCOVER_PEERS);
+        c.mAsyncChannel.sendMessage(DISCOVER_PEERS, 0, c.putListener(listener));
     }
 
     /**
      * Start a p2p connection to a device with the specified configuration.
      *
      * <p> The function call immediately returns after sending a connection request
-     * to the framework. The application handler is notified of a success or failure to initiate
-     * connectivity with {@link #CONNECT_SUCCEEDED} or {@link #CONNECT_FAILED}.
+     * to the framework. The application is notified of a success or failure to initiate
+     * connect through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
      *
      * <p> Register for {@link #WIFI_P2P_CONNECTION_CHANGED_ACTION} intent to
      * determine when the framework notifies of a change in connectivity.
@@ -460,100 +520,102 @@ public class WifiP2pManager {
      * a p2p group with {@link #createGroup}, an invitation to join the group is sent to
      * the peer device.
      *
-     * @param config options as described in {@link WifiP2pConfig} class.
+     * @param c is the channel created at {@link #initialize}
+     * @param config options as described in {@link WifiP2pConfig} class
+     * @param listener for callbacks on success or failure. Can be null.
      */
-    public void connect(Channel c, WifiP2pConfig config) {
+    public void connect(Channel c, WifiP2pConfig config, ActionListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(CONNECT, config);
+        c.mAsyncChannel.sendMessage(CONNECT, 0, c.putListener(listener), config);
+    }
+
+    /**
+     * Cancel any ongoing p2p group negotiation
+     *
+     * <p> The function call immediately returns after sending a connection cancellation request
+     * to the framework. The application is notified of a success or failure to initiate
+     * cancellation through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callbacks on success or failure. Can be null.
+     */
+    public void cancelConnect(Channel c, ActionListener listener) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(CANCEL_CONNECT, 0, c.putListener(listener));
     }
 
     /**
      * Create a p2p group with the current device as the group owner. This essentially creates
      * an access point that can accept connections from legacy clients as well as other p2p
      * devices.
-     * <p> For p2p operation, this would normally not be used unless the current device needs
+     *
+     * <p class="note"><strong>Note:</strong>
+     * This function would normally not be used unless the current device needs
      * to form a p2p connection with a legacy client
      *
      * <p> The function call immediately returns after sending a group creation request
-     * to the framework. The application handler is notified of a success or failure to create
-     * group with {@link #CREATE_GROUP_SUCCEEDED} or {@link #CREATE_GROUP_FAILED}.
+     * to the framework. The application is notified of a success or failure to initiate
+     * group creation through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
      *
-     * <p> Application can request for the group details with {@link #requestGroupInfo} which will
-     * deliver a {@link #RESPONSE_GROUP_INFO} message on the application handler. The application
-     * can then extract a {@link WifiP2pGroup} object by calling {@link #groupInfoInResponse}
-     * on the message.
+     * <p> Application can request for the group details with {@link #requestGroupInfo}.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callbacks on success or failure. Can be null.
      */
-    public void createGroup(Channel c) {
+    public void createGroup(Channel c, ActionListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(CREATE_GROUP);
+        c.mAsyncChannel.sendMessage(CREATE_GROUP, 0, c.putListener(listener));
     }
 
     /**
      * Remove the current p2p group.
      *
      * <p> The function call immediately returns after sending a group removal request
-     * to the framework. The application handler is notified of a success or failure to remove
-     * a group with {@link #REMOVE_GROUP_SUCCEEDED} or {@link #REMOVE_GROUP_FAILED}.
+     * to the framework. The application is notified of a success or failure to initiate
+     * group removal through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callbacks on success or failure. Can be null.
      */
-    public void removeGroup(Channel c) {
+    public void removeGroup(Channel c, ActionListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(REMOVE_GROUP);
+        c.mAsyncChannel.sendMessage(REMOVE_GROUP, 0, c.putListener(listener));
     }
 
     /**
-     * Request the current list of peers. This returns a {@link #RESPONSE_PEERS} on the application
-     * handler. The {@link #RESPONSE_PEERS} message on the handler indicates that the peer list is
-     * available. Use {@link #peersInResponse} to extract {@link WifiP2pDeviceList} from the message
+     * Request the current list of peers.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callback when peer list is available. Can be null.
      */
-    public void requestPeers(Channel c) {
+    public void requestPeers(Channel c, PeerListListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(REQUEST_PEERS);
+        c.mAsyncChannel.sendMessage(REQUEST_PEERS, 0, c.putListener(listener));
     }
 
     /**
-     * Upon receiving a {@link #RESPONSE_PEERS} on the application handler, an application
-     * can extract the peer device list using this function.
+     * Request device connection info.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callback when connection info is available. Can be null.
      */
-    public WifiP2pDeviceList peersInResponse(Message msg) {
-        return (WifiP2pDeviceList) msg.obj;
-    }
-
-    /**
-     * Request device connection info. This returns a {@link #RESPONSE_CONNECTION_INFO} on
-     * the application handler. The {@link #RESPONSE_CONNECTION_INFO} message on the handler
-     * indicates that connection info is available. Use {@link #connectionInfoInResponse} to
-     * extract {@link WifiP2pInfo} from the message.
-     */
-    public void requestConnectionInfo(Channel c) {
+    public void requestConnectionInfo(Channel c, ConnectionInfoListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(REQUEST_CONNECTION_INFO);
+        c.mAsyncChannel.sendMessage(REQUEST_CONNECTION_INFO, 0, c.putListener(listener));
     }
 
     /**
-     * Upon receiving a {@link #RESPONSE_CONNECTION_INFO} on the application handler, an application
-     * can extract the connection info using this function.
+     * Request p2p group info.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callback when group info is available. Can be null.
      */
-    public WifiP2pInfo connectionInfoInResponse(Message msg) {
-        return (WifiP2pInfo) msg.obj;
-    }
-
-    /**
-     * Request p2p group info. This returns a {@link #RESPONSE_GROUP_INFO} on
-     * the application handler. The {@link #RESPONSE_GROUP_INFO} message on the handler
-     * indicates that group info is available. Use {@link #groupInfoInResponse} to
-     * extract {@link WifiP2pGroup} from the message.
-     */
-    public void requestGroupInfo(Channel c) {
+    public void requestGroupInfo(Channel c, GroupInfoListener listener) {
         if (c == null) return;
-        c.mAsyncChannel.sendMessage(REQUEST_GROUP_INFO);
-    }
-
-    /**
-     * Upon receiving a {@link #RESPONSE_GROUP_INFO} on the application handler, an application
-     * can extract the group info using this function.
-     */
-    public WifiP2pGroup groupInfoInResponse(Message msg) {
-        return (WifiP2pGroup) msg.obj;
+        c.mAsyncChannel.sendMessage(REQUEST_GROUP_INFO, 0, c.putListener(listener));
     }
 
     /**
@@ -568,38 +630,6 @@ public class WifiP2pManager {
             return mService.getMessenger();
         } catch (RemoteException e) {
             return null;
-        }
-    }
-
-    /**
-     * Setup DNS connectivity on the current process to the connected Wi-Fi p2p peers
-     *
-     * @return -1 on failure
-     * @hide
-     */
-    public int startPeerCommunication() {
-        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
-        try {
-            return cm.startUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "p2p", new Binder());
-        } catch (RemoteException e) {
-            return -1;
-        }
-    }
-
-    /**
-     * Tear down connectivity to the connected Wi-Fi p2p peers
-     *
-     * @return -1 on failure
-     * @hide
-     */
-    public int stopPeerCommunication() {
-        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
-        try {
-            return cm.stopUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "p2p");
-        } catch (RemoteException e) {
-            return -1;
         }
     }
 

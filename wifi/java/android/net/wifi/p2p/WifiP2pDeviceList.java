@@ -27,7 +27,6 @@ import java.util.Collections;
 
 /**
  * A class representing a Wi-Fi P2p device list
- * @hide
  *
  * {@see WifiP2pManager}
  */
@@ -35,11 +34,11 @@ public class WifiP2pDeviceList implements Parcelable {
 
     private Collection<WifiP2pDevice> mDevices;
 
-    WifiP2pDeviceList() {
+    public WifiP2pDeviceList() {
         mDevices = new ArrayList<WifiP2pDevice>();
     }
 
-    /** copy constructor {@hide} */
+    /** copy constructor */
     public WifiP2pDeviceList(WifiP2pDeviceList source) {
         if (source != null) {
             mDevices = source.getDeviceList();
@@ -91,7 +90,6 @@ public class WifiP2pDeviceList implements Parcelable {
         return Collections.unmodifiableCollection(mDevices);
     }
 
-    /** @hide */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         for (WifiP2pDevice device : mDevices) {
@@ -100,12 +98,12 @@ public class WifiP2pDeviceList implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mDevices.size());
         for(WifiP2pDevice device : mDevices) {
@@ -113,7 +111,7 @@ public class WifiP2pDeviceList implements Parcelable {
         }
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     public static final Creator<WifiP2pDeviceList> CREATOR =
         new Creator<WifiP2pDeviceList>() {
             public WifiP2pDeviceList createFromParcel(Parcel in) {
