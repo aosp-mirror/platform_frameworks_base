@@ -968,6 +968,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         + mPolicyVisibilityAfterAnim);
             }
             mPolicyVisibility = mPolicyVisibilityAfterAnim;
+            mService.mLayoutNeeded = true;
             if (!mPolicyVisibility) {
                 if (mService.mCurrentFocus == this) {
                     mService.mFocusMayChange = true;
