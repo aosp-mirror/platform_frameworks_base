@@ -90,6 +90,8 @@ static const nsecs_t kWarningThrottle = seconds(5);
 // RecordThread loop sleep time upon application overrun or audio HAL read error
 static const int kRecordThreadSleepUs = 5000;
 
+static const nsecs_t kSetParametersTimeout = seconds(2);
+
 // ----------------------------------------------------------------------------
 
 static bool recordingAllowed() {
@@ -1102,7 +1104,7 @@ status_t AudioFlinger::ThreadBase::setParameters(const String8& keyValuePairs)
     mWaitWorkCV.signal();
     // wait condition with timeout in case the thread loop has exited
     // before the request could be processed
-    if (mParamCond.waitRelative(mLock, seconds(2)) == NO_ERROR) {
+    if (mParamCond.waitRelative(mLock, kSetParametersTimeout) == NO_ERROR) {
         status = mParamStatus;
         mWaitWorkCV.signal();
     } else {
@@ -2443,7 +2445,9 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
 
         mParamStatus = status;
         mParamCond.signal();
-        mWaitWorkCV.wait(mLock);
+        // wait for condition with time out in case the thread calling ThreadBase::setParameters()
+        // already timed out waiting for the status and will never signal the condition.
+        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeout);
     }
     return reconfig;
 }
@@ -2923,7 +2927,9 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
 
         mParamStatus = status;
         mParamCond.signal();
-        mWaitWorkCV.wait(mLock);
+        // wait for condition with time out in case the thread calling ThreadBase::setParameters()
+        // already timed out waiting for the status and will never signal the condition.
+        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeout);
     }
     return reconfig;
 }
@@ -5215,7 +5221,9 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
 
         mParamStatus = status;
         mParamCond.signal();
-        mWaitWorkCV.wait(mLock);
+        // wait for condition with time out in case the thread calling ThreadBase::setParameters()
+        // already timed out waiting for the status and will never signal the condition.
+        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeout);
     }
     return reconfig;
 }
