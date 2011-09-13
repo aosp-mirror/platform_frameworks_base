@@ -9,7 +9,7 @@ page.title=User Interface
     <li><a href="#ViewHierarchy">View Hierarchy</a></li>
     <li><a href="#Layout">Layout</a></li>
     <li><a href="#Widgets">Widgets</a></li>
-    <li><a href="#Events">UI Events</a></li>
+    <li><a href="#Events">Input Events</a></li>
     <li><a href="#Menus">Menus</a></li>
     <li><a href="#Advanced">Advanced Topics</a>
       <ol>
@@ -104,7 +104,7 @@ the Android system initializes these run-time objects, corresponding to the elem
 another LinearLayout (or other type of view group) inside here, to lengthen the view hierarchy and create a more
 complex layout.</p>
 
-<p>For more on building a UI layout, read <a href="declaring-layout.html">Declaring Layout</a>.
+<p>For more on building a UI layout, read <a href="declaring-layout.html">XML Layouts</a>.
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
@@ -132,16 +132,16 @@ Some widgets provided by Android are more complex, like a date picker, a clock, 
 But you're not limited to the kinds of widgets provided by the Android platform. If you'd
 like to do something more customized and create your own actionable elements, you can, by defining your own 
 View object or by extending and combining existing widgets.</p>
-<p>Read more in <a href="custom-components.html">Building Custom Components</a>.</p>
+<p>Read more in the <a href="custom-components.html">Custom Components</a> developer guide.</p>
 
 <p>For a list of the widgets provided by Android, see the {@link android.widget} package.</p>
 
 
-<h2 id="Events">UI Events</h2>
+<h2 id="Events">Input Events</h2>
 
 <p>Once you've added some Views/widgets to the UI, you probably want to know about the 
-user's interaction with them, so you can perform actions. To be informed of UI events, you need to 
-do one of two things:</p>
+user's interaction with them, so you can perform actions. To be informed of user input events, you
+need to do one of two things:</p>
 <ul>
   <li><strong>Define an event listener and register it with the View.</strong> More often than not,
 this is how you'll listen for events. The View class contains a collection of nested interfaces named
@@ -166,8 +166,8 @@ so your only chance to define them is when you
 </li>
 </ul>
 
-<p>Continue reading about handling user interaction with Views in the <a href="ui-events.html">Handling UI Events</a>
-document.</p>
+<p>Continue reading about handling user interaction with Views in the <a
+href="ui-events.html">Input Events</a> document.</p>
 
 
 <h2 id="Menus">Menus</h2>
@@ -192,7 +192,7 @@ method will be called by the framework.</p>
 
 <p>And just like your application layout, you have the option to declare the items for you menu in an XML file.</p>
 
-<p>Read <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a> to learn more.</p>
+<p>Read <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> to learn more.</p>
 
 
 <h2 id="Advanced">Advanced Topics</h2>
@@ -232,4 +232,4 @@ applied to specific activities or the entire application.</li>
 <p>Styles and themes are resources. Android provides some default style and theme resources that you can use, 
 or you can declare your own custom style and theme resources.</p>
 <p>Learn more about using styles and themes in the
-<a href="themes.html">Applying Styles and Themes</a> document.</p>
+<a href="themes.html">Styles and Themes</a> document.</p>

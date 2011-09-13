@@ -1,18 +1,7 @@
-page.title=Notifying the User
+page.title=Notifications
 parent.title=User Interface
 parent.link=../index.html
 @jd:body
-
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>Topics</h2>
-    <ol>
-      <li><a href="toasts.html">Creating Toast Notifications</a></li>
-      <li><a href="notifications.html">Creating Status Bar Notifications</a></li>
-      <li><a href="{@docRoot}guide/topics/ui/dialogs.html">Creating Dialogs</a></li>
-    </ol>
-  </div>
-</div>
 
 <p>Several types of situations may arise that require you to notify the user 
 about an event that occurs in your application. Some events require the user to respond
@@ -57,7 +46,7 @@ to the screen. A toast can not accept user interaction events; if you'd like
 the user to respond and take action, consider using a 
 <a href="#StatusBar">Status Bar Notification</a> instead.</p>
 
-<p>For more information, refer to <a href="toasts.html">Creating Toast Notifications</a>.</p>
+<p>For more information, refer to <a href="toasts.html">Toast Notifications</a>.</p>
 
 
 <h2 id="StatusBar">Status Bar Notification</h2>
@@ -79,7 +68,7 @@ while your Activity is still in focus, consider using a
 <a href="#Dialog">Dialog Notification</a> instead.</p>
 
 <p>For more information, refer to 
-<a href="notifications.html">Creating Status Bar Notifications</a>.</p>
+<a href="notifications.html">Status Bar Notifications</a>.</p>
 
 
 <h2 id="Dialog">Dialog Notification</h2>
@@ -97,7 +86,7 @@ You can use also use dialogs as integral components
 in your application's UI and for other purposes besides notifications.
 For a complete discussion on all the available types of dialogs, 
 including its uses for notifications, refer to 
-<a href="{@docRoot}guide/topics/ui/dialogs.html">Creating Dialogs</a>.</p>
+<a href="{@docRoot}guide/topics/ui/dialogs.html">Dialogs</a>.</p>
 
 
 

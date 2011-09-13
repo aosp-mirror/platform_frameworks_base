@@ -1,4 +1,4 @@
-page.title=Creating Menus
+page.title=Menus
 parent.title=User Interface
 parent.link=index.html
 @jd:body
@@ -36,7 +36,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
     <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a></li>
   </ol>
 </div>
@@ -301,8 +301,8 @@ cannot take focus, so you should never use focus as the basis for modifying
 items in the Options Menu. If you want to provide menu items that are context-sensitive to a {@link
 android.view.View}, use a <a href="#context-menu">Context Menu</a>.</p>
 
-<p>If you're developing for Android 3.0 or higher, be sure to also read <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a>.</p>
+<p>If you're developing for Android 3.0 or higher, be sure to also read the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.</p>
 
 
 

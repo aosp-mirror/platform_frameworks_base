@@ -297,8 +297,7 @@ Guidelines</a>.</p>
 
 <p>Creating the App Widget layout is simple if you're
 familiar with <a
-href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout in
-XML</a>.
+href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a>.
 However, you must be aware that App Widget layouts are based on {@link
 android.widget.RemoteViews},
 which do not support every kind of layout or view widget.</p>

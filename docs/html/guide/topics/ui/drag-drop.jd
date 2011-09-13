@@ -1,4 +1,4 @@
-page.title=Dragging and Dropping
+page.title=Drag and Drop
 parent.title=User Interface
 parent.link=index.html
 @jd:body
@@ -107,7 +107,7 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
             <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
             </li>
             <li>
-                <a href="{@docRoot}guide/topics/ui/ui-events.html">Handling UI Events</a>
+                <a href="{@docRoot}guide/topics/ui/ui-events.html">Input Events</a>
             </li>
         </ol>
     </div>

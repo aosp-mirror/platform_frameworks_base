@@ -101,41 +101,41 @@
           </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">
-               <span class="en">Declaring Layout</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">
-               <span class="en">Creating Menus</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
-               <span class="en">Using the Action Bar</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
-                <span class="en">Creating Dialogs</span>
+               <span class="en">XML Layouts</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/ui-events.html">
-                <span class="en">Handling UI Events</span>
+                <span class="en">Input Events</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">
+               <span class="en">Menus</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
+               <span class="en">Action Bar</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
+                <span class="en">Dialogs</span>
               </a></li>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">
-                <span class="en">Notifying the User</span>
+                <span class="en">Notifications</span>
             </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/toasts.html">
-                <span class="en">Creating Toast Notifications</span>
+                <span class="en">Toast Notifications</span>
               </a></li>
               <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/notifications.html">
-                <span class="en">Creating Status Bar Notifications</span>
+                <span class="en">Status Bar Notifications</span>
               </a></li>
             </ul>
           </li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/drag-drop.html">
-                <span class="en">Dragging and Dropping</span>
+                <span class="en">Drag and Drop</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
-                <span class="en">Applying Styles and Themes</span>
+                <span class="en">Styles and Themes</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/custom-components.html">
-                <span class="en">Building Custom Components</span>
+                <span class="en">Custom Components</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">
                 <span class="en">Binding to Data with AdapterView</span>

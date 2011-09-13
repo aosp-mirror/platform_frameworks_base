@@ -150,7 +150,7 @@ use your Canvas to draw a Bitmap handled by the system.</p>
 <p class="note"><strong>Note: </strong> In order to request an invalidate from a thread other than your main
 Activity's thread, you must call <code>{@link android.view.View#postInvalidate()}</code>.</p>
 
-<p>Also read <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>
+<p>Also read <a href="{@docRoot}guide/topics/ui/custom-components.html">Custom Components</a>
 for a guide to extending a View class, and <a href="2d-graphics.html">2D Graphics: Drawables</a> for
 information on using Drawable objects like images from your resources and other primitive shapes.</p>
 
