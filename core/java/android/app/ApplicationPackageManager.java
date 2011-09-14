@@ -42,6 +42,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.ManifestDigest;
+import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -1206,6 +1207,19 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void updateUserFlags(int id, int flags) {
         // TODO:
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public VerifierDeviceIdentity getVerifierDeviceIdentity() {
+        try {
+            return mPM.getVerifierDeviceIdentity();
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+        return null;
     }
 
     private final ContextImpl mContext;

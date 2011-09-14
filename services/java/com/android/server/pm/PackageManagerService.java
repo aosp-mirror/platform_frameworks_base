@@ -71,6 +71,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.content.pm.ManifestDigest;
+import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -8404,5 +8405,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         mUserManager.removeUser(userId);
         return true;
+    }
+
+    @Override
+    public VerifierDeviceIdentity getVerifierDeviceIdentity() throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                "Only package verification agents can read the verifier device identity");
+
+        synchronized (mPackages) {
+            return mSettings.getVerifierDeviceIdentityLPw();
+        }
     }
 }

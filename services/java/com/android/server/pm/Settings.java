@@ -39,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
 import android.content.pm.Signature;
+import android.content.pm.VerifierDeviceIdentity;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -86,7 +87,10 @@ final class Settings {
     // used to grant newer permissions one time during a system upgrade.
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
-    
+
+    /** Device identity for the purpose of package verification. */
+    private VerifierDeviceIdentity mVerifierDeviceIdentity;
+
     // The user's preferred activities associated with particular intent
     // filters.
     final IntentResolver<PreferredActivity, PreferredActivity> mPreferredActivities =
@@ -865,6 +869,12 @@ final class Settings {
             serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
             serializer.endTag(null, "last-platform-version");
             
+            if (mVerifierDeviceIdentity != null) {
+                serializer.startTag(null, "verifier");
+                serializer.attribute(null, "device", mVerifierDeviceIdentity.toString());
+                serializer.endTag(null, "verifier");
+            }
+
             serializer.startTag(null, "permission-trees");
             for (BasePermission bp : mPermissionTrees.values()) {
                 writePermissionLPr(serializer, bp);
@@ -1279,6 +1289,14 @@ final class Settings {
                             mExternalSdkPlatform = Integer.parseInt(external);
                         }
                     } catch (NumberFormatException e) {
+                    }
+                } else if (tagName.equals("verifier")) {
+                    final String deviceIdentity = parser.getAttributeValue(null, "device");
+                    try {
+                        mVerifierDeviceIdentity = VerifierDeviceIdentity.parse(deviceIdentity);
+                    } catch (IllegalArgumentException e) {
+                        Slog.w(PackageManagerService.TAG, "Discard invalid verifier device id: "
+                                + e.getMessage());
                     }
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
@@ -1892,6 +1910,16 @@ final class Settings {
 
         mUserIds.add(obj);
         return PackageManagerService.FIRST_APPLICATION_UID + N;
+    }
+
+    public VerifierDeviceIdentity getVerifierDeviceIdentityLPw() {
+        if (mVerifierDeviceIdentity == null) {
+            mVerifierDeviceIdentity = VerifierDeviceIdentity.generate();
+
+            writeLPr();
+        }
+
+        return mVerifierDeviceIdentity;
     }
 
     public PackageSetting getDisabledSystemPkgLPr(String name) {

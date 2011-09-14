@@ -42,6 +42,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -3119,6 +3120,14 @@ public class PackageManagerTests extends AndroidTestCase {
         int retCode = PackageManager.INSTALL_FAILED_INVALID_URI;
         File invalidFile = new File("/nonexistent-file.apk");
         invokeInstallPackageFail(Uri.fromFile(invalidFile), 0, retCode);
+    }
+
+    @SmallTest
+    public void testGetVerifierDeviceIdentity() {
+        PackageManager pm = getPm();
+        VerifierDeviceIdentity id = pm.getVerifierDeviceIdentity();
+
+        assertNotNull("Verifier device identity should not be null", id);
     }
 
     /*---------- Recommended install location tests ----*/

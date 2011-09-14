@@ -16,4 +16,4 @@
 
 package android.content.pm;
 
-parcelable ParceledListSlice;
+parcelable VerifierDeviceIdentity;
