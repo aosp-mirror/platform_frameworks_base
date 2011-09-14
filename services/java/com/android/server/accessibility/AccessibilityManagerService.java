@@ -225,7 +225,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     return false;
                 }
             }
-            
+
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
@@ -697,6 +697,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void manageServicesLocked() {
         populateEnabledServicesLocked(mEnabledServices);
         updateServicesStateLocked(mInstalledServices, mEnabledServices);
+        disableAccessibilityIfNoEnabledServices(mEnabledServices);
     }
 
     /**
@@ -777,6 +778,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service.unbind();
                 }
             }
+        }
+    }
+
+    /**
+     * Disables accessibility if there are no enabled accessibility services which
+     * to consume the generated accessibility events.
+     *
+     * @param enabledServices The set of enabled services.
+     */
+    private void disableAccessibilityIfNoEnabledServices(Set<ComponentName> enabledServices) {
+        if (enabledServices.isEmpty()) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_ENABLED, 0);
         }
     }
 
