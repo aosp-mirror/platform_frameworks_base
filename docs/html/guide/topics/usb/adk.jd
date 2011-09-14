@@ -77,6 +77,10 @@ page.title=Android Open Accessory Development Kit
         DIY Drones</a></li>
 
       <li><a href=
+        "http://mbed.org/order/">
+        mbed</a></li>
+
+      <li><a href=
         "http://www.microchip.com/android">
         Microchip</a></li>
 
@@ -129,6 +133,11 @@ page.title=Android Open Accessory Development Kit
     <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">DIY
     Drones</a> provides an Arduino-compatible board geared towards RC (radio controlled) and UAV
     (unmanned aerial vehicle) enthusiasts.</li>
+
+    <li><a href="http://mbed.org/order/">mbed</a> provides a microcontroller and a library
+    to develop accessories that support the Android accessory protocol. For more information, see
+    <a href="http://mbed.org/cookbook/mbed-with-Android-ADK">mbed with the Android ADK</a>.
+    </li>
 
     <li><a href="http://www.microchip.com/android">Microchip</a> provides a PIC based USB
     microcontroller board.</li>
