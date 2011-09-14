@@ -131,10 +131,13 @@ public class BackupRestoreConfirmation extends Activity {
         final String action = intent.getAction();
 
         final int layoutId;
+        final int titleId;
         if (action.equals(FullBackup.FULL_BACKUP_INTENT_ACTION)) {
             layoutId = R.layout.confirm_backup;
+            titleId = R.string.backup_confirm_title;
         } else if (action.equals(FullBackup.FULL_RESTORE_INTENT_ACTION)) {
             layoutId = R.layout.confirm_restore;
+            titleId = R.string.restore_confirm_title;
         } else {
             Slog.w(TAG, "Backup/restore confirmation activity launched with invalid action!");
             finish();
@@ -159,6 +162,7 @@ public class BackupRestoreConfirmation extends Activity {
             mObserver.setHandler(mHandler);
         }
 
+        setTitle(titleId);
         setContentView(layoutId);
 
         // Same resource IDs for each layout variant (backup / restore)
