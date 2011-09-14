@@ -181,7 +181,7 @@ included with the <a href="{@docRoot}sdk/index.html">Android SDK</a>:</p>
   <li>Expand the <em>Third party Add-ons</em> and <em>Google Inc. add-ons</em>.</li>
   <li>Check <strong>Google Usb Driver package</strong> and click <strong>Install selected</strong>.</li>
   <li>Proceed to install the package. When done, the driver files are
-downloaded into the <code>&lt;sdk&gt;\google-usb_driver\</code> directory.</li>
+downloaded into the <code>&lt;sdk&gt;\extras\google\usb_driver\</code> directory.</li>
 </ol>
 
 
@@ -229,7 +229,7 @@ process.</p>
   <li>Select <strong>Browse my computer for driver software</strong> and click
     <strong>Next</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.)</li>
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
   <li>Click <strong>Next</strong> to install the driver.</li>
 </ol>
 
@@ -252,7 +252,7 @@ driver:</p>
 <strong>Search removable media</strong>; and check <strong>Include this location in the
 search</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.)</li>
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
   <li>Click <strong>Next</strong> to upgrade the driver.</li>
 </ol>
 
@@ -274,7 +274,7 @@ Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.)</li>
     removable media</strong>; and check <strong>Include
 this location in the search</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.)</li>
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
   <li>Click <strong>Next</strong> to install the driver.</li>
 </ol>
 
@@ -296,7 +296,7 @@ driver:</p>
     removable media</strong>; and check <strong>Include
 this location in the search</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.)</li>
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
   <li>Click <strong>Next</strong> to upgrade the driver.</li>
 </ol>
 
@@ -314,8 +314,8 @@ Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.)</li>
   <li>Select <strong>I don't have the disk. Show me other options</strong>.</li>
   <li>Select <strong>Browse my computer for driver software</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.) As long as you specified the exact
-location of the 
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
+exact location of the 
     installation package, you may leave <strong>Include subfolders</strong> checked or
   unchecked&mdash;it doesn't matter.</li>
   <li>Click <strong>Next</strong>. Vista may prompt you to confirm the privilege elevation
@@ -339,7 +339,7 @@ driver:</p>
   search for the driver
     software. Select <strong>Browse my computer for driver software</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\google-usb_driver\}.) As long as you specified the
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
 exact location of the 
     installation package, you may leave <strong>Include subfolders</strong> checked or
     unchecked&mdash;it doesn't matter.</li>
