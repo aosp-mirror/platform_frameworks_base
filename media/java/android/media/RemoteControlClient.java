@@ -16,7 +16,9 @@
 
 package android.media;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -203,6 +205,8 @@ public class RemoteControlClient
     public final static int FLAG_INFORMATION_REQUEST_ALBUM_ART = 1 << 3;
 
     /**
+     * @hide
+     * TODO remove after modifying known (internal) media apps using this API
      * Class constructor.
      * @param mediaButtonEventReceiver The receiver for the media button events. It needs to have
      *     been registered with {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
@@ -226,6 +230,8 @@ public class RemoteControlClient
     }
 
     /**
+     * @hide
+     * TODO remove after modifying known (internal) media apps using this API
      * Class constructor for a remote control client whose internal event handling
      * happens on a user-provided Looper.
      * @param mediaButtonEventReceiver The receiver for the media button events. It needs to have
@@ -238,6 +244,56 @@ public class RemoteControlClient
      */
     public RemoteControlClient(ComponentName mediaButtonEventReceiver, Looper looper) {
         mRcEventReceiver = mediaButtonEventReceiver;
+
+        mEventHandler = new EventHandler(this, looper);
+    }
+
+    /**
+     * Class constructor.
+     * @param mediaButtonIntent The intent that will be sent for the media button events sent
+     *     by remote controls.
+     *     This intent needs to have been constructed with the {@link Intent#ACTION_MEDIA_BUTTON}
+     *     action, and have a component that will handle the intent (set with
+     *     {@link Intent#setComponent(ComponentName)}) registered with
+     *     {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
+     *     before this new RemoteControlClient can itself be registered with
+     *     {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
+     * @see AudioManager#registerMediaButtonEventReceiver(ComponentName)
+     * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
+     */
+    public RemoteControlClient(PendingIntent mediaButtonIntent) {
+        // TODO implement using PendingIntent instead of ComponentName
+        mRcEventReceiver = null;
+
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else {
+            mEventHandler = null;
+            Log.e(TAG, "RemoteControlClient() couldn't find main application thread");
+        }
+    }
+
+    /**
+     * Class constructor for a remote control client whose internal event handling
+     * happens on a user-provided Looper.
+     * @param mediaButtonIntent The intent that will be sent for the media button events sent
+     *     by remote controls.
+     *     This intent needs to have been constructed with the {@link Intent#ACTION_MEDIA_BUTTON}
+     *     action, and have a component that will handle the intent (set with
+     *     {@link Intent#setComponent(ComponentName)}) registered with
+     *     {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
+     *     before this new RemoteControlClient can itself be registered with
+     *     {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
+     * @param looper The Looper running the event loop.
+     * @see AudioManager#registerMediaButtonEventReceiver(ComponentName)
+     * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
+     */
+    public RemoteControlClient(PendingIntent mediaButtonIntent, Looper looper) {
+        // TODO implement using PendingIntent instead of ComponentName
+        mRcEventReceiver = null;
 
         mEventHandler = new EventHandler(this, looper);
     }
