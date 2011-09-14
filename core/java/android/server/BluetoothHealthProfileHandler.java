@@ -29,12 +29,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This handles all the operations on the Bluetooth Health profile.
@@ -58,6 +58,7 @@ final class BluetoothHealthProfileHandler {
     private static final int MESSAGE_REGISTER_APPLICATION = 0;
     private static final int MESSAGE_UNREGISTER_APPLICATION = 1;
     private static final int MESSAGE_CONNECT_CHANNEL = 2;
+    private static final AtomicInteger sChannelId = new AtomicInteger();
 
     class HealthChannel {
         private ParcelFileDescriptor mChannelFd;
@@ -67,6 +68,7 @@ final class BluetoothHealthProfileHandler {
         private BluetoothHealthAppConfiguration mConfig;
         private int mState;
         private int mChannelType;
+        private int mId;
 
         HealthChannel(BluetoothDevice device, BluetoothHealthAppConfiguration config,
                 ParcelFileDescriptor fd, boolean mainChannel, String channelPath) {
@@ -76,6 +78,7 @@ final class BluetoothHealthProfileHandler {
              mDevice = device;
              mConfig = config;
              mState = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
+             mId = getChannelId();
         }
     }
 
@@ -117,7 +120,7 @@ final class BluetoothHealthProfileHandler {
                 for (HealthChannel chan : mHealthChannels) {
                     if (chan.mConfig.equals(unregisterApp) &&
                             chan.mState != BluetoothHealth.STATE_CHANNEL_DISCONNECTED) {
-                        disconnectChannel(chan.mDevice, unregisterApp, chan.hashCode());
+                        disconnectChannel(chan.mDevice, unregisterApp, chan.mId);
                     }
                 }
 
@@ -141,11 +144,11 @@ final class BluetoothHealthProfileHandler {
                 String channelType = getStringChannelType(chan.mChannelType);
 
                 if (!mBluetoothService.createChannelNative(deviceObjectPath, configPath,
-                          channelType, chan.hashCode())) {
+                          channelType, chan.mId)) {
                     int prevState = chan.mState;
                     int state = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
                     callHealthChannelCallback(chan.mConfig, chan.mDevice, prevState, state, null,
-                            chan.hashCode());
+                            chan.mId);
                     mHealthChannels.remove(chan);
                 }
             }
@@ -216,7 +219,7 @@ final class BluetoothHealthProfileHandler {
 
         int prevState = BluetoothHealth.STATE_CHANNEL_DISCONNECTED;
         int state = BluetoothHealth.STATE_CHANNEL_CONNECTING;
-        callHealthChannelCallback(config, device, prevState, state, null, chan.hashCode());
+        callHealthChannelCallback(config, device, prevState, state, null, chan.mId);
 
         Message msg = mHandler.obtainMessage(MESSAGE_CONNECT_CHANNEL);
         msg.obj = chan;
@@ -245,6 +248,23 @@ final class BluetoothHealthProfileHandler {
         }
     }
 
+    private int getChannelId() {
+        // The function doesn't need to be synchronized, as the health profile handler
+        // will only allow one health channel object creation at a time.
+        // In the worst case the while loop will have to break out at some point of
+        // time, because only a limited number of L2CAP channels are possible.
+        int id;
+        boolean found;
+        do {
+            id = sChannelId.incrementAndGet();
+            found = false;
+            for (HealthChannel chan: mHealthChannels) {
+                if (chan.mId == id) found = true;
+            }
+        } while (found);
+        return id;
+    }
+
     boolean disconnectChannel(BluetoothDevice device,
             BluetoothHealthAppConfiguration config, int id) {
         HealthChannel chan = findChannelById(id);
@@ -260,14 +280,14 @@ final class BluetoothHealthProfileHandler {
         int prevState = chan.mState;
         chan.mState = BluetoothHealth.STATE_CHANNEL_DISCONNECTING;
         callHealthChannelCallback(config, device, prevState, chan.mState,
-                null, chan.hashCode());
+                null, chan.mId);
 
         if (!mBluetoothService.destroyChannelNative(deviceObjectPath, chan.mChannelPath,
-                                                    chan.hashCode())) {
+                                                    chan.mId)) {
             prevState = chan.mState;
             chan.mState = BluetoothHealth.STATE_CHANNEL_CONNECTED;
             callHealthChannelCallback(config, device, prevState, chan.mState,
-                    chan.mChannelFd, chan.hashCode());
+                    chan.mChannelFd, chan.mId);
             return false;
         } else {
             return true;
@@ -276,7 +296,7 @@ final class BluetoothHealthProfileHandler {
 
     private HealthChannel findChannelById(int id) {
         for (HealthChannel chan : mHealthChannels) {
-            if (chan.hashCode() == id) return chan;
+            if (chan.mId == id) return chan;
         }
         return null;
     }
@@ -434,7 +454,7 @@ final class BluetoothHealthProfileHandler {
             fd = mBluetoothService.getChannelFdNative(channelPath);
             if (fd == null) {
                 errorLog("Error obtaining fd for channel:" + channelPath);
-                disconnectChannel(device, config, channel.hashCode());
+                disconnectChannel(device, config, channel.mId);
                 return;
             }
             boolean mainChannel =
@@ -467,7 +487,7 @@ final class BluetoothHealthProfileHandler {
         }
         channel.mState = state;
         callHealthChannelCallback(config, device, prevState, state, channel.mChannelFd,
-                channel.hashCode());
+                channel.mId);
     }
 
     private void callHealthChannelCallback(BluetoothHealthAppConfiguration config,
