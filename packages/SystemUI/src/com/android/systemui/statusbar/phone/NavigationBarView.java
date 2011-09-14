@@ -42,7 +42,7 @@ import com.android.systemui.R;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
-    final static String TAG = "NavigationBarView";
+    final static String TAG = "PhoneStatusBar/NavigationBarView";
 
     final static boolean DEBUG_DEADZONE = false;
 
@@ -60,6 +60,7 @@ public class NavigationBarView extends LinearLayout {
     boolean mVertical;
 
     boolean mHidden, mLowProfile;
+    int mDisabledFlags = 0;
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -99,7 +100,7 @@ public class NavigationBarView extends LinearLayout {
                 // even though setting the systemUI visibility below will turn these views
                 // on, we need them to come up faster so that they can catch this motion
                 // event
-                setLowProfile(false, false);
+                setLowProfile(false, false, false);
 
                 try {
                     mBarService.setSystemUiVisibility(0);
@@ -110,9 +111,18 @@ public class NavigationBarView extends LinearLayout {
         }
     };
 
-    public void setNavigationVisibility(int disabledFlags) {
-        boolean disableNavigation = ((disabledFlags & View.STATUS_BAR_DISABLE_NAVIGATION) != 0);
-        boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
+    public void setDisabledFlags(int disabledFlags) {
+        Slog.d(TAG, "setDisabledFlags: " + disabledFlags);
+        setDisabledFlags(disabledFlags, false);
+    }
+
+    public void setDisabledFlags(int disabledFlags, boolean force) {
+        if (!force && mDisabledFlags == disabledFlags) return;
+
+        mDisabledFlags = disabledFlags;
+
+        final boolean disableNavigation = ((disabledFlags & View.STATUS_BAR_DISABLE_NAVIGATION) != 0);
+        final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
 
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
@@ -121,11 +131,11 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setLowProfile(final boolean lightsOut) {
-        setLowProfile(lightsOut, true);
+        setLowProfile(lightsOut, true, false);
     }
 
-    public void setLowProfile(final boolean lightsOut, final boolean animate) {
-        if (lightsOut == mLowProfile) return;
+    public void setLowProfile(final boolean lightsOut, final boolean animate, final boolean force) {
+        if (!force && lightsOut == mLowProfile) return;
 
         mLowProfile = lightsOut;
 
@@ -244,6 +254,10 @@ public class NavigationBarView extends LinearLayout {
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
         mVertical = (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270);
+
+        // force the low profile & disabled states into compliance
+        setLowProfile(mLowProfile, false, true /* force */);
+        setDisabledFlags(mDisabledFlags, true /* force */);
 
         if (DEBUG_DEADZONE) {
             mCurrentView.findViewById(R.id.deadzone).setBackgroundColor(0x808080FF);
