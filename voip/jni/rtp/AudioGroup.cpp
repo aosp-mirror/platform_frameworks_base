@@ -28,6 +28,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+// #define LOG_NDEBUG 0
 #define LOG_TAG "AudioGroup"
 #include <cutils/atomic.h>
 #include <cutils/properties.h>
@@ -62,9 +63,9 @@ int gRandom = -1;
 // a modulo operation on the index while accessing the array. However modulo can
 // be expensive on some platforms, such as ARM. Thus we round up the size of the
 // array to the nearest power of 2 and then use bitwise-and instead of modulo.
-// Currently we make it 512ms long and assume packet interval is 40ms or less.
-// The first 80ms is the place where samples get mixed. The rest 432ms is the
-// real jitter buffer. For a stream at 8000Hz it takes 8192 bytes. These numbers
+// Currently we make it 2048ms long and assume packet interval is 50ms or less.
+// The first 100ms is the place where samples get mixed. The rest is the real
+// jitter buffer. For a stream at 8000Hz it takes 32 kilobytes. These numbers
 // are chosen by experiments and each of them can be adjusted as needed.
 
 // Originally a stream does not send packets when it is receive-only or there is
@@ -84,9 +85,11 @@ int gRandom = -1;
 // + Resampling is not done yet, so streams in one group must use the same rate.
 //   For the first release only 8000Hz is supported.
 
-#define BUFFER_SIZE     512
-#define HISTORY_SIZE    80
-#define MEASURE_PERIOD  2000
+#define BUFFER_SIZE     2048
+#define HISTORY_SIZE    100
+#define MEASURE_BASE    100
+#define MEASURE_PERIOD  5000
+#define DTMF_PERIOD     200
 
 class AudioStream
 {
@@ -278,7 +281,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
     if (mMode != RECEIVE_ONLY && mDtmfEvent != -1) {
         int duration = mTimestamp - mDtmfStart;
         // Make sure duration is reasonable.
-        if (duration >= 0 && duration < mSampleRate * 100) {
+        if (duration >= 0 && duration < mSampleRate * DTMF_PERIOD) {
             duration += mSampleCount;
             int32_t buffer[4] = {
                 htonl(mDtmfMagic | mSequence),
@@ -286,7 +289,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
                 mSsrc,
                 htonl(mDtmfEvent | duration),
             };
-            if (duration >= mSampleRate * 100) {
+            if (duration >= mSampleRate * DTMF_PERIOD) {
                 buffer[3] |= htonl(1 << 23);
                 mDtmfEvent = -1;
             }
@@ -298,43 +301,39 @@ void AudioStream::encode(int tick, AudioStream *chain)
     }
 
     int32_t buffer[mSampleCount + 3];
+    bool data = false;
+    if (mMode != RECEIVE_ONLY) {
+        // Mix all other streams.
+        memset(buffer, 0, sizeof(buffer));
+        while (chain) {
+            if (chain != this) {
+                data |= chain->mix(buffer, tick - mInterval, tick, mSampleRate);
+            }
+            chain = chain->mNext;
+        }
+    }
+
     int16_t samples[mSampleCount];
-    if (mMode == RECEIVE_ONLY) {
+    if (data) {
+        // Saturate into 16 bits.
+        for (int i = 0; i < mSampleCount; ++i) {
+            int32_t sample = buffer[i];
+            if (sample < -32768) {
+                sample = -32768;
+            }
+            if (sample > 32767) {
+                sample = 32767;
+            }
+            samples[i] = sample;
+        }
+    } else {
         if ((mTick ^ mKeepAlive) >> 10 == 0) {
             return;
         }
         mKeepAlive = mTick;
         memset(samples, 0, sizeof(samples));
-    } else {
-        // Mix all other streams.
-        bool mixed = false;
-        memset(buffer, 0, sizeof(buffer));
-        while (chain) {
-            if (chain != this &&
-                chain->mix(buffer, tick - mInterval, tick, mSampleRate)) {
-                mixed = true;
-            }
-            chain = chain->mNext;
-        }
 
-        if (mixed) {
-            // Saturate into 16 bits.
-            for (int i = 0; i < mSampleCount; ++i) {
-                int32_t sample = buffer[i];
-                if (sample < -32768) {
-                    sample = -32768;
-                }
-                if (sample > 32767) {
-                    sample = 32767;
-                }
-                samples[i] = sample;
-            }
-        } else {
-            if ((mTick ^ mKeepAlive) >> 10 == 0) {
-                return;
-            }
-            mKeepAlive = mTick;
-            memset(samples, 0, sizeof(samples));
+        if (mMode != RECEIVE_ONLY) {
             LOGV("stream[%d] no data", mSocket);
         }
     }
@@ -380,19 +379,16 @@ void AudioStream::decode(int tick)
         }
     }
 
-    // Adjust the jitter buffer if the latency keeps larger than two times of the
-    // packet interval in the past two seconds.
-    int score = mBufferTail - tick - mInterval * 2;
-    if (mLatencyScore > score) {
+    // Adjust the jitter buffer if the latency keeps larger than the threshold
+    // in the measurement period.
+    int score = mBufferTail - tick - MEASURE_BASE;
+    if (mLatencyScore > score || mLatencyScore <= 0) {
         mLatencyScore = score;
-    }
-    if (mLatencyScore <= 0) {
         mLatencyTimer = tick;
-        mLatencyScore = score;
     } else if (tick - mLatencyTimer >= MEASURE_PERIOD) {
         LOGV("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
         mBufferTail -= mLatencyScore;
-        mLatencyTimer = tick;
+        mLatencyScore = -1;
     }
 
     int count = (BUFFER_SIZE - (mBufferTail - mBufferHead)) * mSampleRate;
