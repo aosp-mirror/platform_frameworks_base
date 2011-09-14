@@ -104,14 +104,6 @@ public class TrafficStats {
         return NetworkManagementSocketTagger.getThreadSocketStatsTag();
     }
 
-    /**
-     * @deprecated unsupported, will eventually be removed
-     */
-    @Deprecated
-    public static void setThreadStatsTag(String tag) {
-        setThreadStatsTag(tag.hashCode());
-    }
-
     public static void clearThreadStatsTag() {
         NetworkManagementSocketTagger.setThreadSocketStatsTag(-1);
     }
