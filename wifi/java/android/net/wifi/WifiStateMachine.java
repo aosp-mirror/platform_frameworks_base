@@ -1917,15 +1917,17 @@ public class WifiStateMachine extends StateMachine {
                         Log.e(TAG, "Failed to reload STA firmware " + e);
                         // continue
                     }
-                    //A runtime crash can leave the interface up and
-                    //this affects connectivity when supplicant starts up.
-                    //Ensure interface is down before a supplicant start.
-                    try {
+                   try {
+                       //A runtime crash can leave the interface up and
+                       //this affects connectivity when supplicant starts up.
+                       //Ensure interface is down before a supplicant start.
                         mNwService.setInterfaceDown(mInterfaceName);
+                        //Set privacy extensions
+                        mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
                     } catch (RemoteException re) {
-                        if (DBG) Log.w(TAG, "Unable to bring down wlan interface: " + re);
+                        if (DBG) Log.w(TAG, "Unable to change interface settings: " + re);
                     } catch (IllegalStateException ie) {
-                        if (DBG) Log.w(TAG, "Unable to bring down wlan interface: " + ie);
+                        if (DBG) Log.w(TAG, "Unable to change interface settings: " + ie);
                     }
 
                     if(WifiNative.startSupplicant()) {
