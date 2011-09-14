@@ -30,13 +30,11 @@ DbgContext * getDbgContextThreadSpecific() {
 }
 
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
-                       const unsigned MAX_VERTEX_ATTRIBS, const GLenum readFormat,
-                       const GLenum readType)
+                       const unsigned MAX_VERTEX_ATTRIBS)
         : lzf_buf(NULL), lzf_readIndex(0), lzf_refSize(0), lzf_refBufSize(0)
         , version(version), hooks(hooks)
         , MAX_VERTEX_ATTRIBS(MAX_VERTEX_ATTRIBS)
-        , readFormat(readFormat), readType(readType)
-        , readBytesPerPixel(GetBytesPerPixel(readFormat, readType))
+        , readBytesPerPixel(4)
         , captureSwap(0), captureDraw(0)
         , vertexAttribs(new VertexAttrib[MAX_VERTEX_ATTRIBS])
         , hasNonVBOAttribs(false), indexBuffers(NULL), indexBuffer(NULL)
@@ -67,11 +65,7 @@ DbgContext* CreateDbgContext(const unsigned version, const gl_hooks_t * const ho
     assert(GL_NO_ERROR == hooks->gl.glGetError());
     GLint MAX_VERTEX_ATTRIBS = 0;
     hooks->gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &MAX_VERTEX_ATTRIBS);
-    GLint readFormat, readType;
-    hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
-    hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-    DbgContext* dbg = new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS, readFormat, readType);
-
+    DbgContext* dbg = new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS);
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_expect_response(false);
@@ -100,33 +94,31 @@ unsigned GetBytesPerPixel(const GLenum format, const GLenum type)
 {
     switch (type) {
     case GL_UNSIGNED_SHORT_5_6_5:
-        return 2;
     case GL_UNSIGNED_SHORT_4_4_4_4:
-        return 2;
     case GL_UNSIGNED_SHORT_5_5_5_1:
         return 2;
     case GL_UNSIGNED_BYTE:
         break;
     default:
-        assert(0);
+        LOGE("GetBytesPerPixel: unknown type %x", type);
     }
 
     switch (format) {
     case GL_ALPHA:
-        return 1;
     case GL_LUMINANCE:
         return 1;
-        break;
     case GL_LUMINANCE_ALPHA:
         return 2;
     case GL_RGB:
         return 3;
     case GL_RGBA:
+    case 0x80E1:   // GL_BGRA_EXT
         return 4;
     default:
-        assert(0);
-        return 0;
+        LOGE("GetBytesPerPixel: unknown format %x", format);
     }
+
+    return 1; // in doubt...
 }
 
 void DbgContext::Fetch(const unsigned index, std::string * const data) const

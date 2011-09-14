@@ -151,7 +151,7 @@ protected:
     virtual void SetUp() {
         ServerFileTest::SetUp();
 
-        dbg = new DbgContext(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE);
+        dbg = new DbgContext(1, &hooks, 32);
         ASSERT_NE((void *)NULL, dbg);
         for (unsigned int i = 0; i < sizeof(hooks) / sizeof(void *); i++)
             ((void **)&hooks)[i] = reinterpret_cast<void *>(glNoop);
