@@ -432,6 +432,10 @@
     <integer-array name="config_autoBrightnessLevels">
     </integer-array>
 
+
+    <!-- Minimum screen brightness allowed by the power manager. -->
+    <integer name="config_screenBrightnessDim">20</integer>
+
     <!-- Array of output values for LCD backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.

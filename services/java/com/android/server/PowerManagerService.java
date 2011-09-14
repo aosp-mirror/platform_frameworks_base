@@ -237,6 +237,7 @@ public class PowerManagerService extends IPowerManager.Stub
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
     private int mButtonBrightnessOverride = -1;
+    private int mScreenBrightnessDim;
     private boolean mUseSoftwareAutoBrightness;
     private boolean mAutoBrightessEnabled;
     private int[] mAutoBrightnessLevels;
@@ -588,6 +589,9 @@ public class PowerManagerService extends IPowerManager.Stub
 
         mUnplugTurnsOnScreen = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
+
+        mScreenBrightnessDim = resources.getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDim);
 
         // read settings for auto-brightness
         mUseSoftwareAutoBrightness = resources.getBoolean(
@@ -1885,7 +1889,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         nominalCurrentValue = preferredBrightness;
                         break;
                     case SCREEN_ON_BIT:
-                        nominalCurrentValue = Power.BRIGHTNESS_DIM;
+                        nominalCurrentValue = mScreenBrightnessDim;
                         break;
                     case 0:
                         nominalCurrentValue = Power.BRIGHTNESS_OFF;
@@ -1904,7 +1908,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 // the scale is because the brightness ramp isn't linear and this biases
                 // it so the later parts take longer.
                 final float scale = 1.5f;
-                float ratio = (((float)Power.BRIGHTNESS_DIM)/preferredBrightness);
+                float ratio = (((float)mScreenBrightnessDim)/preferredBrightness);
                 if (ratio > 1.0f) ratio = 1.0f;
                 if ((newState & SCREEN_ON_BIT) == 0) {
                     if ((oldState & SCREEN_BRIGHT_BIT) != 0) {
@@ -1931,7 +1935,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         // will then count going dim as turning off.
                         mScreenOffTime = SystemClock.elapsedRealtime();
                     }
-                    brightness = Power.BRIGHTNESS_DIM;
+                    brightness = mScreenBrightnessDim;
                 }
             }
             long identity = Binder.clearCallingIdentity();
@@ -1961,7 +1965,7 @@ public class PowerManagerService extends IPowerManager.Stub
             setLightBrightness(offMask, Power.BRIGHTNESS_OFF);
         }
         if (dimMask != 0) {
-            int brightness = Power.BRIGHTNESS_DIM;
+            int brightness = mScreenBrightnessDim;
             if ((newState & BATTERY_LOW_BIT) != 0 &&
                     brightness > Power.BRIGHTNESS_LOW_BATTERY) {
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
@@ -2129,7 +2133,7 @@ public class PowerManagerService extends IPowerManager.Stub
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
                                                           SCREEN_BRIGHTNESS);
              // Don't let applications turn the screen all the way off
-            return Math.max(brightness, Power.BRIGHTNESS_DIM);
+            return Math.max(brightness, mScreenBrightnessDim);
         } catch (SettingNotFoundException snfe) {
             return Power.BRIGHTNESS_ON;
         }
@@ -2817,7 +2821,7 @@ public class PowerManagerService extends IPowerManager.Stub
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         // Don't let applications turn the screen all the way off
         synchronized (mLocks) {
-            brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
+            brightness = Math.max(brightness, mScreenBrightnessDim);
             mLcdLight.setBrightness(brightness);
             mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
             mButtonLight.setBrightness(brightness);
