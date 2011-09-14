@@ -2085,6 +2085,10 @@ public final class WebViewCore {
             if (!core.getSettings().enableSmoothTransition()) return;
 
             synchronized (core) {
+                if (core.mNativeClass == 0) {
+                    Log.w(LOGTAG, "Cannot pauseUpdatePicture, core destroyed or not initialized!");
+                    return;
+                }
                 core.nativeSetIsPaused(true);
                 core.mDrawIsPaused = true;
             }
@@ -2099,6 +2103,10 @@ public final class WebViewCore {
                 return;
 
             synchronized (core) {
+                if (core.mNativeClass == 0) {
+                    Log.w(LOGTAG, "Cannot resumeUpdatePicture, core destroyed!");
+                    return;
+                }
                 core.nativeSetIsPaused(false);
                 core.mDrawIsPaused = false;
                 // always redraw on resume to reenable gif animations
