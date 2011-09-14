@@ -401,6 +401,7 @@ class BluetoothEventLoop {
             Intent intent = new Intent(BluetoothDevice.ACTION_NAME_CHANGED);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             intent.putExtra(BluetoothDevice.EXTRA_NAME, propValues[1]);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         } else if (name.equals("Alias")) {
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
@@ -410,6 +411,7 @@ class BluetoothEventLoop {
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             intent.putExtra(BluetoothDevice.EXTRA_CLASS,
                     new BluetoothClass(Integer.valueOf(propValues[1])));
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         } else if (name.equals("Connected")) {
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
@@ -425,6 +427,7 @@ class BluetoothEventLoop {
                 intent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
             }
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         } else if (name.equals("UUIDs")) {
             String uuid = null;
