@@ -11765,7 +11765,6 @@ package android.net {
     method public static void incrementOperationCount(int);
     method public static void incrementOperationCount(int, int);
     method public static void setThreadStatsTag(int);
-    method public static deprecated void setThreadStatsTag(java.lang.String);
     method public static void tagSocket(java.net.Socket) throws java.net.SocketException;
     method public static void untagSocket(java.net.Socket) throws java.net.SocketException;
     field public static final int UNSUPPORTED = -1; // 0xffffffff
