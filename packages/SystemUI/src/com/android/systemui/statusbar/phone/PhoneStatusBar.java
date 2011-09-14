@@ -469,20 +469,10 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     private WindowManager.LayoutParams getNavigationBarLayoutParams() {
-        final int rotation = mDisplay.getRotation();
-        final boolean sideways = 
-            (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270);
-
-        final Resources res = mContext.getResources();
-        final int size = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
-
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                sideways ? size : ViewGroup.LayoutParams.MATCH_PARENT,
-                sideways ? ViewGroup.LayoutParams.MATCH_PARENT : size,
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
                     0
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
@@ -494,21 +484,6 @@ public class PhoneStatusBar extends StatusBar {
         }
 
         lp.setTitle("NavigationBar");
-        switch (rotation) {
-            case Surface.ROTATION_90:
-                // device has been turned 90deg counter-clockwise
-                lp.gravity = Gravity.RIGHT | Gravity.FILL_VERTICAL;
-                break;
-            case Surface.ROTATION_270:
-                // device has been turned 90deg clockwise
-                lp.gravity = (NavigationBarView.NAVBAR_ALWAYS_AT_RIGHT ? Gravity.RIGHT
-                                                                       : Gravity.LEFT) 
-                             | Gravity.FILL_VERTICAL;
-                break;
-            default:
-                lp.gravity = Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
-                break;
-        }
         lp.windowAnimations = 0;
 
         return lp;
