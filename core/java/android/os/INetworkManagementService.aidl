@@ -74,6 +74,11 @@ interface INetworkManagementService
     void setInterfaceUp(String iface);
 
     /**
+     * Set interface IPv6 privacy extensions
+     */
+    void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable);
+
+    /**
      * Retrieves the network routes currently configured on the specified
      * interface
      */
