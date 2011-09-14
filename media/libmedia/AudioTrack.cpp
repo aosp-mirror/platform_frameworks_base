@@ -262,7 +262,7 @@ status_t AudioTrack::set(
     mFlushed = false;
     mFlags = flags;
     AudioSystem::acquireAudioSessionId(mSessionId);
-
+    mRestoreStatus = NO_ERROR;
     return NO_ERROR;
 }
 
@@ -1161,8 +1161,8 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
     status_t result;
 
     if (!(android_atomic_or(CBLK_RESTORING_ON, &cblk->flags) & CBLK_RESTORING_MSK)) {
-        LOGW("dead IAudioTrack, creating a new one from %s",
-             fromStart ? "start()" : "obtainBuffer()");
+        LOGW("dead IAudioTrack, creating a new one from %s TID %d",
+             fromStart ? "start()" : "obtainBuffer()", gettid());
 
         // signal old cblk condition so that other threads waiting for available buffers stop
         // waiting now
@@ -1217,32 +1217,34 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
             }
             if (mActive) {
                 result = mAudioTrack->start();
+                LOGW_IF(result != NO_ERROR, "restoreTrack_l() start() failed status %d", result);
             }
             if (fromStart && result == NO_ERROR) {
                 mNewPosition = mCblk->server + mUpdatePeriod;
             }
         }
         if (result != NO_ERROR) {
-            mActive = false;
+            android_atomic_and(~CBLK_RESTORING_ON, &cblk->flags);
+            LOGW_IF(result != NO_ERROR, "restoreTrack_l() failed status %d", result);
         }
-
+        mRestoreStatus = result;
         // signal old cblk condition for other threads waiting for restore completion
         android_atomic_or(CBLK_RESTORED_ON, &cblk->flags);
         cblk->cv.broadcast();
     } else {
         if (!(cblk->flags & CBLK_RESTORED_MSK)) {
-            LOGW("dead IAudioTrack, waiting for a new one");
+            LOGW("dead IAudioTrack, waiting for a new one TID %d", gettid());
             mLock.unlock();
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(RESTORE_TIMEOUT_MS));
+            if (result == NO_ERROR) {
+                result = mRestoreStatus;
+            }
             cblk->lock.unlock();
             mLock.lock();
         } else {
-            LOGW("dead IAudioTrack, already restored");
-            result = NO_ERROR;
+            LOGW("dead IAudioTrack, already restored TID %d", gettid());
+            result = mRestoreStatus;
             cblk->lock.unlock();
-        }
-        if (result != NO_ERROR || mActive == 0) {
-            result = status_t(STOPPED);
         }
     }
     LOGV("restoreTrack_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
@@ -1254,7 +1256,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
     }
     cblk->lock.lock();
 
-    LOGW_IF(result != NO_ERROR, "restoreTrack_l() error %d", result);
+    LOGW_IF(result != NO_ERROR, "restoreTrack_l() error %d TID %d", result, gettid());
 
     return result;
 }
