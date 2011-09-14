@@ -1798,6 +1798,20 @@ public final class Telephony {
         public static final String ROAMING_PROTOCOL = "roaming_protocol";
 
         public static final String CURRENT = "current";
+
+        /**
+          * Current status of APN
+          * true : enabled APN, false : disabled APN.
+          */
+        public static final String CARRIER_ENABLED = "carrier_enabled";
+
+        /**
+          * Radio Access Technology info
+          * To check what values can hold, refer to ServiceState.java.
+          * This should be spread to other technologies,
+          * but currently only used for LTE(14) and EHRPD(13).
+          */
+        public static final String BEARER = "bearer";
     }
 
     public static final class Intents {

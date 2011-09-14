@@ -889,7 +889,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         types,
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROTOCOL)),
                         cursor.getString(cursor.getColumnIndexOrThrow(
-                                Telephony.Carriers.ROAMING_PROTOCOL)));
+                                Telephony.Carriers.ROAMING_PROTOCOL)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(
+                                Telephony.Carriers.CARRIER_ENABLED)) == 1,
+                        cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.BEARER)));
                 result.add(apn);
             } while (cursor.moveToNext());
         }
@@ -1982,6 +1985,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         String operator = mPhone.mIccRecords.getOperatorNumeric();
         if (operator != null) {
             String selection = "numeric = '" + operator + "'";
+            // query only enabled apn.
+            // carrier_enabled : 1 means enabled apn, 0 disabled apn.
+            selection += " and carrier_enabled = 1";
             if (DBG) log("createAllApnList: selection=" + selection);
 
             Cursor cursor = mPhone.getContext().getContentResolver().query(
@@ -2069,6 +2075,18 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
+     * Check current radio access technology is LTE or EHRPD.
+     *
+     * @param integer value of radio access technology
+     * @return true when current radio access technology is LTE or EHRPD
+     * @	   false when current radio access technology is not LTE or EHRPD
+     */
+    private boolean needToCheckApnBearer(int radioTech) {
+        return (radioTech == ServiceState.RADIO_TECHNOLOGY_LTE ||
+                radioTech == ServiceState.RADIO_TECHNOLOGY_EHRPD);
+    }
+
+    /**
      * Build a list of APNs to be used to create PDP's.
      *
      * @param requestedApnType
@@ -2088,6 +2106,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         String operator = mPhone.mIccRecords.getOperatorNumeric();
+        int radioTech = mPhone.getServiceState().getRadioTechnology();
+        boolean needToCheckApnBearer = needToCheckApnBearer(radioTech);
+
         if (requestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
             if (canSetPreferApn && mPreferredApn != null) {
                 if (DBG) {
@@ -2095,9 +2116,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         + mPreferredApn.numeric + ":" + mPreferredApn);
                 }
                 if (mPreferredApn.numeric.equals(operator)) {
-                    apnList.add(mPreferredApn);
-                    if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
-                    return apnList;
+                    if (!needToCheckApnBearer || mPreferredApn.bearer == radioTech) {
+                        apnList.add(mPreferredApn);
+                        if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
+                        return apnList;
+                    } else {
+                        if (DBG) log("buildWaitingApns: no preferred APN");
+                        setPreferredApn(-1);
+                        mPreferredApn = null;
+                    }
                 } else {
                     if (DBG) log("buildWaitingApns: no preferred APN");
                     setPreferredApn(-1);
@@ -2108,7 +2135,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (mAllApns != null) {
             for (ApnSetting apn : mAllApns) {
                 if (apn.canHandleType(requestedApnType)) {
-                    apnList.add(apn);
+                    if (!needToCheckApnBearer || apn.bearer == radioTech) {
+                        if (DBG) log("apn info : " +apn.toString());
+                        apnList.add(apn);
+                    }
                 }
             }
         } else {
