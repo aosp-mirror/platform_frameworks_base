@@ -2074,7 +2074,7 @@ public class ListView extends AbsListView {
     }
 
     private boolean commonKey(int keyCode, int count, KeyEvent event) {
-        if (mAdapter == null) {
+        if (mAdapter == null || !mIsAttached) {
             return false;
         }
 
