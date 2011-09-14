@@ -46,4 +46,8 @@ final class SslCertLookupTable {
     public boolean isAllowed(SslError sslError) {
         return table.getBoolean(sslError.toString());
     }
+
+    public void clear() {
+        table.clear();
+    }
 }
