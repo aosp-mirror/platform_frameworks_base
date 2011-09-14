@@ -2169,7 +2169,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (topIsFullscreen) {
                     if (mStatusBarCanHide) {
                         if (DEBUG_LAYOUT) Log.v(TAG, "Hiding status bar");
-                        if (mStatusBar.hideLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                        if (mStatusBar.hideLw(true)) {
+                            changes |= FINISH_LAYOUT_REDO_LAYOUT;
+
+                            mHandler.post(new Runnable() { public void run() {
+                                if (mStatusBarService != null) {
+                                    try {
+                                        mStatusBarService.collapse();
+                                    } catch (RemoteException ex) {}
+                                }
+                            }});
+                        }
                     } else if (localLOGV) {
                         Log.v(TAG, "Preventing status bar from hiding by policy");
                     }
