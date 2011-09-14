@@ -815,7 +815,10 @@ public class AccountManager {
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        final Bundle optionsIn = options == null ? new Bundle() : options;
+        final Bundle optionsIn = new Bundle();
+        if (options != null) {
+            optionsIn.putAll(options);
+        }
         optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
@@ -982,7 +985,10 @@ public class AccountManager {
 
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        final Bundle optionsIn = options == null ? new Bundle() : options;
+        final Bundle optionsIn = new Bundle();
+        if (options != null) {
+            optionsIn.putAll(options);
+        }
         optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
         return new AmsTask(null, handler, callback) {
             public void doWork() throws RemoteException {
@@ -1045,14 +1051,16 @@ public class AccountManager {
             final Bundle addAccountOptions,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
-        final Bundle options = (addAccountOptions == null) ? new Bundle() :
-            addAccountOptions;
-        options.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+        final Bundle optionsIn = new Bundle();
+        if (addAccountOptions != null) {
+            optionsIn.putAll(addAccountOptions);
+        }
+        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
 
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.addAcount(mResponse, accountType, authTokenType,
-                        requiredFeatures, activity != null, options);
+                        requiredFeatures, activity != null, optionsIn);
             }
         }.start();
     }
