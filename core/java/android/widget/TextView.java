@@ -9617,10 +9617,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private class SuggestionInfo {
-            int suggestionStart, suggestionEnd; // range of suggestion item with replacement text
-            int spanStart, spanEnd; // range in TextView where text should be inserted
+            int suggestionStart, suggestionEnd; // range of actual suggestion within text
             SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
-            int suggestionIndex; // the index of the suggestion inside suggestionSpan
+            int suggestionIndex; // the index of this suggestion inside suggestionSpan
             SpannableStringBuilder text = new SpannableStringBuilder();
             TextAppearanceSpan highlightSpan = new TextAppearanceSpan(mContext,
                     android.R.style.TextAppearance_SuggestionHighlight);
@@ -9804,8 +9803,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
                     SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
-                    suggestionInfo.spanStart = spanStart;
-                    suggestionInfo.spanEnd = spanEnd;
                     suggestionInfo.suggestionSpan = suggestionSpan;
                     suggestionInfo.suggestionIndex = suggestionIndex;
                     suggestionInfo.text.replace(0, suggestionInfo.text.length(),
@@ -9829,8 +9826,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int misspelledEnd = spannable.getSpanEnd(misspelledSpan);
                 if (misspelledStart >= 0 && misspelledEnd > misspelledStart) {
                     SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
-                    suggestionInfo.spanStart = misspelledStart;
-                    suggestionInfo.spanEnd = misspelledEnd;
                     suggestionInfo.suggestionSpan = misspelledSpan;
                     suggestionInfo.suggestionIndex = -1;
                     suggestionInfo.text.replace(0, suggestionInfo.text.length(),
@@ -9862,8 +9857,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         private void highlightTextDifferences(SuggestionInfo suggestionInfo, int unionStart,
                 int unionEnd) {
-            final int spanStart = suggestionInfo.spanStart;
-            final int spanEnd = suggestionInfo.spanEnd;
+            final Spannable text = (Spannable) mText;
+            final int spanStart = text.getSpanStart(suggestionInfo.suggestionSpan);
+            final int spanEnd = text.getSpanEnd(suggestionInfo.suggestionSpan);
 
             // Adjust the start/end of the suggestion span
             suggestionInfo.suggestionStart = spanStart - unionStart;
@@ -9883,10 +9879,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
+                Editable editable = (Editable) mText;
 
                 SuggestionInfo suggestionInfo = mSuggestionInfos[position];
-                final int spanStart = suggestionInfo.spanStart;
-                final int spanEnd = suggestionInfo.spanEnd;
+                final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
+                final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
                 final String originalText = mText.subSequence(spanStart, spanEnd).toString();
 
                 if (suggestionInfo.suggestionIndex < 0) {
@@ -9897,7 +9894,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionInfo.removeMisspelledFlag();
                 } else {
                     // SuggestionSpans are removed by replace: save them before
-                    Editable editable = (Editable) mText;
                     SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
                             SuggestionSpan.class);
                     final int length = suggestionSpans.length;
