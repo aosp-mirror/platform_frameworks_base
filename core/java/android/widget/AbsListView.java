@@ -635,7 +635,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Track if we are currently attached to a window.
      */
-    private boolean mIsAttached;
+    boolean mIsAttached;
 
     /**
      * Track the item count from the last time we handled a data change.
