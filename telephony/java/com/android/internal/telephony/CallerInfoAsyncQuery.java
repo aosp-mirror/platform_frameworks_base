@@ -403,9 +403,7 @@ public class CallerInfoAsyncQuery {
         cw.number = number;
 
         // check to see if these are recognized numbers, and use shortcuts if we can.
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-            Context.COUNTRY_DETECTOR);
-        if (PhoneNumberUtils.isEmergencyNumber(number, detector.detectCountry().getCountryIso())) {
+        if (PhoneNumberUtils.isLocalEmergencyNumber(number, context)) {
             cw.event = EVENT_EMERGENCY_NUMBER;
         } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
             cw.event = EVENT_VOICEMAIL_NUMBER;

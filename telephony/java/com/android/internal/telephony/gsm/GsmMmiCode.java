@@ -496,7 +496,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
             return false;
         }
 
-        if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
+        if (PhoneNumberUtils.isLocalEmergencyNumber(dialString, phone.getContext())) {
             return false;
         } else {
             return isShortCodeUSSD(dialString, phone);
