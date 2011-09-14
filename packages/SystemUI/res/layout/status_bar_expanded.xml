@@ -115,14 +115,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     systemui:rowHeight="@dimen/notification_height"
-                    android:background="@color/notification_list_shadow_top"
                     />
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="16dp"
-                    android:src="@drawable/notification_list_shadow"
-                    android:scaleType="fitXY"
-                />
+
             </LinearLayout>
         </ScrollView>
 
