@@ -450,6 +450,19 @@ class AudioPlaybackHandler {
      */
     private static final long MIN_SLEEP_TIME_MS = 20;
 
+    /**
+     * The maximum increment of time to sleep while waiting for an audiotrack
+     * to finish playing.
+     */
+    private static final long MAX_SLEEP_TIME_MS = 2500;
+
+    /**
+     * The maximum amount of time to wait for an audio track to make progress while
+     * it remains in PLAYSTATE_PLAYING. This should never happen in normal usage, but
+     * could happen in exceptional circumstances like a media_server crash.
+     */
+    private static final long MAX_PROGRESS_WAIT_MS = MAX_SLEEP_TIME_MS;
+
     private static void blockUntilDone(SynthesisMessageParams params) {
         if (params.mAudioTrack == null || params.mBytesWritten <= 0) {
             return;
@@ -490,16 +503,34 @@ class AudioPlaybackHandler {
         final AudioTrack audioTrack = params.mAudioTrack;
         final int lengthInFrames = params.mBytesWritten / params.mBytesPerFrame;
 
+        int previousPosition = -1;
         int currentPosition = 0;
-        while ((currentPosition = audioTrack.getPlaybackHeadPosition()) < lengthInFrames) {
-            if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
-                break;
-            }
+        long blockedTimeMs = 0;
+
+        while ((currentPosition = audioTrack.getPlaybackHeadPosition()) < lengthInFrames &&
+                audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
 
             final long estimatedTimeMs = ((lengthInFrames - currentPosition) * 1000) /
                     audioTrack.getSampleRate();
+            final long sleepTimeMs = clip(estimatedTimeMs, MIN_SLEEP_TIME_MS, MAX_SLEEP_TIME_MS);
 
-            final long sleepTimeMs = Math.max(estimatedTimeMs, MIN_SLEEP_TIME_MS);
+            // Check if the audio track has made progress since the last loop
+            // iteration. We should then add in the amount of time that was
+            // spent sleeping in the last iteration.
+            if (currentPosition == previousPosition) {
+                // This works only because the sleep time that would have been calculated
+                // would be the same in the previous iteration too.
+                blockedTimeMs += sleepTimeMs;
+                // If we've taken too long to make progress, bail.
+                if (blockedTimeMs > MAX_PROGRESS_WAIT_MS) {
+                    Log.w(TAG, "Waited unsuccessfully for " + MAX_PROGRESS_WAIT_MS + "ms " +
+                            "for AudioTrack to make progress, Aborting");
+                    break;
+                }
+            } else {
+                blockedTimeMs = 0;
+            }
+            previousPosition = currentPosition;
 
             if (DBG) Log.d(TAG, "About to sleep for : " + sleepTimeMs + " ms," +
                     " Playback position : " + currentPosition + ", Length in frames : "
@@ -510,6 +541,18 @@ class AudioPlaybackHandler {
                 break;
             }
         }
+    }
+
+    private static final long clip(long value, long min, long max) {
+        if (value < min) {
+            return min;
+        }
+
+        if (value > max) {
+            return max;
+        }
+
+        return value;
     }
 
     private static AudioTrack createStreamingAudioTrack(SynthesisMessageParams params) {
