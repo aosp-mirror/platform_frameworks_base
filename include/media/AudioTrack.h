@@ -487,6 +487,7 @@ protected:
     int                     mAuxEffectId;
     Mutex                   mLock;
     bool                    mIsTimed;
+    status_t                mRestoreStatus;
 };
 
 class TimedAudioTrack : public AudioTrack
