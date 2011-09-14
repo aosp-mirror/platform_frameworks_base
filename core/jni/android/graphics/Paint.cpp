@@ -366,17 +366,13 @@ public:
         NPE_CHECK_RETURN_ZERO(env, jpaint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
+        size_t textLength = env->GetStringLength(text);
         int count = end - start;
-        if ((start | count) < 0) {
+        if ((start | count) < 0 || (size_t)end > textLength) {
             doThrowAIOOBE(env);
             return 0;
         }
         if (count == 0) {
-            return 0;
-        }
-        size_t textLength = env->GetStringLength(text);
-        if ((size_t)count > textLength) {
-            doThrowAIOOBE(env);
             return 0;
         }
 
@@ -385,7 +381,7 @@ public:
         jfloat width = 0;
 
 #if RTL_USE_HARFBUZZ
-        TextLayout::getTextRunAdvances(paint, textArray, start, count, end,
+        TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
                 paint->getFlags(), NULL /* dont need all advances */, width);
 #else
 
