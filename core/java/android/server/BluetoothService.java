@@ -145,7 +145,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private final ArrayList<String> mUuidIntentTracker;
     private final HashMap<RemoteService, IBluetoothCallback> mUuidCallbackTracker;
 
-    private final HashMap<Integer, Integer> mServiceRecordToPid;
+    private final HashMap<Integer, Pair<Integer, IBinder>> mServiceRecordToPid;
 
     private final HashMap<String, BluetoothDeviceProfileState> mDeviceProfileState;
     private final BluetoothProfileState mA2dpProfileState;
@@ -221,7 +221,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceOobData = new HashMap<String, Pair<byte[], byte[]>>();
         mUuidIntentTracker = new ArrayList<String>();
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
-        mServiceRecordToPid = new HashMap<Integer, Integer>();
+        mServiceRecordToPid = new HashMap<Integer, Pair<Integer, IBinder>>();
         mDeviceProfileState = new HashMap<String, BluetoothDeviceProfileState>();
         mA2dpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.A2DP);
         mHfpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HFP);
@@ -1516,10 +1516,10 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         int pid = Binder.getCallingPid();
-        mServiceRecordToPid.put(new Integer(handle), new Integer(pid));
+        mServiceRecordToPid.put(new Integer(handle), new Pair<Integer, IBinder>(pid, b));
         try {
             b.linkToDeath(new Reaper(handle, pid, RFCOMM_RECORD_REAPER), 0);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
         return handle;
     }
 
@@ -1532,12 +1532,12 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     private synchronized void checkAndRemoveRecord(int handle, int pid) {
-        Integer handleInt = new Integer(handle);
-        Integer owner = mServiceRecordToPid.get(handleInt);
+        Pair<Integer, IBinder> pidPair = mServiceRecordToPid.get(handle);
+        Integer owner = pidPair.first;
         if (owner != null && pid == owner.intValue()) {
             if (DBG) Log.d(TAG, "Removing service record " +
                 Integer.toHexString(handle) + " for pid " + pid);
-            mServiceRecordToPid.remove(handleInt);
+            mServiceRecordToPid.remove(handle);
             removeServiceRecordNative(handle);
         }
     }
@@ -1593,6 +1593,7 @@ public class BluetoothService extends IBluetooth.Stub {
             try {
                 binder.linkToDeath(new Reaper(pid, STATE_CHANGE_REAPER), 0);
             } catch (RemoteException e) {
+                Log.e(TAG, "", e);
                 return false;
             }
         }
@@ -1867,7 +1868,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private void dumpApplicationServiceRecords(PrintWriter pw) {
         pw.println("\n--Application Service Records--");
         for (Integer handle : mServiceRecordToPid.keySet()) {
-            Integer pid = mServiceRecordToPid.get(handle);
+            Integer pid = mServiceRecordToPid.get(handle).first;
             pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
         }
         mAdapter.closeProfileProxy(BluetoothProfile.PAN, mBluetoothHeadset);
