@@ -480,6 +480,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    public void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable)
+            throws IllegalStateException {
+        String cmd = String.format("interface ipv6privacyextensions %s %s", iface,
+                enable ? "enable" : "disable");
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate with native daemon to set ipv6privacyextensions - " + e);
+        }
+    }
+
+
+
     /* TODO: This is right now a IPv4 only function. Works for wifi which loses its
        IPv6 addresses on interface down, but we need to do full clean up here */
     public void clearInterfaceAddresses(String iface) throws IllegalStateException {
