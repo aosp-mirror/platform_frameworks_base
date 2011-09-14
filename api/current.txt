@@ -14386,7 +14386,7 @@ package android.os {
     field public static final int HONEYCOMB = 11; // 0xb
     field public static final int HONEYCOMB_MR1 = 12; // 0xc
     field public static final int HONEYCOMB_MR2 = 13; // 0xd
-    field public static final int ICE_CREAM_SANDWICH = 10000; // 0x2710
+    field public static final int ICE_CREAM_SANDWICH = 14; // 0xe
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {

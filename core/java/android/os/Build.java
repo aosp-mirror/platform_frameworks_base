@@ -277,7 +277,7 @@ public class Build {
         public static final int HONEYCOMB_MR2 = 13;
 
         /**
-         * Current version under development.
+         * Android 4.0.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -298,7 +298,7 @@ public class Build {
          *      {@link android.R.style#Theme_DeviceDefault} family.
          * </ul>
          */
-        public static final int ICE_CREAM_SANDWICH = CUR_DEVELOPMENT;
+        public static final int ICE_CREAM_SANDWICH = 14;
     }
     
     /** The type of build, like "user" or "eng". */
