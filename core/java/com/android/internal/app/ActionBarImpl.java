@@ -48,6 +48,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.SpinnerAdapter;
 
 import java.lang.ref.WeakReference;
@@ -397,6 +398,7 @@ public class ActionBarImpl extends ActionBar {
                 // TODO animate this
                 mSplitView.setVisibility(View.VISIBLE);
             }
+            mContextView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             mActionMode = mode;
             return mode;
         }
@@ -681,6 +683,7 @@ public class ActionBarImpl extends ActionBar {
 
             // Clear out the context mode views after the animation finishes
             mContextView.closeMode();
+            mActionView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
             mActionMode = null;
 
