@@ -25,6 +25,7 @@
                  android:permission="android.permission.CONFIRM_FULL_BACKUP" >
 
         <activity android:name=".BackupRestoreConfirmation" 
+                  android:title=""
                   android:windowSoftInputMode="stateAlwaysHidden"
                   android:excludeFromRecents="true"
                   android:exported="true" >
