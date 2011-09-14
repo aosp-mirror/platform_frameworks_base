@@ -190,6 +190,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
 
             @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                synchronized (mLock) {
+                    Iterator<ComponentName> it = mEnabledServices.iterator();
+                    while (it.hasNext()) {
+                        ComponentName comp = it.next();
+                        String compPkg = comp.getPackageName();
+                        if (compPkg.equals(packageName)) {
+                            it.remove();
+                            updateEnabledAccessibilitySerivcesSettingLocked(mEnabledServices);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            @Override
             public boolean onHandleForceStop(Intent intent, String[] packages,
                     int uid, boolean doit) {
                 synchronized (mLock) {
@@ -209,18 +225,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         }
                     }
                     if (changed) {
-                        it = mEnabledServices.iterator();
-                        StringBuilder str = new StringBuilder();
-                        while (it.hasNext()) {
-                            if (str.length() > 0) {
-                                str.append(':');
-                            }
-                            str.append(it.next().flattenToShortString());
-                        }
-                        Settings.Secure.putString(mContext.getContentResolver(),
-                                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                str.toString());
-                        manageServicesLocked();
+                        updateEnabledAccessibilitySerivcesSettingLocked(mEnabledServices);
                     }
                     return false;
                 }
@@ -251,6 +256,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
 
                 super.onReceive(context, intent);
+            }
+
+            private void updateEnabledAccessibilitySerivcesSettingLocked(
+                    Set<ComponentName> enabledServices) {
+                Iterator<ComponentName> it = enabledServices.iterator();
+                StringBuilder str = new StringBuilder();
+                while (it.hasNext()) {
+                    if (str.length() > 0) {
+                        str.append(':');
+                    }
+                    str.append(it.next().flattenToShortString());
+                }
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                        str.toString());
             }
         };
 
