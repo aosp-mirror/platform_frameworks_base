@@ -60,9 +60,9 @@ parent.link=index.html
 
   <p>The following screenshot shows a typical DDMS screen in Eclipse. If you are starting DDMS from
   the command line, the screen is slightly different, but much of the functionality is identical.
-  Notice that the highlighted process, <code>com.example.android.notepad</code>, that is running in the emulator
-  has the debugging port 8700 assigned to it as well as 8609. This signifies that DDMS is currently
-  forwarding port 8609 to the static debugging port of 8700.</p>
+  Notice that the highlighted process, <code>com.android.email</code>, that is running in the emulator
+  has the debugging port 8700 assigned to it as well as 8606. This signifies that DDMS is currently
+  forwarding port 8606 to the static debugging port of 8700.</p>
 
   <img src="{@docRoot}images/debug-ddms.png"
        width="1024" />
@@ -76,7 +76,7 @@ parent.link=index.html
 
   <p class="note"><strong>Tip:</strong> You can set a number of DDMS preferences in
   <strong>File</strong> &gt; <strong>Preferences</strong>. Preferences are saved to
-  <code>$HOME/.ddmsrc</code>.</p>
+  <code>$HOME/.android/ddms.cfg</code>.</p>
 
   <p class="warning"><strong>Known debugging issues with Dalvik</strong><br />
   Debugging an application in the Dalvik VM should work the same as it does in other VMs. However,
