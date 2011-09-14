@@ -773,20 +773,20 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public void binderDied() {
-            IBinder newModeOwner = null;
+            int newModeOwnerPid = 0;
             synchronized(mSetModeDeathHandlers) {
                 Log.w(TAG, "setMode() client died");
                 int index = mSetModeDeathHandlers.indexOf(this);
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
                 } else {
-                    newModeOwner = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid);
+                    newModeOwnerPid = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid);
                 }
             }
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode
-            if (newModeOwner != null) {
-                 disconnectBluetoothSco(newModeOwner);
+            if (newModeOwnerPid != 0) {
+                 disconnectBluetoothSco(newModeOwnerPid);
             }
         }
 
@@ -817,28 +817,28 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        IBinder newModeOwner = null;
+        int newModeOwnerPid = 0;
         synchronized(mSetModeDeathHandlers) {
             if (mode == AudioSystem.MODE_CURRENT) {
                 mode = mMode;
             }
-            newModeOwner = setModeInt(mode, cb, Binder.getCallingPid());
+            newModeOwnerPid = setModeInt(mode, cb, Binder.getCallingPid());
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode
-        if (newModeOwner != null) {
-             disconnectBluetoothSco(newModeOwner);
+        if (newModeOwnerPid != 0) {
+             disconnectBluetoothSco(newModeOwnerPid);
         }
     }
 
     // must be called synchronized on mSetModeDeathHandlers
-    // setModeInt() returns a non null IBInder if the audio mode was successfully set to
+    // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
-    IBinder setModeInt(int mode, IBinder cb, int pid) {
-        IBinder newModeOwner = null;
+    int setModeInt(int mode, IBinder cb, int pid) {
+        int newModeOwnerPid = 0;
         if (cb == null) {
             Log.e(TAG, "setModeInt() called with null binder");
-            return newModeOwner;
+            return newModeOwnerPid;
         }
 
         SetModeDeathHandler hdlr = null;
@@ -901,13 +901,17 @@ public class AudioService extends IAudioService.Stub {
 
         if (status == AudioSystem.AUDIO_STATUS_OK) {
             if (mode != AudioSystem.MODE_NORMAL) {
-                newModeOwner = cb;
+                if (mSetModeDeathHandlers.isEmpty()) {
+                    Log.e(TAG, "setMode() different from MODE_NORMAL with empty mode client stack");
+                } else {
+                    newModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
+                }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int index = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
             setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, true, false);
         }
-        return newModeOwner;
+        return newModeOwnerPid;
     }
 
     /** pre-condition: oldMode != newMode */
@@ -1351,6 +1355,10 @@ public class AudioService extends IAudioService.Stub {
             return mCb;
         }
 
+        public int getPid() {
+            return mCreatorPid;
+        }
+
         public int totalCount() {
             synchronized(mScoClients) {
                 int count = 0;
@@ -1445,13 +1453,13 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    public void clearAllScoClients(IBinder exceptBinder, boolean stopSco) {
+    public void clearAllScoClients(int exceptPid, boolean stopSco) {
         synchronized(mScoClients) {
             ScoClient savedClient = null;
             int size = mScoClients.size();
             for (int i = 0; i < size; i++) {
                 ScoClient cl = mScoClients.get(i);
-                if (cl.getBinder() != exceptBinder) {
+                if (cl.getPid() != exceptPid) {
                     cl.clearCount(stopSco);
                 } else {
                     savedClient = cl;
@@ -1480,7 +1488,7 @@ public class AudioService extends IAudioService.Stub {
         return result;
     }
 
-    private void disconnectBluetoothSco(IBinder exceptBinder) {
+    private void disconnectBluetoothSco(int exceptPid) {
         synchronized(mScoClients) {
             checkScoAudioState();
             if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL ||
@@ -1498,14 +1506,14 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             } else {
-                clearAllScoClients(exceptBinder, true);
+                clearAllScoClients(exceptPid, true);
             }
         }
     }
 
     private void resetBluetoothSco() {
         synchronized(mScoClients) {
-            clearAllScoClients(null, false);
+            clearAllScoClients(0, false);
             mScoAudioState = SCO_STATE_INACTIVE;
             broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
         }
@@ -2509,7 +2517,7 @@ public class AudioService extends IAudioService.Stub {
                     case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
                         state = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
                         mScoAudioState = SCO_STATE_INACTIVE;
-                        clearAllScoClients(null, false);
+                        clearAllScoClients(0, false);
                         break;
                     case BluetoothHeadset.STATE_AUDIO_CONNECTING:
                         if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL &&
