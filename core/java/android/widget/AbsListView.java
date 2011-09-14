@@ -2576,13 +2576,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int longPressPosition, final long longPressId) {
         // CHOICE_MODE_MULTIPLE_MODAL takes over long press.
         if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
-            if (mChoiceActionMode == null) {
-                mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
+            if (mChoiceActionMode == null &&
+                    (mChoiceActionMode = startActionMode(mMultiChoiceModeCallback)) != null) {
                 setItemChecked(longPressPosition, true);
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             }
-            // TODO Should we select the long pressed item if we were already in
-            // selection mode? (i.e. treat it like an item click?)
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             return true;
         }
 
