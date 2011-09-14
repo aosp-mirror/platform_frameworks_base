@@ -297,7 +297,7 @@ public class PhoneStatusBar extends StatusBar {
                 mNavigationBarView = 
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
-                setNavigationVisibility(mDisabled);
+                mNavigationBarView.setDisabledFlags(mDisabled);
 
                 sb.setOnSystemUiVisibilityChangeListener(
                     new View.OnSystemUiVisibilityChangeListener() {
@@ -1083,59 +1083,64 @@ public class PhoneStatusBar extends StatusBar {
                 old, state, diff));
         }
 
+        StringBuilder flagdbg = new StringBuilder();
+        flagdbg.append("disable: < ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_EXPAND) != 0) ? "EXPAND" : "expand");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_EXPAND) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "ICONS" : "icons");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "TICKER" : "ticker");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_NAVIGATION) != 0) ? "NAVIGATION" : "navigation");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_NAVIGATION) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
+        flagdbg.append(">");
+        Slog.d(TAG, flagdbg.toString());
+
         if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
             boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
             showClock(show);
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Slog.d(TAG, "DISABLE_EXPAND: yes");
                 animateCollapse();
             }
         }
 
         if ((diff & (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK)) != 0) {
-            setNavigationVisibility(state &
-                    (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK));
+            // the nav bar will take care of DISABLE_NAVIGATION and DISABLE_BACK
+            mNavigationBarView.setDisabledFlags(state);
+
+            if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
+                // close recents if it's visible
+                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+            }
         }
 
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 if (mTicking) {
                     mTicker.halt();
                 } else {
                     setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
                 }
             } else {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
                 if (!mExpandedVisible) {
                     setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
                 }
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
                 mTicker.halt();
             }
-        }
-    }
-
-    private void setNavigationVisibility(int visibility) {
-        boolean disableNavigation = ((visibility & StatusBarManager.DISABLE_NAVIGATION) != 0);
-        boolean disableBack = ((visibility & StatusBarManager.DISABLE_BACK) != 0);
-
-        Slog.i(TAG, "DISABLE_BACK: " + (disableBack ? "yes" : "no"));
-        Slog.i(TAG, "DISABLE_NAVIGATION: " + (disableNavigation ? "yes" : "no"));
-
-        if (mNavigationBarView != null) {
-            mNavigationBarView.setNavigationVisibility(visibility);
-        }
-
-        if (disableNavigation) {
-            // close recents if it's visible
-            mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-            mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         }
     }
 
