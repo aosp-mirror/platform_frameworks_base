@@ -988,7 +988,6 @@ public class ListPopupWindow {
                 mDropDownList.setSelector(mDropDownListHighlight);
             }
             mDropDownList.setAdapter(mAdapter);
-            mDropDownList.setVerticalFadingEdgeEnabled(true);
             mDropDownList.setOnItemClickListener(mItemClickListener);
             mDropDownList.setFocusable(true);
             mDropDownList.setFocusableInTouchMode(true);
