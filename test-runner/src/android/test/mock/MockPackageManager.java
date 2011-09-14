@@ -38,6 +38,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.ManifestDigest;
+import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -550,6 +551,14 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public void verifyPendingInstall(int id, boolean verified, String failureMessage) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public VerifierDeviceIdentity getVerifierDeviceIdentity() {
         throw new UnsupportedOperationException();
     }
 }
