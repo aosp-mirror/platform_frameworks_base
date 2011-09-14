@@ -10879,8 +10879,8 @@ package android.media {
   }
 
   public class RemoteControlClient {
-    ctor public RemoteControlClient(android.content.ComponentName);
-    ctor public RemoteControlClient(android.content.ComponentName, android.os.Looper);
+    ctor public RemoteControlClient(android.app.PendingIntent);
+    ctor public RemoteControlClient(android.app.PendingIntent, android.os.Looper);
     method public android.media.RemoteControlClient.MetadataEditor editMetadata(boolean);
     method public void setPlaybackState(int);
     method public void setTransportControlFlags(int);
