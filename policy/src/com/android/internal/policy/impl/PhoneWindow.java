@@ -2171,6 +2171,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         if (mActionModePopup != null) {
                             post(mShowActionModePopup);
                         }
+                        mActionModeView.sendAccessibilityEvent(
+                                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     } else {
                         mActionMode = null;
                     }

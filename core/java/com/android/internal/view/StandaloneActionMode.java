@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.ref.WeakReference;
 
@@ -86,6 +87,7 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
         }
         mFinished = true;
 
+        mContextView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         mCallback.onDestroyActionMode(this);
     }
 
