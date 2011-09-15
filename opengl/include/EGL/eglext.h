@@ -242,6 +242,20 @@ typedef EGLBoolean (EGLAPIENTRYP PFNEGLSETSWAPRECTANGLEANDROIDPROC) (EGLDisplay 
 #define EGL_RECORDABLE_ANDROID                  0x3142  /* EGLConfig attribute */
 #endif
 
+/* EGL_NV_system_time
+ */
+#ifndef EGL_NV_system_time
+#define EGL_NV_system_time 1
+typedef khronos_int64_t EGLint64NV;
+typedef khronos_uint64_t EGLuint64NV;
+#ifdef EGL_EGLEXT_PROTOTYPES
+EGLAPI EGLuint64NV EGLAPIENTRY eglGetSystemTimeFrequencyNV(void);
+EGLAPI EGLuint64NV EGLAPIENTRY eglGetSystemTimeNV(void);
+#endif
+typedef EGLuint64NV (EGLAPIENTRYP PFNEGLGETSYSTEMTIMEFREQUENCYNVPROC)(void);
+typedef EGLuint64NV (EGLAPIENTRYP PFNEGLGETSYSTEMTIMENVPROC)(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
