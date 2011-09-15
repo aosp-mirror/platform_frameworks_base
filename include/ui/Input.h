@@ -620,8 +620,39 @@ private:
  */
 class VelocityTracker {
 public:
+    // Default polynomial degree.  (used by getVelocity)
+    static const uint32_t DEFAULT_DEGREE = 2;
+
+    // Default sample horizon.  (used by getVelocity)
+    // We don't use too much history by default since we want to react to quick
+    // changes in direction.
+    static const nsecs_t DEFAULT_HORIZON = 100 * 1000000; // 100 ms
+
     struct Position {
         float x, y;
+    };
+
+    struct Estimator {
+        static const size_t MAX_DEGREE = 2;
+
+        // Polynomial coefficients describing motion in X and Y.
+        float xCoeff[MAX_DEGREE + 1], yCoeff[MAX_DEGREE + 1];
+
+        // Polynomial degree (number of coefficients), or zero if no information is
+        // available.
+        uint32_t degree;
+
+        // Confidence (coefficient of determination), between 0 (no fit) and 1 (perfect fit).
+        float confidence;
+
+        inline void clear() {
+            degree = 0;
+            confidence = 0;
+            for (size_t i = 0; i <= MAX_DEGREE; i++) {
+                xCoeff[i] = 0;
+                yCoeff[i] = 0;
+            }
+        }
     };
 
     VelocityTracker();
@@ -645,9 +676,15 @@ public:
     void addMovement(const MotionEvent* event);
 
     // Gets the velocity of the specified pointer id in position units per second.
-    // Returns false and sets the velocity components to zero if there is no movement
-    // information for the pointer.
+    // Returns false and sets the velocity components to zero if there is
+    // insufficient movement information for the pointer.
     bool getVelocity(uint32_t id, float* outVx, float* outVy) const;
+
+    // Gets a quadratic estimator for the movements of the specified pointer id.
+    // Returns false and clears the estimator if there is no information available
+    // about the pointer.
+    bool getEstimator(uint32_t id, uint32_t degree, nsecs_t horizon,
+            Estimator* outEstimator) const;
 
     // Gets the active pointer id, or -1 if none.
     inline int32_t getActivePointerId() const { return mActivePointerId; }
@@ -657,13 +694,7 @@ public:
 
 private:
     // Number of samples to keep.
-    static const uint32_t HISTORY_SIZE = 10;
-
-    // Oldest sample to consider when calculating the velocity.
-    static const nsecs_t MAX_AGE = 100 * 1000000; // 100 ms
-
-    // The minimum duration between samples when estimating velocity.
-    static const nsecs_t MIN_DURATION = 5 * 1000000; // 5 ms
+    static const uint32_t HISTORY_SIZE = 20;
 
     struct Movement {
         nsecs_t eventTime;

@@ -59,6 +59,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     private static native void nativeComputeCurrentVelocity(int ptr, int units, float maxVelocity);
     private static native float nativeGetXVelocity(int ptr, int id);
     private static native float nativeGetYVelocity(int ptr, int id);
+    private static native boolean nativeGetEstimator(int ptr, int id,
+            int degree, int horizonMillis, Estimator outEstimator);
 
     /**
      * Retrieve a new VelocityTracker object to watch the velocity of a
@@ -214,5 +216,95 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      */
     public float getYVelocity(int id) {
         return nativeGetYVelocity(mPtr, id);
+    }
+
+    /**
+     * Get an estimator for the movements of a pointer using past movements of the
+     * pointer to predict future movements.
+     *
+     * It is not necessary to call {@link #computeCurrentVelocity(int)} before calling
+     * this method.
+     *
+     * @param id Which pointer's velocity to return.
+     * @param degree The desired polynomial degree.  The actual estimator may have
+     * a lower degree than what is requested here.  If -1, uses the default degree.
+     * @param horizonMillis The maximum age of the oldest sample to consider, in milliseconds.
+     * If -1, uses the default horizon.
+     * @param outEstimator The estimator to populate.
+     * @return True if an estimator was obtained, false if there is no information
+     * available about the pointer.
+     *
+     * @hide For internal use only.  Not a final API.
+     */
+    public boolean getEstimator(int id, int degree, int horizonMillis, Estimator outEstimator) {
+        if (outEstimator == null) {
+            throw new IllegalArgumentException("outEstimator must not be null");
+        }
+        return nativeGetEstimator(mPtr, id, degree, horizonMillis, outEstimator);
+    }
+
+    /**
+     * An estimator for the movements of a pointer based on a polynomial model.
+     *
+     * The last recorded position of the pointer is at time zero seconds.
+     * Past estimated positions are at negative times and future estimated positions
+     * are at positive times.
+     *
+     * First coefficient is position (in pixels), second is velocity (in pixels per second),
+     * third is acceleration (in pixels per second squared).
+     *
+     * @hide For internal use only.  Not a final API.
+     */
+    public static final class Estimator {
+        // Must match VelocityTracker::Estimator::MAX_DEGREE
+        private static final int MAX_DEGREE = 2;
+
+        /**
+         * Polynomial coefficients describing motion in X.
+         */
+        public final float[] xCoeff = new float[MAX_DEGREE + 1];
+
+        /**
+         * Polynomial coefficients describing motion in Y.
+         */
+        public final float[] yCoeff = new float[MAX_DEGREE + 1];
+
+        /**
+         * Polynomial degree, or zero if only position information is available.
+         */
+        public int degree;
+
+        /**
+         * Confidence (coefficient of determination), between 0 (no fit) and 1 (perfect fit).
+         */
+        public float confidence;
+
+        /**
+         * Gets an estimate of the X position of the pointer at the specified time point.
+         * @param time The time point in seconds, 0 is the last recorded time.
+         * @return The estimated X coordinate.
+         */
+        public float estimateX(float time) {
+            return estimate(time, xCoeff);
+        }
+
+        /**
+         * Gets an estimate of the Y position of the pointer at the specified time point.
+         * @param time The time point in seconds, 0 is the last recorded time.
+         * @return The estimated Y coordinate.
+         */
+        public float estimateY(float time) {
+            return estimate(time, yCoeff);
+        }
+
+        private float estimate(float time, float[] c) {
+            float a = 0;
+            float scale = 1;
+            for (int i = 0; i <= degree; i++) {
+                a += c[i] * scale;
+                scale *= time;
+            }
+            return a;
+        }
     }
 }
