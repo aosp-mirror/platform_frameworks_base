@@ -30,7 +30,7 @@ import android.util.Slog;
  */
 public class Display {
     static final String TAG = "Display";
-    static final boolean DEBUG_COMPAT = false;
+    static final boolean DEBUG_DISPLAY_SIZE = false;
 
     /**
      * The default Display id.
@@ -117,7 +117,8 @@ public class Display {
                 outSize.x = getRawWidth();
                 outSize.y = getRawHeight();
             }
-            if (DEBUG_COMPAT && doCompat) Slog.v(TAG, "Returning display size: " + outSize);
+            if (DEBUG_DISPLAY_SIZE && doCompat) Slog.v(
+                    TAG, "Returning display size: " + outSize);
         } catch (RemoteException e) {
             Slog.w("Display", "Unable to get display size", e);
         }
@@ -203,6 +204,8 @@ public class Display {
                 outSize.x = getRawWidth();
                 outSize.y = getRawHeight();
             }
+            if (DEBUG_DISPLAY_SIZE) Slog.v(
+                    TAG, "Returning real display size: " + outSize);
         } catch (RemoteException e) {
             Slog.w("Display", "Unable to get real display size", e);
         }
@@ -215,7 +218,13 @@ public class Display {
      * </p>
      * @hide
      */
-    native public int getRawWidth();
+    public int getRawWidth() {
+        int w = getRawWidthNative();
+        if (DEBUG_DISPLAY_SIZE) Slog.v(
+                TAG, "Returning raw display width: " + w);
+        return w;
+    }
+    private native int getRawWidthNative();
 
     /**
      * Gets the raw height of the display, in pixels.
@@ -224,7 +233,13 @@ public class Display {
      * </p>
      * @hide
      */
-    native public int getRawHeight();
+    public int getRawHeight() {
+        int h = getRawHeightNative();
+        if (DEBUG_DISPLAY_SIZE) Slog.v(
+                TAG, "Returning raw display height: " + h);
+        return h;
+    }
+    private native int getRawHeightNative();
     
     /**
      * Returns the rotation of the screen from its "natural" orientation.
@@ -293,8 +308,9 @@ public class Display {
             ci.applyToDisplayMetrics(outMetrics);
         }
 
-        if (DEBUG_COMPAT) Slog.v(TAG, "Returning DisplayMetrics: " + outMetrics.widthPixels
-                + "x" + outMetrics.heightPixels + " " + outMetrics.density);
+        if (DEBUG_DISPLAY_SIZE) Slog.v(TAG, "Returning DisplayMetrics: "
+                + outMetrics.widthPixels + "x" + outMetrics.heightPixels
+                + " " + outMetrics.density);
     }
 
     /**
