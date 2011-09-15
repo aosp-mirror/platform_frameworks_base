@@ -16,6 +16,9 @@
 
 package android.inputmethodservice;
 
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuPopupHelper;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -23,11 +26,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.LinearLayout;
-
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuPopupHelper;
 
 /**
  * ExtractEditLayout provides an ActionMode presentation for the
@@ -56,6 +57,7 @@ public class ExtractEditLayout extends LinearLayout {
             mExtractActionButton.setVisibility(INVISIBLE);
             mEditButton.setVisibility(VISIBLE);
             mActionMode = mode;
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             return mode;
         }
         return null;
@@ -157,6 +159,8 @@ public class ExtractEditLayout extends LinearLayout {
 
             mExtractActionButton.setVisibility(VISIBLE);
             mEditButton.setVisibility(INVISIBLE);
+
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
             mActionMode = null;
         }

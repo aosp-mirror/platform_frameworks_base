@@ -34,6 +34,7 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -454,5 +455,18 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     @Override
     public boolean shouldDelayChildPressedState() {
         return false;
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            // Action mode started
+            event.setSource(this);
+            event.setClassName(getClass().getName());
+            event.setPackageName(getContext().getPackageName());
+            event.setContentDescription(mTitle);
+        } else {
+            super.onInitializeAccessibilityEvent(event);
+        }
     }
 }
