@@ -180,24 +180,6 @@ void AAH_TXSender::unregisterEndpoint(const Endpoint& endpoint) {
     }
 }
 
-void AAH_TXSender::assignSeqNumber(const Endpoint& endpoint,
-                                       const sp<TRTPPacket>& packet) {
-    Mutex::Autolock lock(mEndpointLock);
-    assignSeqNumber_l(endpoint, packet);
-}
-
-void AAH_TXSender::assignSeqNumber_l(const Endpoint& endpoint,
-                                         const sp<TRTPPacket>& packet) {
-    EndpointState* eps = mEndpointMap.valueFor(endpoint);
-    if (!eps) {
-        // the endpoint state has disappeared, so the player that sent this
-        // packet must be dead.
-        return;
-    }
-    packet->setEpoch(eps->epoch);
-    packet->setSeqNumber(eps->trtpSeqNumber++);
-}
-
 void AAH_TXSender::onMessageReceived(const sp<AMessage>& msg) {
     switch (msg->what()) {
         case kWhatSendPacket:
@@ -219,8 +201,6 @@ void AAH_TXSender::onMessageReceived(const sp<AMessage>& msg) {
 }
 
 void AAH_TXSender::onSendPacket(const sp<AMessage>& msg) {
-    LOGV("*** %s", __PRETTY_FUNCTION__);
-
     sp<RefBase> obj;
     CHECK(msg->findObject(kSendPacketTRTPPacket, &obj));
     sp<TRTPPacket> packet = static_cast<TRTPPacket*>(obj.get());
@@ -233,19 +213,33 @@ void AAH_TXSender::onSendPacket(const sp<AMessage>& msg) {
     CHECK(msg->findInt32(kSendPacketPort, &port32));
     uint16_t port = port32;
 
-    doSendPacket(packet, ipAddr, port);
-
-    addToRetryBuffer(Endpoint(ipAddr, port), packet);
+    Mutex::Autolock lock(mEndpointLock);
+    doSendPacket_l(packet, Endpoint(ipAddr, port));
 }
 
-void AAH_TXSender::doSendPacket(sp<TRTPPacket> packet,
-                                uint32_t ipAddr,
-                                uint16_t port) {
+void AAH_TXSender::doSendPacket_l(const sp<TRTPPacket>& packet,
+                                  const Endpoint& endpoint) {
+    EndpointState* eps = mEndpointMap.valueFor(endpoint);
+    if (!eps) {
+        // the endpoint state has disappeared, so the player that sent this
+        // packet must be dead.
+        return;
+    }
+
+    // assign the packet's sequence number
+    packet->setEpoch(eps->epoch);
+    packet->setSeqNumber(eps->trtpSeqNumber++);
+
+    // add the packet to the retry buffer
+    RetryBuffer& retry = eps->retry;
+    retry.push_back(packet);
+
+    // send the packet
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = ipAddr;
-    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = endpoint.addr;
+    addr.sin_port = htons(endpoint.port);
 
     ssize_t result = sendto(mSocket,
                             packet->getPacket(),
@@ -258,32 +252,7 @@ void AAH_TXSender::doSendPacket(sp<TRTPPacket> packet,
     }
 }
 
-void AAH_TXSender::addToRetryBuffer(const Endpoint& endpoint,
-                                    const sp<TRTPPacket>& packet) {
-    Mutex::Autolock lock(mEndpointLock);
-
-    EndpointState* eps = mEndpointMap.valueFor(endpoint);
-    if (!eps) {
-        return;
-    }
-
-    addToRetryBuffer_l(eps, packet);
-}
-
-void AAH_TXSender::addToRetryBuffer_l(EndpointState* eps,
-                                      const sp<TRTPPacket>& packet) {
-    RetryBuffer& retry = eps->retry;
-    retry.push_back(packet);
-
-    LOGV("*** %s seq=%hu size=%d",
-         __PRETTY_FUNCTION__,
-         packet->getSeqNumber(),
-         retry.size());
-}
-
 void AAH_TXSender::trimRetryBuffers() {
-    LOGV("*** %s", __PRETTY_FUNCTION__);
-
     Mutex::Autolock lock(mEndpointLock);
 
     nsecs_t localTimeNow = systemTime();
@@ -301,8 +270,6 @@ void AAH_TXSender::trimRetryBuffers() {
                 break;
             }
         }
-
-        LOGV("*** %s size=%d", __PRETTY_FUNCTION__, retry.size());
 
         if (retry.isEmpty() && eps->playerRefCount == 0) {
             endpointsToRemove.add(mEndpointMap.keyAt(i));
@@ -336,13 +303,11 @@ void AAH_TXSender::sendHeartbeats() {
         sp<TRTPControlPacket> packet = new TRTPControlPacket();
         packet->setCommandID(TRTPControlPacket::kCommandNop);
 
-        assignSeqNumber_l(ep, packet);
         packet->setExpireTime(systemTime() +
                               AAH_TXPlayer::kAAHRetryKeepAroundTimeNs);
         packet->pack();
 
-        doSendPacket(packet, ep.addr, ep.port);
-        addToRetryBuffer_l(eps, packet);
+        doSendPacket_l(packet, ep);
     }
 
     // schedule the next heartbeat

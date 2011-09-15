@@ -67,8 +67,6 @@ class AAH_TXSender : public virtual RefBase {
 
     uint16_t registerEndpoint(const Endpoint& endpoint);
     void unregisterEndpoint(const Endpoint& endpoint);
-    void assignSeqNumber(const Endpoint& endpoint,
-                         const sp<TRTPPacket>& packet);
 
     enum {
         kWhatSendPacket,
@@ -106,15 +104,11 @@ class AAH_TXSender : public virtual RefBase {
     friend class AHandlerReflector<AAH_TXSender>;
     void onMessageReceived(const sp<AMessage>& msg);
     void onSendPacket(const sp<AMessage>& msg);
-    void doSendPacket(sp<TRTPPacket> packet, uint32_t ipAddr, uint16_t port);
-    void addToRetryBuffer(const Endpoint& endpoint,
-                          const sp<TRTPPacket>& packet);
-    void addToRetryBuffer_l(EndpointState* eps,
-                            const sp<TRTPPacket>& packet);
+    void doSendPacket_l(const sp<TRTPPacket>& packet,
+                        const Endpoint& endpoint);
     void trimRetryBuffers();
     void sendHeartbeats();
-    void assignSeqNumber_l(const Endpoint& endpoint,
-                           const sp<TRTPPacket>& packet);
+
     sp<ALooper> mLooper;
     sp<AHandlerReflector<AAH_TXSender> > mReflector;
 

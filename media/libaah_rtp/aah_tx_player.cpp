@@ -1075,7 +1075,6 @@ void AAH_TXPlayer::queuePacketToSender_l(const sp<TRTPPacket>& packet) {
             return;
         }
 
-        mAAH_Sender->assignSeqNumber(mEndpoint, packet);
         message->setInt32(AAH_TXSender::kSendPacketIPAddr, mEndpoint.addr);
         message->setInt32(AAH_TXSender::kSendPacketPort, mEndpoint.port);
     }
