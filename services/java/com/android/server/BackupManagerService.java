@@ -34,6 +34,7 @@ import android.app.backup.IRestoreSession;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -4765,6 +4766,11 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    boolean deviceIsProvisioned() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        return (Settings.Secure.getInt(resolver, Settings.Secure.DEVICE_PROVISIONED, 0) != 0);
+    }
+
     // Run a *full* backup pass for the given package, writing the resulting data stream
     // to the supplied file descriptor.  This method is synchronous and does not return
     // to the caller until the backup has been completed.
@@ -4785,12 +4791,19 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        if (DEBUG) Slog.v(TAG, "Requesting full backup: apks=" + includeApks
-                + " shared=" + includeShared + " all=" + doAllApps
-                + " pkgs=" + pkgList);
-
         long oldId = Binder.clearCallingIdentity();
         try {
+            // Doesn't make sense to do a full backup prior to setup
+            if (!deviceIsProvisioned()) {
+                Slog.i(TAG, "Full backup not supported before setup");
+                return;
+            }
+
+            if (DEBUG) Slog.v(TAG, "Requesting full backup: apks=" + includeApks
+                    + " shared=" + includeShared + " all=" + doAllApps
+                    + " pkgs=" + pkgList);
+            Slog.i(TAG, "Beginning full backup...");
+
             FullBackupParams params = new FullBackupParams(fd, includeApks, includeShared,
                     doAllApps, pkgList);
             final int token = generateToken();
@@ -4822,17 +4835,25 @@ class BackupManagerService extends IBackupManager.Stub {
                 // just eat it
             }
             Binder.restoreCallingIdentity(oldId);
+            Slog.d(TAG, "Full backup processing complete.");
         }
-        if (MORE_DEBUG) Slog.d(TAG, "Full backup done; returning to caller");
     }
 
     public void fullRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
-        Slog.i(TAG, "Beginning full restore...");
 
         long oldId = Binder.clearCallingIdentity();
 
         try {
+            // Check whether the device has been provisioned -- we don't handle
+            // full restores prior to completing the setup process.
+            if (!deviceIsProvisioned()) {
+                Slog.i(TAG, "Full restore not permitted before setup");
+                return;
+            }
+
+            Slog.i(TAG, "Beginning full restore...");
+
             FullRestoreParams params = new FullRestoreParams(fd);
             final int token = generateToken();
             synchronized (mFullConfirmations) {
@@ -4863,7 +4884,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 Slog.w(TAG, "Error trying to close fd after full restore: " + e);
             }
             Binder.restoreCallingIdentity(oldId);
-            Slog.i(TAG, "Full restore completed");
+            Slog.i(TAG, "Full restore processing complete.");
         }
     }
 
