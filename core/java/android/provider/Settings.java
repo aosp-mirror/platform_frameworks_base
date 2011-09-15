@@ -4031,6 +4031,8 @@ public final class Settings {
         public static final String NETSTATS_UID_MAX_HISTORY = "netstats_uid_max_history";
         /** {@hide} */
         public static final String NETSTATS_TAG_MAX_HISTORY = "netstats_tag_max_history";
+        /** {@hide} */
+        public static final String NETSTATS_FORCE_COMPLETE_POLL = "netstats_force_complete_poll";
 
         /** Preferred NTP server. {@hide} */
         public static final String NTP_SERVER = "ntp_server";

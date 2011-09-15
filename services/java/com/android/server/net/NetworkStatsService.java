@@ -34,6 +34,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
+import static android.provider.Settings.Secure.NETSTATS_FORCE_COMPLETE_POLL;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_PERSIST_THRESHOLD;
@@ -176,6 +177,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public long getUidMaxHistory();
         public long getTagMaxHistory();
         public long getTimeCacheMaxAge();
+        public boolean getForceCompletePoll();
     }
 
     private final Object mStatsLock = new Object();
@@ -682,8 +684,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (LOGV) Slog.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
         final long startRealtime = SystemClock.elapsedRealtime();
 
-        final boolean pollNetwork = (flags & FLAG_POLL_NETWORK) != 0;
-        final boolean pollUid = (flags & FLAG_POLL_UID) != 0;
+        boolean pollNetwork = (flags & FLAG_POLL_NETWORK) != 0;
+        boolean pollUid = (flags & FLAG_POLL_UID) != 0;
+
+        // when complete poll requested, any partial poll enables everything
+        final boolean forceCompletePoll = mSettings.getForceCompletePoll();
+        if (forceCompletePoll && (pollNetwork || pollUid)) {
+            pollNetwork = true;
+            pollUid = true;
+        }
+
         final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
         final boolean persistUid = (flags & FLAG_PERSIST_UID) != 0;
         final boolean forcePersist = (flags & FLAG_FORCE_PERSIST) != 0;
@@ -1360,6 +1370,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         private long getSecureLong(String name, long def) {
             return Settings.Secure.getLong(mResolver, name, def);
         }
+        private boolean getSecureBoolean(String name, boolean def) {
+            final int defInt = def ? 1 : 0;
+            return Settings.Secure.getInt(mResolver, name, defInt) != 0;
+        }
 
         public long getPollInterval() {
             return getSecureLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
@@ -1384,6 +1398,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         public long getTimeCacheMaxAge() {
             return DAY_IN_MILLIS;
+        }
+        public boolean getForceCompletePoll() {
+            return getSecureBoolean(NETSTATS_FORCE_COMPLETE_POLL, false);
         }
     }
 }

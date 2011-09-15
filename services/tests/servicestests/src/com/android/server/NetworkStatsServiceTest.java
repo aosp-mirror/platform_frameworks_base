@@ -758,6 +758,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expect(mSettings.getUidMaxHistory()).andReturn(maxHistory).anyTimes();
         expect(mSettings.getTagMaxHistory()).andReturn(maxHistory).anyTimes();
         expect(mSettings.getTimeCacheMaxAge()).andReturn(DAY_IN_MILLIS).anyTimes();
+        expect(mSettings.getForceCompletePoll()).andReturn(false).anyTimes();
     }
 
     private void expectCurrentTime() throws Exception {
