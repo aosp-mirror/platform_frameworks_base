@@ -4023,7 +4023,7 @@ public class WebView extends AbsoluteLayout
     protected void finalize() throws Throwable {
         try {
             if (mNativeClass != 0) {
-                post(new Runnable() {
+                mPrivateHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         destroy();
