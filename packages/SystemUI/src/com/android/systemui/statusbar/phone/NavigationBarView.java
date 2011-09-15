@@ -112,7 +112,6 @@ public class NavigationBarView extends LinearLayout {
     };
 
     public void setDisabledFlags(int disabledFlags) {
-        Slog.d(TAG, "setDisabledFlags: " + disabledFlags);
         setDisabledFlags(disabledFlags, false);
     }
 

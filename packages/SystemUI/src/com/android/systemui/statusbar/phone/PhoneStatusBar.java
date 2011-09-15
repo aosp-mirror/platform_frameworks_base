@@ -1091,7 +1091,7 @@ public class PhoneStatusBar extends StatusBar {
 
         if ((diff & (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK)) != 0) {
             // the nav bar will take care of DISABLE_NAVIGATION and DISABLE_BACK
-            mNavigationBarView.setDisabledFlags(state);
+            if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
 
             if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
                 // close recents if it's visible
