@@ -2452,13 +2452,16 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                     mOutputPortSettingsHaveChanged = formatChanged;
                 }
 
-                enablePortAsync(portIndex);
-
-                status_t err = allocateBuffersOnPort(portIndex);
-
+                status_t err = enablePortAsync(portIndex);
                 if (err != OK) {
-                    CODEC_LOGE("allocateBuffersOnPort failed (err = %d)", err);
+                    CODEC_LOGE("enablePortAsync(%ld) failed (err = %d)", portIndex, err);
                     setState(ERROR);
+                } else {
+                    err = allocateBuffersOnPort(portIndex);
+                    if (err != OK) {
+                        CODEC_LOGE("allocateBuffersOnPort failed (err = %d)", err);
+                        setState(ERROR);
+                    }
                 }
             }
             break;
@@ -2773,16 +2776,14 @@ void OMXCodec::disablePortAsync(OMX_U32 portIndex) {
     freeBuffersOnPort(portIndex, true);
 }
 
-void OMXCodec::enablePortAsync(OMX_U32 portIndex) {
+status_t OMXCodec::enablePortAsync(OMX_U32 portIndex) {
     CHECK(mState == EXECUTING || mState == RECONFIGURING);
 
     CHECK_EQ((int)mPortStatus[portIndex], (int)DISABLED);
     mPortStatus[portIndex] = ENABLING;
 
     CODEC_LOGV("sending OMX_CommandPortEnable(%ld)", portIndex);
-    status_t err =
-        mOMX->sendCommand(mNode, OMX_CommandPortEnable, portIndex);
-    CHECK_EQ(err, (status_t)OK);
+    return mOMX->sendCommand(mNode, OMX_CommandPortEnable, portIndex);
 }
 
 void OMXCodec::fillOutputBuffers() {
