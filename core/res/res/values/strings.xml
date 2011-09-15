@@ -2490,7 +2490,10 @@
     <string name="textSelectionCABTitle">Text selection</string>
 
     <!-- Option to add the current misspelled word to the user dictionary. [CHAR LIMIT=25] -->
-    <string name="addToDictionary">+ add to dictionary</string>
+    <string name="addToDictionary">add to dictionary</string>
+
+    <!-- Option to delete the highlighted part of the text from the suggestion popup. [CHAR LIMIT=25] -->
+    <string name="deleteText">delete</string>
 
     <!-- EditText context menu -->
     <string name="inputMethod">Input method</string>
