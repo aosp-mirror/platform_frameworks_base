@@ -3218,7 +3218,7 @@
     <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_warning_title">Data usage warning</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_body">usage exceeds <xliff:g id="size" example="3.8GB">%s</xliff:g></string>
+    <string name="data_usage_warning_body">Touch to view usage and settings</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_title">2G-3G data disabled</string>
