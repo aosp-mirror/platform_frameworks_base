@@ -593,10 +593,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     }
 
     private boolean isSecure() {
-        // TODO: make this work with SIM and Account cases below.
-        boolean usingBiometric = mLockPatternUtils.usingBiometricWeak();
-        if (usingBiometric && mLockPatternUtils.isBiometricEnabled())
-            return true;
         UnlockMode unlockMode = getUnlockMode();
         boolean secure = false;
         switch (unlockMode) {
