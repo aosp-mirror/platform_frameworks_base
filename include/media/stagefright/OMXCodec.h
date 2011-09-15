@@ -303,7 +303,7 @@ private:
     bool flushPortAsync(OMX_U32 portIndex);
 
     void disablePortAsync(OMX_U32 portIndex);
-    void enablePortAsync(OMX_U32 portIndex);
+    status_t enablePortAsync(OMX_U32 portIndex);
 
     static size_t countBuffersWeOwn(const Vector<BufferInfo> &buffers);
     static bool isIntermediateState(State state);
