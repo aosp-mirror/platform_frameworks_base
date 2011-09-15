@@ -11383,13 +11383,13 @@ package android.media.effect {
     method public static boolean isEffectSupported(java.lang.String);
     field public static final java.lang.String EFFECT_AUTOFIX = "android.media.effect.effects.AutoFixEffect";
     field public static final java.lang.String EFFECT_BACKDROPPER = "android.media.effect.effects.BackDropperEffect";
+    field public static final java.lang.String EFFECT_BITMAPOVERLAY = "android.media.effect.effects.BitmapOverlayEffect";
     field public static final java.lang.String EFFECT_BLACKWHITE = "android.media.effect.effects.BlackWhiteEffect";
     field public static final java.lang.String EFFECT_BRIGHTNESS = "android.media.effect.effects.BrightnessEffect";
     field public static final java.lang.String EFFECT_CONTRAST = "android.media.effect.effects.ContrastEffect";
     field public static final java.lang.String EFFECT_CROP = "android.media.effect.effects.CropEffect";
     field public static final java.lang.String EFFECT_CROSSPROCESS = "android.media.effect.effects.CrossProcessEffect";
     field public static final java.lang.String EFFECT_DOCUMENTARY = "android.media.effect.effects.DocumentaryEffect";
-    field public static final java.lang.String EFFECT_DOODLE = "android.media.effect.effects.DoodleEffect";
     field public static final java.lang.String EFFECT_DUOTONE = "android.media.effect.effects.DuotoneEffect";
     field public static final java.lang.String EFFECT_FILLLIGHT = "android.media.effect.effects.FillLightEffect";
     field public static final java.lang.String EFFECT_FISHEYE = "android.media.effect.effects.FisheyeEffect";
