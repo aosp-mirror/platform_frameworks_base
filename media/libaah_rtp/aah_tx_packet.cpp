@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #define LOG_TAG "LibAAH_RTP"
 #include <utils/Log.h>
 
 #include <arpa/inet.h>
 #include <string.h>
+
+#include <media/stagefright/MediaDebug.h>
 
 #include "aah_tx_packet.h"
 
@@ -29,6 +32,130 @@ const uint32_t TRTPPacket::kTRTPEpochMask;
 TRTPPacket::~TRTPPacket() {
     delete mPacket;
 }
+
+/*** TRTP packet properties ***/
+
+void TRTPPacket::setSeqNumber(uint16_t val) {
+    mSeqNumber = val;
+
+    if (mIsPacked) {
+        const int kTRTPSeqNumberOffset = 2;
+        uint16_t* buf = reinterpret_cast<uint16_t*>(
+            mPacket + kTRTPSeqNumberOffset);
+        *buf = htons(mSeqNumber);
+    }
+}
+
+uint16_t TRTPPacket::getSeqNumber() const {
+    return mSeqNumber;
+}
+
+void TRTPPacket::setPTS(int64_t val) {
+    CHECK(!mIsPacked);
+    mPTS = val;
+    mPTSValid = true;
+}
+
+int64_t TRTPPacket::getPTS() const {
+    return mPTS;
+}
+
+void TRTPPacket::setEpoch(uint32_t val) {
+    mEpoch = val;
+
+    if (mIsPacked) {
+        const int kTRTPEpochOffset = 8;
+        uint32_t* buf = reinterpret_cast<uint32_t*>(
+            mPacket + kTRTPEpochOffset);
+        uint32_t val = ntohl(*buf);
+        val &= ~(kTRTPEpochMask << kTRTPEpochShift);
+        val |= (mEpoch & kTRTPEpochMask) << kTRTPEpochShift;
+        *buf = htonl(val);
+    }
+}
+
+void TRTPPacket::setProgramID(uint16_t val) {
+    CHECK(!mIsPacked);
+    mProgramID = val;
+}
+
+void TRTPPacket::setSubstreamID(uint16_t val) {
+    CHECK(!mIsPacked);
+    mSubstreamID = val;
+}
+
+
+void TRTPPacket::setClockTransform(const LinearTransform& trans) {
+    CHECK(!mIsPacked);
+    mClockTranform = trans;
+    mClockTranformValid = true;
+}
+
+uint8_t* TRTPPacket::getPacket() const {
+    CHECK(mIsPacked);
+    return mPacket;
+}
+
+int TRTPPacket::getPacketLen() const {
+    CHECK(mIsPacked);
+    return mPacketLen;
+}
+
+void TRTPPacket::setExpireTime(nsecs_t val) {
+    CHECK(!mIsPacked);
+    mExpireTime = val;
+}
+
+nsecs_t TRTPPacket::getExpireTime() const {
+    return mExpireTime;
+}
+
+/*** TRTP audio packet properties ***/
+
+void TRTPAudioPacket::setCodecType(TRTPAudioCodecType val) {
+    CHECK(!mIsPacked);
+    mCodecType = val;
+}
+
+void TRTPAudioPacket::setRandomAccessPoint(bool val) {
+    CHECK(!mIsPacked);
+    mRandomAccessPoint = val;
+}
+
+void TRTPAudioPacket::setDropable(bool val) {
+    CHECK(!mIsPacked);
+    mDropable = val;
+}
+
+void TRTPAudioPacket::setDiscontinuity(bool val) {
+    CHECK(!mIsPacked);
+    mDiscontinuity = val;
+}
+
+void TRTPAudioPacket::setEndOfStream(bool val) {
+    CHECK(!mIsPacked);
+    mEndOfStream = val;
+}
+
+void TRTPAudioPacket::setVolume(uint8_t val) {
+    CHECK(!mIsPacked);
+    mVolume = val;
+}
+
+void TRTPAudioPacket::setAccessUnitData(void* data, int len) {
+    CHECK(!mIsPacked);
+    mAccessUnitData = data;
+    mAccessUnitLen = len;
+}
+
+/*** TRTP control packet properties ***/
+
+void TRTPControlPacket::setCommandID(TRTPCommandID val) {
+    CHECK(!mIsPacked);
+    mCommandID = val;
+}
+
+/*** TRTP packet serializers ***/
 
 void TRTPPacket::writeU8(uint8_t*& buf, uint8_t val) {
     *buf = val;
@@ -76,7 +203,7 @@ void TRTPPacket::writeTRTPHeader(uint8_t*& buf,
         writeU32(buf, 0);
     }
     writeU32(buf,
-            ((mEpoch & kTRTPEpochMask) << 10) |
+            ((mEpoch & kTRTPEpochMask) << kTRTPEpochShift) |
             ((mProgramID & 0x1F) << 5) |
             (mSubstreamID & 0x1F));
 
@@ -100,6 +227,10 @@ void TRTPPacket::writeTRTPHeader(uint8_t*& buf,
 }
 
 bool TRTPAudioPacket::pack() {
+    if (mIsPacked) {
+        return false;
+    }
+
     int packetLen = kRTPHeaderLen +
                     mAccessUnitLen +
                     TRTPHeaderLen();
@@ -130,6 +261,7 @@ bool TRTPAudioPacket::pack() {
 
     memcpy(cur, mAccessUnitData, mAccessUnitLen);
 
+    mIsPacked = true;
     return true;
 }
 
@@ -171,6 +303,10 @@ int TRTPAudioPacket::TRTPHeaderLen() const {
 }
 
 bool TRTPControlPacket::pack() {
+    if (mIsPacked) {
+        return false;
+    }
+
     // command packets contain a 2-byte command ID
     int packetLen = kRTPHeaderLen +
                     TRTPHeaderLen() +
@@ -188,6 +324,7 @@ bool TRTPControlPacket::pack() {
     writeTRTPHeader(cur, true, packetLen);
     writeU16(cur, mCommandID);
 
+    mIsPacked = true;
     return true;
 }
 
