@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 
 import com.android.systemui.R;
 
+// Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView
         extends LinearLayout 
         implements NetworkController.SignalCluster {
@@ -42,9 +43,11 @@ public class SignalClusterView
     private int mWifiStrengthId = 0, mWifiActivityId = 0;
     private boolean mMobileVisible = false;
     private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
+    private boolean mIsAirplaneMode = false;
 
     ViewGroup mWifiGroup, mMobileGroup;
     ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType;
+    View mSpacer;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -74,6 +77,7 @@ public class SignalClusterView
         mMobile         = (ImageView) findViewById(R.id.mobile_signal);
         mMobileActivity = (ImageView) findViewById(R.id.mobile_inout);
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
+        mSpacer         =             findViewById(R.id.spacer);
 
         apply();
     }
@@ -109,6 +113,10 @@ public class SignalClusterView
         apply();
     }
 
+    public void setIsAirplaneMode(boolean is) {
+        mIsAirplaneMode = is;
+    }
+
     // Run after each indicator change.
     private void apply() {
         if (mWifiGroup == null) return;
@@ -133,6 +141,12 @@ public class SignalClusterView
             mMobileType.setImageResource(mMobileTypeId);
         } else {
             mMobileGroup.setVisibility(View.GONE);
+        }
+
+        if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
+            mSpacer.setVisibility(View.INVISIBLE);
+        } else {
+            mSpacer.setVisibility(View.GONE);
         }
 
         if (DEBUG) Slog.d(TAG,
