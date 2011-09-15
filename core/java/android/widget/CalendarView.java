@@ -339,10 +339,8 @@ public class CalendarView extends FrameLayout {
         // initialization based on locale
         setCurrentLocale(Locale.getDefault());
 
-        TypedValue calendarViewStyle = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.calendarViewStyle, calendarViewStyle, true);
-        TypedArray attributesArray = context.obtainStyledAttributes(calendarViewStyle.resourceId,
-                R.styleable.CalendarView);
+        TypedArray attributesArray = context.obtainStyledAttributes(attrs, R.styleable.CalendarView,
+                R.attr.calendarViewStyle, 0);
         mShowWeekNumber = attributesArray.getBoolean(R.styleable.CalendarView_showWeekNumber,
                 DEFAULT_SHOW_WEEK_NUMBER);
         mFirstDayOfWeek = attributesArray.getInt(R.styleable.CalendarView_firstDayOfWeek,
@@ -354,6 +352,9 @@ public class CalendarView extends FrameLayout {
         String maxDate = attributesArray.getString(R.styleable.CalendarView_maxDate);
         if (TextUtils.isEmpty(maxDate) || !parseDate(maxDate, mMaxDate)) {
             parseDate(DEFAULT_MAX_DATE, mMaxDate);
+        }
+        if (mMaxDate.before(mMinDate)) {
+            throw new IllegalArgumentException("Max date cannot be before min date.");
         }
         mShownWeekCount = attributesArray.getInt(R.styleable.CalendarView_shownWeekCount,
                 DEFAULT_SHOWN_WEEK_COUNT);
@@ -407,9 +408,16 @@ public class CalendarView extends FrameLayout {
         setUpListView();
         setUpAdapter();
 
-        // go to today now
+        // go to today or whichever is close to today min or max date
         mTempDate.setTimeInMillis(System.currentTimeMillis());
-        goTo(mTempDate, false, true, true);
+        if (mTempDate.before(mMinDate)) {
+            goTo(mMinDate, false, true, true);
+        } else if (mMaxDate.before(mTempDate)) {
+            goTo(mMaxDate, false, true, true);
+        } else {
+            goTo(mTempDate, false, true, true);
+        }
+
         invalidate();
     }
 
