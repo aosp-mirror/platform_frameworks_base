@@ -143,6 +143,7 @@ LOCAL_SRC_FILES:= \
 	android_server_BluetoothService.cpp \
 	android_server_BluetoothEventLoop.cpp \
 	android_server_BluetoothA2dpService.cpp \
+	android_server_NetworkManagementSocketTagger.cpp \
 	android_server_Watchdog.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
