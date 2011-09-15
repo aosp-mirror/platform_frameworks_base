@@ -1724,6 +1724,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             displayWidth, displayHeight);
                     if (mNavigationBar.isVisibleLw()) {
                         mDockBottom = mTmpNavigationFrame.top;
+                        mRestrictedScreenHeight = mDockBottom - mDockTop;
                     }
                 } else {
                     // Landscape screen; nav bar goes to the right.
@@ -1731,6 +1732,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             displayWidth, displayHeight);
                     if (mNavigationBar.isVisibleLw()) {
                         mDockRight = mTmpNavigationFrame.left;
+                        mRestrictedScreenWidth = mDockRight - mDockLeft;
                     }
                 }
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
@@ -1747,25 +1749,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.bottom = df.bottom = vf.bottom = mDockBottom;
 
             mStatusBar.computeFrameLw(pf, df, vf, vf);
-
-            // now, let's consider the navigation bar; if it exists, it must be removed from the
-            // available screen real estate (like an un-hideable status bar)
-            if (navr != null) {
-                if (navr.top == 0) {
-                    // Navigation bar is vertical
-                    if (mRestrictedScreenLeft == navr.left) {
-                        mRestrictedScreenLeft = navr.right;
-                        mRestrictedScreenWidth -= (navr.right - navr.left);
-                    } else if ((mRestrictedScreenLeft+mRestrictedScreenWidth) == navr.right) {
-                        mRestrictedScreenWidth -= (navr.right - navr.left);
-                    }
-                } else {
-                    // Navigation bar horizontal, at bottom
-                    if ((mRestrictedScreenHeight+mRestrictedScreenTop) == navr.bottom) {
-                        mRestrictedScreenHeight -= (navr.bottom-navr.top);
-                    }
-                }
-            }
 
             if (mStatusBar.isVisibleLw()) {
                 // If the status bar is hidden, we don't want to cause
