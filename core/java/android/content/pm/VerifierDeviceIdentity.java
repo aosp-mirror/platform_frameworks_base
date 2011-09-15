@@ -153,6 +153,15 @@ public class VerifierDeviceIdentity implements Parcelable {
                 value = group - ('2' - 26);
             } else if (group == SEPARATOR) {
                 continue;
+            } else if ('a' <= group && group <= 'z') {
+                /* Lowercase letters should be the same as uppercase for Base32 */
+                value = group - 'a';
+            } else if (group == '0') {
+                /* Be nice to users that mistake O (letter) for 0 (zero) */
+                value = 'O' - 'A';
+            } else if (group == '1') {
+                /* Be nice to users that mistake I (letter) for 1 (one) */
+                value = 'I' - 'A';
             } else {
                 throw new IllegalArgumentException("base base-32 character: " + group);
             }
