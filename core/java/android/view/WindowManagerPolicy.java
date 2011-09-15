@@ -478,14 +478,14 @@ public interface WindowManagerPolicy {
      * decorations that can never be removed.  That is, system bar or
      * button bar.
      */
-    public int getNonDecorDisplayWidth(int rotation, int fullWidth);
+    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation);
 
     /**
      * Return the display height available after excluding any screen
      * decorations that can never be removed.  That is, system bar or
      * button bar.
      */
-    public int getNonDecorDisplayHeight(int rotation, int fullHeight);
+    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation);
 
     /**
      * Return the available screen width that we should report for the
@@ -493,7 +493,7 @@ public interface WindowManagerPolicy {
      * {@link #getNonDecorDisplayWidth(int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
-    public int getConfigDisplayWidth(int rotation, int fullWidth);
+    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation);
 
     /**
      * Return the available screen height that we should report for the
@@ -501,7 +501,7 @@ public interface WindowManagerPolicy {
      * {@link #getNonDecorDisplayHeight(int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
-    public int getConfigDisplayHeight(int rotation, int fullHeight);
+    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation);
 
     /**
      * Return whether the given window should forcibly hide everything
@@ -671,8 +671,10 @@ public interface WindowManagerPolicy {
      * 
      * @param displayWidth The current full width of the screen.
      * @param displayHeight The current full height of the screen.
+     * @param displayRotation The current rotation being applied to the base
+     * window.
      */
-    public void beginLayoutLw(int displayWidth, int displayHeight);
+    public void beginLayoutLw(int displayWidth, int displayHeight, int displayRotation);
 
     /**
      * Called for each window attached to the window manager as layout is

@@ -5707,8 +5707,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
-    private int reduceConfigWidthSize(int curSize, int rotation, float density, int dw) {
-        int size = (int)(mPolicy.getConfigDisplayWidth(rotation, dw) / density);
+    private int reduceConfigWidthSize(int curSize, int rotation, float density, int dw, int dh) {
+        int size = (int)(mPolicy.getConfigDisplayWidth(dw, dh, rotation) / density);
         if (size < curSize) {
             curSize = size;
         }
@@ -5728,17 +5728,17 @@ public class WindowManagerService extends IWindowManager.Stub
             unrotDw = dw;
             unrotDh = dh;
         }
-        int sw = reduceConfigWidthSize(unrotDw, Surface.ROTATION_0, density, unrotDw);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDh);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDh);
+        int sw = reduceConfigWidthSize(unrotDw, Surface.ROTATION_0, density, unrotDw, unrotDh);
+        sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDw, unrotDh);
+        sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw, unrotDh);
+        sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDw, unrotDh);
         return sw;
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, DisplayMetrics dm,
             int dw, int dh) {
-        dm.noncompatWidthPixels = mPolicy.getNonDecorDisplayWidth(rotation, dw);
-        dm.noncompatHeightPixels = mPolicy.getNonDecorDisplayHeight(rotation, dh);
+        dm.noncompatWidthPixels = mPolicy.getNonDecorDisplayWidth(dw, dh, rotation);
+        dm.noncompatHeightPixels = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
         int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
@@ -5815,15 +5815,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Update application display metrics.
         final DisplayMetrics dm = mDisplayMetrics;
-        mAppDisplayWidth = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
-        mAppDisplayHeight = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
+        mAppDisplayWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        mAppDisplayHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         mDisplay.getMetricsWithSize(dm, mAppDisplayWidth, mAppDisplayHeight);
 
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
 
-        config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(mRotation, dw) / dm.density);
-        config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(mRotation, dh) / dm.density);
+        config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation)
+                / dm.density);
+        config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation)
+                / dm.density);
         config.smallestScreenWidthDp = computeSmallestWidth(rotated, dw, dh, dm.density);
 
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
@@ -7157,7 +7159,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_LAYOUT) Slog.v(TAG, "performLayout: needed="
                 + mLayoutNeeded + " dw=" + dw + " dh=" + dh);
         
-        mPolicy.beginLayoutLw(dw, dh);
+        mPolicy.beginLayoutLw(dw, dh, mRotation);
 
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;
