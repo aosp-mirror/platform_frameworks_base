@@ -687,6 +687,7 @@ public class InputMethodService extends AbstractInputMethodService {
         super.onDestroy();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
+        finishViews();
         if (mWindowAdded) {
             // Disable exit animation for the current IME window
             // to avoid the race condition between the exit and enter animations
@@ -695,7 +696,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindow.dismiss();
         }
     }
-    
+
     /**
      * Take care of handling configuration changes.  Subclasses of
      * InputMethodService generally don't need to deal directly with
@@ -1436,7 +1437,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     }
 
-    public void hideWindow() {
+    private void finishViews() {
         if (mInputViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
             onFinishInputView(false);
@@ -1446,6 +1447,10 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
+    }
+
+    public void hideWindow() {
+        finishViews();
         mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
         if (mWindowVisible) {
             mWindow.hide();
