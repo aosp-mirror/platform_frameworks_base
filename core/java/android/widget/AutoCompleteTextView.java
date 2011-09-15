@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -37,6 +35,8 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+
+import com.android.internal.R;
 
 
 /**
@@ -837,10 +837,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     public void onCommitCompletion(CompletionInfo completion) {
         if (isPopupShowing()) {
-            mBlockCompletion = true;
-            replaceText(completion.getText());
-            mBlockCompletion = false;
-
             mPopup.performItemClick(completion.getPosition());
         }
     }
