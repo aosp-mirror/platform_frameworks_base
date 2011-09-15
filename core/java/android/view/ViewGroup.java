@@ -802,13 +802,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void findViewsWithText(ArrayList<View> outViews, CharSequence text) {
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence text, int flags) {
+        super.findViewsWithText(outViews, text, flags);
         final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < childrenCount; i++) {
             View child = children[i];
-            if ((child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
-                child.findViewsWithText(outViews, text);
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                    && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+                child.findViewsWithText(outViews, text, flags);
             }
         }
     }

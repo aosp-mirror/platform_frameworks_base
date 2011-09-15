@@ -148,6 +148,29 @@ public class InterrogationActivityTest
     }
 
     @LargeTest
+    public void testFindAccessibilityNodeInfoByViewTextContentDescription() throws Exception {
+        beforeClassIfNeeded();
+        final long startTimeMillis = SystemClock.uptimeMillis();
+        try {
+            // bring up the activity
+            getActivity();
+
+            // find a view by text
+            List<AccessibilityNodeInfo> buttons =  AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfosByViewTextInActiveWindow(getConnection(),
+                        "contentDescription");
+            assertEquals(1, buttons.size());
+        } finally {
+            afterClassIfNeeded();
+            if (DEBUG) {
+                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                Log.i(LOG_TAG, "testFindAccessibilityNodeInfoByViewTextContentDescription: "
+                        + elapsedTimeMillis + "ms");
+            }
+        }
+    }
+
+    @LargeTest
     public void testTraverseAllViews() throws Exception {
         beforeClassIfNeeded();
         final long startTimeMillis = SystemClock.uptimeMillis();

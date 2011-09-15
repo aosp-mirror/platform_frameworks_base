@@ -489,14 +489,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (oldService != null) {
                 tryRemoveServiceLocked(oldService);
             }
+            // Now this service is enabled.
+            mEnabledServices.add(componentName);
+            // Also make sure this service is the only one.
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    componentName.flattenToString());
             // This API is intended for testing so enable accessibility to make
             // sure clients can start poking with the window content.
             Settings.Secure.putInt(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_ENABLED, 1);
-            // Also disable all accessibility services to avoid interference
-            // with the tests.
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "");
         }
         AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
         accessibilityServiceInfo.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
