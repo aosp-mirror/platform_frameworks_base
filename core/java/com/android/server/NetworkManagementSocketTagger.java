@@ -75,30 +75,20 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
             Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=0x"
                     + Integer.toHexString(options.statsTag) + ", statsUid=" + options.statsUid);
         }
-        try {
-            // TODO: skip tagging when options would be no-op
-            tagSocketFd(fd, options.statsTag, options.statsUid);
-        } catch (IOException e) {
-            throw new SocketException("Problem tagging socket", e);
-        }
+        // TODO: skip tagging when options would be no-op
+        tagSocketFd(fd, options.statsTag, options.statsUid);
     }
 
-    private void tagSocketFd(FileDescriptor fd, int tag, int uid) throws IOException {
-        final int fdNum = fd.getInt$();
-        if (fdNum == -1 || (tag == -1 && uid == -1)) return;
+    private void tagSocketFd(FileDescriptor fd, int tag, int uid) {
+        int errno;
+        if (tag == -1 && uid == -1) return;
 
-        String cmd = "t " + fdNum;
-        if (tag == -1) {
-            // Case where just the uid needs adjusting. But probably the caller
-            // will want to track his own name here, just in case.
-            cmd += " 0";
-        } else {
-            cmd += " " + tagToKernel(tag);
+        errno = native_tagSocketFd(fd, tag, uid);
+        if (errno < 0) {
+            Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
+                  + tag + ", " +
+                  + uid + ") failed with errno" + errno);
         }
-        if (uid != -1) {
-            cmd += " " + uid;
-        }
-        internalModuleCtrl(cmd);
     }
 
     @Override
@@ -106,19 +96,18 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         if (LOGD) {
             Log.i(TAG, "untagSocket(" + fd.getInt$() + ")");
         }
-        try {
-            unTagSocketFd(fd);
-        } catch (IOException e) {
-            throw new SocketException("Problem untagging socket", e);
-        }
+        unTagSocketFd(fd);
     }
 
-    private void unTagSocketFd(FileDescriptor fd) throws IOException {
-        int fdNum = fd.getInt$();
+    private void unTagSocketFd(FileDescriptor fd) {
         final SocketTags options = threadSocketTags.get();
-        if (fdNum == -1 || (options.statsTag == -1 && options.statsUid == -1)) return;
-        String cmd = "u " + fdNum;
-        internalModuleCtrl(cmd);
+        int errno;
+        if (options.statsTag == -1 && options.statsUid == -1) return;
+
+        errno = native_untagSocketFd(fd);
+        if (errno < 0) {
+            Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
+        }
     }
 
     public static class SocketTags {
@@ -127,66 +116,17 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     }
 
     public static void setKernelCounterSet(int uid, int counterSet) {
-        final StringBuilder command = new StringBuilder();
-        command.append("s ").append(counterSet).append(" ").append(uid);
-        try {
-            internalModuleCtrl(command.toString());
-        } catch (IOException e) {
-            Slog.w(TAG, "problem changing counter set for uid " + uid + " : " + e);
+        int errno = native_setCounterSet(counterSet, uid);
+        if (errno < 0) {
+            Log.w(TAG, "setKernelCountSet(" + uid + ", " + counterSet + ") failed with errno " + errno);
         }
     }
 
     public static void resetKernelUidStats(int uid) {
-        final StringBuilder command = new StringBuilder();
-        command.append("d 0 ").append(uid);
-        try {
-            internalModuleCtrl(command.toString());
-        } catch (IOException e) {
-            Slog.w(TAG, "problem clearing counters for uid " + uid + " : " + e);
+        int errno = native_deleteTagData(0, uid);
+        if (errno < 0) {
+            Slog.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
         }
-    }
-
-    /**
-     * Sends commands to the kernel netfilter module.
-     *
-     * @param cmd command string for the qtaguid netfilter module. May not be null.
-     *   <p>Supports:
-     *     <ul><li>tag a socket:<br>
-     *        <code>t <i>sock_fd</i> <i>acct_tag</i> [<i>uid_in_case_caller_is_acting_on_behalf_of</i>]</code><br>
-     *     <code>*_tag</code> defaults to default_policy_tag_from_uid(uid_of_caller)<br>
-     *     <code>acct_tag</code> is either 0 or greater that 2^32.<br>
-     *     <code>uid_*</code> is only settable by privileged UIDs (DownloadManager,...)
-     *     </li>
-     *     <li>untag a socket, preserving counters:<br>
-     *       <code>u <i>sock_fd</i></code>
-     *     </li></ul>
-     *   <p>Notes:<br>
-     *   <ul><li><i>sock_fd</i> is withing the callers process space.</li>
-     *   <li><i>*_tag</i> are 64bit values</li></ul>
-     *
-     */
-    private static void internalModuleCtrl(String cmd) throws IOException {
-        if (!SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) return;
-
-        // TODO: migrate to native library for tagging commands
-        FileOutputStream procOut = null;
-        try {
-            procOut = new FileOutputStream("/proc/net/xt_qtaguid/ctrl");
-            procOut.write(cmd.getBytes(Charsets.US_ASCII));
-        } finally {
-            IoUtils.closeQuietly(procOut);
-        }
-    }
-
-    /**
-     * Convert {@link Integer} tag to {@code /proc/} format. Assumes unsigned
-     * base-10 format like {@code 2147483647}. Currently strips signed bit to
-     * avoid using {@link BigInteger}.
-     */
-    public static String tagToKernel(int tag) {
-        // TODO: eventually write in hex, since that's what proc exports
-        // TODO: migrate to direct integer instead of odd shifting
-        return Long.toString((((long) tag) << 32) & 0x7FFFFFFF00000000L);
     }
 
     /**
@@ -197,4 +137,9 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         // TODO: migrate to direct integer instead of odd shifting
         return (int) (Long.decode(string) >> 32);
     }
+
+    private static native int native_tagSocketFd(FileDescriptor fd, int tag, int uid);
+    private static native int native_untagSocketFd(FileDescriptor fd);
+    private static native int native_setCounterSet(int uid, int counterSetNum);
+    private static native int native_deleteTagData(int tag, int uid);
 }

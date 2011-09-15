@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -37,6 +35,8 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+
+import com.android.internal.R;
 
 
 /**
@@ -744,7 +744,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             if (mFilter != null) {
                 mPopupCanBeUpdated = true;
                 performFiltering(getText(), mLastKeyCode);
-                buildImeCompletions();
             }
         } else {
             // drop down is automatically dismissed when enough characters
@@ -837,10 +836,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     public void onCommitCompletion(CompletionInfo completion) {
         if (isPopupShowing()) {
-            mBlockCompletion = true;
-            replaceText(completion.getText());
-            mBlockCompletion = false;
-
             mPopup.performItemClick(completion.getPosition());
         }
     }
@@ -938,7 +933,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          */
 
         final boolean dropDownAlwaysVisible = mPopup.isDropDownAlwaysVisible();
-        if ((count > 0 || dropDownAlwaysVisible) && enoughToFilter()) {
+        final boolean enoughToFilter = enoughToFilter();
+        if ((count > 0 || dropDownAlwaysVisible) && enoughToFilter) {
             if (hasFocus() && hasWindowFocus() && mPopupCanBeUpdated) {
                 showDropDown();
             }
@@ -1049,6 +1045,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Displays the drop down on screen.</p>
      */
     public void showDropDown() {
+        buildImeCompletions();
+
         if (mPopup.getAnchorView() == null) {
             if (mDropDownAnchorId != View.NO_ID) {
                 mPopup.setAnchorView(getRootView().findViewById(mDropDownAnchorId));
@@ -1064,7 +1062,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mPopup.show();
         mPopup.getListView().setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }
-    
+
     /**
      * Forces outside touches to be ignored. Normally if {@link #isDropDownAlwaysVisible()} is
      * false, we allow outside touch to dismiss the dropdown. If this is set to true, then we
@@ -1075,7 +1073,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public void setForceIgnoreOutsideTouch(boolean forceIgnoreOutsideTouch) {
         mPopup.setForceIgnoreOutsideTouch(forceIgnoreOutsideTouch);
     }
-    
+
     private void buildImeCompletions() {
         final ListAdapter adapter = mAdapter;
         if (adapter != null) {
@@ -1090,8 +1088,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                         realCount++;
                         Object item = adapter.getItem(i);
                         long id = adapter.getItemId(i);
-                        completions[i] = new CompletionInfo(id, i,
-                                convertSelectionToString(item));
+                        completions[i] = new CompletionInfo(id, i, convertSelectionToString(item));
                     }
                 }
                 

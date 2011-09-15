@@ -142,5 +142,5 @@ option java_package com.android.server
 # ---------------------------
 # NetworkStatsService.java
 # ---------------------------
-51100 netstats_mobile_sample (iface_rx|2|2),(iface_tx|2|2),(uid_rx|2|2),(uid_tx|2|2)
-51101 netstats_wifi_sample (iface_rx|2|2),(iface_tx|2|2),(uid_rx|2|2),(uid_tx|2|2)
+51100 netstats_mobile_sample (iface_rx_bytes|2|2),(iface_tx_bytes|2|2),(iface_rx_pkts|2|1),(iface_tx_pkts|2|1),(uid_rx_bytes|2|2),(uid_tx_bytes|2|2),(uid_rx_pkts|2|1),(uid_tx_pkts|2|1)
+51101 netstats_wifi_sample (iface_rx_bytes|2|2),(iface_tx_bytes|2|2),(iface_rx_pkts|2|1),(iface_tx_pkts|2|1),(uid_rx_bytes|2|2),(uid_tx_bytes|2|2),(uid_rx_pkts|2|1),(uid_tx_pkts|2|1)

@@ -25,6 +25,8 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
 
     private static final String TEST_1_ENCODED = "HUXY-A75N-FLKV-F";
 
+    private static final String TEST_1_ENCODED_LOWERCASE = "huxy-a75n-flkv-f";
+
     private static final long TEST_2 = 0x5A05FF5A05F0A555L;
 
     private static final long TEST_MAXVALUE = Long.MAX_VALUE;
@@ -44,6 +46,10 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
     private static final String TEST_NEGONE_ENCODED = "P777-7777-7777-7";
 
     private static final String TEST_OVERFLOW_ENCODED = "QAAA-AAAA-AAAA-A";
+
+    private static final String TEST_SUBSTITUTION_CORRECTED = "OIIO-IIOO-IOOI-I";
+
+    private static final String TEST_SUBSTITUTION_UNCORRECTED = "0110-1100-1001-1";
 
     public void testVerifierDeviceIdentity_Equals_Success() {
         VerifierDeviceIdentity id1 = new VerifierDeviceIdentity(TEST_1);
@@ -125,6 +131,7 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
         assertEquals("Original identity and parceled identity should be the same", id1, id2);
     }
 
+    @SuppressWarnings("serial")
     private static class MockRandom extends Random {
         private long mNextLong;
 
@@ -181,7 +188,7 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
 
     public void testVerifierDeviceIdentity_Parse_TooShort() {
         try {
-            VerifierDeviceIdentity id = VerifierDeviceIdentity.parse("AAAA-AAAA-AAAA-");
+            VerifierDeviceIdentity.parse("AAAA-AAAA-AAAA-");
             fail("Parsing should fail when device identifier is too short");
         } catch (IllegalArgumentException e) {
             // success
@@ -190,7 +197,7 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
 
     public void testVerifierDeviceIdentity_Parse_WayTooShort() {
         try {
-            VerifierDeviceIdentity id = VerifierDeviceIdentity.parse("----------------");
+            VerifierDeviceIdentity.parse("----------------");
             fail("Parsing should fail when device identifier is too short");
         } catch (IllegalArgumentException e) {
             // success
@@ -199,7 +206,7 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
 
     public void testVerifierDeviceIdentity_Parse_TooLong() {
         try {
-            VerifierDeviceIdentity id = VerifierDeviceIdentity.parse("AAAA-AAAA-AAAA-AA");
+            VerifierDeviceIdentity.parse("AAAA-AAAA-AAAA-AA");
             fail("Parsing should fail when device identifier is too long");
         } catch (IllegalArgumentException e) {
             // success
@@ -208,10 +215,32 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
 
     public void testVerifierDeviceIdentity_Parse_Overflow() {
         try {
-            VerifierDeviceIdentity id = VerifierDeviceIdentity.parse(TEST_OVERFLOW_ENCODED);
+            VerifierDeviceIdentity.parse(TEST_OVERFLOW_ENCODED);
             fail("Parsing should fail when the value will overflow");
         } catch (IllegalArgumentException e) {
             // success
         }
+    }
+
+    public void testVerifierDeviceIdentity_Parse_SquashToUppercase() {
+        VerifierDeviceIdentity id1 = new VerifierDeviceIdentity(TEST_1);
+
+        VerifierDeviceIdentity id2 = VerifierDeviceIdentity.parse(TEST_1_ENCODED_LOWERCASE);
+
+        assertEquals("Lowercase should parse to be the same as uppercase", id1, id2);
+
+        assertEquals("Substituted identity should render to the same string",
+                id1.toString(), id2.toString());
+    }
+
+    public void testVerifierDeviceIdentity_Parse_1I_And_0O_Substitution() {
+        VerifierDeviceIdentity id1 = VerifierDeviceIdentity.parse(TEST_SUBSTITUTION_CORRECTED);
+
+        VerifierDeviceIdentity id2 = VerifierDeviceIdentity.parse(TEST_SUBSTITUTION_UNCORRECTED);
+
+        assertEquals("Substitution should replace 0 with O and 1 with I", id1, id2);
+
+        assertEquals("Substituted identity should render to the same string",
+                id1.toString(), id2.toString());
     }
 }

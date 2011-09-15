@@ -212,6 +212,11 @@ public class RelativeLayout extends ViewGroup {
      * Describes how the child views are positioned. Defaults to
      * <code>Gravity.LEFT | Gravity.TOP</code>.
      *
+     * <p>Note that since RelativeLayout considers the positioning of each child
+     * relative to one another to be significant, setting gravity will affect
+     * the positioning of all children as a single unit within the parent.
+     * This happens after children have been relatively positioned.</p>
+     *
      * @param gravity See {@link android.view.Gravity}
      *
      * @see #setHorizontalGravity(int)

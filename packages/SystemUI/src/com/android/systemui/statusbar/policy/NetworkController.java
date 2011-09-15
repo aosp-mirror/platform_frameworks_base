@@ -141,6 +141,7 @@ public class NetworkController extends BroadcastReceiver {
         void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
                 int typeIcon);
+        void setIsAirplaneMode(boolean is);
     }
 
     /**
@@ -877,6 +878,7 @@ public class NetworkController extends BroadcastReceiver {
                         mPhoneSignalIconId,
                         mMobileActivityIconId,
                         mDataTypeIconId);
+                cluster.setIsAirplaneMode(mAirplaneMode);
             }
         }
 
