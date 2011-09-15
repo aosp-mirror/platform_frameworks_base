@@ -32,6 +32,7 @@ import android.util.Log;
 import android.text.TextUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 /**
@@ -1759,6 +1761,44 @@ public class AccountManager {
                 activity, addAccountOptions, getAuthTokenOptions, callback, handler);
         task.start();
         return task;
+    }
+
+    /**
+     * Returns an intent to an {@link Activity} that prompts the user to choose from a list of
+     * accounts.
+     * The caller will then typically start the activity by calling
+     * <code>startActivityWithResult(intent, ...);</code>.
+     * <p>
+     * On success the activity returns a Bundle with the account name and type specified using
+     * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
+     * <p>
+     * The most common case is to call this with one account type, e.g.:
+     * <p>
+     * <pre>  newChooseAccountsIntent(null, null, new String[]{"com.google"}, null);</pre>
+     * @param selectedAccount if specified, indicates that the {@link Account} is the currently
+     * selected one, according to the caller's definition of selected.
+     * @param allowableAccounts an optional {@link ArrayList} of accounts that are allowed to be
+     * shown. If not specified then this field will not limit the displayed accounts.
+     * @param allowableAccountTypes an optional string array of account types. These are used
+     * both to filter the shown accounts and to filter the list of account types that are shown
+     * when adding an account.
+     * @param addAccountOptions This {@link Bundle} is passed as the addAccount options
+     * @return an {@link Intent} that can be used to launch the ChooseAccount activity flow. 
+     */
+    static public Intent newChooseAccountIntent(Account selectedAccount,
+            ArrayList<Account> allowableAccounts,
+            String[] allowableAccountTypes,
+            Bundle addAccountOptions) {
+        Intent intent = new Intent();
+        intent.setClassName("android", "android.accounts.ChooseTypeAndAccountActivity");
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
+                allowableAccounts);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST,
+                allowableAccountTypes != null ? Lists.newArrayList(allowableAccountTypes) : 0);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
+                addAccountOptions);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_SELECTED_ACCOUNT, selectedAccount);
+        return intent;
     }
 
     private final HashMap<OnAccountsUpdateListener, Handler> mAccountsUpdatedListeners =
