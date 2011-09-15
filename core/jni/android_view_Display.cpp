@@ -63,14 +63,14 @@ static void android_view_Display_init(
     env->SetFloatField(clazz, offsets.ydpi,     info.ydpi);
 }
 
-static jint android_view_Display_getRawWidth(
+static jint android_view_Display_getRawWidthNative(
         JNIEnv* env, jobject clazz)
 {
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
     return SurfaceComposerClient::getDisplayWidth(dpy);
 }
 
-static jint android_view_Display_getRawHeight(
+static jint android_view_Display_getRawHeightNative(
         JNIEnv* env, jobject clazz)
 {
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
@@ -103,10 +103,10 @@ static JNINativeMethod gMethods[] = {
             (void*)android_view_Display_getDisplayCount },
 	{   "init", "(I)V",
             (void*)android_view_Display_init },
-    {   "getRawWidth", "()I",
-            (void*)android_view_Display_getRawWidth },
-    {   "getRawHeight", "()I",
-            (void*)android_view_Display_getRawHeight },
+    {   "getRawWidthNative", "()I",
+            (void*)android_view_Display_getRawWidthNative },
+    {   "getRawHeightNative", "()I",
+            (void*)android_view_Display_getRawHeightNative },
     {   "getOrientation", "()I",
             (void*)android_view_Display_getOrientation }
 };
