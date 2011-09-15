@@ -33,7 +33,8 @@ class TRTPPacket : public RefBase {
     };
 
     TRTPPacket(TRTPHeaderType headerType)
-        : mVersion(2)
+        : mIsPacked(false)
+        , mVersion(2)
         , mPadding(false)
         , mExtension(false)
         , mCsrcCount(0)
@@ -54,31 +55,28 @@ class TRTPPacket : public RefBase {
   public:
     virtual ~TRTPPacket();
 
-    void setSeqNumber(uint16_t val) { mSeqNumber = val; }
-    uint16_t getSeqNumber() const { return mSeqNumber; }
-    void setPTS(int64_t val) {
-        mPTS = val;
-        mPTSValid = true;
-    }
-    int64_t getPTS() const { return mPTS; }
-    void setEpoch(uint32_t val) { mEpoch = val; }
-    void setProgramID(uint16_t val) { mProgramID = val; }
-    void setSubstreamID(uint16_t val) { mSubstreamID = val; }
-    void setClockTransform(const LinearTransform& trans) {
-        mClockTranform = trans;
-        mClockTranformValid = true;
-    }
+    void setSeqNumber(uint16_t val);
+    uint16_t getSeqNumber() const;
 
-    uint8_t* getPacket() const { return mPacket; }
-    int getPacketLen() const { return mPacketLen; }
+    void setPTS(int64_t val);
+    int64_t getPTS() const;
 
-    void setExpireTime(nsecs_t val) { mExpireTime = val; }
-    nsecs_t getExpireTime() const { return mExpireTime; }
+    void setEpoch(uint32_t val);
+    void setProgramID(uint16_t val);
+    void setSubstreamID(uint16_t val);
+    void setClockTransform(const LinearTransform& trans);
+
+    uint8_t* getPacket() const;
+    int getPacketLen() const;
+
+    void setExpireTime(nsecs_t val);
+    nsecs_t getExpireTime() const;
 
     virtual bool pack() = 0;
 
     // mask for the number of bits in a TRTP epoch
     static const uint32_t kTRTPEpochMask = (1 << 22) - 1;
+    static const int kTRTPEpochShift = 10;
 
   protected:
     static const int kRTPHeaderLen = 12;
@@ -92,6 +90,8 @@ class TRTPPacket : public RefBase {
     void writeU16(uint8_t*& buf, uint16_t val);
     void writeU32(uint8_t*& buf, uint32_t val);
     void writeU64(uint8_t*& buf, uint64_t val);
+
+    bool mIsPacked;
 
     uint8_t mVersion;
     bool mPadding;
@@ -135,16 +135,13 @@ class TRTPAudioPacket : public TRTPPacket {
         kCodecMPEG1Audio = 3,
     };
 
-    void setCodecType(TRTPAudioCodecType val) { mCodecType = val; }
-    void setRandomAccessPoint(bool val) { mRandomAccessPoint = val; }
-    void setDropable(bool val) { mDropable = val; }
-    void setDiscontinuity(bool val) { mDiscontinuity = val; }
-    void setEndOfStream(bool val) { mEndOfStream = val; }
-    void setVolume(uint8_t val) { mVolume = val; }
-    void setAccessUnitData(void* data, int len) {
-        mAccessUnitData = data;
-        mAccessUnitLen = len;
-    }
+    void setCodecType(TRTPAudioCodecType val);
+    void setRandomAccessPoint(bool val);
+    void setDropable(bool val);
+    void setDiscontinuity(bool val);
+    void setEndOfStream(bool val);
+    void setVolume(uint8_t val);
+    void setAccessUnitData(void* data, int len);
 
     virtual bool pack();
 
@@ -174,7 +171,7 @@ class TRTPControlPacket : public TRTPPacket {
         kCommandEOS   = 3,
     };
 
-    void setCommandID(TRTPCommandID val) { mCommandID = val; }
+    void setCommandID(TRTPCommandID val);
 
     virtual bool pack();
 
