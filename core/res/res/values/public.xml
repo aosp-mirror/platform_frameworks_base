@@ -1702,305 +1702,276 @@
   <public type="style" name="TextAppearance.Holo.DialogWindowTitle" id="0x01030117" />
 
 <!-- ===============================================================
-     Resources added in version 14 of the platform (Ice Cream Sandwich)
+     Resources added in version 14 of the platform (Ice Cream Sandwich / 4.0)
      =============================================================== -->
   <eat-comment />
-  <public type="attr" name="state_hovered" />
-  <public type="attr" name="state_drag_can_accept" />
-  <public type="attr" name="state_drag_hovered" />
-  <public type="attr" name="stopWithTask" />
+  <public type="attr" name="state_hovered" id="0x01010367" />
+  <public type="attr" name="state_drag_can_accept" id="0x01010368" />
+  <public type="attr" name="state_drag_hovered" id="0x01010369" />
+  <public type="attr" name="stopWithTask" id="0x0101036a" />
+  <public type="attr" name="switchTextOn" id="0x0101036b" />
+  <public type="attr" name="switchTextOff" id="0x0101036c" />
+  <public type="attr" name="switchPreferenceStyle" id="0x0101036d" />
+  <public type="attr" name="switchTextAppearance" id="0x0101036e" />
+  <public type="attr" name="track" id="0x0101036f" />
+  <public type="attr" name="switchMinWidth" id="0x01010370" />
+  <public type="attr" name="switchPadding" id="0x01010371" />
+  <public type="attr" name="thumbTextPadding" id="0x01010372" />
+  <public type="attr" name="textSuggestionsWindowStyle" id="0x01010373" />
+  <public type="attr" name="textEditSuggestionItemLayout" id="0x01010374" />
+  <public type="attr" name="rowCount" id="0x01010375" />
+  <public type="attr" name="rowOrderPreserved" id="0x01010376" />
+  <public type="attr" name="columnCount" id="0x01010377" />
+  <public type="attr" name="columnOrderPreserved" id="0x01010378" />
+  <public type="attr" name="useDefaultMargins" id="0x01010379" />
+  <public type="attr" name="alignmentMode" id="0x0101037a" />
+  <public type="attr" name="layout_row" id="0x0101037b" />
+  <public type="attr" name="layout_rowSpan" id="0x0101037c" />
+  <public type="attr" name="layout_columnSpan" id="0x0101037d" />
+  <public type="attr" name="actionModeSelectAllDrawable" id="0x0101037e" />
+  <public type="attr" name="isAuxiliary" id="0x0101037f" />
+  <public type="attr" name="accessibilityEventTypes" id="0x01010380" />
+  <public type="attr" name="packageNames" id="0x01010381" />
+  <public type="attr" name="accessibilityFeedbackType" id="0x01010382" />
+  <public type="attr" name="notificationTimeout" id="0x01010383" />
+  <public type="attr" name="accessibilityFlags" id="0x01010384" />
+  <public type="attr" name="canRetrieveWindowContent" id="0x01010385" />
+  <public type="attr" name="listPreferredItemHeightLarge" id="0x01010386" />
+  <public type="attr" name="listPreferredItemHeightSmall" id="0x01010387" />
+  <public type="attr" name="actionBarSplitStyle" id="0x01010388" />
+  <public type="attr" name="actionProviderClass" id="0x01010389" />
+  <public type="attr" name="backgroundStacked" id="0x0101038a" />
+  <public type="attr" name="backgroundSplit" id="0x0101038b" />
+  <public type="attr" name="textAllCaps" id="0x0101038c" />
+  <public type="attr" name="colorPressedHighlight" id="0x0101038d" />
+  <public type="attr" name="colorLongPressedHighlight" id="0x0101038e" />
+  <public type="attr" name="colorFocusedHighlight" id="0x0101038f" />
+  <public type="attr" name="colorActivatedHighlight" id="0x01010390" />
+  <public type="attr" name="colorMultiSelectHighlight" id="0x01010391" />
+  <public type="attr" name="drawableStart" id="0x01010392" />
+  <public type="attr" name="drawableEnd" id="0x01010393" />
+  <public type="attr" name="actionModeStyle" id="0x01010394" />
+  <public type="attr" name="minResizeWidth" id="0x01010395" />
+  <public type="attr" name="minResizeHeight" id="0x01010396" />
+  <public type="attr" name="actionBarWidgetTheme" id="0x01010397" />
+  <public type="attr" name="uiOptions" id="0x01010398" />
+  <public type="attr" name="subtypeLocale" id="0x01010399" />
+  <public type="attr" name="subtypeExtraValue" id="0x0101039a" />
+  <public type="attr" name="actionBarDivider" id="0x0101039b" />
+  <public type="attr" name="actionBarItemBackground" id="0x0101039c" />
+  <public type="attr" name="actionModeSplitBackground" id="0x0101039d" />
+  <public type="attr" name="textAppearanceListItem" id="0x0101039e" />
+  <public type="attr" name="textAppearanceListItemSmall" id="0x0101039f" />
+  <public type="attr" name="targetDescriptions" id="0x010103a0" />
+  <public type="attr" name="directionDescriptions" id="0x010103a1" />
+  <public type="attr" name="overridesImplicitlyEnabledSubtype" id="0x010103a2" />
+  <public type="attr" name="listPreferredItemPaddingLeft" id="0x010103a3" />
+  <public type="attr" name="listPreferredItemPaddingRight" id="0x010103a4" />
+  <public type="attr" name="requiresFadingEdge" id="0x010103a5" />
 
-  <public type="attr" name="switchTextOn" />
-  <public type="attr" name="switchTextOff" />
-  <public type="attr" name="switchPreferenceStyle" />
-  <public type="attr" name="switchTextAppearance" />
-  <public type="attr" name="track" />
-  <public type="attr" name="switchMinWidth" />
-  <public type="attr" name="switchPadding" />
-  <public type="attr" name="thumbTextPadding" />
+  <public type="style" name="TextAppearance.SuggestionHighlight" id="0x01030118" />
+  <public type="style" name="Theme.Holo.Light.DarkActionBar" id="0x01030119" />
+  <public type="style" name="Widget.Holo.Button.Borderless.Small" id="0x0103011a" />
+  <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" id="0x0103011b" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title.Inverse" id="0x0103011c" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse" id="0x0103011d" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title.Inverse" id="0x0103011e" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse" id="0x0103011f" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Menu" id="0x01030120" />
+  <public type="style" name="Widget.Holo.ActionBar.Solid" id="0x01030121" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.Solid" id="0x01030122" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.Solid.Inverse" id="0x01030123" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabBar.Inverse" id="0x01030124" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabView.Inverse" id="0x01030125" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabText.Inverse" id="0x01030126" />
+  <public type="style" name="Widget.Holo.Light.ActionMode.Inverse" id="0x01030127" />
+  <public type="style" name="Theme.DeviceDefault" id="0x01030128" />
+  <public type="style" name="Theme.DeviceDefault.NoActionBar" id="0x01030129" />
+  <public type="style" name="Theme.DeviceDefault.NoActionBar.Fullscreen" id="0x0103012a" />
+  <public type="style" name="Theme.DeviceDefault.Light" id="0x0103012b" />
+  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar" id="0x0103012c" />
+  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" id="0x0103012d" />
+  <public type="style" name="Theme.DeviceDefault.Dialog" id="0x0103012e" />
+  <public type="style" name="Theme.DeviceDefault.Dialog.MinWidth" id="0x0103012f" />
+  <public type="style" name="Theme.DeviceDefault.Dialog.NoActionBar" id="0x01030130" />
+  <public type="style" name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" id="0x01030131" />
+  <public type="style" name="Theme.DeviceDefault.Light.Dialog" id="0x01030132" />
+  <public type="style" name="Theme.DeviceDefault.Light.Dialog.MinWidth" id="0x01030133" />
+  <public type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar" id="0x01030134" />
+  <public type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" id="0x01030135" />
+  <public type="style" name="Theme.DeviceDefault.DialogWhenLarge" id="0x01030136" />
+  <public type="style" name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" id="0x01030137" />
+  <public type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge" id="0x01030138" />
+  <public type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" id="0x01030139" />
+  <public type="style" name="Theme.DeviceDefault.Panel" id="0x0103013a" />
+  <public type="style" name="Theme.DeviceDefault.Light.Panel" id="0x0103013b" />
+  <public type="style" name="Theme.DeviceDefault.Wallpaper" id="0x0103013c" />
+  <public type="style" name="Theme.DeviceDefault.Wallpaper.NoTitleBar" id="0x0103013d" />
+  <public type="style" name="Theme.DeviceDefault.InputMethod" id="0x0103013e" />
+  <public type="style" name="Theme.DeviceDefault.Light.DarkActionBar" id="0x0103013f" />
+  <public type="style" name="Widget.DeviceDefault" id="0x01030140" />
+  <public type="style" name="Widget.DeviceDefault.Button" id="0x01030141" />
+  <public type="style" name="Widget.DeviceDefault.Button.Small" id="0x01030142" />
+  <public type="style" name="Widget.DeviceDefault.Button.Inset" id="0x01030143" />
+  <public type="style" name="Widget.DeviceDefault.Button.Toggle" id="0x01030144" />
+  <public type="style" name="Widget.DeviceDefault.Button.Borderless.Small" id="0x01030145" />
+  <public type="style" name="Widget.DeviceDefault.TextView" id="0x01030146" />
+  <public type="style" name="Widget.DeviceDefault.AutoCompleteTextView" id="0x01030147" />
+  <public type="style" name="Widget.DeviceDefault.CompoundButton.CheckBox" id="0x01030148" />
+  <public type="style" name="Widget.DeviceDefault.ListView.DropDown" id="0x01030149" />
+  <public type="style" name="Widget.DeviceDefault.EditText" id="0x0103014a" />
+  <public type="style" name="Widget.DeviceDefault.ExpandableListView" id="0x0103014b" />
+  <public type="style" name="Widget.DeviceDefault.GridView" id="0x0103014c" />
+  <public type="style" name="Widget.DeviceDefault.ImageButton" id="0x0103014d" />
+  <public type="style" name="Widget.DeviceDefault.ListView" id="0x0103014e" />
+  <public type="style" name="Widget.DeviceDefault.PopupWindow" id="0x0103014f" />
+  <public type="style" name="Widget.DeviceDefault.ProgressBar" id="0x01030150" />
+  <public type="style" name="Widget.DeviceDefault.ProgressBar.Horizontal" id="0x01030151" />
+  <public type="style" name="Widget.DeviceDefault.ProgressBar.Small" id="0x01030152" />
+  <public type="style" name="Widget.DeviceDefault.ProgressBar.Small.Title" id="0x01030153" />
+  <public type="style" name="Widget.DeviceDefault.ProgressBar.Large" id="0x01030154" />
+  <public type="style" name="Widget.DeviceDefault.SeekBar" id="0x01030155" />
+  <public type="style" name="Widget.DeviceDefault.RatingBar" id="0x01030156" />
+  <public type="style" name="Widget.DeviceDefault.RatingBar.Indicator" id="0x01030157" />
+  <public type="style" name="Widget.DeviceDefault.RatingBar.Small" id="0x01030158" />
+  <public type="style" name="Widget.DeviceDefault.CompoundButton.RadioButton" id="0x01030159" />
+  <public type="style" name="Widget.DeviceDefault.ScrollView" id="0x0103015a" />
+  <public type="style" name="Widget.DeviceDefault.HorizontalScrollView" id="0x0103015b" />
+  <public type="style" name="Widget.DeviceDefault.Spinner" id="0x0103015c" />
+  <public type="style" name="Widget.DeviceDefault.CompoundButton.Star" id="0x0103015d" />
+  <public type="style" name="Widget.DeviceDefault.TabWidget" id="0x0103015e" />
+  <public type="style" name="Widget.DeviceDefault.WebTextView" id="0x0103015f" />
+  <public type="style" name="Widget.DeviceDefault.WebView" id="0x01030160" />
+  <public type="style" name="Widget.DeviceDefault.DropDownItem" id="0x01030161" />
+  <public type="style" name="Widget.DeviceDefault.DropDownItem.Spinner" id="0x01030162" />
+  <public type="style" name="Widget.DeviceDefault.TextView.SpinnerItem" id="0x01030163" />
+  <public type="style" name="Widget.DeviceDefault.ListPopupWindow" id="0x01030164" />
+  <public type="style" name="Widget.DeviceDefault.PopupMenu" id="0x01030165" />
+  <public type="style" name="Widget.DeviceDefault.ActionButton" id="0x01030166" />
+  <public type="style" name="Widget.DeviceDefault.ActionButton.Overflow" id="0x01030167" />
+  <public type="style" name="Widget.DeviceDefault.ActionButton.TextButton" id="0x01030168" />
+  <public type="style" name="Widget.DeviceDefault.ActionMode" id="0x01030169" />
+  <public type="style" name="Widget.DeviceDefault.ActionButton.CloseMode" id="0x0103016a" />
+  <public type="style" name="Widget.DeviceDefault.ActionBar" id="0x0103016b" />
+  <public type="style" name="Widget.DeviceDefault.Button.Borderless" id="0x0103016c" />
+  <public type="style" name="Widget.DeviceDefault.Tab" id="0x0103016d" />
+  <public type="style" name="Widget.DeviceDefault.CalendarView" id="0x0103016e" />
+  <public type="style" name="Widget.DeviceDefault.DatePicker" id="0x0103016f" />
+  <public type="style" name="Widget.DeviceDefault.ActionBar.TabView" id="0x01030170" />
+  <public type="style" name="Widget.DeviceDefault.ActionBar.TabText" id="0x01030171" />
+  <public type="style" name="Widget.DeviceDefault.ActionBar.TabBar" id="0x01030172" />
+  <public type="style" name="Widget.DeviceDefault.ActionBar.Solid" id="0x01030173" />
+  <public type="style" name="Widget.DeviceDefault.Light" id="0x01030174" />
+  <public type="style" name="Widget.DeviceDefault.Light.Button" id="0x01030175" />
+  <public type="style" name="Widget.DeviceDefault.Light.Button.Small" id="0x01030176" />
+  <public type="style" name="Widget.DeviceDefault.Light.Button.Inset" id="0x01030177" />
+  <public type="style" name="Widget.DeviceDefault.Light.Button.Toggle" id="0x01030178" />
+  <public type="style" name="Widget.DeviceDefault.Light.Button.Borderless.Small" id="0x01030179" />
+  <public type="style" name="Widget.DeviceDefault.Light.TextView" id="0x0103017a" />
+  <public type="style" name="Widget.DeviceDefault.Light.AutoCompleteTextView" id="0x0103017b" />
+  <public type="style" name="Widget.DeviceDefault.Light.CompoundButton.CheckBox" id="0x0103017c" />
+  <public type="style" name="Widget.DeviceDefault.Light.ListView.DropDown" id="0x0103017d" />
+  <public type="style" name="Widget.DeviceDefault.Light.EditText" id="0x0103017e" />
+  <public type="style" name="Widget.DeviceDefault.Light.ExpandableListView" id="0x0103017f" />
+  <public type="style" name="Widget.DeviceDefault.Light.GridView" id="0x01030180" />
+  <public type="style" name="Widget.DeviceDefault.Light.ImageButton" id="0x01030181" />
+  <public type="style" name="Widget.DeviceDefault.Light.ListView" id="0x01030182" />
+  <public type="style" name="Widget.DeviceDefault.Light.PopupWindow" id="0x01030183" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar" id="0x01030184" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Horizontal" id="0x01030185" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Small" id="0x01030186" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Small.Title" id="0x01030187" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Large" id="0x01030188" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Inverse" id="0x01030189" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Small.Inverse" id="0x0103018a" />
+  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Large.Inverse" id="0x0103018b" />
+  <public type="style" name="Widget.DeviceDefault.Light.SeekBar" id="0x0103018c" />
+  <public type="style" name="Widget.DeviceDefault.Light.RatingBar" id="0x0103018d" />
+  <public type="style" name="Widget.DeviceDefault.Light.RatingBar.Indicator" id="0x0103018e" />
+  <public type="style" name="Widget.DeviceDefault.Light.RatingBar.Small" id="0x0103018f" />
+  <public type="style" name="Widget.DeviceDefault.Light.CompoundButton.RadioButton" id="0x01030190" />
+  <public type="style" name="Widget.DeviceDefault.Light.ScrollView" id="0x01030191" />
+  <public type="style" name="Widget.DeviceDefault.Light.HorizontalScrollView" id="0x01030192" />
+  <public type="style" name="Widget.DeviceDefault.Light.Spinner" id="0x01030193" />
+  <public type="style" name="Widget.DeviceDefault.Light.CompoundButton.Star" id="0x01030194" />
+  <public type="style" name="Widget.DeviceDefault.Light.TabWidget" id="0x01030195" />
+  <public type="style" name="Widget.DeviceDefault.Light.WebTextView" id="0x01030196" />
+  <public type="style" name="Widget.DeviceDefault.Light.WebView" id="0x01030197" />
+  <public type="style" name="Widget.DeviceDefault.Light.DropDownItem" id="0x01030198" />
+  <public type="style" name="Widget.DeviceDefault.Light.DropDownItem.Spinner" id="0x01030199" />
+  <public type="style" name="Widget.DeviceDefault.Light.TextView.SpinnerItem" id="0x0103019a" />
+  <public type="style" name="Widget.DeviceDefault.Light.ListPopupWindow" id="0x0103019b" />
+  <public type="style" name="Widget.DeviceDefault.Light.PopupMenu" id="0x0103019c" />
+  <public type="style" name="Widget.DeviceDefault.Light.Tab" id="0x0103019d" />
+  <public type="style" name="Widget.DeviceDefault.Light.CalendarView" id="0x0103019e" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionButton" id="0x0103019f" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionButton.Overflow" id="0x010301a0" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionMode" id="0x010301a1" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionButton.CloseMode" id="0x010301a2" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar" id="0x010301a3" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabView" id="0x010301a4" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabText" id="0x010301a5" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabBar" id="0x010301a6" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.Solid" id="0x010301a7" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" id="0x010301a8" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabBar.Inverse" id="0x010301a9" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabView.Inverse" id="0x010301aa" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabText.Inverse" id="0x010301ab" />
+  <public type="style" name="Widget.DeviceDefault.Light.ActionMode.Inverse" id="0x010301ac" />
+  <public type="style" name="TextAppearance.DeviceDefault" id="0x010301ad" />
+  <public type="style" name="TextAppearance.DeviceDefault.Inverse" id="0x010301ae" />
+  <public type="style" name="TextAppearance.DeviceDefault.Large" id="0x010301af" />
+  <public type="style" name="TextAppearance.DeviceDefault.Large.Inverse" id="0x010301b0" />
+  <public type="style" name="TextAppearance.DeviceDefault.Medium" id="0x010301b1" />
+  <public type="style" name="TextAppearance.DeviceDefault.Medium.Inverse" id="0x010301b2" />
+  <public type="style" name="TextAppearance.DeviceDefault.Small" id="0x010301b3" />
+  <public type="style" name="TextAppearance.DeviceDefault.Small.Inverse" id="0x010301b4" />
+  <public type="style" name="TextAppearance.DeviceDefault.SearchResult.Title" id="0x010301b5" />
+  <public type="style" name="TextAppearance.DeviceDefault.SearchResult.Subtitle" id="0x010301b6" />
+  <public type="style" name="TextAppearance.DeviceDefault.WindowTitle" id="0x010301b7" />
+  <public type="style" name="TextAppearance.DeviceDefault.DialogWindowTitle" id="0x010301b8" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget" id="0x010301b9" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.Button" id="0x010301ba" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" id="0x010301bb" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.TabWidget" id="0x010301bc" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.TextView" id="0x010301bd" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.TextView.PopupMenu" id="0x010301be" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.DropDownHint" id="0x010301bf" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.DropDownItem" id="0x010301c0" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" id="0x010301c1" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.EditText" id="0x010301c2" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.PopupMenu" id="0x010301c3" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" id="0x010301c4" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" id="0x010301c5" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" id="0x010301c6" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" id="0x010301c7" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" id="0x010301c8" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" id="0x010301c9" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" id="0x010301ca" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle.Inverse" id="0x010301cb" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Title.Inverse" id="0x010301cc" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" id="0x010301cd" />
+  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" id="0x010301ce" />
+  <public type="style" name="DeviceDefault.ButtonBar" id="0x010301cf" />
+  <public type="style" name="DeviceDefault.ButtonBar.AlertDialog" id="0x010301d0" />
+  <public type="style" name="DeviceDefault.SegmentedButton" id="0x010301d1" />
+  <public type="style" name="DeviceDefault.Light.ButtonBar" id="0x010301d2" />
+  <public type="style" name="DeviceDefault.Light.ButtonBar.AlertDialog" id="0x010301d3" />
+  <public type="style" name="DeviceDefault.Light.SegmentedButton" id="0x010301d4" />
 
-  <public type="attr" name="textSuggestionsWindowStyle" />
-  <public type="attr" name="textEditSuggestionItemLayout" />
+  <public type="integer" name="status_bar_notification_info_maxnum" id="0x010e0003" />
 
-  <public type="attr" name="rowCount" />
-  <public type="attr" name="rowOrderPreserved" />
-  <public type="attr" name="columnCount" />
-  <public type="attr" name="columnOrderPreserved" />
-  <public type="attr" name="useDefaultMargins" />
-  <public type="attr" name="alignmentMode" />
+  <public type="string" name="status_bar_notification_info_overflow" id="0x01040017" />
 
-  <public type="attr" name="layout_row" />
-  <public type="attr" name="layout_rowSpan" />
-
-  <public type="attr" name="layout_columnSpan" />
-
-  <public type="attr" name="actionModeSelectAllDrawable" />
-
-  <public type="attr" name="isAuxiliary" />
-
-  <public type="attr" name="accessibilityEventTypes" />
-  <public type="attr" name="packageNames" />
-  <public type="attr" name="accessibilityFeedbackType" />
-  <public type="attr" name="notificationTimeout" />
-  <public type="attr" name="accessibilityFlags" />
-  <public type="attr" name="canRetrieveWindowContent" />
-
-  <public type="attr" name="listPreferredItemHeightLarge" />
-  <public type="attr" name="listPreferredItemHeightSmall" />
-
-  <public type="attr" name="actionBarSplitStyle" />
-
-  <public type="attr" name="actionProviderClass" />
-
-  <public type="attr" name="backgroundStacked" />
-  <public type="attr" name="backgroundSplit" />
-
-  <public type="attr" name="textAllCaps" />
-
-  <public type="attr" name="colorPressedHighlight" />
-  <public type="attr" name="colorLongPressedHighlight" />
-  <public type="attr" name="colorFocusedHighlight" />
-  <public type="attr" name="colorActivatedHighlight" />
-  <public type="attr" name="colorMultiSelectHighlight" />
-
-  <public type="attr" name="drawableStart" />
-  <public type="attr" name="drawableEnd" />
-
-  <public type="attr" name="actionModeStyle" />
-
-  <public type="attr" name="minResizeWidth" />
-  <public type="attr" name="minResizeHeight" />
-
-  <public type="attr" name="actionBarWidgetTheme" />
-  <public type="attr" name="uiOptions" />
-
-  <public type="attr" name="subtypeLocale" />
-  <public type="attr" name="subtypeExtraValue" />
-
-  <public type="attr" name="actionBarDivider" />
-  <public type="attr" name="actionBarItemBackground" />
-  <public type="attr" name="actionModeSplitBackground" />
-
-  <public type="attr" name="textAppearanceListItem" />
-  <public type="attr" name="textAppearanceListItemSmall" />
-
-  <public type="attr" name="targetDescriptions" />
-  <public type="attr" name="directionDescriptions" />
-
-  <public type="attr" name="overridesImplicitlyEnabledSubtype" />
-
-  <public type="attr" name="listPreferredItemPaddingLeft" />
-  <public type="attr" name="listPreferredItemPaddingRight" />
-
-  <public type="attr" name="requiresFadingEdge" />
-
-  <public type="style" name="TextAppearance.SuggestionHighlight" />
-
-  <public type="style" name="Theme.Holo.Light.DarkActionBar" />
-  <public type="style" name="Widget.Holo.Button.Borderless.Small" />
-  <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Menu" />
-  <public type="style" name="Widget.Holo.ActionBar.Solid" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.Solid" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.Solid.Inverse" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.TabBar.Inverse" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.TabView.Inverse" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.TabText.Inverse" />
-  <public type="style" name="Widget.Holo.Light.ActionMode.Inverse" />
-
-  <public type="style" name="Theme.DeviceDefault" />
-  <public type="style" name="Theme.DeviceDefault.NoActionBar" />
-  <public type="style" name="Theme.DeviceDefault.NoActionBar.Fullscreen" />
-  <public type="style" name="Theme.DeviceDefault.Light" />
-  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar" />
-  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
-  <public type="style" name="Theme.DeviceDefault.Dialog" />
-  <public type="style" name="Theme.DeviceDefault.Dialog.MinWidth" />
-  <public type="style" name="Theme.DeviceDefault.Dialog.NoActionBar" />
-  <public type="style" name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" />
-  <public type="style" name="Theme.DeviceDefault.Light.Dialog" />
-  <public type="style" name="Theme.DeviceDefault.Light.Dialog.MinWidth" />
-  <public type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
-  <public type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" />
-  <public type="style" name="Theme.DeviceDefault.DialogWhenLarge" />
-  <public type="style" name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" />
-  <public type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge" />
-  <public type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" />
-  <public type="style" name="Theme.DeviceDefault.Panel" />
-  <public type="style" name="Theme.DeviceDefault.Light.Panel" />
-  <public type="style" name="Theme.DeviceDefault.Wallpaper" />
-  <public type="style" name="Theme.DeviceDefault.Wallpaper.NoTitleBar" />
-  <public type="style" name="Theme.DeviceDefault.InputMethod" />
-  <public type="style" name="Theme.DeviceDefault.Light.DarkActionBar" />
-
-  <public type="style" name="Widget.DeviceDefault" />
-  <public type="style" name="Widget.DeviceDefault.Button" />
-  <public type="style" name="Widget.DeviceDefault.Button.Small" />
-  <public type="style" name="Widget.DeviceDefault.Button.Inset" />
-  <public type="style" name="Widget.DeviceDefault.Button.Toggle" />
-  <public type="style" name="Widget.DeviceDefault.Button.Borderless.Small" />
-  <public type="style" name="Widget.DeviceDefault.TextView" />
-  <public type="style" name="Widget.DeviceDefault.AutoCompleteTextView" />
-  <public type="style" name="Widget.DeviceDefault.CompoundButton.CheckBox" />
-  <public type="style" name="Widget.DeviceDefault.ListView.DropDown" />
-  <public type="style" name="Widget.DeviceDefault.EditText" />
-  <public type="style" name="Widget.DeviceDefault.ExpandableListView" />
-  <public type="style" name="Widget.DeviceDefault.GridView" />
-  <public type="style" name="Widget.DeviceDefault.ImageButton" />
-  <public type="style" name="Widget.DeviceDefault.ListView" />
-  <public type="style" name="Widget.DeviceDefault.PopupWindow" />
-  <public type="style" name="Widget.DeviceDefault.ProgressBar" />
-  <public type="style" name="Widget.DeviceDefault.ProgressBar.Horizontal" />
-  <public type="style" name="Widget.DeviceDefault.ProgressBar.Small" />
-  <public type="style" name="Widget.DeviceDefault.ProgressBar.Small.Title" />
-  <public type="style" name="Widget.DeviceDefault.ProgressBar.Large" />
-  <public type="style" name="Widget.DeviceDefault.SeekBar" />
-  <public type="style" name="Widget.DeviceDefault.RatingBar" />
-  <public type="style" name="Widget.DeviceDefault.RatingBar.Indicator" />
-  <public type="style" name="Widget.DeviceDefault.RatingBar.Small" />
-  <public type="style" name="Widget.DeviceDefault.CompoundButton.RadioButton" />
-  <public type="style" name="Widget.DeviceDefault.ScrollView" />
-  <public type="style" name="Widget.DeviceDefault.HorizontalScrollView" />
-  <public type="style" name="Widget.DeviceDefault.Spinner" />
-  <public type="style" name="Widget.DeviceDefault.CompoundButton.Star" />
-  <public type="style" name="Widget.DeviceDefault.TabWidget" />
-  <public type="style" name="Widget.DeviceDefault.WebTextView" />
-  <public type="style" name="Widget.DeviceDefault.WebView" />
-  <public type="style" name="Widget.DeviceDefault.DropDownItem" />
-  <public type="style" name="Widget.DeviceDefault.DropDownItem.Spinner" />
-  <public type="style" name="Widget.DeviceDefault.TextView.SpinnerItem" />
-  <public type="style" name="Widget.DeviceDefault.ListPopupWindow" />
-  <public type="style" name="Widget.DeviceDefault.PopupMenu" />
-  <public type="style" name="Widget.DeviceDefault.ActionButton" />
-  <public type="style" name="Widget.DeviceDefault.ActionButton.Overflow" />
-  <public type="style" name="Widget.DeviceDefault.ActionButton.TextButton" />
-  <public type="style" name="Widget.DeviceDefault.ActionMode" />
-  <public type="style" name="Widget.DeviceDefault.ActionButton.CloseMode" />
-  <public type="style" name="Widget.DeviceDefault.ActionBar" />
-  <public type="style" name="Widget.DeviceDefault.Button.Borderless" />
-  <public type="style" name="Widget.DeviceDefault.Tab" />
-  <public type="style" name="Widget.DeviceDefault.CalendarView" />
-  <public type="style" name="Widget.DeviceDefault.DatePicker" />
-  <public type="style" name="Widget.DeviceDefault.ActionBar.TabView" />
-  <public type="style" name="Widget.DeviceDefault.ActionBar.TabText" />
-  <public type="style" name="Widget.DeviceDefault.ActionBar.TabBar" />
-  <public type="style" name="Widget.DeviceDefault.ActionBar.Solid" />
-  <public type="style" name="Widget.DeviceDefault.Light" />
-  <public type="style" name="Widget.DeviceDefault.Light.Button" />
-  <public type="style" name="Widget.DeviceDefault.Light.Button.Small" />
-  <public type="style" name="Widget.DeviceDefault.Light.Button.Inset" />
-  <public type="style" name="Widget.DeviceDefault.Light.Button.Toggle" />
-  <public type="style" name="Widget.DeviceDefault.Light.Button.Borderless.Small" />
-  <public type="style" name="Widget.DeviceDefault.Light.TextView" />
-  <public type="style" name="Widget.DeviceDefault.Light.AutoCompleteTextView" />
-  <public type="style" name="Widget.DeviceDefault.Light.CompoundButton.CheckBox" />
-  <public type="style" name="Widget.DeviceDefault.Light.ListView.DropDown" />
-  <public type="style" name="Widget.DeviceDefault.Light.EditText" />
-  <public type="style" name="Widget.DeviceDefault.Light.ExpandableListView" />
-  <public type="style" name="Widget.DeviceDefault.Light.GridView" />
-  <public type="style" name="Widget.DeviceDefault.Light.ImageButton" />
-  <public type="style" name="Widget.DeviceDefault.Light.ListView" />
-  <public type="style" name="Widget.DeviceDefault.Light.PopupWindow" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Horizontal" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Small" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Small.Title" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Large" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Small.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.ProgressBar.Large.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.SeekBar" />
-  <public type="style" name="Widget.DeviceDefault.Light.RatingBar" />
-  <public type="style" name="Widget.DeviceDefault.Light.RatingBar.Indicator" />
-  <public type="style" name="Widget.DeviceDefault.Light.RatingBar.Small" />
-  <public type="style" name="Widget.DeviceDefault.Light.CompoundButton.RadioButton" />
-  <public type="style" name="Widget.DeviceDefault.Light.ScrollView" />
-  <public type="style" name="Widget.DeviceDefault.Light.HorizontalScrollView" />
-  <public type="style" name="Widget.DeviceDefault.Light.Spinner" />
-  <public type="style" name="Widget.DeviceDefault.Light.CompoundButton.Star" />
-  <public type="style" name="Widget.DeviceDefault.Light.TabWidget" />
-  <public type="style" name="Widget.DeviceDefault.Light.WebTextView" />
-  <public type="style" name="Widget.DeviceDefault.Light.WebView" />
-  <public type="style" name="Widget.DeviceDefault.Light.DropDownItem" />
-  <public type="style" name="Widget.DeviceDefault.Light.DropDownItem.Spinner" />
-  <public type="style" name="Widget.DeviceDefault.Light.TextView.SpinnerItem" />
-  <public type="style" name="Widget.DeviceDefault.Light.ListPopupWindow" />
-  <public type="style" name="Widget.DeviceDefault.Light.PopupMenu" />
-  <public type="style" name="Widget.DeviceDefault.Light.Tab" />
-  <public type="style" name="Widget.DeviceDefault.Light.CalendarView" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionButton" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionButton.Overflow" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionMode" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionButton.CloseMode" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabView" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabText" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabBar" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.Solid" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabBar.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabView.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionBar.TabText.Inverse" />
-  <public type="style" name="Widget.DeviceDefault.Light.ActionMode.Inverse" />
-
-  <public type="style" name="TextAppearance.DeviceDefault" />
-  <public type="style" name="TextAppearance.DeviceDefault.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Large" />
-  <public type="style" name="TextAppearance.DeviceDefault.Large.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Medium" />
-  <public type="style" name="TextAppearance.DeviceDefault.Medium.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Small" />
-  <public type="style" name="TextAppearance.DeviceDefault.Small.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.SearchResult.Title" />
-  <public type="style" name="TextAppearance.DeviceDefault.SearchResult.Subtitle" />
-  <public type="style" name="TextAppearance.DeviceDefault.WindowTitle" />
-  <public type="style" name="TextAppearance.DeviceDefault.DialogWindowTitle" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.Button" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.TabWidget" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.TextView" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.TextView.PopupMenu" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.DropDownHint" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.DropDownItem" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.EditText" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.PopupMenu" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Title.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" />
-  <public type="style" name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" />
-
-  <public type="style" name="DeviceDefault.ButtonBar" />
-  <public type="style" name="DeviceDefault.ButtonBar.AlertDialog" />
-  <public type="style" name="DeviceDefault.SegmentedButton" />
-  <public type="style" name="DeviceDefault.Light.ButtonBar" />
-  <public type="style" name="DeviceDefault.Light.ButtonBar.AlertDialog" />
-  <public type="style" name="DeviceDefault.Light.SegmentedButton" />
-
-  <public type="integer" name="status_bar_notification_info_maxnum" />
-  <public type="string" name="status_bar_notification_info_overflow" />
-
-  <public type="color" name="holo_blue_light" />
-  <public type="color" name="holo_blue_dark" />
-  <public type="color" name="holo_green_light" />
-  <public type="color" name="holo_green_dark" />
-  <public type="color" name="holo_red_light" />
-  <public type="color" name="holo_red_dark" />
-  <public type="color" name="holo_orange_light" />
-  <public type="color" name="holo_orange_dark" />
-  <public type="color" name="holo_purple" />
-  <public type="color" name="holo_blue_bright" />
+  <public type="color" name="holo_blue_light" id="0x01060012" />
+  <public type="color" name="holo_blue_dark" id="0x01060013" />
+  <public type="color" name="holo_green_light" id="0x01060014" />
+  <public type="color" name="holo_green_dark" id="0x01060015" />
+  <public type="color" name="holo_red_light" id="0x01060016" />
+  <public type="color" name="holo_red_dark" id="0x01060017" />
+  <public type="color" name="holo_orange_light" id="0x01060018" />
+  <public type="color" name="holo_orange_dark" id="0x01060019" />
+  <public type="color" name="holo_purple" id="0x0106001a" />
+  <public type="color" name="holo_blue_bright" id="0x0106001b" />
 
 </resources>
