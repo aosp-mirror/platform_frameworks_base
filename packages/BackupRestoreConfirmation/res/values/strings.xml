@@ -43,4 +43,15 @@
 
     <!-- Text for message to user when performing a full restore operation, explaining that they must enter the password originally used to encrypt the full backup data. -->
     <string name="restore_enc_password_text">If the restore data is encrypted, please enter the password below:</string>
+
+    <!-- Text of a toast telling the user that a full backup operation has begun -->
+    <string name="toast_backup_started">Backup starting...</string>
+    <!-- Text of a toast telling the user that a full backup operation has ended -->
+    <string name="toast_backup_ended">Backup finished</string>
+    <!-- Text of a toast telling the user that a full restore operation has begun -->
+    <string name="toast_restore_started">Restore starting...</string>
+    <!-- Text of a toast telling the user that a full restore operation has ended -->
+    <string name="toast_restore_ended">Restore ended</string>
+    <!-- Text of a toast telling the user that the operation has timed out -->
+    <string name="toast_timeout">Operation timed out</string>
 </resources>

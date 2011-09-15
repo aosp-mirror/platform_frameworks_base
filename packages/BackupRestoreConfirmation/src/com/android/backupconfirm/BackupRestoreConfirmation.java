@@ -82,7 +82,7 @@ public class BackupRestoreConfirmation extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_START_BACKUP: {
-                    Toast.makeText(mContext, "!!! Backup starting !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, R.string.toast_backup_started, Toast.LENGTH_LONG).show();
                 }
                 break;
 
@@ -93,13 +93,13 @@ public class BackupRestoreConfirmation extends Activity {
                 break;
 
                 case MSG_END_BACKUP: {
-                    Toast.makeText(mContext, "!!! Backup ended !!!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.toast_backup_ended, Toast.LENGTH_LONG).show();
                     finish();
                 }
                 break;
 
                 case MSG_START_RESTORE: {
-                    Toast.makeText(mContext, "!!! Restore starting !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, R.string.toast_restore_started, Toast.LENGTH_LONG).show();
                 }
                 break;
 
@@ -110,13 +110,13 @@ public class BackupRestoreConfirmation extends Activity {
                 break;
 
                 case MSG_END_RESTORE: {
-                    Toast.makeText(mContext, "!!! Restore ended !!!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.toast_restore_ended, Toast.LENGTH_SHORT).show();
                     finish();
                 }
                 break;
 
                 case MSG_TIMEOUT: {
-                    Toast.makeText(mContext, "!!! TIMED OUT !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, R.string.toast_timeout, Toast.LENGTH_LONG).show();
                 }
                 break;
             }
