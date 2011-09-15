@@ -59,7 +59,7 @@ public class NavigationBarView extends LinearLayout {
     int mBarSize;
     boolean mVertical;
 
-    boolean mHidden, mLowProfile;
+    boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
 
     public View getRecentsButton() {
@@ -91,6 +91,7 @@ public class NavigationBarView extends LinearLayout {
         final Resources res = mContext.getResources();
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
+        mShowMenu = false;
     }
 
     View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
@@ -126,7 +127,23 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
-        getMenuButton()   .setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
+ 
+        getMenuButton()   .setVisibility((disableNavigation || !mShowMenu)
+                                                           ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    public void setMenuVisibility(final boolean show) {
+        setMenuVisibility(show, false);
+    }
+
+    public void setMenuVisibility(final boolean show, final boolean force) {
+        if (!force && mShowMenu == show) return;
+
+        mShowMenu = show;
+
+        getMenuButton().setVisibility(
+            (0 != (mDisabledFlags & View.STATUS_BAR_DISABLE_NAVIGATION) || !mShowMenu)
+                ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void setLowProfile(final boolean lightsOut) {
@@ -257,6 +274,7 @@ public class NavigationBarView extends LinearLayout {
         // force the low profile & disabled states into compliance
         setLowProfile(mLowProfile, false, true /* force */);
         setDisabledFlags(mDisabledFlags, true /* force */);
+        setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG_DEADZONE) {
             mCurrentView.findViewById(R.id.deadzone).setBackgroundColor(0x808080FF);
