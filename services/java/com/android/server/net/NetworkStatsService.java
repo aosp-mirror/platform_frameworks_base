@@ -855,14 +855,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         ifaceTotal = getSummaryForNetwork(template, start, end).getTotal(ifaceTotal);
         uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
         EventLogTags.writeNetstatsMobileSample(
-                ifaceTotal.rxBytes, ifaceTotal.txBytes, uidTotal.rxBytes, uidTotal.txBytes);
+                ifaceTotal.rxBytes, ifaceTotal.txBytes,
+                ifaceTotal.rxPackets, ifaceTotal.txPackets,
+                uidTotal.rxBytes, uidTotal.txBytes,
+                uidTotal.rxPackets, uidTotal.txPackets);
 
         // collect wifi sample
         template = buildTemplateWifi();
         ifaceTotal = getSummaryForNetwork(template, start, end).getTotal(ifaceTotal);
         uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
         EventLogTags.writeNetstatsWifiSample(
-                ifaceTotal.rxBytes, ifaceTotal.txBytes, uidTotal.rxBytes, uidTotal.txBytes);
+                ifaceTotal.rxBytes, ifaceTotal.txBytes,
+                ifaceTotal.rxPackets, ifaceTotal.txPackets,
+                uidTotal.rxBytes, uidTotal.txBytes,
+                uidTotal.rxPackets, uidTotal.txPackets);
     }
 
     /**
