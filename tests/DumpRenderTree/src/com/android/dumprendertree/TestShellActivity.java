@@ -286,11 +286,23 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mWebView.stopLoading();
     }
 
+
+    //TODO: remove. this is temporary for bug investigation
+    @Override
+    public void finish() {
+      Exception e = new Exception("finish() call stack");
+      Log.d(LOGTAG, "finish stack trace", e);
+      super.finish();
+    }
+
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        //TODO: remove exception log. this is temporary for bug investigation
+        Exception e = new Exception("onDestroy stack trace");
+        Log.d(LOGTAG, "onDestroy stack trace", e);
         mWebView.destroy();
         mWebView = null;
+        super.onDestroy();
     }
 
     @Override
