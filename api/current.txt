@@ -22920,7 +22920,7 @@ package android.view {
     method public android.view.View findFocus();
     method public final android.view.View findViewById(int);
     method public final android.view.View findViewWithTag(java.lang.Object);
-    method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence);
+    method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence, int);
     method protected boolean fitSystemWindows(android.graphics.Rect);
     method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
@@ -23249,6 +23249,8 @@ package android.view {
     field protected static final int[] ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     field protected static final int[] ENABLED_STATE_SET;
     field protected static final int[] ENABLED_WINDOW_FOCUSED_STATE_SET;
+    field public static final int FIND_VIEWS_WITH_CONTENT_DESCRIPTION = 2; // 0x2
+    field public static final int FIND_VIEWS_WITH_TEXT = 1; // 0x1
     field public static final int FOCUSABLES_ALL = 0; // 0x0
     field public static final int FOCUSABLES_TOUCH_MODE = 1; // 0x1
     field protected static final int[] FOCUSED_SELECTED_STATE_SET;

@@ -261,6 +261,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Finds {@link AccessibilityNodeInfo}s by text. The match is case
      * insensitive containment. The search is relative to this info i.e.
      * this info is the root of the traversed tree.
+     *
      * <p>
      *   <strong>Note:</strong> It is a client responsibility to recycle the
      *     received info by calling {@link AccessibilityNodeInfo#recycle()}
