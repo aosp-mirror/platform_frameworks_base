@@ -54,6 +54,11 @@ interface IPhoneSubInfo {
     String getLine1AlphaTag();
 
     /**
+     * Retrieves MSISDN Number.
+     */
+    String getMsisdn();
+
+    /**
      * Retrieves the voice mail number.
      */
     String getVoiceMailNumber();
