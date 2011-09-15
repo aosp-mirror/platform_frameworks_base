@@ -62,6 +62,7 @@ static char const * const sExtensionString  =
         "EGL_KHR_fence_sync "
         "EGL_ANDROID_image_native_buffer "
         "EGL_ANDROID_swap_rectangle "
+        "EGL_NV_system_time "
         ;
 
 struct extention_map_t {
@@ -80,6 +81,10 @@ static const extention_map_t sExtentionMap[] = {
             (__eglMustCastToProperFunctionPointerType)&eglDestroyImageKHR },
     { "eglSetSwapRectangleANDROID",
             (__eglMustCastToProperFunctionPointerType)&eglSetSwapRectangleANDROID },
+    { "eglGetSystemTimeFrequencyNV",
+            (__eglMustCastToProperFunctionPointerType)&eglGetSystemTimeFrequencyNV },
+    { "eglGetSystemTimeNV",
+            (__eglMustCastToProperFunctionPointerType)&eglGetSystemTimeNV },
 };
 
 // accesses protected by sExtensionMapMutex
@@ -1453,4 +1458,47 @@ EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
                 dp->disp[s->impl].dpy, s->surface, left, top, width, height);
     }
     return setError(EGL_BAD_DISPLAY, NULL);
+}
+
+// ----------------------------------------------------------------------------
+// NVIDIA extensions
+// ----------------------------------------------------------------------------
+EGLuint64NV eglGetSystemTimeFrequencyNV()
+{
+    clearError();
+
+    if (egl_init_drivers() == EGL_FALSE) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    }
+
+    EGLuint64NV ret = 0;
+    egl_connection_t* const cnx = &gEGLImpl[IMPL_HARDWARE];
+
+    if (cnx->dso) {
+        if (cnx->egl.eglGetSystemTimeFrequencyNV) {
+            return cnx->egl.eglGetSystemTimeFrequencyNV();
+        }
+    }
+
+    return setError(EGL_BAD_DISPLAY, 0);;
+}
+
+EGLuint64NV eglGetSystemTimeNV()
+{
+    clearError();
+
+    if (egl_init_drivers() == EGL_FALSE) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    }
+
+    EGLuint64NV ret = 0;
+    egl_connection_t* const cnx = &gEGLImpl[IMPL_HARDWARE];
+
+    if (cnx->dso) {
+        if (cnx->egl.eglGetSystemTimeNV) {
+            return cnx->egl.eglGetSystemTimeNV();
+        }
+    }
+
+    return setError(EGL_BAD_DISPLAY, 0);;
 }
