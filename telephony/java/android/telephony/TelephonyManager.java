@@ -762,6 +762,26 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the MSISDN string.
+     * for a GSM phone. Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @hide
+     */
+    public String getMsisdn() {
+        try {
+            return getSubscriberInfo().getMsisdn();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
      * Returns the voice mail number. Return null if it is unavailable.
      * <p>
      * Requires Permission:

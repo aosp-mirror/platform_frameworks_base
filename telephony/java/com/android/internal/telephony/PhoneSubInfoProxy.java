@@ -75,6 +75,13 @@ public class PhoneSubInfoProxy extends IPhoneSubInfo.Stub {
     }
 
     /**
+     * Retrieves the MSISDN Number.
+     */
+    public String getMsisdn() {
+        return mPhoneSubInfo.getMsisdn();
+    }
+
+    /**
      * Retrieves the voice mail number.
      */
     public String getVoiceMailNumber() {

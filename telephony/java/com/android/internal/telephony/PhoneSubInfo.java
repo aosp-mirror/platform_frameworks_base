@@ -105,6 +105,14 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     }
 
     /**
+     * Retrieves the MSISDN string.
+     */
+    public String getMsisdn() {
+        mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
+        return mPhone.getMsisdn();
+    }
+
+    /**
      * Retrieves the voice mail number.
      */
     public String getVoiceMailNumber() {
