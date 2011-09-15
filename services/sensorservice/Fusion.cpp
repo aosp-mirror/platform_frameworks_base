@@ -167,6 +167,9 @@ Fusion::Fusion() {
     Bm.y = 1;
     Bm.z = 0;
 
+    x0 = 0;
+    x1 = 0;
+
     init();
 }
 

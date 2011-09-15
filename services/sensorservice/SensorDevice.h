@@ -37,11 +37,14 @@ class SensorDevice : public Singleton<SensorDevice> {
     friend class Singleton<SensorDevice>;
     struct sensors_poll_device_t* mSensorDevice;
     struct sensors_module_t* mSensorModule;
-    Mutex mLock; // protect mActivationCount[].rates
+    mutable Mutex mLock; // protect mActivationCount[].rates
     // fixed-size array after construction
     struct Info {
-        Info() { }
+        Info() : delay(0) { }
         KeyedVector<void*, nsecs_t> rates;
+        nsecs_t delay;
+        status_t setDelayForIdent(void* ident, int64_t ns);
+        nsecs_t selectDelay();
     };
     DefaultKeyedVector<int, Info> mActivationCount;
 
