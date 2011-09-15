@@ -4661,7 +4661,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     return;
                 }
 
-                root.findViewsWithText(foundViews, text);
+                root.findViewsWithText(foundViews, text, View.FIND_VIEWS_WITH_TEXT
+                        | View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
                 if (foundViews.isEmpty()) {
                     return;
                 }

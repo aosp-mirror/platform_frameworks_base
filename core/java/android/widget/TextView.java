@@ -8677,18 +8677,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void findViewsWithText(ArrayList<View> outViews, CharSequence searched) {
-        if (TextUtils.isEmpty(searched)) {
-            return;
-        }
-        CharSequence thisText = getText();
-        if (TextUtils.isEmpty(thisText)) {
-            return;
-        }
-        String searchedLowerCase = searched.toString().toLowerCase();
-        String thisTextLowerCase = thisText.toString().toLowerCase();
-        if (thisTextLowerCase.contains(searchedLowerCase)) {
-            outViews.add(this);
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence searched, int flags) {
+        super.findViewsWithText(outViews, searched, flags);
+        if (!outViews.contains(this) && (flags & FIND_VIEWS_WITH_TEXT) != 0
+                && !TextUtils.isEmpty(searched) && !TextUtils.isEmpty(mText)) {
+            String searchedLowerCase = searched.toString().toLowerCase();
+            String textLowerCase = mText.toString().toLowerCase();
+            if (textLowerCase.contains(searchedLowerCase)) {
+                outViews.add(this);
+            }
         }
     }
 

@@ -70,6 +70,7 @@
             android:layout_width="160px"
             android:layout_height="100px"
             android:text="@string/button6"
+            android:contentDescription="contentDescription"
         />
     </LinearLayout>
 

@@ -45,6 +45,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.LocaleUtil;
@@ -1926,6 +1927,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x0000FFFF;
+
+    /**
+     * Find views that render the specified text.
+     *
+     * @see #findViewsWithText(ArrayList, CharSequence, int)
+     */
+    public static final int FIND_VIEWS_WITH_TEXT = 0x00000001;
+
+    /**
+     * Find find views that contain the specified content description.
+     *
+     * @see #findViewsWithText(ArrayList, CharSequence, int)
+     */
+    public static final int FIND_VIEWS_WITH_CONTENT_DESCRIPTION = 0x00000002;
 
     /**
      * Controls the over-scroll mode for this view.
@@ -5132,12 +5147,28 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Finds the Views that contain given text. The containment is case insensitive.
-     * As View's text is considered any text content that View renders.
+     * The search is performed by either the text that the View renders or the content
+     * description that describes the view for accessibility purposes and the view does
+     * not render or both. Clients can specify how the search is to be performed via
+     * passing the {@link #FIND_VIEWS_WITH_TEXT} and
+     * {@link #FIND_VIEWS_WITH_CONTENT_DESCRIPTION} flags.
      *
      * @param outViews The output list of matching Views.
-     * @param text The text to match against.
+     * @param searched The text to match against.
+     * 
+     * @see #FIND_VIEWS_WITH_TEXT
+     * @see #FIND_VIEWS_WITH_CONTENT_DESCRIPTION
+     * @see #setContentDescription(CharSequence)
      */
-    public void findViewsWithText(ArrayList<View> outViews, CharSequence text) {
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence searched, int flags) {
+        if ((flags & FIND_VIEWS_WITH_CONTENT_DESCRIPTION) != 0 && !TextUtils.isEmpty(searched)
+                && !TextUtils.isEmpty(mContentDescription)) {
+            String searchedLowerCase = searched.toString().toLowerCase();
+            String contentDescriptionLowerCase = mContentDescription.toString().toLowerCase();
+            if (contentDescriptionLowerCase.contains(searchedLowerCase)) {
+                outViews.add(this);
+            }
+        }
     }
 
     /**
