@@ -1,296 +1,484 @@
-page.title=2D Graphics
+page.title=Canvas and Drawables
 parent.title=Graphics
 parent.link=index.html
 @jd:body
 
-
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>In this document</h2>
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#draw-with-canvas">Draw with a Canvas</a>
     <ol>
-      <li><a href="#drawables">Drawables</a>
+      <li><a href="#on-view">On a View</a></li>
+      <li><a href="#on-surfaceview">On a SurfaceView</a></li>
+    </ol>
+    </li>
+    <li><a href="#drawables">Drawables</a>
         <ol>
           <li><a href="#drawables-from-images">Creating from resource images</a></li>
           <li><a href="#drawables-from-xml">Creating from resource XML</a></li>
         </ol>
-      </li>
-      <li><a href="#shape-drawable">Shape Drawable</a></li>
-   <!--   <li><a href="#state-list">StateListDrawable</a></li> -->
-      <li><a href="#nine-patch">Nine-patch</a></li>
-    </ol>
+    </li>
+    <li><a href="#shape-drawable">Shape Drawable</a></li>
+    <li><a href="#nine-patch">Nine-patch</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL with the Framework
+APIs</a></li>
+    <li><a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a></li>
+  </ol>
   </div>
 </div>
 
-<p>Android offers a custom 2D graphics library for drawing and animating shapes and images.
-The {@link android.graphics.drawable} and {@link android.view.animation}
-packages are where you'll find the common classes used for drawing and animating in two-dimensions.
+<p>The Android framework APIs provides a set 2D drawing APIs that allow you to render your own
+custom graphics onto a canvas or to modify existing Views to customize their look and feel.
+When drawing 2D graphics, you'll typically do so in one of two ways:</p>
+
+<ol type="a">
+  <li>Draw your graphics or animations into a View object from your layout. In this manner,
+  the drawing of your graphics is handled by the system's
+  normal View hierarchy drawing process &mdash; you simply define the graphics to go inside the View.</li>
+  <li>Draw your graphics directly to a Canvas. This way, you personally call the appropriate class's
+  {@link android.view.View#onDraw onDraw()} method (passing it your Canvas), or one of the Canvas
+<code>draw...()</code> methods (like
+  <code>{@link android.graphics.Canvas#drawPicture(Picture,Rect) drawPicture()}</code>). In doing so, you are also in
+  control of any animation.</li>
+</ol>
+
+<p>Option "a," drawing to a View, is your best choice when you want to draw simple graphics that do not
+need to change dynamically and are not part of a performance-intensive game. For example, you should
+draw your graphics into a View when you want to display a static graphic or predefined animation, within
+an otherwise static application. Read <a href="#drawables">Drawables</a> for more information.</li>
 </p>
 
-<p>This document offers an introduction to drawing graphics in your Android application.
-We'll discuss the basics of using Drawable objects to draw
-graphics, how to use a couple subclasses of the Drawable class, and how to
-create animations that either tween (move, stretch, rotate) a single graphic
-or animate a series of graphics (like a roll of film).</p>
+<p>Option "b," drawing to a Canvas, is better when your application needs to regularly re-draw itself.
+Applications such as video games should be drawing to the Canvas on its own. However, there's more than
+one way to do this:</p>
 
+<ul>
+  <li>In the same thread as your UI Activity, wherein you create a custom View component in
+  your layout, call <code>{@link android.view.View#invalidate()}</code> and then handle the
+  <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code> callback.</li>
+  <li>Or, in a separate thread, wherein you manage a {@link android.view.SurfaceView} and
+  perform draws to the Canvas as fast as your thread is capable
+  (you do not need to request <code>invalidate()</code>).</li>
+</ul>
+
+<h2 id="draw-with-canvas">Draw with a Canvas</h2>
+
+<p>When you're writing an application in which you would like to perform specialized drawing
+and/or control the animation of graphics,
+you should do so by drawing through a {@link android.graphics.Canvas}. A Canvas works for you as
+a pretense, or interface, to the actual surface upon which your graphics will be drawn &mdash; it
+holds all of your "draw" calls. Via the Canvas, your drawing is actually performed upon an
+underlying {@link android.graphics.Bitmap}, which is placed into the window.</p>
+
+<p>In the event that you're drawing within the <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code>
+callback method, the Canvas is provided for you and you need only place your drawing calls upon it.
+You can also acquire a Canvas from <code>{@link android.view.SurfaceHolder#lockCanvas() SurfaceHolder.lockCanvas()}</code>,
+when dealing with a SurfaceView object. (Both of these scenarios are discussed in the following sections.)
+However, if you need to create a new Canvas, then you must define the {@link android.graphics.Bitmap}
+upon which drawing will actually be performed. The Bitmap is always required for a Canvas. You can set up
+a new Canvas like this:</p>
+<pre>
+Bitmap b = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+Canvas c = new Canvas(b);
+</pre>
+
+<p>Now your Canvas will draw onto the defined Bitmap. After drawing upon it with the Canvas, you can then carry your
+Bitmap to another Canvas with one of the <code>{@link android.graphics.Canvas#drawBitmap(Bitmap,Matrix,Paint)
+Canvas.drawBitmap(Bitmap,...)}</code> methods. It's recommended that you ultimately draw your final
+graphics through a Canvas offered to you
+by <code>{@link android.view.View#onDraw(Canvas) View.onDraw()}</code> or
+<code>{@link android.view.SurfaceHolder#lockCanvas() SurfaceHolder.lockCanvas()}</code> (see the following sections).</p>
+
+<p>The {@link android.graphics.Canvas} class has its own set of drawing methods that you can use,
+like <code>drawBitmap(...)</code>, <code>drawRect(...)</code>, <code>drawText(...)</code>, and many more.
+Other classes that you might use also have <code>draw()</code> methods. For example, you'll probably
+have some {@link android.graphics.drawable.Drawable} objects that you want to put on the Canvas. Drawable
+has its own <code>{@link android.graphics.drawable.Drawable#draw(Canvas) draw()}</code> method
+that takes your Canvas as an argument.</p>
+
+
+<h3 id="on-view">On a View</h3>
+
+<p>If your application does not require a significant amount of processing or
+frame-rate speed (perhaps for a chess game, a snake game,
+or another slowly-animated application), then you should consider creating a custom View component
+and drawing with a Canvas in <code>{@link android.view.View#onDraw(Canvas) View.onDraw()}</code>.
+The most convenient aspect of doing so is that the Android framework will
+provide you with a pre-defined Canvas to which you will place your drawing calls.</p>
+
+<p>To start, extend the {@link android.view.View} class (or descendant thereof) and define
+the <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code> callback method. This method will be called by the Android
+framework to request that your View draw itself. This is where you will perform all your calls
+to draw through the {@link android.graphics.Canvas}, which is passed to you through the <code>onDraw()</code> callback.</p>
+
+<p>The Android framework will only call <code>onDraw()</code> as necessary. Each time that
+your application is prepared to be drawn, you must request your View be invalidated by calling
+<code>{@link android.view.View#invalidate()}</code>. This indicates that you'd like your View to be drawn and
+Android will then call your <code>onDraw()</code> method (though is not guaranteed that the callback will
+be instantaneous). </p>
+
+<p>Inside your View component's <code>onDraw()</code>, use the Canvas given to you for all your drawing,
+using various <code>Canvas.draw...()</code> methods, or other class <code>draw()</code> methods that
+take your Canvas as an argument. Once your <code>onDraw()</code> is complete, the Android framework will
+use your Canvas to draw a Bitmap handled by the system.</p>
+
+<p class="note"><strong>Note: </strong> In order to request an invalidate from a thread other than your main
+Activity's thread, you must call <code>{@link android.view.View#postInvalidate()}</code>.</p>
+
+<p>Also read <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>
+for a guide to extending a View class, and <a href="2d-graphics.html">2D Graphics: Drawables</a> for
+information on using Drawable objects like images from your resources and other primitive shapes.</p>
+
+<p>For a sample application, see the Snake game, in the SDK samples folder:
+<code>&lt;your-sdk-directory>/samples/Snake/</code>.</p>
+
+<h3 id="on-surfaceview">On a SurfaceView</h3>
+
+<p>The {@link android.view.SurfaceView} is a special subclass of View that offers a dedicated
+drawing surface within the View hierarchy. The aim is to offer this drawing surface to
+an application's secondary thread, so that the application isn't required
+to wait until the system's View hierarchy is ready to draw. Instead, a secondary thread
+that has reference to a SurfaceView can draw to its own Canvas at its own pace.</p>
+
+<p>To begin, you need to create a new class that extends {@link android.view.SurfaceView}. The class should also
+implement {@link android.view.SurfaceHolder.Callback}. This subclass is an interface that will notify you
+with information about the underlying {@link android.view.Surface}, such as when it is created, changed, or destroyed.
+These events  are important so that you know when you can start drawing, whether you need
+to make adjustments based on new surface properties, and when to stop drawing and potentially
+kill some tasks. Inside your SurfaceView class is also a good place to define your secondary Thread class, which will
+perform all the drawing procedures to your Canvas.</p>
+
+<p>Instead of handling the Surface object directly, you should handle it via
+a {@link android.view.SurfaceHolder}. So, when your SurfaceView is initialized, get the SurfaceHolder by calling
+<code>{@link android.view.SurfaceView#getHolder()}</code>. You should then notify the SurfaceHolder that you'd
+like to receive SurfaceHolder callbacks (from {@link android.view.SurfaceHolder.Callback}) by calling
+{@link android.view.SurfaceHolder#addCallback(SurfaceHolder.Callback) addCallback()}
+(pass it <var>this</var>). Then override each of the
+{@link android.view.SurfaceHolder.Callback} methods inside your SurfaceView class.</p>
+
+<p>In order to draw to the Surface Canvas from within your second thread, you must pass the thread your SurfaceHandler
+and retrieve the Canvas with <code>{@link android.view.SurfaceHolder#lockCanvas() lockCanvas()}</code>.
+You can now take the Canvas given to you by the SurfaceHolder and do your necessary drawing upon it.
+Once you're done drawing with the Canvas, call
+<code>{@link android.view.SurfaceHolder#unlockCanvasAndPost(Canvas) unlockCanvasAndPost()}</code>, passing it
+your Canvas object. The Surface will now draw the Canvas as you left it. Perform this sequence of locking and
+unlocking the canvas each time you want to redraw.</p>
+
+<p class="note"><strong>Note:</strong> On each pass you retrieve the Canvas from the SurfaceHolder,
+the previous state of the Canvas will be retained. In order to properly animate your graphics, you must re-paint the
+entire surface. For example, you can clear the previous state of the Canvas by filling in a color
+with <code>{@link android.graphics.Canvas#drawColor(int) drawColor()}</code> or setting a background image
+with <code>{@link android.graphics.Canvas#drawBitmap(Bitmap,Rect,RectF,Paint) drawBitmap()}</code>. Otherwise,
+you will see traces of the drawings you previously performed.</p>
+
+
+<p>For a sample application, see the Lunar Lander game, in the SDK samples folder:
+<code>&lt;your-sdk-directory>/samples/LunarLander/</code>. Or,
+browse the source in the <a href="{@docRoot}guide/samples/index.html">Sample Code</a> section.</p>
 
 <h2 id="drawables">Drawables</h2>
+<p>Android offers a custom 2D graphics library for drawing shapes and images.
+  The {@link android.graphics.drawable} package is where you'll find the common classes used for
+  drawing in two-dimensions.</p>
 
-<p>A {@link android.graphics.drawable.Drawable} is a general abstraction for "something that can be drawn."
-You'll discover that the Drawable class extends to define a variety of specific kinds of drawable graphics,
-including {@link android.graphics.drawable.BitmapDrawable}, {@link android.graphics.drawable.ShapeDrawable},
-{@link android.graphics.drawable.PictureDrawable}, {@link android.graphics.drawable.LayerDrawable}, and several more.
-Of course, you can also extend these to define your own custom Drawable objects that behave in unique ways.</p>
+<p>This document discusses the basics of using Drawable objects to draw graphics and how to use a
+couple subclasses of the Drawable class. For information on using Drawables to do frame-by-frame
+animation, see <a href="{@docRoot}guide/topics/animation/frame-animation.html">Frame-by-Frame
+Animation</a>.</p>
 
-<p>There are three ways to define and instantiate a Drawable: using an image saved in your project resources;
-using an XML file that defines the Drawable properties; or using the normal class constructors. Below, we'll discuss
-each the first two techniques (using constructors is nothing new for an experienced developer).</p>
+<p>A {@link android.graphics.drawable.Drawable} is a general abstraction for "something that can be
+  drawn."  You'll discover that the Drawable class extends to define a variety of specific kinds of
+drawable graphics, including {@link android.graphics.drawable.BitmapDrawable}, {@link
+  android.graphics.drawable.ShapeDrawable}, {@link android.graphics.drawable.PictureDrawable},
+{@link android.graphics.drawable.LayerDrawable}, and several more.  Of course, you can also extend
+these to define your own custom Drawable objects that behave in unique ways.</p>
+
+<p>There are three ways to define and instantiate a Drawable: using an image saved in your project
+  resources; using an XML file that defines the Drawable properties; or using the normal class
+constructors. Below, we'll discuss each the first two techniques (using constructors is nothing new
+for an experienced developer).</p>
 
 
 <h3 id="drawables-from-images">Creating from resource images</h3>
 
-<p>A simple way to add graphics to your application is by referencing an image file from your project resources. 
-Supported file types are PNG (preferred), JPG (acceptable) and GIF (discouraged). This technique would 
-obviously be preferred for application icons, logos, or other graphics such as those used in a game.</p>
+<p>A simple way to add graphics to your application is by referencing an image file from your
+  project resources. Supported file types are PNG (preferred), JPG (acceptable) and GIF
+(discouraged). This technique would obviously be preferred for application icons, logos, or other
+graphics such as those used in a game.</p>
 
-<p>To use an image resource, just add your file to the <code>res/drawable/</code> directory of your project.
-From there, you can reference it from your code or your XML layout. 
-Either way, it is referred using a resource ID, which is the file name without the file type
-extension (E.g., <code>my_image.png</code> is referenced as <var>my_image</var>).</p>
+<p>To use an image resource, just add your file to the <code>res/drawable/</code> directory of your
+  project. From there, you can reference it from your code or your XML layout.
+  Either way, it is referred using a resource ID, which is the file name without the file type
+  extension (E.g., <code>my_image.png</code> is referenced as <var>my_image</var>).</p>
 
-<p class="note"><strong>Note:</strong> Image resources placed in <code>res/drawable/</code> may be 
-automatically optimized with lossless image compression by the 
-<code>aapt</code> tool during the build process. For example, a true-color PNG that does
-not require more than 256 colors may be converted to an 8-bit PNG with a color palette. This 
-will result in an image of equal quality but which requires less memory. So be aware that the
-image binaries placed in this directory can change during the build. If you plan on reading
-an image as a bit stream in order to convert it to a bitmap, put your images in the <code>res/raw/</code>
-folder instead, where they will not be optimized.</p>
+<p class="note"><strong>Note:</strong> Image resources placed in <code>res/drawable/</code> may be
+  automatically optimized with lossless image compression by the
+  <code>aapt</code> tool during the build process. For example, a true-color PNG that does
+  not require more than 256 colors may be converted to an 8-bit PNG with a color palette. This
+  will result in an image of equal quality but which requires less memory. So be aware that the
+  image binaries placed in this directory can change during the build. If you plan on reading
+  an image as a bit stream in order to convert it to a bitmap, put your images in the
+  <code>res/raw/</code> folder instead, where they will not be optimized.</p>
 
 <h4>Example code</h4>
-<p>The following code snippet demonstrates how to build an {@link android.widget.ImageView} that uses an image
-from drawable resources and add it to the layout.</p>
+<p>The following code snippet demonstrates how to build an {@link android.widget.ImageView} that
+  uses an image from drawable resources and add it to the layout.</p>
 <pre>
-LinearLayout mLinearLayout;
+  LinearLayout mLinearLayout;
 
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  protected void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
 
-    // Create a LinearLayout in which to add the ImageView
-    mLinearLayout = new LinearLayout(this);
+  // Create a LinearLayout in which to add the ImageView
+  mLinearLayout = new LinearLayout(this);
 
-    // Instantiate an ImageView and define its properties
-    ImageView i = new ImageView(this);
-    i.setImageResource(R.drawable.my_image);
-    i.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
-    i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+  // Instantiate an ImageView and define its properties
+  ImageView i = new ImageView(this);
+  i.setImageResource(R.drawable.my_image);
+  i.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
+  i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT,
+  LayoutParams.WRAP_CONTENT));
 
-    // Add the ImageView to the layout and set the layout as the content view
-    mLinearLayout.addView(i);
-    setContentView(mLinearLayout);
-}
+  // Add the ImageView to the layout and set the layout as the content view
+  mLinearLayout.addView(i);
+  setContentView(mLinearLayout);
+  }
 </pre>
-<p>In other cases, you may want to handle your image resource as a 
-{@link android.graphics.drawable.Drawable} object.
-To do so, create a Drawable from the resource like so:
-<pre>
-Resources res = mContext.getResources();
-Drawable myImage = res.getDrawable(R.drawable.my_image);
-</pre>
+<p>In other cases, you may want to handle your image resource as a
+  {@link android.graphics.drawable.Drawable} object.
+  To do so, create a Drawable from the resource like so:
+  <pre>
+    Resources res = mContext.getResources();
+    Drawable myImage = res.getDrawable(R.drawable.my_image);
+  </pre>
 
-<p class="warning"><strong>Note:</strong> Each unique resource in your project can maintain only one
-state, no matter how many different objects you may instantiate for it. For example, if you instantiate two
-Drawable objects from the same image resource, then change a property (such as the alpha) for one of the 
-Drawables, then it will also affect the other. So when dealing with multiple instances of an image resource, 
-instead of directly transforming the Drawable, you should perform a <a href="#tween-animation">tween animation</a>.</p>
-
-
-<h4>Example XML</h4>
-<p>The XML snippet below shows how to add a resource Drawable to an 
-{@link android.widget.ImageView} in the XML layout (with some red tint just for fun).
-<pre>
-&lt;ImageView   
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content"
-  android:tint="#55ff0000"
-  android:src="@drawable/my_image"/>
-</pre>
-<p>For more information on using project resources, read about
-  <a href="{@docRoot}guide/topics/resources/index.html">Resources and Assets</a>.</p>
+  <p class="warning"><strong>Note:</strong> Each unique resource in your project can maintain only
+one state, no matter how many different objects you may instantiate for it. For example, if you
+    instantiate two Drawable objects from the same image resource, then change a property (such
+as the alpha) for one of the Drawables, then it will also affect the other. So when dealing with
+multiple instances of an image resource, instead of directly transforming the Drawable, you
+should perform a <a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">tween
+animation</a>.</p>
 
 
-<h3 id="drawables-from-xml">Creating from resource XML</h3>
-
-<p>By now, you should be familiar with Android's principles of developing a
-<a href="{@docRoot}guide/topics/ui/index.html">User Interface</a>. Hence, you understand the power
-and flexibility inherent in defining objects in XML. This philosophy caries over from Views to Drawables.
-If there is a Drawable object that you'd like to create, which is not initially dependent on variables defined by
-your application code or user interaction, then defining the Drawable in XML is a good option.
-Even if you expect your Drawable to change its properties during the user's experience with your application, 
-you should consider defining the object in XML, as you can always modify properties once it is instantiated.</p>
-
-<p>Once you've defined your Drawable in XML, save the file in the <code>res/drawable/</code> directory of
-your project. Then, retrieve and instantiate the object by calling
-{@link android.content.res.Resources#getDrawable(int) Resources.getDrawable()}, passing it the resource ID 
-of your XML file. (See the <a href="#drawable-xml-example">example below</a>.)</p>
-
-<p>Any Drawable subclass that supports the <code>inflate()</code> method can be defined in 
-XML and instantiated by your application. 
-Each Drawable that supports XML inflation utilizes specific XML attributes that help define the object
-properties (see the class reference to see what these are). See the class documentation for each
-Drawable subclass for information on how to define it in XML.
-
-<h4 id="drawable-xml-example">Example</h4>
-<p>Here's some XML that defines a TransitionDrawable:</p>
-<pre>
-&lt;transition xmlns:android="http://schemas.android.com/apk/res/android">
-  &lt;item android:drawable="&#64;drawable/image_expand">
-  &lt;item android:drawable="&#64;drawable/image_collapse">
-&lt;/transition>
-</pre>
-
-<p>With this XML saved in the file <code>res/drawable/expand_collapse.xml</code>, 
-the following code will instantiate the TransitionDrawable and set it as the content of an ImageView:</p>
-<pre>
-Resources res = mContext.getResources();
-TransitionDrawable transition = (TransitionDrawable) res.getDrawable(R.drawable.expand_collapse);
-ImageView image = (ImageView) findViewById(R.id.toggle_image);
-image.setImageDrawable(transition);
-</pre>
-<p>Then this transition can be run forward (for 1 second) with:</p>
-<pre>transition.startTransition(1000);</pre>
-
-<p>Refer to the Drawable classes listed above for more information on the XML attributes supported by each.</p>
+  <h4>Example XML</h4>
+  <p>The XML snippet below shows how to add a resource Drawable to an
+    {@link android.widget.ImageView} in the XML layout (with some red tint just for fun).
+    <pre>
+      &lt;ImageView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:tint="#55ff0000"
+      android:src="@drawable/my_image"/>
+  </pre>
+  <p>For more information on using project resources, read about
+    <a href="{@docRoot}guide/topics/resources/index.html">Resources and Assets</a>.</p>
 
 
+  <h3 id="drawables-from-xml">Creating from resource XML</h3>
 
-<h2 id="shape-drawable">Shape Drawable</h2>
+  <p>By now, you should be familiar with Android's principles of developing a
+    <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a>. Hence, you understand the
+power and flexibility inherent in defining objects in XML. This philosophy caries over from Views
+to Drawables.  If there is a Drawable object that you'd like to create, which is not initially
+dependent on variables defined by your application code or user interaction, then defining the
+Drawable in XML is a good option. Even if you expect your Drawable to change its properties
+during the user's experience with your application, you should consider defining the object in
+XML, as you can always modify properties once it is instantiated.</p>
 
-<p>When you want to dynamically draw some two-dimensional graphics, a {@link android.graphics.drawable.ShapeDrawable}
-object will probably suit your needs. With a ShapeDrawable, you can programmatically draw
-primitive shapes and style them in any way imaginable.</p>
+  <p>Once you've defined your Drawable in XML, save the file in the <code>res/drawable/</code>
+    directory of your project. Then, retrieve and instantiate the object by calling
+    {@link android.content.res.Resources#getDrawable(int) Resources.getDrawable()}, passing it the
+    resource ID of your XML file. (See the <a href="#drawable-xml-example">example
+below</a>.)</p>
 
-<p>A ShapeDrawable is an extension of {@link android.graphics.drawable.Drawable}, so you can use one where ever
-a Drawable is expected &mdash; perhaps for the background of a View, set with 
-{@link android.view.View#setBackgroundDrawable(android.graphics.drawable.Drawable) setBackgroundDrawable()}. 
-Of course, you can also draw your shape as its own custom {@link android.view.View}, 
-to be added to your layout however you please.
-Because the ShapeDrawable has its own <code>draw()</code> method, you can create a subclass of View that 
-draws the ShapeDrawable during the <code>View.onDraw()</code> method.
-Here's a basic extension of the View class that does just this, to draw a ShapeDrawable as a View:</p>
-<pre>
-public class CustomDrawableView extends View {
-    private ShapeDrawable mDrawable;
+  <p>Any Drawable subclass that supports the <code>inflate()</code> method can be defined in
+    XML and instantiated by your application. Each Drawable that supports XML inflation utilizes
+specific XML attributes that help define the object
+    properties (see the class reference to see what these are). See the class documentation for each
+    Drawable subclass for information on how to define it in XML.
 
-    public CustomDrawableView(Context context) {
-        super(context);
+    <h4 id="drawable-xml-example">Example</h4>
+    <p>Here's some XML that defines a TransitionDrawable:</p>
+    <pre>
+      &lt;transition xmlns:android="http://schemas.android.com/apk/res/android">
+      &lt;item android:drawable="&#64;drawable/image_expand">
+      &lt;item android:drawable="&#64;drawable/image_collapse">
+      &lt;/transition>
+    </pre>
 
-        int x = 10;
-        int y = 10;
-        int width = 300;
-        int height = 50;
+    <p>With this XML saved in the file <code>res/drawable/expand_collapse.xml</code>,
+      the following code will instantiate the TransitionDrawable and set it as the content of an
+      ImageView:</p>
+    <pre>
+      Resources res = mContext.getResources();
+      TransitionDrawable transition = (TransitionDrawable)
+res.getDrawable(R.drawable.expand_collapse);
+      ImageView image = (ImageView) findViewById(R.id.toggle_image);
+      image.setImageDrawable(transition);
+    </pre>
+    <p>Then this transition can be run forward (for 1 second) with:</p>
+    <pre>transition.startTransition(1000);</pre>
 
-        mDrawable = new ShapeDrawable(new OvalShape());
-        mDrawable.getPaint().setColor(0xff74AC23);
-        mDrawable.setBounds(x, y, x + width, y + height);
-    }
+    <p>Refer to the Drawable classes listed above for more information on the XML attributes
+supported by each.</p>
 
-    protected void onDraw(Canvas canvas) {
-        mDrawable.draw(canvas);
-    }
-}
-</pre>
 
-<p>In the constructor, a ShapeDrawable is defines as an {@link android.graphics.drawable.shapes.OvalShape}.
-It's then given a color and the bounds of the shape are set. If you do not set the bounds, then the
-shape will not be drawn, whereas if you don't set the color, it will default to black.</p>
-<p>With the custom View defined, it can be drawn any way you like. With the sample above, we can
-draw the shape programmatically in an Activity:</p>
-<pre>
-CustomDrawableView mCustomDrawableView;
 
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    mCustomDrawableView = new CustomDrawableView(this);
-    
-    setContentView(mCustomDrawableView);
-}
-</pre>
+    <h2 id="shape-drawable">Shape Drawable</h2>
 
-<p>If you'd like to draw this custom drawable from the XML layout instead of from the Activity, 
-then the CustomDrawable class must override the {@link android.view.View#View(android.content.Context, android.util.AttributeSet) View(Context, AttributeSet)} constructor, which is called when 
-instantiating a View via inflation from XML. Then add a CustomDrawable element to the XML, 
-like so:</p>
-<pre>
-&lt;com.example.shapedrawable.CustomDrawableView
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    />
-</pre>
+    <p>When you want to dynamically draw some two-dimensional graphics, a {@link
+      android.graphics.drawable.ShapeDrawable}
+      object will probably suit your needs. With a ShapeDrawable, you can programmatically draw
+      primitive shapes and style them in any way imaginable.</p>
 
-<p>The ShapeDrawable class (like many other Drawable types in the {@link android.graphics.drawable} package)
-allows you to define various properties of the drawable with public methods. 
-Some properties you might want to adjust include
-alpha transparency, color filter, dither, opacity and color.</p>
+    <p>A ShapeDrawable is an extension of {@link android.graphics.drawable.Drawable}, so you can use
+one      where ever
+      a Drawable is expected &mdash; perhaps for the background of a View, set with
+      {@link android.view.View#setBackgroundDrawable(android.graphics.drawable.Drawable)
+      setBackgroundDrawable()}.
+      Of course, you can also draw your shape as its own custom {@link android.view.View},
+      to be added to your layout however you please.
+      Because the ShapeDrawable has its own <code>draw()</code> method, you can create a subclass of
+View      that
+      draws the ShapeDrawable during the <code>View.onDraw()</code> method.
+      Here's a basic extension of the View class that does just this, to draw a ShapeDrawable as a
+      View:</p>
+    <pre>
+      public class CustomDrawableView extends View {
+      private ShapeDrawable mDrawable;
 
-<p>You can also define primitive drawable shapes using XML. For more information, see the
-section about Shape Drawables in the <a
+      public CustomDrawableView(Context context) {
+      super(context);
+
+      int x = 10;
+      int y = 10;
+      int width = 300;
+      int height = 50;
+
+      mDrawable = new ShapeDrawable(new OvalShape());
+      mDrawable.getPaint().setColor(0xff74AC23);
+      mDrawable.setBounds(x, y, x + width, y + height);
+      }
+
+      protected void onDraw(Canvas canvas) {
+      mDrawable.draw(canvas);
+      }
+      }
+    </pre>
+
+    <p>In the constructor, a ShapeDrawable is defines as an {@link
+      android.graphics.drawable.shapes.OvalShape}.
+      It's then given a color and the bounds of the shape are set. If you do not set the bounds,
+then the
+      shape will not be drawn, whereas if you don't set the color, it will default to black.</p>
+    <p>With the custom View defined, it can be drawn any way you like. With the sample above, we can
+      draw the shape programmatically in an Activity:</p>
+    <pre>
+      CustomDrawableView mCustomDrawableView;
+
+      protected void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      mCustomDrawableView = new CustomDrawableView(this);
+
+      setContentView(mCustomDrawableView);
+      }
+    </pre>
+
+    <p>If you'd like to draw this custom drawable from the XML layout instead of from the Activity,
+      then the CustomDrawable class must override the {@link
+      android.view.View#View(android.content.Context, android.util.AttributeSet) View(Context,
+      AttributeSet)} constructor, which is called when
+      instantiating a View via inflation from XML. Then add a CustomDrawable element to the XML,
+      like so:</p>
+    <pre>
+      &lt;com.example.shapedrawable.CustomDrawableView
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      />
+  </pre>
+
+  <p>The ShapeDrawable class (like many other Drawable types in the {@link
+android.graphics.drawable}    package)
+    allows you to define various properties of the drawable with public methods.
+    Some properties you might want to adjust include
+    alpha transparency, color filter, dither, opacity and color.</p>
+
+  <p>You can also define primitive drawable shapes using XML. For more information, see the
+    section about Shape Drawables in the <a
+
 href="{@docRoot}guide/topics/resources/drawable-resource.html#Shape">Drawable Resources</a>
-document.</p>
+    document.</p>
 
-<!-- TODO
-<h2 id="state-list">StateListDrawable</h2>
+  <!-- TODO
+       <h2 id="state-list">StateListDrawable</h2>
 
-<p>A StateListDrawable is an extension of the DrawableContainer class, making it  little different. 
-The primary distinction is that the 
-StateListDrawable manages a collection of images for the Drawable, instead of just one. 
-This means that it can switch the image when you want, without switching objects. However, the 
-intention of the StateListDrawable is to automatically change the image used based on the state
-of the object it's attached to.
--->
+       <p>A StateListDrawable is an extension of the DrawableContainer class, making it  little
+different.
+         The primary distinction is that the
+         StateListDrawable manages a collection of images for the Drawable, instead of just one.
+         This means that it can switch the image when you want, without switching objects. However,
+the
+         intention of the StateListDrawable is to automatically change the image used based on the
+state
+         of the object it's attached to.
+         -->
 
-<h2 id="nine-patch">Nine-patch</h2>
+         <h2 id="nine-patch">Nine-patch</h2>
 
-<p>A {@link android.graphics.drawable.NinePatchDrawable} graphic is a stretchable bitmap image, which Android
-will automatically resize to accommodate the contents of the View in which you have placed it as the background. 
-An example use of a NinePatch is the backgrounds used by standard Android buttons &mdash;
-buttons must stretch to accommodate strings of various lengths. A NinePatch drawable is a standard PNG 
-image that includes an extra 1-pixel-wide border. It must be saved with the extension <code>.9.png</code>,
-and saved into the <code>res/drawable/</code> directory of your project.
+         <p>A {@link android.graphics.drawable.NinePatchDrawable} graphic is a stretchable bitmap
+image,           which Android
+           will automatically resize to accommodate the contents of the View in which you have
+placed it as the           background.
+           An example use of a NinePatch is the backgrounds used by standard Android buttons &mdash;
+           buttons must stretch to accommodate strings of various lengths. A NinePatch drawable is a
+standard           PNG
+           image that includes an extra 1-pixel-wide border. It must be saved with the extension
+           <code>.9.png</code>,
+           and saved into the <code>res/drawable/</code> directory of your project.
+         </p>
+         <p>
+           The border is used to define the stretchable and static areas of
+           the image. You indicate a stretchable section by drawing one (or more) 1-pixel-wide
+           black line(s) in the left and top part of the border (the other border pixels should
+           be fully transparent or white). You can have as many stretchable sections as you want:
+           their relative size stays the same, so the largest sections always remain the largest.
+         </p>
+         <p>
+           You can also define an optional drawable section of the image (effectively,
+           the padding lines) by drawing a line on the right and bottom lines.
+           If a View object sets the NinePatch as its background and then specifies the
+           View's text, it will stretch itself so that all the text fits inside only
+           the area designated by the right and bottom lines (if included). If the
+           padding lines are not included, Android uses the left and top lines to
+           define this drawable area.
+         </p>
+         <p>To clarify the difference between the different lines, the left and top lines define
+           which pixels of the image are allowed to be replicated in order to stretch the image.
+           The bottom and right lines define the relative area within the image that the contents
+           of the View are allowed to lie within.</p>
+         <p>
+           Here is a sample NinePatch file used to define a button:
+         </p>
+         <img src="{@docRoot}images/ninepatch_raw.png" alt="" />
+
+         <p>This NinePatch defines one stretchable area with the left and top lines
+           and the drawable area with the bottom and right lines. In the top image, the dotted grey
+           lines identify the regions of the image that will be replicated in order to stretch the
+image. The           pink
+           rectangle in the bottom image identifies the region in which the contents of the View are
+allowed.
+           If the contents don't fit in this region, then the image will be stretched so that they
+do.
 </p>
-<p>
-    The border is used to define the stretchable and static areas of 
-    the image. You indicate a stretchable section by drawing one (or more) 1-pixel-wide 
-    black line(s) in the left and top part of the border (the other border pixels should
-    be fully transparent or white). You can have as many stretchable sections as you want:
-    their relative size stays the same, so the largest sections always remain the largest.
-</p>
-<p>
-    You can also define an optional drawable section of the image (effectively, 
-    the padding lines) by drawing a line on the right and bottom lines. 
-    If a View object sets the NinePatch as its background and then specifies the 
-    View's text, it will stretch itself so that all the text fits inside only
-    the area designated by the right and bottom lines (if included). If the 
-    padding lines are not included, Android uses the left and top lines to 
-    define this drawable area.
-</p>
-<p>To clarify the difference between the different lines, the left and top lines define 
-which pixels of the image are allowed to be replicated in order to stretch the image.
-The bottom and right lines define the relative area within the image that the contents
-of the View are allowed to lie within.</p>
-<p>
-    Here is a sample NinePatch file used to define a button:
-</p>
-    <img src="{@docRoot}images/ninepatch_raw.png" alt="" />
 
-<p>This NinePatch defines one stretchable area with the left and top lines
-and the drawable area with the bottom and right lines. In the top image, the dotted grey
-lines identify the regions of the image that will be replicated in order to stretch the image. The pink
-rectangle in the bottom image identifies the region in which the contents of the View are allowed.
-If the contents don't fit in this region, then the image will be stretched so that they do.
-</p>
-
-<p>The <a href="{@docRoot}guide/developing/tools/draw9patch.html">Draw 9-patch</a> tool offers 
-   an extremely handy way to create your NinePatch images, using a WYSIWYG graphics editor. It 
+<p>The <a href="{@docRoot}guide/developing/tools/draw9patch.html">Draw 9-patch</a> tool offers
+   an extremely handy way to create your NinePatch images, using a WYSIWYG graphics editor. It
 even raises warnings if the region you've defined for the stretchable area is at risk of
 producing drawing artifacts as a result of the pixel replication.
 </p>
@@ -298,7 +486,8 @@ producing drawing artifacts as a result of the pixel replication.
 <h3>Example XML</h3>
 
 <p>Here's some sample layout XML that demonstrates how to add a NinePatch image to a
-couple of buttons. (The NinePatch image is saved as <code>res/drawable/my_button_background.9.png</code>
+couple of buttons. (The NinePatch image is saved as
+<code>res/drawable/my_button_background.9.png</code>
 <pre>
 &lt;Button id="@+id/tiny"
         android:layout_width="wrap_content"
@@ -318,11 +507,12 @@ couple of buttons. (The NinePatch image is saved as <code>res/drawable/my_button
         android:textSize="30sp"
         android:background="@drawable/my_button_background"/&gt;
 </pre>
-<p>Note that the width and height are set to "wrap_content" to make the button fit neatly around the text.
+<p>Note that the width and height are set to "wrap_content" to make the button fit neatly around the
+text.
 </p>
 
-<p>Below are the two buttons rendered from the XML and NinePatch image shown above. 
-Notice how the width and height of the button varies with the text, and the background image 
+<p>Below are the two buttons rendered from the XML and NinePatch image shown above.
+Notice how the width and height of the button varies with the text, and the background image
 stretches to accommodate it.
 </p>
 
