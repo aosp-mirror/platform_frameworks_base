@@ -368,6 +368,10 @@ int androidSetThreadPriority(pid_t tid, int pri)
     return rc;
 }
 
+int androidGetThreadPriority(pid_t tid) {
+    return getpriority(PRIO_PROCESS, tid);
+}
+
 int androidGetThreadSchedulingGroup(pid_t tid)
 {
     int ret = ANDROID_TGROUP_DEFAULT;
