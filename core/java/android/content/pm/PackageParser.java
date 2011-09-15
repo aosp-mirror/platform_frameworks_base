@@ -28,7 +28,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
 import com.android.internal.util.XmlUtils;
@@ -40,11 +42,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -150,12 +159,14 @@ public class PackageParser {
      * @hide
      */
     public static class PackageLite {
-        public String packageName;
-        public int installLocation;
-        public String mScanPath;
-        public PackageLite(String packageName, int installLocation) {
+        public final String packageName;
+        public final int installLocation;
+        public final VerifierInfo[] verifiers;
+
+        public PackageLite(String packageName, int installLocation, List<VerifierInfo> verifiers) {
             this.packageName = packageName;
             this.installLocation = installLocation;
+            this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
         }
     }
 
@@ -619,8 +630,9 @@ public class PackageParser {
      * @return PackageLite object with package information or null on failure.
      */
     public static PackageLite parsePackageLite(String packageFilePath, int flags) {
-        XmlResourceParser parser = null;
         AssetManager assmgr = null;
+        final XmlResourceParser parser;
+        final Resources res;
         try {
             assmgr = new AssetManager();
             assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -631,6 +643,9 @@ public class PackageParser {
                 return null;
             }
 
+            final DisplayMetrics metrics = new DisplayMetrics();
+            metrics.setToDefaults();
+            res = new Resources(assmgr, metrics, null);
             parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
         } catch (Exception e) {
             if (assmgr != null) assmgr.close();
@@ -638,11 +653,12 @@ public class PackageParser {
                     + packageFilePath, e);
             return null;
         }
-        AttributeSet attrs = parser;
-        String errors[] = new String[1];
+
+        final AttributeSet attrs = parser;
+        final String errors[] = new String[1];
         PackageLite packageLite = null;
         try {
-            packageLite = parsePackageLite(parser, attrs, flags, errors);
+            packageLite = parsePackageLite(res, parser, attrs, flags, errors);
         } catch (IOException e) {
             Slog.w(TAG, packageFilePath, e);
         } catch (XmlPullParserException e) {
@@ -719,9 +735,9 @@ public class PackageParser {
         return pkgName.intern();
     }
 
-    private static PackageLite parsePackageLite(XmlPullParser parser,
-            AttributeSet attrs, int flags, String[] outError)
-            throws IOException, XmlPullParserException {
+    private static PackageLite parsePackageLite(Resources res, XmlPullParser parser,
+            AttributeSet attrs, int flags, String[] outError) throws IOException,
+            XmlPullParserException {
 
         int type;
         while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -759,7 +775,26 @@ public class PackageParser {
                 break;
             }
         }
-        return new PackageLite(pkgName.intern(), installLocation);
+
+        // Only search the tree when the tag is directly below <manifest>
+        final int searchDepth = parser.getDepth() + 1;
+
+        final List<VerifierInfo> verifiers = new ArrayList<VerifierInfo>();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() >= searchDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            if (parser.getDepth() == searchDepth && "package-verifier".equals(parser.getName())) {
+                final VerifierInfo verifier = parseVerifier(res, parser, attrs, flags, outError);
+                if (verifier != null) {
+                    verifiers.add(verifier);
+                }
+            }
+        }
+
+        return new PackageLite(pkgName.intern(), installLocation, verifiers);
     }
 
     /**
@@ -2689,6 +2724,63 @@ public class PackageParser {
         XmlUtils.skipCurrentTag(parser);
 
         return data;
+    }
+
+    private static VerifierInfo parseVerifier(Resources res, XmlPullParser parser,
+            AttributeSet attrs, int flags, String[] outError) throws XmlPullParserException,
+            IOException {
+        final TypedArray sa = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestPackageVerifier);
+
+        final String packageName = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestPackageVerifier_name);
+
+        final String encodedPublicKey = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestPackageVerifier_publicKey);
+
+        sa.recycle();
+
+        if (packageName == null || packageName.length() == 0) {
+            Slog.i(TAG, "verifier package name was null; skipping");
+            return null;
+        } else if (encodedPublicKey == null) {
+            Slog.i(TAG, "verifier " + packageName + " public key was null; skipping");
+        }
+
+        EncodedKeySpec keySpec;
+        try {
+            final byte[] encoded = Base64.decode(encodedPublicKey, Base64.DEFAULT);
+            keySpec = new X509EncodedKeySpec(encoded);
+        } catch (IllegalArgumentException e) {
+            Slog.i(TAG, "Could not parse verifier " + packageName + " public key; invalid Base64");
+            return null;
+        }
+
+        /* First try the key as an RSA key. */
+        try {
+            final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            final PublicKey publicKey = keyFactory.generatePublic(keySpec);
+            return new VerifierInfo(packageName, publicKey);
+        } catch (NoSuchAlgorithmException e) {
+            Log.wtf(TAG, "Could not parse public key because RSA isn't included in build");
+            return null;
+        } catch (InvalidKeySpecException e) {
+            // Not a RSA public key.
+        }
+
+        /* Now try it as a DSA key. */
+        try {
+            final KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+            final PublicKey publicKey = keyFactory.generatePublic(keySpec);
+            return new VerifierInfo(packageName, publicKey);
+        } catch (NoSuchAlgorithmException e) {
+            Log.wtf(TAG, "Could not parse public key because DSA isn't included in build");
+            return null;
+        } catch (InvalidKeySpecException e) {
+            // Not a DSA public key.
+        }
+
+        return null;
     }
 
     private static final String ANDROID_RESOURCES
