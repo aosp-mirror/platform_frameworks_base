@@ -4436,6 +4436,7 @@ public class WebView extends AbsoluteLayout
                 mHeldMotionless = MOTIONLESS_PENDING;
             }
         }
+        int saveCount = canvas.save();
         if (animateZoom) {
             mZoomManager.animateZoom(canvas);
         } else if (!canvas.isHardwareAccelerated()) {
@@ -4486,10 +4487,6 @@ public class WebView extends AbsoluteLayout
                 nativeUseHardwareAccelSkia(mHardwareAccelSkia);
             }
 
-            if (mSelectingText && USE_JAVA_TEXT_SELECTION) {
-                drawTextSelectionHandles(canvas);
-            }
-
         } else {
             DrawFilter df = null;
             if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
@@ -4505,6 +4502,11 @@ public class WebView extends AbsoluteLayout
             if (!mBlockWebkitViewMessages && content != 0) {
                 mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
             }
+        }
+
+        canvas.restoreToCount(saveCount);
+        if (mSelectingText && USE_JAVA_TEXT_SELECTION) {
+            drawTextSelectionHandles(canvas);
         }
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
