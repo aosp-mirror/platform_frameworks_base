@@ -218,9 +218,9 @@ public class TimePicker extends FrameLayout {
                     updateAmPmControl();
                 }
             });
+            EditText amPmInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
+            amPmInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
         }
-        EditText amPmInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
-        amPmInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
         // update controls to initial state
         updateHourControl();
@@ -519,9 +519,11 @@ public class TimePicker extends FrameLayout {
         text = mContext.getString(R.string.time_picker_decrement_hour_button);
         mHourSpinner.findViewById(R.id.decrement).setContentDescription(text);
         // AM/PM
-        text = mContext.getString(R.string.time_picker_increment_set_pm_button);
-        mAmPmSpinner.findViewById(R.id.increment).setContentDescription(text);
-        text = mContext.getString(R.string.time_picker_decrement_set_am_button);
-        mAmPmSpinner.findViewById(R.id.decrement).setContentDescription(text);
+        if (mAmPmSpinner != null) {
+            text = mContext.getString(R.string.time_picker_increment_set_pm_button);
+            mAmPmSpinner.findViewById(R.id.increment).setContentDescription(text);
+            text = mContext.getString(R.string.time_picker_decrement_set_am_button);
+            mAmPmSpinner.findViewById(R.id.decrement).setContentDescription(text);
+        }
     }
 }
