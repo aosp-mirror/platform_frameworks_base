@@ -1536,6 +1536,26 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
+                android:excludeFromRecents="true"
+                android:exported="true"
+                android:theme="@android:style/Theme.Holo.Dialog"
+                android:label="@string/choose_account_label"
+                android:process=":ui">
+                <intent-filter>
+                    <action android:name="android.intent.action.PICK" />
+                    <category android:name="android.intent.category.ACCOUNT" />
+                </intent-filter>
+        </activity>
+
+        <activity android:name="android.accounts.ChooseAccountTypeActivity"
+                android:excludeFromRecents="true"
+                android:exported="true"
+                android:theme="@android:style/Theme.Holo.Dialog"
+                android:label="@string/choose_account_label"
+                android:process=":ui">
+        </activity>
+
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
