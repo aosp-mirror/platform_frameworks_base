@@ -51,7 +51,10 @@ public class PointerLocationView extends View {
         // Most recent velocity.
         private float mXVelocity;
         private float mYVelocity;
-        
+
+        // Position estimator.
+        private VelocityTracker.Estimator mEstimator = new VelocityTracker.Estimator();
+
         public void clearTrace() {
             mTraceCount = 0;
         }
@@ -74,6 +77,10 @@ public class PointerLocationView extends View {
             mTraceCount += 1;
         }
     }
+
+    private final int ESTIMATE_PAST_POINTS = 4;
+    private final int ESTIMATE_FUTURE_POINTS = 2;
+    private final float ESTIMATE_INTERVAL = 0.02f;
 
     private final ViewConfiguration mVC;
     private final Paint mTextPaint;
@@ -278,8 +285,20 @@ public class PointerLocationView extends View {
                     haveLast = true;
                 }
                 
-                // Draw velocity vector.
                 if (drawn) {
+                    // Draw movement estimate curve.
+                    mPaint.setARGB(128, 128, 0, 128);
+                    float lx = ps.mEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
+                    float ly = ps.mEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
+                    for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
+                        float x = ps.mEstimator.estimateX(i * ESTIMATE_INTERVAL);
+                        float y = ps.mEstimator.estimateY(i * ESTIMATE_INTERVAL);
+                        canvas.drawLine(lx, ly, x, y, mPaint);
+                        lx = x;
+                        ly = y;
+                    }
+
+                    // Draw velocity vector.
                     mPaint.setARGB(255, 255, 64, 128);
                     float xVel = ps.mXVelocity * (1000 / 60);
                     float yVel = ps.mYVelocity * (1000 / 60);
@@ -517,6 +536,7 @@ public class PointerLocationView extends View {
                     ps.addTrace(coords.x, coords.y);
                     ps.mXVelocity = mVelocity.getXVelocity(id);
                     ps.mYVelocity = mVelocity.getYVelocity(id);
+                    mVelocity.getEstimator(id, -1, -1, ps.mEstimator);
                     ps.mToolType = event.getToolType(i);
                 }
             }

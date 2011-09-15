@@ -29,6 +29,14 @@ namespace android {
 // Special constant to request the velocity of the active pointer.
 static const int ACTIVE_POINTER_ID = -1;
 
+static struct {
+    jfieldID xCoeff;
+    jfieldID yCoeff;
+    jfieldID degree;
+    jfieldID confidence;
+} gEstimatorClassInfo;
+
+
 // --- VelocityTrackerState ---
 
 class VelocityTrackerState {
@@ -39,6 +47,8 @@ public:
     void addMovement(const MotionEvent* event);
     void computeCurrentVelocity(int32_t units, float maxVelocity);
     void getVelocity(int32_t id, float* outVx, float* outVy);
+    bool getEstimator(int32_t id, uint32_t degree, nsecs_t horizon,
+            VelocityTracker::Estimator* outEstimator);
 
 private:
     struct Velocity {
@@ -118,6 +128,11 @@ void VelocityTrackerState::getVelocity(int32_t id, float* outVx, float* outVy) {
     }
 }
 
+bool VelocityTrackerState::getEstimator(int32_t id, uint32_t degree, nsecs_t horizon,
+        VelocityTracker::Estimator* outEstimator) {
+    return mVelocityTracker.getEstimator(id, degree, horizon, outEstimator);
+}
+
 
 // --- JNI Methods ---
 
@@ -169,6 +184,30 @@ static jfloat android_view_VelocityTracker_nativeGetYVelocity(JNIEnv* env, jclas
     return vy;
 }
 
+static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jclass clazz,
+        jint ptr, jint id, jint degree, jint horizonMillis, jobject outEstimatorObj) {
+    VelocityTrackerState* state = reinterpret_cast<VelocityTrackerState*>(ptr);
+    VelocityTracker::Estimator estimator;
+    bool result = state->getEstimator(id,
+            degree < 0 ? VelocityTracker::DEFAULT_DEGREE : uint32_t(degree),
+            horizonMillis < 0 ? VelocityTracker::DEFAULT_HORIZON :
+                    nsecs_t(horizonMillis) * 1000000L,
+            &estimator);
+
+    jfloatArray xCoeffObj = jfloatArray(env->GetObjectField(outEstimatorObj,
+            gEstimatorClassInfo.xCoeff));
+    jfloatArray yCoeffObj = jfloatArray(env->GetObjectField(outEstimatorObj,
+            gEstimatorClassInfo.yCoeff));
+
+    env->SetFloatArrayRegion(xCoeffObj, 0, VelocityTracker::Estimator::MAX_DEGREE + 1,
+            estimator.xCoeff);
+    env->SetFloatArrayRegion(yCoeffObj, 0, VelocityTracker::Estimator::MAX_DEGREE + 1,
+            estimator.yCoeff);
+    env->SetIntField(outEstimatorObj, gEstimatorClassInfo.degree, estimator.degree);
+    env->SetFloatField(outEstimatorObj, gEstimatorClassInfo.confidence, estimator.confidence);
+    return result;
+}
+
 
 // --- JNI Registration ---
 
@@ -195,12 +234,35 @@ static JNINativeMethod gVelocityTrackerMethods[] = {
     { "nativeGetYVelocity",
             "(II)F",
             (void*)android_view_VelocityTracker_nativeGetYVelocity },
+    { "nativeGetEstimator",
+            "(IIIILandroid/view/VelocityTracker$Estimator;)Z",
+            (void*)android_view_VelocityTracker_nativeGetEstimator },
 };
+
+#define FIND_CLASS(var, className) \
+        var = env->FindClass(className); \
+        LOG_FATAL_IF(! var, "Unable to find class " className);
+
+#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
+        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
+        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_view_VelocityTracker(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/VelocityTracker",
             gVelocityTrackerMethods, NELEM(gVelocityTrackerMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+
+    jclass clazz;
+    FIND_CLASS(clazz, "android/view/VelocityTracker$Estimator");
+
+    GET_FIELD_ID(gEstimatorClassInfo.xCoeff, clazz,
+            "xCoeff", "[F");
+    GET_FIELD_ID(gEstimatorClassInfo.yCoeff, clazz,
+            "yCoeff", "[F");
+    GET_FIELD_ID(gEstimatorClassInfo.degree, clazz,
+            "degree", "I");
+    GET_FIELD_ID(gEstimatorClassInfo.confidence, clazz,
+            "confidence", "F");
     return 0;
 }
 
