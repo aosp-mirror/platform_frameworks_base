@@ -62,6 +62,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.HardwareCanvas;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -4252,7 +4253,11 @@ public class WebView extends AbsoluteLayout
          * click action, look for a word under the  click. If one is found,
          * animate the text selection into view.
          * FIXME: no animation code yet */
-        return selectText();
+        final boolean isSelecting = selectText();
+        if (isSelecting) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
+        return isSelecting;
     }
 
     /**
