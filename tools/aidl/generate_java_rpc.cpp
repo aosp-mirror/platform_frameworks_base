@@ -94,6 +94,7 @@ public:
     bool needed;
     Method* processMethod;
     Variable* actionParam;
+    Variable* requestParam;
     Variable* errorParam;
     Variable* requestData;
     Variable* resultData;
@@ -159,15 +160,15 @@ ServiceBaseClass::generate_process()
     this->actionParam = new Variable(STRING_TYPE, "action");
     this->processMethod->parameters.push_back(this->actionParam);
 
-    Variable* requestParam = new Variable(BYTE_TYPE, "requestParam", 1);
-    this->processMethod->parameters.push_back(requestParam);
+    this->requestParam = new Variable(BYTE_TYPE, "requestParam", 1);
+    this->processMethod->parameters.push_back(this->requestParam);
 
     this->errorParam = new Variable(RPC_ERROR_TYPE, "errorParam", 0);
     this->processMethod->parameters.push_back(this->errorParam);
 
     this->requestData = new Variable(RPC_DATA_TYPE, "request");
     this->processMethod->statements->Add(new VariableDeclaration(requestData,
-                new NewExpression(RPC_DATA_TYPE, 1, requestParam)));
+                new NewExpression(RPC_DATA_TYPE, 1, this->requestParam)));
 
     this->resultData = new Variable(RPC_DATA_TYPE, "resultData");
     this->processMethod->statements->Add(new VariableDeclaration(this->resultData,
@@ -193,6 +194,12 @@ ServiceBaseClass::AddMethod(const string& methodName, StatementBlock** statement
 void
 ServiceBaseClass::DoneWithMethods()
 {
+    IfStatement* fallthrough = new IfStatement();
+        fallthrough->statements = new StatementBlock;
+        fallthrough->statements->Add(new ReturnStatement(
+                    new MethodCall(SUPER_VALUE, "process", 3, this->actionParam, this->requestParam,
+                        this->errorParam)));
+    this->dispatchIfStatement->elseif = fallthrough;
     IfStatement* s = new IfStatement;
         s->statements = new StatementBlock;
     this->processMethod->statements->Add(s);
