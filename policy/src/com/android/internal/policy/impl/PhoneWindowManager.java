@@ -345,6 +345,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpDisplayFrame = new Rect();
     static final Rect mTmpContentFrame = new Rect();
     static final Rect mTmpVisibleFrame = new Rect();
+    static final Rect mTmpNavigationFrame = new Rect();
     
     WindowState mTopFullscreenOpaqueWindowState;
     WindowState mTopAppWindowState;
@@ -1125,27 +1126,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mStatusBarCanHide;
     }
 
-    public int getNonDecorDisplayWidth(int rotation, int fullWidth) {
+    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation) {
         // Assumes that the navigation bar appears on the side of the display in landscape.
-        final boolean horizontal
-            = (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90);
-        return fullWidth - (horizontal ? mNavigationBarWidth : 0);
+        if (fullWidth > fullHeight) {
+            return fullWidth - mNavigationBarWidth;
+        }
+        return fullWidth;
     }
 
-    public int getNonDecorDisplayHeight(int rotation, int fullHeight) {
-        final boolean horizontal
-            = (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90);
+    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation) {
+        // Assumes the navigation bar appears on the bottom of the display in portrait.
         return fullHeight
             - (mStatusBarCanHide ? 0 : mStatusBarHeight)
-            - (horizontal ? 0 : mNavigationBarHeight);
+            - ((fullWidth > fullHeight) ? 0 : mNavigationBarHeight);
     }
 
-    public int getConfigDisplayWidth(int rotation, int fullWidth) {
-        return getNonDecorDisplayWidth(rotation, fullWidth);
+    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation) {
+        return getNonDecorDisplayWidth(fullWidth, fullHeight, rotation);
     }
 
-    public int getConfigDisplayHeight(int rotation, int fullHeight) {
-        return getNonDecorDisplayHeight(rotation, fullHeight);
+    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation) {
+        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation);
     }
 
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
@@ -1687,7 +1688,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     /** {@inheritDoc} */
-    public void beginLayoutLw(int displayWidth, int displayHeight) {
+    public void beginLayoutLw(int displayWidth, int displayHeight, int displayRotation) {
         mUnrestrictedScreenLeft = mUnrestrictedScreenTop = 0;
         mUnrestrictedScreenWidth = displayWidth;
         mUnrestrictedScreenHeight = displayHeight;
@@ -1713,30 +1714,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mStatusBar != null) {
             Rect navr = null;
             if (mNavigationBar != null) {
-                mNavigationBar.computeFrameLw(pf, df, vf, vf);
-                if (mNavigationBar.isVisibleLw()) {
-                    navr = mNavigationBar.getFrameLw();
-
-                    if (navr.top == 0) {
-                        // Navigation bar is vertical
-                        if (mDockLeft == navr.left) {
-                            mDockLeft = navr.right;
-                        } else if (mDockRight == navr.right) {
-                            mDockRight = navr.left;
-                        }
-                    } else {
-                        // Navigation bar horizontal, at bottom
-                        if (mDockBottom == navr.bottom) {
-                            mDockBottom = navr.top;
-                        }
+                // Force the navigation bar to its appropriate place and
+                // size.  We need to do this directly, instead of relying on
+                // it to bubble up from the nav bar, because this needs to
+                // change atomically with screen rotations.
+                if (displayWidth < displayHeight) {
+                    // Portrait screen; nav bar goes on bottom.
+                    mTmpNavigationFrame.set(0, displayHeight-mNavigationBarHeight,
+                            displayWidth, displayHeight);
+                    if (mNavigationBar.isVisibleLw()) {
+                        mDockBottom = mTmpNavigationFrame.top;
+                    }
+                } else {
+                    // Landscape screen; nav bar goes to the right.
+                    mTmpNavigationFrame.set(displayWidth-mNavigationBarWidth, 0,
+                            displayWidth, displayHeight);
+                    if (mNavigationBar.isVisibleLw()) {
+                        mDockRight = mTmpNavigationFrame.left;
                     }
                 }
+                mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
+                        mTmpNavigationFrame, mTmpNavigationFrame);
+                if (DEBUG_LAYOUT) Log.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
             }
-            if (DEBUG_LAYOUT) {
-                Log.i(TAG, "mNavigationBar frame: " + navr);
-                Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
-                            mDockLeft, mDockTop, mDockRight, mDockBottom));
-            }
+            if (DEBUG_LAYOUT) Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
+                    mDockLeft, mDockTop, mDockRight, mDockBottom));
 
             // apply navigation bar insets
             pf.left = df.left = vf.left = mDockLeft;
@@ -1862,7 +1864,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void layoutWindowLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached) {
         // we've already done the status bar
-        if (win == mStatusBar) {
+        if (win == mStatusBar || win == mNavigationBar) {
             return;
         }
 
