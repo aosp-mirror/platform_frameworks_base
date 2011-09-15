@@ -299,7 +299,12 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                          sampleRate, numChannels);
 
                     mAudioSink->close();
-                    CHECK_EQ(mAudioSink->open(sampleRate, numChannels), (status_t)OK);
+                    CHECK_EQ(mAudioSink->open(
+                                sampleRate,
+                                numChannels,
+                                AUDIO_FORMAT_PCM_16_BIT,
+                                8 /* bufferCount */),
+                             (status_t)OK);
                     mAudioSink->start();
 
                     mRenderer->signalAudioSinkChanged();

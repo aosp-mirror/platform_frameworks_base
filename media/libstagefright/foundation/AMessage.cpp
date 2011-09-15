@@ -385,6 +385,15 @@ AString AMessage::debugString(int32_t indent) const {
                             item.u.refValue)->debugString(
                                 indent + strlen(item.mName) + 14).c_str());
                 break;
+            case kTypeRect:
+                tmp = StringPrintf(
+                        "Rect %s(%d, %d, %d, %d)",
+                        item.mName,
+                        item.u.rectValue.mLeft,
+                        item.u.rectValue.mTop,
+                        item.u.rectValue.mRight,
+                        item.u.rectValue.mBottom);
+                break;
             default:
                 TRESPASS();
         }

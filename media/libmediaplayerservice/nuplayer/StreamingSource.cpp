@@ -52,7 +52,7 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
         return false;
     }
 
-    for (int32_t i = 0; i < 10; ++i) {
+    for (int32_t i = 0; i < 50; ++i) {
         char buffer[188];
         sp<AMessage> extra;
         ssize_t n = mStreamListener->read(buffer, sizeof(buffer), &extra);
