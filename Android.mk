@@ -238,7 +238,7 @@ $(full_classes_compiled_jar): $(framework_res_R_stamp)
 # Make sure that framework-res is installed when framework is.
 $(LOCAL_INSTALLED_MODULE): | $(dir $(LOCAL_INSTALLED_MODULE))framework-res.apk
 
-framework_built := $(LOCAL_BUILT_MODULE)
+framework_built := $(call java-lib-deps,framework)
 
 # AIDL files to be preprocessed and included in the SDK,
 # relative to the root of the build tree.
