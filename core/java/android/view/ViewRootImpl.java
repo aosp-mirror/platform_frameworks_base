@@ -1054,7 +1054,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     || attachInfo.mSystemUiVisibility != oldVis
                     || attachInfo.mHasSystemUiListeners) {
                 params = lp;
-                windowAttributesChanges |= WindowManager.LayoutParams.BUFFER_CHANGED;
             }
         }
 
