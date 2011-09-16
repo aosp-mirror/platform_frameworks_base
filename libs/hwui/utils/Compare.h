@@ -28,7 +28,7 @@
  */
 #define LTE_FLOAT(a) \
     if (a < rhs.a) return true; \
-    if (ALMOST_EQUAL(a, rhs.a))
+    if (a == rhs.a)
 
 /**
  * Compare integers.
