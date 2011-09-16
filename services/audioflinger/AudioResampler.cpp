@@ -434,9 +434,9 @@ void AudioResamplerOrder1::AsmMono16Loop(int16_t *in, int32_t* maxOutPt, int32_t
 
         // the following loop works on 2 frames
 
-        ".Y4L01:\n"
+        "1:\n"
         "   cmp r8, r2\n"                   // curOut - maxCurOut
-        "   bcs .Y4L02\n"
+        "   bcs 2f\n"
 
 #define MO_ONE_FRAME \
     "   add r0, r1, r7, asl #1\n"       /* in + inputIndex */\
@@ -460,8 +460,8 @@ void AudioResamplerOrder1::AsmMono16Loop(int16_t *in, int32_t* maxOutPt, int32_t
         MO_ONE_FRAME    // frame 2
 
         "   cmp r7, r3\n"                   // inputIndex - maxInIdx
-        "   bcc .Y4L01\n"
-        ".Y4L02:\n"
+        "   bcc 1b\n"
+        "2:\n"
 
         "   bic r6, r6, #0xC0000000\n"             // phaseFraction & ...
         // save modified values
@@ -541,9 +541,9 @@ void AudioResamplerOrder1::AsmStereo16Loop(int16_t *in, int32_t* maxOutPt, int32
         // r13 sp
         // r14
 
-        ".Y5L01:\n"
+        "3:\n"
         "   cmp r8, r2\n"                   // curOut - maxCurOut
-        "   bcs .Y5L02\n"
+        "   bcs 4f\n"
 
 #define ST_ONE_FRAME \
     "   bic r6, r6, #0xC0000000\n"      /* phaseFraction & ... */\
@@ -577,8 +577,8 @@ void AudioResamplerOrder1::AsmStereo16Loop(int16_t *in, int32_t* maxOutPt, int32
     ST_ONE_FRAME    // frame 1
 
         "   cmp r7, r3\n"                       // inputIndex - maxInIdx
-        "   bcc .Y5L01\n"
-        ".Y5L02:\n"
+        "   bcc 3b\n"
+        "4:\n"
 
         "   bic r6, r6, #0xC0000000\n"              // phaseFraction & ...
         // save modified values
