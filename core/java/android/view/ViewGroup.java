@@ -290,6 +290,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int FLAG_SPLIT_MOTION_EVENTS = 0x200000;
 
     /**
+     * When set, this ViewGroup will not dispatch onAttachedToWindow calls
+     * to children when adding new views. This is used to prevent multiple
+     * onAttached calls when a ViewGroup adds children in its own onAttached method.
+     */
+    private static final int FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW = 0x400000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -2154,8 +2161,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
+        mGroupFlags |= FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW;
         super.dispatchAttachedToWindow(info, visibility);
+        mGroupFlags &= ~FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW;
+
         visibility |= mViewFlags & VISIBILITY_MASK;
+
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
@@ -3321,7 +3332,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         AttachInfo ai = mAttachInfo;
-        if (ai != null) {
+        if (ai != null && (mGroupFlags & FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW) == 0) {
             boolean lastKeepOn = ai.mKeepScreenOn;
             ai.mKeepScreenOn = false;
             child.dispatchAttachedToWindow(mAttachInfo, (mViewFlags&VISIBILITY_MASK));
