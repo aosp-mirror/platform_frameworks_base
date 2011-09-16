@@ -92,6 +92,7 @@ private:
     sp<NativeWindowWrapper> mNativeWindow;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
     sp<Decoder> mVideoDecoder;
+    bool mVideoIsAVC;
     sp<Decoder> mAudioDecoder;
     sp<Renderer> mRenderer;
 
@@ -118,6 +119,9 @@ private:
 
     int64_t mSkipRenderingAudioUntilMediaTimeUs;
     int64_t mSkipRenderingVideoUntilMediaTimeUs;
+
+    int64_t mVideoLateByUs;
+    int64_t mNumFramesTotal, mNumFramesDropped;
 
     status_t instantiateDecoder(bool audio, sp<Decoder> *decoder);
 

@@ -101,6 +101,7 @@ private:
     bool mPaused;
 
     int64_t mLastPositionUpdateUs;
+    int64_t mVideoLateByUs;
 
     bool onDrainAudioQueue();
     void postDrainAudioQueue(int64_t delayUs = 0);
@@ -118,6 +119,7 @@ private:
     void notifyEOS(bool audio, status_t finalResult);
     void notifyFlushComplete(bool audio);
     void notifyPosition();
+    void notifyVideoLateBy(int64_t lateByUs);
 
     void flushQueue(List<QueueEntry> *queue);
     bool dropBufferWhileFlushing(bool audio, const sp<AMessage> &msg);

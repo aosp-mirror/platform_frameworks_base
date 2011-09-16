@@ -329,6 +329,28 @@ bool IsIDR(const sp<ABuffer> &buffer) {
     return foundIDR;
 }
 
+bool IsAVCReferenceFrame(const sp<ABuffer> &accessUnit) {
+    const uint8_t *data = accessUnit->data();
+    size_t size = accessUnit->size();
+
+    const uint8_t *nalStart;
+    size_t nalSize;
+    while (getNextNALUnit(&data, &size, &nalStart, &nalSize, true) == OK) {
+        CHECK_GT(nalSize, 0u);
+
+        unsigned nalType = nalStart[0] & 0x1f;
+
+        if (nalType == 5) {
+            return true;
+        } else if (nalType == 1) {
+            unsigned nal_ref_idc = (nalStart[0] >> 5) & 3;
+            return nal_ref_idc != 0;
+        }
+    }
+
+    return true;
+}
+
 sp<MetaData> MakeAACCodecSpecificData(
         unsigned profile, unsigned sampling_freq_index,
         unsigned channel_configuration) {

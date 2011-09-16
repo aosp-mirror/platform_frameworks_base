@@ -34,10 +34,13 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/ACodec.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
+
+#include "avc_utils.h"
 
 namespace android {
 
@@ -45,6 +48,7 @@ namespace android {
 
 NuPlayer::NuPlayer()
     : mUIDValid(false),
+      mVideoIsAVC(false),
       mAudioEOS(false),
       mVideoEOS(false),
       mScanSourcesPending(false),
@@ -52,7 +56,12 @@ NuPlayer::NuPlayer()
       mFlushingAudio(NONE),
       mFlushingVideo(NONE),
       mResetInProgress(false),
-      mResetPostponed(false) {
+      mResetPostponed(false),
+      mSkipRenderingAudioUntilMediaTimeUs(-1ll),
+      mSkipRenderingVideoUntilMediaTimeUs(-1ll),
+      mVideoLateByUs(0ll),
+      mNumFramesTotal(0ll),
+      mNumFramesDropped(0ll) {
 }
 
 NuPlayer::~NuPlayer() {
@@ -185,10 +194,14 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
         {
             LOGV("kWhatStart");
 
+            mVideoIsAVC = false;
             mAudioEOS = false;
             mVideoEOS = false;
             mSkipRenderingAudioUntilMediaTimeUs = -1;
             mSkipRenderingVideoUntilMediaTimeUs = -1;
+            mVideoLateByUs = 0;
+            mNumFramesTotal = 0;
+            mNumFramesDropped = 0;
 
             mSource->start();
 
@@ -269,6 +282,8 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 } else {
                     CHECK(IsFlushingState(mFlushingVideo, &needShutdown));
                     mFlushingVideo = FLUSHED;
+
+                    mVideoLateByUs = 0;
                 }
 
                 LOGV("decoder %s flush completed", audio ? "audio" : "video");
@@ -397,13 +412,18 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 int64_t positionUs;
                 CHECK(msg->findInt64("positionUs", &positionUs));
 
+                CHECK(msg->findInt64("videoLateByUs", &mVideoLateByUs));
+
                 if (mDriver != NULL) {
                     sp<NuPlayerDriver> driver = mDriver.promote();
                     if (driver != NULL) {
                         driver->notifyPosition(positionUs);
+
+                        driver->notifyFrameStats(
+                                mNumFramesTotal, mNumFramesDropped);
                     }
                 }
-            } else {
+            } else if (what == Renderer::kWhatFlushComplete) {
                 CHECK_EQ(what, (int32_t)Renderer::kWhatFlushComplete);
 
                 int32_t audio;
@@ -565,6 +585,12 @@ status_t NuPlayer::instantiateDecoder(bool audio, sp<Decoder> *decoder) {
         return -EWOULDBLOCK;
     }
 
+    if (!audio) {
+        const char *mime;
+        CHECK(meta->findCString(kKeyMIMEType, &mime));
+        mVideoIsAVC = !strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime);
+    }
+
     sp<AMessage> notify =
         new AMessage(audio ? kWhatAudioNotify : kWhatVideoNotify,
                      id());
@@ -598,53 +624,70 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
     }
 
     sp<ABuffer> accessUnit;
-    status_t err = mSource->dequeueAccessUnit(audio, &accessUnit);
 
-    if (err == -EWOULDBLOCK) {
-        return err;
-    } else if (err != OK) {
-        if (err == INFO_DISCONTINUITY) {
-            int32_t type;
-            CHECK(accessUnit->meta()->findInt32("discontinuity", &type));
+    bool dropAccessUnit;
+    do {
+        status_t err = mSource->dequeueAccessUnit(audio, &accessUnit);
 
-            bool formatChange =
-                type == ATSParser::DISCONTINUITY_FORMATCHANGE;
+        if (err == -EWOULDBLOCK) {
+            return err;
+        } else if (err != OK) {
+            if (err == INFO_DISCONTINUITY) {
+                int32_t type;
+                CHECK(accessUnit->meta()->findInt32("discontinuity", &type));
 
-            LOGV("%s discontinuity (formatChange=%d)",
-                 audio ? "audio" : "video", formatChange);
+                bool formatChange =
+                    type == ATSParser::DISCONTINUITY_FORMATCHANGE;
 
-            if (audio) {
-                mSkipRenderingAudioUntilMediaTimeUs = -1;
-            } else {
-                mSkipRenderingVideoUntilMediaTimeUs = -1;
-            }
+                LOGV("%s discontinuity (formatChange=%d)",
+                     audio ? "audio" : "video", formatChange);
 
-            sp<AMessage> extra;
-            if (accessUnit->meta()->findMessage("extra", &extra)
-                    && extra != NULL) {
-                int64_t resumeAtMediaTimeUs;
-                if (extra->findInt64(
-                            "resume-at-mediatimeUs", &resumeAtMediaTimeUs)) {
-                    LOGI("suppressing rendering of %s until %lld us",
-                            audio ? "audio" : "video", resumeAtMediaTimeUs);
+                if (audio) {
+                    mSkipRenderingAudioUntilMediaTimeUs = -1;
+                } else {
+                    mSkipRenderingVideoUntilMediaTimeUs = -1;
+                }
 
-                    if (audio) {
-                        mSkipRenderingAudioUntilMediaTimeUs =
-                            resumeAtMediaTimeUs;
-                    } else {
-                        mSkipRenderingVideoUntilMediaTimeUs =
-                            resumeAtMediaTimeUs;
+                sp<AMessage> extra;
+                if (accessUnit->meta()->findMessage("extra", &extra)
+                        && extra != NULL) {
+                    int64_t resumeAtMediaTimeUs;
+                    if (extra->findInt64(
+                                "resume-at-mediatimeUs", &resumeAtMediaTimeUs)) {
+                        LOGI("suppressing rendering of %s until %lld us",
+                                audio ? "audio" : "video", resumeAtMediaTimeUs);
+
+                        if (audio) {
+                            mSkipRenderingAudioUntilMediaTimeUs =
+                                resumeAtMediaTimeUs;
+                        } else {
+                            mSkipRenderingVideoUntilMediaTimeUs =
+                                resumeAtMediaTimeUs;
+                        }
                     }
                 }
+
+                flushDecoder(audio, formatChange);
             }
 
-            flushDecoder(audio, formatChange);
+            reply->setInt32("err", err);
+            reply->post();
+            return OK;
         }
 
-        reply->setInt32("err", err);
-        reply->post();
-        return OK;
-    }
+        if (!audio) {
+            ++mNumFramesTotal;
+        }
+
+        dropAccessUnit = false;
+        if (!audio
+                && mVideoLateByUs > 100000ll
+                && mVideoIsAVC
+                && !IsAVCReferenceFrame(accessUnit)) {
+            dropAccessUnit = true;
+            ++mNumFramesDropped;
+        }
+    } while (dropAccessUnit);
 
     // LOGV("returned a valid buffer of %s data", audio ? "audio" : "video");
 
