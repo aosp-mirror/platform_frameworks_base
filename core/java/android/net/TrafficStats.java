@@ -53,25 +53,33 @@ public class TrafficStats {
     public static final int UID_REMOVED = -4;
 
     /**
+     * Special UID value used when collecting {@link NetworkStatsHistory} for
+     * tethering traffic.
+     *
+     * @hide
+     */
+    public static final int UID_TETHERING = -5;
+
+    /**
      * Default tag value for {@link DownloadManager} traffic.
      *
      * @hide
      */
-    public static final int TAG_SYSTEM_DOWNLOAD = 0xFFFF0001;
+    public static final int TAG_SYSTEM_DOWNLOAD = 0xFFFFFF01;
 
     /**
      * Default tag value for {@link MediaPlayer} traffic.
      *
      * @hide
      */
-    public static final int TAG_SYSTEM_MEDIA = 0xFFFF0002;
+    public static final int TAG_SYSTEM_MEDIA = 0xFFFFFF02;
 
     /**
      * Default tag value for {@link BackupManager} traffic.
      *
      * @hide
      */
-    public static final int TAG_SYSTEM_BACKUP = 0xFFFF0003;
+    public static final int TAG_SYSTEM_BACKUP = 0xFFFFFF03;
 
     /**
      * Snapshot of {@link NetworkStats} when the currently active profiling
@@ -90,6 +98,10 @@ public class TrafficStats {
      * <p>
      * Changes only take effect during subsequent calls to
      * {@link #tagSocket(Socket)}.
+     * <p>
+     * Tags between {@code 0xFFFFFF00} and {@code 0xFFFFFFFF} are reserved and
+     * used internally by system services like {@link DownloadManager} when
+     * performing traffic on behalf of an application.
      */
     public static void setThreadStatsTag(int tag) {
         NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
