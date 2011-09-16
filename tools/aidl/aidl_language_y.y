@@ -19,6 +19,7 @@ static int count_brackets(const char*);
 %token ARRAY
 %token PARCELABLE
 %token INTERFACE
+%token FLATTENABLE
 %token RPC
 %token IN
 %token OUT
@@ -78,7 +79,7 @@ declaration:
     ;
 
 parcelable_decl:
-        PARCELABLE IDENTIFIER ';'                  { 
+        PARCELABLE IDENTIFIER ';'                   {
                                                         parcelable_type* b = (parcelable_type*)malloc(sizeof(parcelable_type));
                                                         b->document_item.item_type = PARCELABLE_TYPE;
                                                         b->document_item.next = NULL;
@@ -98,6 +99,27 @@ parcelable_decl:
                                                                      g_currentFilename, $2.buffer.lineno, $2.buffer.data);
                                                         $$.parcelable = NULL;
                                                     }
+    |   FLATTENABLE IDENTIFIER ';'                  {
+                                                        parcelable_type* b = (parcelable_type*)malloc(sizeof(parcelable_type));
+                                                        b->document_item.item_type = FLATTENABLE_TYPE;
+                                                        b->document_item.next = NULL;
+                                                        b->parcelable_token = $1.buffer;
+                                                        b->name = $2.buffer;
+                                                        b->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
+                                                        b->semicolon_token = $3.buffer;
+                                                        $$.parcelable = b;
+                                                    }
+    |   FLATTENABLE ';'                             {
+                                                        fprintf(stderr, "%s:%d syntax error in flattenable declaration. Expected type name.\n",
+                                                                     g_currentFilename, $1.buffer.lineno);
+                                                        $$.parcelable = NULL;
+                                                    }
+    |   FLATTENABLE error ';'                       {
+                                                        fprintf(stderr, "%s:%d syntax error in flattenable declaration. Expected type name, saw \"%s\".\n",
+                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
+                                                        $$.parcelable = NULL;
+                                                    }
+
     ;
 
 interface_header:

@@ -114,7 +114,7 @@ struct Statement
     virtual void Write(FILE* to) = 0;
 };
 
-struct StatementBlock
+struct StatementBlock : public Statement
 {
     vector<Statement*> statements;
 

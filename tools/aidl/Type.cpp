@@ -82,8 +82,7 @@ register_base_types()
     STRING_TYPE = new StringType();
     NAMES.Add(STRING_TYPE);
 
-    OBJECT_TYPE = new Type("java.lang", "Object",
-            Type::BUILT_IN, false, false);
+    OBJECT_TYPE = new Type("java.lang", "Object", Type::BUILT_IN, false, false, false);
     NAMES.Add(OBJECT_TYPE);
 
     CHAR_SEQUENCE_TYPE = new CharSequenceType();
@@ -95,7 +94,7 @@ register_base_types()
     LIST_TYPE = new ListType();
     NAMES.Add(LIST_TYPE);
 
-    TEXT_UTILS_TYPE = new Type("android.text", "TextUtils", Type::BUILT_IN, false, false);
+    TEXT_UTILS_TYPE = new Type("android.text", "TextUtils", Type::BUILT_IN, false, false, false);
     NAMES.Add(TEXT_UTILS_TYPE);
 
     REMOTE_EXCEPTION_TYPE = new RemoteExceptionType();
@@ -122,19 +121,18 @@ register_base_types()
     PARCELABLE_INTERFACE_TYPE = new ParcelableInterfaceType();
     NAMES.Add(PARCELABLE_INTERFACE_TYPE);
 
-    CONTEXT_TYPE = new Type("android.content", "Context",
-                                    Type::BUILT_IN, false, false);
+    CONTEXT_TYPE = new Type("android.content", "Context", Type::BUILT_IN, false, false, false);
     NAMES.Add(CONTEXT_TYPE);
 
     RPC_SERVICE_BASE_TYPE = new Type("com.android.athome.service", "AndroidAtHomeService",
-                                    Type::BUILT_IN, false, false);
+                                    Type::BUILT_IN, false, false, false);
     NAMES.Add(RPC_SERVICE_BASE_TYPE);
 
     RPC_DATA_TYPE = new RpcDataType();
     NAMES.Add(RPC_DATA_TYPE);
 
     RPC_BROKER_TYPE = new Type("com.android.athome.utils", "AndroidAtHomeBroker",
-                                    Type::BUILT_IN, false, false);
+                                    Type::BUILT_IN, false, false, false);
     NAMES.Add(RPC_BROKER_TYPE);
 
     RPC_ENDPOINT_INFO_TYPE = new ParcelableType("com.android.athome.rpc", "EndpointInfo",
@@ -150,7 +148,7 @@ register_base_types()
     NAMES.Add(RPC_ERROR_TYPE);
 
     RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
-                                    Type::BUILT_IN, false, false);
+                                    Type::BUILT_IN, false, false, false);
     NAMES.Add(RPC_ERROR_LISTENER_TYPE);
 
     CLASSLOADER_TYPE = new ClassLoaderType();
@@ -179,27 +177,30 @@ make_generic_type(const string& package, const string& name,
 
 // ================================================================
 
-Type::Type(const string& name, int kind, bool canWriteToParcel, bool canBeOut)
+Type::Type(const string& name, int kind, bool canWriteToParcel, bool canWriteToRpcData,
+        bool canBeOut)
     :m_package(),
      m_name(name),
      m_declFile(""),
      m_declLine(-1),
      m_kind(kind),
      m_canWriteToParcel(canWriteToParcel),
+     m_canWriteToRpcData(canWriteToRpcData),
      m_canBeOut(canBeOut)
 {
     m_qualifiedName = name;
 }
 
 Type::Type(const string& package, const string& name,
-            int kind, bool canWriteToParcel, bool canBeOut,
-            const string& declFile, int declLine)
+            int kind, bool canWriteToParcel, bool canWriteToRpcData,
+            bool canBeOut, const string& declFile, int declLine)
     :m_package(package),
      m_name(name),
      m_declFile(declFile),
      m_declLine(declLine),
      m_kind(kind),
      m_canWriteToParcel(canWriteToParcel),
+     m_canWriteToRpcData(canWriteToRpcData),
      m_canBeOut(canBeOut)
 {
     if (package.length() > 0) {
@@ -339,7 +340,7 @@ BasicType::BasicType(const string& name, const string& marshallParcel,
           const string& createArrayParcel, const string& readArrayParcel,
           const string& marshallRpc, const string& unmarshallRpc,
           const string& writeArrayRpc, const string& createArrayRpc, const string& readArrayRpc)
-    :Type(name, BUILT_IN, true, false),
+    :Type(name, BUILT_IN, true, true, false),
      m_marshallParcel(marshallParcel),
      m_unmarshallParcel(unmarshallParcel),
      m_writeArrayParcel(writeArrayParcel),
@@ -407,7 +408,7 @@ BasicType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, 
 // ================================================================
 
 BooleanType::BooleanType()
-    :Type("boolean", BUILT_IN, true, false)
+    :Type("boolean", BUILT_IN, true, true, false)
 {
 }
 
@@ -468,7 +469,7 @@ BooleanType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v
 // ================================================================
 
 CharType::CharType()
-    :Type("char", BUILT_IN, true, false)
+    :Type("char", BUILT_IN, true, true, false)
 {
 }
 
@@ -527,7 +528,7 @@ CharType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, V
 // ================================================================
 
 StringType::StringType()
-    :Type("java.lang", "String", BUILT_IN, true, false)
+    :Type("java.lang", "String", BUILT_IN, true, true, false)
 {
 }
 
@@ -591,7 +592,7 @@ StringType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
 // ================================================================
 
 CharSequenceType::CharSequenceType()
-    :Type("java.lang", "CharSequence", BUILT_IN, true, false)
+    :Type("java.lang", "CharSequence", BUILT_IN, true, true, false)
 {
 }
 
@@ -651,7 +652,7 @@ CharSequenceType::CreateFromParcel(StatementBlock* addTo, Variable* v,
 // ================================================================
 
 RemoteExceptionType::RemoteExceptionType()
-    :Type("android.os", "RemoteException", BUILT_IN, false, false)
+    :Type("android.os", "RemoteException", BUILT_IN, false, false, false)
 {
 }
 
@@ -670,7 +671,7 @@ RemoteExceptionType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variab
 // ================================================================
 
 RuntimeExceptionType::RuntimeExceptionType()
-    :Type("java.lang", "RuntimeException", BUILT_IN, false, false)
+    :Type("java.lang", "RuntimeException", BUILT_IN, false, false, false)
 {
 }
 
@@ -690,7 +691,7 @@ RuntimeExceptionType::CreateFromParcel(StatementBlock* addTo, Variable* v, Varia
 // ================================================================
 
 IBinderType::IBinderType()
-    :Type("android.os", "IBinder", BUILT_IN, true, false)
+    :Type("android.os", "IBinder", BUILT_IN, true, false, false)
 {
 }
 
@@ -729,7 +730,7 @@ IBinderType::ReadArrayFromParcel(StatementBlock* addTo, Variable* v, Variable* p
 // ================================================================
 
 IInterfaceType::IInterfaceType()
-    :Type("android.os", "IInterface", BUILT_IN, false, false)
+    :Type("android.os", "IInterface", BUILT_IN, false, false, false)
 {
 }
 
@@ -749,7 +750,7 @@ IInterfaceType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variable* p
 // ================================================================
 
 BinderType::BinderType()
-    :Type("android.os", "Binder", BUILT_IN, false, false)
+    :Type("android.os", "Binder", BUILT_IN, false, false, false)
 {
 }
 
@@ -770,7 +771,7 @@ BinderType::CreateFromParcel(StatementBlock* addTo, Variable* v,
 // ================================================================
 
 BinderProxyType::BinderProxyType()
-    :Type("android.os", "BinderProxy", BUILT_IN, false, false)
+    :Type("android.os", "BinderProxy", BUILT_IN, false, false, false)
 {
 }
 
@@ -791,7 +792,7 @@ BinderProxyType::CreateFromParcel(StatementBlock* addTo, Variable* v,
 // ================================================================
 
 ParcelType::ParcelType()
-    :Type("android.os", "Parcel", BUILT_IN, false, false)
+    :Type("android.os", "Parcel", BUILT_IN, false, false, false)
 {
 }
 
@@ -810,7 +811,7 @@ ParcelType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variable* parce
 // ================================================================
 
 ParcelableInterfaceType::ParcelableInterfaceType()
-    :Type("android.os", "Parcelable", BUILT_IN, false, false)
+    :Type("android.os", "Parcelable", BUILT_IN, false, false, false)
 {
 }
 
@@ -829,7 +830,7 @@ ParcelableInterfaceType::CreateFromParcel(StatementBlock* addTo, Variable* v, Va
 // ================================================================
 
 MapType::MapType()
-    :Type("java.util", "Map", BUILT_IN, true, true)
+    :Type("java.util", "Map", BUILT_IN, true, false, true)
 {
 }
 
@@ -869,7 +870,7 @@ MapType::ReadFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, Va
 // ================================================================
 
 ListType::ListType()
-    :Type("java.util", "List", BUILT_IN, true, true)
+    :Type("java.util", "List", BUILT_IN, true, true, true)
 {
 }
 
@@ -918,7 +919,7 @@ ListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, V
 
 ParcelableType::ParcelableType(const string& package, const string& name,
                         bool builtIn, const string& declFile, int declLine)
-    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, true, true,
+    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, true, false, true,
             declFile, declLine)
 {
 }
@@ -1019,13 +1020,81 @@ ParcelableType::ReadArrayFromParcel(StatementBlock* addTo, Variable* v, Variable
                     v, new LiteralExpression(creator)));
 }
 
+// ================================================================
+
+FlattenableType::FlattenableType(const string& package, const string& name,
+                        bool builtIn, const string& declFile, int declLine)
+    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, false, true, true,
+            declFile, declLine)
+{
+}
+
+string
+FlattenableType::CreatorName() const
+{
+    return QualifiedName() + ".CREATOR";
+}
+
+void
+FlattenableType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags)
+{
+    // if (v != null) {
+    //     RpcData _obj = new RpcData();
+    //     v.writeToRpcData(_obj);
+    //     data.putRpcData(k, obj);
+    // }
+    IfStatement* ifpart = new IfStatement;
+    ifpart->expression = new Comparison(v, "!=", NULL_VALUE);
+    Variable* _obj = new Variable(RPC_DATA_TYPE, "_obj");
+    ifpart->statements->Add(new VariableDeclaration(_obj, new NewExpression(RPC_DATA_TYPE)));
+    ifpart->statements->Add(new MethodCall(v, "writeToRpcData", 1, _obj));
+    ifpart->statements->Add(new MethodCall(data, "putRpcData", 2, k, _obj));
+
+    addTo->Add(ifpart);
+}
+
+void
+FlattenableType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl)
+{
+    // RpcData _obj_XX = data.getRpcData(k);
+    // if (_data_XX != null)
+    //     v = CLASS.RPC_CREATOR.createFromParcel(parcel)
+    // } else {
+    //     v = null;
+    // }
+
+    StatementBlock* block = new StatementBlock;
+    addTo->Add(block);
+
+    Variable* _obj = new Variable(RPC_DATA_TYPE, "_obj");
+    block->Add(new VariableDeclaration(_obj, new MethodCall(data, "getRpcData", 1, k)));
+
+    IfStatement* ifpart = new IfStatement();
+    ifpart->expression = new Comparison(_obj, "!=", NULL_VALUE);
+    ifpart->statements->Add(new Assignment(v,
+                new MethodCall(v->type, "RPC_CREATOR.createFromRpcData", 1, data)));
+
+    IfStatement* elsepart = new IfStatement();
+    ifpart->elseif = elsepart;
+    elsepart->statements->Add(new Assignment(v, NULL_VALUE));
+
+    block->Add(ifpart);
+}
+
+bool
+FlattenableType::CanBeArray() const
+{
+    return true;
+}
 
 // ================================================================
 
 InterfaceType::InterfaceType(const string& package, const string& name,
                         bool builtIn, bool oneway,
                         const string& declFile, int declLine)
-    :Type(package, name, builtIn ? BUILT_IN : INTERFACE, true, false,
+    :Type(package, name, builtIn ? BUILT_IN : INTERFACE, true, false, false,
                         declFile, declLine)
     ,m_oneway(oneway)
 {
@@ -1064,7 +1133,7 @@ InterfaceType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variable* pa
 
 GenericType::GenericType(const string& package, const string& name,
                          const vector<Type*>& args)
-    :Type(package, name, BUILT_IN, true, true)
+    :Type(package, name, BUILT_IN, true, true, true)
 {
     m_args = args;
 
@@ -1210,7 +1279,7 @@ GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variabl
 // ================================================================
 
 RpcDataType::RpcDataType()
-    :Type("com.android.athome.rpc", "RpcData", Type::BUILT_IN, false, false)
+    :Type("com.android.athome.rpc", "RpcData", Type::BUILT_IN, false, true, true)
 {
 }
 
@@ -1232,7 +1301,7 @@ RpcDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v
 // ================================================================
 
 ClassLoaderType::ClassLoaderType()
-    :Type("java.lang", "ClassLoader", BUILT_IN, false, false)
+    :Type("java.lang", "ClassLoader", BUILT_IN, false, false, false)
 {
 }
 

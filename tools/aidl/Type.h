@@ -24,9 +24,9 @@ public:
     };
 
                     Type(const string& name, int kind, bool canWriteToParcel,
-                            bool canBeOut);
+                            bool canWriteToRpcData, bool canBeOut);
                     Type(const string& package, const string& name,
-                            int kind, bool canWriteToParcel, bool canBeOut,
+                            int kind, bool canWriteToParcel, bool canWriteToRpcData, bool canBeOut,
                             const string& declFile = "", int declLine = -1);
     virtual         ~Type();
 
@@ -36,7 +36,8 @@ public:
     inline int      Kind() const                { return m_kind; }
     inline string   DeclFile() const            { return m_declFile; }
     inline int      DeclLine() const            { return m_declLine; }
-    inline bool     CanBeMarshalled() const     { return m_canWriteToParcel; }
+    inline bool     CanWriteToParcel() const    { return m_canWriteToParcel; }
+    inline bool     CanWriteToRpcData() const   { return m_canWriteToRpcData; }
     inline bool     CanBeOutParameter() const   { return m_canBeOut; }
     
     virtual string  ImportType() const;
@@ -79,6 +80,7 @@ private:
     int m_declLine;
     int m_kind;
     bool m_canWriteToParcel;
+    bool m_canWriteToRpcData;
     bool m_canBeOut;
 };
 
@@ -371,6 +373,22 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
+};
+
+class FlattenableType : public Type
+{
+public:
+                    FlattenableType(const string& package, const string& name,
+                            bool builtIn, const string& declFile, int declLine);
+
+    virtual string  CreatorName() const;
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+
+    virtual bool    CanBeArray() const;
 };
 
 class InterfaceType : public Type
