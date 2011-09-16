@@ -35,7 +35,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -108,9 +107,6 @@ public class MultiWaveView extends View {
     private float mSnapMargin = 0.0f;
     private boolean mDragging;
     private int mNewTargetResources;
-
-    private boolean mWaveHovered = false;
-    private long mLastHoverExitTimeMillis = 0;
 
     private AnimatorListener mResetListener = new AnimatorListenerAdapter() {
         public void onAnimationEnd(Animator animator) {
@@ -660,57 +656,11 @@ public class MultiWaveView extends View {
     }
 
     private void handleDown(MotionEvent event) {
-        final float x = event.getX();
-        final float y = event.getY();
-        final float dx = x - mWaveCenterX;
-        final float dy = y - mWaveCenterY;
-        if (dist2(dx,dy) <= getScaledTapRadiusSquared()) {
-            if (DEBUG) Log.v(TAG, "** Handle HIT");
-            switchToState(STATE_FIRST_TOUCH, x, y);
-            moveHandleTo(x, y, false);
-            mDragging = true;
-        } else {
+       if (!trySwitchToFirstTouchState(event)) {
             mDragging = false;
             stopTargetAnimation();
             ping();
         }
-    }
-
-    @Override
-    public boolean onHoverEvent(MotionEvent event) {
-        if (AccessibilityManager.getInstance(mContext).isTouchExplorationEnabled()) {
-            final int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_HOVER_ENTER:
-                case MotionEvent.ACTION_HOVER_MOVE:
-                    final float dx = event.getX() - mWaveCenterX;
-                    final float dy = event.getY() - mWaveCenterY;
-                    if (dist2(dx,dy) <= getScaledTapRadiusSquared()) {
-                        if (!mWaveHovered) {
-                            mWaveHovered = true;
-                            final long timeSinceLastHoverExitMillis =
-                                event.getEventTime() - mLastHoverExitTimeMillis;
-                            final long recurringEventsInterval =
-                                ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
-                            if (timeSinceLastHoverExitMillis > recurringEventsInterval) {
-                                String text =
-                                    mContext.getString(R.string.content_description_sliding_handle);
-                                announceText(text);
-                            }
-                        }
-                    } else {
-                        mWaveHovered = false;
-                    }
-                    break;
-                case MotionEvent.ACTION_HOVER_EXIT:
-                    mLastHoverExitTimeMillis = event.getEventTime();
-                    mWaveHovered = false;
-                    break;
-                default:
-                    mWaveHovered = false;
-            }
-        }
-        return super.onHoverEvent(event);
     }
 
     private void handleUp(MotionEvent event) {
@@ -720,6 +670,7 @@ public class MultiWaveView extends View {
 
     private void handleMove(MotionEvent event) {
         if (!mDragging) {
+            trySwitchToFirstTouchState(event);
             return;
         }
 
@@ -792,6 +743,27 @@ public class MultiWaveView extends View {
         mActiveTarget = activeTarget;
     }
 
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (AccessibilityManager.getInstance(mContext).isTouchExplorationEnabled()) {
+            final int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    event.setAction(MotionEvent.ACTION_DOWN);
+                    break;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    event.setAction(MotionEvent.ACTION_MOVE);
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    event.setAction(MotionEvent.ACTION_UP);
+                    break;
+            }
+            onTouchEvent(event);
+            event.setAction(action);
+        }
+        return super.onHoverEvent(event);
+    }
+
     /**
      * Sets the current grabbed state, and dispatches a grabbed state change
      * event to our listener.
@@ -806,6 +778,21 @@ public class MultiWaveView extends View {
                 mOnTriggerListener.onGrabbedStateChange(this, mGrabbedState);
             }
         }
+    }
+
+    private boolean trySwitchToFirstTouchState(MotionEvent event) {
+        final float x = event.getX();
+        final float y = event.getY();
+        final float dx = x - mWaveCenterX;
+        final float dy = y - mWaveCenterY;
+        if (dist2(dx,dy) <= getScaledTapRadiusSquared()) {
+            if (DEBUG) Log.v(TAG, "** Handle HIT");
+            switchToState(STATE_FIRST_TOUCH, x, y);
+            moveHandleTo(x, y, false);
+            mDragging = true;
+            return true;
+        }
+        return false;
     }
 
     private void performInitialLayout(float centerX, float centerY) {
