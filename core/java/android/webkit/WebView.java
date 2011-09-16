@@ -4280,7 +4280,6 @@ public class WebView extends AbsoluteLayout
         }
         nativeSetExtendSelection();
         mDrawSelectionPointer = false;
-        mSelectionStarted = true;
         mTouchMode = TOUCH_DRAG_MODE;
         return true;
     }
