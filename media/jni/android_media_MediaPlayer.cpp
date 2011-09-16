@@ -247,6 +247,11 @@ getVideoSurfaceTexture(JNIEnv* env, jobject thiz) {
 static void
 decVideoSurfaceRef(JNIEnv *env, jobject thiz)
 {
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return;
+    }
+
     sp<ISurfaceTexture> old_st = getVideoSurfaceTexture(env, thiz);
     if (old_st != NULL) {
         old_st->decStrong(thiz);
