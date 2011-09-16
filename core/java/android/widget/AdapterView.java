@@ -338,8 +338,10 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      */
     public interface OnItemSelectedListener {
         /**
-         * Callback method to be invoked when an item in this view has been
-         * selected.
+         * <p>Callback method to be invoked when an item in this view has been
+         * selected. This callback is invoked only when the newly selected
+         * position is different from the previously selected position or if
+         * there was no selected item.</p>
          *
          * Impelmenters can call getItemAtPosition(position) if they need to access the
          * data associated with the selected item.
