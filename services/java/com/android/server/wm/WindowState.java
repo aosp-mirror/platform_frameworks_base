@@ -1101,7 +1101,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final Matrix tmpMatrix = mTmpMatrix;
 
             // Compute the desired transformation.
-            tmpMatrix.setTranslate(0, 0);
+            if (screenAnimation) {
+                // If we are doing a screen animation, the global rotation
+                // applied to windows can result in windows that are carefully
+                // aligned with each other to slightly separate, allowing you
+                // to see what is behind them.  An unsightly mess.  This...
+                // thing...  magically makes it call good: scale each window
+                // slightly (two pixels larger in each dimension, from the
+                // window's center).
+                final float w = frame.width();
+                final float h = frame.height();
+                tmpMatrix.setScale(1 + 2/w, 1 + 2/h, w/2, h/2);
+            } else {
+                tmpMatrix.reset();
+            }
             tmpMatrix.postScale(mGlobalScale, mGlobalScale);
             if (selfTransformation) {
                 tmpMatrix.postConcat(mTransformation.getMatrix());
