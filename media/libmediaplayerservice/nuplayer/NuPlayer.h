@@ -70,19 +70,19 @@ private:
     struct StreamingSource;
 
     enum {
-        kWhatSetDataSource,
-        kWhatSetVideoNativeWindow,
-        kWhatSetAudioSink,
-        kWhatMoreDataQueued,
-        kWhatStart,
-        kWhatScanSources,
-        kWhatVideoNotify,
-        kWhatAudioNotify,
-        kWhatRendererNotify,
-        kWhatReset,
-        kWhatSeek,
-        kWhatPause,
-        kWhatResume,
+        kWhatSetDataSource              = '=DaS',
+        kWhatSetVideoNativeWindow       = '=NaW',
+        kWhatSetAudioSink               = '=AuS',
+        kWhatMoreDataQueued             = 'more',
+        kWhatStart                      = 'strt',
+        kWhatScanSources                = 'scan',
+        kWhatVideoNotify                = 'vidN',
+        kWhatAudioNotify                = 'audN',
+        kWhatRendererNotify             = 'renN',
+        kWhatReset                      = 'rset',
+        kWhatSeek                       = 'seek',
+        kWhatPause                      = 'paus',
+        kWhatResume                     = 'rsme',
     };
 
     wp<NuPlayerDriver> mDriver;

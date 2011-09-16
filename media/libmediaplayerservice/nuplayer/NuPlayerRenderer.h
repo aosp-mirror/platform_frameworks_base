@@ -45,9 +45,9 @@ struct NuPlayer::Renderer : public AHandler {
     void resume();
 
     enum {
-        kWhatEOS,
-        kWhatFlushComplete,
-        kWhatPosition,
+        kWhatEOS                = 'eos ',
+        kWhatFlushComplete      = 'fluC',
+        kWhatPosition           = 'posi',
     };
 
 protected:
@@ -57,14 +57,14 @@ protected:
 
 private:
     enum {
-        kWhatDrainAudioQueue,
-        kWhatDrainVideoQueue,
-        kWhatQueueBuffer,
-        kWhatQueueEOS,
-        kWhatFlush,
-        kWhatAudioSinkChanged,
-        kWhatPause,
-        kWhatResume,
+        kWhatDrainAudioQueue    = 'draA',
+        kWhatDrainVideoQueue    = 'draV',
+        kWhatQueueBuffer        = 'queB',
+        kWhatQueueEOS           = 'qEOS',
+        kWhatFlush              = 'flus',
+        kWhatAudioSinkChanged   = 'auSC',
+        kWhatPause              = 'paus',
+        kWhatResume             = 'resm',
     };
 
     struct QueueEntry {
@@ -102,8 +102,8 @@ private:
 
     int64_t mLastPositionUpdateUs;
 
-    void onDrainAudioQueue();
-    void postDrainAudioQueue();
+    bool onDrainAudioQueue();
+    void postDrainAudioQueue(int64_t delayUs = 0);
 
     void onDrainVideoQueue();
     void postDrainVideoQueue();

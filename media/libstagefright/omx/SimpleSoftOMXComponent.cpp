@@ -42,7 +42,7 @@ SimpleSoftOMXComponent::SimpleSoftOMXComponent(
     mLooper->start(
             false, // runOnCallingThread
             false, // canCallJava
-            PRIORITY_AUDIO);
+            ANDROID_PRIORITY_FOREGROUND);
 }
 
 void SimpleSoftOMXComponent::prepareForDestruction() {

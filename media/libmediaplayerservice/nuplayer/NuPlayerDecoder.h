@@ -43,13 +43,14 @@ protected:
 
 private:
     enum {
-        kWhatCodecNotify,
+        kWhatCodecNotify        = 'cdcN',
     };
 
     sp<AMessage> mNotify;
     sp<NativeWindowWrapper> mNativeWindow;
 
     sp<ACodec> mCodec;
+    sp<ALooper> mCodecLooper;
 
     Vector<sp<ABuffer> > mCSD;
     size_t mCSDIndex;
