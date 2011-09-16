@@ -111,7 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableLeft="@android:drawable/ic_emergency"
-            android:drawablePadding="8dip"
+            android:drawablePadding="4dip"
             android:text="@android:string/lockscreen_emergency_call"
         />
     </LinearLayout>

@@ -29,7 +29,8 @@
     android:gravity="center_horizontal">
 
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
-        android:layout_marginBottom="18dip"
+        android:layout_marginTop="@dimen/keyguard_lockscreen_status_line_clockfont_top_margin"
+        android:layout_marginBottom="12dip"
         android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
         android:layout_gravity="right">
 
@@ -149,7 +150,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="8dip"
+            android:layout_marginBottom="12dip"
             android:gravity="center_horizontal"
             android:singleLine="true"
             android:ellipsize="marquee"
