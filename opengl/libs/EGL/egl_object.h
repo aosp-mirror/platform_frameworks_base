@@ -130,7 +130,7 @@ protected:
         if (window != NULL) {
             native_window_set_buffers_format(window, 0);
             if (native_window_api_disconnect(window, NATIVE_WINDOW_API_EGL)) {
-                LOGE("EGLNativeWindowType %p disconnected failed", window);
+                LOGW("EGLNativeWindowType %p disconnect failed", window);
             }
         }
     }
