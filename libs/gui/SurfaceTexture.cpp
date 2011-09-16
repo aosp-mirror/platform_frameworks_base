@@ -595,7 +595,7 @@ status_t SurfaceTexture::disconnect(int api) {
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
-        LOGE("connect: SurfaceTexture has been abandoned!");
+        LOGE("disconnect: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
 
