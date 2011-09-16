@@ -659,8 +659,8 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendActionDownAndUp(MotionEvent prototype, int policyFlags) {
-        // Tap with the pointer that last went up - we may have inactive pointers.
-        final int pointerId = mPointerTracker.getLastReceivedUpPointerId();
+        // Tap with the pointer that last explored - we may have inactive pointers.
+        final int pointerId = prototype.getPointerId(prototype.getActionIndex());
         final int pointerIdBits = (1 << pointerId);
         sendMotionEvent(prototype, MotionEvent.ACTION_DOWN, pointerIdBits, policyFlags);
         sendMotionEvent(prototype, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
