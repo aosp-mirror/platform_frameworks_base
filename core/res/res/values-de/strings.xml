@@ -1141,7 +1141,6 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
-    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Schieberegler: Tippen und halten"</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach unten"</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach links"</string>

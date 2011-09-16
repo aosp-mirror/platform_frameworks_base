@@ -1467,7 +1467,6 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modus verander"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invoersleutel"</string>
-    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Glyhandvatsel. Tik en hou."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Op na <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Af vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Links vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>

@@ -1141,7 +1141,6 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Funktionsändring"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Skift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retur"</string>
-    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Skärmlåsfunktion. Tryck och dra."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Upp för <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Ned för <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Vänster för <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
