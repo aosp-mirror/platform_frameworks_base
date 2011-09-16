@@ -482,7 +482,11 @@ public class RemoteControlClient
             synchronized(mCacheLock) {
                 // assign the edited data
                 mMetadata = new Bundle(mEditorMetadata);
+                if ((mArtwork != null) && (!mArtwork.equals(mEditorArtwork))) {
+                    mArtwork.recycle();
+                }
                 mArtwork = mEditorArtwork;
+                mEditorArtwork = null;
                 if (mMetadataChanged & mArtworkChanged) {
                     // send to remote control display if conditions are met
                     sendMetadataWithArtwork_syncCacheLock();
