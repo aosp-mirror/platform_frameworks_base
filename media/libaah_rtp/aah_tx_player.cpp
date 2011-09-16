@@ -17,6 +17,8 @@
 #define LOG_TAG "LibAAH_RTP"
 #include <utils/Log.h>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 #include <netdb.h>
 #include <netinet/ip.h>
 
@@ -698,20 +700,38 @@ status_t AAH_TXPlayer::invoke(const Parcel& request, Parcel *reply) {
     }
 
     switch (methodID) {
-        case kInvokeSetAAHDstIPPort: {
+        case kInvokeSetAAHDstIPPort:
+        case kInvokeSetAAHConfigBlob: {
             if (mEndpointValid) {
                 return INVALID_OPERATION;
             }
 
-            String16 addr = request.readString16();
+            String8 addr;
+            uint16_t port;
 
-            int32_t port32;
-            err = request.readInt32(&port32);
-            if (err != android::OK) {
-                return err;
+            if (methodID == kInvokeSetAAHDstIPPort) {
+                addr = String8(request.readString16());
+
+                int32_t port32;
+                err = request.readInt32(&port32);
+                if (err != android::OK) {
+                    return err;
+                }
+                port = static_cast<uint16_t>(port32);
+            } else {
+                String8 blob(request.readString16());
+
+                char addr_buf[101];
+                if (sscanf(blob.string(), "V1:%100s %" SCNu16,
+                           addr_buf, &port) != 2) {
+                    return BAD_VALUE;
+                }
+                if (addr.setTo(addr_buf) != OK) {
+                    return NO_MEMORY;
+                }
             }
 
-            struct hostent* ent = gethostbyname(String8(addr).string());
+            struct hostent* ent = gethostbyname(addr.string());
             if (ent == NULL) {
                 return ERROR_UNKNOWN_HOST;
             }
@@ -722,7 +742,7 @@ status_t AAH_TXPlayer::invoke(const Parcel& request, Parcel *reply) {
             Mutex::Autolock lock(mEndpointLock);
             mEndpoint = AAH_TXSender::Endpoint(
                         reinterpret_cast<struct in_addr*>(ent->h_addr)->s_addr,
-                        static_cast<uint16_t>(port32));
+                        port);
             mEndpointValid = true;
             return OK;
         };
