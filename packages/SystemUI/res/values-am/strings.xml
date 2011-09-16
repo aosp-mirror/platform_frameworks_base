@@ -25,14 +25,10 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"ማሳወቂያዎች አሳይ"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ከዝርዝር አስወግድ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"የትግበራ መረጃ"</string>
-    <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
-    <skip />
-    <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->
-    <skip />
-    <!-- no translation found for status_bar_latest_events_title (6594767438577593172) -->
-    <skip />
-    <!-- no translation found for battery_low_title (7923774589611311406) -->
-    <skip />
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ምንም ማሳወቂያዎች የሉም"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"በመካሄድ ላይ ያለ"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ማሳወቂያዎች"</string>
+    <string name="battery_low_title" msgid="7923774589611311406">"እባክዎ ኃይልመሙያ ያያይዙ"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"ባትሪው እያነሰ ነው።"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> ቀሪ"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ኃይል መሙያ አይታገዝም።"\n" የቀረበውን ኃይል መሙያ ብቻ ተጠቀም።"</string>
@@ -40,8 +36,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ቅንብሮች"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"የአውሮፕላን ሁነታ"</string>
-    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
-    <skip />
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ማያ በራስ ሰር አሽከርክር"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ድምጽ አጥፋ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ራስ ሰር"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"ማሳወቂያዎች"</string>
@@ -49,155 +44,83 @@
     <string name="recent_tasks_empty" msgid="1905484479067697884">"ምንም የቅርብ ጊዜ ትግበራዎች የሉም።"</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"ትግበራዎች"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ብሉቱዝ አያይዝ"</string>
-    <!-- no translation found for status_bar_input_method_settings_configure_input_methods (737483394044014246) -->
-    <skip />
-    <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
-    <skip />
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
-    <!-- no translation found for compat_mode_on (6623839244840638213) -->
-    <skip />
-    <!-- no translation found for compat_mode_off (4434467572461327898) -->
-    <skip />
-    <!-- no translation found for compat_mode_help_header (7020175705401506719) -->
-    <skip />
-    <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
-    <!-- no translation found for usb_preference_title (6551050377388882787) -->
-    <skip />
-    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
-    <skip />
-    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
-    <skip />
-    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
-    <skip />
-    <!-- no translation found for accessibility_back (567011538994429120) -->
-    <skip />
-    <!-- no translation found for accessibility_home (8217216074895377641) -->
-    <skip />
-    <!-- no translation found for accessibility_menu (316839303324695949) -->
-    <skip />
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"ግቤት ሜተዶችንአዋቀር"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"የቁልፍ ሰሌዳ ተጠቀም"</string>
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"<xliff:g id="APPLICATION">%1$s</xliff:g> ትግበራ የUSB  መሣሪያለመድረስ ይፈቅዳል?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"<xliff:g id="APPLICATION">%1$s</xliff:g> ትግበራ የUSB ተቀጥላለመድረስ ይፈቅዳል?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"የዚህ USB ተቀጥላ ሲያያዝ <xliff:g id="ACTIVITY">%1$s</xliff:g>ይከፈት?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"የዚህ USB ተቀጥላ ሲያያዝ <xliff:g id="ACTIVITY">%1$s</xliff:g>  ይከፈት?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"ምንም የተጫኑ ትግበራዎችከዚህ የUSB ተቀጥላ ጋር አይሰሩም። በ<xliff:g id="URL">%1$s</xliff:g> ስለዚህ ተቀጥላ የበለጠ ይረዱ።"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"የUSB  ተቀጥላ"</string>
+    <string name="label_view" msgid="6304565553218192990">"ዕይታ"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"ለዚህ USB  መሣሪያ በነባሪነት ተጠቀም"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ለዚህ USB  ተቀጥላ በነባሪነት ተጠቀም"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"ማያ እንዲሞላ አጉላ"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
+    <string name="compat_mode_help_header" msgid="7020175705401506719">"የተኳኋኝነት አጉላ"</string>
+    <string name="compat_mode_help_body" msgid="4946726776359270040">"ትግበራ ለትንሽ ማያ ሲነደፍ፣ የአጉላ መቆመጣጠሪያ በሰዓት በኩል ብቅ ይላል።"</string>
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"የማያፎቶዎችወደ ማዕከለ ስዕላት ተቀምጠዋል"</string>
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"የማያ ፎቶማስቀመጥ አልተቻለም። ውጫዊ ማከማቻም አገልግሎት ላይ ሊሆን ይችላል።"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"እንደ ማህደረ አጫዋች (MTP) ሰካ"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"እንደ ካሜራ (PTP) ሰካ"</string>
+    <string name="installer_cd_button_title" msgid="8485631662288445893">"ለMac የAndroid ፋይል ሰደዳ ትግበራ ጫን"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"ተመለስ"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"መነሻ"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"ምናሌ"</string>
     <string name="accessibility_recent" msgid="3027675523629738534">"የቅርብ ጊዜ ትግበራዎች"</string>
-    <!-- no translation found for accessibility_ime_switch_button (5032926134740456424) -->
-    <skip />
-    <!-- no translation found for accessibility_compatibility_zoom_button (8461115318742350699) -->
-    <skip />
-    <!-- no translation found for accessibility_compatibility_zoom_example (4220687294564945780) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_connected (2707027633242983370) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_disconnected (7416648669976870175) -->
-    <skip />
-    <!-- no translation found for accessibility_no_battery (358343022352820946) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_one_bar (7774887721891057523) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_two_bars (8500650438735009973) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_three_bars (2302983330865040446) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_full (8909122401720158582) -->
-    <skip />
-    <!-- no translation found for accessibility_no_phone (4894708937052611281) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_one_bar (687699278132664115) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_two_bars (8384905382804815201) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_three_bars (8521904843919971885) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_signal_full (6471834868580757898) -->
-    <skip />
-    <!-- no translation found for accessibility_no_data (4791966295096867555) -->
-    <skip />
-    <!-- no translation found for accessibility_data_one_bar (1415625833238273628) -->
-    <skip />
-    <!-- no translation found for accessibility_data_two_bars (6166018492360432091) -->
-    <skip />
-    <!-- no translation found for accessibility_data_three_bars (9167670452395038520) -->
-    <skip />
-    <!-- no translation found for accessibility_data_signal_full (2708384608124519369) -->
-    <skip />
-    <!-- no translation found for accessibility_no_wifi (4017628918351949575) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_one_bar (1914343229091303434) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_two_bars (7869150535859760698) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_three_bars (2665319332961356254) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (1275764416228473932) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_gprs (1606477224486747751) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_3g (8628562305003568260) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_3.5g (8664845609981692001) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_4g (7741000750630089612) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_cdma (6132648193978823023) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_edge (4477457051631979278) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_wifi (1127208787254436420) -->
-    <skip />
-    <!-- no translation found for accessibility_no_sim (8274017118472455155) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_tether (4102784498140271969) -->
-    <skip />
-    <!-- no translation found for accessibility_airplane_mode (834748999790763092) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
-    <!-- no translation found for accessibility_settings_button (7913780116850379698) -->
-    <skip />
-    <!-- no translation found for accessibility_notifications_button (2933903195211483438) -->
-    <skip />
-    <!-- no translation found for accessibility_remove_notification (4883990503785778699) -->
-    <skip />
-    <!-- no translation found for accessibility_gps_enabled (3511469499240123019) -->
-    <skip />
-    <!-- no translation found for accessibility_gps_acquiring (8959333351058967158) -->
-    <skip />
-    <!-- no translation found for accessibility_tty_enabled (4613200365379426561) -->
-    <skip />
-    <!-- no translation found for accessibility_ringer_vibrate (666585363364155055) -->
-    <skip />
-    <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
-    <skip />
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"የግቤት ሜተድ አዝራር ቀይር"</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"የተኳኋኝአጉላ አዝራር።"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"አነስተኛውን ማያ ወደ ትልቅ አጉላ።"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ብሉቱዝ ተያይዟል።"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ብሉቱዝ ተለያይቷል።"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"ምንም ባትሪ የለም።"</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ባትሪ አንድ አሞሌ።"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ባትሪ ሁለት አሞሌዎች።"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"ባትሪ ሦስት አሞሌዎች።"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"ባትሪ ሙሉ ነው።"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"ምንም ስልክ የለም።"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"የስልክ አንድ አሞሌ"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"የስልክ ሁለት አሞሌ"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"የስልክ ሦስት አሞሌ"</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"የስልክ አመልካች ሙሉ ነው።"</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"ምንም ውሂብ የለም።"</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"የውሂብ አንድ አሞሌ"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"የውሂብ ሁለት አሞሌዎች።"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"የውሂብ ሦስት አሞሌዎች።"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"የውሂብ አመልካች ሙሉ ነው።"</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"ምንም WiFi የለም።"</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"የWiFi አንድ አሞሌ።"</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"የWiFi  ሁለትአሞሌዎች።"</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"የWiFi ሦስት አሞሌዎች።"</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"የWiFi  አመልካች ሙሉ ነው።"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"ምንም SIM የለም።"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
+    <string name="accessibility_settings_button" msgid="7913780116850379698">"የቅንብሮች አዝራር።"</string>
+    <string name="accessibility_notifications_button" msgid="2933903195211483438">"የማሳወቂያዎች አዝራር።"</string>
+    <string name="accessibility_remove_notification" msgid="4883990503785778699">"ማሳወቂያ አስወግድ።"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ነቅቷል።"</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS በማግኘት ላይ።"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter ነቅቷል።"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"የስልክ ጥሪ ይንዘር።"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"የስልክ ጥሪ ፀጥታ።"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G ውሂብ ቦዝኗል"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G ውሂብ ቦዝኗል"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"የተንቀሳቃሽ ውሂብ ቦዝኗል"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ውሂብ ቦዝኗል"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"የተጠቀሰው የውሂብ አጠቃቀም ወሰን ደርሷል።"\n\n" ተጨማሪ የውሂብ አጠቃቀም የድምጸ ተያያዥ ሞደም ክፍያን ሊጨምር ይችላል።"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"ውሂብ ድጋሚ አንቃ"</string>
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ምንም በይነመረብ ተያያዥ የለም።"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ተያይዟል"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"ለGPS በመፈለግ ላይ"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"በ GPS የተዘጋጀ ሥፍራ"</string>
 </resources>

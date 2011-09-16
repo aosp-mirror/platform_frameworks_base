@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Kopiraj URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Odabir teksta..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Odabir teksta"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ dodaj u rječnik"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje s tekstom"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Prostora ima sve manje"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Zahtjev za postavljanje izravne Wi-Fi veze od <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Kliknite \"U redu\" za potvrdu."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Zahtjev za postavljanje izravne Wi-Fi veze s <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Unesite PIN da biste nastavili."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS pin <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> treba unijeti na paralelni uređaj <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> da bi se uspostavljanje veze nastavilo"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct uključen"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Dodirnite za postavke"</string>
     <string name="select_character" msgid="3365550120617701745">"Umetni znak"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Nepoznata aplikacija"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Slanje SMS poruka"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB pohrana"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Uređivanje..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Upozorenje o upotrebi podataka"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"upotreba prelazi <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G podaci su onemogućeni"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G podaci su onemogućeni"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilni podaci su onemogućeni"</string>

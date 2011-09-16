@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Выбрать текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Выбор текста"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"Добавить в словарь"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Способ ввода"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Операции с текстом"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Недостаточно места"</string>
@@ -1156,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Изменить..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Осталось мало трафика"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"израсходовано больше <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Передача данных 2G/3G отключена"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Передача данных 4G отключена"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобильный Интернет отключен"</string>

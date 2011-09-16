@@ -229,7 +229,7 @@
     <string name="permdesc_retrieve_window_content" msgid="3390962289797156152">"Ermöglicht einer App, den Inhalt des aktiven Fensters abzurufen. Schädliche Apps können den gesamten Fensterinhalt abrufen und mit Ausnahme von Passwörtern den gesamten Text auswerten."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"partielles Herunterfahren"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Versetzt den Aktivitätsmanager in einen heruntergefahrenen Zustand. Führt kein vollständiges Herunterfahren aus."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"Anwendungswechsel verhindern"</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hindert den Nutzer daran, zu einer anderen Anwendung zu wechseln"</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"Start von Apps überwachen und steuern"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Ermöglicht der App, den Start von Systemaktivitäten zu überwachen und zu steuern. Schädliche Anwendungen können so das gesamte System beeinträchtigen. Diese Berechtigung wird nur zu Entwicklungszwecken und nie für die normale Nutzung benötigt."</string>
@@ -373,7 +373,7 @@
     <string name="permlab_asec_create" msgid="6414757234789336327">"Internen Speicher erstellen"</string>
     <string name="permdesc_asec_create" msgid="2621346764995731250">"Ermöglicht der App, einen internen Speicher zu erstellen."</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"Internen Speicher vernichten"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Ermöglicht der App, den internen Speicher zu vernichten."</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Ermöglicht der App, den internen Speicher zu vernichten"</string>
     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"Internen Speicher bereitstellen/trennen"</string>
     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Ermöglicht der App, internen Speicher bereitzustellen bzw. zu trennen."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"Internen Speicher umbenennen"</string>
@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"URL kopieren"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Text auswählen..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Textauswahl"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"Zum Wörterbuch hinzufügen"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Geringer Speicher"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Anfrage für Wi-Fi Direct-Verbindungseinrichtung von <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klicken Sie auf \"OK\", um sie zu akzeptieren."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Anfrage für Wi-Fi Direct-Verbindungseinrichtung von <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Geben Sie zum Fortfahren die PIN ein."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Die WPS-PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> muss auf dem Peer-Gerät <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> eingegeben werden, damit die Verbindungseinrichtung fortgesetzt werden kann."</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ist aktiviert."</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Zum Aufrufen der Einstellungen berühren"</string>
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Unbekannte App"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
@@ -1113,19 +1116,19 @@
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Erhöhen"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Verringern"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> tippen und halten"</string>
-    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Zum Erhöhen nach oben und zum Verringern nach unten ziehen"</string>
-    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minute erhöhen"</string>
-    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minute verringern"</string>
-    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Stunde erhöhen"</string>
-    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Stunde verringern"</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Zum Vorstellen nach oben und zum Zurückstellen nach unten ziehen"</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minute vorstellen"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minute zurückstellen"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Stunde vorstellen"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Stunde zurückstellen"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Zeit festlegen"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen (Vormittag)"</string>
-    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Monat erhöhen"</string>
-    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Monat verringern"</string>
-    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Tag erhöhen"</string>
-    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Tag verringern"</string>
-    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Jahr erhöhen"</string>
-    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Jahr verringern"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Monat vorstellen"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Monat zurückstellen"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Tag vorstellen"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Tag zurückstellen"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Jahr vorstellen"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Jahr zurückstellen"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"Aktiviert"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"Nicht aktiviert"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"Ausgewählt"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-Speicher"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Bearbeiten..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Warnung zu Datennutzung"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"Datennutzung liegt über <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-/3G-Daten deaktiviert"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-Daten deaktiviert"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobile Daten deaktiviert"</string>

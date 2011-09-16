@@ -751,7 +751,7 @@
     <string name="searchview_description_search" msgid="6749826639098512120">"Carian"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Pertanyaan carian"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Pertanyaan jelas"</string>
-    <string name="searchview_description_submit" msgid="2688450133297983542">"Hantar pertanyaan"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"Serah pertanyaan"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Carian suara"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 bulan yang lalu"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Sebelum 1 bulan yang lalu"</string>
@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ tambah ke kamus"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Kekurangan ruang"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK untuk menerima."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Masukkan pin untuk meneruskan."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pin WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> perlu dimasukkan pada peranti rakan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> untuk penyediaan sambungan untuk meneruskan"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct dihidupkan"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Sentuh untuk tetapan"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplikasi tidak dikenali"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"Storan USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Edit..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Amaran penggunaan data"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"penggunaan melebihi <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Data 2G-3G dilumpuhkan"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data 4G dilumpuhkan"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data mudah alih dilumpuhkan"</string>

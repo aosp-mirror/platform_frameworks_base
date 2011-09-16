@@ -37,7 +37,7 @@
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Mode pesawat"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Putar layar secara otomatis"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"BISUKAN"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"BUNGKAM"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Pemberitahuan"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Terbaru"</string>

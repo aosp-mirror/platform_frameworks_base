@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"คัดลอก URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"เลือกข้อความ..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"การเลือกข้อความ"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+เพิ่มลงในพจนานุกรม"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"เหลือที่ว่างน้อย"</string>
@@ -1156,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"ที่เก็บข้อมูล USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"แก้ไข..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"คำเตือนการใช้ข้อมูล"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"การใช้งานเกิน <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"ปิดใช้งานข้อมูล 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ปิดใช้งานข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ปิดใช้งานข้อมูลมือถือ"</string>

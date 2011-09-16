@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copier l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Sélect. le texte..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Sélection de texte"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ ajouter au dictionnaire"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Mode de saisie"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Actions sur le texte"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Espace disponible faible"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Demande de configuration du Wi-Fi Direct de <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Cliquez sur \"OK\" pour accepter."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Demande de configuration du Wi-Fi Direct de <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Saisissez le code PIN pour continuer."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Afin de poursuivre la configuration de la connexion, vous devez saisir le code WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> sur l\'appareil associé <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>."</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct activé"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Appuyez pour accéder aux paramètres."</string>
     <string name="select_character" msgid="3365550120617701745">"Insérer un caractère"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Application inconnue"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Envoi de messages SMS"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"Mémoire de stockage USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Modifier..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertissement utilisation données"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"plus de <xliff:g id="SIZE">%s</xliff:g> utilisés"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Données 2G-3G désactivées"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Données 4G désactivées"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Données mobiles désactivées"</string>

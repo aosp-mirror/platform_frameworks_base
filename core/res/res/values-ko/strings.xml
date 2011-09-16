@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"URL 복사"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"텍스트 선택..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"텍스트 선택"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"사전에 추가"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"저장공간 부족"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>에서 Wi-Fi Direct 연결 설정을 요청합니다. 수락하려면 확인을 클릭하세요."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>에서 Wi-Fi Direct 연결 설정을 요청합니다. 계속 진행하려면 PIN을 입력하세요."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"연결 설정을 계속하려면 WPS 핀(<xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>)을 피어 기기(<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>)에 입력해야 합니다."</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct 켜짐"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"설정으로 이동하려면 터치하세요."</string>
     <string name="select_character" msgid="3365550120617701745">"문자 삽입"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"알 수 없는 애플리케이션"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS 메시지를 보내는 중"</string>
@@ -1141,10 +1144,10 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"모드 변경"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift 키"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 키"</string>
-    <string name="description_direction_up" msgid="1983114130441878529">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> 방향으로 위"</string>
-    <string name="description_direction_down" msgid="4294993639091088240">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> 방향으로 아래"</string>
-    <string name="description_direction_left" msgid="6814008463839915747">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> 방향으로 왼쪽"</string>
-    <string name="description_direction_right" msgid="4296057241963012862">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> 방향으로 오른쪽"</string>
+    <string name="description_direction_up" msgid="1983114130441878529">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 아래로 슬라이드"</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 오른쪽으로 슬라이드"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"잠금 해제"</string>
     <string name="description_target_camera" msgid="969071997552486814">"카메라"</string>
     <string name="description_target_silent" msgid="893551287746522182">"무음"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB 저장소"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"수정..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"데이터 사용 경고"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"사용량이 <xliff:g id="SIZE">%s</xliff:g>을(를) 초과했습니다."</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 데이터 사용중지됨"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 데이터 사용중지됨"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"모바일 데이터 사용중지됨"</string>

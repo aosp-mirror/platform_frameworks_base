@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"کپی URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"انتخاب متن..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ افزودن به فرهنگ لغت"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"فضا کم است"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"درخواست راه‌اندازی Wi-Fi Direct از طرف <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> دریافت شد. برای قبول کردن، تأیید را کلیک کنید."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"درخواست راه‌اندازی Wi-Fi Direct از طرف <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> دریافت شد. برای ادامه پین را وارد کنید."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"پین WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> باید در دستگاه مرتبط شده <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> نیز وارد شود تا راه‌اندازی اتصال ادامه یابد."</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct روشن است"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"لمس کردن برای تنظیمات"</string>
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"برنامه ناشناس"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"ارسال پیامک ها"</string>
@@ -1114,18 +1117,18 @@
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> ضربه بزنید و نگه دارید."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"برای افزایش به بالا و برای کاهش به پایین بلغزانید."</string>
-    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"دقیقه افزایشی"</string>
-    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"دقیقه کاهشی"</string>
-    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"ساعت افزایشی"</string>
-    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"ساعت کاهشی"</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">" افزایش دقیقه"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"کاهش دقیقه"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"افزایش ساعت"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"کاهش ساعت"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"تنظیم ب.ظ"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"تنظیم ق.ظ"</string>
     <string name="date_picker_increment_month_button" msgid="6324978841467899081">"ماه افزایشی"</string>
-    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"ماه کاهشی"</string>
-    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"روز افزایشی"</string>
-    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"روز کاهشی"</string>
-    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"سال افزایشی"</string>
-    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"سال کاهشی"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"کاهش ماه"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"افزایش روز"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"کاهش روز"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"افزایش سال"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"کاهش سال"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"علامت زده"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"بدون علامت"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"انتخاب شد"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"حافظه USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"ویرایش..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"هشدار میزان استفاده از داده"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"استفاده از <xliff:g id="SIZE">%s</xliff:g> بیشتر شده است"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"داده های 2G-3G غیرفعال شد"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"داده 4G غیر فعال شده است"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"داده های تلفن همراه غیرفعال شد"</string>
