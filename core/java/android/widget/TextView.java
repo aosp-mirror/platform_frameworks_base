@@ -3250,7 +3250,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
-        if (startSpellCheck) {
+        if (startSpellCheck && mSpellChecker != null) {
+            // This view has to have been previously attached for mSpellChecker to exist  
             updateSpellCheckSpans(0, textLength);
         }
 
@@ -4412,6 +4413,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Resolve drawables as the layout direction has been resolved
         resolveDrawables();
+        
+        updateSpellCheckSpans(0, mText.length());
     }
 
     @Override
@@ -4443,6 +4446,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         hideControllers();
 
         resetResolvedDrawables();
+
+        if (mSpellChecker != null) {
+            mSpellChecker.closeSession();
+            removeMisspelledSpans();
+            // Forces the creation of a new SpellChecker next time this window is created.
+            // Will handle the cases where the settings has been changed in the meantime.
+            mSpellChecker = null;
+        }
     }
 
     @Override
@@ -7595,7 +7606,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             ims.mChangedDelta += after-before;
         }
-        
+
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
 
@@ -7737,7 +7748,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Create new SpellCheckSpans on the modified region.
      */
     private void updateSpellCheckSpans(int start, int end) {
-        if (!(mText instanceof Editable) || !isSuggestionsEnabled()) return;
+        if (!isTextEditable() || !isSuggestionsEnabled() || !getSpellChecker().isSessionActive())
+            return;
         Editable text = (Editable) mText;
 
         WordIterator wordIterator = getWordIterator();
@@ -8427,8 +8439,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int flags = suggestionSpans[i].getFlags();
                 if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
                         && (flags & SuggestionSpan.FLAG_MISSPELLED) == 0) {
-                    flags = flags & ~SuggestionSpan.FLAG_EASY_CORRECT;
+                    flags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
                     suggestionSpans[i].setFlags(flags);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes the suggestion spans for misspelled words.
+     */
+    private void removeMisspelledSpans() {
+        if (mText instanceof Spannable) {
+            Spannable spannable = (Spannable) mText;
+            SuggestionSpan[] suggestionSpans = spannable.getSpans(0,
+                    spannable.length(), SuggestionSpan.class);
+            for (int i = 0; i < suggestionSpans.length; i++) {
+                int flags = suggestionSpans[i].getFlags();
+                if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
+                        && (flags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                    spannable.removeSpan(suggestionSpans[i]);
                 }
             }
         }
@@ -9573,7 +9603,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
 
-
         private class CustomPopupWindow extends PopupWindow {
             public CustomPopupWindow(Context context, int defStyle) {
                 super(context, null, defStyle);
@@ -9585,9 +9614,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 TextView.this.getPositionListener().removeSubscriber(SuggestionsPopupWindow.this);
 
-                if ((mText instanceof Spannable)) {
-                    ((Spannable) mText).removeSpan(mSuggestionRangeSpan);
-                }
+                // Safe cast since show() checks that mText is an Editable
+                ((Spannable) mText).removeSpan(mSuggestionRangeSpan);
 
                 setCursorVisible(mCursorWasVisibleBeforeSuggestions);
                 if (hasInsertionController()) {
@@ -9637,8 +9665,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             void removeMisspelledFlag() {
                 int suggestionSpanFlags = suggestionSpan.getFlags();
                 if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
-                    suggestionSpanFlags &= ~(SuggestionSpan.FLAG_MISSPELLED);
-                    suggestionSpanFlags &= ~(SuggestionSpan.FLAG_EASY_CORRECT);
+                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
+                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
                     suggestionSpan.setFlags(suggestionSpanFlags);
                 }
             }
@@ -10520,9 +10548,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public abstract int getCurrentCursorOffset();
 
-        protected void updateSelection(int offset) {
-            updateDrawable();
-        }
+        protected abstract void updateSelection(int offset);
 
         public abstract void updatePosition(float x, float y);
 
@@ -10796,8 +10822,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updateSelection(int offset) {
-            super.updateSelection(offset);
             Selection.setSelection((Spannable) mText, offset, getSelectionEnd());
+            updateDrawable();
         }
 
         @Override
@@ -10838,8 +10864,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updateSelection(int offset) {
-            super.updateSelection(offset);
             Selection.setSelection((Spannable) mText, getSelectionStart(), offset);
+            updateDrawable();
         }
 
         @Override
