@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"URL másolása"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Szöveg kijelölése..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Szöveg kijelölése"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ hozzáadás a szótárhoz"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Kevés a hely"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct kapcsolódási kérés a következőtől: <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Az elfogadáshoz kattintson az OK gombra."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct csatlakoztatási kérés a következőtől: <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Adja meg a PIN-kódot a folytatáshoz."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"A csatlakoztatás folytatásához be kell írni a(z) <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> WPS PIN-kódot a partnereszközön (<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>)"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"A Wi-Fi Direct be van kapcsolva"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"A beállításokhoz érintse meg"</string>
     <string name="select_character" msgid="3365550120617701745">"Karakter beszúrása"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Ismeretlen alkalmazás"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-ek küldése"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-tár"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Szerkesztés..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Adathasználati figyelmeztetés"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"Túllépte ezt a méretet: <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G adatforgalom letiltva"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G adatforgalom letiltva"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobil adatforgalom letiltva"</string>

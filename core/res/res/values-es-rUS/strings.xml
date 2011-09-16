@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selección de texto"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ agregar al diccionario"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Poco espacio de almacenamiento"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Solicitud de configuración de conexión de Wi-Fi Direct desde <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Haz clic en Aceptar."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Solicitud de configuración de conexión de Wi-Fi Direct desde <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Ingresa el PIN para continuar."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Debes introducir el PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> en el otro dispositivo <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> para continuar con la configuración de conexión."</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Se activó Wi-Fi Direct."</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tocar para ajustar los parámetros de configuración"</string>
     <string name="select_character" msgid="3365550120617701745">"Insertar caracteres"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplicación desconocida"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensajes SMS"</string>
@@ -1141,10 +1144,10 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Cambio de modo"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Mayúscula"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Ingresar"</string>
-    <string name="description_direction_up" msgid="1983114130441878529">"Hacia arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="4294993639091088240">"Hacia abajo para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="6814008463839915747">"Hacia la izquierda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="4296057241963012862">"Hacia la derecha para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_up" msgid="1983114130441878529">"Hacia arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"Hacia abajo para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"Hacia la izquierda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"Hacia la derecha para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Desbloquear"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Cámara"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencioso"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"Almacenamiento USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Editar..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertencia de uso de datos"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"el uso supera <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Datos de 2 GB - 3 GB desactivados"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datos de 4 GB desactivados"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Datos móviles desactivados"</string>

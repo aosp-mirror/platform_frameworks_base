@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"複製網址"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"選取文字..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"選取文字"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">" + 新增至字典"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"輸入方式"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字動作"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"儲存空間即將不足"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求，按一下 [確定] 即可接受。"</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求。輸入 PIN 即可繼續進行。"</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"必須在對端裝置 <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> 上輸入 WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>，才能繼續進行連線設定"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct 已開啟"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"輕觸即可設定"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字元"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"未知的應用程式"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"傳送 SMS 簡訊"</string>
@@ -1112,7 +1115,7 @@
     <string name="choose_account_label" msgid="4191313562041125787">"選取帳戶"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"增加"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減少"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> 輕按並按住。"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> 持續輕按。"</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"向上滑動即可增加，向下滑動即可減少。"</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"增加分鐘數"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"減少分鐘數"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"編輯..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"資料用量警告"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"用量超過 <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"已停用 2G-3G 數據"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"已停用 4G 數據"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"已停用行動數據"</string>

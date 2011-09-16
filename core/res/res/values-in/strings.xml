@@ -344,8 +344,8 @@
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Sumber lokasi kualitas tinggi akses seperti Sistem Penentuan Posisi Global pada tablet, jika tersedia. Aplikasi berbahaya dapat menggunakan ini untuk menentukan perkiraan lokasi Anda, dan dapat menyedot daya baterai."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Akses sumber lokasi detail seperti GPS pada ponsel, jika tersedia. Aplikasi hasad dapat menggunakan ini untuk menentukan lokasi Anda, dapat menguras daya baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"lokasi sementara (berdasarkan jaringan)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Sumber lokasi sementara akses seperti database jaringan seluler untuk menentukan perkiraan lokasi tablet, jika tersedia. Aplikasi berbahaya dapat menggunakan ini untuk menentukan perkiraan lokasi Anda."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Akses sumber lokasi sementara seperti database jaringan seluler untuk menentukan lokasi ponsel terdekat, jika ada. Aplikasi hasad dapat menggunakan ini untuk memperkirakan lokasi Anda."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Sumber lokasi sementara akses seperti basis data jaringan seluler untuk menentukan perkiraan lokasi tablet, jika tersedia. Aplikasi berbahaya dapat menggunakan ini untuk menentukan perkiraan lokasi Anda."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Akses sumber lokasi sementara seperti basis data jaringan seluler untuk menentukan lokasi ponsel terdekat, jika ada. Aplikasi hasad dapat menggunakan ini untuk memperkirakan lokasi Anda."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"akses SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Izinkan aplikasi menggunakan fitur tingkat rendah SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"baca buffer frame"</string>
@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ tambahkan ke kamus"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Metode masukan"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Ruang penyimpanan tinggal sedikit"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Permintaan penyiapan sambungan WiFI Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK untuk menerima."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Permintaan penyiapan sambungan WiFi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Masukkan pin untuk melanjutkan."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pin WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> harus dimasukkan pada perangkat rekan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> agar penyiapan sambungan dapat dilanjutkan"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Langsung aktif"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Sentuh untuk setelan"</string>
     <string name="select_character" msgid="3365550120617701745">"Sisipkan huruf"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplikasi tidak dikenal"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Mengirim pesan SMS"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"Penyimpanan USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Edit..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Peringatan penggunaan data"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"penggunaan melebihi <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Data 2G-3G dinonaktifkan"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data 4G dinonaktifkan"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data seluler dinonaktifkan"</string>

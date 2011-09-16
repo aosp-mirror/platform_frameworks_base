@@ -16,6 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for backup_confirm_title (827563724209303345) -->
+    <skip />
+    <!-- no translation found for restore_confirm_title (5469365809567486602) -->
+    <skip />
     <string name="backup_confirm_text" msgid="1878021282758896593">"系统请求将所有数据完整备份至已连接的桌面计算机。允许此操作吗？"\n\n"如果您本人未要求备份，请阻止该操作。"</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"备份我的数据"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"不备份"</string>
@@ -26,4 +30,14 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"请输入用于加密完整备份数据的密码。如果留空，系统将会使用您当前的备份密码："</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"如果您想为整个备份数据加密，请在下方输入密码："</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"如果恢复数据已加密，请在下方输入密码："</string>
+    <!-- no translation found for toast_backup_started (550354281452756121) -->
+    <skip />
+    <!-- no translation found for toast_backup_ended (3818080769548726424) -->
+    <skip />
+    <!-- no translation found for toast_restore_started (7881679218971277385) -->
+    <skip />
+    <!-- no translation found for toast_restore_ended (1764041639199696132) -->
+    <skip />
+    <!-- no translation found for toast_timeout (5276598587087626877) -->
+    <skip />
 </resources>

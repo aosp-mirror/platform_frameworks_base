@@ -859,7 +859,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copia l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Selecciona el text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecció de text"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ afegeix al diccionari"</string>
+    <string name="addToDictionary" msgid="9090375111134433012">"afegeix al diccionari"</string>
+    <string name="deleteText" msgid="7070985395199629156">"suprimeix"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Queda poc espai"</string>
@@ -1156,7 +1157,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Emmagatzematge USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Edita..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertiment d\'ús de dades"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"l\'ús supera <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Toca per veure l\'ús i la configuració"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Dades 2G-3G desactivades"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dades 4G desactivades"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dades mòbils desactivades"</string>

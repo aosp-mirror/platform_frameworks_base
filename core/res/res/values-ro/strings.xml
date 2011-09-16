@@ -861,7 +861,9 @@
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selectare text"</string>
     <!-- unknown placeholder WORD in addToDictionary -->
     <skip />
-    <!-- no translation found for addToDictionary (2839899368418071843) -->
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
     <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acţiuni pentru text"</string>
@@ -949,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Solicitare de configurare a conexiunii pentru Wi-Fi Direct de la <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Faceţi clic pe OK pentru a accepta."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Solicitare de configurare a conexiunii Wi-Fi Direct de la <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Introduceţi codul PIN pentru a continua."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pentru a continua configurarea conexiunii, este necesar să introduceţi codul PIN WPS pentru <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> pe dispozitivul pereche <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct este activat"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Atingeţi pentru setări"</string>
     <string name="select_character" msgid="3365550120617701745">"Introduceţi caracterul"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplicaţie necunoscută"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Se trimit mesaje SMS"</string>
@@ -1115,34 +1115,20 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Selectaţi un cont"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementaţi"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decrementaţi"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (1343063395404990189) -->
-    <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Apăsaţi şi ţineţi apăsat <xliff:g id="VALUE">%s</xliff:g>."</string>
+    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Glisaţi în sus pentru incrementare şi în jos pentru decrementare."</string>
+    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Incrementaţi valoarea pentru minut"</string>
+    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Decrementaţi valoarea pentru minut"</string>
+    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Incrementaţi valoarea pentru oră"</string>
+    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Decrementaţi valoarea pentru oră"</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Setaţi valoarea PM"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Setaţi valoarea AM"</string>
+    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Incrementaţi valoarea pentru lună"</string>
+    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Decrementaţi valoarea pentru lună"</string>
+    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Incrementaţi valoarea pentru zi"</string>
+    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Decrementaţi valoarea pentru zi"</string>
+    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Incrementaţi valoarea pentru an"</string>
+    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Decrementaţi valoarea pentru an"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"bifată"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"nebifată"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"selectat"</string>
@@ -1158,14 +1144,10 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Schimbarea modului"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
-    <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
-    <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
-    <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
-    <skip />
+    <string name="description_direction_up" msgid="1983114130441878529">"În sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="4294993639091088240">"În jos pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="6814008463839915747">"La stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="4296057241963012862">"La dreapta pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Deblocaţi"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Cameră foto"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silenţios"</string>
@@ -1179,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"Dsipozitiv de stocare USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Editaţi..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertisment de utiliz. a datelor"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"utilizarea depăşeşte <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Datele 2G-3G au fost dezactivate"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datele 4G au fost dezactivate"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Datele mobile au fost dezactiv."</string>

@@ -859,7 +859,12 @@
     <string name="copyUrl" msgid="2538211579596067402">"Skopírovať adresu URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Vybrať text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Výber textu"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ pridať do slovníka"</string>
+    <!-- unknown placeholder WORD in addToDictionary -->
+    <skip />
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Metóda vstupu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operácie s textom"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Nedostatok pamäte"</string>
@@ -946,10 +951,8 @@
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Žiadosť o nastavenie priameho pripojenia siete Wi-Fi zo zariadenia <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Prijmete kliknutím na tlačidlo OK."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Žiadosť o nastavenie priameho pripojenia siete Wi-Fi z adresy <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Pokračujte zadaním kódu PIN."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Aby mohlo nastavenie pripojenia pokračovať, je potrebné zadať kód PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> v zdieľanom zariadení <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Priame pripojenie siete Wi-Fi je zapnuté"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Nastavenia otvoríte dotykom"</string>
     <string name="select_character" msgid="3365550120617701745">"Vkladanie znakov"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Neznáma aplikácia"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odosielanie správ SMS"</string>
@@ -1158,7 +1161,10 @@
     <string name="storage_usb" msgid="3017954059538517278">"Ukladací priestor USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Upraviť..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Upozornenie o využití dát"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"Objem prenes. dát prekrač. <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <!-- unknown placeholder SIZE in data_usage_warning_body -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Dátové prenosy 2G a 3G zakázané"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dátové prenosy 4G zakázané"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilné dátové prenosy zakázané"</string>

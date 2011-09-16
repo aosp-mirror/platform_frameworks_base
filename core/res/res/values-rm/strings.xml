@@ -977,7 +977,9 @@
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecziun da text"</string>
     <!-- unknown placeholder WORD in addToDictionary -->
     <skip />
-    <!-- no translation found for addToDictionary (2839899368418071843) -->
+    <!-- no translation found for addToDictionary (9090375111134433012) -->
+    <skip />
+    <!-- no translation found for deleteText (7070985395199629156) -->
     <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Metoda d\'endataziun"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acziuns da text"</string>
@@ -1402,7 +1404,7 @@
     <skip />
     <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
     <skip />
-    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
     <skip />
     <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
     <skip />
