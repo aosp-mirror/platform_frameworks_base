@@ -338,7 +338,7 @@ public class SearchManager
 
     /**
      * Column name for suggestions cursor. <i>Optional.</i> This column may be
-     * used to specify the time in (@link System#currentTimeMillis
+     * used to specify the time in {@link System#currentTimeMillis
      * System.currentTImeMillis()} (wall time in UTC) when an item was last
      * accessed within the results-providing application. If set, this may be
      * used to show more-recently-used items first.
