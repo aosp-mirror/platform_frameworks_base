@@ -67,6 +67,10 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     enum {
         // set the IP address and port of the A@H receiver
         kInvokeSetAAHDstIPPort = 1,
+
+        // set the destination IP address and port (and perhaps any additional
+        // parameters added in the future) packaged in one string
+        kInvokeSetAAHConfigBlob,
     };
 
     static const int64_t kAAHRetryKeepAroundTimeNs;
