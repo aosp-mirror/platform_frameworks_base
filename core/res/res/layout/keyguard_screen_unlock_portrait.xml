@@ -171,4 +171,19 @@
         android:layout_height="0dip"
         />
 
+    <!-- Area to overlay FaceLock -->
+    <TextView android:id="@+id/faceLockAreaView"
+        android:visibility="gone"
+        android:layout_row="4"
+        android:layout_column="0"
+        android:layout_rowSpan="1"
+        android:layout_columnSpan="1"
+        android:layout_gravity="fill"
+        android:layout_marginTop="8dip"
+        android:layout_marginBottom="8dip"
+        android:layout_width="0dip"
+        android:layout_height="0dip"
+        android:background="@color/facelock_color_background"
+    />
+
 </GridLayout>
