@@ -369,7 +369,11 @@ int androidSetThreadPriority(pid_t tid, int pri)
 }
 
 int androidGetThreadPriority(pid_t tid) {
+#if defined(HAVE_PTHREADS)
     return getpriority(PRIO_PROCESS, tid);
+#else
+    return ANDROID_PRIORITY_NORMAL;
+#endif
 }
 
 int androidGetThreadSchedulingGroup(pid_t tid)
