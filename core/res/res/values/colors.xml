@@ -112,6 +112,9 @@
     <color name="lockscreen_clock_am_pm">#ff9a9a9a</color>
     <color name="lockscreen_owner_info">#ff9a9a9a</color>
 
+    <!-- FaceLock -->
+    <color name="facelock_color_background">#000000</color>
+
     <!-- For holo theme -->
       <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
       <drawable name="screen_background_holo_dark">#ff000000</drawable>
