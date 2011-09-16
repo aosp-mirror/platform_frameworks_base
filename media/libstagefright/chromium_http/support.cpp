@@ -74,10 +74,32 @@ bool logMessageHandler(
     return false;
 }
 
+struct AutoPrioritySaver {
+    AutoPrioritySaver()
+        : mTID(androidGetTid()),
+          mPrevPriority(androidGetThreadPriority(mTID)) {
+        androidSetThreadPriority(mTID, ANDROID_PRIORITY_NORMAL);
+    }
+
+    ~AutoPrioritySaver() {
+        androidSetThreadPriority(mTID, mPrevPriority);
+    }
+
+private:
+    pid_t mTID;
+    int mPrevPriority;
+
+    DISALLOW_EVIL_CONSTRUCTORS(AutoPrioritySaver);
+};
 
 static void InitializeNetworkThreadIfNecessary() {
     Mutex::Autolock autoLock(gNetworkThreadLock);
+
     if (gNetworkThread == NULL) {
+        // Make sure any threads spawned by the chromium framework are
+        // running at normal priority instead of inheriting this thread's.
+        AutoPrioritySaver saver;
+
         gNetworkThread = new base::Thread("network");
         base::Thread::Options options;
         options.message_loop_type = MessageLoop::TYPE_IO;

@@ -1377,8 +1377,13 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
                     memcpy(info->mData->data(), buffer->data(), buffer->size());
                 }
 
-                LOGV("[%s] calling emptyBuffer %p",
-                     mCodec->mComponentName.c_str(), bufferID);
+                if (flags & OMX_BUFFERFLAG_CODECCONFIG) {
+                    LOGV("[%s] calling emptyBuffer %p w/ codec specific data",
+                         mCodec->mComponentName.c_str(), bufferID);
+                } else {
+                    LOGV("[%s] calling emptyBuffer %p w/ time %lld us",
+                         mCodec->mComponentName.c_str(), bufferID, timeUs);
+                }
 
                 CHECK_EQ(mCodec->mOMX->emptyBuffer(
                             mCodec->mNode,
@@ -1396,7 +1401,7 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
                 LOGV("[%s] Signalling EOS on the input port",
                      mCodec->mComponentName.c_str());
 
-                LOGV("[%s] calling emptyBuffer %p",
+                LOGV("[%s] calling emptyBuffer %p signalling EOS",
                      mCodec->mComponentName.c_str(), bufferID);
 
                 CHECK_EQ(mCodec->mOMX->emptyBuffer(
@@ -1457,8 +1462,8 @@ bool ACodec::BaseState::onOMXFillBufferDone(
         int64_t timeUs,
         void *platformPrivate,
         void *dataPtr) {
-    LOGV("[%s] onOMXFillBufferDone %p",
-         mCodec->mComponentName.c_str(), bufferID);
+    LOGV("[%s] onOMXFillBufferDone %p time %lld us",
+         mCodec->mComponentName.c_str(), bufferID, timeUs);
 
     ssize_t index;
     BufferInfo *info =
@@ -1686,7 +1691,11 @@ void ACodec::UninitializedState::onSetup(
             ++matchIndex) {
         componentName = matchingCodecs.itemAt(matchIndex).string();
 
+        pid_t tid = androidGetTid();
+        int prevPriority = androidGetThreadPriority(tid);
+        androidSetThreadPriority(tid, ANDROID_PRIORITY_FOREGROUND);
         status_t err = omx->allocateNode(componentName.c_str(), observer, &node);
+        androidSetThreadPriority(tid, prevPriority);
 
         if (err == OK) {
             break;

@@ -118,9 +118,24 @@ void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
 
             mDrainAudioQueuePending = false;
 
-            onDrainAudioQueue();
+            if (onDrainAudioQueue()) {
+                uint32_t numFramesPlayed;
+                CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed),
+                         (status_t)OK);
 
-            postDrainAudioQueue();
+                uint32_t numFramesPendingPlayout =
+                    mNumFramesWritten - numFramesPlayed;
+
+                // This is how long the audio sink will have data to
+                // play back.
+                int64_t delayUs =
+                    mAudioSink->msecsPerFrame()
+                        * numFramesPendingPlayout * 1000ll;
+
+                // Let's give it more data after about half that time
+                // has elapsed.
+                postDrainAudioQueue(delayUs / 2);
+            }
             break;
         }
 
@@ -182,7 +197,7 @@ void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
     }
 }
 
-void NuPlayer::Renderer::postDrainAudioQueue() {
+void NuPlayer::Renderer::postDrainAudioQueue(int64_t delayUs) {
     if (mDrainAudioQueuePending || mSyncQueues || mPaused) {
         return;
     }
@@ -194,19 +209,33 @@ void NuPlayer::Renderer::postDrainAudioQueue() {
     mDrainAudioQueuePending = true;
     sp<AMessage> msg = new AMessage(kWhatDrainAudioQueue, id());
     msg->setInt32("generation", mAudioQueueGeneration);
-    msg->post();
+    msg->post(delayUs);
 }
 
 void NuPlayer::Renderer::signalAudioSinkChanged() {
     (new AMessage(kWhatAudioSinkChanged, id()))->post();
 }
 
-void NuPlayer::Renderer::onDrainAudioQueue() {
-    for (;;) {
-        if (mAudioQueue.empty()) {
-            break;
-        }
+bool NuPlayer::Renderer::onDrainAudioQueue() {
+    uint32_t numFramesPlayed;
+    CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed), (status_t)OK);
 
+    ssize_t numFramesAvailableToWrite =
+        mAudioSink->frameCount() - (mNumFramesWritten - numFramesPlayed);
+
+#if 0
+    if (numFramesAvailableToWrite == mAudioSink->frameCount()) {
+        LOGI("audio sink underrun");
+    } else {
+        LOGV("audio queue has %d frames left to play",
+             mAudioSink->frameCount() - numFramesAvailableToWrite);
+    }
+#endif
+
+    size_t numBytesAvailableToWrite =
+        numFramesAvailableToWrite * mAudioSink->frameSize();
+
+    while (numBytesAvailableToWrite > 0 && !mAudioQueue.empty()) {
         QueueEntry *entry = &*mAudioQueue.begin();
 
         if (entry->mBuffer == NULL) {
@@ -216,20 +245,7 @@ void NuPlayer::Renderer::onDrainAudioQueue() {
 
             mAudioQueue.erase(mAudioQueue.begin());
             entry = NULL;
-            return;
-        }
-
-        uint32_t numFramesPlayed;
-        CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed), (status_t)OK);
-
-        ssize_t numFramesAvailableToWrite =
-            mAudioSink->frameCount() - (mNumFramesWritten - numFramesPlayed);
-
-        size_t numBytesAvailableToWrite =
-            numFramesAvailableToWrite * mAudioSink->frameSize();
-
-        if (numBytesAvailableToWrite == 0) {
-            break;
+            return false;
         }
 
         if (entry->mOffset == 0) {
@@ -274,10 +290,14 @@ void NuPlayer::Renderer::onDrainAudioQueue() {
             entry = NULL;
         }
 
-        mNumFramesWritten += copy / mAudioSink->frameSize();
+        numBytesAvailableToWrite -= copy;
+        size_t copiedFrames = copy / mAudioSink->frameSize();
+        mNumFramesWritten += copiedFrames;
     }
 
     notifyPosition();
+
+    return !mAudioQueue.empty();
 }
 
 void NuPlayer::Renderer::postDrainVideoQueue() {
@@ -344,7 +364,14 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
     int64_t mediaTimeUs;
     CHECK(entry->mBuffer->meta()->findInt64("timeUs", &mediaTimeUs));
 
-    LOGI("rendering video at media time %.2f secs", mediaTimeUs / 1E6);
+    int64_t realTimeUs = mediaTimeUs - mAnchorTimeMediaUs + mAnchorTimeRealUs;
+    int64_t lateByUs = ALooper::GetNowUs() - realTimeUs;
+
+    if (lateByUs > 40000) {
+        LOGI("video late by %lld us (%.2f secs)", lateByUs, lateByUs / 1E6);
+    } else {
+        LOGV("rendering video at media time %.2f secs", mediaTimeUs / 1E6);
+    }
 #endif
 
     entry->mNotifyConsumed->setInt32("render", true);

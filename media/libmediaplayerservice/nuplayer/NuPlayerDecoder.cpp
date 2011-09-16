@@ -59,8 +59,21 @@ void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
         format->setObject("native-window", mNativeWindow);
     }
 
+    // Current video decoders do not return from OMX_FillThisBuffer
+    // quickly, violating the OpenMAX specs, until that is remedied
+    // we need to invest in an extra looper to free the main event
+    // queue.
+    bool needDedicatedLooper = !strncasecmp(mime, "video/", 6);
+
     mCodec = new ACodec;
-    looper()->registerHandler(mCodec);
+
+    if (needDedicatedLooper && mCodecLooper == NULL) {
+        mCodecLooper = new ALooper;
+        mCodecLooper->setName("NuPlayerDecoder");
+        mCodecLooper->start(false, false, ANDROID_PRIORITY_AUDIO);
+    }
+
+    (needDedicatedLooper ? mCodecLooper : looper())->registerHandler(mCodec);
 
     mCodec->setNotificationMessage(notifyMsg);
     mCodec->initiateSetup(format);
