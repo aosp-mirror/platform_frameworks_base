@@ -153,6 +153,7 @@ public final class ActivityThread {
     final HashMap<IBinder, Service> mServices
             = new HashMap<IBinder, Service>();
     AppBindData mBoundApplication;
+    Profiler mProfiler;
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
     Configuration mResConfiguration;
@@ -364,10 +365,6 @@ public final class ActivityThread {
         ApplicationInfo appInfo;
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
-        String profileFile;
-        ParcelFileDescriptor profileFd;
-        boolean autoStopProfiler;
-        boolean profiling;
         Bundle instrumentationArgs;
         IInstrumentationWatcher instrumentationWatcher;
         int debugMode;
@@ -375,10 +372,23 @@ public final class ActivityThread {
         boolean persistent;
         Configuration config;
         CompatibilityInfo compatInfo;
-        boolean handlingProfiling;
+
+        /** Initial values for {@link Profiler}. */
+        String initProfileFile;
+        ParcelFileDescriptor initProfileFd;
+        boolean initAutoStopProfiler;
+
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
+    }
+
+    static final class Profiler {
+        String profileFile;
+        ParcelFileDescriptor profileFd;
+        boolean autoStopProfiler;
+        boolean profiling;
+        boolean handlingProfiling;
         public void setProfiler(String file, ParcelFileDescriptor fd) {
             if (profiling) {
                 if (fd != null) {
@@ -661,8 +671,6 @@ public final class ActivityThread {
             data.appInfo = appInfo;
             data.providers = providers;
             data.instrumentationName = instrumentationName;
-            data.setProfiler(profileFile, profileFd);
-            data.autoStopProfiler = false;
             data.instrumentationArgs = instrumentationArgs;
             data.instrumentationWatcher = instrumentationWatcher;
             data.debugMode = debugMode;
@@ -670,6 +678,9 @@ public final class ActivityThread {
             data.persistent = persistent;
             data.config = config;
             data.compatInfo = compatInfo;
+            data.initProfileFile = profileFile;
+            data.initProfileFd = profileFd;
+            data.initAutoStopProfiler = false;
             queueOrSendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -1293,8 +1304,8 @@ public final class ActivityThread {
         public final boolean queueIdle() {
             ActivityClientRecord a = mNewActivities;
             boolean stopProfiling = false;
-            if (mBoundApplication != null && mBoundApplication.profileFd != null
-                    && mBoundApplication.autoStopProfiler) {
+            if (mBoundApplication != null && mProfiler.profileFd != null
+                    && mProfiler.autoStopProfiler) {
                 stopProfiling = true;
             }
             if (a != null) {
@@ -1320,7 +1331,7 @@ public final class ActivityThread {
                 } while (a != null);
             }
             if (stopProfiling) {
-                mBoundApplication.stopProfiling();
+                mProfiler.stopProfiling();
             }
             ensureJitEnabled();
             return false;
@@ -1635,12 +1646,12 @@ public final class ActivityThread {
     }
 
     public boolean isProfiling() {
-        return mBoundApplication != null && mBoundApplication.profileFile != null
-                && mBoundApplication.profileFd == null;
+        return mProfiler != null && mProfiler.profileFile != null
+                && mProfiler.profileFd == null;
     }
 
     public String getProfileFilePath() {
-        return mBoundApplication.profileFile;
+        return mProfiler.profileFile;
     }
 
     public Looper getLooper() {
@@ -1679,6 +1690,9 @@ public final class ActivityThread {
             ContextImpl context = getSystemContext();
             context.init(new LoadedApk(this, "android", context, info,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO), null, this);
+
+            // give ourselves a default profiler
+            mProfiler = new Profiler();
         }
     }
 
@@ -1947,9 +1961,9 @@ public final class ActivityThread {
         unscheduleGcIdler();
 
         if (r.profileFd != null) {
-            mBoundApplication.setProfiler(r.profileFile, r.profileFd);
-            mBoundApplication.startProfiling();
-            mBoundApplication.autoStopProfiler = r.autoStopProfiler;
+            mProfiler.setProfiler(r.profileFile, r.profileFd);
+            mProfiler.startProfiling();
+            mProfiler.autoStopProfiler = r.autoStopProfiler;
         }
 
         if (localLOGV) Slog.v(
@@ -3570,10 +3584,10 @@ public final class ActivityThread {
                     case 1:
                         ViewDebug.startLooperProfiling(pcd.path, pcd.fd.getFileDescriptor());
                         break;
-                    default:
-                        mBoundApplication.setProfiler(pcd.path, pcd.fd);
-                        mBoundApplication.autoStopProfiler = false;
-                        mBoundApplication.startProfiling();
+                    default:                        
+                        mProfiler.setProfiler(pcd.path, pcd.fd);
+                        mProfiler.autoStopProfiler = false;
+                        mProfiler.startProfiling();
                         break;
                 }
             } catch (RuntimeException e) {
@@ -3592,7 +3606,7 @@ public final class ActivityThread {
                     ViewDebug.stopLooperProfiling();
                     break;
                 default:
-                    mBoundApplication.stopProfiling();
+                    mProfiler.stopProfiling();
                     break;
             }
         }
@@ -3685,6 +3699,11 @@ public final class ActivityThread {
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);
 
+        mProfiler = new Profiler();
+        mProfiler.profileFile = data.initProfileFile;
+        mProfiler.profileFd = data.initProfileFd;
+        mProfiler.autoStopProfiler = data.initAutoStopProfiler;
+
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
@@ -3699,8 +3718,8 @@ public final class ActivityThread {
             }
         }
 
-        if (data.profileFd != null) {
-            data.startProfiling();
+        if (mProfiler.profileFd != null) {
+            mProfiler.startProfiling();
         }
 
         // If the app is Honeycomb MR1 or earlier, switch its AsyncTask
@@ -3841,10 +3860,10 @@ public final class ActivityThread {
             mInstrumentation.init(this, instrContext, appContext,
                     new ComponentName(ii.packageName, ii.name), data.instrumentationWatcher);
 
-            if (data.profileFile != null && !ii.handleProfiling
-                    && data.profileFd == null) {
-                data.handlingProfiling = true;
-                File file = new File(data.profileFile);
+            if (mProfiler.profileFile != null && !ii.handleProfiling
+                    && mProfiler.profileFd == null) {
+                mProfiler.handlingProfiling = true;
+                File file = new File(mProfiler.profileFile);
                 file.getParentFile().mkdirs();
                 Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
             }
@@ -3896,8 +3915,8 @@ public final class ActivityThread {
 
     /*package*/ final void finishInstrumentation(int resultCode, Bundle results) {
         IActivityManager am = ActivityManagerNative.getDefault();
-        if (mBoundApplication.profileFile != null && mBoundApplication.handlingProfiling
-                && mBoundApplication.profileFd == null) {
+        if (mProfiler.profileFile != null && mProfiler.handlingProfiling
+                && mProfiler.profileFd == null) {
             Debug.stopMethodTracing();
         }
         //Slog.i(TAG, "am: " + ActivityManagerNative.getDefault()
