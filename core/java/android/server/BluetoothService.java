@@ -390,8 +390,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /**
-     * The Bluetooth has been turned off, but hot. Do bonding, profile,
-     * and internal cleanup
+     * The Bluetooth has been turned off, but hot. Do bonding, profile cleanup
      */
     synchronized void finishDisable() {
         // mark in progress bondings as cancelled
@@ -409,8 +408,17 @@ public class BluetoothService extends IBluetooth.Stub {
         Intent intent = new Intent(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         intent.putExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+    }
 
+    /**
+     * Local clean up after broadcasting STATE_OFF intent
+     */
+    synchronized void cleanupAfterFinishDisable() {
         mAdapterProperties.clear();
+
+        for (Integer srHandle : mServiceRecordToPid.keySet()) {
+            removeServiceRecordNative(srHandle);
+        }
         mServiceRecordToPid.clear();
 
         mProfilesConnected = 0;
@@ -1526,6 +1534,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public void removeServiceRecord(int handle) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
                                                 "Need BLUETOOTH permission");
+        // Since this is a binder call check if Bluetooth is off
+        if (getBluetoothStateInternal() == BluetoothAdapter.STATE_OFF) return;
         Message message = mHandler.obtainMessage(MESSAGE_REMOVE_SERVICE_RECORD);
         message.obj = new Pair<Integer, Integer>(handle, Binder.getCallingPid());
         mHandler.sendMessage(message);
@@ -1533,8 +1543,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private synchronized void checkAndRemoveRecord(int handle, int pid) {
         Pair<Integer, IBinder> pidPair = mServiceRecordToPid.get(handle);
-        Integer owner = pidPair.first;
-        if (owner != null && pid == owner.intValue()) {
+        if (pidPair != null && pid == pidPair.first) {
             if (DBG) Log.d(TAG, "Removing service record " +
                 Integer.toHexString(handle) + " for pid " + pid);
             mServiceRecordToPid.remove(handle);
