@@ -54,6 +54,10 @@ test_document(document_item_type* d)
             parcelable_type* b = (parcelable_type*)d;
             printf("parcelable %s %s;\n", b->package, b->name.data);
         }
+        else if (d->item_type == FLATTENABLE_TYPE) {
+            parcelable_type* b = (parcelable_type*)d;
+            printf("flattenable %s %s;\n", b->package, b->name.data);
+        }
         else {
             printf("UNKNOWN d=0x%08lx d->item_type=%d\n", (long)d, d->item_type);
         }
@@ -238,7 +242,8 @@ check_filenames(const char* filename, document_item_type* items)
 {
     int err = 0;
     while (items) {
-        if (items->item_type == PARCELABLE_TYPE) {
+        if (items->item_type == PARCELABLE_TYPE
+                || items->item_type == FLATTENABLE_TYPE) {
             parcelable_type* p = (parcelable_type*)items;
             err |= check_filename(filename, p->package, &p->name);
         }
@@ -296,6 +301,11 @@ gather_types(const char* filename, document_item_type* items)
             type = new ParcelableType(p->package ? p->package : "",
                             p->name.data, false, filename, p->name.lineno);
         }
+        else if (items->item_type == FLATTENABLE_TYPE) {
+            parcelable_type* p = (parcelable_type*)items;
+            type = new FlattenableType(p->package ? p->package : "",
+                            p->name.data, false, filename, p->name.lineno);
+        }
         else if (items->item_type == INTERFACE_TYPE_BINDER
                 || items->item_type == INTERFACE_TYPE_RPC) {
             interface_type* c = (interface_type*)items;
@@ -321,14 +331,14 @@ gather_types(const char* filename, document_item_type* items)
                 string name = c->name.data;
                 name += ".Stub";
                 Type* stub = new Type(c->package ? c->package : "",
-                                        name, Type::GENERATED, false, false,
+                                        name, Type::GENERATED, false, false, false,
                                         filename, c->name.lineno);
                 NAMES.Add(stub);
 
                 name = c->name.data;
                 name += ".Stub.Proxy";
                 Type* proxy = new Type(c->package ? c->package : "",
-                                        name, Type::GENERATED, false, false,
+                                        name, Type::GENERATED, false, false, false,
                                         filename, c->name.lineno);
                 NAMES.Add(proxy);
             }
@@ -341,7 +351,7 @@ gather_types(const char* filename, document_item_type* items)
                 string name = c->name.data;
                 name += ".ServiceBase";
                 Type* base = new Type(c->package ? c->package : "",
-                                        name, Type::GENERATED, false, false,
+                                        name, Type::GENERATED, false, false, false,
                                         filename, c->name.lineno);
                 NAMES.Add(base);
             }
@@ -396,7 +406,7 @@ matches_keyword(const char* str)
 }
 
 static int
-check_method(const char* filename, method_type* m)
+check_method(const char* filename, int kind, method_type* m)
 {
     int err = 0;
 
@@ -409,7 +419,8 @@ check_method(const char* filename, method_type* m)
         return err;
     }
 
-    if (!returnType->CanBeMarshalled()) {
+    if (!(kind == INTERFACE_TYPE_BINDER ? returnType->CanWriteToParcel()
+                : returnType->CanWriteToRpcData())) {
         fprintf(stderr, "%s:%d return type %s can't be marshalled.\n", filename,
                     m->type.type.lineno, m->type.type.data);
         err = 1;
@@ -445,7 +456,7 @@ check_method(const char* filename, method_type* m)
             goto next;
         }
         
-        if (!t->CanBeMarshalled()) {
+        if (!(kind == INTERFACE_TYPE_BINDER ? t->CanWriteToParcel() : t->CanWriteToRpcData())) {
             fprintf(stderr, "%s:%d parameter %d: '%s %s' can't be marshalled.\n",
                         filename, m->type.type.lineno, index,
                         arg->type.type.data, arg->name.data);
@@ -512,8 +523,9 @@ check_types(const char* filename, document_item_type* items)
 {
     int err = 0;
     while (items) {
-        // (nothing to check for PARCELABLE_TYPE)
-        if (items->item_type == INTERFACE_TYPE_BINDER) {
+        // (nothing to check for PARCELABLE_TYPE or FLATTENABLE_TYPE)
+        if (items->item_type == INTERFACE_TYPE_BINDER
+                || items->item_type == INTERFACE_TYPE_RPC) {
             map<string,method_type*> methodNames;
             interface_type* c = (interface_type*)items;
 
@@ -522,7 +534,7 @@ check_types(const char* filename, document_item_type* items)
                 if (member->item_type == METHOD_TYPE) {
                     method_type* m = (method_type*)member;
 
-                    err |= check_method(filename, m);
+                    err |= check_method(filename, items->item_type, m);
 
                     // prevent duplicate methods
                     if (methodNames.find(m->name.data) == methodNames.end()) {
@@ -568,19 +580,22 @@ exactly_one_interface(const char* filename, const document_item_type* items, con
         else if (next->item_type == PARCELABLE_TYPE) {
             lineno = ((parcelable_type*)next)->parcelable_token.lineno;
         }
+        else if (next->item_type == FLATTENABLE_TYPE) {
+            lineno = ((parcelable_type*)next)->parcelable_token.lineno;
+        }
         fprintf(stderr, "%s:%d aidl can only handle one interface per file\n",
                             filename, lineno);
         return 1;
     }
 
-    if (items->item_type == PARCELABLE_TYPE) {
+    if (items->item_type == PARCELABLE_TYPE || items->item_type == FLATTENABLE_TYPE) {
         *onlyParcelable = true;
         if (options.failOnParcelable) {
             fprintf(stderr, "%s:%d aidl can only generate code for interfaces, not"
-                            " parcelables,\n", filename,
+                            " parcelables or flattenables,\n", filename,
                             ((parcelable_type*)items)->parcelable_token.lineno);
-            fprintf(stderr, "%s:%d .aidl files that only declare parcelables "
-                            "don't need to go in the Makefile.\n", filename,
+            fprintf(stderr, "%s:%d .aidl files that only declare parcelables or flattenables"
+                            "may not go in the Makefile.\n", filename,
                             ((parcelable_type*)items)->parcelable_token.lineno);
             return 1;
         }
@@ -680,7 +695,7 @@ generate_outputFileName(const Options& options, const document_item_type* items)
         interface_type* type = (interface_type*)items;
 
         return generate_outputFileName2(options, type->name, type->package);
-    } else if (items->item_type == PARCELABLE_TYPE) {
+    } else if (items->item_type == PARCELABLE_TYPE || items->item_type == FLATTENABLE_TYPE) {
         parcelable_type* type = (parcelable_type*)items;
         return generate_outputFileName2(options, type->name, type->package);
     }
@@ -756,6 +771,20 @@ parse_preprocessed_file(const string& filename)
                     sizeof(parcelable_type));
             memset(parcl, 0, sizeof(parcelable_type));
             parcl->document_item.item_type = PARCELABLE_TYPE;
+            parcl->parcelable_token.lineno = lineno;
+            parcl->parcelable_token.data = strdup(type);
+            parcl->package = packagename ? strdup(packagename) : NULL;
+            parcl->name.lineno = lineno;
+            parcl->name.data = strdup(classname);
+            parcl->semicolon_token.lineno = lineno;
+            parcl->semicolon_token.data = strdup(";");
+            doc = (document_item_type*)parcl;
+        }
+        else if (0 == strcmp("flattenable", type)) {
+            parcelable_type* parcl = (parcelable_type*)malloc(
+                    sizeof(parcelable_type));
+            memset(parcl, 0, sizeof(parcelable_type));
+            parcl->document_item.item_type = FLATTENABLE_TYPE;
             parcl->parcelable_token.lineno = lineno;
             parcl->parcelable_token.data = strdup(type);
             parcl->package = packagename ? strdup(packagename) : NULL;
@@ -942,6 +971,15 @@ preprocess_aidl(const Options& options)
         document_item_type* doc = g_document;
         string line;
         if (doc->item_type == PARCELABLE_TYPE) {
+            line = "parcelable ";
+            parcelable_type* parcelable = (parcelable_type*)doc;
+            if (parcelable->package) {
+                line += parcelable->package;
+                line += '.';
+            }
+            line += parcelable->name.data;
+        }
+        else if (doc->item_type == FLATTENABLE_TYPE) {
             line = "parcelable ";
             parcelable_type* parcelable = (parcelable_type*)doc;
             if (parcelable->package) {

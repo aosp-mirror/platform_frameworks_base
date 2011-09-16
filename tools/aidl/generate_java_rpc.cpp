@@ -6,7 +6,7 @@
 #include <string.h>
 
 Type* SERVICE_CONTAINER_TYPE = new Type("com.android.athome.service",
-        "AndroidAtHomeServiceContainer", Type::BUILT_IN, false, false);
+        "AndroidAtHomeServiceContainer", Type::BUILT_IN, false, false, false);
 
 static string
 format_int(int n)
@@ -237,7 +237,7 @@ ResultDispatcherClass::ResultDispatcherClass()
 {
     this->modifiers = PRIVATE | FINAL;
     this->what = Class::CLASS;
-    this->type = new Type("_ResultDispatcher", Type::GENERATED, false, false);
+    this->type = new Type("_ResultDispatcher", Type::GENERATED, false, false, false);
     this->interfaces.push_back(RPC_RESULT_HANDLER_TYPE);
 
     // methodId
@@ -373,7 +373,7 @@ generate_results_method(const method_type* method, RpcProxyClass* proxyClass)
 
     string resultsMethodName = results_method_name(method->name.data);
     Type* resultsInterfaceType = new Type(results_class_name(method->name.data),
-            Type::GENERATED, false, false);
+            Type::GENERATED, false, false, false);
 
     if (!method->oneway) {
         Class* resultsClass = new Class;
