@@ -245,6 +245,15 @@ getVideoSurfaceTexture(JNIEnv* env, jobject thiz) {
 }
 
 static void
+decVideoSurfaceRef(JNIEnv *env, jobject thiz)
+{
+    sp<ISurfaceTexture> old_st = getVideoSurfaceTexture(env, thiz);
+    if (old_st != NULL) {
+        old_st->decStrong(thiz);
+    }
+}
+
+static void
 setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlayerMustBeAlive)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -255,16 +264,15 @@ setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlaye
         return;
     }
 
-    sp<ISurfaceTexture> old_st = getVideoSurfaceTexture(env, thiz);
+    decVideoSurfaceRef(env, thiz);
+
     sp<ISurfaceTexture> new_st;
     if (jsurface) {
         sp<Surface> surface(Surface_getSurface(env, jsurface));
         new_st = surface->getSurfaceTexture();
         new_st->incStrong(thiz);
     }
-    if (old_st != NULL) {
-        old_st->decStrong(thiz);
-    }
+
     env->SetIntField(thiz, fields.surface_texture, (int)new_st.get());
 
     // This will fail if the media player has not been initialized yet. This
@@ -625,7 +633,7 @@ static void
 android_media_MediaPlayer_release(JNIEnv *env, jobject thiz)
 {
     LOGV("release");
-    setVideoSurface(env, thiz, NULL, false /* mediaPlayerMustBeAlive */);
+    decVideoSurfaceRef(env, thiz);
     sp<MediaPlayer> mp = setMediaPlayer(env, thiz, 0);
     if (mp != NULL) {
         // this prevents native callbacks after the object is released
