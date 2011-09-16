@@ -3174,9 +3174,6 @@
 
     <!-- Slide lock screen -->
 
-    <!-- Description of the sliding handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="content_description_sliding_handle">"Sliding handle. Tap and hold."</string>
-
     <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_up">Up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
     <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
