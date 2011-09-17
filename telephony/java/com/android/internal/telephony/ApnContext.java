@@ -154,6 +154,12 @@ public class ApnContext {
         return mState;
     }
 
+    public boolean isDisconnected() {
+        DataConnectionTracker.State currentState = getState();
+        return ((currentState == DataConnectionTracker.State.IDLE) ||
+                    currentState == DataConnectionTracker.State.FAILED);
+    }
+
     public synchronized void setReason(String reason) {
         if (DBG) {
             log("set reason as " + reason + ", for type " + mApnType + ",current state " + mState);
