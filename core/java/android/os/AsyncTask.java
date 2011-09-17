@@ -237,7 +237,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /** @hide Used to force static handler to be created. */
     public static void init() {
-        // TODO: This doesn't do anything, we should get rid of it
         sHandler.getLooper();
     }
 
@@ -255,7 +254,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
                 mTaskInvoked.set(true);
 
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                //noinspection unchecked
                 return postResult(doInBackground(mParams));
             }
         };
@@ -290,7 +288,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private Result postResult(Result result) {
-        @SuppressWarnings({"unchecked"}) Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
+        Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
                 new AsyncTaskResult<Result>(this, result));
         message.sendToTarget();
         return result;
@@ -600,10 +598,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private static class InternalHandler extends Handler {
-        InternalHandler() {
-            super(Looper.getMainLooper());
-        }
-        
         @SuppressWarnings({"unchecked", "RawUseOfParameterizedType"})
         @Override
         public void handleMessage(Message msg) {
