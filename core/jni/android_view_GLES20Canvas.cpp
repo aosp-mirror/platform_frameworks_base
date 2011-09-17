@@ -477,19 +477,23 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 #if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-    value = TextLayoutCache::getInstance().getValue(paint, text, 0, count, count, flags);
+    value = TextLayoutCache::getInstance().getValue(paint, text, count, flags);
     if (value == NULL) {
         LOGE("Cannot get TextLayoutCache value");
         return ;
     }
 #else
     value = new TextLayoutCacheValue();
-    value->computeValues(paint, text, 0, count, count, flags);
+    value->computeValues(paint, text, count, flags);
 #endif
-    const jchar* glyphArray = value->getGlyphs();
-    int glyphCount = value->getGlyphsCount();
-    int bytesCount = glyphCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphArray, bytesCount, glyphCount, x, y, paint);
+    size_t startIndex = 0;
+    size_t glyphsCount = 0;
+    value->getGlyphsIndexAndCount(0, count, &startIndex, &glyphsCount);
+    jchar* glyphs = new jchar[glyphsCount];
+    value->getGlyphs(startIndex, glyphsCount, glyphs);
+    int bytesCount = glyphsCount * sizeof(jchar);
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
+    delete[] glyphs;
 #else
     const jchar *workText;
     jchar* buffer = NULL;
@@ -507,19 +511,23 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 #if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-    value = TextLayoutCache::getInstance().getValue(paint, text, start, count, contextCount, flags);
+    value = TextLayoutCache::getInstance().getValue(paint, text, contextCount, flags);
     if (value == NULL) {
         LOGE("Cannot get TextLayoutCache value");
         return ;
     }
 #else
     value = new TextLayoutCacheValue();
-    value->computeValues(paint, text, start, count, contextCount, flags);
+    value->computeValues(paint, text, contextCount, flags);
 #endif
-    const jchar* glyphArray = value->getGlyphs();
-    int glyphCount = value->getGlyphsCount();
-    int bytesCount = glyphCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphArray, bytesCount, glyphCount, x, y, paint);
+    size_t startIndex = 0;
+    size_t glyphsCount = 0;
+    value->getGlyphsIndexAndCount(start, count, &startIndex, &glyphsCount);
+    jchar* glyphs = new jchar[glyphsCount];
+    value->getGlyphs(startIndex, glyphsCount, glyphs);
+    int bytesCount = glyphsCount * sizeof(jchar);
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
+    delete[] glyphs;
 #else
     uint8_t rtl = flags & 0x1;
     if (rtl) {

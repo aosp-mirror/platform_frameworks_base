@@ -758,21 +758,7 @@ public:
             jfloat x, jfloat y, int flags, SkPaint* paint) {
 
         jint count = end - start;
-        sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-        value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
-                        end, flags);
-        if (value == NULL) {
-            LOGE("Cannot get TextLayoutCache value");
-            return ;
-        }
-#else
-        value = new TextLayoutCacheValue();
-        value->computeValues(paint, textArray, start, count, end, flags);
-#endif
-
-        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
-            x, y, flags, paint);
+        drawTextWithGlyphs(canvas, textArray + start, 0, count, count, x, y, flags, paint);
     }
 
     static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
@@ -781,19 +767,23 @@ public:
 
         sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-        value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
-                        contextCount, flags);
+        value = TextLayoutCache::getInstance().getValue(paint, textArray, contextCount, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
         }
 #else
         value = new TextLayoutCacheValue();
-        value->computeValues(paint, textArray, start, count, contextCount, flags);
+        value->computeValues(paint, textArray, contextCount, flags);
 #endif
 
-        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
-                x, y, flags, paint);
+        size_t startIndex = 0;
+        size_t glyphsCount = 0;
+        value->getGlyphsIndexAndCount(start, count, &startIndex, &glyphsCount);
+        jchar* glyphs = new jchar[glyphsCount];
+        value->getGlyphs(startIndex, glyphsCount, glyphs);
+        doDrawGlyphs(canvas, glyphs, 0, glyphsCount, x, y, flags, paint);
+        delete[] glyphs;
     }
 
     static void doDrawGlyphs(SkCanvas* canvas, const jchar* glyphArray, int index, int count,
