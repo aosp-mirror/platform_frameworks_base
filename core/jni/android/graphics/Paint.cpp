@@ -352,7 +352,7 @@ public:
         jfloat result = 0;
 #if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
-                paint->getFlags(), NULL /* dont need all advances */, result);
+                paint->getFlags(), NULL /* dont need all advances */, &result);
 #else
         // we double count, since measureText wants a byteLength
         SkScalar width = paint->measureText(textArray + index, count << 1);
@@ -382,7 +382,7 @@ public:
 
 #if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
-                paint->getFlags(), NULL /* dont need all advances */, width);
+                paint->getFlags(), NULL /* dont need all advances */, &width);
 #else
 
         width = SkScalarToFloat(paint->measureText(textArray + start, count << 1));
@@ -406,7 +406,7 @@ public:
 
 #if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
-                paint->getFlags(), NULL /* dont need all advances */, width);
+                paint->getFlags(), NULL /* dont need all advances */, &width);
 #else
         width = SkScalarToFloat(paint->measureText(textArray, textLength << 1));
 #endif
@@ -435,10 +435,8 @@ public:
         jfloat* widthsArray = autoWidths.ptr();
 
 #if RTL_USE_HARFBUZZ
-        jfloat totalAdvance;
-
         TextLayout::getTextRunAdvances(paint, text, 0, count, count,
-                paint->getFlags(), widthsArray, totalAdvance);
+                paint->getFlags(), widthsArray, NULL);
 #else
         SkScalar* scalarArray = (SkScalar*)widthsArray;
 
@@ -489,7 +487,7 @@ public:
         HB_FontRec font;
         FontData fontData;
         TextLayoutCacheValue::shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, text,
-                start, count, contextCount, flags);
+                contextCount, flags);
 
         int glyphCount = shaperItem.num_glyphs;
         for (int i = 0; i < glyphCount; i++) {
@@ -533,7 +531,7 @@ public:
         jfloat totalAdvance = 0;
 
         TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
-                                       advancesArray, totalAdvance);
+                                       advancesArray, &totalAdvance);
 
         if (advances != NULL) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
@@ -604,10 +602,8 @@ public:
             jint count, jint flags, jint offset, jint opt) {
 #if RTL_USE_HARFBUZZ
         jfloat scalarArray[count];
-        jfloat totalAdvance = 0;
-
         TextLayout::getTextRunAdvances(paint, text, start, count, count, flags,
-                scalarArray, totalAdvance);
+                scalarArray, NULL);
 #else
         SkScalar scalarArray[count];
         jchar buffer[count];
