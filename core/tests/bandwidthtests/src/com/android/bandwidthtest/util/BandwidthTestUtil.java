@@ -18,6 +18,15 @@ package com.android.bandwidthtest.util;
 
 import android.util.Log;
 
+import com.android.internal.http.multipart.FilePart;
+import com.android.internal.http.multipart.MultipartEntity;
+import com.android.internal.http.multipart.Part;
+import com.android.internal.http.multipart.StringPart;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
@@ -80,7 +89,7 @@ public class BandwidthTestUtil {
      * Download a given file from a target url to a given destination file.
      * @param targetUrl the url to download
      * @param file the {@link File} location where to save to
-     * @return true if it succeeded.
+     * @return true if it succeeded
      */
     public static boolean DownloadFromUrl(String targetUrl, File file) {
         try {
@@ -106,4 +115,32 @@ public class BandwidthTestUtil {
         return true;
     }
 
+    /**
+     * Post a given file for a given device and timestamp to the server.
+     * @param postUrl {@link String} url used to upload files
+     * @param deviceId {@link String} device id that is uploading
+     * @param timestamp {@link String} timestamp
+     * @param file {@link File} to upload
+     * @return true if it succeeded
+     */
+    public static boolean postFileToServer(String postUrl, String deviceId, String timestamp,
+            File file) {
+        try {
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost(postUrl);
+            Part[] parts = {
+                    new StringPart("device_id", deviceId),
+                    new StringPart("timestamp", timestamp),
+                    new FilePart("file", file)
+            };
+            MultipartEntity reqEntity = new MultipartEntity(parts, postRequest.getParams());
+            postRequest.setEntity(reqEntity);
+            HttpResponse res = httpClient.execute(postRequest);
+            res.getEntity().getContent().close();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Could not upload file with error: " + e);
+            return false;
+        }
+        return true;
+    }
 }

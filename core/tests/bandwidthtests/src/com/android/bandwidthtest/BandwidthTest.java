@@ -120,6 +120,42 @@ public class BandwidthTest extends InstrumentationTestCase {
     }
 
     /**
+     * Ensure that downloading on wifi reports reasonable stats.
+     */
+    @LargeTest
+    public void testWifiUpload() {
+        assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
+        // Download a file from the server.
+        String ts = Long.toString(System.currentTimeMillis());
+        String targetUrl = BandwidthTestUtil.buildDownloadUrl(
+                mTestServer, FILE_SIZE, mDeviceId, ts);
+        File tmpSaveFile = new File(BASE_DIR + File.separator + TMP_FILENAME);
+        assertTrue(BandwidthTestUtil.DownloadFromUrl(targetUrl, tmpSaveFile));
+
+        ts = Long.toString(System.currentTimeMillis());
+        NetworkStats pre_test_stats = fetchDataFromProc(mUid);
+        TrafficStats.startDataProfiling(mContext);
+        assertTrue(BandwidthTestUtil.postFileToServer(mTestServer, mDeviceId, ts, tmpSaveFile));
+        NetworkStats prof_stats = TrafficStats.stopDataProfiling(mContext);
+        Log.d(LOG_TAG, prof_stats.toString());
+        NetworkStats post_test_stats = fetchDataFromProc(mUid);
+        NetworkStats proc_stats = post_test_stats.subtract(pre_test_stats);
+
+        // Output measurements to instrumentation out, so that it can be compared to that of
+        // the server.
+        Bundle results = new Bundle();
+        results.putString("device_id", mDeviceId);
+        results.putString("timestamp", ts);
+        results.putInt("size", FILE_SIZE);
+        AddStatsToResults(PROF_LABEL, prof_stats, results);
+        AddStatsToResults(PROC_LABEL, proc_stats, results);
+        getInstrumentation().sendStatus(INSTRUMENTATION_IN_PROGRESS, results);
+
+        // Clean up.
+        assertTrue(cleanUpFile(tmpSaveFile));
+    }
+
+    /**
      * We want to make sure that if we use the Download Manager to download stuff,
      * accounting still goes to the app making the call and that the numbers still make sense.
      */
