@@ -279,6 +279,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private static final String LOG_TAG = "InstrumentationTestRunner";
 
     private final Bundle mResults = new Bundle();
+    private Bundle mArguments;
     private AndroidTestRunner mTestRunner;
     private boolean mDebug;
     private boolean mJustCount;
@@ -292,6 +293,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     @Override
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
+        mArguments = arguments;
 
         // Apk paths used to search for test classes when using TestSuiteBuilders.
         String[] apkPaths =
@@ -377,6 +379,16 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mTestRunner.setPerformanceResultsWriter(resultPrinter);
         }
         start();
+    }
+
+    /**
+     * Get the Bundle object that contains the arguments
+     *
+     * @return the Bundle object
+     * @hide
+     */
+    public Bundle getBundle(){
+        return mArguments;
     }
 
     List<Predicate<TestMethod>> getBuilderRequirements() {
