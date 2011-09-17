@@ -313,7 +313,7 @@ is designed to run.  If the current screen is larger than the value specified,
 the system forces the application into screen compatibility mode, to ensure best
 display on the current screen.</li>
 
-<li><code>android:smallestWidthLimitDp="<em>numDp"</em></code> &mdash; This
+<li><code>android:requiresSmallestWidthDp="<em>numDp"</em></code> &mdash; This
 attribute lets you specify the minimum smallestWidth on which the application
 can run. If the current screen is smaller than the value specified, the system
 considers the application incompatible with the device, but does not prevent it
