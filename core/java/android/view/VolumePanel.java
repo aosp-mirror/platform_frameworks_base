@@ -34,10 +34,12 @@ import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -175,20 +177,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         View view = mView = inflater.inflate(R.layout.volume_adjust, null);
         mView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-                // Dismiss the dialog if the user touches outside the visible area. This is not
-                // handled by the usual dialog dismissing code because there is a region above
-                // the panel (marginTop) that is still within the dialog.
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    int x = (int) event.getX();
-                    int y = (int) event.getY();
-                    if (x < mPanel.getLeft() || x > mPanel.getRight() || y < mPanel.getTop()
-                            || y > mPanel.getBottom()) {
-                        forceTimeout();
-                        return true;
-                    }
-                }
                 resetTimeout();
-                return true;
+                return false;
             }
         });
         mPanel = (ViewGroup) mView.findViewById(R.id.visible_panel);
@@ -196,7 +186,15 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mMoreButton = (ImageView) mView.findViewById(R.id.expand_button);
         mDivider = (ImageView) mView.findViewById(R.id.expand_button_divider);
 
-        mDialog = new Dialog(context, R.style.Theme_Panel_Volume);
+        mDialog = new Dialog(context, R.style.Theme_Panel_Volume) {
+            public boolean onTouchEvent(MotionEvent event) {
+                if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                    forceTimeout();
+                    return true;
+                }
+                return false;
+            }
+        };
         mDialog.setTitle("Volume control"); // No need to localize
         mDialog.setContentView(mView);
         mDialog.setOnDismissListener(new OnDismissListener() {
@@ -208,11 +206,17 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         // Change some window properties
         Window window = mDialog.getWindow();
         window.setGravity(Gravity.TOP);
-        WindowManager.LayoutParams lp = window.getAttributes();
+        LayoutParams lp = window.getAttributes();
         lp.token = null;
-        lp.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+        // Offset from the top
+        lp.y = mContext.getResources().getDimensionPixelOffset(
+                com.android.internal.R.dimen.volume_panel_top);
+        lp.type = LayoutParams.TYPE_VOLUME_OVERLAY;
+        lp.width = LayoutParams.WRAP_CONTENT;
+        lp.height = LayoutParams.WRAP_CONTENT;
         window.setAttributes(lp);
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = new Vibrator();
