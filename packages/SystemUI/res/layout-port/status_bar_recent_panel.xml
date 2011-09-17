@@ -67,6 +67,12 @@
 
     </FrameLayout>
 
+    <include layout="@layout/status_bar_no_recent_apps"
+        android:id="@+id/recents_no_apps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
+
     <View android:id="@+id/recents_dismiss_button"
         android:layout_width="80px"
         android:layout_height="@*android:dimen/status_bar_height"
