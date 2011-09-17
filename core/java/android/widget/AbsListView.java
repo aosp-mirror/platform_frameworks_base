@@ -3654,7 +3654,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 vt.computeCurrentVelocity(1000, mMaximumVelocity);
                 final float yvel = -vt.getYVelocity(activeId);
 
-                if (scroller.isScrollingInDirection(0, yvel)) {
+                if (Math.abs(yvel) >= mMinimumVelocity
+                        && scroller.isScrollingInDirection(0, yvel)) {
                     // Keep the fling alive a little longer
                     postDelayed(this, FLYWHEEL_TIMEOUT);
                 } else {

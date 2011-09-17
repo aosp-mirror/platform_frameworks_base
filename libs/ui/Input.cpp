@@ -1020,6 +1020,8 @@ bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const
             return true;
         }
     }
+    *outVx = 0;
+    *outVy = 0;
     return false;
 }
 
