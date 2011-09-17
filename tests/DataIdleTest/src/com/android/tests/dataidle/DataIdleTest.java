@@ -72,6 +72,7 @@ public class DataIdleTest extends InstrumentationTestCase {
      */
     private void fetchStats(NetworkTemplate template) {
         try {
+            mStatsService.forceUpdate();
             NetworkStats stats = mStatsService.getSummaryForAllUid(template, Long.MIN_VALUE,
                     Long.MAX_VALUE, false);
             reportStats(stats);
