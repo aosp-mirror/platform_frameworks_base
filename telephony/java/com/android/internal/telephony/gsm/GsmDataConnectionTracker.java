@@ -787,9 +787,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
         DataConnectionAc dcac = apnContext.getDataConnectionAc();
         if (tearDown) {
-            boolean isConnected = (apnContext.getState() != State.IDLE
-                                   && apnContext.getState() != State.FAILED);
-            if (!isConnected) {
+            if (apnContext.isDisconnected()) {
                 // The request is tearDown and but ApnContext is not connected.
                 // If apnContext is not enabled anymore, break the linkage to the DCAC/DC.
                 apnContext.setState(State.IDLE);
@@ -1019,11 +1017,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private void onApnChanged() {
         // TODO: How to handle when multiple APNs are active?
-        boolean isConnected;
 
         ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
-        isConnected = (defaultApnContext.getState() != State.IDLE
-                       && defaultApnContext.getState() != State.FAILED);
+        boolean defaultApnIsDisconnected = defaultApnContext.isDisconnected();
 
         if (mPhone instanceof GSMPhone) {
             // The "current" may no longer be valid.  MMS depends on this to send properly. TBD
@@ -1034,8 +1030,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // match the current operator.
         if (DBG) log("onApnChanged: createAllApnList and cleanUpAllConnections");
         createAllApnList();
-        cleanUpAllConnections(isConnected, Phone.REASON_APN_CHANGED);
-        if (!isConnected) {
+        cleanUpAllConnections(!defaultApnIsDisconnected, Phone.REASON_APN_CHANGED);
+        if (defaultApnIsDisconnected) {
             setupDataOnReadyApns(Phone.REASON_APN_CHANGED);
         }
     }
@@ -1885,7 +1881,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         // if all data connection are gone, check whether Airplane mode request was
         // pending.
-        if (!isConnected()) {
+        if (isDisconnected()) {
             if (mPhone.getServiceStateTracker().processPendingRadioPowerOffAfterDataOff()) {
                 // Radio will be turned off. No need to retry data setup
                 apnContext.setApnSetting(null);
@@ -1957,10 +1953,23 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected boolean isConnected() {
         for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.getState() == State.CONNECTED) {
-            return true;
+                // At least one context is connected, return true
+                return true;
             }
         }
+        // There are not any contexts connected, return false
         return false;
+    }
+
+    protected boolean isDisconnected() {
+        for (ApnContext apnContext : mApnContexts.values()) {
+            if (!apnContext.isDisconnected()) {
+                // At least one context was not disconnected return false
+                return false;
+            }
+        }
+        // All contexts were disconnected so return true
+        return true;
     }
 
     @Override
