@@ -166,7 +166,7 @@ in which the application UI will need to be drawn, not including screen areas
 reserved by the system.
 </li>
 
-<li>In constrast, a screen's <em>width</em> and <em>height</em> represent the
+<li>In contrast, a screen's <em>width</em> and <em>height</em> represent the
 current horizontal or vertical space available for application layout, measured
 in "dp" units, not including screen areas reserved by the system. The width and
 height of a screen change when the user switches orientation between landscape
