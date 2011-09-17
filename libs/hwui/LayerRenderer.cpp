@@ -31,13 +31,8 @@ namespace uirenderer {
 // Rendering
 ///////////////////////////////////////////////////////////////////////////////
 
-Rect* gHackDontCorruptRegisters;
-
 void LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
-
-    Rect dirty(left, top, right, bottom);
-    gHackDontCorruptRegisters = &dirty;
 
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->getFbo());
 
@@ -45,6 +40,7 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
     const float height = mLayer->layer.getHeight();
 
 #if RENDER_LAYERS_AS_REGIONS
+    Rect dirty(left, top, right, bottom);
     if (dirty.isEmpty() || (dirty.left <= 0 && dirty.top <= 0 &&
             dirty.right >= width && dirty.bottom >= height)) {
         mLayer->region.clear();
