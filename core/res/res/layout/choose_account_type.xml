@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_gravity="left"
-        android:text="@string/choose_account_label"
+        android:text="@string/add_account_label"
         android:paddingTop="16dip"
         android:paddingBottom="16dip"
         android:textColor="@android:color/holo_blue_light"
@@ -38,30 +38,12 @@
     <View android:layout_height="3dip"
           android:layout_width="match_parent"
           android:background="#323232"/>
-    
-    <TextView android:id="@+id/description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_gravity="left|center_vertical"
-        android:text="@string/choose_account_text"
-        android:paddingTop="16dip"
-        android:paddingBottom="16dip"
-    />
 
     <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawSelectorOnTop="false"
+        android:layout_height="0dip"
         android:layout_weight="1"
+        android:drawSelectorOnTop="false"
         android:scrollbarAlwaysDrawVerticalTrack="true" />
 
-    <Button android:id="@+id/addAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/add_account_button_label"
-    />
 </LinearLayout>

@@ -52,12 +52,12 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.choose_account);
+        setContentView(R.layout.choose_account_type);
 
         // Read the validAccountTypes, if present, and add them to the setOfAllowableAccountTypes
         Set<String> setOfAllowableAccountTypes = null;
         ArrayList<String> validAccountTypes = getIntent().getStringArrayListExtra(
-                ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST);
+                ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
         if (validAccountTypes != null) {
             setOfAllowableAccountTypes = new HashSet<String>(validAccountTypes.size());
             for (String type : validAccountTypes) {
@@ -138,10 +138,14 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
 
     protected void runAddAccountForAuthenticator(AuthInfo authInfo) {
         Log.d(TAG, "selected account type " + authInfo.name);
-        Bundle options = getIntent().getBundleExtra(
+        final Bundle options = getIntent().getBundleExtra(
                 ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE);
-        AccountManager.get(this).addAccount(authInfo.desc.type, null, null, options,
-                this, this, null);
+        final String[] requiredFeatures = getIntent().getStringArrayExtra(
+                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY);
+        final String authTokenType = getIntent().getStringExtra(
+                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING);
+        AccountManager.get(this).addAccount(authInfo.desc.type, authTokenType, requiredFeatures,
+                options, this, this, null /* Handler */);
     }
 
     public void run(final AccountManagerFuture<Bundle> accountManagerFuture) {
