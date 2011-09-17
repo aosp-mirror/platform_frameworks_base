@@ -25,8 +25,9 @@
 
 #include <ui/GraphicBuffer.h>
 
-#include <utils/threads.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
+#include <utils/threads.h>
 
 #define ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID "mSurfaceTexture"
 
@@ -201,6 +202,10 @@ public:
     // references on the buffers (e.g. if a buffer is referenced by a client or
     // by OpenGL ES as a texture) then those buffer will remain allocated.
     void abandon();
+
+    // set the name of the SurfaceTexture that will be used to identify it in
+    // log messages.
+    void setName(const String8& name);
 
     // dump our state in a String
     void dump(String8& result) const;
@@ -443,6 +448,10 @@ private:
     // SurfaceTexture that has been abandoned will return the NO_INIT error from
     // all ISurfaceTexture methods capable of returning an error.
     bool mAbandoned;
+
+    // mName is a string used to identify the SurfaceTexture in log messages.
+    // It is set by the setName method.
+    String8 mName;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the
