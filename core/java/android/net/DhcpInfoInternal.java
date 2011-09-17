@@ -24,6 +24,7 @@ import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A simple object for retrieving the results of a DHCP request.
@@ -41,14 +42,18 @@ public class DhcpInfoInternal {
     public String serverAddress;
     public int leaseDuration;
 
-    private Collection<RouteInfo> routes;
+    private Collection<RouteInfo> mRoutes;
 
     public DhcpInfoInternal() {
-        routes = new ArrayList<RouteInfo>();
+        mRoutes = new ArrayList<RouteInfo>();
     }
 
     public void addRoute(RouteInfo routeInfo) {
-        routes.add(routeInfo);
+        mRoutes.add(routeInfo);
+    }
+
+    public Collection<RouteInfo> getRoutes() {
+        return Collections.unmodifiableCollection(mRoutes);
     }
 
     private int convertToInt(String addr) {
@@ -66,7 +71,7 @@ public class DhcpInfoInternal {
     public DhcpInfo makeDhcpInfo() {
         DhcpInfo info = new DhcpInfo();
         info.ipAddress = convertToInt(ipAddress);
-        for (RouteInfo route : routes) {
+        for (RouteInfo route : mRoutes) {
             if (route.isDefaultRoute()) {
                 info.gateway = convertToInt(route.getGateway().getHostAddress());
                 break;
@@ -94,14 +99,14 @@ public class DhcpInfoInternal {
     public LinkProperties makeLinkProperties() {
         LinkProperties p = new LinkProperties();
         p.addLinkAddress(makeLinkAddress());
-        for (RouteInfo route : routes) {
+        for (RouteInfo route : mRoutes) {
             p.addRoute(route);
         }
+        //if empty, connectivity configures default DNS
         if (TextUtils.isEmpty(dns1) == false) {
             p.addDns(NetworkUtils.numericToInetAddress(dns1));
         } else {
-            p.addDns(NetworkUtils.numericToInetAddress(serverAddress));
-            Log.d(TAG, "empty dns1, use dhcp server as dns1!");
+            Log.d(TAG, "makeLinkProperties with empty dns1!");
         }
         if (TextUtils.isEmpty(dns2) == false) {
             p.addDns(NetworkUtils.numericToInetAddress(dns2));
@@ -111,11 +116,33 @@ public class DhcpInfoInternal {
         return p;
     }
 
+    /* Updates the DHCP fields that need to be retained from
+     * original DHCP request if the DHCP renewal shows them as
+     * being empty
+     */
+    public void updateFromDhcpRequest(DhcpInfoInternal orig) {
+        if (orig == null) return;
+
+        if (TextUtils.isEmpty(dns1)) {
+            dns1 = orig.dns1;
+        }
+
+        if (TextUtils.isEmpty(dns2)) {
+            dns2 = orig.dns2;
+        }
+
+        if (mRoutes.size() == 0) {
+            for (RouteInfo route : orig.getRoutes()) {
+                addRoute(route);
+            }
+        }
+    }
+
     public String toString() {
         String routeString = "";
-        for (RouteInfo route : routes) routeString += route.toString() + " | ";
+        for (RouteInfo route : mRoutes) routeString += route.toString() + " | ";
         return "addr: " + ipAddress + "/" + prefixLength +
-                " routes: " + routeString +
+                " mRoutes: " + routeString +
                 " dns: " + dns1 + "," + dns2 +
                 " dhcpServer: " + serverAddress +
                 " leaseDuration: " + leaseDuration;
