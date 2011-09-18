@@ -644,7 +644,7 @@ public class WebView extends AbsoluteLayout
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
 
-    static final boolean USE_WEBKIT_RINGS = true;
+    static final boolean USE_WEBKIT_RINGS = false;
     // the color used to highlight the touch rectangles
     private static final int HIGHLIGHT_COLOR = 0x6633b5e5;
     // the round corner for the highlight path
@@ -730,6 +730,7 @@ public class WebView extends AbsoluteLayout
     static final int SELECT_AT                          = 135;
     static final int SCREEN_ON                          = 136;
     static final int ENTER_FULLSCREEN_VIDEO             = 137;
+    static final int UPDATE_SELECTION                   = 138;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -4062,8 +4063,11 @@ public class WebView extends AbsoluteLayout
         // state.
         // If mNativeClass is 0, we should not reach here, so we do not
         // need to check it again.
+        boolean pressed = (mTouchMode == TOUCH_SHORTPRESS_START_MODE
+                || mTouchMode == TOUCH_INIT_MODE
+                || mTouchMode == TOUCH_SHORTPRESS_MODE);
         nativeRecordButtons(hasFocus() && hasWindowFocus(),
-                (mTouchMode == TOUCH_SHORTPRESS_START_MODE && !USE_WEBKIT_RINGS)
+                (pressed && !USE_WEBKIT_RINGS)
                 || mTrackballDown || mGotCenterDown, false);
         drawCoreAndCursorRing(canvas, mBackgroundColor,
                 mDrawCursorRing && drawRings);
@@ -6532,6 +6536,8 @@ public class WebView extends AbsoluteLayout
         mLastTouchTime = eventTime;
         mVelocityTracker = VelocityTracker.obtain();
         mSnapScrollMode = SNAP_NONE;
+        mPrivateHandler.sendEmptyMessageDelayed(UPDATE_SELECTION,
+                ViewConfiguration.getTapTimeout());
     }
 
     private void startDrag() {
@@ -7194,10 +7200,15 @@ public class WebView extends AbsoluteLayout
         return mZoomManager.zoomOut();
     }
 
+    /**
+     * This selects the best clickable target at mLastTouchX and mLastTouchY
+     * and calls showCursorTimed on the native side
+     */
     private void updateSelection() {
         if (mNativeClass == 0) {
             return;
         }
+        mPrivateHandler.removeMessages(UPDATE_SELECTION);
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
@@ -7297,6 +7308,7 @@ public class WebView extends AbsoluteLayout
             return;
         }
         mTouchMode = TOUCH_DONE_MODE;
+        updateSelection();
         switchOutDrawHistory();
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX(mLastTouchX + mScrollX);
@@ -8185,6 +8197,14 @@ public class WebView extends AbsoluteLayout
                     }
                     sendEmptyMessageDelayed(
                             SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
+                    break;
+                }
+                case UPDATE_SELECTION: {
+                    if (mTouchMode == TOUCH_INIT_MODE
+                            || mTouchMode == TOUCH_SHORTPRESS_MODE
+                            || mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
+                        updateSelection();
+                    }
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
