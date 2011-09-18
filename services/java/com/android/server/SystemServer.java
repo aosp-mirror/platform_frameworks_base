@@ -233,10 +233,13 @@ class ServerThread extends Thread {
                 bluetooth = new BluetoothService(context);
                 ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, bluetooth);
                 bluetooth.initAfterRegistration();
-                bluetoothA2dp = new BluetoothA2dpService(context, bluetooth);
-                ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
-                                          bluetoothA2dp);
-                bluetooth.initAfterA2dpRegistration();
+
+                if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+                    bluetoothA2dp = new BluetoothA2dpService(context, bluetooth);
+                    ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
+                                              bluetoothA2dp);
+                    bluetooth.initAfterA2dpRegistration();
+                }
 
                 int airplaneModeOn = Settings.System.getInt(mContentResolver,
                         Settings.System.AIRPLANE_MODE_ON, 0);
