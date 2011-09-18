@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -451,7 +452,7 @@ public class BridgeWindowManager implements IWindowManager {
         return 0;
     }
 
-    public void waitForAllDrawn() {
+    public void waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
         // TODO Auto-generated method stub
     }
     
