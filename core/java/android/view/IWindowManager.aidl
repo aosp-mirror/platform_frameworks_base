@@ -23,6 +23,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -220,7 +221,7 @@ interface IWindowManager
     void setPointerSpeed(int speed);
 
     /**
-     * Block until all windows the window manager knows about have been drawn.
+     * Block until the given window has been drawn to the screen.
      */
-    void waitForAllDrawn();
+    void waitForWindowDrawn(IBinder token, in IRemoteCallback callback);
 }
