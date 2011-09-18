@@ -796,6 +796,21 @@ public class PopupWindow {
      * @param y the popup's y location offset
      */
     public void showAtLocation(View parent, int gravity, int x, int y) {
+        showAtLocation(parent.getWindowToken(), gravity, x, y);
+    }
+
+    /**
+     * Display the content view in a popup window at the specified location.
+     *
+     * @param token Window token to use for creating the new window
+     * @param gravity the gravity which controls the placement of the popup window
+     * @param x the popup's x location offset
+     * @param y the popup's y location offset
+     *
+     * @hide Internal use only. Applications should use
+     *       {@link #showAtLocation(View, int, int, int)} instead.
+     */
+    public void showAtLocation(IBinder token, int gravity, int x, int y) {
         if (isShowing() || mContentView == null) {
             return;
         }
@@ -805,7 +820,7 @@ public class PopupWindow {
         mIsShowing = true;
         mIsDropdown = false;
 
-        WindowManager.LayoutParams p = createPopupLayout(parent.getWindowToken());
+        WindowManager.LayoutParams p = createPopupLayout(token);
         p.windowAnimations = computeAnimationResource();
        
         preparePopup(p);
