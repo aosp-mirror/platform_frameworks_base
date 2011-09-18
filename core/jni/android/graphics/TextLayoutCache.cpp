@@ -242,6 +242,22 @@ TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint,
     hinting = paint->getHinting();
 }
 
+TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
+        text(NULL),
+        textCopy(other.textCopy),
+        contextCount(other.contextCount),
+        dirFlags(other.dirFlags),
+        typeface(other.typeface),
+        textSize(other.textSize),
+        textSkewX(other.textSkewX),
+        textScaleX(other.textScaleX),
+        flags(other.flags),
+        hinting(other.hinting) {
+    if (other.text) {
+        textCopy.setTo(other.text);
+    }
+}
+
 bool TextLayoutCacheKey::operator<(const TextLayoutCacheKey& rhs) const {
     LTE_INT(count) {
         LTE_INT(contextCount) {
@@ -253,7 +269,7 @@ bool TextLayoutCacheKey::operator<(const TextLayoutCacheKey& rhs) const {
                                 LTE_INT(flags) {
                                     LTE_INT(hinting) {
                                         LTE_INT(dirFlags) {
-                                            return strncmp16(text, rhs.text, contextCount) < 0;
+                                            return strncmp16(getText(), rhs.getText(), contextCount) < 0;
                                         }
                                     }
                                 }
@@ -269,7 +285,7 @@ bool TextLayoutCacheKey::operator<(const TextLayoutCacheKey& rhs) const {
 
 void TextLayoutCacheKey::internalTextCopy() {
     textCopy.setTo(text, contextCount);
-    text = textCopy.string();
+    text = NULL;
 }
 
 size_t TextLayoutCacheKey::getSize() {
