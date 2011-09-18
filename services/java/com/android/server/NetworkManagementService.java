@@ -123,6 +123,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int InterfaceTxCounterResult  = 217;
         public static final int InterfaceRxThrottleResult = 218;
         public static final int InterfaceTxThrottleResult = 219;
+        public static final int QuotaCounterResult        = 220;
+        public static final int TetheringStatsResult      = 221;
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
@@ -1441,6 +1443,73 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         return stats;
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsTethering(String[] ifacePairs) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+
+        if (ifacePairs.length % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "unexpected ifacePairs; length=" + ifacePairs.length);
+        }
+
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
+        for (int i = 0; i < ifacePairs.length; i += 2) {
+            final String ifaceIn = ifacePairs[i];
+            final String ifaceOut = ifacePairs[i + 1];
+            if (ifaceIn != null && ifaceOut != null) {
+                stats.combineValues(getNetworkStatsTethering(ifaceIn, ifaceOut));
+            }
+        }
+        return stats;
+    }
+
+    private NetworkStats.Entry getNetworkStatsTethering(String ifaceIn, String ifaceOut) {
+        final StringBuilder command = new StringBuilder();
+        command.append("bandwidth gettetherstats ").append(ifaceIn).append(" ").append(ifaceOut);
+
+        final String rsp;
+        try {
+            rsp = mConnector.doCommand(command.toString()).get(0);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon", e);
+        }
+
+        final String[] tok = rsp.split(" ");
+        /* Expecting: "code ifaceIn ifaceOut rx_bytes rx_packets tx_bytes tx_packets" */
+        if (tok.length != 7) {
+            throw new IllegalStateException("Native daemon returned unexpected result: " + rsp);
+        }
+
+        final int code;
+        try {
+            code = Integer.parseInt(tok[0]);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(
+                    "Failed to parse native daemon return code for " + ifaceIn + " " + ifaceOut);
+        }
+        if (code != NetdResponseCode.TetheringStatsResult) {
+            throw new IllegalStateException(
+                    "Unexpected return code from native daemon for " + ifaceIn + " " + ifaceOut);
+        }
+
+        try {
+            final NetworkStats.Entry entry = new NetworkStats.Entry();
+            entry.iface = ifaceIn;
+            entry.uid = UID_ALL;
+            entry.set = SET_DEFAULT;
+            entry.tag = TAG_NONE;
+            entry.rxBytes = Long.parseLong(tok[3]);
+            entry.rxPackets = Long.parseLong(tok[4]);
+            entry.txBytes = Long.parseLong(tok[5]);
+            entry.txPackets = Long.parseLong(tok[6]);
+            return entry;
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(
+                    "problem parsing tethering stats for " + ifaceIn + " " + ifaceOut + ": " + e);
+        }
     }
 
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {

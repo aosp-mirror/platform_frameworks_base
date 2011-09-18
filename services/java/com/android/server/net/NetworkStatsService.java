@@ -25,6 +25,7 @@ import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
+import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -34,6 +35,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Secure.NETSTATS_FORCE_COMPLETE_POLL;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
@@ -68,6 +70,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -89,6 +92,7 @@ import android.util.TrustedTime;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.util.Objects;
 import com.android.server.EventLogTags;
+import com.android.server.connectivity.Tethering;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -134,11 +138,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Flags to control detail level of poll event. */
     private static final int FLAG_POLL_NETWORK = 0x1;
     private static final int FLAG_POLL_UID = 0x2;
+    private static final int FLAG_POLL_TETHER = 0x3;
     private static final int FLAG_PERSIST_NETWORK = 0x10;
     private static final int FLAG_PERSIST_UID = 0x20;
     private static final int FLAG_FORCE_PERSIST = 0x100;
 
-    private static final int FLAG_POLL_ALL = FLAG_POLL_NETWORK | FLAG_POLL_UID;
+    private static final int FLAG_POLL_ALL = FLAG_POLL_NETWORK | FLAG_POLL_UID | FLAG_POLL_TETHER;
     private static final int FLAG_PERSIST_ALL = FLAG_PERSIST_NETWORK | FLAG_PERSIST_UID;
 
     private final Context mContext;
@@ -195,6 +200,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private NetworkStats mLastPollNetworkSnapshot;
     private NetworkStats mLastPollUidSnapshot;
     private NetworkStats mLastPollOperationsSnapshot;
+    private NetworkStats mLastPollTetherSnapshot;
 
     private NetworkStats mLastPersistNetworkSnapshot;
     private NetworkStats mLastPersistUidSnapshot;
@@ -257,6 +263,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // watch for network interfaces to be claimed
         final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION_IMMEDIATE);
         mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
+
+        // watch for tethering changes
+        final IntentFilter tetherFilter = new IntentFilter(ACTION_TETHER_STATE_CHANGED);
+        mContext.registerReceiver(mTetherReceiver, tetherFilter, CONNECTIVITY_INTERNAL, mHandler);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
@@ -543,6 +553,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     };
 
+    /**
+     * Receiver that watches for {@link Tethering} to claim interface pairs.
+     */
+    private BroadcastReceiver mTetherReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and verified CONNECTIVITY_INTERNAL
+            // permission above.
+            performPoll(FLAG_POLL_TETHER);
+        }
+    };
+
     private BroadcastReceiver mPollReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -686,12 +708,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         boolean pollNetwork = (flags & FLAG_POLL_NETWORK) != 0;
         boolean pollUid = (flags & FLAG_POLL_UID) != 0;
+        boolean pollTether = (flags & FLAG_POLL_TETHER) != 0;
 
         // when complete poll requested, any partial poll enables everything
         final boolean forceCompletePoll = mSettings.getForceCompletePoll();
-        if (forceCompletePoll && (pollNetwork || pollUid)) {
+        if (forceCompletePoll && (pollNetwork || pollUid || pollTether)) {
             pollNetwork = true;
             pollUid = true;
+            pollTether = true;
         }
 
         final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
@@ -721,6 +745,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     writeNetworkStatsLocked();
                     mLastPersistNetworkSnapshot = networkSnapshot;
                 }
+            }
+
+            if (pollTether) {
+                final String[] ifacePairs = mConnManager.getTetheredIfacePairs();
+                final NetworkStats tetherSnapshot = mNetworkManager.getNetworkStatsTethering(
+                        ifacePairs);
+                performTetherPollLocked(tetherSnapshot, currentTime);
+
+                // persisted during normal UID cycle below
             }
 
             if (pollUid) {
@@ -846,6 +879,38 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mLastPollUidSnapshot = uidSnapshot;
         mLastPollOperationsSnapshot = mOperations;
         mOperations = new NetworkStats(0L, 10);
+    }
+
+    /**
+     * Update {@link #mUidStats} historical usage for
+     * {@link TrafficStats#UID_TETHERING} based on tethering statistics.
+     */
+    private void performTetherPollLocked(NetworkStats tetherSnapshot, long currentTime) {
+        ensureUidStatsLoadedLocked();
+
+        final NetworkStats delta = computeStatsDelta(
+                mLastPollTetherSnapshot, tetherSnapshot, false);
+        final long timeStart = currentTime - delta.getElapsedRealtime();
+
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < delta.size(); i++) {
+            entry = delta.getValues(i, entry);
+            final NetworkIdentitySet ident = mActiveIfaces.get(entry.iface);
+            if (ident == null) {
+                if (entry.rxBytes > 0 || entry.rxPackets > 0 || entry.txBytes > 0
+                        || entry.txPackets > 0) {
+                    Log.w(TAG, "dropping tether delta from unknown iface: " + entry);
+                }
+                continue;
+            }
+
+            final NetworkStatsHistory history = findOrCreateUidStatsLocked(
+                    ident, UID_TETHERING, SET_DEFAULT, TAG_NONE);
+            history.recordData(timeStart, currentTime, entry);
+        }
+
+        // normal UID poll will trim any history beyond max
+        mLastPollTetherSnapshot = tetherSnapshot;
     }
 
     /**
