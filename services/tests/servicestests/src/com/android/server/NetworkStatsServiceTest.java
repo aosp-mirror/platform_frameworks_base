@@ -272,7 +272,11 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // graceful shutdown system, which should trigger persist of stats, and
         // clear any values in memory.
+        expectCurrentTime();
+        expectDefaultSettings();
+        replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SHUTDOWN));
+        verifyAndReset();
 
         // talk with zombie service to assert stats have gone; and assert that
         // we persisted them to file.
@@ -487,6 +491,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // now pretend two UIDs are uninstalled, which should migrate stats to
         // special "removed" bucket.
+        expectCurrentTime();
         expectDefaultSettings();
         replay();
         final Intent intent = new Intent(ACTION_UID_REMOVED);
@@ -758,7 +763,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expect(mSettings.getUidMaxHistory()).andReturn(maxHistory).anyTimes();
         expect(mSettings.getTagMaxHistory()).andReturn(maxHistory).anyTimes();
         expect(mSettings.getTimeCacheMaxAge()).andReturn(DAY_IN_MILLIS).anyTimes();
-        expect(mSettings.getForceCompletePoll()).andReturn(false).anyTimes();
     }
 
     private void expectCurrentTime() throws Exception {
