@@ -19,7 +19,6 @@ package com.android.server.connectivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothPan;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,15 +27,14 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
-import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkUtils;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -51,6 +49,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.util.IState;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -59,8 +58,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Set;
+
 /**
  * @hide
  *
@@ -68,7 +67,6 @@ import java.util.Set;
  *
  * TODO - look for parent classes and code sharing
  */
-
 public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private Context mContext;
@@ -627,6 +625,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             retVal[i] = list.get(i);
         }
         return retVal;
+    }
+
+    public String[] getTetheredIfacePairs() {
+        final ArrayList<String> list = Lists.newArrayList();
+        synchronized (mIfaces) {
+            for (TetherInterfaceSM sm : mIfaces.values()) {
+                if (sm.isTethered()) {
+                    list.add(sm.mMyUpstreamIfaceName);
+                    list.add(sm.mIfaceName);
+                }
+            }
+        }
+        return list.toArray(new String[list.size()]);
     }
 
     public String[] getTetherableIfaces() {

@@ -2394,6 +2394,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return mTethering.getTetheredIfaces();
     }
 
+    @Override
+    public String[] getTetheredIfacePairs() {
+        enforceTetherAccessPermission();
+        return mTethering.getTetheredIfacePairs();
+    }
+
     public String[] getTetheringErroredIfaces() {
         enforceTetherAccessPermission();
         return mTethering.getErroredIfaces();
