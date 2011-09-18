@@ -14,9 +14,8 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/btn_cab_done_default_holo_light" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+          android:exitFadeDuration="@android:integer/config_mediumAnimTime">
     <item android:state_pressed="true"
         android:drawable="@drawable/btn_cab_done_pressed_holo_light" />
     <item android:state_focused="true" android:state_enabled="true"

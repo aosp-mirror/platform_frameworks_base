@@ -2135,7 +2135,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                 com.android.internal.R.attr.actionModePopupWindowStyle);
                         mActionModePopup.setLayoutInScreenEnabled(true);
                         mActionModePopup.setLayoutInsetDecor(true);
-                        mActionModePopup.setClippingEnabled(false);
+                        mActionModePopup.setWindowLayoutType(
+                                WindowManager.LayoutParams.TYPE_APPLICATION);
                         mActionModePopup.setContentView(mActionModeView);
                         mActionModePopup.setWidth(MATCH_PARENT);
 
@@ -2144,10 +2145,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                 com.android.internal.R.attr.actionBarSize, heightValue, true);
                         final int height = TypedValue.complexToDimensionPixelSize(heightValue.data,
                                 mContext.getResources().getDisplayMetrics());
-                        mActionModePopup.setHeight(height);
+                        mActionModeView.setContentHeight(height);
+                        mActionModePopup.setHeight(WRAP_CONTENT);
                         mShowActionModePopup = new Runnable() {
                             public void run() {
-                                mActionModePopup.showAtLocation(PhoneWindow.DecorView.this,
+                                mActionModePopup.showAtLocation(
+                                        mActionModeView.getApplicationWindowToken(),
                                         Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
                             }
                         };
