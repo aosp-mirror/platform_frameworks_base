@@ -63,6 +63,9 @@ public class DhcpStateMachine extends StateMachine {
     private PowerManager.WakeLock mDhcpRenewWakeLock;
     private static final String WAKELOCK_TAG = "DHCP";
 
+    //Remember DHCP configuration from first request
+    private DhcpInfoInternal mDhcpInfo;
+
     private static final int DHCP_RENEW = 0;
     private static final String ACTION_DHCP_RENEW = "android.net.wifi.DHCP_RENEW";
 
@@ -335,9 +338,11 @@ public class DhcpStateMachine extends StateMachine {
         if (dhcpAction == DhcpAction.START) {
             Log.d(TAG, "DHCP request on " + mInterfaceName);
             success = NetworkUtils.runDhcp(mInterfaceName, dhcpInfoInternal);
+            mDhcpInfo = dhcpInfoInternal;
         } else if (dhcpAction == DhcpAction.RENEW) {
             Log.d(TAG, "DHCP renewal on " + mInterfaceName);
             success = NetworkUtils.runDhcpRenew(mInterfaceName, dhcpInfoInternal);
+            dhcpInfoInternal.updateFromDhcpRequest(mDhcpInfo);
         }
 
         if (success) {
