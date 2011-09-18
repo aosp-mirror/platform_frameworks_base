@@ -40,8 +40,10 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.LocalPowerManager;
 import android.os.Message;
 import android.os.Messenger;
@@ -125,6 +127,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.FallbackAction;
+import android.view.WindowManagerPolicy.ScreenOnListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -2826,24 +2829,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateLockScreenTimeout();
             updateScreenSaverTimeoutLocked();
         }
-        try {
-            mWindowManager.waitForAllDrawn();
-        } catch (RemoteException e) {
-        }
-        // Wait for one frame to give surface flinger time to do its
-        // compositing.  Yes this is a hack, but I am really not up right now for
-        // implementing some mechanism to block until SF is done. :p
-        try {
-            Thread.sleep(20);
-        } catch (InterruptedException e) {
-        }
     }
 
     /** {@inheritDoc} */
-    public void screenTurnedOn() {
+    public void screenTurningOn(final ScreenOnListener screenOnListener) {
         EventLog.writeEvent(70000, 1);
         if (mKeyguardMediator != null) {
-            mKeyguardMediator.onScreenTurnedOn();
+            //Slog.i(TAG, "Screen turning on...");
+            mKeyguardMediator.onScreenTurnedOn(new KeyguardViewManager.ShowListener() {
+                @Override public void onShown(IBinder windowToken) {
+                    if (windowToken != null) {
+                        try {
+                            mWindowManager.waitForWindowDrawn(windowToken, new IRemoteCallback.Stub() {
+                                @Override public void sendResult(Bundle data) {
+                                    Slog.i(TAG, "Lock screen displayed!");
+                                    screenOnListener.onScreenOn();
+                                }
+                            });
+                        } catch (RemoteException e) {
+                        }
+                    } else {
+                        Slog.i(TAG, "No lock screen!");
+                        screenOnListener.onScreenOn();
+                    }
+                }
+            });
         }
         synchronized (mLock) {
             mScreenOn = true;

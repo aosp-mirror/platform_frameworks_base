@@ -73,6 +73,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.os.Message;
@@ -91,6 +92,7 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
@@ -385,6 +387,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * list or contain windows that need to be force removed.
      */
     ArrayList<WindowState> mForceRemoves;
+
+    /**
+     * Windows that clients are waiting to have drawn.
+     */
+    ArrayList<Pair<WindowState, IRemoteCallback>> mWaitingForDrawn
+            = new ArrayList<Pair<WindowState, IRemoteCallback>>();
 
     /**
      * Used when rebuilding window list to keep track of windows that have
@@ -6301,6 +6309,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int DRAG_END_TIMEOUT = 21;
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
         public static final int BOOT_TIMEOUT = 23;
+        public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
 
         private Session mLastReportedHold;
 
@@ -6611,11 +6620,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case BOOT_TIMEOUT: {
-                    performBootTimeout();
-                    break;
-                }
-
                 case APP_FREEZE_TIMEOUT: {
                     synchronized (mWindowMap) {
                         Slog.w(TAG, "App freeze timeout expired.");
@@ -6682,6 +6686,27 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case REPORT_HARD_KEYBOARD_STATUS_CHANGE: {
                     notifyHardKeyboardStatusChange();
+                    break;
+                }
+
+                case BOOT_TIMEOUT: {
+                    performBootTimeout();
+                    break;
+                }
+
+                case WAITING_FOR_DRAWN_TIMEOUT: {
+                    Pair<WindowState, IRemoteCallback> pair;
+                    synchronized (mWindowMap) {
+                        pair = (Pair<WindowState, IRemoteCallback>)msg.obj;
+                        Slog.w(TAG, "Timeout waiting for drawn: " + pair.first);
+                        if (!mWaitingForDrawn.remove(pair)) {
+                            return;
+                        }
+                    }
+                    try {
+                        pair.second.sendResult(null);
+                    } catch (RemoteException e) {
+                    }
                     break;
                 }
             }
@@ -8588,39 +8613,54 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        mWindowMap.notifyAll();
+        checkDrawnWindowsLocked();
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
         enableScreenIfNeededLocked();
     }
 
-    public void waitForAllDrawn() {
+    void checkDrawnWindowsLocked() {
+        if (mWaitingForDrawn.size() > 0) {
+            for (int j=mWaitingForDrawn.size()-1; j>=0; j--) {
+                Pair<WindowState, IRemoteCallback> pair = mWaitingForDrawn.get(j);
+                WindowState win = pair.first;
+                //Slog.i(TAG, "Waiting for drawn " + win + ": removed="
+                //        + win.mRemoved + " visible=" + win.isVisibleLw()
+                //        + " shown=" + win.mSurfaceShown);
+                if (win.mRemoved || !win.isVisibleLw()) {
+                    // Window has been removed or made invisible; no draw
+                    // will now happen, so stop waiting.
+                    Slog.w(TAG, "Aborted waiting for drawn: " + pair.first);
+                    try {
+                        pair.second.sendResult(null);
+                    } catch (RemoteException e) {
+                    }
+                    mWaitingForDrawn.remove(pair);
+                    mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
+                } else if (win.mSurfaceShown) {
+                    // Window is now drawn (and shown).
+                    try {
+                        pair.second.sendResult(null);
+                    } catch (RemoteException e) {
+                    }
+                    mWaitingForDrawn.remove(pair);
+                    mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
+                }
+            }
+        }
+    }
+
+    public void waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
         synchronized (mWindowMap) {
-            while (true) {
-                final int N = mWindows.size();
-                boolean okay = true;
-                for (int i=0; i<N && okay; i++) {
-                    WindowState w = mWindows.get(i);
-                    if (DEBUG_SCREEN_ON) {
-                        Slog.i(TAG, "Window " + w + " vis=" + w.isVisibleLw()
-                                + " obscured=" + w.mObscured + " drawn=" + w.isDrawnLw());
-                    }
-                    if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
-                        if (DEBUG_SCREEN_ON) {
-                            Slog.i(TAG, "Window not yet drawn: " + w);
-                        }
-                        okay = false;
-                        break;
-                    }
-                }
-                if (okay) {
-                    return;
-                }
-                try {
-                    mWindowMap.wait();
-                } catch (InterruptedException e) {
-                }
+            WindowState win = windowForClientLocked(null, token, true);
+            if (win != null) {
+                Pair<WindowState, IRemoteCallback> pair =
+                        new Pair<WindowState, IRemoteCallback>(win, callback);
+                Message m = mH.obtainMessage(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
+                mH.sendMessageDelayed(m, 2000);
+                mWaitingForDrawn.add(pair);
+                checkDrawnWindowsLocked();
             }
         }
     }
@@ -9288,6 +9328,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.println();
                     }
                 }
+            }
+        }
+        if (mWaitingForDrawn.size() > 0) {
+            pw.println();
+            pw.println("  Clients waiting for these windows to be drawn:");
+            for (int i=mWaitingForDrawn.size()-1; i>=0; i--) {
+                Pair<WindowState, IRemoteCallback> pair = mWaitingForDrawn.get(i);
+                pw.print("  Waiting #"); pw.print(i); pw.print(' '); pw.print(pair.first);
+                        pw.print(": "); pw.println(pair.second);
             }
         }
         pw.println();
