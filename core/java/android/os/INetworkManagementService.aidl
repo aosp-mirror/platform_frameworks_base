@@ -231,6 +231,13 @@ interface INetworkManagementService
     NetworkStats getNetworkStatsUidDetail(int uid);
 
     /**
+     * Return summary of network statistics for the requested pairs of
+     * tethering interfaces.  Even indexes are remote interface, and odd
+     * indexes are corresponding local interfaces.
+     */
+    NetworkStats getNetworkStatsTethering(in String[] ifacePairs);
+
+    /**
      * Set quota for an interface.
      */
     void setInterfaceQuota(String iface, long quotaBytes);
