@@ -116,7 +116,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
     private static final int SET_HIDDEN = 12;
     private static final int KEYGUARD_TIMEOUT = 13;
-    private static final int REPORT_SHOW_DONE = 14;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -238,8 +237,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private boolean mKeyboardOpen = false;
 
     private boolean mScreenOn = false;
-
-    private boolean mShowPending = false;
 
     // last known state of the cellular connection
     private String mPhoneState = TelephonyManager.EXTRA_STATE_IDLE;
@@ -383,19 +380,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
-                if (!doKeyguardLocked() && why == WindowManagerPolicy.OFF_BECAUSE_OF_USER) {
-                    // The user has explicitly turned off the screen, causing it
-                    // to lock.  We want to block here until the keyguard window
-                    // has shown, so the power manager won't complete the screen
-                    // off flow until that point, so we know it won't turn *on*
-                    // the screen until this is done.
-                    while (mShowPending) {
-                        try {
-                            wait();
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
+                doKeyguardLocked();
             }
         }
     }
@@ -403,12 +388,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     /**
      * Let's us know the screen was turned on.
      */
-    public void onScreenTurnedOn() {
+    public void onScreenTurnedOn(KeyguardViewManager.ShowListener showListener) {
         synchronized (this) {
             mScreenOn = true;
             mDelayedShowingSequence++;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
-            notifyScreenOnLocked();
+            notifyScreenOnLocked(showListener);
         }
     }
 
@@ -573,7 +558,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * work that will happen is done; returns false if the caller can wait for
      * the keyguard to be shown.
      */
-    private boolean doKeyguardLocked() {
+    private void doKeyguardLocked() {
         // if another app is disabling us, don't show
         if (!mExternallyEnabled) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
@@ -587,13 +572,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             // ends (see the broadcast receiver below)
             // TODO: clean this up when we have better support at the window manager level
             // for apps that wish to be on top of the keyguard
-            return true;
+            return;
         }
 
         // if the keyguard is already showing, don't bother
         if (mKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
-            return true;
+            return;
         }
 
         // if the setup wizard hasn't run yet, don't show
@@ -609,18 +594,16 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (!lockedOrMissing && !provisioned) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
                     + " and the sim is not locked or missing");
-            return true;
+            return;
         }
 
         if (mLockPatternUtils.isLockScreenDisabled()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
-            return true;
+            return;
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
-        mShowPending = true;
         showLocked();
-        return false;
     }
 
     /**
@@ -658,9 +641,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #onScreenTurnedOn()
      * @see #handleNotifyScreenOn
      */
-    private void notifyScreenOnLocked() {
+    private void notifyScreenOnLocked(KeyguardViewManager.ShowListener showListener) {
         if (DEBUG) Log.d(TAG, "notifyScreenOnLocked");
-        mHandler.sendEmptyMessage(NOTIFY_SCREEN_ON);
+        Message msg = mHandler.obtainMessage(NOTIFY_SCREEN_ON, showListener);
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -974,7 +958,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     handleNotifyScreenOff();
                     return;
                 case NOTIFY_SCREEN_ON:
-                    handleNotifyScreenOn();
+                    handleNotifyScreenOn((KeyguardViewManager.ShowListener)msg.obj);
                     return;
                 case WAKE_WHEN_READY:
                     handleWakeWhenReady(msg.arg1);
@@ -994,12 +978,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 case KEYGUARD_TIMEOUT:
                     synchronized (KeyguardViewMediator.this) {
                         doKeyguardLocked();
-                    }
-                    break;
-                case REPORT_SHOW_DONE:
-                    synchronized (KeyguardViewMediator.this) {
-                        mShowPending = false;
-                        KeyguardViewMediator.this.notifyAll();
                     }
                     break;
             }
@@ -1113,12 +1091,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             playSounds(true);
 
             mShowKeyguardWakeLock.release();
-
-            // We won't say the show is done yet because the view hierarchy
-            // still needs to do the traversal.  Posting this message allows
-            // us to hold off until that is done.
-            Message msg = mHandler.obtainMessage(REPORT_SHOW_DONE);
-            mHandler.sendMessage(msg);
         }
     }
 
@@ -1284,10 +1256,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * Handle message sent by {@link #notifyScreenOnLocked()}
      * @see #NOTIFY_SCREEN_ON
      */
-    private void handleNotifyScreenOn() {
+    private void handleNotifyScreenOn(KeyguardViewManager.ShowListener showListener) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOn");
-            mKeyguardViewManager.onScreenTurnedOn();
+            mKeyguardViewManager.onScreenTurnedOn(showListener);
         }
     }
 

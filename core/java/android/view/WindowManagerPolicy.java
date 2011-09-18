@@ -772,10 +772,16 @@ public interface WindowManagerPolicy {
      */
     public void screenTurnedOff(int why);
 
+    public interface ScreenOnListener {
+        void onScreenOn();
+    };
+
     /**
-     * Called after the screen turns on.
+     * Called when the power manager would like to turn the screen on.
+     * Must call back on the listener to tell it when the higher-level system
+     * is ready for the screen to go on (i.e. the lock screen is shown).
      */
-    public void screenTurnedOn();
+    public void screenTurningOn(ScreenOnListener screenOnListener);
 
     /**
      * Return whether the screen is currently on.
