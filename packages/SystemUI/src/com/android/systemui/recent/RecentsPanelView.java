@@ -83,6 +83,7 @@ public class RecentsPanelView extends RelativeLayout
     private int mIconDpi;
     private View mRecentsScrim;
     private View mRecentsGlowView;
+    private View mRecentsNoApps;
     private ViewGroup mRecentsContainer;
     private Bitmap mDefaultThumbnailBackground;
 
@@ -373,8 +374,9 @@ public class RecentsPanelView extends RelativeLayout
 
 
         mRecentsGlowView = findViewById(R.id.recents_glow);
-        mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
-        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, this);
+        mRecentsScrim = findViewById(R.id.recents_bg_protect);
+        mRecentsNoApps = findViewById(R.id.recents_no_apps);
+        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, mRecentsNoApps, this);
         mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
         mRecentsDismissButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -581,6 +583,9 @@ public class RecentsPanelView extends RelativeLayout
             mThumbnailLoader.cancel(false);
             mThumbnailLoader = null;
         }
+        if (mRecentsNoApps != null) { // doesn't exist on large devices
+            mRecentsNoApps.setVisibility(View.INVISIBLE);
+        }
         mActivityDescriptions = getRecentTasks();
         for (ActivityDescription ad : mActivityDescriptions) {
             ad.setThumbnail(mDefaultThumbnailBackground);
@@ -647,7 +652,11 @@ public class RecentsPanelView extends RelativeLayout
         } else {
             // Immediately hide this panel
             if (DEBUG) Log.v(TAG, "Nothing to show");
-            hide(false);
+            if (mRecentsNoApps != null) { // doesn't exist on large devices
+                mRecentsNoApps.setVisibility(View.VISIBLE);
+            } else {
+                hide(false);
+            }
         }
     }
 

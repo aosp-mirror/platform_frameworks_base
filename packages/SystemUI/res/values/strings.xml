@@ -41,6 +41,10 @@
     <!-- Title shown in recents popup for inspecting an application's properties -->
     <string name="status_bar_recent_inspect_item_title">App info</string>
 
+    <!-- Message shown in the middle of the screen after clicking on the recent apps button
+         when there are no recent apps to show [CHAR LIMIT=45]-->
+    <string name="status_bar_no_recent_apps">No recent apps</string>
+
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing.  [CHAR LIMIT=40]-->
     <string name="status_bar_no_notifications_title">No notifications</string>
