@@ -106,5 +106,9 @@ private:
                            UErrorCode &status);
     static void handleText(SkPaint* paint, const jchar* text, jsize len,
                            int bidiFlags, jfloat x, jfloat y, SkCanvas* canvas, SkPath* path);
+
+    static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
+            size_t start, size_t count, size_t contextCount, int dirFlags,
+            jfloat* outAdvances, jfloat* outTotalAdvance);
 };
 } // namespace android
