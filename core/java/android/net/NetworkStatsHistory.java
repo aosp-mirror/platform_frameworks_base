@@ -441,10 +441,10 @@ public class NetworkStatsHistory implements Parcelable {
             final long curStart = bucketStart[i];
             final long curEnd = curStart + bucketDuration;
 
-            // bucket is older than record; we're finished
-            if (curEnd < start) break;
-            // bucket is newer than record; keep looking
-            if (curStart > end) continue;
+            // bucket is older than request; we're finished
+            if (curEnd <= start) break;
+            // bucket is newer than request; keep looking
+            if (curStart >= end) continue;
 
             // include full value for active buckets, otherwise only fractional
             final boolean activeBucket = curStart < now && curEnd > now;
@@ -466,7 +466,6 @@ public class NetworkStatsHistory implements Parcelable {
             if (txPackets != null) entry.txPackets += txPackets[i] * overlap / bucketDuration;
             if (operations != null) entry.operations += operations[i] * overlap / bucketDuration;
         }
-
         return entry;
     }
 
