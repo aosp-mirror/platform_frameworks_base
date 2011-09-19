@@ -71,7 +71,7 @@ public:
 
     static void getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
                                    jint count, jint contextCount, jint dirFlags,
-                                   jfloat* resultAdvances, jfloat& resultTotalAdvance);
+                                   jfloat* resultAdvances, jfloat* resultTotalAdvance);
 
     static void getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint start,
                                    jint count, jint contextCount, jint dirFlags,
