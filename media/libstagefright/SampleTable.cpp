@@ -23,8 +23,8 @@
 
 #include <arpa/inet.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/Utils.h>
 
 namespace android {
@@ -37,6 +37,71 @@ const uint32_t SampleTable::kChunkOffsetType64 = FOURCC('c', 'o', '6', '4');
 const uint32_t SampleTable::kSampleSizeType32 = FOURCC('s', 't', 's', 'z');
 // static
 const uint32_t SampleTable::kSampleSizeTypeCompact = FOURCC('s', 't', 'z', '2');
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct SampleTable::CompositionDeltaLookup {
+    CompositionDeltaLookup();
+
+    void setEntries(
+            const uint32_t *deltaEntries, size_t numDeltaEntries);
+
+    uint32_t getCompositionTimeOffset(uint32_t sampleIndex);
+
+private:
+    Mutex mLock;
+
+    const uint32_t *mDeltaEntries;
+    size_t mNumDeltaEntries;
+
+    size_t mCurrentDeltaEntry;
+    size_t mCurrentEntrySampleIndex;
+
+    DISALLOW_EVIL_CONSTRUCTORS(CompositionDeltaLookup);
+};
+
+SampleTable::CompositionDeltaLookup::CompositionDeltaLookup()
+    : mDeltaEntries(NULL),
+      mNumDeltaEntries(0),
+      mCurrentDeltaEntry(0),
+      mCurrentEntrySampleIndex(0) {
+}
+
+void SampleTable::CompositionDeltaLookup::setEntries(
+        const uint32_t *deltaEntries, size_t numDeltaEntries) {
+    Mutex::Autolock autolock(mLock);
+
+    mDeltaEntries = deltaEntries;
+    mNumDeltaEntries = numDeltaEntries;
+    mCurrentDeltaEntry = 0;
+    mCurrentEntrySampleIndex = 0;
+}
+
+uint32_t SampleTable::CompositionDeltaLookup::getCompositionTimeOffset(
+        uint32_t sampleIndex) {
+    Mutex::Autolock autolock(mLock);
+
+    if (mDeltaEntries == NULL) {
+        return 0;
+    }
+
+    if (sampleIndex < mCurrentEntrySampleIndex) {
+        mCurrentDeltaEntry = 0;
+        mCurrentEntrySampleIndex = 0;
+    }
+
+    while (mCurrentDeltaEntry < mNumDeltaEntries) {
+        uint32_t sampleCount = mDeltaEntries[2 * mCurrentDeltaEntry];
+        if (sampleIndex < mCurrentEntrySampleIndex + sampleCount) {
+            return mDeltaEntries[2 * mCurrentDeltaEntry + 1];
+        }
+
+        mCurrentEntrySampleIndex += sampleCount;
+        ++mCurrentDeltaEntry;
+    }
+
+    return 0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,6 +121,7 @@ SampleTable::SampleTable(const sp<DataSource> &source)
       mSampleTimeEntries(NULL),
       mCompositionTimeDeltaEntries(NULL),
       mNumCompositionTimeDeltaEntries(0),
+      mCompositionDeltaLookup(new CompositionDeltaLookup),
       mSyncSampleOffset(-1),
       mNumSyncSamples(0),
       mSyncSamples(NULL),
@@ -70,6 +136,9 @@ SampleTable::~SampleTable() {
 
     delete[] mSyncSamples;
     mSyncSamples = NULL;
+
+    delete mCompositionDeltaLookup;
+    mCompositionDeltaLookup = NULL;
 
     delete[] mCompositionTimeDeltaEntries;
     mCompositionTimeDeltaEntries = NULL;
@@ -318,6 +387,9 @@ status_t SampleTable::setCompositionTimeToSampleParams(
         mCompositionTimeDeltaEntries[i] = ntohl(mCompositionTimeDeltaEntries[i]);
     }
 
+    mCompositionDeltaLookup->setEntries(
+            mCompositionTimeDeltaEntries, mNumCompositionTimeDeltaEntries);
+
     return OK;
 }
 
@@ -430,8 +502,12 @@ void SampleTable::buildSampleEntriesTable() {
 
                 mSampleTimeEntries[sampleIndex].mSampleIndex = sampleIndex;
 
+                uint32_t compTimeDelta =
+                    mCompositionDeltaLookup->getCompositionTimeOffset(
+                            sampleIndex);
+
                 mSampleTimeEntries[sampleIndex].mCompositionTime =
-                    sampleTime + getCompositionTimeOffset(sampleIndex);
+                    sampleTime + compTimeDelta;
             }
 
             ++sampleIndex;
@@ -739,25 +815,8 @@ status_t SampleTable::getMetaDataForSample(
     return OK;
 }
 
-uint32_t SampleTable::getCompositionTimeOffset(uint32_t sampleIndex) const {
-    if (mCompositionTimeDeltaEntries == NULL) {
-        return 0;
-    }
-
-    uint32_t curSample = 0;
-    for (size_t i = 0; i < mNumCompositionTimeDeltaEntries; ++i) {
-        uint32_t sampleCount = mCompositionTimeDeltaEntries[2 * i];
-
-        if (sampleIndex < curSample + sampleCount) {
-            uint32_t sampleDelta = mCompositionTimeDeltaEntries[2 * i + 1];
-
-            return sampleDelta;
-        }
-
-        curSample += sampleCount;
-    }
-
-    return 0;
+uint32_t SampleTable::getCompositionTimeOffset(uint32_t sampleIndex) {
+    return mCompositionDeltaLookup->getCompositionTimeOffset(sampleIndex);
 }
 
 }  // namespace android
