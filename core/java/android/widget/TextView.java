@@ -1193,6 +1193,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         super.setEnabled(enabled);
         prepareCursorControllers();
+        if (enabled) {
+            // Make sure IME is updated with current editor info.
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) imm.restartInput(this);
+        }
     }
 
     /**
