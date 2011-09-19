@@ -77,7 +77,7 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
                 pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
                                                   dbg->readBytesPerPixel);
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                                   dbg->readFormat, dbg->readType, pixels);
+                        GL_RGBA, GL_UNSIGNED_BYTE, pixels);
             }
             break;
         case glesv2debugger::Message_Function_SKIP:
@@ -134,19 +134,22 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     msg.set_arg7(dbg->maxAttrib); // indicate capturing vertex data
     std::string * const data = msg.mutable_data();
     if (GL_UNSIGNED_BYTE == type) {
-        if (dbg->indexBuffer)
+        if (dbg->indexBuffer) {
             FetchIndexed(count, (unsigned char *)dbg->indexBuffer->data +
                          (unsigned long)indices, data, dbg);
-        else
+        } else {
             FetchIndexed(count, (unsigned char *)indices, data, dbg);
+        }
     } else if (GL_UNSIGNED_SHORT == type) {
-        if (dbg->indexBuffer)
+        if (dbg->indexBuffer) {
             FetchIndexed(count, (unsigned short *)((char *)dbg->indexBuffer->data +
                                                    (unsigned long)indices), data, dbg);
-        else
+        } else {
             FetchIndexed(count, (unsigned short *)indices, data, dbg);
-    } else
+        }
+    } else {
         assert(0);
+    }
 
     void * pixels = NULL;
     int viewport[4] = {};
@@ -174,7 +177,7 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             Send(msg, cmd);
             expectResponse = cmd.expect_response();
             // TODO: pack glReadPixels data with vertex data instead of
-            //  relying on sperate call for transport, this would allow
+            //  relying on separate call for transport, this would allow
             //  auto generated message loop using EXTEND_Debug macro
             if (dbg->captureDraw > 0) {
                 dbg->captureDraw--;
@@ -182,7 +185,7 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
                 pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
                                                   dbg->readBytesPerPixel);
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                                   dbg->readFormat, dbg->readType, pixels);
+                        GL_RGBA, GL_UNSIGNED_BYTE, pixels);
             }
             break;
         case glesv2debugger::Message_Function_SKIP:

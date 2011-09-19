@@ -41,11 +41,11 @@ EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
         void * pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
                         dbg->readBytesPerPixel);
         dbg->hooks->gl.glReadPixels(viewport[0], viewport[1], viewport[2],
-                                    viewport[3], dbg->readFormat, dbg->readType, pixels);
+                                    viewport[3], GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         dbg->CompressReadPixelBuffer(msg.mutable_data());
         msg.set_data_type(msg.ReferencedImage);
-        msg.set_pixel_format(dbg->readFormat);
-        msg.set_pixel_type(dbg->readType);
+        msg.set_pixel_format(GL_RGBA);
+        msg.set_pixel_type(GL_UNSIGNED_BYTE);
         msg.set_image_width(viewport[2]);
         msg.set_image_height(viewport[3]);
     }

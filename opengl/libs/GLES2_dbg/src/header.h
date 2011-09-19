@@ -87,7 +87,6 @@ public:
     const unsigned int version; // 0 is GLES1, 1 is GLES2
     const gl_hooks_t * const hooks;
     const unsigned int MAX_VERTEX_ATTRIBS;
-    const GLenum readFormat, readType; // implementation supported glReadPixels
     const unsigned int readBytesPerPixel;
 
     unsigned int captureSwap; // number of eglSwapBuffers to glReadPixels
@@ -124,8 +123,7 @@ public:
     unsigned maxAttrib; // number of slots used by program
 
     DbgContext(const unsigned version, const gl_hooks_t * const hooks,
-               const unsigned MAX_VERTEX_ATTRIBS, const GLenum readFormat,
-               const GLenum readType);
+               const unsigned MAX_VERTEX_ATTRIBS);
     ~DbgContext();
 
     void Fetch(const unsigned index, std::string * const data) const;

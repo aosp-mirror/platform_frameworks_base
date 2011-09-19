@@ -29,7 +29,7 @@ protected:
     gl_hooks_t hooks;
 
     DbgContextTest()
-            : dbg(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE) {
+            : dbg(1, &hooks, 32) {
         // You can do set-up work for each test here.
         hooks.gl.glGetError = GetError;
     }
