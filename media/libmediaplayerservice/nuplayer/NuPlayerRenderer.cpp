@@ -47,7 +47,8 @@ NuPlayer::Renderer::Renderer(
       mHasVideo(false),
       mSyncQueues(false),
       mPaused(false),
-      mLastPositionUpdateUs(-1ll) {
+      mLastPositionUpdateUs(-1ll),
+      mVideoLateByUs(0ll) {
 }
 
 NuPlayer::Renderer::~Renderer() {
@@ -357,22 +358,26 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
 
         mVideoQueue.erase(mVideoQueue.begin());
         entry = NULL;
+
+        mVideoLateByUs = 0ll;
+
+        notifyPosition();
         return;
     }
 
-#if 0
     int64_t mediaTimeUs;
     CHECK(entry->mBuffer->meta()->findInt64("timeUs", &mediaTimeUs));
 
     int64_t realTimeUs = mediaTimeUs - mAnchorTimeMediaUs + mAnchorTimeRealUs;
-    int64_t lateByUs = ALooper::GetNowUs() - realTimeUs;
+    mVideoLateByUs = ALooper::GetNowUs() - realTimeUs;
 
-    if (lateByUs > 40000) {
-        LOGI("video late by %lld us (%.2f secs)", lateByUs, lateByUs / 1E6);
+    bool tooLate = (mVideoLateByUs > 40000);
+
+    if (tooLate) {
+        LOGV("video late by %lld us (%.2f secs)", lateByUs, lateByUs / 1E6);
     } else {
         LOGV("rendering video at media time %.2f secs", mediaTimeUs / 1E6);
     }
-#endif
 
     entry->mNotifyConsumed->setInt32("render", true);
     entry->mNotifyConsumed->post();
@@ -604,6 +609,7 @@ void NuPlayer::Renderer::notifyPosition() {
     sp<AMessage> notify = mNotify->dup();
     notify->setInt32("what", kWhatPosition);
     notify->setInt64("positionUs", positionUs);
+    notify->setInt64("videoLateByUs", mVideoLateByUs);
     notify->post();
 }
 

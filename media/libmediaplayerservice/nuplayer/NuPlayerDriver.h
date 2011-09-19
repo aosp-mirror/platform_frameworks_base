@@ -60,16 +60,19 @@ struct NuPlayerDriver : public MediaPlayerInterface {
     virtual status_t getMetadata(
             const media::Metadata::Filter& ids, Parcel *records);
 
+    virtual status_t dump(int fd, const Vector<String16> &args) const;
+
     void notifyResetComplete();
     void notifyDuration(int64_t durationUs);
     void notifyPosition(int64_t positionUs);
     void notifySeekComplete();
+    void notifyFrameStats(int64_t numFramesTotal, int64_t numFramesDropped);
 
 protected:
     virtual ~NuPlayerDriver();
 
 private:
-    Mutex mLock;
+    mutable Mutex mLock;
     Condition mCondition;
 
     // The following are protected through "mLock"
@@ -77,6 +80,8 @@ private:
     bool mResetInProgress;
     int64_t mDurationUs;
     int64_t mPositionUs;
+    int64_t mNumFramesTotal;
+    int64_t mNumFramesDropped;
     // <<<
 
     sp<ALooper> mLooper;

@@ -31,6 +31,8 @@ NuPlayerDriver::NuPlayerDriver()
     : mResetInProgress(false),
       mDurationUs(-1),
       mPositionUs(-1),
+      mNumFramesTotal(0),
+      mNumFramesDropped(0),
       mLooper(new ALooper),
       mState(UNINITIALIZED),
       mStartupSeekTimeUs(-1) {
@@ -290,6 +292,32 @@ void NuPlayerDriver::notifyPosition(int64_t positionUs) {
 
 void NuPlayerDriver::notifySeekComplete() {
     sendEvent(MEDIA_SEEK_COMPLETE);
+}
+
+void NuPlayerDriver::notifyFrameStats(
+        int64_t numFramesTotal, int64_t numFramesDropped) {
+    Mutex::Autolock autoLock(mLock);
+    mNumFramesTotal = numFramesTotal;
+    mNumFramesDropped = numFramesDropped;
+}
+
+status_t NuPlayerDriver::dump(int fd, const Vector<String16> &args) const {
+    Mutex::Autolock autoLock(mLock);
+
+    FILE *out = fdopen(dup(fd), "w");
+
+    fprintf(out, " NuPlayer\n");
+    fprintf(out, "  numFramesTotal(%lld), numFramesDropped(%lld), "
+                 "percentageDropped(%.2f)\n",
+                 mNumFramesTotal,
+                 mNumFramesDropped,
+                 mNumFramesTotal == 0
+                    ? 0.0 : (double)mNumFramesDropped / mNumFramesTotal);
+
+    fclose(out);
+    out = NULL;
+
+    return OK;
 }
 
 }  // namespace android
