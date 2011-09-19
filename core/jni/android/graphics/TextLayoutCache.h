@@ -110,9 +110,6 @@ private:
  * TextLayoutCacheValue is the Cache value
  */
 class TextLayoutCacheValue : public RefBase {
-protected:
-    ~TextLayoutCacheValue();
-
 public:
     TextLayoutCacheValue();
 
@@ -122,11 +119,11 @@ public:
     void computeValues(SkPaint* paint, const UChar* chars, size_t start, size_t count,
             size_t contextCount, int dirFlags);
 
-    inline const jfloat* getAdvances() const { return mAdvances; }
-    inline size_t getAdvancesCount() const { return mAdvancesCount; }
+    inline const jfloat* getAdvances() const { return mAdvances.array(); }
+    inline size_t getAdvancesCount() const { return mAdvances.size(); }
     inline jfloat getTotalAdvance() const { return mTotalAdvance; }
-    inline const jchar* getGlyphs() const { return mGlyphs; }
-    inline size_t getGlyphsCount() const { return mGlyphsCount; }
+    inline const jchar* getGlyphs() const { return mGlyphs.array(); }
+    inline size_t getGlyphsCount() const { return mGlyphs.size(); }
 
     /**
      * Get the size of the Cache entry
@@ -143,8 +140,8 @@ public:
 
     static void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
-            jfloat* outAdvances, jfloat* outTotalAdvance,
-            jchar** outGlyphs, size_t* outGlyphsCount);
+            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+            Vector<jchar>* const outGlyphs);
 
     static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
@@ -152,9 +149,9 @@ public:
 
 private:
     /**
-     * Advances array
+     * Advances vector
      */
-    jfloat* mAdvances;
+    Vector<jfloat> mAdvances;
 
     /**
      * Total number of advances
@@ -162,19 +159,9 @@ private:
     jfloat mTotalAdvance;
 
     /**
-     * Allocated size for advances array
+     * Glyphs vector
      */
-    size_t mAdvancesCount;
-
-    /**
-     * Glyphs array
-     */
-    jchar* mGlyphs;
-
-    /**
-     * Total number of glyphs
-     */
-    size_t mGlyphsCount;
+    Vector<jchar> mGlyphs;
 
     /**
      * Time for computing the values (in milliseconds)
@@ -187,8 +174,8 @@ private:
 
     static void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, bool isRTL,
-            jfloat* outAdvances, jfloat* outTotalAdvance,
-            jchar** outGlyphs, size_t* outGlyphsCount);
+            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+            Vector<jchar>* const outGlyphs);
 }; // TextLayoutCacheValue
 
 /**
