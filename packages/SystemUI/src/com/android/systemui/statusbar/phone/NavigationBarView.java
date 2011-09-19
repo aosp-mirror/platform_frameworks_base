@@ -244,15 +244,6 @@ public class NavigationBarView extends LinearLayout {
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        try {
-            mBarService.setSystemUiVisibility(0);
-        } catch (android.os.RemoteException ex) {
-        }
-        return false; // pass it on
-    }
-
     public void reorient() {
         final int rot = mDisplay.getRotation();
         for (int i=0; i<4; i++) {
