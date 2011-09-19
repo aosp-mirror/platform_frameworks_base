@@ -64,6 +64,7 @@ import java.util.TimerTask;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
+    private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
 
     ContentResolver mContentResolver;
 
@@ -149,9 +150,15 @@ class ServerThread extends Thread {
             AttributeCache.init(context);
 
             Slog.i(TAG, "Package Manager");
+            // Only run "core" apps if we're encrypting the device.
+            String cryptState = SystemProperties.get("vold.decrypt");
+            boolean onlyCore = ENCRYPTING_STATE.equals(cryptState);
+            if (onlyCore) {
+                Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
+            }
             pm = PackageManagerService.main(context,
                     factoryTest != SystemServer.FACTORY_TEST_OFF,
-                    false);
+                    onlyCore);
 
             ActivityManagerService.setSystemProcess();
 
