@@ -86,6 +86,8 @@ protected:
     ~SampleTable();
 
 private:
+    struct CompositionDeltaLookup;
+
     static const uint32_t kChunkOffsetType32;
     static const uint32_t kChunkOffsetType64;
     static const uint32_t kSampleSizeType32;
@@ -117,6 +119,7 @@ private:
 
     uint32_t *mCompositionTimeDeltaEntries;
     size_t mNumCompositionTimeDeltaEntries;
+    CompositionDeltaLookup *mCompositionDeltaLookup;
 
     off64_t mSyncSampleOffset;
     uint32_t mNumSyncSamples;
@@ -135,8 +138,7 @@ private:
     friend struct SampleIterator;
 
     status_t getSampleSize_l(uint32_t sample_index, size_t *sample_size);
-
-    uint32_t getCompositionTimeOffset(uint32_t sampleIndex) const;
+    uint32_t getCompositionTimeOffset(uint32_t sampleIndex);
 
     static int CompareIncreasingTime(const void *, const void *);
 
