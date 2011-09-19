@@ -3094,6 +3094,12 @@
     <!-- Choose Account Activity label -->
     <string name="choose_account_label">Select an account</string>
 
+    <string name="add_account_label">"Add an account"</string>
+    <string name="choose_account_text">"Which account would you like to use?"</string>
+
+    <!-- Button label to add an account [CHAR LIMIT=20] -->
+    <string name="add_account_button_label">Add account</string>
+
     <!-- NumberPicker - accessibility support -->
     <!-- Description of the button to increment the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_increment_button">Increment</string>
@@ -3173,6 +3179,9 @@
     <string name="keyboardview_keycode_enter">Enter</string>
 
     <!-- Slide lock screen -->
+
+    <!-- Description of the sliding handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="content_description_sliding_handle">"Sliding handle. Tap and hold."</string>
 
     <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_up">Up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
