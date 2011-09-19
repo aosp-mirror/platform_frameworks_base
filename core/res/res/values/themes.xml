@@ -94,7 +94,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
-        <item name="editTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="editTextColor">?android:color/primary_text_light</item>
         <item name="editTextBackground">@android:drawable/edit_text</item>
         
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
@@ -410,7 +410,7 @@ please see themes_device_defaults.xml.
         <item name="textColorLink">@android:color/link_text_light</item>
         <item name="textColorLinkInverse">@android:color/link_text_dark</item>
         
-        <item name="editTextColor">?android:attr/textColorPrimary</item>
+        <item name="editTextColor">@android:color/primary_text_light</item>
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_light</item>
