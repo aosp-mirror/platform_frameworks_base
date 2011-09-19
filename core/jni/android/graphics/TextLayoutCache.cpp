@@ -290,13 +290,7 @@ size_t TextLayoutCacheKey::getSize() {
  * TextLayoutCacheValue
  */
 TextLayoutCacheValue::TextLayoutCacheValue() :
-        mAdvances(NULL), mTotalAdvance(0), mAdvancesCount(0),
-        mGlyphs(NULL), mGlyphsCount(0), mElapsedTime(0) {
-}
-
-TextLayoutCacheValue::~TextLayoutCacheValue() {
-    delete[] mAdvances;
-    delete[] mGlyphs;
+        mTotalAdvance(0), mElapsedTime(0) {
 }
 
 void TextLayoutCacheValue::setElapsedTime(uint32_t time) {
@@ -309,11 +303,11 @@ uint32_t TextLayoutCacheValue::getElapsedTime() {
 
 void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars, size_t start,
         size_t count, size_t contextCount, int dirFlags) {
-    mAdvancesCount = count;
-    mAdvances = new float[count];
-
+    // Give a hint for advances and glyphs vectors size
+    mAdvances.setCapacity(count);
+    mGlyphs.setCapacity(count);
     computeValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
-            mAdvances, &mTotalAdvance, &mGlyphs, &mGlyphsCount);
+            &mAdvances, &mTotalAdvance, &mGlyphs);
 #if DEBUG_ADVANCES
     LOGD("Advances - count=%d - countextCount=%d - totalAdvance=%f - "
             "adv[0]=%f adv[1]=%f adv[2]=%f adv[3]=%f", count, contextCount, mTotalAdvance,
@@ -322,8 +316,8 @@ void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars, siz
 }
 
 size_t TextLayoutCacheValue::getSize() {
-    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvancesCount +
-            sizeof(jchar) * mGlyphsCount;
+    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvances.capacity() +
+            sizeof(jchar) * mGlyphs.capacity();
 }
 
 void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font,
@@ -394,27 +388,10 @@ void TextLayoutCacheValue::shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontR
     }
 }
 
-struct GlyphRun {
-    inline GlyphRun() {}
-    inline GlyphRun(jchar* glyphs, size_t glyphsCount, bool isRTL) :
-            glyphs(glyphs), glyphsCount(glyphsCount), isRTL(isRTL) { }
-    jchar* glyphs;
-    size_t glyphsCount;
-    int isRTL;
-};
-
-void static reverseGlyphArray(jchar* glyphs, size_t count) {
-    for (size_t i = 0; i < count / 2; i++) {
-        jchar temp = glyphs[i];
-        glyphs[i] = glyphs[count - 1 - i];
-        glyphs[count - 1 - i] = temp;
-    }
-}
-
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
-        jfloat* outAdvances, jfloat* outTotalAdvance,
-        jchar** outGlyphs, size_t* outGlyphsCount) {
+        Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+        Vector<jchar>* const outGlyphs) {
 
         UBiDiLevel bidiReq = 0;
         bool forceLTR = false;
@@ -435,11 +412,7 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                             forceLTR, forceRTL);
 #endif
             computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, forceRTL,
-                    outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
-
-            if (forceRTL && *outGlyphsCount > 1) {
-                reverseGlyphArray(*outGlyphs, *outGlyphsCount);
-            }
+                    outAdvances, outTotalAdvance, outGlyphs);
         } else {
             UBiDi* bidi = ubidi_open();
             if (bidi) {
@@ -461,15 +434,8 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                                 "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
 #endif
                         computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount,
-                                isRTL, outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
-
-                        if (isRTL && *outGlyphsCount > 1) {
-                            reverseGlyphArray(*outGlyphs, *outGlyphsCount);
-                        }
+                                isRTL, outAdvances, outTotalAdvance, outGlyphs);
                     } else {
-                        Vector<GlyphRun> glyphRuns;
-                        jchar* runGlyphs;
-                        size_t runGlyphsCount = 0;
                         int32_t end = start + count;
                         for (size_t i = 0; i < rc; ++i) {
                             int32_t startRun;
@@ -503,34 +469,9 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                             computeRunValuesWithHarfbuzz(paint, chars, startRun,
                                     lengthRun, contextCount, isRTL,
                                     outAdvances, &runTotalAdvance,
-                                    &runGlyphs, &runGlyphsCount);
+                                    outGlyphs);
 
-                            outAdvances += lengthRun;
                             *outTotalAdvance += runTotalAdvance;
-                            *outGlyphsCount += runGlyphsCount;
-#if DEBUG_GLYPHS
-                            LOGD("computeValuesWithHarfbuzz -- run=%d run-glyphs-count=%d",
-                                    i, runGlyphsCount);
-                            for (size_t j = 0; j < runGlyphsCount; j++) {
-                                LOGD("                          -- glyphs[%d]=%d", j, runGlyphs[j]);
-                            }
-#endif
-                            glyphRuns.push(GlyphRun(runGlyphs, runGlyphsCount, isRTL));
-                        }
-                        *outGlyphs = new jchar[*outGlyphsCount];
-
-                        jchar* glyphs = *outGlyphs;
-                        for (size_t i = 0; i < glyphRuns.size(); i++) {
-                            const GlyphRun& glyphRun = glyphRuns.itemAt(i);
-                            if (glyphRun.isRTL) {
-                                for (size_t n = 0; n < glyphRun.glyphsCount; n++) {
-                                    glyphs[glyphRun.glyphsCount - n - 1] = glyphRun.glyphs[n];
-                                }
-                            } else {
-                                memcpy(glyphs, glyphRun.glyphs, glyphRun.glyphsCount * sizeof(jchar));
-                            }
-                            glyphs += glyphRun.glyphsCount;
-                            delete[] glyphRun.glyphs;
                         }
                     }
                 }
@@ -543,22 +484,18 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                         "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
 #endif
                 computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, isRTL,
-                        outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
-
-                if (isRTL && *outGlyphsCount > 1) {
-                    reverseGlyphArray(*outGlyphs, *outGlyphsCount);
-                }
+                        outAdvances, outTotalAdvance, outGlyphs);
             }
         }
 #if DEBUG_GLYPHS
-        LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", *outGlyphsCount);
+        LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", outGlyphs->size());
 #endif
 }
 
 static void logGlyphs(HB_ShaperItem shaperItem) {
     LOGD("Got glyphs - count=%d", shaperItem.num_glyphs);
     for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
-        LOGD("      glyphs[%d]=%d - offset.x=%f offset.y=%f", i, shaperItem.glyphs[i],
+        LOGD("      glyph[%d]=%d - offset.x=%f offset.y=%f", i, shaperItem.glyphs[i],
                 HBFixedToFloat(shaperItem.offsets[i].x),
                 HBFixedToFloat(shaperItem.offsets[i].y));
     }
@@ -566,12 +503,13 @@ static void logGlyphs(HB_ShaperItem shaperItem) {
 
 void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, bool isRTL,
-        jfloat* outAdvances, jfloat* outTotalAdvance,
-        jchar** outGlyphs, size_t* outGlyphsCount) {
+        Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+        Vector<jchar>* const outGlyphs) {
 
     HB_ShaperItem shaperItem;
     HB_FontRec font;
     FontData fontData;
+
     shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, chars, start, count,
             contextCount, isRTL);
 
@@ -588,30 +526,28 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
 #if DEBUG_GLYPHS
     LOGD("HARFBUZZ -- advances array is empty or num_glypth = 0");
 #endif
-        for (size_t i = 0; i < count; i++) {
-            outAdvances[i] = 0;
-        }
+        outAdvances->insertAt(0, outAdvances->size(), count);
         *outTotalAdvance = 0;
-
-        if (outGlyphs) {
-            *outGlyphsCount = 0;
-            *outGlyphs = new jchar[0];
-        }
 
         // Cleaning
         deleteGlyphArrays(&shaperItem);
         HB_FreeFace(shaperItem.face);
         return;
     }
+
     // Get Advances and their total
-    jfloat totalAdvance = outAdvances[0] = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[0]]);
+    jfloat currentAdvance = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[0]]);
+    jfloat totalAdvance = currentAdvance;
+    outAdvances->add(currentAdvance);
     for (size_t i = 1; i < count; i++) {
         size_t clusterPrevious = shaperItem.log_clusters[i - 1];
         size_t cluster = shaperItem.log_clusters[i];
         if (cluster == clusterPrevious) {
-            outAdvances[i] = 0;
+            outAdvances->add(0);
         } else {
-            totalAdvance += outAdvances[i] = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[i]]);
+            currentAdvance = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[i]]);
+            totalAdvance += currentAdvance;
+            outAdvances->add(currentAdvance);
         }
     }
     *outTotalAdvance = totalAdvance;
@@ -623,12 +559,15 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
     }
 #endif
 
-    // Get Glyphs
+    // Get Glyphs and reverse them in place if RTL
     if (outGlyphs) {
-        *outGlyphsCount = shaperItem.num_glyphs;
-        *outGlyphs = new jchar[shaperItem.num_glyphs];
-        for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
-            (*outGlyphs)[i] = (jchar) shaperItem.glyphs[i];
+        size_t count = shaperItem.num_glyphs;
+        for (size_t i = 0; i < count; i++) {
+            jchar glyph = (jchar) shaperItem.glyphs[(!isRTL) ? i : count - 1 - i];
+#if DEBUG_GLYPHS
+            LOGD("HARFBUZZ  -- glyph[%d]=%d", i, glyph);
+#endif
+            outGlyphs->add(glyph);
         }
     }
 
