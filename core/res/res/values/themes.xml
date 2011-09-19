@@ -94,7 +94,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
-        <item name="editTextColor">?android:color/primary_text_light</item>
+        <item name="editTextColor">@android:color/primary_text_light</item>
         <item name="editTextBackground">@android:drawable/edit_text</item>
         
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
