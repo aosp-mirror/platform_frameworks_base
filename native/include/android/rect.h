@@ -23,6 +23,9 @@ extern "C" {
 #endif
 
 typedef struct ARect {
+#ifdef __cplusplus
+    typedef int32_t value_type;
+#endif
     int32_t left;
     int32_t top;
     int32_t right;

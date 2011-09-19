@@ -28,7 +28,19 @@ namespace uirenderer {
 // Structs
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Rect {
+class Rect {
+    static inline float min(float a, float b) { return (a<b) ? a : b; }
+    static inline float max(float a, float b) { return (a>b) ? a : b; }
+    Rect intersectWith(float l, float t, float r, float b) const {
+        Rect tmp;
+        tmp.left    = max(left, l);
+        tmp.top     = max(top, t);
+        tmp.right   = min(right, r);
+        tmp.bottom  = min(bottom, b);
+        return tmp;
+    }
+
+public:
     float left;
     float top;
     float right;
@@ -36,6 +48,9 @@ struct Rect {
 
     // Used by Region
     typedef float value_type;
+
+    // we don't provide copy-ctor and operator= on purpose
+    // because we want the compiler generated versions
 
     inline Rect():
             left(0),
@@ -58,24 +73,6 @@ struct Rect {
             bottom(height) {
     }
 
-    inline Rect(const Rect& r) {
-        set(r);
-    }
-
-    inline Rect(Rect& r) {
-        set(r);
-    }
-
-    Rect& operator=(const Rect& r) {
-        set(r);
-        return *this;
-    }
-
-    Rect& operator=(Rect& r) {
-        set(r);
-        return *this;
-    }
-
     friend int operator==(const Rect& a, const Rect& b) {
         return !memcmp(&a, &b, sizeof(a));
     }
@@ -89,7 +86,9 @@ struct Rect {
     }
 
     inline bool isEmpty() const {
-        return left >= right || top >= bottom;
+        // this is written in such way this it'll handle NANs to return
+        // true (empty)
+        return !((left < right) && (top < bottom));
     }
 
     inline void setEmpty() {
@@ -115,27 +114,18 @@ struct Rect {
         return bottom - top;
     }
 
-    bool intersects(float left, float top, float right, float bottom) const {
-        return left < right && top < bottom &&
-                this->left < this->right && this->top < this->bottom &&
-                this->left < right && left < this->right &&
-                this->top < bottom && top < this->bottom;
+    bool intersects(float l, float t, float r, float b) const {
+        return !intersectWith(l,t,r,b).isEmpty();
     }
 
     bool intersects(const Rect& r) const {
         return intersects(r.left, r.top, r.right, r.bottom);
     }
 
-    bool intersect(float left, float top, float right, float bottom) {
-        if (left < right && top < bottom && !this->isEmpty() &&
-                this->left < right && left < this->right &&
-                this->top < bottom && top < this->bottom) {
-
-            if (this->left < left) this->left = left;
-            if (this->top < top) this->top = top;
-            if (this->right > right) this->right = right;
-            if (this->bottom > bottom) this->bottom = bottom;
-
+    bool intersect(float l, float t, float r, float b) {
+        Rect tmp(intersectWith(l,t,r,b));
+        if (!tmp.isEmpty()) {
+            set(tmp);
             return true;
         }
         return false;
@@ -182,7 +172,7 @@ struct Rect {
         LOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
     }
 
-}; // struct Rect
+}; // class Rect
 
 }; // namespace uirenderer
 }; // namespace android
