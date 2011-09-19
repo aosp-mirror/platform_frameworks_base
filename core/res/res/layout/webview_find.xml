@@ -26,7 +26,7 @@
         android:scrollHorizontally="true"
         android:inputType="text"
         android:hint="@string/find_on_page"
-        android:imeOptions="actionDone"
+        android:imeOptions="actionDone|flagNoExtractUi|flagNoFullscreen"
         android:layout_marginRight="10dip"
         />
     <TextView android:id="@+id/matches"
