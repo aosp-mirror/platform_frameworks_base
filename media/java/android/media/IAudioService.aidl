@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
 import android.media.IRemoteControlClient;
@@ -85,13 +86,12 @@ interface IAudioService {
     
     void unregisterAudioFocusClient(String clientId);
 
-    void registerMediaButtonEventReceiver(in ComponentName eventReceiver);
+    oneway void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c);
+    oneway void unregisterMediaButtonIntent(in PendingIntent pi,  in ComponentName c);
 
-    void unregisterMediaButtonEventReceiver(in ComponentName eventReceiver);
-
-    oneway void registerRemoteControlClient(in ComponentName eventReceiver,
-           in IRemoteControlClient rcClient, in String clientName, in String callingPackageName);
-    oneway void unregisterRemoteControlClient(in ComponentName eventReceiver,
+    oneway void registerRemoteControlClient(in PendingIntent mediaIntent,
+           in IRemoteControlClient rcClient, in String callingPackageName);
+    oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
            in IRemoteControlClient rcClient);
 
     oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd);

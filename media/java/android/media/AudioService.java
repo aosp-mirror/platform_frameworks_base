@@ -18,6 +18,8 @@ package android.media;
 
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -35,6 +37,7 @@ import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2084,7 +2087,7 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
-        private void persistMediaButtonReceiver(ComponentName receiver) {
+        private void onHandlePersistMediaButtonReceiver(ComponentName receiver) {
             Settings.System.putString(mContentResolver, Settings.System.MEDIA_BUTTON_RECEIVER,
                     receiver == null ? "" : receiver.flattenToString());
         }
@@ -2201,7 +2204,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_PERSIST_MEDIABUTTONRECEIVER:
-                    persistMediaButtonReceiver( (ComponentName) msg.obj );
+                    onHandlePersistMediaButtonReceiver( (ComponentName) msg.obj );
                     break;
 
                 case MSG_RCDISPLAY_CLEAR:
@@ -2894,14 +2897,22 @@ public class AudioService extends IAudioService.Stub {
                 }
                 synchronized(mRCStack) {
                     if (!mRCStack.empty()) {
-                        // create a new intent specifically aimed at the current registered listener
+                        // create a new intent to fill in the extras of the registered PendingIntent
                         Intent targetedIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                        targetedIntent.putExtras(intent.getExtras());
-                        targetedIntent.setComponent(mRCStack.peek().mReceiverComponent);
-                        // trap the current broadcast
-                        abortBroadcast();
-                        //Log.v(TAG, " Sending intent" + targetedIntent);
-                        context.sendBroadcast(targetedIntent, null);
+                        Bundle extras = intent.getExtras();
+                        if (extras != null) {
+                            targetedIntent.putExtras(extras);
+                            // trap the current broadcast
+                            abortBroadcast();
+                            //Log.v(TAG, " Sending intent" + targetedIntent);
+                            // send the intent that was registered by the client
+                            try {
+                                mRCStack.peek().mMediaIntent.send(context, 0, targetedIntent);
+                            } catch (CanceledException e) {
+                                Log.e(TAG, "Error sending pending intent " + mRCStack.peek());
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
             }
@@ -2936,18 +2947,18 @@ public class AudioService extends IAudioService.Stub {
      */
     private class RcClientDeathHandler implements IBinder.DeathRecipient {
         private IBinder mCb; // To be notified of client's death
-        private ComponentName mRcEventReceiver;
+        private PendingIntent mMediaIntent;
 
-        RcClientDeathHandler(IBinder cb, ComponentName eventReceiver) {
+        RcClientDeathHandler(IBinder cb, PendingIntent pi) {
             mCb = cb;
-            mRcEventReceiver = eventReceiver;
+            mMediaIntent = pi;
         }
 
         public void binderDied() {
             Log.w(TAG, "  RemoteControlClient died");
             // remote control client died, make sure the displays don't use it anymore
             //  by setting its remote control client to null
-            registerRemoteControlClient(mRcEventReceiver, null, null, null/*ignored*/);
+            registerRemoteControlClient(mMediaIntent, null, null/*ignored*/);
         }
 
         public IBinder getBinder() {
@@ -2956,18 +2967,29 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private static class RemoteControlStackEntry {
-        /** the target for the ACTION_MEDIA_BUTTON events */
-        public ComponentName mReceiverComponent;// always non null
+        /**
+         * The target for the ACTION_MEDIA_BUTTON events.
+         * Always non null.
+         */
+        public PendingIntent mMediaIntent;
+        /**
+         * The registered media button event receiver.
+         * Always non null.
+         */
+        public ComponentName mReceiverComponent;
         public String mCallingPackageName;
-        public String mRcClientName;
         public int mCallingUid;
-
-        /** provides access to the information to display on the remote control */
+        /**
+         * Provides access to the information to display on the remote control.
+         * May be null (when a media button event receiver is registered,
+         *     but no remote control client has been registered) */
         public IRemoteControlClient mRcClient;
         public RcClientDeathHandler mRcClientDeathHandler;
 
-        public RemoteControlStackEntry(ComponentName r) {
-            mReceiverComponent = r;
+        /** precondition: mediaIntent != null, eventReceiver != null */
+        public RemoteControlStackEntry(PendingIntent mediaIntent, ComponentName eventReceiver) {
+            mMediaIntent = mediaIntent;
+            mReceiverComponent = eventReceiver;
             mCallingUid = -1;
             mRcClient = null;
         }
@@ -3003,7 +3025,8 @@ public class AudioService extends IAudioService.Stub {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
-                pw.println("     receiver: " + rcse.mReceiverComponent +
+                pw.println("  pi: " + rcse.mMediaIntent +
+                        "  -- ercvr: " + rcse.mReceiverComponent +
                         "  -- client: " + rcse.mRcClient +
                         "  -- uid: " + rcse.mCallingUid);
             }
@@ -3035,7 +3058,6 @@ public class AudioService extends IAudioService.Stub {
                     mAudioHandler.sendMessage(
                             mAudioHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
                                     null));
-                    return;
                 } else if (oldTop != mRCStack.peek()) {
                     // the top of the stack has changed, save it in the system settings
                     // by posting a message to persist it
@@ -3049,25 +3071,32 @@ public class AudioService extends IAudioService.Stub {
 
     /**
      * Helper function:
-     * Restore remote control receiver from the system settings
+     * Restore remote control receiver from the system settings.
      */
     private void restoreMediaButtonReceiver() {
         String receiverName = Settings.System.getString(mContentResolver,
                 Settings.System.MEDIA_BUTTON_RECEIVER);
         if ((null != receiverName) && !receiverName.isEmpty()) {
-            ComponentName receiverComponentName = ComponentName.unflattenFromString(receiverName);
-            registerMediaButtonEventReceiver(receiverComponentName);
+            ComponentName eventReceiver = ComponentName.unflattenFromString(receiverName);
+            // construct a PendingIntent targeted to the restored component name
+            // for the media button and register it
+            Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            //     the associated intent will be handled by the component being registered
+            mediaButtonIntent.setComponent(eventReceiver);
+            PendingIntent pi = PendingIntent.getBroadcast(mContext,
+                    0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
+            registerMediaButtonIntent(pi, eventReceiver);
         }
-        // upon restoring (e.g. after boot), do we want to refresh all remotes?
     }
 
     /**
      * Helper function:
-     * Set the new remote control receiver at the top of the RC focus stack
+     * Set the new remote control receiver at the top of the RC focus stack.
+     * precondition: mediaIntent != null, target != null
      */
-    private void pushMediaButtonReceiver(ComponentName newReceiver) {
+    private void pushMediaButtonReceiver(PendingIntent mediaIntent, ComponentName target) {
         // already at top of stack?
-        if (!mRCStack.empty() && mRCStack.peek().mReceiverComponent.equals(newReceiver)) {
+        if (!mRCStack.empty() && mRCStack.peek().mMediaIntent.equals(mediaIntent)) {
             return;
         }
         Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
@@ -3075,31 +3104,32 @@ public class AudioService extends IAudioService.Stub {
         boolean wasInsideStack = false;
         while(stackIterator.hasNext()) {
             rcse = (RemoteControlStackEntry)stackIterator.next();
-            if(rcse.mReceiverComponent.equals(newReceiver)) {
+            if(rcse.mMediaIntent.equals(mediaIntent)) {
                 wasInsideStack = true;
                 stackIterator.remove();
                 break;
             }
         }
         if (!wasInsideStack) {
-            rcse = new RemoteControlStackEntry(newReceiver);
+            rcse = new RemoteControlStackEntry(mediaIntent, target);
         }
         mRCStack.push(rcse);
 
         // post message to persist the default media button receiver
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(
-                MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, newReceiver/*obj*/) );
+                MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, target/*obj*/) );
     }
 
     /**
      * Helper function:
-     * Remove the remote control receiver from the RC focus stack
+     * Remove the remote control receiver from the RC focus stack.
+     * precondition: pi != null
      */
-    private void removeMediaButtonReceiver(ComponentName newReceiver) {
+    private void removeMediaButtonReceiver(PendingIntent pi) {
         Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
         while(stackIterator.hasNext()) {
             RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
-            if(rcse.mReceiverComponent.equals(newReceiver)) {
+            if(rcse.mMediaIntent.equals(pi)) {
                 stackIterator.remove();
                 break;
             }
@@ -3110,8 +3140,8 @@ public class AudioService extends IAudioService.Stub {
      * Helper function:
      * Called synchronized on mRCStack
      */
-    private boolean isCurrentRcController(ComponentName eventReceiver) {
-        if (!mRCStack.empty() && mRCStack.peek().mReceiverComponent.equals(eventReceiver)) {
+    private boolean isCurrentRcController(PendingIntent pi) {
+        if (!mRCStack.empty() && mRCStack.peek().mMediaIntent.equals(pi)) {
             return true;
         }
         return false;
@@ -3124,12 +3154,12 @@ public class AudioService extends IAudioService.Stub {
      * Update the remote control displays with the new "focused" client generation
      */
     private void setNewRcClientOnDisplays_syncRcsCurrc(int newClientGeneration,
-            ComponentName newClientEventReceiver, boolean clearing) {
+            PendingIntent newMediaIntent, boolean clearing) {
         // NOTE: Only one IRemoteControlDisplay supported in this implementation
         if (mRcDisplay != null) {
             try {
                 mRcDisplay.setCurrentClientId(
-                        newClientGeneration, newClientEventReceiver, clearing);
+                        newClientGeneration, newMediaIntent, clearing);
             } catch (RemoteException e) {
                 Log.e(TAG, "Dead display in setNewRcClientOnDisplays_syncRcsCurrc() "+e);
                 // if we had a display before, stop monitoring its death
@@ -3167,10 +3197,9 @@ public class AudioService extends IAudioService.Stub {
      *    where the display should be cleared.
      */
     private void setNewRcClient_syncRcsCurrc(int newClientGeneration,
-            ComponentName newClientEventReceiver, boolean clearing) {
+            PendingIntent newMediaIntent, boolean clearing) {
         // send the new valid client generation ID to all displays
-        setNewRcClientOnDisplays_syncRcsCurrc(newClientGeneration, newClientEventReceiver,
-                clearing);
+        setNewRcClientOnDisplays_syncRcsCurrc(newClientGeneration, newMediaIntent, clearing);
         // send the new valid client generation ID to all clients
         setNewRcClientGenerationOnClients_syncRcsCurrc(newClientGeneration);
     }
@@ -3186,7 +3215,7 @@ public class AudioService extends IAudioService.Stub {
                 mCurrentRcClientGen++;
                 // synchronously update the displays and clients with the new client generation
                 setNewRcClient_syncRcsCurrc(mCurrentRcClientGen,
-                        null /*event receiver*/, true /*clearing*/);
+                        null /*newMediaIntent*/, true /*clearing*/);
             }
         }
     }
@@ -3204,7 +3233,7 @@ public class AudioService extends IAudioService.Stub {
                     // synchronously update the displays and clients with
                     //      the new client generation
                     setNewRcClient_syncRcsCurrc(mCurrentRcClientGen,
-                            rcse.mReceiverComponent /*event receiver*/,
+                            rcse.mMediaIntent /*newMediaIntent*/,
                             false /*clearing*/);
 
                     // tell the current client that it needs to send info
@@ -3301,27 +3330,34 @@ public class AudioService extends IAudioService.Stub {
         updateRemoteControlDisplay_syncAfRcs(infoChangedFlags);
     }
 
-    /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
-    public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
-        Log.i(TAG, "  Remote Control   registerMediaButtonEventReceiver() for " + eventReceiver);
+    /** 
+     * see AudioManager.registerMediaButtonIntent(PendingIntent pi, ComponentName c)
+     * precondition: mediaIntent != null, target != null
+     */
+    public void registerMediaButtonIntent(PendingIntent mediaIntent, ComponentName eventReceiver) {
+        Log.i(TAG, "  Remote Control   registerMediaButtonIntent() for " + mediaIntent);
 
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
-                pushMediaButtonReceiver(eventReceiver);
+                pushMediaButtonReceiver(mediaIntent, eventReceiver);
                 // new RC client, assume every type of information shall be queried
                 checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
             }
         }
     }
 
-    /** see AudioManager.unregisterMediaButtonEventReceiver(ComponentName eventReceiver) */
-    public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
-        Log.i(TAG, "  Remote Control   unregisterMediaButtonEventReceiver() for " + eventReceiver);
+    /** 
+     * see AudioManager.unregisterMediaButtonIntent(PendingIntent mediaIntent)
+     * precondition: mediaIntent != null, eventReceiver != null
+     */
+    public void unregisterMediaButtonIntent(PendingIntent mediaIntent, ComponentName eventReceiver)
+    {
+        Log.i(TAG, "  Remote Control   unregisterMediaButtonIntent() for " + mediaIntent);
 
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
-                boolean topOfStackWillChange = isCurrentRcController(eventReceiver);
-                removeMediaButtonReceiver(eventReceiver);
+                boolean topOfStackWillChange = isCurrentRcController(mediaIntent);
+                removeMediaButtonReceiver(mediaIntent);
                 if (topOfStackWillChange) {
                     // current RC client will change, assume every type of info needs to be queried
                     checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
@@ -3331,8 +3367,8 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...) */
-    public void registerRemoteControlClient(ComponentName eventReceiver,
-            IRemoteControlClient rcClient, String clientName, String callingPackageName) {
+    public void registerRemoteControlClient(PendingIntent mediaIntent,
+            IRemoteControlClient rcClient, String callingPackageName) {
         if (DEBUG_RC) Log.i(TAG, "Register remote control client rcClient="+rcClient);
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
@@ -3340,7 +3376,7 @@ public class AudioService extends IAudioService.Stub {
                 Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
                 while(stackIterator.hasNext()) {
                     RemoteControlStackEntry rcse = stackIterator.next();
-                    if(rcse.mReceiverComponent.equals(eventReceiver)) {
+                    if(rcse.mMediaIntent.equals(mediaIntent)) {
                         // already had a remote control client?
                         if (rcse.mRcClientDeathHandler != null) {
                             // stop monitoring the old client's death
@@ -3357,7 +3393,6 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                         rcse.mCallingPackageName = callingPackageName;
-                        rcse.mRcClientName = clientName;
                         rcse.mCallingUid = Binder.getCallingUid();
                         if (rcClient == null) {
                             rcse.mRcClientDeathHandler = null;
@@ -3366,7 +3401,7 @@ public class AudioService extends IAudioService.Stub {
                         // monitor the new client's death
                         IBinder b = rcClient.asBinder();
                         RcClientDeathHandler rcdh =
-                                new RcClientDeathHandler(b, rcse.mReceiverComponent);
+                                new RcClientDeathHandler(b, rcse.mMediaIntent);
                         try {
                             b.linkToDeath(rcdh, 0);
                         } catch (RemoteException e) {
@@ -3380,7 +3415,7 @@ public class AudioService extends IAudioService.Stub {
                 }
                 // if the eventReceiver is at the top of the stack
                 // then check for potential refresh of the remote controls
-                if (isCurrentRcController(eventReceiver)) {
+                if (isCurrentRcController(mediaIntent)) {
                     checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
             }
@@ -3388,24 +3423,23 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /**
-     * see AudioManager.unregisterRemoteControlClient(ComponentName eventReceiver, ...)
+     * see AudioManager.unregisterRemoteControlClient(PendingIntent pi, ...)
      * rcClient is guaranteed non-null
      */
-    public void unregisterRemoteControlClient(ComponentName eventReceiver,
+    public void unregisterRemoteControlClient(PendingIntent mediaIntent,
             IRemoteControlClient rcClient) {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
                 while(stackIterator.hasNext()) {
                     RemoteControlStackEntry rcse = stackIterator.next();
-                    if ((rcse.mReceiverComponent.equals(eventReceiver))
+                    if ((rcse.mMediaIntent.equals(mediaIntent))
                             && rcClient.equals(rcse.mRcClient)) {
                         // we found the IRemoteControlClient to unregister
                         // stop monitoring its death
                         rcse.unlinkToRcClientDeath();
                         // reset the client-related fields
                         rcse.mRcClient = null;
-                        rcse.mRcClientName = null;
                         rcse.mRcClientDeathHandler = null;
                         rcse.mCallingPackageName = null;
                     }

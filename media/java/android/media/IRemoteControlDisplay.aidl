@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -31,14 +32,12 @@ oneway interface IRemoteControlDisplay
     /**
      * Sets the generation counter of the current client that is displayed on the remote control.
      * @param clientGeneration the new RemoteControlClient generation
-     * @param clientEventReceiver the media button event receiver associated with the client.
-     *    May be null, which implies there is no registered media button event receiver. This
-     *    parameter is supplied as an optimization so a display can directly target media button
-     *    events to the client.
+     * @param clientMediaIntent the PendingIntent associated with the client.
+     *    May be null, which implies there is no registered media button event receiver.
      * @param clearing true if the new client generation value maps to a remote control update
      *    where the display should be cleared.
      */
-    void setCurrentClientId(int clientGeneration, in ComponentName clientEventReceiver,
+    void setCurrentClientId(int clientGeneration, in PendingIntent clientMediaIntent,
             boolean clearing);
 
     void setPlaybackState(int generationId, int state);
