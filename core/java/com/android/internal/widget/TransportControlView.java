@@ -21,6 +21,8 @@ import java.lang.ref.WeakReference;
 import com.android.internal.widget.LockScreenWidgetCallback;
 import com.android.internal.widget.LockScreenWidgetInterface;
 
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,7 +70,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
     private int mClientGeneration;
     private Metadata mMetadata = new Metadata();
     private boolean mAttached;
-    private ComponentName mClientName;
+    private PendingIntent mClientIntent;
     private int mTransportControlFlags;
     private int mPlayState;
     private AudioManager mAudioManager;
@@ -116,7 +118,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
                     }
                 }
                 mClientGeneration = msg.arg1;
-                mClientName = (ComponentName) msg.obj;
+                mClientIntent = (PendingIntent) msg.obj;
                 break;
 
             }
@@ -174,12 +176,12 @@ public class TransportControlView extends FrameLayout implements OnClickListener
             }
         }
 
-        public void setCurrentClientId(int clientGeneration, ComponentName clientEventReceiver,
+        public void setCurrentClientId(int clientGeneration, PendingIntent mediaIntent,
                 boolean clearing) throws RemoteException {
             Handler handler = mLocalHandler.get();
             if (handler != null) {
                 handler.obtainMessage(MSG_SET_GENERATION_ID,
-                    clientGeneration, (clearing ? 1 : 0), clientEventReceiver).sendToTarget();
+                    clientGeneration, (clearing ? 1 : 0), mediaIntent).sendToTarget();
             }
         }
     };
@@ -365,16 +367,27 @@ public class TransportControlView extends FrameLayout implements OnClickListener
     }
 
     private void sendMediaButtonClick(int keyCode) {
-        // TODO: target to specific player based on mClientName
+        // use the registered PendingIntent that will be processed by the registered
+        //    media button event receiver, which is the component of mClientIntent
         KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
         Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-        getContext().sendOrderedBroadcast(intent, null);
+        try {
+            mClientIntent.send(getContext(), 0, intent);
+        } catch (CanceledException e) {
+            Log.e(TAG, "Error sending intent for media button down: "+e);
+            e.printStackTrace();
+        }
 
         keyEvent = new KeyEvent(KeyEvent.ACTION_UP, keyCode);
         intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-        getContext().sendOrderedBroadcast(intent, null);
+        try {
+            mClientIntent.send(getContext(), 0, intent);
+        } catch (CanceledException e) {
+            Log.e(TAG, "Error sending intent for media button up: "+e);
+            e.printStackTrace();
+        }
     }
 
     public void setCallback(LockScreenWidgetCallback callback) {

@@ -34,6 +34,7 @@ import android.util.Log;
 import java.lang.IllegalArgumentException;
 
 /**
+ * TODO javadoc update for ComponentName - PendingIntent change
  * RemoteControlClient enables exposing information meant to be consumed by remote controls
  * capable of displaying metadata, artwork and media transport control buttons.
  * A remote control client object is associated with a media button event receiver. This
@@ -205,50 +206,6 @@ public class RemoteControlClient
     public final static int FLAG_INFORMATION_REQUEST_ALBUM_ART = 1 << 3;
 
     /**
-     * @hide
-     * TODO remove after modifying known (internal) media apps using this API
-     * Class constructor.
-     * @param mediaButtonEventReceiver The receiver for the media button events. It needs to have
-     *     been registered with {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
-     *     before this new RemoteControlClient can itself be registered with
-     *     {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
-     * @see AudioManager#registerMediaButtonEventReceiver(ComponentName)
-     * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
-     */
-    public RemoteControlClient(ComponentName mediaButtonEventReceiver) {
-        mRcEventReceiver = mediaButtonEventReceiver;
-
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else {
-            mEventHandler = null;
-            Log.e(TAG, "RemoteControlClient() couldn't find main application thread");
-        }
-    }
-
-    /**
-     * @hide
-     * TODO remove after modifying known (internal) media apps using this API
-     * Class constructor for a remote control client whose internal event handling
-     * happens on a user-provided Looper.
-     * @param mediaButtonEventReceiver The receiver for the media button events. It needs to have
-     *     been registered with {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)}
-     *     before this new RemoteControlClient can itself be registered with
-     *     {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
-     * @param looper The Looper running the event loop.
-     * @see AudioManager#registerMediaButtonEventReceiver(ComponentName)
-     * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
-     */
-    public RemoteControlClient(ComponentName mediaButtonEventReceiver, Looper looper) {
-        mRcEventReceiver = mediaButtonEventReceiver;
-
-        mEventHandler = new EventHandler(this, looper);
-    }
-
-    /**
      * Class constructor.
      * @param mediaButtonIntent The intent that will be sent for the media button events sent
      *     by remote controls.
@@ -262,8 +219,7 @@ public class RemoteControlClient
      * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
      */
     public RemoteControlClient(PendingIntent mediaButtonIntent) {
-        // TODO implement using PendingIntent instead of ComponentName
-        mRcEventReceiver = null;
+        mRcMediaIntent = mediaButtonIntent;
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -292,8 +248,7 @@ public class RemoteControlClient
      * @see AudioManager#registerRemoteControlClient(RemoteControlClient)
      */
     public RemoteControlClient(PendingIntent mediaButtonIntent, Looper looper) {
-        // TODO implement using PendingIntent instead of ComponentName
-        mRcEventReceiver = null;
+        mRcMediaIntent = mediaButtonIntent;
 
         mEventHandler = new EventHandler(this, looper);
     }
@@ -614,9 +569,10 @@ public class RemoteControlClient
     private int mInternalClientGenId = -2;
 
     /**
-     * The media button event receiver associated with this remote control client
+     * The media button intent description associated with this remote control client
+     * (can / should include target component for intent handling)
      */
-    private final ComponentName mRcEventReceiver;
+    private final PendingIntent mRcMediaIntent;
 
     /**
      * The remote control display to which this client will send information.
@@ -626,10 +582,10 @@ public class RemoteControlClient
 
     /**
      * @hide
-     * Accessor to media button event receiver
+     * Accessor to media button intent description (includes target component)
      */
-    public ComponentName getRcEventReceiver() {
-        return mRcEventReceiver;
+    public PendingIntent getRcMediaIntent() {
+        return mRcMediaIntent;
     }
     /**
      * @hide

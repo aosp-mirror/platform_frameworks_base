@@ -18,8 +18,10 @@ package android.media;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.os.Binder;
@@ -1684,17 +1686,42 @@ public class AudioManager {
      * Register a component to be the sole receiver of MEDIA_BUTTON intents.
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that will receive the media button intent. This broadcast receiver must be declared
-     *      in the application manifest.
+     *      in the application manifest. The package of the component must match that of
+     *      the context you're registering from.
      */
     public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
         if (eventReceiver == null) {
             return;
         }
+        if (!eventReceiver.getPackageName().equals(mContext.getPackageName())) {
+            Log.e(TAG, "registerMediaButtonEventReceiver() error: " +
+                    "receiver and context package names don't match");
+            return;
+        }
+        // construct a PendingIntent for the media button and register it
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        //     the associated intent will be handled by the component being registered
+        mediaButtonIntent.setComponent(eventReceiver);
+        PendingIntent pi = PendingIntent.getBroadcast(mContext,
+                0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
+        registerMediaButtonIntent(pi, eventReceiver);
+    }
+
+    /**
+     * @hide
+     * no-op if (pi == null) or (eventReceiver == null)
+     */
+    public void registerMediaButtonIntent(PendingIntent pi, ComponentName eventReceiver) {
+        if ((pi == null) || (eventReceiver == null)) {
+            Log.e(TAG, "Cannot call registerMediaButtonIntent() with a null parameter");
+            return;
+        }
         IAudioService service = getService();
         try {
-            service.registerMediaButtonEventReceiver(eventReceiver);
+            // pi != null
+            service.registerMediaButtonIntent(pi, eventReceiver);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerMediaButtonEventReceiver"+e);
+            Log.e(TAG, "Dead object in registerMediaButtonIntent"+e);
         }
     }
 
@@ -1707,14 +1734,26 @@ public class AudioManager {
         if (eventReceiver == null) {
             return;
         }
-        IAudioService service = getService();
-        try {
-            service.unregisterMediaButtonEventReceiver(eventReceiver);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterMediaButtonEventReceiver"+e);
-        }
+        // construct a PendingIntent for the media button and unregister it
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        //     the associated intent will be handled by the component being registered
+        mediaButtonIntent.setComponent(eventReceiver);
+        PendingIntent pi = PendingIntent.getBroadcast(mContext,
+                0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
+        unregisterMediaButtonIntent(pi, eventReceiver);
     }
 
+    /**
+     * @hide
+     */
+    public void unregisterMediaButtonIntent(PendingIntent pi, ComponentName eventReceiver) {
+        IAudioService service = getService();
+        try {
+            service.unregisterMediaButtonIntent(pi, eventReceiver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterMediaButtonIntent"+e);
+        }
+    }
 
     /**
      * Registers the remote control client for providing information to display on the remote
@@ -1724,14 +1763,13 @@ public class AudioManager {
      * @see RemoteControlClient
      */
     public void registerRemoteControlClient(RemoteControlClient rcClient) {
-        if ((rcClient == null) || (rcClient.getRcEventReceiver() == null)) {
+        if ((rcClient == null) || (rcClient.getRcMediaIntent() == null)) {
             return;
         }
         IAudioService service = getService();
         try {
-            service.registerRemoteControlClient(rcClient.getRcEventReceiver(), /* eventReceiver */
+            service.registerRemoteControlClient(rcClient.getRcMediaIntent(),   /* mediaIntent   */
                     rcClient.getIRemoteControlClient(),                        /* rcClient      */
-                    rcClient.toString(),                                       /* clientName    */
                     // used to match media button event receiver and audio focus
                     mContext.getPackageName());                                /* packageName   */
         } catch (RemoteException e) {
@@ -1746,13 +1784,13 @@ public class AudioManager {
      * @see #registerRemoteControlClient(RemoteControlClient)
      */
     public void unregisterRemoteControlClient(RemoteControlClient rcClient) {
-        if ((rcClient == null) || (rcClient.getRcEventReceiver() == null)) {
+        if ((rcClient == null) || (rcClient.getRcMediaIntent() == null)) {
             return;
         }
         IAudioService service = getService();
         try {
-            service.unregisterRemoteControlClient(rcClient.getRcEventReceiver(), /* eventReceiver */
-                    rcClient.getIRemoteControlClient());                         /* rcClient      */
+            service.unregisterRemoteControlClient(rcClient.getRcMediaIntent(), /* mediaIntent   */
+                    rcClient.getIRemoteControlClient());                       /* rcClient      */
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterRemoteControlClient"+e);
         }
