@@ -102,6 +102,9 @@ public class TransportControlView extends FrameLayout implements OnClickListener
 
             case MSG_SET_ARTWORK:
                 if (mClientGeneration == msg.arg1) {
+                    if (mMetadata.bitmap != null) {
+                        mMetadata.bitmap.recycle();
+                    }
                     mMetadata.bitmap = (Bitmap) msg.obj;
                     mAlbumArt.setImageBitmap(mMetadata.bitmap);
                 }
