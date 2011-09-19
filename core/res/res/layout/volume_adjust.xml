@@ -21,7 +21,6 @@
         android:id="@+id/visible_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
         android:background="@android:drawable/dialog_full_holo_dark"
         android:orientation="horizontal"
         >
