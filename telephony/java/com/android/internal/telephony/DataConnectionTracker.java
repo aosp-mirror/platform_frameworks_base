@@ -1019,7 +1019,7 @@ public abstract class DataConnectionTracker extends Handler {
         sendMessage(msg);
     }
 
-    public abstract boolean isAnyActiveDataConnections();
+    public abstract boolean isDisconnected();
 
     protected void onSetUserDataEnabled(boolean enabled) {
         synchronized (mDataEnabledLock) {
