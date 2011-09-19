@@ -1782,7 +1782,8 @@ public class AccountManager {
      * <p>
      * The most common case is to call this with one account type, e.g.:
      * <p>
-     * <pre>  newChooseAccountsIntent(null, null, new String[]{"com.google"}, null);</pre>
+     * <pre>  newChooseAccountsIntent(null, null, new String[]{"com.google"}, false, null,
+     * null, null, null);</pre>
      * @param selectedAccount if specified, indicates that the {@link Account} is the currently
      * selected one, according to the caller's definition of selected.
      * @param allowableAccounts an optional {@link ArrayList} of accounts that are allowed to be
@@ -1792,13 +1793,14 @@ public class AccountManager {
      * when adding an account.
      * @param alwaysPromptForAccount if set the account chooser screen is always shown, otherwise
      * it is only shown when there is more than one account from which to choose
-     * @param descriptionOverrideText if set, this string is used as the description in the
+     * @param descriptionOverrideText if non-null this string is used as the description in the
      * accounts chooser screen rather than the default
-     * @param addAccountAuthTokenType This {@link Bundle} is passed as the {@link #addAccount}
-     * authTokenType
-     * @param addAccountRequiredFeatures This {@link Bundle} is passed as the {@link #addAccount}
-     * requiredFeatures
+     * @param addAccountAuthTokenType this string is passed as the {@link #addAccount}
+     * authTokenType parameter
+     * @param addAccountRequiredFeatures this string array is passed as the {@link #addAccount}
+     * requiredFeatures parameter
      * @param addAccountOptions This {@link Bundle} is passed as the {@link #addAccount} options
+     * parameter
      * @return an {@link Intent} that can be used to launch the ChooseAccount activity flow.
      */
     static public Intent newChooseAccountIntent(Account selectedAccount,
