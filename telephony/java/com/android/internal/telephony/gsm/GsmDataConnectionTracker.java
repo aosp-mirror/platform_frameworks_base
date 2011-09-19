@@ -1961,7 +1961,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return false;
     }
 
-    protected boolean isDisconnected() {
+    @Override
+    public boolean isDisconnected() {
         for (ApnContext apnContext : mApnContexts.values()) {
             if (!apnContext.isDisconnected()) {
                 // At least one context was not disconnected return false
@@ -2345,11 +2346,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
         return cid;
-    }
-
-    @Override
-    public boolean isAnyActiveDataConnections() {
-        return isConnected();
     }
 
     @Override

@@ -946,8 +946,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
-    public boolean isAnyActiveDataConnections() {
-        return (mState != State.IDLE);
+    public boolean isDisconnected() {
+        return ((mState == State.IDLE) || (mState == State.FAILED));
     }
 
     @Override
