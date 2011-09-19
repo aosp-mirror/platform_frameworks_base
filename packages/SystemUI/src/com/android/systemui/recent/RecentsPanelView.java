@@ -129,7 +129,7 @@ public class RecentsPanelView extends RelativeLayout
         }
 
         public void setThumbnail(Bitmap thumbnail) {
-            mThumbnail = compositeBitmap(mDefaultThumbnailBackground, thumbnail);
+            mThumbnail = thumbnail;
         }
 
         public Bitmap getThumbnail() {
@@ -480,13 +480,10 @@ public class RecentsPanelView extends RelativeLayout
             if (resolveInfo != null) {
                 final ActivityInfo info = resolveInfo.activityInfo;
                 final String title = info.loadLabel(pm).toString();
-                // Drawable icon = info.loadIcon(pm);
                 Drawable icon = getFullResIcon(resolveInfo, pm);
                 if (title != null && title.length() > 0 && icon != null) {
                     if (DEBUG) Log.v(TAG, "creating activity desc for id="
                             + recentInfo.id + ", label=" + title);
-                    ActivityManager.TaskThumbnails thumbs = am.getTaskThumbnails(
-                            recentInfo.persistentId);
                     ActivityDescription item = new ActivityDescription(recentInfo,
                             resolveInfo, intent, index, info.packageName);
                     activityDescriptions.add(item);
@@ -525,7 +522,9 @@ public class RecentsPanelView extends RelativeLayout
         synchronized (ad) {
             ad.mLabel = label;
             ad.mIcon = icon;
-            ad.setThumbnail(thumbs != null ? thumbs.mainThumbnail : mDefaultThumbnailBackground);
+            if (thumbs != null && thumbs.mainThumbnail != null) {
+                ad.setThumbnail(thumbs.mainThumbnail);
+            }
         }
     }
 
@@ -658,21 +657,6 @@ public class RecentsPanelView extends RelativeLayout
                 hide(false);
             }
         }
-    }
-
-    private Bitmap compositeBitmap(Bitmap background, Bitmap thumbnail) {
-        Bitmap outBitmap = background.copy(background.getConfig(), true);
-        if (thumbnail != null) {
-            Canvas canvas = new Canvas(outBitmap);
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setFilterBitmap(true);
-            paint.setAlpha(255);
-            canvas.drawBitmap(thumbnail, null,
-                    new RectF(0, 0, outBitmap.getWidth(), outBitmap.getHeight()), paint);
-            canvas.setBitmap(null);
-        }
-        return outBitmap;
     }
 
     private void updateUiElements(Configuration config) {
