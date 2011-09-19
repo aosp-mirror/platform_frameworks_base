@@ -72,6 +72,8 @@ public:
             const UChar* text, size_t start, size_t count,
             size_t contextCount, int dirFlags);
 
+    TextLayoutCacheKey(const TextLayoutCacheKey& other);
+
     bool operator<(const TextLayoutCacheKey& rhs) const;
 
     /**
@@ -86,7 +88,7 @@ public:
     size_t getSize();
 
 private:
-    const UChar* text;
+    const UChar* text; // if text is NULL, use textCopy
     String16 textCopy;
     size_t start;
     size_t count;
@@ -98,6 +100,10 @@ private:
     SkScalar textScaleX;
     uint32_t flags;
     SkPaint::Hinting hinting;
+
+    inline const UChar* getText() const {
+        return text ? text : textCopy.string();
+    }
 }; // TextLayoutCacheKey
 
 /*
