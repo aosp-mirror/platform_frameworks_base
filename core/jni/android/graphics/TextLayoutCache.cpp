@@ -239,6 +239,8 @@ TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint,
 TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
         text(NULL),
         textCopy(other.textCopy),
+        start(other.start),
+        count(other.count),
         contextCount(other.contextCount),
         dirFlags(other.dirFlags),
         typeface(other.typeface),
