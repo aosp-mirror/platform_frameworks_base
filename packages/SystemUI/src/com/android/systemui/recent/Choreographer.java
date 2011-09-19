@@ -38,17 +38,20 @@ import android.view.View;
     View mRootView;
     View mScrimView;
     View mContentView;
+    View mNoRecentAppsView;
     AnimatorSet mContentAnim;
     Animator.AnimatorListener mListener;
 
     // the panel will start to appear this many px from the end
     final int HYPERSPACE_OFFRAMP = 200;
 
-    public Choreographer(View root, View scrim, View content, Animator.AnimatorListener listener) {
+    public Choreographer(View root, View scrim, View content,
+            View noRecentApps, Animator.AnimatorListener listener) {
         mRootView = root;
         mScrimView = scrim;
         mContentView = content;
         mListener = listener;
+        mNoRecentAppsView = noRecentApps;
     }
 
     void createAnimation(boolean appearing) {
@@ -81,8 +84,24 @@ import android.view.View;
                 : new android.view.animation.DecelerateInterpolator(1.0f));
         glowAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
 
+        Animator noRecentAppsFadeAnim = null;
+        if (mNoRecentAppsView != null &&  // doesn't exist on large devices
+                mNoRecentAppsView.getVisibility() == View.VISIBLE) {
+            noRecentAppsFadeAnim = ObjectAnimator.ofFloat(mNoRecentAppsView, "alpha",
+                    mContentView.getAlpha(), appearing ? 1.0f : 0.0f);
+            noRecentAppsFadeAnim.setInterpolator(appearing
+                    ? new android.view.animation.AccelerateInterpolator(1.0f)
+                    : new android.view.animation.DecelerateInterpolator(1.0f));
+            noRecentAppsFadeAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
+        }
+
         mContentAnim = new AnimatorSet();
         final Builder builder = mContentAnim.play(glowAnim).with(posAnim);
+
+        if (noRecentAppsFadeAnim != null) {
+            builder.with(noRecentAppsFadeAnim);
+        }
+
         Drawable background = mScrimView.getBackground();
         if (background != null) {
             Animator bgAnim = ObjectAnimator.ofInt(background,
