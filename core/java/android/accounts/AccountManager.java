@@ -1790,22 +1790,43 @@ public class AccountManager {
      * @param allowableAccountTypes an optional string array of account types. These are used
      * both to filter the shown accounts and to filter the list of account types that are shown
      * when adding an account.
-     * @param addAccountOptions This {@link Bundle} is passed as the addAccount options
-     * @return an {@link Intent} that can be used to launch the ChooseAccount activity flow. 
+     * @param alwaysPromptForAccount if set the account chooser screen is always shown, otherwise
+     * it is only shown when there is more than one account from which to choose
+     * @param descriptionOverrideText if set, this string is used as the description in the
+     * accounts chooser screen rather than the default
+     * @param addAccountAuthTokenType This {@link Bundle} is passed as the {@link #addAccount}
+     * authTokenType
+     * @param addAccountRequiredFeatures This {@link Bundle} is passed as the {@link #addAccount}
+     * requiredFeatures
+     * @param addAccountOptions This {@link Bundle} is passed as the {@link #addAccount} options
+     * @return an {@link Intent} that can be used to launch the ChooseAccount activity flow.
      */
     static public Intent newChooseAccountIntent(Account selectedAccount,
             ArrayList<Account> allowableAccounts,
             String[] allowableAccountTypes,
+            boolean alwaysPromptForAccount,
+            String descriptionOverrideText,
+            String addAccountAuthTokenType,
+            String[] addAccountRequiredFeatures,
             Bundle addAccountOptions) {
         Intent intent = new Intent();
         intent.setClassName("android", "android.accounts.ChooseTypeAndAccountActivity");
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
                 allowableAccounts);
-        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST,
-                allowableAccountTypes != null ? Lists.newArrayList(allowableAccountTypes) : 0);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
+                allowableAccountTypes);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
                 addAccountOptions);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_SELECTED_ACCOUNT, selectedAccount);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT,
+                alwaysPromptForAccount);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_DESCRIPTION_TEXT_OVERRIDE,
+                descriptionOverrideText);
+        intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING,
+                addAccountAuthTokenType);
+        intent.putExtra(
+                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY,
+                addAccountRequiredFeatures);
         return intent;
     }
 

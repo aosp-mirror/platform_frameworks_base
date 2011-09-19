@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,17 +58,45 @@ public class ChooseTypeAndAccountActivity extends Activity {
      * that match the types in this list, if this parameter is supplied. This list is also
      * used to filter the allowable account types if add account is selected.
      */
-    public static final String EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST = "allowableAccountTypes";
+    public static final String EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY = "allowableAccountTypes";
 
     /**
-     * This is passed as the options bundle in AccountManager.addAccount() if it is called.
+     * This is passed as the addAccountOptions parameter in AccountManager.addAccount()
+     * if it is called.
      */
     public static final String EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE = "addAccountOptions";
+
+    /**
+     * This is passed as the requiredFeatures parameter in AccountManager.addAccount()
+     * if it is called.
+     */
+    public static final String EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY = 
+            "addAccountRequiredFeatures";
+
+    /**
+     * This is passed as the authTokenType string in AccountManager.addAccount()
+     * if it is called.
+     */
+    public static final String EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING = "authTokenType";
 
     /**
      * If set then the specified account is already "selected".
      */
     public static final String EXTRA_SELECTED_ACCOUNT = "selectedAccount";
+
+    /**
+     * If true then display the account selection list even if there is just
+     * one account to choose from. boolean.
+     */
+    public static final String EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT =
+            "alwaysPromptForAccount";
+
+    /**
+     * If set then this string willb e used as the description rather than
+     * the default.
+     */
+    public static final String EXTRA_DESCRIPTION_TEXT_OVERRIDE =
+            "descriptionTextOverride";
 
     private ArrayList<AccountInfo> mAccountInfos;
 
@@ -75,7 +104,22 @@ public class ChooseTypeAndAccountActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_type_and_account);
+
+        // save some items we use frequently
         final AccountManager accountManager = AccountManager.get(this);
+        final Intent intent = getIntent();
+
+        // override the description text if supplied
+        final String descriptionOverride =
+                intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
+        if (!TextUtils.isEmpty(descriptionOverride)) {
+            ((TextView)findViewById(R.id.description)).setText(descriptionOverride);
+        }
+
+        // If the selected account matches one in the list we will place a
+        // checkmark next to it.
+        final Account selectedAccount =
+                (Account)intent.getParcelableExtra(EXTRA_SELECTED_ACCOUNT);
 
         // build an efficiently queryable map of account types to authenticator descriptions
         final HashMap<String, AuthenticatorDescription> typeToAuthDescription =
@@ -87,7 +131,7 @@ public class ChooseTypeAndAccountActivity extends Activity {
         // Read the validAccounts, if present, and add them to the setOfAllowableAccounts
         Set<Account> setOfAllowableAccounts = null;
         final ArrayList<Parcelable> validAccounts =
-                getIntent().getParcelableArrayListExtra(EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST);
+                intent.getParcelableArrayListExtra(EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST);
         if (validAccounts != null) {
             setOfAllowableAccounts = new HashSet<Account>(validAccounts.size());
             for (Parcelable parcelable : validAccounts) {
@@ -98,7 +142,7 @@ public class ChooseTypeAndAccountActivity extends Activity {
         // Read the validAccountTypes, if present, and add them to the setOfAllowableAccountTypes
         Set<String> setOfAllowableAccountTypes = null;
         final ArrayList<String> validAccountTypes =
-                getIntent().getStringArrayListExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST);
+                intent.getStringArrayListExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
         if (validAccountTypes != null) {
             setOfAllowableAccountTypes = new HashSet<String>(validAccountTypes.size());
             for (String type : validAccountTypes) {
@@ -121,7 +165,8 @@ public class ChooseTypeAndAccountActivity extends Activity {
                 continue;
             }
             mAccountInfos.add(new AccountInfo(account,
-                    getDrawableForType(typeToAuthDescription, account.type)));
+                    getDrawableForType(typeToAuthDescription, account.type),
+                    account.equals(selectedAccount)));
         }
 
         // If there are no allowable accounts go directly to add account
@@ -131,7 +176,8 @@ public class ChooseTypeAndAccountActivity extends Activity {
         }
 
         // if there is only one allowable account return it
-        if (mAccountInfos.size() == 1) {
+        if (!intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false)
+                && mAccountInfos.size() == 1) {
             Account account = mAccountInfos.get(0).account;
             setResultAndFinish(account.name, account.type);
             return;
@@ -143,7 +189,6 @@ public class ChooseTypeAndAccountActivity extends Activity {
         list.setAdapter(new AccountArrayAdapter(this,
                 android.R.layout.simple_list_item_1, mAccountInfos));
         list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        list.setTextFilterEnabled(false);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 onListItemClick((ListView)parent, v, position, id);
@@ -173,9 +218,11 @@ public class ChooseTypeAndAccountActivity extends Activity {
                 return;
             }
         }
+        Log.d(TAG, "ChooseTypeAndAccountActivity.onActivityResult: canceled");
         setResult(Activity.RESULT_CANCELED);
         finish();
     }
+
 
     private Drawable getDrawableForType(
             final HashMap<String, AuthenticatorDescription> typeToAuthDescription,
@@ -212,31 +259,40 @@ public class ChooseTypeAndAccountActivity extends Activity {
         bundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
         bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
         setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
+        Log.d(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: "
+                + "selected account " + accountName + ", " + accountType);
         finish();
     }
 
     private void startChooseAccountTypeActivity() {
         final Intent intent = new Intent(this, ChooseAccountTypeActivity.class);
-        intent.putStringArrayListExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST,
-                getIntent().getStringArrayListExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST));
+        intent.putStringArrayListExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
+                getIntent().getStringArrayListExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY));
         intent.putExtra(EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
-                getIntent().getBundleExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_ARRAYLIST));
+                getIntent().getBundleExtra(EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE));
+        intent.putExtra(EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY,
+                getIntent().getStringArrayExtra(EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY));
+        intent.putExtra(EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING,
+                getIntent().getStringArrayExtra(EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING));
         startActivityForResult(intent, 0);
     }
 
     private static class AccountInfo {
         final Account account;
         final Drawable drawable;
+        private final boolean checked;
 
-        AccountInfo(Account account, Drawable drawable) {
+        AccountInfo(Account account, Drawable drawable, boolean checked) {
             this.account = account;
             this.drawable = drawable;
+            this.checked = checked;
         }
     }
 
     private static class ViewHolder {
         ImageView icon;
         TextView text;
+        ImageView checkmark;
     }
 
     private static class AccountArrayAdapter extends ArrayAdapter<AccountInfo> {
@@ -256,10 +312,11 @@ public class ChooseTypeAndAccountActivity extends Activity {
             ViewHolder holder;
 
             if (convertView == null) {
-                convertView = mLayoutInflater.inflate(R.layout.choose_account_row, null);
+                convertView = mLayoutInflater.inflate(R.layout.choose_selected_account_row, null);
                 holder = new ViewHolder();
                 holder.text = (TextView) convertView.findViewById(R.id.account_row_text);
                 holder.icon = (ImageView) convertView.findViewById(R.id.account_row_icon);
+                holder.checkmark = (ImageView) convertView.findViewById(R.id.account_row_checkmark);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -267,7 +324,9 @@ public class ChooseTypeAndAccountActivity extends Activity {
 
             holder.text.setText(mInfos.get(position).account.name);
             holder.icon.setImageDrawable(mInfos.get(position).drawable);
-
+            final int displayCheckmark =
+                    mInfos.get(position).checked ? View.VISIBLE : View.INVISIBLE;
+            holder.checkmark.setVisibility(displayCheckmark);
             return convertView;
         }
     }
