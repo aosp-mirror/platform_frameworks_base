@@ -24,6 +24,7 @@ import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.SystemProperties;
 import android.provider.Contacts;
@@ -1570,6 +1571,32 @@ public class PhoneNumberUtils
       } catch (NumberParseException e) {
       }
       return isEmergencyNumber(number);
+    }
+
+    /**
+     * Checks if a given number is an emergency number for the country that the user is in. The
+     * current country is determined using the CountryDetector.
+     *
+     * @param number the number to look up.
+     * @param context the specific context which the number should be checked against
+     * @return if a phone number is an emergency number for a local country, based on the
+     * CountryDetector.
+     * @see android.location.CountryDetector
+     * @hide
+     */
+    public static boolean isLocalEmergencyNumber(String number, Context context) {
+        String countryIso;
+        CountryDetector detector = (CountryDetector) context.getSystemService(
+                Context.COUNTRY_DETECTOR);
+        if (detector != null) {
+            countryIso = detector.detectCountry().getCountryIso();
+        } else {
+            Locale locale = context.getResources().getConfiguration().locale;
+            countryIso = locale.getCountry();
+            Log.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
+                    + countryIso);
+        }
+        return isEmergencyNumber(number, countryIso);
     }
 
     /**
