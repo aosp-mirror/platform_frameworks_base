@@ -718,8 +718,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void manageServicesLocked() {
         populateEnabledServicesLocked(mEnabledServices);
-        updateServicesStateLocked(mInstalledServices, mEnabledServices);
-        disableAccessibilityIfNoEnabledServices(mEnabledServices);
+        final int enabledInstalledServicesCount = updateServicesStateLocked(mInstalledServices,
+                mEnabledServices);
+        // No enabled installed services => disable accessibility to avoid
+        // sending accessibility events with no recipient across processes. 
+        if (mIsAccessibilityEnabled && enabledInstalledServicesCount == 0) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_ENABLED, 0);
+        }
     }
 
     /**
@@ -771,13 +777,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *
      * @param installedServices All installed {@link AccessibilityService}s.
      * @param enabledServices The {@link ComponentName}s of the enabled services.
+     * @return The number of enabled installed services.
      */
-    private void updateServicesStateLocked(List<AccessibilityServiceInfo> installedServices,
+    private int updateServicesStateLocked(List<AccessibilityServiceInfo> installedServices,
             Set<ComponentName> enabledServices) {
 
         Map<ComponentName, Service> componentNameToServiceMap = mComponentNameToServiceMap;
         boolean isEnabled = mIsAccessibilityEnabled;
 
+        int enabledInstalledServices = 0;
         for (int i = 0, count = installedServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = installedServices.get(i);
             ComponentName componentName = ComponentName.unflattenFromString(
@@ -790,6 +798,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         service = new Service(componentName, installedService, false);
                     }
                     service.bind();
+                    enabledInstalledServices++;
                 } else {
                     if (service != null) {
                         service.unbind();
@@ -801,19 +810,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
         }
-    }
 
-    /**
-     * Disables accessibility if there are no enabled accessibility services which
-     * to consume the generated accessibility events.
-     *
-     * @param enabledServices The set of enabled services.
-     */
-    private void disableAccessibilityIfNoEnabledServices(Set<ComponentName> enabledServices) {
-        if (enabledServices.isEmpty()) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_ENABLED, 0);
-        }
+        return enabledInstalledServices;
     }
 
     /**
