@@ -725,7 +725,22 @@ public abstract class PackageManager {
     public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
 
     /**
+     * Used as the {@code verificationCode} argument for
+     * {@link PackageManager#verifyPendingInstall} to indicate that the calling
+     * package verifier allows the installation to proceed.
+     */
+    public static final int VERIFICATION_ALLOW = 1;
+
+    /**
+     * Used as the {@code verificationCode} argument for
+     * {@link PackageManager#verifyPendingInstall} to indicate the calling
+     * package verifier does not vote to allow the installation to proceed.
+     */
+    public static final int VERIFICATION_REJECT = -1;
+
+    /**
      * Range of IDs allocated for a user.
+     *
      * @hide
      */
     public static final int PER_USER_RANGE = 100000;
@@ -1045,9 +1060,7 @@ public abstract class PackageManager {
     /**
      * Extra field name for the ID of a package pending verification. Passed to
      * a package verifier and is used to call back to
-     * {@link PackageManager#verifyPendingInstall(int, boolean)}
-     *
-     * @hide
+     * {@link PackageManager#verifyPendingInstall(int, int)}
      */
     public static final String EXTRA_VERIFICATION_ID = "android.content.pm.extra.VERIFICATION_ID";
 
@@ -2156,16 +2169,17 @@ public abstract class PackageManager {
     /**
      * Allows a package listening to the
      * {@link Intent#ACTION_PACKAGE_NEEDS_VERIFICATION package verification
-     * broadcast} to respond to the package manager.
+     * broadcast} to respond to the package manager. The response must include
+     * the {@code verificationCode} which is one of
+     * {@link PackageManager#VERIFICATION_ALLOW} or
+     * {@link PackageManager#VERIFICATION_REJECT}.
      *
      * @param id pending package identifier as passed via the
      *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra
-     * @param verified whether the package was verified as valid
-     * @param failureMessage if verification was false, this is the error
-     *            message that may be shown to the user
-     * @hide
+     * @param verificationCode either {@link PackageManager#VERIFICATION_ALLOW}
+     *            or {@link PackageManager#VERIFICATION_REJECT}.
      */
-    public abstract void verifyPendingInstall(int id, boolean verified, String failureMessage);
+    public abstract void verifyPendingInstall(int id, int verificationCode);
 
     /**
      * Change the installer associated with a given package.  There are limitations

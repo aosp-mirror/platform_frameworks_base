@@ -1561,8 +1561,21 @@
             <enum name="xhdpi" value="320" />
         </attr>
     </declare-styleable>
-    
-    
+
+    <!-- The attribute that holds a Base64-encoded public key. -->
+    <attr name="publicKey" format="string" />
+
+    <!-- Attributes relating to a package verifier -->
+    <declare-styleable name="AndroidManifestPackageVerifier" parent="AndroidManifest">
+        <!-- Specifies the Java-style package name that defines this
+             package verifier. -->
+        <attr name="name" />
+
+        <!-- The Base64 encoded public key of the package verifier's
+             signature. -->
+        <attr name="publicKey" />
+    </declare-styleable>
+
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May
          also include zero or more {@link #IntentCategory <category> and
          {@link #Extra <extra>} tags. -->

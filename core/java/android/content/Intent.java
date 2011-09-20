@@ -1535,8 +1535,6 @@ public class Intent implements Parcelable, Cloneable {
      * <p class="note">
      * This is a protected intent that can only be sent by the system.
      * </p>
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_NEEDS_VERIFICATION = "android.intent.action.PACKAGE_NEEDS_VERIFICATION";
