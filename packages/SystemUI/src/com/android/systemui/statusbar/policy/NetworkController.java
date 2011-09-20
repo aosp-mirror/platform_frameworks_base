@@ -282,7 +282,7 @@ public class NetworkController extends BroadcastReceiver {
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-            if (DEBUG || CHATTY) {
+            if (DEBUG) {
                 Slog.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength + 
                     ((signalStrength == null) ? "" : (" level=" + signalStrength.getLevel())));
             }
@@ -323,13 +323,6 @@ public class NetworkController extends BroadcastReceiver {
             }
             mDataState = state;
             mDataNetType = networkType;
-            if (state < 0) {
-                // device without a data connection
-                if (CHATTY) {
-                    Slog.d(TAG, "clearing mSignalStrength");
-                }
-                mSignalStrength = null;
-            }
             updateDataNetType();
             updateDataIcon();
             refreshViews();
@@ -409,9 +402,6 @@ public class NetworkController extends BroadcastReceiver {
                 int iconLevel;
                 int[] iconList;
                 mLastSignalLevel = iconLevel = mSignalStrength.getLevel();
-                if (CHATTY) {
-                    Slog.d(TAG, "updateTelephonySignalStrength: signal level = " + iconLevel);
-                }
                 if (isCdma()) {
                     if (isCdmaEri()) {
                         iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
