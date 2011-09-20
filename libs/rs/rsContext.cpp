@@ -37,11 +37,10 @@ pthread_mutex_t Context::gLibMutex = PTHREAD_MUTEX_INITIALIZER;
 
 bool Context::initGLThread() {
     pthread_mutex_lock(&gInitMutex);
-    LOGV("initGLThread start %p", this);
 
     if (!mHal.funcs.initGraphics(this)) {
         pthread_mutex_unlock(&gInitMutex);
-        LOGE("%p, initGraphics failed", this);
+        LOGE("%p initGraphics failed", this);
         return false;
     }
 
@@ -50,7 +49,6 @@ bool Context::initGLThread() {
 }
 
 void Context::deinitEGL() {
-    LOGV("%p, deinitEGL", this);
     mHal.funcs.shutdownGraphics(this);
 }
 
@@ -284,7 +282,7 @@ void * Context::threadProc(void *vrsc) {
         }
     }
 
-    LOGV("%p, RS Thread exiting", rsc);
+    LOGV("%p RS Thread exiting", rsc);
 
     if (rsc->mIsGraphicsContext) {
         pthread_mutex_lock(&gInitMutex);
@@ -292,7 +290,7 @@ void * Context::threadProc(void *vrsc) {
         pthread_mutex_unlock(&gInitMutex);
     }
 
-    LOGV("%p, RS Thread exited", rsc);
+    LOGV("%p RS Thread exited", rsc);
     return NULL;
 }
 
@@ -426,7 +424,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
 }
 
 Context::~Context() {
-    LOGV("Context::~Context");
+    LOGV("%p Context::~Context", this);
 
     if (!mIsContextLite) {
         mIO.coreFlush();
@@ -450,7 +448,7 @@ Context::~Context() {
         }
         pthread_mutex_unlock(&gInitMutex);
     }
-    LOGV("Context::~Context done");
+    LOGV("%p Context::~Context done", this);
 }
 
 void Context::setSurface(uint32_t w, uint32_t h, RsNativeWindow sur) {
@@ -667,10 +665,10 @@ void rsi_ContextDestroyWorker(Context *rsc) {
 }
 
 void rsi_ContextDestroy(Context *rsc) {
-    LOGV("rsContextDestroy %p", rsc);
+    LOGV("%p rsContextDestroy", rsc);
     rsContextDestroyWorker(rsc);
     delete rsc;
-    LOGV("rsContextDestroy 2 %p", rsc);
+    LOGV("%p rsContextDestroy done", rsc);
 }
 
 
@@ -701,7 +699,7 @@ void rsi_ContextDeinitToClient(Context *rsc) {
 
 RsContext rsContextCreate(RsDevice vdev, uint32_t version,
                           uint32_t sdkVersion) {
-    LOGV("rsContextCreate %p", vdev);
+    LOGV("rsContextCreate dev=%p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, NULL);
     if (rsc) {
@@ -713,14 +711,14 @@ RsContext rsContextCreate(RsDevice vdev, uint32_t version,
 RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
                             uint32_t sdkVersion, RsSurfaceConfig sc,
                             uint32_t dpi) {
-    LOGV("rsContextCreateGL %p", vdev);
+    LOGV("rsContextCreateGL dev=%p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, &sc);
     if (rsc) {
         rsc->setTargetSdkVersion(sdkVersion);
         rsc->setDPI(dpi);
     }
-    LOGV("rsContextCreateGL ret %p ", rsc);
+    LOGV("%p rsContextCreateGL ret", rsc);
     return rsc;
 }
 
