@@ -161,13 +161,19 @@ android_media_MediaProfiles_native_get_audio_encoder_cap(JNIEnv *env, jobject th
     return cap;
 }
 
+static bool isCamcorderQualityKnown(int quality)
+{
+    return ((quality >= CAMCORDER_QUALITY_LIST_START &&
+             quality <= CAMCORDER_QUALITY_LIST_END) ||
+            (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LIST_START &&
+             quality <= CAMCORDER_QUALITY_TIME_LAPSE_LIST_END));
+}
+
 static jobject
 android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject thiz, jint id, jint quality)
 {
     LOGV("native_get_camcorder_profile: %d %d", id, quality);
-    if (!((quality >= CAMCORDER_QUALITY_LOW && quality <= CAMCORDER_QUALITY_1080P) ||
-                (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LOW &&
-                quality <= CAMCORDER_QUALITY_TIME_LAPSE_1080P))) {
+    if (!isCamcorderQualityKnown(quality)) {
         jniThrowException(env, "java/lang/RuntimeException", "Unknown camcorder profile quality");
         return NULL;
     }
@@ -216,9 +222,7 @@ static jboolean
 android_media_MediaProfiles_native_has_camcorder_profile(JNIEnv *env, jobject thiz, jint id, jint quality)
 {
     LOGV("native_has_camcorder_profile: %d %d", id, quality);
-    if (!((quality >= CAMCORDER_QUALITY_LOW && quality <= CAMCORDER_QUALITY_1080P) ||
-                (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LOW &&
-                quality <= CAMCORDER_QUALITY_TIME_LAPSE_1080P))) {
+    if (!isCamcorderQualityKnown(quality)) {
         return false;
     }
 
