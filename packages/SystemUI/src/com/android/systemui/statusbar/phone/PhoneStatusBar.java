@@ -1572,8 +1572,7 @@ public class PhoneStatusBar extends StatusBar {
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
         if (mNavigationBarView != null) {
-            mNavigationBarView.getMenuButton().setVisibility(showMenu
-                ? View.VISIBLE : View.INVISIBLE);
+            mNavigationBarView.setMenuVisibility(showMenu);
         }
 
         // See above re: lights-out policy for legacy apps.
