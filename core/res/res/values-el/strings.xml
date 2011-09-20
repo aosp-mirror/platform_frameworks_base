@@ -859,12 +859,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Αντιγραφή διεύθυνσης URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Επιλογή κειμένου..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Επιλογή κειμένου"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"προσθήκη στο λεξικό"</string>
+    <string name="deleteText" msgid="7070985395199629156">"διαγραφή"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Μέθοδος εισόδου"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Ενέργειες κειμένου"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Απομένει λίγος ελεύθερος χώρος"</string>
@@ -1113,6 +1109,12 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Αναίρεση των διαγραφών."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Να μην γίνει καμία ενέργεια τώρα."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Επιλογή λογαριασμού"</string>
+    <!-- no translation found for add_account_label (2935267344849993553) -->
+    <skip />
+    <!-- no translation found for choose_account_text (6891230675141555481) -->
+    <skip />
+    <!-- no translation found for add_account_button_label (3611982894853435874) -->
+    <skip />
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Αύξηση"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Μείωση"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Πατήστε και κρατήστε πατημένο το <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1144,6 +1146,7 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Αλλαγή τρόπου"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Στοιχείο χειρισμού με δυνατότητα ολίσθησης. Πατήστε παρατεταμένα."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Κύλιση πάνω <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Κύλιση κάτω για <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Κύλιση αριστερά για <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1161,10 +1164,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Χώρος αποθήκευσης USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Επεξεργασία..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Προειδοποίηση χρήσης δεδομένων"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Αγγ.για προβ.της χρ.και των ρυθ."</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Τα δεδ. 2G-3G απενεργοποιήθηκαν"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Τα δεδομένα 4G απενεργοποιήθηκαν"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Τα δεδομ. κιν. τηλεφ. απενεργοπ."</string>

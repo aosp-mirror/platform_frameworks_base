@@ -859,12 +859,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"URL kopiëren"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Tekst selecteren..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Tekstselectie"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"toevoegen aan woordenboek"</string>
+    <string name="deleteText" msgid="7070985395199629156">"verwijderen"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Invoermethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstacties"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Weinig ruimte"</string>
@@ -1113,6 +1109,12 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Verwijderingen ongedaan maken."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Nu niets doen."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Selecteer een account"</string>
+    <!-- no translation found for add_account_label (2935267344849993553) -->
+    <skip />
+    <!-- no translation found for choose_account_text (6891230675141555481) -->
+    <skip />
+    <!-- no translation found for add_account_button_label (3611982894853435874) -->
+    <skip />
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Hoger"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Lager"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Tik <xliff:g id="VALUE">%s</xliff:g> keer en blijf aanraken."</string>
@@ -1144,6 +1146,7 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modus wijzigen"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Schuifgreep. Tikken en blijven aanraken."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Omlaag voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Links voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1161,10 +1164,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-opslag"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Bewerken..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Waarschuwing v. gegevensgebruik"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Aanraken: gebruik/inst. bekijken"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-/3G-gegevens uitgeschakeld"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-gegevens uitgeschakeld"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiele gegevens uitgeschakeld"</string>
