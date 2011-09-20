@@ -1085,9 +1085,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 // pulse repeatedly
                 mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
                         ledOnMS, ledOffMS);
-            } else {
-                // pulse only once
-                mNotificationLight.pulse(ledARGB, ledOnMS);
             }
         }
     }
