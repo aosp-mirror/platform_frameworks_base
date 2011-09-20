@@ -470,6 +470,8 @@ public class MediaScanner
         private int mCompilation;
         private boolean mIsDrm;
         private boolean mNoMedia;   // flag to suppress file from appearing in media tables
+        private int mWidth;
+        private int mHeight;
 
         public FileCacheEntry beginFile(String path, String mimeType, long lastModified,
                 long fileSize, boolean isDirectory, boolean noMedia) {
@@ -545,6 +547,8 @@ public class MediaScanner
             mWriter = null;
             mCompilation = 0;
             mIsDrm = false;
+            mWidth = 0;
+            mHeight = 0;
 
             return entry;
         }
@@ -581,6 +585,10 @@ public class MediaScanner
                         if (MediaFile.isAudioFileType(mFileType)
                                 || MediaFile.isVideoFileType(mFileType)) {
                             processFile(path, mimeType, this);
+                        }
+
+                        if (MediaFile.isImageFileType(mFileType)) {
+                            processImageFile(path);
                         }
 
                         result = endFile(entry, ringtones, notifications, alarms, music, podcasts);
@@ -697,6 +705,18 @@ public class MediaScanner
             return genreTagValue;
         }
 
+        private void processImageFile(String path) {
+            try {
+                mBitmapOptions.outWidth = 0;
+                mBitmapOptions.outHeight = 0;
+                BitmapFactory.decodeFile(path, mBitmapOptions);
+                mWidth = mBitmapOptions.outWidth;
+                mHeight = mBitmapOptions.outHeight;
+            } catch (Throwable th) {
+                // ignore;
+            }
+        }
+
         public void setMimeType(String mimeType) {
             if ("audio/mp4".equals(mMimeType) &&
                     mimeType.startsWith("video")) {
@@ -724,6 +744,11 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.SIZE, mFileSize);
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
             map.put(MediaStore.MediaColumns.IS_DRM, mIsDrm);
+
+            if (mWidth > 0 && mHeight > 0) {
+                map.put(MediaStore.MediaColumns.WIDTH, mWidth);
+                map.put(MediaStore.MediaColumns.HEIGHT, mHeight);
+            }
 
             if (!mNoMedia) {
                 if (MediaFile.isVideoFileType(mFileType)) {
