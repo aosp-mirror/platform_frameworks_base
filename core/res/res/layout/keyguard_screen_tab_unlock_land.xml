@@ -104,6 +104,7 @@
         android:id="@+id/carrier"
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
+        android:layout_marginBottom="12dip"
         android:gravity="right"
         android:singleLine="true"
         android:ellipsize="marquee"
