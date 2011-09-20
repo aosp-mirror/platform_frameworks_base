@@ -593,7 +593,8 @@ public class RecentsPanelView extends RelativeLayout
         if (mActivityDescriptions.size() > 0) {
             if (DEBUG) Log.v(TAG, "Showing " + mActivityDescriptions.size() + " apps");
             updateUiElements(getResources().getConfiguration());
-            final ArrayList<ActivityDescription> descriptions = mActivityDescriptions;
+            final ArrayList<ActivityDescription> descriptions =
+                new ArrayList<ActivityDescription>(mActivityDescriptions);
             loadActivityDescription(descriptions.get(0), 0);
             applyActivityDescription(descriptions.get(0), 0, false);
             if (descriptions.size() > 1) {
