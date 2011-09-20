@@ -319,7 +319,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String id = Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             if (id != null && id.length() > 0) {
-                String name = new String("android_").concat(id);
+                String name = new String("android-").concat(id);
                 SystemProperties.set("net.hostname", name);
             }
         }
