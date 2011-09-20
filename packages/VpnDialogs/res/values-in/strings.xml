@@ -20,12 +20,12 @@
     <string name="warning" msgid="5470743576660160079">"Dengan melanjutkan, Anda memberikan izin kepada aplikasi untuk mencegat semua lalu lintas jaringan. "<b>"JANGAN memberi izin kecuali Anda mempercayai aplikasi ini."</b>" Jika tidak, data Anda berisiko disusupi oleh perangkat lunak jahat."</string>
     <string name="accept" msgid="2889226408765810173">"Saya mempercayai aplikasi ini."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN tersambung"</string>
-    <string name="configure" msgid="4905518375574791375">"Konfigurasi"</string>
+    <string name="configure" msgid="4905518375574791375">"Konfigurasikan"</string>
     <string name="disconnect" msgid="971412338304200056">"Putuskan sambungan"</string>
     <string name="session" msgid="6470628549473641030">"Sesi:"</string>
     <string name="duration" msgid="3584782459928719435">"Durasi:"</string>
-    <string name="data_transmitted" msgid="8239988320199846094">"Data yang Dikirimkan:"</string>
-    <string name="data_received" msgid="7431729884377019935">"Data Diterima:"</string>
+    <!-- outdated translation 8239988320199846094 -->     <string name="data_transmitted" msgid="7988167672982199061">"Data yang Dikirimkan:"</string>
+    <!-- outdated translation 7431729884377019935 -->     <string name="data_received" msgid="4062776929376067820">"Data Diterima:"</string>
     <string name="blank_value" msgid="6278484582661984635">"--"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> byte / <xliff:g id="NUMBER_1">%2$s</xliff:g> paket"</string>
 </resources>

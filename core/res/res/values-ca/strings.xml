@@ -859,7 +859,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copia l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Selecciona el text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecció de text"</string>
-    <string name="addToDictionary" msgid="2839899368418071843">"+ afegeix al diccionari"</string>
+    <string name="addToDictionary" msgid="9090375111134433012">"afegeix al diccionari"</string>
+    <string name="deleteText" msgid="7070985395199629156">"suprimeix"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Queda poc espai"</string>
@@ -1108,6 +1109,12 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Desfés les supressions."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"No facis res de moment."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Selecciona un compte"</string>
+    <!-- no translation found for add_account_label (2935267344849993553) -->
+    <skip />
+    <!-- no translation found for choose_account_text (6891230675141555481) -->
+    <skip />
+    <!-- no translation found for add_account_button_label (3611982894853435874) -->
+    <skip />
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementa"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminueix"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> mantén premut."</string>
@@ -1139,6 +1146,7 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Canvi de mode"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retorn"</string>
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Llisca el dit. Mantén premut."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Cap avall per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1156,7 +1164,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Emmagatzematge USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Edita..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertiment d\'ús de dades"</string>
-    <string name="data_usage_warning_body" msgid="3354394590936526648">"l\'ús supera <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Toca per veure l\'ús i la configuració"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Dades 2G-3G desactivades"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dades 4G desactivades"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dades mòbils desactivades"</string>

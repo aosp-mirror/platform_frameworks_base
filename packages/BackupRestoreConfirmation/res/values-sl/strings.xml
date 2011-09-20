@@ -16,6 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for backup_confirm_title (827563724209303345) -->
+    <skip />
+    <!-- no translation found for restore_confirm_title (5469365809567486602) -->
+    <skip />
     <string name="backup_confirm_text" msgid="1878021282758896593">"Zahtevano je popolno varnostno kopiranje vseh podatkov v povezanem računalniku. Ali želite to dovoliti?"\n\n"Če varnostnega kopiranja niste zahtevali, ne dovolite nadaljevanja postopka."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Varnostno kopiraj moje podatke"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Brez varnostnega kopiranja"</string>
@@ -26,4 +30,14 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Vnesite geslo za šifriranje podatkov popolnega varnostnega kopiranja. Če to pustite prazno, bo uporabljeno trenutno geslo za varnostno kopiranje:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Če želite šifrirati vse varnostno kopirane podatke, spodaj vnesite geslo:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Če so podatki za obnovitev šifrirani, spodaj vnesite geslo:"</string>
+    <!-- no translation found for toast_backup_started (550354281452756121) -->
+    <skip />
+    <!-- no translation found for toast_backup_ended (3818080769548726424) -->
+    <skip />
+    <!-- no translation found for toast_restore_started (7881679218971277385) -->
+    <skip />
+    <!-- no translation found for toast_restore_ended (1764041639199696132) -->
+    <skip />
+    <!-- no translation found for toast_timeout (5276598587087626877) -->
+    <skip />
 </resources>
