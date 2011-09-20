@@ -16,6 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for backup_confirm_title (827563724209303345) -->
+    <skip />
+    <!-- no translation found for restore_confirm_title (5469365809567486602) -->
+    <skip />
     <string name="backup_confirm_text" msgid="1878021282758896593">"درخواست پشتیبان گیری کامل از تمام داده‌ها به یک رایانه دسک‌تاپ متصل داده شده است. آیا می‌خواهید این عمل انجام شود؟"\n\n"اگر شما درخواست تهیه نسخه پشتیبان را نداده‌اید، اجازه‌ ادامه عملیات را ندهید."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"از داده‌های من نسخه پشتیبان تهیه شود"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"نسخه پشتیبان تهیه نشود"</string>
@@ -26,4 +30,14 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"لطفاً یک گذرواژه برای رمزگذاری داده‌های کامل نسخه پشتیبانی وارد کنید. اگر این خالی بماند، گذرواژه فعلی نسخه پشتیبان مورد استفاده قرار خواهد گرفت:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"اگر می‌خواهید تمام نسخه پشتیبانی داده را رمزدار کنید، یک گذرواژه در زیر وارد کنید:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"اگر داده بازیابی شده رمزگذاری شده است، لطفاً گذرواژه را در زیر وارد کنید:"</string>
+    <!-- no translation found for toast_backup_started (550354281452756121) -->
+    <skip />
+    <!-- no translation found for toast_backup_ended (3818080769548726424) -->
+    <skip />
+    <!-- no translation found for toast_restore_started (7881679218971277385) -->
+    <skip />
+    <!-- no translation found for toast_restore_ended (1764041639199696132) -->
+    <skip />
+    <!-- no translation found for toast_timeout (5276598587087626877) -->
+    <skip />
 </resources>
