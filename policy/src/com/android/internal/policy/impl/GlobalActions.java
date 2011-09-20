@@ -118,18 +118,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      */
     private AlertDialog createDialog() {
         mSilentModeToggle = new ToggleAction(
-                R.drawable.ic_lock_silent_mode,
-                R.drawable.ic_lock_silent_mode_off,
+                R.drawable.ic_audio_vol_mute,
+                R.drawable.ic_audio_vol,
                 R.string.global_action_toggle_silent_mode,
                 R.string.global_action_silent_mode_on_status,
                 R.string.global_action_silent_mode_off_status) {
 
             void willCreate() {
-                // XXX: FIXME: switch to ic_lock_vibrate_mode when available
+                // XXX: FIXME: Add vibrate indicator when available
                 mEnabledIconResId = (Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.VIBRATE_IN_SILENT, 1) == 1)
-                    ? R.drawable.ic_lock_silent_mode_vibrate
-                    : R.drawable.ic_lock_silent_mode;
+                    ? R.drawable.ic_audio_vol_mute
+                    : R.drawable.ic_audio_vol_mute;
             }
 
             void onToggle(boolean on) {
