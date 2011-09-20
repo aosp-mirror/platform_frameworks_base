@@ -67,6 +67,7 @@ const MediaProfiles::NameToTagMap MediaProfiles::sCamcorderQualityNameMap[] = {
     {"480p", CAMCORDER_QUALITY_480P},
     {"720p", CAMCORDER_QUALITY_720P},
     {"1080p", CAMCORDER_QUALITY_1080P},
+    {"qvga", CAMCORDER_QUALITY_QVGA},
 
     {"timelapselow",  CAMCORDER_QUALITY_TIME_LAPSE_LOW},
     {"timelapsehigh", CAMCORDER_QUALITY_TIME_LAPSE_HIGH},
@@ -74,7 +75,8 @@ const MediaProfiles::NameToTagMap MediaProfiles::sCamcorderQualityNameMap[] = {
     {"timelapsecif", CAMCORDER_QUALITY_TIME_LAPSE_CIF},
     {"timelapse480p", CAMCORDER_QUALITY_TIME_LAPSE_480P},
     {"timelapse720p", CAMCORDER_QUALITY_TIME_LAPSE_720P},
-    {"timelapse1080p", CAMCORDER_QUALITY_TIME_LAPSE_1080P}
+    {"timelapse1080p", CAMCORDER_QUALITY_TIME_LAPSE_1080P},
+    {"timelapseqvga", CAMCORDER_QUALITY_TIME_LAPSE_QVGA},
 };
 
 /*static*/ void
@@ -1139,7 +1141,7 @@ int MediaProfiles::getStartTimeOffsetMs(int cameraId) const {
     if (index >= 0) {
         offsetTimeMs = mStartTimeOffsets.valueFor(cameraId);
     }
-    LOGV("%s: offsetTime=%d ms and cameraId=%d", offsetTimeMs, cameraId);
+    LOGV("offsetTime=%d ms and cameraId=%d", offsetTimeMs, cameraId);
     return offsetTimeMs;
 }
 
