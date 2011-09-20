@@ -39,25 +39,21 @@ class JniUtil {
     private static Boolean sUseChromiumHttpStack;
     private static Context sContext;
 
-    private static boolean initialized = false;
-
     private static void checkInitialized() {
-        if (!initialized) {
+        if (sContext == null) {
             throw new IllegalStateException("Call CookieSyncManager::createInstance() or create a webview before using this class");
         }
     }
 
     protected static synchronized void setContext(Context context) {
-        if (initialized)
+        if (sContext != null) {
             return;
+        }
 
         sContext = context.getApplicationContext();
-        initialized = true;
     }
 
     protected static synchronized Context getContext() {
-        if (!initialized)
-            return null;
         return sContext;
     }
 
@@ -68,8 +64,9 @@ class JniUtil {
     private static synchronized String getDatabaseDirectory() {
         checkInitialized();
 
-        if (sDatabaseDirectory == null)
+        if (sDatabaseDirectory == null) {
             sDatabaseDirectory = sContext.getDatabasePath("dummy").getParent();
+        }
 
         return sDatabaseDirectory;
     }
@@ -81,8 +78,9 @@ class JniUtil {
     private static synchronized String getCacheDirectory() {
         checkInitialized();
 
-        if (sCacheDirectory == null)
+        if (sCacheDirectory == null) {
             sCacheDirectory = sContext.getCacheDir().getAbsolutePath();
+        }
 
         return sCacheDirectory;
     }
