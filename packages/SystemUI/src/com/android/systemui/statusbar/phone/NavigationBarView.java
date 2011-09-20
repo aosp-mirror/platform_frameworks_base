@@ -160,9 +160,15 @@ public class NavigationBarView extends LinearLayout {
         final View navButtons = mCurrentView.findViewById(R.id.nav_buttons);
         final View lowLights = mCurrentView.findViewById(R.id.lights_out);
 
+        // ok, everyone, stop it right there
+        navButtons.animate().cancel();
+        lowLights.animate().cancel();
+
         if (!animate) {
-            lowLights.setVisibility(View.GONE);
-            navButtons.setAlpha(1f);
+            navButtons.setAlpha(lightsOut ? 0f : 1f);
+
+            lowLights.setAlpha(lightsOut ? 1f : 0f);
+            lowLights.setVisibility(lightsOut ? View.VISIBLE : View.GONE);
         } else {
             navButtons.animate()
                 .alpha(lightsOut ? 0f : 1f)
@@ -170,8 +176,10 @@ public class NavigationBarView extends LinearLayout {
                 .start();
 
             lowLights.setOnTouchListener(mLightsOutListener);
-            lowLights.setAlpha(0f);
-            lowLights.setVisibility(View.VISIBLE);
+            if (lowLights.getVisibility() == View.GONE) {
+                lowLights.setAlpha(0f);
+                lowLights.setVisibility(View.VISIBLE);
+            }
             lowLights.animate()
                 .alpha(lightsOut ? 1f : 0f)
                 .setStartDelay(lightsOut ? 500 : 0)
