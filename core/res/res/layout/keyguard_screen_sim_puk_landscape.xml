@@ -175,7 +175,7 @@
             android:layout_marginLeft="8dip"
             android:textSize="18sp"
             android:drawableLeft="@drawable/ic_emergency"
-            android:drawablePadding="8dip"
+            android:drawablePadding="4dip"
         />
     </LinearLayout>
 
