@@ -125,6 +125,12 @@ class DragState {
             mDragWindowHandle.frameTop = 0;
             mDragWindowHandle.frameRight = mService.mCurDisplayWidth;
             mDragWindowHandle.frameBottom = mService.mCurDisplayHeight;
+
+            // Pause rotations before a drag.
+            if (WindowManagerService.DEBUG_ORIENTATION) {
+                Slog.d(WindowManagerService.TAG, "Pausing rotation during drag");
+            }
+            mService.pauseRotationLocked();
         }
     }
 
@@ -142,6 +148,12 @@ class DragState {
 
             mDragWindowHandle = null;
             mDragApplicationHandle = null;
+
+            // Resume rotations after a drag.
+            if (WindowManagerService.DEBUG_ORIENTATION) {
+                Slog.d(WindowManagerService.TAG, "Resuming rotation after drag");
+            }
+            mService.resumeRotationLocked();
         }
     }
 
@@ -257,13 +269,6 @@ class DragState {
         // free our resources and drop all the object references
         mService.mDragState.reset();
         mService.mDragState = null;
-
-        if (WindowManagerService.DEBUG_ORIENTATION) Slog.d(WindowManagerService.TAG, "Performing post-drag rotation");
-        boolean changed = mService.setRotationUncheckedLocked(
-                WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
-        if (changed) {
-            mService.mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
-        }
     }
 
     void notifyMoveLw(float x, float y) {

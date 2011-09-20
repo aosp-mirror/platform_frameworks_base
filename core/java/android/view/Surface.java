@@ -207,9 +207,6 @@ public class Surface implements Parcelable {
 
     /** Enable dithering when compositing this surface @hide */
     public static final int SURFACE_DITHER    = 0x04;
-    
-    /** Disable the orientation animation @hide */
-    public static final int FLAGS_ORIENTATION_ANIMATION_DISABLE = 0x000000001;
 
     // The mSurfaceControl will only be present for Surfaces used by the window
     // server or system processes. When this class is parceled we defer to the
@@ -393,7 +390,7 @@ public class Surface implements Parcelable {
      * set the orientation of the given display.
      * @param display
      * @param orientation
-     * @param flags
+     * @param flags Currently unused, set to 0.
      * @hide
      */
     public static native   void setOrientation(int display, int orientation, int flags);

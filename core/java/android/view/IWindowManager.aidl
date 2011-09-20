@@ -163,15 +163,13 @@ interface IWindowManager
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
-     * Change the current screen rotation, constants as per
-     * {@link android.view.Surface}.
-     * @param rotation the intended rotation.
+     * Update the current screen rotation based on the current state of
+     * the world.
      * @param alwaysSendConfiguration Flag to force a new configuration to
      * be evaluated.  This can be used when there are other parameters in
      * configuration that are changing.
-     * @param animFlags Animation flags as per {@link android.view.Surface}.
      */
-    void setRotation(int rotation, boolean alwaysSendConfiguration, int animFlags);
+    void updateRotation(boolean alwaysSendConfiguration);
 
     /**
      * Retrieve the current screen orientation, constants as per
