@@ -88,6 +88,10 @@ public final class CookieSyncManager extends WebSyncManager {
      */
     public static synchronized CookieSyncManager createInstance(
             Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("Invalid context argument");
+        }
+
         JniUtil.setContext(context);
         Context appContext = context.getApplicationContext();
         if (sRef == null) {
