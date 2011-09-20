@@ -176,8 +176,9 @@ protected:
                     }
 
                     onDrainThisBuffer(msg);
-                } else if (what == ACodec::kWhatEOS) {
-                    printf("$\n");
+                } else if (what == ACodec::kWhatEOS
+                        || what == ACodec::kWhatError) {
+                    printf((what == ACodec::kWhatEOS) ? "$\n" : "E\n");
 
                     int64_t delayUs = ALooper::GetNowUs() - mStartTimeUs;
 
@@ -412,7 +413,8 @@ private:
         sp<AMessage> reply;
         CHECK(msg->findMessage("reply", &reply));
 
-        if (mSeekState == SEEK_FLUSHING) {
+        if (mSource == NULL || mSeekState == SEEK_FLUSHING) {
+            reply->setInt32("err", ERROR_END_OF_STREAM);
             reply->post();
             return;
         }

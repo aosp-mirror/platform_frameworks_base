@@ -228,6 +228,20 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
 
         buffer->meta()->setInt32("csd", true);
         mCSD.push(buffer);
+    } else if (meta->findData(kKeyVorbisInfo, &type, &data, &size)) {
+        sp<ABuffer> buffer = new ABuffer(size);
+        memcpy(buffer->data(), data, size);
+
+        buffer->meta()->setInt32("csd", true);
+        mCSD.push(buffer);
+
+        CHECK(meta->findData(kKeyVorbisBooks, &type, &data, &size));
+
+        buffer = new ABuffer(size);
+        memcpy(buffer->data(), data, size);
+
+        buffer->meta()->setInt32("csd", true);
+        mCSD.push(buffer);
     }
 
     return msg;

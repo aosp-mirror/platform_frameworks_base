@@ -40,6 +40,8 @@ struct NuPlayer : public AHandler {
     void setDataSource(
             const char *url, const KeyedVector<String8, String8> *headers);
 
+    void setDataSource(int fd, int64_t offset, int64_t length);
+
     void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink);
     void start();
@@ -60,12 +62,13 @@ protected:
 
 private:
     struct Decoder;
+    struct GenericSource;
     struct HTTPLiveSource;
     struct NuPlayerStreamListener;
     struct Renderer;
+    struct RTSPSource;
     struct Source;
     struct StreamingSource;
-    struct RTSPSource;
 
     enum {
         kWhatSetDataSource              = '=DaS',

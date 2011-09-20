@@ -541,6 +541,12 @@ void MediaPlayerService::Client::disconnect()
 }
 
 static player_type getDefaultPlayerType() {
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.use-nuplayer", value, NULL)
+            && (!strcmp("1", value) || !strcasecmp("true", value))) {
+        return NU_PLAYER;
+    }
+
     return STAGEFRIGHT_PLAYER;
 }
 

@@ -27,6 +27,7 @@
 #include "NuPlayerSource.h"
 #include "RTSPSource.h"
 #include "StreamingSource.h"
+#include "GenericSource.h"
 
 #include "ATSParser.h"
 
@@ -84,18 +85,44 @@ void NuPlayer::setDataSource(const sp<IStreamSource> &source) {
     msg->post();
 }
 
+static bool IsHTTPLiveURL(const char *url) {
+    if (!strncasecmp("http://", url, 7)
+            || !strncasecmp("https://", url, 8)) {
+        size_t len = strlen(url);
+        if (len >= 5 && !strcasecmp(".m3u8", &url[len - 5])) {
+            return true;
+        }
+
+        if (strstr(url,"m3u8")) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void NuPlayer::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
 
-    if (!strncasecmp(url, "rtsp://", 7)) {
-        msg->setObject(
-                "source", new RTSPSource(url, headers, mUIDValid, mUID));
+    sp<Source> source;
+    if (IsHTTPLiveURL(url)) {
+        source = new HTTPLiveSource(url, headers, mUIDValid, mUID);
+    } else if (!strncasecmp(url, "rtsp://", 7)) {
+        source = new RTSPSource(url, headers, mUIDValid, mUID);
     } else {
-        msg->setObject(
-                "source", new HTTPLiveSource(url, headers, mUIDValid, mUID));
+        source = new GenericSource(url, headers, mUIDValid, mUID);
     }
 
+    msg->setObject("source", source);
+    msg->post();
+}
+
+void NuPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
+    sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
+
+    sp<Source> source = new GenericSource(fd, offset, length);
+    msg->setObject("source", source);
     msg->post();
 }
 
