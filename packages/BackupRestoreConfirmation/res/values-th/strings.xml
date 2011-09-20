@@ -16,6 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for backup_confirm_title (827563724209303345) -->
+    <skip />
+    <!-- no translation found for restore_confirm_title (5469365809567486602) -->
+    <skip />
     <string name="backup_confirm_text" msgid="1878021282758896593">"เราได้รับการขอให้ทำการสำรองข้อมูลทั้งหมดลงในคอมพิวเตอร์เดสก์ท็อปที่เชื่อมต่ออยู่ คุณต้องการอนุญาตให้ดำเนินการตามนี้หรือไม่"\n\n" หากคุณไม่ได้เป็นผู้ขอให้ทำการสำรองข้อมูลดังกล่าว โปรดอย่าอนุญาตให้ดำเนินการ"</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"สำรองข้อมูลของฉัน"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"ไม่ต้องสำรองข้อมูล"</string>
@@ -26,4 +30,14 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"โปรดป้อนรหัสผ่านเพื่อใช้สำหรับเข้ารหัสข้อมูลที่สำรองแบบเต็มรูปแบบ หากเว้นว่างไว้ รหัสผ่านการสำรองข้อมูลปัจจุบันของคุณจะถูกใช้:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"หากคุณต้องการเข้ารหัสข้อมูลที่สำรองเต็มรูปแบบ โปรดป้อนรหัสผ่านด้านล่างนี้:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"หากมีการเข้ารหัสข้อมูลที่คืนค่า โปรดป้อนรหัสผ่านด้านล่างนี้:"</string>
+    <!-- no translation found for toast_backup_started (550354281452756121) -->
+    <skip />
+    <!-- no translation found for toast_backup_ended (3818080769548726424) -->
+    <skip />
+    <!-- no translation found for toast_restore_started (7881679218971277385) -->
+    <skip />
+    <!-- no translation found for toast_restore_ended (1764041639199696132) -->
+    <skip />
+    <!-- no translation found for toast_timeout (5276598587087626877) -->
+    <skip />
 </resources>

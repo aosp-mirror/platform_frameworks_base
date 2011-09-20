@@ -16,6 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for backup_confirm_title (827563724209303345) -->
+    <skip />
+    <!-- no translation found for restore_confirm_title (5469365809567486602) -->
+    <skip />
     <string name="backup_confirm_text" msgid="1878021282758896593">"Foi solicitada uma cópia de segurança completa de todos os dados para um computador de secretária. Pretende permitir esta operação?"\n\n"Caso não tenha solicitado a cópia de segurança, não permita que a operação prossiga."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Fazer cópia de seg. dos dados"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Não efetuar cópia de seg."</string>
@@ -26,4 +30,14 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduza uma palavra-passe a utilizar para encriptar os dados da cópia de segurança completa. Se deixar o campo em branco, será utilizada a palavra-passe de cópia de segurança atual."</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se pretender encriptar os dados da cópia de segurança completa, introduza uma palavra-passe abaixo:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se os dados a restaurar estiverem encriptados, introduza a palavra-passe abaixo:"</string>
+    <!-- no translation found for toast_backup_started (550354281452756121) -->
+    <skip />
+    <!-- no translation found for toast_backup_ended (3818080769548726424) -->
+    <skip />
+    <!-- no translation found for toast_restore_started (7881679218971277385) -->
+    <skip />
+    <!-- no translation found for toast_restore_ended (1764041639199696132) -->
+    <skip />
+    <!-- no translation found for toast_timeout (5276598587087626877) -->
+    <skip />
 </resources>

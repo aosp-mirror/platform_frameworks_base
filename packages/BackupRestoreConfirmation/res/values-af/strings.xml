@@ -16,6 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"Volledige rugsteun"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"Volledige herstel"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"\'n Volledige rugsteun van al die data na \'n tafelrekenaar is aangevra. Wil jy dit toelaat? "\n\n"As jy nie self die rugsteun versoek het nie, moenie toelaat dat die aksie voortgaan nie."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Rugsteun my data"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Moenie rugsteun nie"</string>
@@ -26,4 +28,9 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Voer asb. \'n wagwoord in om te gebruik vir enkripsie van die volle rugsteundata. As dit leeg gelaat word, sal jou huidige rugsteunwagwoord gebruik word:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"As jy die volle rugsteundata wil enkripteer, voer \'n wagwoord hieronder in:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"As die hersteldata geïnkripteer  word, voer asb. die wagwoord hieronder in:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Rugsteun begin tans..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Rugsteun klaar"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"Herstel begin tans..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Herstel beëindig"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Handeling het uitgetel"</string>
 </resources>

@@ -16,6 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for backup_confirm_title (827563724209303345) -->
+    <skip />
+    <!-- no translation found for restore_confirm_title (5469365809567486602) -->
+    <skip />
     <string name="backup_confirm_text" msgid="1878021282758896593">"Έχει ζητηθεί ένα πλήρες αντίγραφο ασφαλείας όλων των δεδομένων σε έναν συνδεδεμένο επιτραπέζιο υπολογιστή. Θέλετε να επιτραπεί αυτή η ενέργεια;"\n\n"Αν δεν έχετε ζητήσει οι ίδιοι αυτό το αντίγραφο ασφαλείας, μην επιτρέψετε την ενέργεια."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Δημιουργία αντιγράφων ασφαλείας για τα δεδομένα μου"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Να μην δημιουργείται αντίγραφο ασφαλείας"</string>
@@ -26,4 +30,14 @@
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Εισαγάγετε έναν κωδικό πρόσβασης για χρήση για την κωδικοποίηση του πλήρους αντιγράφου ασφαλείας δεδομένων. Αν μείνει κενό, θα χρησιμοποιηθεί ο τρέχων κωδικός σας πρόσβασης:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Αν θέλετε να κρυπτογραφήσετε τα πλήρη δεδομένα αντιγράφων ασφαλείας, πληκτρολογήστε έναν κωδικό πρόσβασης παρακάτω:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Εάν η επαναφορά των δεδομένων είναι κρυπτογραφημένη, εισάγετε τον κωδικό πρόσβασης παρακάτω:"</string>
+    <!-- no translation found for toast_backup_started (550354281452756121) -->
+    <skip />
+    <!-- no translation found for toast_backup_ended (3818080769548726424) -->
+    <skip />
+    <!-- no translation found for toast_restore_started (7881679218971277385) -->
+    <skip />
+    <!-- no translation found for toast_restore_ended (1764041639199696132) -->
+    <skip />
+    <!-- no translation found for toast_timeout (5276598587087626877) -->
+    <skip />
 </resources>
