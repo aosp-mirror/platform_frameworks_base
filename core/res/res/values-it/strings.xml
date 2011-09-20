@@ -1109,6 +1109,12 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Annulla le eliminazioni."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Non fare nulla per ora."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Seleziona un account"</string>
+    <!-- no translation found for add_account_label (2935267344849993553) -->
+    <skip />
+    <!-- no translation found for choose_account_text (6891230675141555481) -->
+    <skip />
+    <!-- no translation found for add_account_button_label (3611982894853435874) -->
+    <skip />
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumenta"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuisci"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Tocca e tieni premuto il numero <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1140,6 +1146,7 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Cambio modalità"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maiuscolo"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invio"</string>
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Maniglia scorrevole. Tocca e tieni premuto."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Su per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Giù per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"A sinistra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>

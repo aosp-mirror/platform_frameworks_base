@@ -859,12 +859,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"URL 복사"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"텍스트 선택..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"텍스트 선택"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"사전에 추가"</string>
+    <string name="deleteText" msgid="7070985395199629156">"삭제"</string>
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"저장공간 부족"</string>
@@ -1113,6 +1109,12 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"삭제 실행취소"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"나중에 작업"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"계정 선택"</string>
+    <!-- no translation found for add_account_label (2935267344849993553) -->
+    <skip />
+    <!-- no translation found for choose_account_text (6891230675141555481) -->
+    <skip />
+    <!-- no translation found for add_account_button_label (3611982894853435874) -->
+    <skip />
     <string name="number_picker_increment_button" msgid="4830170763103463443">"올리기"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"줄이기"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> 길게 탭하세요."</string>
@@ -1144,6 +1146,7 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"모드 변경"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift 키"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 키"</string>
+    <string name="content_description_sliding_handle" msgid="7311938669217173870">"슬라이딩 핸들을 길게 탭하세요."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 아래로 슬라이드"</string>
     <string name="description_direction_left" msgid="6814008463839915747">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
@@ -1161,10 +1164,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB 저장소"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"수정..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"데이터 사용 경고"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"사용 및 설정을 보려면 터치하세요."</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 데이터 사용중지됨"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 데이터 사용중지됨"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"모바일 데이터 사용중지됨"</string>
