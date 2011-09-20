@@ -154,6 +154,8 @@ public class WifiStateMachine extends StateMachine {
     private static final int SUPPLICANT_RESTART_TRIES = 5;
 
     private int mSupplicantRestartCount = 0;
+    /* Tracks sequence number on stop failure message */
+    private int mSupplicantStopFailureToken = 0;
 
     private LinkProperties mLinkProperties;
 
@@ -216,6 +218,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_STATIC_IP_SUCCESS                = BASE + 15;
     /* Indicates Static IP failed */
     static final int CMD_STATIC_IP_FAILURE                = BASE + 16;
+    /* Indicates supplicant stop failed */
+    static final int CMD_STOP_SUPPLICANT_FAILED           = BASE + 17;
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
@@ -1735,6 +1739,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_UNLOAD_DRIVER:
                 case CMD_START_SUPPLICANT:
                 case CMD_STOP_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT_FAILED:
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
                 case CMD_START_AP:
@@ -2263,9 +2268,13 @@ public class WifiStateMachine extends StateMachine {
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             Log.d(TAG, "stopping supplicant");
             if (!WifiNative.stopSupplicant()) {
-                Log.e(TAG, "Failed to stop supplicant, issue kill");
-                WifiNative.killSupplicant();
+                Log.e(TAG, "Failed to stop supplicant");
             }
+
+            /* Send ourselves a delayed message to indicate failure after a wait time */
+            sendMessageDelayed(obtainMessage(CMD_STOP_SUPPLICANT_FAILED,
+                    ++mSupplicantStopFailureToken, 0), SUPPLICANT_RESTART_INTERVAL_MSECS);
+
             mNetworkInfo.setIsAvailable(false);
             handleNetworkDisconnect();
             setWifiState(WIFI_STATE_DISABLING);
@@ -2282,8 +2291,20 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     Log.d(TAG, "Supplicant connection lost");
+                    /* Socket connection can be lost when we do a graceful shutdown
+                     * or when the driver is hung. Ensure supplicant is stopped here.
+                     */
+                    WifiNative.killSupplicant();
                     WifiNative.closeSupplicantConnection();
                     transitionTo(mDriverLoadedState);
+                    break;
+                case CMD_STOP_SUPPLICANT_FAILED:
+                    if (message.arg1 == mSupplicantStopFailureToken) {
+                        Log.e(TAG, "Timed out on a supplicant stop, kill and proceed");
+                        WifiNative.killSupplicant();
+                        WifiNative.closeSupplicantConnection();
+                        transitionTo(mDriverLoadedState);
+                    }
                     break;
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
