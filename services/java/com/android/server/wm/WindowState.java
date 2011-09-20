@@ -870,7 +870,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // This must be called while inside a transaction.  Returns true if
     // there is more animation to run.
     boolean stepAnimationLocked(long currentTime, int dw, int dh) {
-        if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOn()) {
+        if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
             if (!mDrawPending && !mCommitDrawPending && mAnimation != null) {
@@ -1217,11 +1217,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * mPolicyVisibility.  Ungh.
      */
     public boolean isVisibleOrBehindKeyguardLw() {
+        if (mRootToken.waitingToShow &&
+                mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            return false;
+        }
         final AppWindowToken atoken = mAppToken;
-        return mSurface != null && !mAttachedHidden
+        final boolean animating = atoken != null
+                ? (atoken.animation != null) : false;
+        return mSurface != null && !mDestroying && !mExiting
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                && !mDrawPending && !mCommitDrawPending
-                && !mExiting && !mDestroying;
+                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
+                                && !mRootToken.hidden)
+                        || mAnimation != null || animating);
     }
 
     /**
@@ -1364,7 +1371,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && (mFrame.top != mLastFrame.top
                         || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove())
-                && mService.mPolicy.isScreenOn();
+                && mService.mPolicy.isScreenOnFully();
     }
 
     boolean isFullscreen(int screenWidth, int screenHeight) {
@@ -1449,7 +1456,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mAnimation);
-            if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOn()) {
+            if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOnFully()) {
                 doAnimation = false;
             } else if (mPolicyVisibility && mAnimation == null) {
                 // Check for the case where we are currently visible and
@@ -1475,7 +1482,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean hideLw(boolean doAnimation, boolean requestAnim) {
         if (doAnimation) {
-            if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOn()) {
+            if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOnFully()) {
                 doAnimation = false;
             }
         }

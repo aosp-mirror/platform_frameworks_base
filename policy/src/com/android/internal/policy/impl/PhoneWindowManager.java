@@ -127,7 +127,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.FallbackAction;
-import android.view.WindowManagerPolicy.ScreenOnListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -288,7 +287,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     int mLongPressOnPowerBehavior = -1;
-    boolean mScreenOn = false;
+    boolean mScreenOnEarly = false;
+    boolean mScreenOnFully = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     static final int DEFAULT_ACCELEROMETER_ROTATION = 0;
@@ -548,11 +548,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         //Could have been invoked due to screen turning on or off or
         //change of the currently visible window's orientation
-        if (localLOGV) Log.v(TAG, "Screen status="+mScreenOn+
+        if (localLOGV) Log.v(TAG, "Screen status="+mScreenOnEarly+
                 ", current orientation="+mCurrentAppOrientation+
                 ", SensorEnabled="+mOrientationSensorEnabled);
         boolean disable = true;
-        if (mScreenOn) {
+        if (mScreenOnEarly) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
@@ -2099,11 +2099,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void animatingWindowLw(WindowState win,
                                 WindowManager.LayoutParams attrs) {
+        if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
+                + win.isVisibleOrBehindKeyguardLw());
         if (mTopFullscreenOpaqueWindowState == null &&
                 win.isVisibleOrBehindKeyguardLw()) {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
-            } 
+            }
             if (attrs.type >= FIRST_APPLICATION_WINDOW
                     && attrs.type <= LAST_APPLICATION_WINDOW
                     && attrs.x == 0 && attrs.y == 0
@@ -2142,10 +2144,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 : null;
 
         if (mStatusBar != null) {
-            if (localLOGV) Log.i(TAG, "force=" + mForceStatusBar
+            if (DEBUG_LAYOUT) Log.i(TAG, "force=" + mForceStatusBar
                     + " top=" + mTopFullscreenOpaqueWindowState);
             if (mForceStatusBar) {
-                if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
+                if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar: forced");
                 if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 if (localLOGV) {
@@ -2173,11 +2175,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 }
                             }});
                         }
-                    } else if (localLOGV) {
+                    } else if (DEBUG_LAYOUT) {
                         Log.v(TAG, "Preventing status bar from hiding by policy");
                     }
                 } else {
-                    if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar: top is not fullscreen");
                     if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
                 }
             }
@@ -2819,7 +2821,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         EventLog.writeEvent(70000, 0);
 
         synchronized (mLock) {
-            mScreenOn = false;
+            mScreenOnEarly = false;
+            mScreenOnFully = false;
         }
         if (mKeyguardMediator != null) {
             mKeyguardMediator.onScreenTurnedOff(why);
@@ -2844,6 +2847,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 @Override public void sendResult(Bundle data) {
                                     Slog.i(TAG, "Lock screen displayed!");
                                     screenOnListener.onScreenOn();
+                                synchronized (mLock) {
+                                    mScreenOnFully = true;
+                                }
                                 }
                             });
                         } catch (RemoteException e) {
@@ -2851,12 +2857,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     } else {
                         Slog.i(TAG, "No lock screen!");
                         screenOnListener.onScreenOn();
+                    synchronized (mLock) {
+                        mScreenOnFully = true;
+                    }
                     }
                 }
             });
         }
         synchronized (mLock) {
-            mScreenOn = true;
+            mScreenOnEarly = true;
             updateOrientationListenerLp();
             updateLockScreenTimeout();
             updateScreenSaverTimeoutLocked();
@@ -2864,8 +2873,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public boolean isScreenOn() {
-        return mScreenOn;
+    public boolean isScreenOnEarly() {
+        return mScreenOnEarly;
+    }
+    
+    /** {@inheritDoc} */
+    public boolean isScreenOnFully() {
+        return mScreenOnFully;
     }
     
     /** {@inheritDoc} */
@@ -3261,7 +3275,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         synchronized (mScreenSaverActivator) {
             mHandler.removeCallbacks(mScreenSaverActivator);
-            if (mScreenSaverEnabled && mScreenOn && mScreenSaverTimeout > 0) {
+            if (mScreenSaverEnabled && mScreenOnEarly && mScreenSaverTimeout > 0) {
                 if (localLOGV)
                     Log.v(TAG, "scheduling screensaver for " + mScreenSaverTimeout + "ms from now");
                 mHandler.postDelayed(mScreenSaverActivator, mScreenSaverTimeout);
@@ -3269,7 +3283,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (localLOGV) {
                     if (mScreenSaverTimeout == 0)
                         Log.v(TAG, "screen saver disabled by user");
-                    else if (!mScreenOn)
+                    else if (!mScreenOnEarly)
                         Log.v(TAG, "screen saver disabled while screen off");
                     else
                         Log.v(TAG, "screen saver disabled by wakelock");
@@ -3292,7 +3306,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void updateLockScreenTimeout() {
         synchronized (mScreenLockTimeout) {
-            boolean enable = (mAllowLockscreenWhenOn && mScreenOn &&
+            boolean enable = (mAllowLockscreenWhenOn && mScreenOnEarly &&
                     mKeyguardMediator != null && mKeyguardMediator.isSecure());
             if (mLockScreenTimerActive != enable) {
                 if (enable) {
@@ -3502,7 +3516,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public boolean allowKeyRepeat() {
         // disable key repeat when screen is off
-        return mScreenOn;
+        return mScreenOnEarly;
     }
 
     private void updateSystemUiVisibility() {
@@ -3558,7 +3572,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(mLidKeyboardAccessibility);
                 pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
                 pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
-        pw.print(prefix); pw.print("mScreenOn="); pw.print(mScreenOn);
+        pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
+                pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);
                 pw.print(" mOrientationSensorEnabled="); pw.print(mOrientationSensorEnabled);
                 pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
         pw.print(prefix); pw.print("mUnrestrictedScreen=("); pw.print(mUnrestrictedScreenLeft);
