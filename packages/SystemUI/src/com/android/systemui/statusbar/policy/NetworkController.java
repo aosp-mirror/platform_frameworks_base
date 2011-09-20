@@ -84,6 +84,7 @@ public class NetworkController extends BroadcastReceiver {
     int mDataTypeIconId;
     boolean mDataActive;
     int mMobileActivityIconId; // overlay arrows for data direction
+    int mLastSignalLevel;
 
     String mContentDescriptionPhoneSignal;
     String mContentDescriptionWifi;
@@ -282,8 +283,9 @@ public class NetworkController extends BroadcastReceiver {
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-            if (DEBUG) {
-                Slog.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength);
+            if (DEBUG || CHATTY) {
+                Slog.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength + 
+                    ((signalStrength == null) ? "" : (" level=" + signalStrength.getLevel())));
             }
             mSignalStrength = signalStrength;
             updateTelephonySignalStrength();
@@ -316,7 +318,7 @@ public class NetworkController extends BroadcastReceiver {
 
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
-            if (DEBUG || CHATTY) {
+            if (DEBUG) {
                 Slog.d(TAG, "onDataConnectionStateChanged: state=" + state
                         + " type=" + networkType);
             }
@@ -324,6 +326,9 @@ public class NetworkController extends BroadcastReceiver {
             mDataNetType = networkType;
             if (state < 0) {
                 // device without a data connection
+                if (CHATTY) {
+                    Slog.d(TAG, "clearing mSignalStrength");
+                }
                 mSignalStrength = null;
             }
             updateDataNetType();
@@ -391,11 +396,12 @@ public class NetworkController extends BroadcastReceiver {
 
     private final void updateTelephonySignalStrength() {
         if (!hasService()) {
-            //Slog.d(TAG, "updateTelephonySignalStrength: no service");
+            if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_0;
             mDataSignalIconId = R.drawable.stat_sys_signal_0;
         } else {
             if (mSignalStrength == null) {
+                if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_0;
                 mDataSignalIconId = R.drawable.stat_sys_signal_0;
                 mContentDescriptionPhoneSignal = mContext.getString(
@@ -403,7 +409,10 @@ public class NetworkController extends BroadcastReceiver {
             } else {
                 int iconLevel;
                 int[] iconList;
-                iconLevel = mSignalStrength.getLevel();
+                mLastSignalLevel = iconLevel = mSignalStrength.getLevel();
+                if (CHATTY) {
+                    Slog.d(TAG, "updateTelephonySignalStrength: signal level = " + iconLevel);
+                }
                 if (isCdma()) {
                     if (isCdmaEri()) {
                         iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
@@ -978,8 +987,10 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("Network Controller state:");
+        pw.println("NetworkController state:");
         pw.println("  - telephony ------");
+        pw.print("  hasService()=");
+        pw.println(hasService());
         pw.print("  mHspaDataDistinguishable=");
         pw.println(mHspaDataDistinguishable);
         pw.print("  mDataConnected=");
@@ -998,6 +1009,10 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(TelephonyManager.getNetworkTypeName(mDataNetType));
         pw.print("  mServiceState=");
         pw.println(mServiceState);
+        pw.print("  mSignalStrength=");
+        pw.println(mSignalStrength);
+        pw.print("  mLastSignalLevel=");
+        pw.println(mLastSignalLevel);
         pw.print("  mNetworkName=");
         pw.println(mNetworkName);
         pw.print("  mNetworkNameDefault=");
@@ -1037,7 +1052,7 @@ public class NetworkController extends BroadcastReceiver {
 
 
         pw.println("  - Bluetooth ----");
-        pw.print(" mBtReverseTethered=");
+        pw.print("  mBtReverseTethered=");
         pw.println(mBluetoothTethered);
 
         pw.println("  - connectivity ------");
@@ -1071,6 +1086,7 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(getResourceName(mLastCombinedSignalIconId));
         pw.print("  mLastLabel=");
         pw.print(mLastLabel);
+        pw.println("");
     }
 
     private String getResourceName(int resId) {
