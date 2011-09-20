@@ -888,7 +888,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
         EventLogTags.writeNetstatsMobileSample(ifaceTotal.rxBytes, ifaceTotal.rxPackets,
                 ifaceTotal.txBytes, ifaceTotal.txPackets, uidTotal.rxBytes, uidTotal.rxPackets,
-                uidTotal.txBytes, uidTotal.rxPackets);
+                uidTotal.txBytes, uidTotal.txPackets);
 
         // collect wifi sample
         template = buildTemplateWifi();
@@ -896,7 +896,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
         EventLogTags.writeNetstatsWifiSample(ifaceTotal.rxBytes, ifaceTotal.rxPackets,
                 ifaceTotal.txBytes, ifaceTotal.txPackets, uidTotal.rxBytes, uidTotal.rxPackets,
-                uidTotal.txBytes, uidTotal.rxPackets);
+                uidTotal.txBytes, uidTotal.txPackets);
     }
 
     /**
