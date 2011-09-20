@@ -56,10 +56,10 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
 
         // Read the validAccountTypes, if present, and add them to the setOfAllowableAccountTypes
         Set<String> setOfAllowableAccountTypes = null;
-        ArrayList<String> validAccountTypes = getIntent().getStringArrayListExtra(
+        String[] validAccountTypes = getIntent().getStringArrayExtra(
                 ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
         if (validAccountTypes != null) {
-            setOfAllowableAccountTypes = new HashSet<String>(validAccountTypes.size());
+            setOfAllowableAccountTypes = new HashSet<String>(validAccountTypes.length);
             for (String type : validAccountTypes) {
                 setOfAllowableAccountTypes.add(type);
             }
