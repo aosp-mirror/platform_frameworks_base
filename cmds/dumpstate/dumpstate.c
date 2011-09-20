@@ -81,8 +81,6 @@ static void dumpstate() {
     dump_file("ZONEINFO", "/proc/zoneinfo");
     dump_file("PAGETYPEINFO", "/proc/pagetypeinfo");
     dump_file("BUDDYINFO", "/proc/buddyinfo");
-    dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");
-    run_command("QTAGUID STATS INFO", 10, "su", "root", "cat", "/proc/net/xt_qtaguid/stats", NULL);
 
     if (screenshot_path[0]) {
         LOGI("taking screenshot\n");
@@ -114,6 +112,11 @@ static void dumpstate() {
     run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
 
     run_command("NETWORK INTERFACES", 10, "su", "root", "netcfg", NULL);
+    dump_file("NETWORK DEV INFO", "/proc/net/dev");
+    dump_file("QTAGUID NETWORK INTERFACES INFO", "/proc/net/xt_qtaguid/iface_stat_all");
+    dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");
+    run_command("QTAGUID STATS INFO", 10, "su", "root", "cat", "/proc/net/xt_qtaguid/stats", NULL);
+
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("NETWORK ROUTES IPV6", "/proc/net/ipv6_route");
     dump_file("ARP CACHE", "/proc/net/arp");
