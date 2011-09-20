@@ -698,7 +698,7 @@ Resources res = {@link android.content.Context#getResources()};
 TypedArray icons = res.{@link android.content.res.Resources#obtainTypedArray(int) obtainTypedArray}(R.array.icons);
 Drawable drawable = icons.{@link android.content.res.TypedArray#getDrawable(int) getDrawable}(0);
 
-TypedArray colors = res.{@link android.content.res.Resources#obtainTypedArray(int) obtainTypedArray}(R.array.icons);
+TypedArray colors = res.{@link android.content.res.Resources#obtainTypedArray(int) obtainTypedArray}(R.array.colors);
 int color = colors.{@link android.content.res.TypedArray#getColor(int,int) getColor}(0,0);
 </pre>
 </dd> <!-- end example -->
