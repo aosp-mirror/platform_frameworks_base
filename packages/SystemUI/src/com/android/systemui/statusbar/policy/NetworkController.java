@@ -315,16 +315,12 @@ public class NetworkController extends BroadcastReceiver {
 
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
-            if (DEBUG || CHATTY) {
+            if (DEBUG) {
                 Slog.d(TAG, "onDataConnectionStateChanged: state=" + state
                         + " type=" + networkType);
             }
             mDataState = state;
             mDataNetType = networkType;
-            if (state < 0) {
-                // device without a data connection
-                mSignalStrength = null;
-            }
             updateDataNetType();
             updateDataIcon();
             refreshViews();
