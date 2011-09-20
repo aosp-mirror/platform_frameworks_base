@@ -292,7 +292,9 @@ public final class CalendarContract {
      */
     protected interface CalendarColumns {
         /**
-         * The color of the calendar
+         * The color of the calendar. This should only be updated by the sync
+         * adapter, not other apps, as changing a calendar's color can adversely
+         * affect its display.
          * <P>Type: INTEGER (color value)</P>
          */
         public static final String CALENDAR_COLOR = "calendar_color";
@@ -551,7 +553,6 @@ public final class CalendarContract {
      * <ul>
      * <li>{@link #NAME}</li>
      * <li>{@link #CALENDAR_DISPLAY_NAME}</li>
-     * <li>{@link #CALENDAR_COLOR}</li>
      * <li>{@link #VISIBLE}</li>
      * <li>{@link #SYNC_EVENTS}</li>
      * </ul>
@@ -559,6 +560,7 @@ public final class CalendarContract {
      * <ul>
      * <li>{@link #ACCOUNT_NAME}</li>
      * <li>{@link #ACCOUNT_TYPE}</li>
+     * <li>{@link #CALENDAR_COLOR}</li>
      * <li>{@link #_SYNC_ID}</li>
      * <li>{@link #DIRTY}</li>
      * <li>{@link #OWNER_ACCOUNT}</li>
@@ -785,7 +787,8 @@ public final class CalendarContract {
         public static final String EVENT_LOCATION = "eventLocation";
 
         /**
-         * A secondary color for the individual event. Column name.
+         * A secondary color for the individual event. Reserved for future use.
+         * Column name.
          * <P>Type: INTEGER</P>
          */
         public static final String EVENT_COLOR = "eventColor";
