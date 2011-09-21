@@ -101,6 +101,7 @@ private:
             size_t *sampleIndex) const;
 
     status_t addMPEG4CodecSpecificData(size_t trackIndex);
+    status_t addH264CodecSpecificData(size_t trackIndex);
 
     static bool IsCorrectChunkType(
         ssize_t trackIndex, Track::Kind kind, uint32_t chunkType);
