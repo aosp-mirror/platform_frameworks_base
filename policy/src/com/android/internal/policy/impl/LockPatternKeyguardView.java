@@ -540,7 +540,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mShowLockBeforeUnlock = resources.getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
         mConfiguration = newConfig;
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
-        updateScreen(mMode, true /* force */);
+        removeCallbacks(mRecreateRunnable);
+        post(mRecreateRunnable);
     }
 
     @Override
