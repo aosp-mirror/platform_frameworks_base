@@ -3250,7 +3250,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
-        if (startSpellCheck) {
+        if (startSpellCheck && getSpellChecker().isSessionActive()) {
             updateSpellCheckSpans(0, textLength);
         }
 
@@ -7595,14 +7595,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             ims.mChangedDelta += after-before;
         }
-        
+
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
 
-        // The WordIterator text change listener may be called after this one.
-        // Make sure this changed text is rescanned before the iterator is used on it.
-        getWordIterator().forceUpdate();
-        updateSpellCheckSpans(start, start + after);
+        if (getSpellChecker().isSessionActive()) {
+            // The WordIterator text change listener may be called after this one.
+            // Make sure this changed text is rescanned before the iterator is used on it.
+            getWordIterator().forceUpdate();
+            updateSpellCheckSpans(start, start + after);
+        }
 
         // Hide the controllers if the amount of content changed
         if (before != after) {
@@ -8254,6 +8256,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mBlink.uncancel();
                 makeBlink();
             }
+            if (getSpellChecker().isSessionActive() && (mSuggestionsPopupWindow == null ||
+                        !mSuggestionsPopupWindow.mSuggestionPopupWindowVisible)) {
+                updateSpellCheckSpans(0, mText.length());
+            }
         } else {
             if (mBlink != null) {
                 mBlink.cancel();
@@ -8265,6 +8271,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             hideControllers();
+
+            if (mSpellChecker != null && (mSuggestionsPopupWindow == null ||
+                    !mSuggestionsPopupWindow.mSuggestionPopupWindowVisible)) {
+                mSpellChecker.closeSession();
+                removeMisspelledSpans();
+                // Forces the creation of a new SpellChecker next time this window if focused.
+                // Will handle the cases where the service has been enabled or disabled in
+                // settings in the meantime.
+                mSpellChecker = null;
+            }
         }
 
         startStopMarquee(hasWindowFocus);
@@ -8427,8 +8443,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int flags = suggestionSpans[i].getFlags();
                 if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
                         && (flags & SuggestionSpan.FLAG_MISSPELLED) == 0) {
-                    flags = flags & ~SuggestionSpan.FLAG_EASY_CORRECT;
+                    flags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
                     suggestionSpans[i].setFlags(flags);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes the suggestion spans for misspelled words.
+     */
+    private void removeMisspelledSpans() {
+        if (mText instanceof Spannable) {
+            Spannable spannable = (Spannable) mText;
+            SuggestionSpan[] suggestionSpans = spannable.getSpans(0,
+                    spannable.length(), SuggestionSpan.class);
+            for (int i = 0; i < suggestionSpans.length; i++) {
+                int flags = suggestionSpans[i].getFlags();
+                if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
+                        && (flags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                    spannable.removeSpan(suggestionSpans[i]);
                 }
             }
         }
@@ -9569,10 +9603,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private SuggestionInfo[] mSuggestionInfos;
         private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
+        private boolean mSuggestionPopupWindowVisible;
         private SuggestionAdapter mSuggestionsAdapter;
         private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
-
 
         private class CustomPopupWindow extends PopupWindow {
             public CustomPopupWindow(Context context, int defStyle) {
@@ -9581,13 +9615,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             @Override
             public void dismiss() {
+                mSuggestionPopupWindowVisible = false;
                 super.dismiss();
 
                 TextView.this.getPositionListener().removeSubscriber(SuggestionsPopupWindow.this);
 
-                if ((mText instanceof Spannable)) {
-                    ((Spannable) mText).removeSpan(mSuggestionRangeSpan);
-                }
+                // Safe cast since show() checks that mText is an Editable
+                ((Spannable) mText).removeSpan(mSuggestionRangeSpan);
 
                 setCursorVisible(mCursorWasVisibleBeforeSuggestions);
                 if (hasInsertionController()) {
@@ -9637,8 +9671,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             void removeMisspelledFlag() {
                 int suggestionSpanFlags = suggestionSpan.getFlags();
                 if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
-                    suggestionSpanFlags &= ~(SuggestionSpan.FLAG_MISSPELLED);
-                    suggestionSpanFlags &= ~(SuggestionSpan.FLAG_EASY_CORRECT);
+                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
+                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
                     suggestionSpan.setFlags(suggestionSpanFlags);
                 }
             }
@@ -9725,6 +9759,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (updateSuggestions()) {
                 mCursorWasVisibleBeforeSuggestions = mCursorVisible;
+                mSuggestionPopupWindowVisible = true;
                 setCursorVisible(false);
                 super.show();
             }
@@ -10520,9 +10555,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public abstract int getCurrentCursorOffset();
 
-        protected void updateSelection(int offset) {
-            updateDrawable();
-        }
+        protected abstract void updateSelection(int offset);
 
         public abstract void updatePosition(float x, float y);
 
@@ -10796,8 +10829,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updateSelection(int offset) {
-            super.updateSelection(offset);
             Selection.setSelection((Spannable) mText, offset, getSelectionEnd());
+            updateDrawable();
         }
 
         @Override
@@ -10838,8 +10871,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void updateSelection(int offset) {
-            super.updateSelection(offset);
             Selection.setSelection((Spannable) mText, getSelectionStart(), offset);
+            updateDrawable();
         }
 
         @Override
