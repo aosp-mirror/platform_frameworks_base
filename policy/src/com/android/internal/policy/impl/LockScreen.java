@@ -336,10 +336,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
 
         mStatusViewManager = new KeyguardStatusViewManager(this, mUpdateMonitor, mLockPatternUtils,
-                mCallback);
-
-        // LockScreen doesn't show the emergency call button by default
-        mStatusViewManager.hideEmergencyCallButton();
+                mCallback, false);
 
         setFocusable(true);
         setFocusableInTouchMode(true);
