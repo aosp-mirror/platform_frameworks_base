@@ -2512,10 +2512,13 @@ public final class WebViewCore {
     // called by JNI
     private void restoreScale(float scale, float textWrapScale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
-            final float defaultScale = mWebView.getDefaultZoomScale();
-            mRestoredScale = (scale <= 0.0) ? defaultScale : scale;
+            // If restored scale and textWrapScale are 0, set them to
+            // overview and reading level scale respectively.
+            mRestoredScale = (scale <= 0.0)
+                ? mWebView.getZoomOverviewScale() : scale;
             if (mSettings.getUseWideViewPort()) {
-                mRestoredTextWrapScale = (textWrapScale <= 0.0) ? defaultScale : textWrapScale;
+                mRestoredTextWrapScale = (textWrapScale <= 0.0)
+                    ? mWebView.getReadingLevelScale() : textWrapScale;
             }
         }
     }
