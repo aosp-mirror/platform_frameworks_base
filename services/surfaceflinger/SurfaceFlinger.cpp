@@ -469,14 +469,14 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
-    if (!mInvalidRegion.isEmpty()) {
+    if (!mSwapRegion.isEmpty()) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const nsecs_t now = systemTime();
         mDebugInSwapBuffers = now;
-        hw.flip(mInvalidRegion);
+        hw.flip(mSwapRegion);
         mLastSwapBufferTime = systemTime() - now;
         mDebugInSwapBuffers = 0;
-        mInvalidRegion.clear();
+        mSwapRegion.clear();
     }
 }
 
@@ -834,7 +834,7 @@ void SurfaceFlinger::handleWorkList()
 void SurfaceFlinger::handleRepaint()
 {
     // compute the invalid region
-    mInvalidRegion.orSelf(mDirtyRegion);
+    mSwapRegion.orSelf(mDirtyRegion);
 
     if (UNLIKELY(mDebugRegion)) {
         debugFlashRegions();
@@ -855,7 +855,7 @@ void SurfaceFlinger::handleRepaint()
         if (flags & DisplayHardware::SWAP_RECTANGLE) {
             // TODO: we really should be able to pass a region to
             // SWAP_RECTANGLE so that we don't have to redraw all this.
-            mDirtyRegion.set(mInvalidRegion.bounds());
+            mDirtyRegion.set(mSwapRegion.bounds());
         } else {
             // in the BUFFER_PRESERVED case, obviously, we can update only
             // what's needed and nothing more.
@@ -868,17 +868,17 @@ void SurfaceFlinger::handleRepaint()
             // (pushed to the framebuffer).
             // This is needed because PARTIAL_UPDATES only takes one
             // rectangle instead of a region (see DisplayHardware::flip())
-            mDirtyRegion.set(mInvalidRegion.bounds());
+            mDirtyRegion.set(mSwapRegion.bounds());
         } else {
             // we need to redraw everything (the whole screen)
             mDirtyRegion.set(hw.bounds());
-            mInvalidRegion = mDirtyRegion;
+            mSwapRegion = mDirtyRegion;
         }
     }
 
     Region expandDirty = setupHardwareComposer(mDirtyRegion);
     mDirtyRegion.orSelf(expandDirty);
-    mInvalidRegion.orSelf(mDirtyRegion);
+    mSwapRegion.orSelf(mDirtyRegion);
     composeSurfaces(mDirtyRegion);
 
     // clear the dirty regions
@@ -1014,7 +1014,7 @@ void SurfaceFlinger::debugFlashRegions()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t flags = hw.getFlags();
     const int32_t height = hw.getHeight();
-    if (mInvalidRegion.isEmpty()) {
+    if (mSwapRegion.isEmpty()) {
         return;
     }
 
@@ -1051,7 +1051,7 @@ void SurfaceFlinger::debugFlashRegions()
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 
-    hw.flip(mInvalidRegion);
+    hw.flip(mSwapRegion);
 
     if (mDebugRegion > 1)
         usleep(mDebugRegion * 1000);

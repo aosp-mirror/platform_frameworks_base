@@ -358,7 +358,7 @@ private:
                 State                       mDrawingState;
                 Region                      mDirtyRegion;
                 Region                      mDirtyRegionRemovedLayer;
-                Region                      mInvalidRegion;
+                Region                      mSwapRegion;
                 Region                      mWormholeRegion;
                 bool                        mVisibleRegionsDirty;
                 bool                        mHwWorkListDirty;
