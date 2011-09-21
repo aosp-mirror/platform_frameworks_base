@@ -40,7 +40,7 @@ oneway interface IRemoteControlDisplay
     void setCurrentClientId(int clientGeneration, in PendingIntent clientMediaIntent,
             boolean clearing);
 
-    void setPlaybackState(int generationId, int state);
+    void setPlaybackState(int generationId, int state, long stateChangeTimeMs);
 
     void setTransportControlFlags(int generationId, int transportControlFlags);
 
