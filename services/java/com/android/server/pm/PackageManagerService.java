@@ -4849,15 +4849,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void verifyPendingInstall(int id, boolean verified, String message)
+    public void verifyPendingInstall(int id, int verificationCode)
             throws RemoteException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT, null);
 
         final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
         msg.arg1 = id;
-        msg.arg2 = verified ? 1 : 0;
-        msg.obj = message;
+        msg.arg2 = verificationCode;
         mHandler.sendMessage(msg);
     }
 
