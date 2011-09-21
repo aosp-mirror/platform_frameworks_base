@@ -165,10 +165,8 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility("alarm_clock", false);
 
         // Sync state
-        mService.setIcon("sync_active", com.android.internal.R.drawable.stat_notify_sync_anim0,
-                0, null);
-        mService.setIcon("sync_failing", com.android.internal.R.drawable.stat_notify_sync_error,
-                0, null);
+        mService.setIcon("sync_active", R.drawable.stat_sys_sync, 0, null);
+        mService.setIcon("sync_failing", R.drawable.stat_sys_sync_error, 0, null);
         mService.setIconVisibility("sync_active", false);
         mService.setIconVisibility("sync_failing", false);
 
