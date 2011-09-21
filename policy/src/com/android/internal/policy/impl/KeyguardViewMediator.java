@@ -1054,6 +1054,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
                     if (sfx != null) {
                         sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                        sfx.setWakeMode(mContext, PowerManager.PARTIAL_WAKE_LOCK);
                         sfx.play();
                     } else {
                         if (DEBUG) Log.d(TAG, "playSounds: failed to load ringtone from uri: "
