@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -59,6 +60,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
     private static final int MSG_SET_ARTWORK = 103;
     private static final int MSG_SET_GENERATION_ID = 104;
     private static final int MAXDIM = 512;
+    private static final int DISPLAY_TIMEOUT_MS = 5000; // 5s
     protected static final boolean DEBUG = true;
     protected static final String TAG = "TransportControlView";
 
@@ -142,7 +144,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
             mLocalHandler = new WeakReference<Handler>(handler);
         }
 
-        public void setPlaybackState(int generationId, int state) {
+        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs) {
             Handler handler = mLocalHandler.get();
             if (handler != null) {
                 handler.obtainMessage(MSG_UPDATE_STATE, generationId, state).sendToTarget();
@@ -401,4 +403,33 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         return false;
     }
 
+    private boolean wasPlayingRecently(int state, long stateChangeTimeMs) {
+        switch (state) {
+            case RemoteControlClient.PLAYSTATE_PLAYING:
+            case RemoteControlClient.PLAYSTATE_FAST_FORWARDING:
+            case RemoteControlClient.PLAYSTATE_REWINDING:
+            case RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS:
+            case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
+            case RemoteControlClient.PLAYSTATE_BUFFERING:
+                // actively playing or about to play
+                return true;
+            case RemoteControlClient.PLAYSTATE_NONE:
+                return false;
+            case RemoteControlClient.PLAYSTATE_STOPPED:
+            case RemoteControlClient.PLAYSTATE_PAUSED:
+            case RemoteControlClient.PLAYSTATE_ERROR:
+                // we have stopped playing, check how long ago
+                if (DEBUG) {
+                    if ((SystemClock.elapsedRealtime() - stateChangeTimeMs) < DISPLAY_TIMEOUT_MS) {
+                        Log.v(TAG, "wasPlayingRecently: time < TIMEOUT was playing recently");
+                    } else {
+                        Log.v(TAG, "wasPlayingRecently: time > TIMEOUT");
+                    }
+                }
+                return ((SystemClock.elapsedRealtime() - stateChangeTimeMs) < DISPLAY_TIMEOUT_MS);
+            default:
+                Log.e(TAG, "Unknown playback state " + state + " in wasPlayingRecently()");
+                return false;
+        }
+    }
 }

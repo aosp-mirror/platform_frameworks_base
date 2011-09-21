@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.lang.IllegalArgumentException;
@@ -494,11 +495,15 @@ public class RemoteControlClient
      */
     public void setPlaybackState(int state) {
         synchronized(mCacheLock) {
-            // store locally
-            mPlaybackState = state;
+            if (mPlaybackState != state) {
+                // store locally
+                mPlaybackState = state;
+                // keep track of when the state change occurred
+                mPlaybackStateChangeTimeMs = SystemClock.elapsedRealtime();
 
-            // send to remote control display if conditions are met
-            sendPlaybackState_syncCacheLock();
+                // send to remote control display if conditions are met
+                sendPlaybackState_syncCacheLock();
+            }
         }
     }
 
@@ -533,6 +538,11 @@ public class RemoteControlClient
      * Access synchronized on mCacheLock
      */
     private int mPlaybackState = PLAYSTATE_NONE;
+    /**
+     * Time of last play state change
+     * Access synchronized on mCacheLock
+     */
+    private long mPlaybackStateChangeTimeMs = 0;
     /**
      * Cache for the artwork bitmap.
      * Access synchronized on mCacheLock
@@ -716,7 +726,8 @@ public class RemoteControlClient
     private void sendPlaybackState_syncCacheLock() {
         if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
             try {
-                mRcDisplay.setPlaybackState(mInternalClientGenId, mPlaybackState);
+                mRcDisplay.setPlaybackState(mInternalClientGenId, mPlaybackState,
+                        mPlaybackStateChangeTimeMs);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in setPlaybackState(), dead display "+e);
                 detachFromDisplay_syncCacheLock();
