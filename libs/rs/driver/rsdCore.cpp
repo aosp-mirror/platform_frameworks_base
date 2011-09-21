@@ -219,7 +219,7 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
 
 
     int cpu = sysconf(_SC_NPROCESSORS_ONLN);
-    LOGV("RS Launching thread(s), reported CPU count %i", cpu);
+    LOGV("%p Launching thread(s), CPUs %i", rsc, cpu);
     if (cpu < 2) cpu = 0;
 
     dc->mWorkers.mCount = (uint32_t)cpu;

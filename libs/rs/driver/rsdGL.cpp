@@ -129,10 +129,7 @@ void rsdGLShutdown(const Context *rsc) {
 
     dc->gl.shaderCache->cleanupAll();
     delete dc->gl.shaderCache;
-
     delete dc->gl.vertexArrayState;
-
-    LOGV("%p, deinitEGL", rsc);
 
     if (dc->gl.egl.context != EGL_NO_CONTEXT) {
         RSD_CALL_GL(eglMakeCurrent, dc->gl.egl.display,
@@ -363,7 +360,7 @@ bool rsdGLInit(const Context *rsc) {
     dc->gl.vertexArrayState->init(dc->gl.gl.maxVertexAttribs);
     dc->gl.currentFrameBuffer = NULL;
 
-    LOGV("initGLThread end %p", rsc);
+    LOGV("%p initGLThread end", rsc);
     rsc->setWatchdogGL(NULL, 0, NULL);
     return true;
 }
