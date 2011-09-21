@@ -39,6 +39,10 @@ package android.opengl;
  *
  */
 public class Matrix {
+
+    /** Temporary memory for operations that need temporary matrix data. */
+    private final static float[] sTemp = new float[32];
+
     /**
      * Multiply two 4x4 matrices together and store the result in a third 4x4
      * matrix. In matrix notation: result = lhs x rhs. Due to the way
@@ -125,95 +129,120 @@ public class Matrix {
             int mOffset) {
         // Invert a 4 x 4 matrix using Cramer's Rule
 
-        // array of transpose source matrix
-        float[] src = new float[16];
-
         // transpose matrix
-        transposeM(src, 0, m, mOffset);
+        final float src0  = m[mOffset +  0];
+        final float src4  = m[mOffset +  1];
+        final float src8  = m[mOffset +  2];
+        final float src12 = m[mOffset +  3];
 
-        // temp array for pairs
-        float[] tmp = new float[12];
+        final float src1  = m[mOffset +  4];
+        final float src5  = m[mOffset +  5];
+        final float src9  = m[mOffset +  6];
+        final float src13 = m[mOffset +  7];
+
+        final float src2  = m[mOffset +  8];
+        final float src6  = m[mOffset +  9];
+        final float src10 = m[mOffset + 10];
+        final float src14 = m[mOffset + 11];
+
+        final float src3  = m[mOffset + 12];
+        final float src7  = m[mOffset + 13];
+        final float src11 = m[mOffset + 14];
+        final float src15 = m[mOffset + 15];
 
         // calculate pairs for first 8 elements (cofactors)
-        tmp[0] = src[10] * src[15];
-        tmp[1] = src[11] * src[14];
-        tmp[2] = src[9] * src[15];
-        tmp[3] = src[11] * src[13];
-        tmp[4] = src[9] * src[14];
-        tmp[5] = src[10] * src[13];
-        tmp[6] = src[8] * src[15];
-        tmp[7] = src[11] * src[12];
-        tmp[8] = src[8] * src[14];
-        tmp[9] = src[10] * src[12];
-        tmp[10] = src[8] * src[13];
-        tmp[11] = src[9] * src[12];
-
-        // Holds the destination matrix while we're building it up.
-        float[] dst = new float[16];
+        final float atmp0  = src10 * src15;
+        final float atmp1  = src11 * src14;
+        final float atmp2  = src9  * src15;
+        final float atmp3  = src11 * src13;
+        final float atmp4  = src9  * src14;
+        final float atmp5  = src10 * src13;
+        final float atmp6  = src8  * src15;
+        final float atmp7  = src11 * src12;
+        final float atmp8  = src8  * src14;
+        final float atmp9  = src10 * src12;
+        final float atmp10 = src8  * src13;
+        final float atmp11 = src9  * src12;
 
         // calculate first 8 elements (cofactors)
-        dst[0] = tmp[0] * src[5] + tmp[3] * src[6] + tmp[4] * src[7];
-        dst[0] -= tmp[1] * src[5] + tmp[2] * src[6] + tmp[5] * src[7];
-        dst[1] = tmp[1] * src[4] + tmp[6] * src[6] + tmp[9] * src[7];
-        dst[1] -= tmp[0] * src[4] + tmp[7] * src[6] + tmp[8] * src[7];
-        dst[2] = tmp[2] * src[4] + tmp[7] * src[5] + tmp[10] * src[7];
-        dst[2] -= tmp[3] * src[4] + tmp[6] * src[5] + tmp[11] * src[7];
-        dst[3] = tmp[5] * src[4] + tmp[8] * src[5] + tmp[11] * src[6];
-        dst[3] -= tmp[4] * src[4] + tmp[9] * src[5] + tmp[10] * src[6];
-        dst[4] = tmp[1] * src[1] + tmp[2] * src[2] + tmp[5] * src[3];
-        dst[4] -= tmp[0] * src[1] + tmp[3] * src[2] + tmp[4] * src[3];
-        dst[5] = tmp[0] * src[0] + tmp[7] * src[2] + tmp[8] * src[3];
-        dst[5] -= tmp[1] * src[0] + tmp[6] * src[2] + tmp[9] * src[3];
-        dst[6] = tmp[3] * src[0] + tmp[6] * src[1] + tmp[11] * src[3];
-        dst[6] -= tmp[2] * src[0] + tmp[7] * src[1] + tmp[10] * src[3];
-        dst[7] = tmp[4] * src[0] + tmp[9] * src[1] + tmp[10] * src[2];
-        dst[7] -= tmp[5] * src[0] + tmp[8] * src[1] + tmp[11] * src[2];
+        final float dst0  = (atmp0 * src5 + atmp3 * src6 + atmp4  * src7)
+                          - (atmp1 * src5 + atmp2 * src6 + atmp5  * src7);
+        final float dst1  = (atmp1 * src4 + atmp6 * src6 + atmp9  * src7)
+                          - (atmp0 * src4 + atmp7 * src6 + atmp8  * src7);
+        final float dst2  = (atmp2 * src4 + atmp7 * src5 + atmp10 * src7)
+                          - (atmp3 * src4 + atmp6 * src5 + atmp11 * src7);
+        final float dst3  = (atmp5 * src4 + atmp8 * src5 + atmp11 * src6)
+                          - (atmp4 * src4 + atmp9 * src5 + atmp10 * src6);
+        final float dst4  = (atmp1 * src1 + atmp2 * src2 + atmp5  * src3)
+                          - (atmp0 * src1 + atmp3 * src2 + atmp4  * src3);
+        final float dst5  = (atmp0 * src0 + atmp7 * src2 + atmp8  * src3)
+                          - (atmp1 * src0 + atmp6 * src2 + atmp9  * src3);
+        final float dst6  = (atmp3 * src0 + atmp6 * src1 + atmp11 * src3)
+                          - (atmp2 * src0 + atmp7 * src1 + atmp10 * src3);
+        final float dst7  = (atmp4 * src0 + atmp9 * src1 + atmp10 * src2)
+                          - (atmp5 * src0 + atmp8 * src1 + atmp11 * src2);
 
         // calculate pairs for second 8 elements (cofactors)
-        tmp[0] = src[2] * src[7];
-        tmp[1] = src[3] * src[6];
-        tmp[2] = src[1] * src[7];
-        tmp[3] = src[3] * src[5];
-        tmp[4] = src[1] * src[6];
-        tmp[5] = src[2] * src[5];
-        tmp[6] = src[0] * src[7];
-        tmp[7] = src[3] * src[4];
-        tmp[8] = src[0] * src[6];
-        tmp[9] = src[2] * src[4];
-        tmp[10] = src[0] * src[5];
-        tmp[11] = src[1] * src[4];
+        final float btmp0  = src2 * src7;
+        final float btmp1  = src3 * src6;
+        final float btmp2  = src1 * src7;
+        final float btmp3  = src3 * src5;
+        final float btmp4  = src1 * src6;
+        final float btmp5  = src2 * src5;
+        final float btmp6  = src0 * src7;
+        final float btmp7  = src3 * src4;
+        final float btmp8  = src0 * src6;
+        final float btmp9  = src2 * src4;
+        final float btmp10 = src0 * src5;
+        final float btmp11 = src1 * src4;
 
         // calculate second 8 elements (cofactors)
-        dst[8] = tmp[0] * src[13] + tmp[3] * src[14] + tmp[4] * src[15];
-        dst[8] -= tmp[1] * src[13] + tmp[2] * src[14] + tmp[5] * src[15];
-        dst[9] = tmp[1] * src[12] + tmp[6] * src[14] + tmp[9] * src[15];
-        dst[9] -= tmp[0] * src[12] + tmp[7] * src[14] + tmp[8] * src[15];
-        dst[10] = tmp[2] * src[12] + tmp[7] * src[13] + tmp[10] * src[15];
-        dst[10] -= tmp[3] * src[12] + tmp[6] * src[13] + tmp[11] * src[15];
-        dst[11] = tmp[5] * src[12] + tmp[8] * src[13] + tmp[11] * src[14];
-        dst[11] -= tmp[4] * src[12] + tmp[9] * src[13] + tmp[10] * src[14];
-        dst[12] = tmp[2] * src[10] + tmp[5] * src[11] + tmp[1] * src[9];
-        dst[12] -= tmp[4] * src[11] + tmp[0] * src[9] + tmp[3] * src[10];
-        dst[13] = tmp[8] * src[11] + tmp[0] * src[8] + tmp[7] * src[10];
-        dst[13] -= tmp[6] * src[10] + tmp[9] * src[11] + tmp[1] * src[8];
-        dst[14] = tmp[6] * src[9] + tmp[11] * src[11] + tmp[3] * src[8];
-        dst[14] -= tmp[10] * src[11] + tmp[2] * src[8] + tmp[7] * src[9];
-        dst[15] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9];
-        dst[15] -= tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8];
+        final float dst8  = (btmp0  * src13 + btmp3  * src14 + btmp4  * src15)
+                          - (btmp1  * src13 + btmp2  * src14 + btmp5  * src15);
+        final float dst9  = (btmp1  * src12 + btmp6  * src14 + btmp9  * src15)
+                          - (btmp0  * src12 + btmp7  * src14 + btmp8  * src15);
+        final float dst10 = (btmp2  * src12 + btmp7  * src13 + btmp10 * src15)
+                          - (btmp3  * src12 + btmp6  * src13 + btmp11 * src15);
+        final float dst11 = (btmp5  * src12 + btmp8  * src13 + btmp11 * src14)
+                          - (btmp4  * src12 + btmp9  * src13 + btmp10 * src14);
+        final float dst12 = (btmp2  * src10 + btmp5  * src11 + btmp1  * src9 )
+                          - (btmp4  * src11 + btmp0  * src9  + btmp3  * src10);
+        final float dst13 = (btmp8  * src11 + btmp0  * src8  + btmp7  * src10)
+                          - (btmp6  * src10 + btmp9  * src11 + btmp1  * src8 );
+        final float dst14 = (btmp6  * src9  + btmp11 * src11 + btmp3  * src8 )
+                          - (btmp10 * src11 + btmp2  * src8  + btmp7  * src9 );
+        final float dst15 = (btmp10 * src10 + btmp4  * src8  + btmp9  * src9 )
+                          - (btmp8  * src9  + btmp11 * src10 + btmp5  * src8 );
 
         // calculate determinant
-        float det =
-                src[0] * dst[0] + src[1] * dst[1] + src[2] * dst[2] + src[3]
-                        * dst[3];
+        final float det =
+                src0 * dst0 + src1 * dst1 + src2 * dst2 + src3 * dst3;
 
         if (det == 0.0f) {
-
+            return false;
         }
 
         // calculate matrix inverse
-        det = 1 / det;
-        for (int j = 0; j < 16; j++)
-            mInv[j + mInvOffset] = dst[j] * det;
+        final float invdet = 1.0f / det;
+        mInv[     mInvOffset] = dst0  * invdet;
+        mInv[ 1 + mInvOffset] = dst1  * invdet;
+        mInv[ 2 + mInvOffset] = dst2  * invdet;
+        mInv[ 3 + mInvOffset] = dst3  * invdet;
+
+        mInv[ 4 + mInvOffset] = dst4  * invdet;
+        mInv[ 5 + mInvOffset] = dst5  * invdet;
+        mInv[ 6 + mInvOffset] = dst6  * invdet;
+        mInv[ 7 + mInvOffset] = dst7  * invdet;
+
+        mInv[ 8 + mInvOffset] = dst8  * invdet;
+        mInv[ 9 + mInvOffset] = dst9  * invdet;
+        mInv[10 + mInvOffset] = dst10 * invdet;
+        mInv[11 + mInvOffset] = dst11 * invdet;
+
+        mInv[12 + mInvOffset] = dst12 * invdet;
+        mInv[13 + mInvOffset] = dst13 * invdet;
+        mInv[14 + mInvOffset] = dst14 * invdet;
+        mInv[15 + mInvOffset] = dst15 * invdet;
 
         return true;
     }
@@ -488,9 +517,10 @@ public class Matrix {
     public static void rotateM(float[] rm, int rmOffset,
             float[] m, int mOffset,
             float a, float x, float y, float z) {
-        float[] r = new float[16];
-        setRotateM(r, 0, a, x, y, z);
-        multiplyMM(rm, rmOffset, m, mOffset, r, 0);
+        synchronized(sTemp) {
+            setRotateM(sTemp, 0, a, x, y, z);
+            multiplyMM(rm, rmOffset, m, mOffset, sTemp, 0);
+        }
     }
 
     /**
@@ -505,10 +535,11 @@ public class Matrix {
      */
     public static void rotateM(float[] m, int mOffset,
             float a, float x, float y, float z) {
-        float[] temp = new float[32];
-        setRotateM(temp, 0, a, x, y, z);
-        multiplyMM(temp, 16, m, mOffset, temp, 0);
-        System.arraycopy(temp, 16, m, mOffset, 16);
+        synchronized(sTemp) {
+            setRotateM(sTemp, 0, a, x, y, z);
+            multiplyMM(sTemp, 16, m, mOffset, sTemp, 0);
+            System.arraycopy(sTemp, 16, m, mOffset, 16);
+        }
     }
 
     /**
