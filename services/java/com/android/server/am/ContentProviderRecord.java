@@ -32,15 +32,15 @@ class ContentProviderRecord extends ContentProviderHolder {
     final ApplicationInfo appInfo;
     final ComponentName name;
     int externals;     // number of non-framework processes supported by this provider
-    ProcessRecord app; // if non-null, hosting application
+    ProcessRecord proc; // if non-null, hosting process.
     ProcessRecord launchingApp; // if non-null, waiting for this app to be launched.
     String stringName;
     
-    public ContentProviderRecord(ProviderInfo _info, ApplicationInfo ai) {
+    public ContentProviderRecord(ProviderInfo _info, ApplicationInfo ai, ComponentName _name) {
         super(_info);
         uid = ai.uid;
         appInfo = ai;
-        name = new ComponentName(_info.packageName, _info.name);
+        name = _name;
         noReleaseNeeded = uid == 0 || uid == Process.SYSTEM_UID;
     }
 
@@ -61,7 +61,7 @@ class ContentProviderRecord extends ContentProviderHolder {
         pw.print(prefix); pw.print("package=");
                 pw.print(info.applicationInfo.packageName);
                 pw.print(" process="); pw.println(info.processName);
-        pw.print(prefix); pw.print("app="); pw.println(app);
+        pw.print(prefix); pw.print("proc="); pw.println(proc);
         if (launchingApp != null) {
             pw.print(prefix); pw.print("launchingApp="); pw.println(launchingApp);
         }
