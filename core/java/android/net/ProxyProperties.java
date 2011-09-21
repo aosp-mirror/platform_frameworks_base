@@ -137,6 +137,8 @@ public class ProxyProperties implements Parcelable {
             if (mExclusionList != null) {
                     sb.append(" xl=").append(mExclusionList);
             }
+        } else {
+            sb.append("[ProxyProperties.mHost == null]");
         }
         return sb.toString();
     }
