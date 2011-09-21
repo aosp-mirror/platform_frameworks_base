@@ -41,8 +41,8 @@ struct NuPlayer::NuPlayerStreamListener : public BnStreamListener {
 
 private:
     enum {
-        kNumBuffers = 16,
-        kBufferSize = 188 * 20
+        kNumBuffers = 8,
+        kBufferSize = 188 * 10
     };
 
     struct QueueEntry {
