@@ -560,8 +560,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     + e);
         }
 
-        for (String line : rsp) {
-            Log.v(TAG, "add route response is " + line);
+        if (DBG) {
+            for (String line : rsp) {
+                Log.v(TAG, "add route response is " + line);
+            }
         }
     }
 

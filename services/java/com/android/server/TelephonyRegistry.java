@@ -53,6 +53,7 @@ import com.android.server.am.BatteryStatsService;
  */
 class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private static final String TAG = "TelephonyRegistry";
+    private static final boolean DBG = false;
 
     private static class Record {
         String pkgForDebug;
@@ -387,9 +388,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
-        Slog.i(TAG, "notifyDataConnection: state=" + state + " isDataConnectivityPossible="
+        if (DBG) {
+            Slog.i(TAG, "notifyDataConnection: state=" + state + " isDataConnectivityPossible="
                 + isDataConnectivityPossible + " reason='" + reason
                 + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType);
+        }
         synchronized (mRecords) {
             boolean modified = false;
             if (state == TelephonyManager.DATA_CONNECTED) {
@@ -421,8 +424,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 modified = true;
             }
             if (modified) {
-                Slog.d(TAG, "onDataConnectionStateChanged(" + mDataConnectionState
+                if (DBG) {
+                    Slog.d(TAG, "onDataConnectionStateChanged(" + mDataConnectionState
                         + ", " + mDataConnectionNetworkType + ")");
+                }
                 for (Record r : mRecords) {
                     if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
                         try {
@@ -639,7 +644,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         String msg = "Modify Phone State Permission Denial: " + method + " from pid="
                 + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
-        Slog.w(TAG, msg);
+        if (DBG) Slog.w(TAG, msg);
         return false;
     }
 

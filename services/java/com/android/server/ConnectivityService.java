@@ -97,7 +97,7 @@ import java.util.List;
 public class ConnectivityService extends IConnectivityManager.Stub {
 
     private static final boolean DBG = true;
-    private static final boolean VDBG = true;
+    private static final boolean VDBG = false;
     private static final String TAG = "ConnectivityService";
 
     private static final boolean LOGD_RULES = false;
@@ -867,7 +867,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // javadoc from interface
     public int startUsingNetworkFeature(int networkType, String feature,
             IBinder binder) {
-        if (DBG) {
+        if (VDBG) {
             log("startUsingNetworkFeature for net " + networkType + ": " + feature);
         }
         enforceChangePermission();
@@ -933,17 +933,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (ni.isConnected() == true) {
                         // add the pid-specific dns
                         handleDnsConfigurationChange(usedNetworkType);
-                        if (DBG) log("special network already active");
+                        if (VDBG) log("special network already active");
                         return Phone.APN_ALREADY_ACTIVE;
                     }
-                    if (DBG) log("special network already connecting");
+                    if (VDBG) log("special network already connecting");
                     return Phone.APN_REQUEST_STARTED;
                 }
 
                 // check if the radio in play can make another contact
                 // assume if cannot for now
 
-                if (DBG) log("reconnecting to special network");
+                if (DBG) {
+                    log("startUsingNetworkFeature reconnecting to " + networkType + ": " + feature);
+                }
                 network.reconnect();
                 return Phone.APN_REQUEST_STARTED;
             } else {
@@ -985,7 +987,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return stopUsingNetworkFeature(u, true);
         } else {
             // none found!
-            if (VDBG) log("ignoring stopUsingNetworkFeature - not a live request");
+            if (VDBG) log("stopUsingNetworkFeature - not a live request, ignoring");
             return 1;
         }
     }
@@ -999,12 +1001,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         NetworkStateTracker tracker = null;
         boolean callTeardown = false;  // used to carry our decision outside of sync block
 
-        if (DBG) {
-            log("stopUsingNetworkFeature for net " + networkType +
-                    ": " + feature);
+        if (VDBG) {
+            log("stopUsingNetworkFeature: net " + networkType + ": " + feature);
         }
 
         if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
+            if (DBG) {
+                log("stopUsingNetworkFeature: net " + networkType + ": " + feature +
+                        ", net is invalid");
+            }
             return -1;
         }
 
@@ -1013,7 +1018,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized(this) {
             // check if this process still has an outstanding start request
             if (!mFeatureUsers.contains(u)) {
-                if (DBG) log("ignoring - this process has no outstanding requests");
+                if (VDBG) {
+                    log("stopUsingNetworkFeature: this process has no outstanding requests" +
+                        ", ignoring");
+                }
                 return 1;
             }
             u.unlinkDeathRecipient();
@@ -1028,7 +1036,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (ignoreDups == false) {
                 for (FeatureUser x : mFeatureUsers) {
                     if (x.isSameUser(u)) {
-                        if (DBG) log("ignoring stopUsingNetworkFeature as dup is found");
+                        if (VDBG) log("stopUsingNetworkFeature: dup is found, ignoring");
                         return 1;
                     }
                 }
@@ -1039,7 +1047,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             tracker =  mNetTrackers[usedNetworkType];
             if (tracker == null) {
-                if (DBG) log("ignoring - no known tracker for net type " + usedNetworkType);
+                if (DBG) {
+                    log("stopUsingNetworkFeature: net " + networkType + ": " + feature +
+                            " no known tracker for used net type " + usedNetworkType);
+                }
                 return -1;
             }
             if (usedNetworkType != networkType) {
@@ -1047,17 +1058,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetRequestersPids[usedNetworkType].remove(currentPid);
                 reassessPidDns(pid, true);
                 if (mNetRequestersPids[usedNetworkType].size() != 0) {
-                    if (DBG) log("not tearing down special network - " +
-                           "others still using it");
+                    if (VDBG) {
+                        log("stopUsingNetworkFeature: net " + networkType + ": " + feature +
+                                " others still using it");
+                    }
                     return 1;
                 }
                 callTeardown = true;
             } else {
-                if (DBG) log("not a known feature - dropping");
+                if (DBG) {
+                    log("stopUsingNetworkFeature: net " + networkType + ": " + feature +
+                            " not a known feature - dropping");
+                }
             }
         }
-        if (DBG) log("Doing network teardown");
+
         if (callTeardown) {
+            if (DBG) {
+                log("stopUsingNetworkFeature: teardown net " + networkType + ": " + feature);
+            }
             tracker.teardown();
             return 1;
         } else {
@@ -1592,7 +1611,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mInitialBroadcast = new Intent(intent);
             }
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            if (DBG) {
+            if (VDBG) {
                 log("sendStickyBroadcast: action=" + intent.getAction());
             }
 
@@ -1604,7 +1623,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (delayMs <= 0) {
             sendStickyBroadcast(intent);
         } else {
-            if (DBG) {
+            if (VDBG) {
                 log("sendStickyBroadcastDelayed: delayMs=" + delayMs + ", action="
                         + intent.getAction());
             }
@@ -1779,12 +1798,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                     }
                     if (resetDns) {
-                        if (DBG) log("resetting DNS cache for " + iface);
+                        if (VDBG) log("resetting DNS cache for " + iface);
                         try {
                             mNetd.flushInterfaceDnsCache(iface);
                         } catch (Exception e) {
                             // never crash - catch them all
-                            loge("Exception resetting dns cache: " + e);
+                            if (DBG) loge("Exception resetting dns cache: " + e);
                         }
                     }
                 }
@@ -1840,12 +1859,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // remove the default route unless somebody else has asked for it
                 String ifaceName = newLp.getInterfaceName();
                 if (TextUtils.isEmpty(ifaceName) == false && mAddedRoutes.contains(r) == false) {
-                    if (DBG) log("Removing " + r + " for interface " + ifaceName);
+                    if (VDBG) log("Removing " + r + " for interface " + ifaceName);
                     try {
                         mNetd.removeRoute(ifaceName, r);
                     } catch (Exception e) {
                         // never crash - catch them all
-                        loge("Exception trying to remove a route: " + e);
+                        if (VDBG) loge("Exception trying to remove a route: " + e);
                     }
                 }
             }
@@ -2059,7 +2078,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses));
                 mNetd.setDefaultInterfaceForDns(iface);
             } catch (Exception e) {
-                loge("exception setting default dns interface: " + e);
+                if (VDBG) loge("exception setting default dns interface: " + e);
             }
         }
         if (!domains.equals(SystemProperties.get("net.dns.search"))) {
@@ -2089,7 +2108,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     mNetd.setDnsServersForInterface(p.getInterfaceName(),
                             NetworkUtils.makeStrings(dnses));
                 } catch (Exception e) {
-                    loge("exception setting dns servers: " + e);
+                    if (VDBG) loge("exception setting dns servers: " + e);
                 }
                 // set per-pid dns for attached secondary nets
                 List pids = mNetRequestersPids[netType];
@@ -2194,9 +2213,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     int type = info.getType();
                     NetworkInfo.State state = info.getState();
 
-                    if (DBG) log("ConnectivityChange for " +
+                    if (VDBG || (state == NetworkInfo.State.CONNECTED) ||
+                            (state == NetworkInfo.State.DISCONNECTED)) {
+                        log("ConnectivityChange for " +
                             info.getTypeName() + ": " +
                             state + "/" + info.getDetailedState());
+                    }
 
                     // Connectivity state changed:
                     // [31-13] Reserved for future use
@@ -2458,23 +2480,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleInetConditionChange(int netType, int condition) {
-        if (DBG) {
-            log("Inet connectivity change, net=" +
-                    netType + ", condition=" + condition +
-                    ",mActiveDefaultNetwork=" + mActiveDefaultNetwork);
-        }
         if (mActiveDefaultNetwork == -1) {
-            if (DBG) log("no active default network - aborting");
+            if (DBG) log("handleInetConditionChange: no active default network - ignore");
             return;
         }
         if (mActiveDefaultNetwork != netType) {
-            if (DBG) log("given net not default - aborting");
+            if (DBG) log("handleInetConditionChange: net=" + netType +
+                            " != default=" + mActiveDefaultNetwork + " - ignore");
             return;
+        }
+        if (VDBG) {
+            log("handleInetConditionChange: net=" +
+                    netType + ", condition=" + condition +
+                    ",mActiveDefaultNetwork=" + mActiveDefaultNetwork);
         }
         mDefaultInetCondition = condition;
         int delay;
         if (mInetConditionChangeInFlight == false) {
-            if (VDBG) log("starting a change hold");
+            if (VDBG) log("handleInetConditionChange: starting a change hold");
             // setup a new hold to debounce this
             if (mDefaultInetCondition > 50) {
                 delay = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -2487,26 +2510,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_INET_CONDITION_HOLD_END,
                     mActiveDefaultNetwork, mDefaultConnectionSequence), delay);
         } else {
-            // we've set the new condition, when this hold ends that will get
-            // picked up
-            if (VDBG) log("currently in hold - not setting new end evt");
+            // we've set the new condition, when this hold ends that will get picked up
+            if (VDBG) log("handleInetConditionChange: currently in hold - not setting new end evt");
         }
     }
 
     private void handleInetConditionHoldEnd(int netType, int sequence) {
-        if (VDBG) {
-            log("Inet hold end, net=" + netType +
-                    ", condition =" + mDefaultInetCondition +
-                    ", published condition =" + mDefaultInetConditionPublished);
+        if (DBG) {
+            log("handleInetConditionHoldEnd: net=" + netType +
+                    ", condition=" + mDefaultInetCondition +
+                    ", published condition=" + mDefaultInetConditionPublished);
         }
         mInetConditionChangeInFlight = false;
 
         if (mActiveDefaultNetwork == -1) {
-            if (DBG) log("no active default network - aborting");
+            if (DBG) log("handleInetConditionHoldEnd: no active default network - ignoring");
             return;
         }
         if (mDefaultConnectionSequence != sequence) {
-            if (DBG) log("event hold for obsolete network - aborting");
+            if (DBG) log("handleInetConditionHoldEnd: event hold for obsolete network - ignoring");
             return;
         }
         // TODO: Figure out why this optimization sometimes causes a
@@ -2518,7 +2540,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         //}
         NetworkInfo networkInfo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         if (networkInfo.isConnected() == false) {
-            if (DBG) log("default network not connected - aborting");
+            if (DBG) log("handleInetConditionHoldEnd: default network not connected - ignoring");
             return;
         }
         mDefaultInetConditionPublished = mDefaultInetCondition;
