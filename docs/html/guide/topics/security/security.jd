@@ -20,6 +20,10 @@ page.title=Security and Permissions
 </ol>
 </div>
 </div>
+<p>This document describes how application developers can use the
+security features provided by Android.  A more general <a
+href="http://source.android.com/tech/security/index.html"> Android Security
+Overview</a> is provided in the Android Open Source Project.</p>
 
 <p>Android is a privilege-separated operating system, in which each
 application runs with a distinct system identity (Linux user ID and group
@@ -41,7 +45,7 @@ includes reading or writing the user's private data (such as contacts or
 e-mails), reading or writing another application's files, performing
 network access, keeping the device awake, etc.</p>
 
-<p>Because the kernel sandboxes applications from each other, applications
+<p>Because Android sandboxes applications from each other, applications
 must explicitly share resources and data. They do this by declaring the
 <em>permissions</em> they need for additional capabilities not provided by
 the basic sandbox. Applications statically declare the permissions they
@@ -50,11 +54,11 @@ application is installed. Android has no mechanism for granting permissions
 dynamically (at run-time) because it complicates the user experience to the
 detriment of security.</p>
 
-<p>The kernel is solely responsible for sandboxing applications from each
-other. In particular the Dalvik VM is not a security boundary, and any app
-can run native code (see <a href="/sdk/ndk/index.html">the Android NDK</a>).
-All types of applications &mdash; Java, native, and hybrid &mdash; are
-sandboxed in the same way and have the same degree of security from each
+<p>The application sandbox does not depend on the technology used to build
+an application. In particular the Dalvik VM is not a security boundary, and
+any app can run native code (see <a href="/sdk/ndk/index.html">the Android
+NDK</a>). All types of applications &mdash; Java, native, and hybrid &mdash;
+are sandboxed in the same way and have the same degree of security from each
 other.</p>
 
 <a name="signing"></a>
@@ -220,12 +224,13 @@ permission:</p>
 </pre>
 
 <p>You can look at the permissions currently defined in the system with the
-shell command <code>adb shell pm list permissions</code>.  In particular,
-the '-s' option displays the permissions in a form roughly similar to how the
-user will see them:</p>
+Settings app and the shell command <code>adb shell pm list permissions</code>.
+To use the Settings app, go to Settings &gt; Applications.  Pick an app and
+scroll down to see the permissions that the app uses. For developers, the adb '-s'
+option displays the permissions in a form similar to how the user will see them:</p>
 
 <pre>
-$ adb shell pm list permissions -s      
+$ adb shell pm list permissions -s
 All Permissions:
 
 Network communication: view Wi-Fi state, create Bluetooth connections, full
