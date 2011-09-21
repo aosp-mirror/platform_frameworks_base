@@ -3159,6 +3159,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void showBootMessage(final CharSequence msg, final boolean always) {
+        if (mHeadless) return;
         mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
