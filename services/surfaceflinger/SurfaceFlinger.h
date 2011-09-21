@@ -277,7 +277,7 @@ private:
             void        handleWorkList();
             void        handleRepaint();
             void        postFramebuffer();
-            Region      setupHardwareComposer(const Region& dirty);
+            void        setupHardwareComposer(Region& dirtyInOut);
             void        composeSurfaces(const Region& dirty);
             void        repaintEverything();
 

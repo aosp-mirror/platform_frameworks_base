@@ -40,6 +40,7 @@ namespace android {
 HWComposer::HWComposer(const sp<SurfaceFlinger>& flinger)
     : mFlinger(flinger),
       mModule(0), mHwc(0), mList(0), mCapacity(0),
+      mNumOVLayers(0), mNumFBLayers(0),
       mDpy(EGL_NO_DISPLAY), mSur(EGL_NO_SURFACE)
 {
     int err = hw_get_module(HWC_HARDWARE_MODULE_ID, &mModule);
@@ -98,7 +99,38 @@ status_t HWComposer::createWorkList(size_t numLayers) {
 
 status_t HWComposer::prepare() const {
     int err = mHwc->prepare(mHwc, mList);
+    if (err == NO_ERROR) {
+        size_t numOVLayers = 0;
+        size_t numFBLayers = 0;
+        size_t count = mList->numHwLayers;
+        for (size_t i=0 ; i<count ; i++) {
+            hwc_layer& l(mList->hwLayers[i]);
+            if (l.flags & HWC_SKIP_LAYER) {
+                l.compositionType = HWC_FRAMEBUFFER;
+            }
+            switch (l.compositionType) {
+                case HWC_OVERLAY:
+                    numOVLayers++;
+                    break;
+                case HWC_FRAMEBUFFER:
+                    numFBLayers++;
+                    break;
+            }
+        }
+        mNumOVLayers = numOVLayers;
+        mNumFBLayers = numFBLayers;
+    }
     return (status_t)err;
+}
+
+size_t HWComposer::getLayerCount(int type) const {
+    switch (type) {
+        case HWC_OVERLAY:
+            return mNumOVLayers;
+        case HWC_FRAMEBUFFER:
+            return mNumFBLayers;
+    }
+    return 0;
 }
 
 status_t HWComposer::commit() const {
