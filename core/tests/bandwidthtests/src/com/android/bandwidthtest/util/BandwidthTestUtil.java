@@ -117,17 +117,24 @@ public class BandwidthTestUtil {
 
     /**
      * Post a given file for a given device and timestamp to the server.
-     * @param postUrl {@link String} url used to upload files
+     * @param server {@link String} url of test server
      * @param deviceId {@link String} device id that is uploading
      * @param timestamp {@link String} timestamp
      * @param file {@link File} to upload
      * @return true if it succeeded
      */
-    public static boolean postFileToServer(String postUrl, String deviceId, String timestamp,
+    public static boolean postFileToServer(String server, String deviceId, String timestamp,
             File file) {
         try {
+            Log.d(LOG_TAG, "Uploading begining");
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost postRequest = new HttpPost(postUrl);
+            String uri = server;
+            if (!uri.endsWith("/")) {
+                uri += "/";
+            }
+            uri += "upload";
+            Log.d(LOG_TAG, "Upload url:" + uri);
+            HttpPost postRequest = new HttpPost(uri);
             Part[] parts = {
                     new StringPart("device_id", deviceId),
                     new StringPart("timestamp", timestamp),
