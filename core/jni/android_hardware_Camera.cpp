@@ -234,34 +234,23 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
         if (heapBase != NULL) {
             const jbyte* data = reinterpret_cast<const jbyte*>(heapBase + offset);
 
-            if (!mManualBufferMode) {
-                LOGV("Allocating callback buffer");
-                obj = env->NewByteArray(size);
-            } else {
-                switch (msgType) {
-                    case CAMERA_MSG_PREVIEW_FRAME: {
-                        obj = getCallbackBuffer(env, &mCallbackBuffers, size);
+            if (msgType == CAMERA_MSG_RAW_IMAGE) {
+                obj = getCallbackBuffer(env, &mRawImageCallbackBuffers, size);
+            } else if (msgType == CAMERA_MSG_PREVIEW_FRAME && mManualBufferMode) {
+                obj = getCallbackBuffer(env, &mCallbackBuffers, size);
 
-                        if (mCallbackBuffers.isEmpty()) {
-                            LOGV("Out of buffers, clearing callback!");
-                            mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_NOOP);
-                            mManualCameraCallbackSet = false;
+                if (mCallbackBuffers.isEmpty()) {
+                    LOGV("Out of buffers, clearing callback!");
+                    mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_NOOP);
+                    mManualCameraCallbackSet = false;
 
-                            if (obj == NULL) {
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case CAMERA_MSG_RAW_IMAGE: {
-                        obj = getCallbackBuffer(env, &mRawImageCallbackBuffers, size);
-                        break;
-                    }
-                    default: {
-                        jniThrowRuntimeException(env, "Unsupported message type");
+                    if (obj == NULL) {
                         return;
                     }
                 }
+            } else {
+                LOGV("Allocating callback buffer");
+                obj = env->NewByteArray(size);
             }
 
             if (obj == NULL) {
