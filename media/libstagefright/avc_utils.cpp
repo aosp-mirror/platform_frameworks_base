@@ -297,7 +297,7 @@ sp<MetaData> MakeAVCCodecSpecificData(const sp<ABuffer> &accessUnit) {
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
 
-    meta->setData(kKeyAVCC, 0, csd->data(), csd->size());
+    meta->setData(kKeyAVCC, kTypeAVCC, csd->data(), csd->size());
     meta->setInt32(kKeyWidth, width);
     meta->setInt32(kKeyHeight, height);
 

@@ -18,6 +18,7 @@
 #define LOG_TAG "AVIExtractor"
 #include <utils/Log.h>
 
+#include "include/avc_utils.h"
 #include "include/AVIExtractor.h"
 
 #include <binder/ProcessState.h>
@@ -362,6 +363,13 @@ static const char *GetMIMETypeForHandler(uint32_t handler) {
         case FOURCC('X', 'V', 'I', 'X'):
             return MEDIA_MIMETYPE_VIDEO_MPEG4;
 
+        // from http://wiki.multimedia.cx/index.php?title=H264
+        case FOURCC('a', 'v', 'c', '1'):
+        case FOURCC('d', 'a', 'v', 'c'):
+        case FOURCC('x', '2', '6', '4'):
+        case FOURCC('v', 's', 's', 'h'):
+            return MEDIA_MIMETYPE_VIDEO_AVC;
+
         default:
             return NULL;
     }
@@ -404,6 +412,14 @@ status_t AVIExtractor::parseStreamHeader(off64_t offset, size_t size) {
 
         if (mime && strncasecmp(mime, "video/", 6)) {
             return ERROR_MALFORMED;
+        }
+
+        if (mime == NULL) {
+            LOGW("Unsupported video format '%c%c%c%c'",
+                 (char)(handler >> 24),
+                 (char)((handler >> 16) & 0xff),
+                 (char)((handler >> 8) & 0xff),
+                 (char)(handler & 0xff));
         }
 
         kind = Track::VIDEO;
@@ -473,8 +489,11 @@ status_t AVIExtractor::parseStreamFormat(off64_t offset, size_t size) {
         track->mMeta->setInt32(kKeyHeight, height);
     } else {
         uint32_t format = U16LE_AT(data);
+
         if (format == 0x55) {
             track->mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+        } else {
+            LOGW("Unsupported audio format = 0x%04x", format);
         }
 
         uint32_t numChannels = U16LE_AT(&data[2]);
@@ -646,21 +665,26 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
 
         AString mime = tmp;
 
-        if (!strncasecmp("video/", mime.c_str(), 6)
-                && track->mThumbnailSampleIndex >= 0) {
-            int64_t thumbnailTimeUs;
-            CHECK_EQ((status_t)OK,
-                     getSampleTime(i, track->mThumbnailSampleIndex,
-                                   &thumbnailTimeUs));
+        if (!strncasecmp("video/", mime.c_str(), 6)) {
+            if (track->mThumbnailSampleIndex >= 0) {
+                int64_t thumbnailTimeUs;
+                CHECK_EQ((status_t)OK,
+                         getSampleTime(i, track->mThumbnailSampleIndex,
+                                       &thumbnailTimeUs));
 
-            track->mMeta->setInt64(kKeyThumbnailTime, thumbnailTimeUs);
+                track->mMeta->setInt64(kKeyThumbnailTime, thumbnailTimeUs);
+            }
+
+            status_t err = OK;
 
             if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_MPEG4)) {
-                status_t err = addMPEG4CodecSpecificData(i);
+                err = addMPEG4CodecSpecificData(i);
+            } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_AVC)) {
+                err = addH264CodecSpecificData(i);
+            }
 
-                if (err != OK) {
-                    return err;
-                }
+            if (err != OK) {
+                return err;
             }
         }
 
@@ -777,6 +801,63 @@ status_t AVIExtractor::addMPEG4CodecSpecificData(size_t trackIndex) {
 
     sp<ABuffer> csd = MakeMPEG4VideoCodecSpecificData(buffer);
     track->mMeta->setData(kKeyESDS, kTypeESDS, csd->data(), csd->size());
+
+    return OK;
+}
+
+status_t AVIExtractor::addH264CodecSpecificData(size_t trackIndex) {
+    Track *track = &mTracks.editItemAt(trackIndex);
+
+    off64_t offset;
+    size_t size;
+    bool isKey;
+    int64_t timeUs;
+
+    // Extract codec specific data from the first non-empty sample.
+
+    size_t sampleIndex = 0;
+    for (;;) {
+        status_t err =
+            getSampleInfo(
+                    trackIndex, sampleIndex, &offset, &size, &isKey, &timeUs);
+
+        if (err != OK) {
+            return err;
+        }
+
+        if (size > 0) {
+            break;
+        }
+
+        ++sampleIndex;
+    }
+
+    sp<ABuffer> buffer = new ABuffer(size);
+    ssize_t n = mDataSource->readAt(offset, buffer->data(), buffer->size());
+
+    if (n < (ssize_t)size) {
+        return n < 0 ? (status_t)n : ERROR_MALFORMED;
+    }
+
+    sp<MetaData> meta = MakeAVCCodecSpecificData(buffer);
+
+    if (meta == NULL) {
+        LOGE("Unable to extract AVC codec specific data");
+        return ERROR_MALFORMED;
+    }
+
+    int32_t width, height;
+    CHECK(meta->findInt32(kKeyWidth, &width));
+    CHECK(meta->findInt32(kKeyHeight, &height));
+
+    uint32_t type;
+    const void *csd;
+    size_t csdSize;
+    CHECK(meta->findData(kKeyAVCC, &type, &csd, &csdSize));
+
+    track->mMeta->setInt32(kKeyWidth, width);
+    track->mMeta->setInt32(kKeyHeight, width);
+    track->mMeta->setData(kKeyAVCC, type, csd, csdSize);
 
     return OK;
 }
