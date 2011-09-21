@@ -23,12 +23,10 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -299,10 +297,12 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         ListPopupWindow popupWindow = getListPopupWindow();
         if (!popupWindow.isShowing()) {
-            if (mIsSelectingDefaultActivity) {
-                mAdapter.setShowDefaultActivity(true);
+            final boolean defaultActivityButtonShown =
+                mDefaultActivityButton.getVisibility() == VISIBLE;
+            if (mIsSelectingDefaultActivity || !defaultActivityButtonShown) {
+                mAdapter.setShowDefaultActivity(true, defaultActivityButtonShown);
             } else {
-                mAdapter.setShowDefaultActivity(false);
+                mAdapter.setShowDefaultActivity(false, false);
             }
             final int contentWidth = Math.min(mAdapter.measureContentWidth(), mListPopupMaxWidth);
             popupWindow.setContentWidth(contentWidth);
@@ -476,8 +476,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                             mAdapter.getDataModel().setDefaultActivity(position);
                         }
                     } else {
-                        // The first item in the model is default action => adjust index
-                        Intent launchIntent  = mAdapter.getDataModel().chooseActivity(position + 1);
+                        // If the default target is not shown in the list, the first
+                        // item in the model is default action => adjust index
+                        position = mAdapter.getShowDefaultActivity() ? position : position + 1;
+                        Intent launchIntent = mAdapter.getDataModel().chooseActivity(position);
                         if (launchIntent != null) {
                             mContext.startActivity(launchIntent);
                         }
@@ -552,6 +554,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         private int mMaxActivityCount = MAX_ACTIVITY_COUNT_DEFAULT;
 
         private boolean mShowDefaultActivity;
+
+        private boolean mHighlightDefaultActivity;
 
         private boolean mShowFooterView;
 
@@ -640,7 +644,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                     TextView titleView = (TextView) convertView.findViewById(R.id.title);
                     titleView.setText(activity.loadLabel(packageManager));
                     // Highlight the default.
-                    if (mShowDefaultActivity && position == 0) {
+                    if (mShowDefaultActivity && position == 0 && mHighlightDefaultActivity) {
                         convertView.setActivated(true);
                     } else {
                         convertView.setActivated(false);
@@ -709,11 +713,18 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             return mDataModel;
         }
 
-        public void setShowDefaultActivity(boolean showDefaultActivity) {
-            if (mShowDefaultActivity != showDefaultActivity) {
+        public void setShowDefaultActivity(boolean showDefaultActivity,
+                boolean highlightDefaultActivity) {
+            if (mShowDefaultActivity != showDefaultActivity
+                    || mHighlightDefaultActivity != highlightDefaultActivity) {
                 mShowDefaultActivity = showDefaultActivity;
+                mHighlightDefaultActivity = highlightDefaultActivity;
                 notifyDataSetChanged();
             }
+        }
+
+        public boolean getShowDefaultActivity() {
+            return mShowDefaultActivity;
         }
     }
 }
