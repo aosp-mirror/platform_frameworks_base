@@ -73,12 +73,14 @@ public:
     virtual bool isSecure() const           { return mSecure; }
     virtual bool isProtected() const;
     virtual void onRemoved();
+    virtual sp<Layer> getLayer() const { return const_cast<Layer*>(this); }
 
     // LayerBaseClient interface
     virtual wp<IBinder> getSurfaceTextureBinder() const;
 
     // only for debugging
     inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
+    inline const sp<GraphicBuffer>& getActiveBuffer() const { return mActiveBuffer; }
 
 protected:
     virtual void onFirstRef();
