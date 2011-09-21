@@ -7170,6 +7170,14 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Return the overview scale of the WebView
+     * @return The overview scale.
+     */
+    float getZoomOverviewScale() {
+        return mZoomManager.getZoomOverviewScale();
+    }
+
+    /**
      * @return TRUE if the WebView can be zoomed in.
      */
     public boolean canZoomIn() {
