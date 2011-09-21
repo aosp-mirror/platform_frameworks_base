@@ -223,7 +223,7 @@ public final class TextServicesManager {
         try {
             sService.setSpellCheckerEnabled(enabled);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in setSpellCheckerSubtype:" + e);
+            Log.e(TAG, "Error in setSpellCheckerEnabled:" + e);
         }
     }
 
@@ -234,7 +234,7 @@ public final class TextServicesManager {
         try {
             return sService.isSpellCheckerEnabled();
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in setSpellCheckerSubtype:" + e);
+            Log.e(TAG, "Error in isSpellCheckerEnabled:" + e);
             return false;
         }
     }
