@@ -469,14 +469,14 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
-    if (!mInvalidRegion.isEmpty()) {
+    if (!mSwapRegion.isEmpty()) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const nsecs_t now = systemTime();
         mDebugInSwapBuffers = now;
-        hw.flip(mInvalidRegion);
+        hw.flip(mSwapRegion);
         mLastSwapBufferTime = systemTime() - now;
         mDebugInSwapBuffers = 0;
-        mInvalidRegion.clear();
+        mSwapRegion.clear();
     }
 }
 
@@ -834,7 +834,7 @@ void SurfaceFlinger::handleWorkList()
 void SurfaceFlinger::handleRepaint()
 {
     // compute the invalid region
-    mInvalidRegion.orSelf(mDirtyRegion);
+    mSwapRegion.orSelf(mDirtyRegion);
 
     if (UNLIKELY(mDebugRegion)) {
         debugFlashRegions();
@@ -855,7 +855,7 @@ void SurfaceFlinger::handleRepaint()
         if (flags & DisplayHardware::SWAP_RECTANGLE) {
             // TODO: we really should be able to pass a region to
             // SWAP_RECTANGLE so that we don't have to redraw all this.
-            mDirtyRegion.set(mInvalidRegion.bounds());
+            mDirtyRegion.set(mSwapRegion.bounds());
         } else {
             // in the BUFFER_PRESERVED case, obviously, we can update only
             // what's needed and nothing more.
@@ -868,32 +868,29 @@ void SurfaceFlinger::handleRepaint()
             // (pushed to the framebuffer).
             // This is needed because PARTIAL_UPDATES only takes one
             // rectangle instead of a region (see DisplayHardware::flip())
-            mDirtyRegion.set(mInvalidRegion.bounds());
+            mDirtyRegion.set(mSwapRegion.bounds());
         } else {
             // we need to redraw everything (the whole screen)
             mDirtyRegion.set(hw.bounds());
-            mInvalidRegion = mDirtyRegion;
+            mSwapRegion = mDirtyRegion;
         }
     }
 
-    Region expandDirty = setupHardwareComposer(mDirtyRegion);
-    mDirtyRegion.orSelf(expandDirty);
-    mInvalidRegion.orSelf(mDirtyRegion);
+    setupHardwareComposer(mDirtyRegion);
     composeSurfaces(mDirtyRegion);
 
-    // clear the dirty regions
+    // update the swap region and clear the dirty region
+    mSwapRegion.orSelf(mDirtyRegion);
     mDirtyRegion.clear();
 }
 
-Region SurfaceFlinger::setupHardwareComposer(const Region& dirty)
+void SurfaceFlinger::setupHardwareComposer(Region& dirtyInOut)
 {
-    Region dirtyOut(dirty);
-
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     HWComposer& hwc(hw.getHwComposer());
     hwc_layer_t* const cur(hwc.getLayers());
     if (!cur) {
-        return dirtyOut;
+        return;
     }
 
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
@@ -916,53 +913,62 @@ Region SurfaceFlinger::setupHardwareComposer(const Region& dirty)
         const sp<LayerBase>& layer(layers[i]);
         layer->setPerFrameData(&cur[i]);
     }
+    const size_t fbLayerCount = hwc.getLayerCount(HWC_FRAMEBUFFER);
     status_t err = hwc.prepare();
     LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
 
     if (err == NO_ERROR) {
+        // what's happening here is tricky.
+        // we want to clear all the layers with the CLEAR_FB flags
+        // that are opaque.
+        // however, since some GPU are efficient at preserving
+        // the backbuffer, we want to take advantage of that so we do the
+        // clear only in the dirty region (other areas will be preserved
+        // on those GPUs).
+        //   NOTE: on non backbuffer preserving GPU, the dirty region
+        //   has already been expanded as needed, so the code is correct
+        //   there too.
+        //
+        // However, the content of the framebuffer cannot be trusted when
+        // we switch to/from FB/OVERLAY, in which case we need to
+        // expand the dirty region to those areas too.
+        //
+        // Note also that there is a special case when switching from
+        // "no layers in FB" to "some layers in FB", where we need to redraw
+        // the entire FB, since some areas might contain uninitialized
+        // data.
+        //
+        // Also we want to make sure to not clear areas that belong to
+        // layers above that won't redraw (we would just erasing them),
+        // that is, we can't erase anything outside the dirty region.
+
         Region transparent;
-        for (size_t i=0 ; i<count ; i++) {
-            // what's happening here is tricky.
-            // we want to clear all the layers with the CLEAR_FB flags
-            // that are opaque.
-            // however, since some GPU have are efficient at preserving
-            // the backbuffer, we want to take advantage of that so we do the
-            // clear only in the dirty region (other areas will be preserved
-            // on those GPUs).
-            //   NOTE: on non backbuffer preserving GPU, the dirty region
-            //   has already been expanded as needed, so the code is correct
-            //   there too.
-            // However, the content of the framebuffer cannot be trusted when
-            // we switch to/from FB/OVERLAY, in which case we need to
-            // expand the dirty region to those areas too.
-            //
-            // Also we want to make sure to not clear areas that belong to
-            // layers above that won't redraw (we would just erasing them),
-            // that is, we can't erase anything outside the dirty region.
 
-            const sp<LayerBase>& layer(layers[i]);
-            if ((cur[i].hints & HWC_HINT_CLEAR_FB) && layer->isOpaque()) {
-                transparent.orSelf(layer->visibleRegionScreen);
+        if (!fbLayerCount && hwc.getLayerCount(HWC_FRAMEBUFFER)) {
+            transparent.set(hw.getBounds());
+            dirtyInOut = transparent;
+        } else {
+            for (size_t i=0 ; i<count ; i++) {
+                const sp<LayerBase>& layer(layers[i]);
+                if ((cur[i].hints & HWC_HINT_CLEAR_FB) && layer->isOpaque()) {
+                    transparent.orSelf(layer->visibleRegionScreen);
+                }
+                bool isOverlay = (cur[i].compositionType != HWC_FRAMEBUFFER);
+                if (isOverlay != layer->isOverlay()) {
+                    // we transitioned to/from overlay, so add this layer
+                    // to the dirty region so the framebuffer can be either
+                    // cleared or redrawn.
+                    dirtyInOut.orSelf(layer->visibleRegionScreen);
+                }
+                layer->setOverlay(isOverlay);
             }
-
-            bool isOverlay = (cur[i].compositionType != HWC_FRAMEBUFFER) &&
-                !(cur[i].flags & HWC_SKIP_LAYER);
-
-            if (isOverlay != layer->isOverlay()) {
-                // we transitioned to/from overlay, so add this layer
-                // to the dirty region so the framebuffer can be either
-                // cleared or redrawn.
-                dirtyOut.orSelf(layer->visibleRegionScreen);
-            }
-            layer->setOverlay(isOverlay);
+            // don't erase stuff outside the dirty region
+            transparent.andSelf(dirtyInOut);
         }
-
 
         /*
          *  clear the area of the FB that need to be transparent
          */
-        // don't erase stuff outside the dirty region
-        transparent.andSelf(dirtyOut);
         if (!transparent.isEmpty()) {
             glClearColor(0,0,0,0);
             Region::const_iterator it = transparent.begin();
@@ -976,7 +982,6 @@ Region SurfaceFlinger::setupHardwareComposer(const Region& dirty)
             }
         }
     }
-    return dirtyOut;
 }
 
 void SurfaceFlinger::composeSurfaces(const Region& dirty)
@@ -997,8 +1002,7 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
     size_t count = layers.size();
     for (size_t i=0 ; i<count ; i++) {
-        if (cur && (cur[i].compositionType != HWC_FRAMEBUFFER) &&
-                !(cur[i].flags & HWC_SKIP_LAYER)) {
+        if (cur && (cur[i].compositionType != HWC_FRAMEBUFFER)) {
             continue;
         }
         const sp<LayerBase>& layer(layers[i]);
@@ -1014,7 +1018,7 @@ void SurfaceFlinger::debugFlashRegions()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t flags = hw.getFlags();
     const int32_t height = hw.getHeight();
-    if (mInvalidRegion.isEmpty()) {
+    if (mSwapRegion.isEmpty()) {
         return;
     }
 
@@ -1051,7 +1055,7 @@ void SurfaceFlinger::debugFlashRegions()
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 
-    hw.flip(mInvalidRegion);
+    hw.flip(mSwapRegion);
 
     if (mDebugRegion > 1)
         usleep(mDebugRegion * 1000);

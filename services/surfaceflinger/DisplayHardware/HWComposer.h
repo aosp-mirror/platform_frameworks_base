@@ -64,6 +64,9 @@ public:
     size_t getNumLayers() const;
     hwc_layer_t* getLayers() const;
 
+    // updated in preapre()
+    size_t getLayerCount(int type) const;
+
     // for debugging
     void dump(String8& out, char* scratch, size_t SIZE,
             const Vector< sp<LayerBase> >& visibleLayersSortedByZ) const;
@@ -81,6 +84,8 @@ private:
     hwc_composer_device_t*  mHwc;
     hwc_layer_list_t*       mList;
     size_t                  mCapacity;
+    mutable size_t          mNumOVLayers;
+    mutable size_t          mNumFBLayers;
     hwc_display_t           mDpy;
     hwc_surface_t           mSur;
     cb_context              mCBContext;

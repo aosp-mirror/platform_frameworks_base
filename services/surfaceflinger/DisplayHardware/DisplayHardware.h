@@ -84,9 +84,10 @@ public:
     
     status_t compositionComplete() const;
     
-    Rect bounds() const {
+    Rect getBounds() const {
         return Rect(mWidth, mHeight);
     }
+    inline Rect bounds() const { return getBounds(); }
 
     // only for debugging
     int getCurrentBufferIndex() const;

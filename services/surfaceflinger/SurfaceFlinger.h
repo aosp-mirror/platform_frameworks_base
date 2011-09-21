@@ -277,7 +277,7 @@ private:
             void        handleWorkList();
             void        handleRepaint();
             void        postFramebuffer();
-            Region      setupHardwareComposer(const Region& dirty);
+            void        setupHardwareComposer(Region& dirtyInOut);
             void        composeSurfaces(const Region& dirty);
             void        repaintEverything();
 
@@ -358,7 +358,7 @@ private:
                 State                       mDrawingState;
                 Region                      mDirtyRegion;
                 Region                      mDirtyRegionRemovedLayer;
-                Region                      mInvalidRegion;
+                Region                      mSwapRegion;
                 Region                      mWormholeRegion;
                 bool                        mVisibleRegionsDirty;
                 bool                        mHwWorkListDirty;

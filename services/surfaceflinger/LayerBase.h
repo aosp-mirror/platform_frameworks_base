@@ -46,6 +46,7 @@ class Client;
 class DisplayHardware;
 class GraphicBuffer;
 class GraphicPlane;
+class Layer;
 class LayerBaseClient;
 class SurfaceFlinger;
 
@@ -105,6 +106,7 @@ public:
             void invalidate();
 
     virtual sp<LayerBaseClient> getLayerBaseClient() const { return 0; }
+    virtual sp<Layer> getLayer() const { return 0; }
 
     virtual const char* getTypeId() const { return "LayerBase"; }
 

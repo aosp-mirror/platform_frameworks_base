@@ -40,6 +40,7 @@ namespace android {
 HWComposer::HWComposer(const sp<SurfaceFlinger>& flinger)
     : mFlinger(flinger),
       mModule(0), mHwc(0), mList(0), mCapacity(0),
+      mNumOVLayers(0), mNumFBLayers(0),
       mDpy(EGL_NO_DISPLAY), mSur(EGL_NO_SURFACE)
 {
     int err = hw_get_module(HWC_HARDWARE_MODULE_ID, &mModule);
@@ -98,7 +99,38 @@ status_t HWComposer::createWorkList(size_t numLayers) {
 
 status_t HWComposer::prepare() const {
     int err = mHwc->prepare(mHwc, mList);
+    if (err == NO_ERROR) {
+        size_t numOVLayers = 0;
+        size_t numFBLayers = 0;
+        size_t count = mList->numHwLayers;
+        for (size_t i=0 ; i<count ; i++) {
+            hwc_layer& l(mList->hwLayers[i]);
+            if (l.flags & HWC_SKIP_LAYER) {
+                l.compositionType = HWC_FRAMEBUFFER;
+            }
+            switch (l.compositionType) {
+                case HWC_OVERLAY:
+                    numOVLayers++;
+                    break;
+                case HWC_FRAMEBUFFER:
+                    numFBLayers++;
+                    break;
+            }
+        }
+        mNumOVLayers = numOVLayers;
+        mNumFBLayers = numFBLayers;
+    }
     return (status_t)err;
+}
+
+size_t HWComposer::getLayerCount(int type) const {
+    switch (type) {
+        case HWC_OVERLAY:
+            return mNumOVLayers;
+        case HWC_FRAMEBUFFER:
+            return mNumFBLayers;
+    }
+    return 0;
 }
 
 status_t HWComposer::commit() const {
@@ -143,18 +175,29 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE,
         snprintf(buffer, SIZE, "  numHwLayers=%u, flags=%08x\n",
                 mList->numHwLayers, mList->flags);
         result.append(buffer);
-
+        result.append(
+                "    type   |   hints  |   flags  | tr | blend |  format  |     source rectangle      |      crop rectangle       name \n"
+                "-----------+----------+----------+----+-------+----------+---------------------------+--------------------------------\n");
+        //      "  ________ | ________ | ________ | __ | _____ | ________ | [_____,_____,_____,_____] | [_____,_____,_____,_____]
         for (size_t i=0 ; i<mList->numHwLayers ; i++) {
             const hwc_layer_t& l(mList->hwLayers[i]);
-            snprintf(buffer, SIZE, "  %8s | %08x | %08x | %02x | %04x | [%5d,%5d,%5d,%5d] |  [%5d,%5d,%5d,%5d] %s\n",
+            const sp<LayerBase> layer(visibleLayersSortedByZ[i]);
+            int32_t format = -1;
+            if (layer->getLayer() != NULL) {
+                const sp<GraphicBuffer>& buffer(layer->getLayer()->getActiveBuffer());
+                if (buffer != NULL) {
+                    format = buffer->getPixelFormat();
+                }
+            }
+            snprintf(buffer, SIZE,
+                    "  %8s | %08x | %08x | %02x | %05x | %08x | [%5d,%5d,%5d,%5d] | [%5d,%5d,%5d,%5d] %s\n",
                     l.compositionType ? "OVERLAY" : "FB",
-                    l.hints, l.flags, l.transform, l.blending,
+                    l.hints, l.flags, l.transform, l.blending, format,
                     l.sourceCrop.left, l.sourceCrop.top, l.sourceCrop.right, l.sourceCrop.bottom,
                     l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
-                    visibleLayersSortedByZ[i]->getName().string());
+                    layer->getName().string());
             result.append(buffer);
         }
-
     }
     if (mHwc && mHwc->common.version >= 1 && mHwc->dump) {
         mHwc->dump(mHwc, buffer, SIZE);
