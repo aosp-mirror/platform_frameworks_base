@@ -143,18 +143,29 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE,
         snprintf(buffer, SIZE, "  numHwLayers=%u, flags=%08x\n",
                 mList->numHwLayers, mList->flags);
         result.append(buffer);
-
+        result.append(
+                "    type   |   hints  |   flags  | tr | blend |  format  |     source rectangle      |      crop rectangle       name \n"
+                "-----------+----------+----------+----+-------+----------+---------------------------+--------------------------------\n");
+        //      "  ________ | ________ | ________ | __ | _____ | ________ | [_____,_____,_____,_____] | [_____,_____,_____,_____]
         for (size_t i=0 ; i<mList->numHwLayers ; i++) {
             const hwc_layer_t& l(mList->hwLayers[i]);
-            snprintf(buffer, SIZE, "  %8s | %08x | %08x | %02x | %04x | [%5d,%5d,%5d,%5d] |  [%5d,%5d,%5d,%5d] %s\n",
+            const sp<LayerBase> layer(visibleLayersSortedByZ[i]);
+            int32_t format = -1;
+            if (layer->getLayer() != NULL) {
+                const sp<GraphicBuffer>& buffer(layer->getLayer()->getActiveBuffer());
+                if (buffer != NULL) {
+                    format = buffer->getPixelFormat();
+                }
+            }
+            snprintf(buffer, SIZE,
+                    "  %8s | %08x | %08x | %02x | %05x | %08x | [%5d,%5d,%5d,%5d] | [%5d,%5d,%5d,%5d] %s\n",
                     l.compositionType ? "OVERLAY" : "FB",
-                    l.hints, l.flags, l.transform, l.blending,
+                    l.hints, l.flags, l.transform, l.blending, format,
                     l.sourceCrop.left, l.sourceCrop.top, l.sourceCrop.right, l.sourceCrop.bottom,
                     l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
-                    visibleLayersSortedByZ[i]->getName().string());
+                    layer->getName().string());
             result.append(buffer);
         }
-
     }
     if (mHwc && mHwc->common.version >= 1 && mHwc->dump) {
         mHwc->dump(mHwc, buffer, SIZE);

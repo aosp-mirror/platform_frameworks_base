@@ -925,7 +925,7 @@ Region SurfaceFlinger::setupHardwareComposer(const Region& dirty)
             // what's happening here is tricky.
             // we want to clear all the layers with the CLEAR_FB flags
             // that are opaque.
-            // however, since some GPU have are efficient at preserving
+            // however, since some GPU are efficient at preserving
             // the backbuffer, we want to take advantage of that so we do the
             // clear only in the dirty region (other areas will be preserved
             // on those GPUs).
