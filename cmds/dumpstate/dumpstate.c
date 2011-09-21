@@ -72,6 +72,7 @@ static void dumpstate() {
     printf("Command line: %s\n", strtok(cmdline_buf, "\n"));
     printf("\n");
 
+    run_command("UPTIME", 10, "uptime", NULL);
     dump_file("MEMORY INFO", "/proc/meminfo");
     run_command("CPU INFO", 10, "top", "-n", "1", "-d", "1", "-m", "30", "-t", NULL);
     run_command("PROCRANK", 20, "procrank", NULL);
