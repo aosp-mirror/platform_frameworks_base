@@ -4,7 +4,7 @@ page.title=SDK Tools
 <p>SDK Tools is a downloadable component for the Android SDK. It includes the
 complete set of development and debugging tools for the Android SDK. </p>
 
-<p>If you are new to the Android SDK, the <a 
+<p>If you are new to the Android SDK, the <a
 href="{@docRoot}sdk/index.html">SDK starter package</a> installs the
 latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory.</p>
 
@@ -66,6 +66,35 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+SDK Tools, Revision 13</a> <em>(September 2011)</em>
+  <div class="toggleme">
+  <dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>If you are developing in Eclipse with ADT, note that the SDK Tools r13 is designed for use with
+ADT 12.0.0 and later. If you haven't already, we highly recommend updating your <a
+href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 12.0.0.</p>
+
+<p>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
+Ant</a> 1.8 or later.</p>
+
+<dt>General notes:</dt>
+<dd>
+  <ul>
+    <li>Fix compilation issue in Ant (<code>dex</code> step) when paths have spaces.</li>
+    <li>Fix issue in emulator installation when paths have spaces.</li>
+    <li>Fix issue when AVD paths have spaces.</li>
+    <li>Fix rendering issue when using emulator scaling (<a href="http://code.google.com/p/android/issues/detail?id=18299">see more</a>).</li>
+  </ul>
+</dd>
+</dl>
+</div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
 SDK Tools, Revision 12</a> <em>(July 2011)</em>
   <div class="toggleme">
   <dl>
@@ -396,7 +425,7 @@ install SDK Tools r4 in your SDK. </p></dd>
 <dt>General notes:</dt>
 <dd>
 <ul>
-<li>Launcher script now forces GDK_NATIVE_WINDOW=true (linux only), to fix a 
+<li>Launcher script now forces GDK_NATIVE_WINDOW=true (linux only), to fix a
 compatibility issue between GTK and SWT.</li>
 </ul>
 </dd>
@@ -405,7 +434,7 @@ compatibility issue between GTK and SWT.</li>
 <dd>
 <ul>
 <li>AVD Launch dialog now shows scale value.</li>
-<li>Fixes potential NPE in SDK Manager on AVD launch, for older AVD with no 
+<li>Fixes potential NPE in SDK Manager on AVD launch, for older AVD with no
 skin name specified.</li>
 <li>Fixes XML validation issue in on older Java versions.</li>
 <li>No longer forces the use of Java 1.5 on Mac OS X.</li>
@@ -470,7 +499,7 @@ display the trace.</li>
 <dd>
 <ul>
 <li>Provides a new UI that lets you set options for controlling
-the emulator skin, screen size/density, and scale factor used when launching 
+the emulator skin, screen size/density, and scale factor used when launching
 an AVD.</li>
 <li>Provides improved AVD creation UI, which lets you customize the hardware
 properties of your AVDs.</li>
@@ -481,11 +510,11 @@ between SDK add-ons and platforms.</li>
 
 <dt>Layoutopt, a new tool for optimizing layouts:</dt>
 
-<dd><p>The SDK Tools r3 package includes <code>layoutopt</code>, a new command-line 
-tool that helps you optimize your layout hierarchies. When run against your 
-layout files, the tool analyzes their hierarchies and notifies you of 
-inefficiencies and other potential issues. The tool also provides simple 
-solutions for the issues it finds. For usage, see <a 
+<dd><p>The SDK Tools r3 package includes <code>layoutopt</code>, a new command-line
+tool that helps you optimize your layout hierarchies. When run against your
+layout files, the tool analyzes their hierarchies and notifies you of
+inefficiencies and other potential issues. The tool also provides simple
+solutions for the issues it finds. For usage, see <a
 href="/guide/developing/tools/layoutopt.html">layoutopt</a>.</p>
 </dd>
 </dl>
