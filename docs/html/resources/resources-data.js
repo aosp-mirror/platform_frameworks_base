@@ -31,7 +31,8 @@ var ANDROID_TAGS = {
   },
   misc: {
     'external': 'External',
-    'new': 'New'
+    'new': 'New',
+    'updated': 'Updated'
   }
 };
 
@@ -377,7 +378,7 @@ var ANDROID_RESOURCES = [
 ///////////////////
  
   {
-    tags: ['sample', 'new'],
+    tags: ['sample'],
     path: 'samples/AccelerometerPlay/index.html',
     title: {
       en: 'Accelerometer Play'
@@ -387,7 +388,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'accessibility'],
+    tags: ['sample', 'accessibility'],
     path: 'samples/AccessibilityService/index.html',
     title: {
       en: 'Accessibility Service'
@@ -407,7 +408,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'layout', 'ui', 'fragment', 'loader', 'new'],
+    tags: ['sample', 'layout', 'ui', 'fragment', 'loader'],
     path: 'samples/Support4Demos/index.html',
     title: {
       en: 'API 4+ Support Demos'
@@ -417,7 +418,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'layout', 'ui', 'new'],
+    tags: ['sample', 'layout', 'ui'],
     path: 'samples/Support13Demos/index.html',
     title: {
       en: 'API 13+ Support Demos'
@@ -487,13 +488,13 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'newfeature', 'ui'],
+    tags: ['sample', 'updated', 'newfeature', 'ui'],
     path: 'samples/HoneycombGallery/index.html',
     title: {
       en: 'Honeycomb Gallery'
     },
     description: {
-      en: 'An image gallery application using APIs that are new in Android 3.0 (a.k.a. Honeycomb).'
+      en: 'An image gallery application that demonstrates a variety of new APIs in Android 3.0 (Honeycomb). In addition to providing a tablet-optimized design, it also supports handsets running Android 4.0 (Ice Cream Sandwich) and beyond, so is a good example of how to reuse Fragments to support different screen sizes.'
     }
   },
   {
@@ -547,7 +548,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'media' ],
+    tags: ['sample', 'media' ],
     path: 'samples/RandomMusicPlayer/index.html',
     title: {
       en: 'Random Music Player'
@@ -557,7 +558,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'newfeature', 'performance', 'gamedev', 'gl'],
+    tags: ['sample', 'newfeature', 'performance', 'gamedev', 'gl'],
     path: 'samples/RenderScript/index.html',
     title: {
       en: 'RenderScript'
@@ -637,7 +638,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'newfeature', 'widgets'],
+    tags: ['sample', 'newfeature', 'widgets'],
     path: 'samples/StackWidget/index.html',
     title: {
       en: 'StackView Widget'
@@ -667,7 +668,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'newfeature'],
+    tags: ['sample', 'newfeature'],
     path: 'samples/USB/index.html',
     title: {
       en: 'USB'
@@ -683,7 +684,7 @@ var ANDROID_RESOURCES = [
       en: 'Voicemail Provider Demo'
     },
     description: {
-      en: 'A sample application to demonstrate how to use voicemail content provider APIs.'
+      en: 'A sample application to demonstrate how to use voicemail content provider APIs in Android 4.0.'
     }
   },
   {
@@ -707,7 +708,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'widgets', 'newfeature', 'new'],
+    tags: ['sample', 'widgets', 'newfeature'],
     path: 'samples/WeatherListWidget/index.html',
     title: {
       en: 'Weather List Widget'
@@ -733,7 +734,7 @@ var ANDROID_RESOURCES = [
       en: 'Text To Speech Engine'
     },
     description: {
-      en: 'An example Text To Speech engine written using the android text to speech engine API.'
+      en: 'An example Text To Speech engine written using the Android text to speech engine API in Android 4.0.'
     }
   },
 

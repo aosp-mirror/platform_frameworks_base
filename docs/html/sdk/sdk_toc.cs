@@ -77,7 +77,7 @@ class="new">new!</span></li>
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>sdk/android-3.2.html">
-        <span class="en">Android 3.2 Platform</span></a> <span class="new">new!</span></div>
+        <span class="en">Android 3.2 Platform</span></a></div>
         <ul>
           <!-- <li><a href="<?cs var:toroot ?>sdk/android-3.2-highlights.html">Platform Highlights</a></li> -->
           <li><a href="<?cs var:toroot ?>sdk/api_diff/13/changes.html">API Differences Report &raquo;</a></li>
@@ -142,11 +142,10 @@ class="new">new!</span></li>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r12</a> <span
-class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r12</a></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
       <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Package,
-r3</a> <span class="new">new!</span></li>
+r3</a></li>
     </ul>
   </li>
   <li>
@@ -169,7 +168,7 @@ r3</a> <span class="new">new!</span></li>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
-      <span class="new">new!</span></li>
+      </li>
     </ul>
   </li>
   <li>
@@ -183,8 +182,7 @@ r3</a> <span class="new">new!</span></li>
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r6b</a> 
-        <span class="new">new!</span>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r6b</a>
         </li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
