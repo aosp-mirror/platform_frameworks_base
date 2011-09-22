@@ -137,14 +137,6 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** @hide */
-    public static SmsMessage newFromCMTI(String line) {
-        // the thinking here is not to read the message immediately
-        // FTA test case
-        Log.e(LOG_TAG, "newFromCMTI: not yet supported");
-        return null;
-    }
-
-    /** @hide */
     public static SmsMessage newFromCDS(String line) {
         try {
             SmsMessage msg = new SmsMessage();
@@ -154,15 +146,6 @@ public class SmsMessage extends SmsMessageBase {
             Log.e(LOG_TAG, "CDS SMS PDU parsing failed: ", ex);
             return null;
         }
-    }
-
-    /**
-     * Note: This functionality is currently not supported in GSM mode.
-     * @hide
-     */
-    public static SmsMessageBase newFromParcel(Parcel p){
-        Log.w(LOG_TAG, "newFromParcel: is not supported in GSM mode.");
-        return null;
     }
 
     /**

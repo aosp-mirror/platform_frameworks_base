@@ -2434,8 +2434,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 SmsMessage sms;
 
                 sms = SmsMessage.newFromCMT(a);
-                if (mSMSRegistrant != null) {
-                    mSMSRegistrant
+                if (mGsmSmsRegistrant != null) {
+                    mGsmSmsRegistrant
                         .notifyRegistrant(new AsyncResult(null, sms, null));
                 }
             break;
@@ -2607,8 +2607,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
                 SmsMessage sms = (SmsMessage) ret;
 
-                if (mSMSRegistrant != null) {
-                    mSMSRegistrant
+                if (mCdmaSmsRegistrant != null) {
+                    mCdmaSmsRegistrant
                         .notifyRegistrant(new AsyncResult(null, sms, null));
                 }
                 break;

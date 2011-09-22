@@ -666,6 +666,7 @@ public final class Telephony {
             public static SmsMessage[] getMessagesFromIntent(
                     Intent intent) {
                 Object[] messages = (Object[]) intent.getSerializableExtra("pdus");
+                String format = intent.getStringExtra("format");
                 byte[][] pduObjs = new byte[messages.length][];
 
                 for (int i = 0; i < messages.length; i++) {
@@ -676,7 +677,7 @@ public final class Telephony {
                 SmsMessage[] msgs = new SmsMessage[pduCount];
                 for (int i = 0; i < pduCount; i++) {
                     pdus[i] = pduObjs[i];
-                    msgs[i] = SmsMessage.createFromPdu(pdus[i]);
+                    msgs[i] = SmsMessage.createFromPdu(pdus[i], format);
                 }
                 return msgs;
             }

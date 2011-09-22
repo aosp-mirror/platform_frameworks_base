@@ -56,9 +56,6 @@ import com.android.internal.telephony.CallForwardInfo;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
-import com.android.internal.telephony.DataConnection;
-import com.android.internal.telephony.DataConnectionTracker;
-import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 import com.android.internal.telephony.IccSmsInterfaceManager;
@@ -140,7 +137,7 @@ public class GSMPhone extends PhoneBase {
         mCM.setPhoneType(Phone.PHONE_TYPE_GSM);
         mCT = new GsmCallTracker(this);
         mSST = new GsmServiceStateTracker (this);
-        mSMS = new GsmSMSDispatcher(this);
+        mSMS = new GsmSMSDispatcher(this, mSmsStorageMonitor, mSmsUsageMonitor);
         mIccFileHandler = new SIMFileHandler(this);
         mIccRecords = new SIMRecords(this);
         mDataConnectionTracker = new GsmDataConnectionTracker (this);
@@ -199,6 +196,7 @@ public class GSMPhone extends PhoneBase {
                 new Integer(Phone.PHONE_TYPE_GSM).toString());
     }
 
+    @Override
     public void dispose() {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
             super.dispose();
@@ -228,19 +226,22 @@ public class GSMPhone extends PhoneBase {
         }
     }
 
+    @Override
     public void removeReferences() {
-            this.mSimulatedRadioControl = null;
-            this.mStkService = null;
-            this.mSimPhoneBookIntManager = null;
-            this.mSimSmsIntManager = null;
-            this.mSMS = null;
-            this.mSubInfo = null;
-            this.mIccRecords = null;
-            this.mIccFileHandler = null;
-            this.mIccCard = null;
-            this.mDataConnectionTracker = null;
-            this.mCT = null;
-            this.mSST = null;
+        Log.d(LOG_TAG, "removeReferences");
+        super.removeReferences();
+        mSimulatedRadioControl = null;
+        mStkService = null;
+        mSimPhoneBookIntManager = null;
+        mSimSmsIntManager = null;
+        mSMS = null;
+        mSubInfo = null;
+        mIccRecords = null;
+        mIccFileHandler = null;
+        mIccCard = null;
+        mDataConnectionTracker = null;
+        mCT = null;
+        mSST = null;
     }
 
     protected void finalize() {
@@ -403,17 +404,6 @@ public class GSMPhone extends PhoneBase {
     /*package*/ void
     notifySignalStrength() {
         mNotifier.notifySignalStrength(this);
-    }
-
-    public void
-    notifyDataConnectionFailed(String reason, String apnType) {
-        mNotifier.notifyDataConnectionFailed(this, reason, apnType);
-    }
-
-    /*package*/ void
-    updateMessageWaitingIndicator(boolean mwi) {
-        // this also calls notifyMessageWaitingIndicator()
-        mIccRecords.setVoiceMessageWaiting(1, mwi ? -1 : 0);
     }
 
     public void
