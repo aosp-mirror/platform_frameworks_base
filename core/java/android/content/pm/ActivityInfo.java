@@ -442,7 +442,11 @@ public class ActivityInfo extends ComponentInfo
     public int uiOptions = 0;
 
     /**
-     * Flag for use with uiOptions.
+     * Flag for use with {@link #uiOptions}.
+     * Indicates that the action bar should put all action items in a separate bar when
+     * the screen is narrow.
+     * <p>This value corresponds to "splitActionBarWhenNarrow" for the {@link #uiOptions} XML
+     * attribute.
      */
     public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1;
 
