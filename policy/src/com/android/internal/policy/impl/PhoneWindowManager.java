@@ -281,7 +281,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
 
-    boolean mAllowAllRotations;
+    int mAllowAllRotations = -1;
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
@@ -686,8 +686,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(
                 com.android.internal.R.integer.config_deskDockRotation);
-        mAllowAllRotations = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_allowAllRotations);
         mCarDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
@@ -2942,8 +2940,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
                 // Otherwise, use sensor only if requested by the application or enabled
                 // by default for USER or UNSPECIFIED modes.  Does not apply to NOSENSOR.
+                if (mAllowAllRotations < 0) {
+                    // Can't read this during init() because the context doesn't
+                    // have display metrics at that time so we cannot determine
+                    // tablet vs. phone then.
+                    mAllowAllRotations = mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_allowAllRotations) ? 1 : 0;
+                }
                 if (sensorRotation != Surface.ROTATION_180
-                        || mAllowAllRotations
+                        || mAllowAllRotations == 1
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR) {
                     preferredRotation = sensorRotation;
                 } else {
