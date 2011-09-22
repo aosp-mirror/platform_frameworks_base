@@ -400,9 +400,9 @@
     <!-- Diable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
-    <!-- Diable puk unlockscreen by default.
+    <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
-    <bool name="config_enable_puk_unlock_screen">false</bool>
+    <bool name="config_enable_puk_unlock_screen">true</bool>
 
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
