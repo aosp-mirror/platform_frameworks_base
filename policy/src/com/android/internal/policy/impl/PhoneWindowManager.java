@@ -721,6 +721,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Controls rotation and the like.
         initializeHdmiState();
+
+        // Match current screen state.
+        if (mPowerManager.isScreenOn()) {
+            screenTurningOn(null);
+        } else {
+            screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+        }
     }
 
     public void setInitialDisplaySize(int width, int height) {
@@ -2792,19 +2799,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void screenTurningOn(final ScreenOnListener screenOnListener) {
         EventLog.writeEvent(70000, 1);
-        if (mKeyguardMediator != null) {
-            //Slog.i(TAG, "Screen turning on...");
+        if (false) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "Screen turning on...", here);
+        }
+        if (screenOnListener != null && mKeyguardMediator != null) {
             mKeyguardMediator.onScreenTurnedOn(new KeyguardViewManager.ShowListener() {
                 @Override public void onShown(IBinder windowToken) {
                     if (windowToken != null) {
                         try {
-                            mWindowManager.waitForWindowDrawn(windowToken, new IRemoteCallback.Stub() {
+                            mWindowManager.waitForWindowDrawn(windowToken,
+                                    new IRemoteCallback.Stub() {
                                 @Override public void sendResult(Bundle data) {
                                     Slog.i(TAG, "Lock screen displayed!");
                                     screenOnListener.onScreenOn();
-                                synchronized (mLock) {
-                                    mScreenOnFully = true;
-                                }
+                                    synchronized (mLock) {
+                                        mScreenOnFully = true;
+                                    }
                                 }
                             });
                         } catch (RemoteException e) {
@@ -2812,12 +2824,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     } else {
                         Slog.i(TAG, "No lock screen!");
                         screenOnListener.onScreenOn();
-                    synchronized (mLock) {
-                        mScreenOnFully = true;
-                    }
+                        synchronized (mLock) {
+                            mScreenOnFully = true;
+                        }
                     }
                 }
             });
+        } else {
+            synchronized (mLock) {
+                mScreenOnFully = true;
+            }
         }
         synchronized (mLock) {
             mScreenOnEarly = true;
