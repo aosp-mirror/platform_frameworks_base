@@ -43,6 +43,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -63,6 +64,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
@@ -990,7 +992,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @return Whether the initialization was successful.
      */
     protected boolean initializePanelMenu(final PanelFeatureState st) {
-        final MenuBuilder menu = new MenuBuilder(getContext());
+        Context context = getContext();
+
+        // If we have an action bar, initialize the menu with a context themed for it.
+        if ((st.featureId == FEATURE_OPTIONS_PANEL || st.featureId == FEATURE_ACTION_BAR) &&
+                mActionBar != null) {
+            TypedValue outValue = new TypedValue();
+            Resources.Theme currentTheme = context.getTheme();
+            currentTheme.resolveAttribute(com.android.internal.R.attr.actionBarWidgetTheme,
+                    outValue, true);
+            final int targetThemeRes = outValue.resourceId;
+
+            if (targetThemeRes != 0 && context.getThemeResId() != targetThemeRes) {
+                context = new ContextThemeWrapper(context, targetThemeRes);
+            }
+        }
+
+        final MenuBuilder menu = new MenuBuilder(context);
 
         menu.setCallback(this);
         st.setMenu(menu);
