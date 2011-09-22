@@ -381,7 +381,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/11.xml 11 \
     -since ./frameworks/base/api/12.xml 12 \
     -since ./frameworks/base/api/13.xml 13 \
-    -since ./frameworks/base/api/current.txt ICS \
+    -since ./frameworks/base/api/14.txt 14 \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -473,7 +473,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=3.2
+framework_docs_SDK_VERSION:=4.0
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 
