@@ -270,6 +270,11 @@ public class NetworkStatsHistory implements Parcelable {
                 || entry.operations < 0) {
             throw new IllegalArgumentException("tried recording negative data");
         }
+        if (entry.rxBytes == 0 && entry.rxPackets == 0 && entry.txBytes == 0 && entry.txPackets == 0
+                && entry.operations == 0) {
+            // nothing to record; skip
+            return;
+        }
 
         // create any buckets needed by this range
         ensureBuckets(start, end);

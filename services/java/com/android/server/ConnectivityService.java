@@ -35,6 +35,7 @@ import android.net.EthernetDataTracker;
 import android.net.IConnectivityManager;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
+import android.net.INetworkStatsService;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
@@ -306,8 +307,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // the set of network types that can only be enabled by system/sig apps
     List mProtectedNetworks;
 
-    public ConnectivityService(
-            Context context, INetworkManagementService netd, INetworkPolicyManager policyManager) {
+    public ConnectivityService(Context context, INetworkManagementService netd,
+            INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         if (DBG) log("ConnectivityService starting up");
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
@@ -496,7 +497,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService nmService = INetworkManagementService.Stub.asInterface(b);
 
-        mTethering = new Tethering(mContext, nmService, mHandler.getLooper());
+        mTethering = new Tethering(mContext, nmService, statsService, mHandler.getLooper());
         mTetheringConfigValid = ((mTethering.getTetherableUsbRegexs().length != 0 ||
                                   mTethering.getTetherableWifiRegexs().length != 0 ||
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&

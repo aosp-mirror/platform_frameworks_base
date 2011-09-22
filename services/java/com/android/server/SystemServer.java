@@ -364,7 +364,8 @@ class ServerThread extends Thread {
 
             try {
                 Slog.i(TAG, "Connectivity Service");
-                connectivity = new ConnectivityService(context, networkManagement, networkPolicy);
+                connectivity = new ConnectivityService(
+                        context, networkManagement, networkStats, networkPolicy);
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
                 networkStats.bindConnectivityManager(connectivity);
                 networkPolicy.bindConnectivityManager(connectivity);
