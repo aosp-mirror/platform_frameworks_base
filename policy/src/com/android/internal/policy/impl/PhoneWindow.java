@@ -3471,6 +3471,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         public boolean onOpenSubMenu(MenuBuilder subMenu) {
+            if (subMenu == null) return false;
+
             // Set a simple callback for the submenu
             subMenu.setCallback(this);
 

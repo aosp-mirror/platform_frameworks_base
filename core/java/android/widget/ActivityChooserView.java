@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,14 +27,13 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.ActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
-
-import com.android.internal.R;
 
 /**
  * This class is a view for choosing an activity for handling a given {@link Intent}.
@@ -105,6 +106,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     private final int mListPopupMaxWidth;
 
     /**
+     * The ActionProvider hosting this view, if applicable.
+     */
+    ActionProvider mProvider;
+
+    /**
      * Observer for the model data.
      */
     private final DataSetObserver mModelDataSetOberver = new DataSetObserver() {
@@ -129,6 +135,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                     getListPopupWindow().dismiss();
                 } else {
                     getListPopupWindow().show();
+                    if (mProvider != null) {
+                        mProvider.subUiVisibilityChanged(true);
+                    }
                 }
             }
         }
@@ -260,6 +269,14 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     }
 
     /**
+     * Set the provider hosting this view, if applicable.
+     * @hide Internal use only
+     */
+    public void setProvider(ActionProvider provider) {
+        mProvider = provider;
+    }
+
+    /**
      * Shows the popup window with activities.
      *
      * @return True if the popup was shown, false if already showing.
@@ -307,6 +324,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             final int contentWidth = Math.min(mAdapter.measureContentWidth(), mListPopupMaxWidth);
             popupWindow.setContentWidth(contentWidth);
             popupWindow.show();
+            if (mProvider != null) {
+                mProvider.subUiVisibilityChanged(true);
+            }
         }
     }
 
@@ -525,6 +545,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         // PopUpWindow.OnDismissListener#onDismiss
         public void onDismiss() {
             notifyOnDismissListener();
+            if (mProvider != null) {
+                mProvider.subUiVisibilityChanged(false);
+            }
         }
 
         private void notifyOnDismissListener() {
