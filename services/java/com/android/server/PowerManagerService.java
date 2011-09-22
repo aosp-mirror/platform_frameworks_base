@@ -564,6 +564,7 @@ public class PowerManagerService extends IPowerManager.Stub
             // We make sure to start out with the screen on due to user activity.
             // (They did just boot their device, after all.)
             forceUserActivityLocked();
+            mInitialized = true;
         }
     }
 
@@ -1330,6 +1331,13 @@ public class PowerManagerService extends IPowerManager.Stub
             // (And also do not send needless broadcasts about the screen.)
             return;
         }
+
+        if (DEBUG_SCREEN_ON) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "sendNotificationLocked: " + on, here);
+        }
+
         if (!on) {
             mStillNeedSleepNotification = false;
         }
@@ -1845,8 +1853,6 @@ public class PowerManagerService extends IPowerManager.Stub
             mPowerState = (mPowerState & ~LIGHTS_MASK) | (newState & LIGHTS_MASK);
 
             updateNativePowerStateLocked();
-
-            mInitialized = true;
         }
     }
 
