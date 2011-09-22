@@ -169,6 +169,7 @@ public class ShareActionProvider extends ActionProvider {
         mContext.getTheme().resolveAttribute(R.attr.actionModeShareDrawable, outTypedValue, true);
         Drawable drawable = mContext.getResources().getDrawable(outTypedValue.resourceId);
         activityChooserView.setExpandActivityOverflowButtonDrawable(drawable);
+        activityChooserView.setProvider(this);
 
         return activityChooserView;
     }
