@@ -1768,6 +1768,7 @@
   <public type="attr" name="listPreferredItemPaddingLeft" id="0x010103a3" />
   <public type="attr" name="listPreferredItemPaddingRight" id="0x010103a4" />
   <public type="attr" name="requiresFadingEdge" id="0x010103a5" />
+  <public type="attr" name="publicKey" id="0x010103a6" />
 
   <public type="style" name="TextAppearance.SuggestionHighlight" id="0x01030118" />
   <public type="style" name="Theme.Holo.Light.DarkActionBar" id="0x01030119" />
