@@ -766,15 +766,8 @@ public class Camera {
          * onAutoFocus will be called immediately with a fake value of
          * <code>success</code> set to <code>true</code>.
          *
-         * The auto-focus routine may lock auto-exposure and auto-white balance
-         * after it completes. To check for the state of these locks, use the
-         * {@link android.hardware.Camera.Parameters#getAutoExposureLock()} and
-         * {@link android.hardware.Camera.Parameters#getAutoWhiteBalanceLock()}
-         * methods. If such locking is undesirable, use
-         * {@link android.hardware.Camera.Parameters#setAutoExposureLock(boolean)}
-         * and
-         * {@link android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)}
-         * to release the locks.
+         * The auto-focus routine does not lock auto-exposure and auto-white
+         * balance after it completes.
          *
          * @param success true if focus was successful, false if otherwise
          * @param camera  the Camera service object
@@ -805,16 +798,10 @@ public class Camera {
      * {@link android.hardware.Camera.Parameters#FLASH_MODE_OFF}, flash may be
      * fired during auto-focus, depending on the driver and camera hardware.<p>
      *
-     * The auto-focus routine may lock auto-exposure and auto-white balance
-     * after it completes. To check for the state of these locks, use the
-     * {@link android.hardware.Camera.Parameters#getAutoExposureLock()} and
-     * {@link android.hardware.Camera.Parameters#getAutoWhiteBalanceLock()}
-     * methods after the {@link AutoFocusCallback#onAutoFocus(boolean, Camera)}
-     * callback is invoked. If such locking is undesirable, use
-     * {@link android.hardware.Camera.Parameters#setAutoExposureLock(boolean)}
-     * and
-     * {@link android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)}
-     * to release the locks.
+     * Auto-exposure lock {@link android.hardware.Camera.Parameters#getAutoExposureLock()}
+     * and auto-white balance locks {@link android.hardware.Camera.Parameters#getAutoWhiteBalanceLock()}
+     * do not change during and after autofocus. But auto-focus routine may stop
+     * auto-exposure and auto-white balance transiently during focusing.
      *
      * @param cb the callback to run
      * @see #cancelAutoFocus()
@@ -834,13 +821,7 @@ public class Camera {
      * this function will return the focus position to the default.
      * If the camera does not support auto-focus, this is a no-op.
      *
-     * Canceling auto-focus will return the auto-exposure lock and auto-white
-     * balance lock to their state before {@link #autoFocus(AutoFocusCallback)}
-     * was called.
-     *
      * @see #autoFocus(Camera.AutoFocusCallback)
-     * @see android.hardware.Camera.Parameters#setAutoExposureLock(boolean)
-     * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
      */
     public final void cancelAutoFocus()
     {
@@ -2778,13 +2759,12 @@ public class Camera {
          *
          * <p>Stopping preview with {@link #stopPreview()}, or triggering still
          * image capture with {@link #takePicture(Camera.ShutterCallback,
-         * Camera.PictureCallback, Camera.PictureCallback)}, will automatically
-         * set the lock to false. However, the lock can be re-enabled before
-         * preview is re-started to keep the same AE parameters.</p>
+         * Camera.PictureCallback, Camera.PictureCallback)}, will not change the
+         * lock.</p>
          *
-         * <p>Exposure compensation, in conjunction with re-enabling the AE and
-         * AWB locks after each still capture, can be used to capture an
-         * exposure-bracketed burst of images, for example.</p>
+         * <p>Exposure compensation, auto-exposure lock, and auto-white balance
+         * lock can be used to capture an exposure-bracketed burst of images,
+         * for example.</p>
          *
          * <p>Auto-exposure state, including the lock state, will not be
          * maintained after camera {@link #release()} is called.  Locking
@@ -2792,14 +2772,6 @@ public class Camera {
          * {@link #startPreview()} will not allow the auto-exposure routine to
          * run at all, and may result in severely over- or under-exposed
          * images.</p>
-         *
-         * <p>The driver may also independently lock auto-exposure after
-         * auto-focus completes. If this is undesirable, be sure to always set
-         * the auto-exposure lock to false after the
-         * {@link AutoFocusCallback#onAutoFocus(boolean, Camera)} callback is
-         * received. The {@link #getAutoExposureLock()} method can be used after
-         * the callback to determine if the camera has locked auto-exposure
-         * independently.</p>
          *
          * @param toggle new state of the auto-exposure lock. True means that
          *        auto-exposure is locked, false means that the auto-exposure
@@ -2817,11 +2789,7 @@ public class Camera {
          * {@link #setAutoExposureLock} for details about the lock.
          *
          * @return State of the auto-exposure lock. Returns true if
-         *         auto-exposure is currently locked, and false otherwise. The
-         *         auto-exposure lock may be independently enabled by the camera
-         *         subsystem when auto-focus has completed. This method can be
-         *         used after the {@link AutoFocusCallback#onAutoFocus(boolean,
-         *         Camera)} callback to determine if the camera has locked AE.
+         *         auto-exposure is currently locked, and false otherwise.
          *
          * @see #setAutoExposureLock(boolean)
          *
@@ -2859,29 +2827,20 @@ public class Camera {
          *
          * <p>Stopping preview with {@link #stopPreview()}, or triggering still
          * image capture with {@link #takePicture(Camera.ShutterCallback,
-         * Camera.PictureCallback, Camera.PictureCallback)}, will automatically
-         * set the lock to false. However, the lock can be re-enabled before
-         * preview is re-started to keep the same white balance parameters.</p>
+         * Camera.PictureCallback, Camera.PictureCallback)}, will not change the
+         * the lock.</p>
          *
          * <p> Changing the white balance mode with {@link #setWhiteBalance}
          * will release the auto-white balance lock if it is set.</p>
          *
-         * <p>Exposure compensation, in conjunction with re-enabling the AE and
-         * AWB locks after each still capture, can be used to capture an
-         * exposure-bracketed burst of images, for example. Auto-white balance
-         * state, including the lock state, will not be maintained after camera
-         * {@link #release()} is called.  Locking auto-white balance after
-         * {@link #open()} but before the first call to {@link #startPreview()}
-         * will not allow the auto-white balance routine to run at all, and may
-         * result in severely incorrect color in captured images.</p>
-         *
-         * <p>The driver may also independently lock auto-white balance after
-         * auto-focus completes. If this is undesirable, be sure to always set
-         * the auto-white balance lock to false after the
-         * {@link AutoFocusCallback#onAutoFocus(boolean, Camera)} callback is
-         * received. The {@link #getAutoWhiteBalanceLock()} method can be used
-         * after the callback to determine if the camera has locked auto-white
-         * balance independently.</p>
+         * <p>Exposure compensation, AE lock, and AWB lock can be used to
+         * capture an exposure-bracketed burst of images, for example.
+         * Auto-white balance state, including the lock state, will not be
+         * maintained after camera {@link #release()} is called.  Locking
+         * auto-white balance after {@link #open()} but before the first call to
+         * {@link #startPreview()} will not allow the auto-white balance routine
+         * to run at all, and may result in severely incorrect color in captured
+         * images.</p>
          *
          * @param toggle new state of the auto-white balance lock. True means
          *        that auto-white balance is locked, false means that the
@@ -2902,11 +2861,7 @@ public class Camera {
          *
          * @return State of the auto-white balance lock. Returns true if
          *         auto-white balance is currently locked, and false
-         *         otherwise. The auto-white balance lock may be independently
-         *         enabled by the camera subsystem when auto-focus has
-         *         completed. This method can be used after the
-         *         {@link AutoFocusCallback#onAutoFocus(boolean, Camera)}
-         *         callback to determine if the camera has locked AWB.
+         *         otherwise.
          *
          * @see #setAutoWhiteBalanceLock(boolean)
          *
