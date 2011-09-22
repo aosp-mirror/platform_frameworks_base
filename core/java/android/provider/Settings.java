@@ -1882,6 +1882,11 @@ public final class Settings {
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
+         *
+         * NOTE: Settings are backed up and restored in the order they appear
+         *       in this array. If you have one setting depending on another,
+         *       make sure that they are ordered appropriately.
+         *
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -4048,6 +4053,12 @@ public final class Settings {
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
         /**
+         * This are the settings to be backed up.
+         *
+         * NOTE: Settings are backed up and restored in the order they appear
+         *       in this array. If you have one setting depending on another,
+         *       make sure that they are ordered appropriately.
+         *
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -4056,11 +4067,11 @@ public final class Settings {
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
-            ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SCRIPT_INJECTION,
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
             TOUCH_EXPLORATION_ENABLED,
+            ACCESSIBILITY_ENABLED,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,
