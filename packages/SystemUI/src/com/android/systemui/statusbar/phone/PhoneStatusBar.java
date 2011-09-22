@@ -2031,8 +2031,13 @@ public class PhoneStatusBar extends StatusBar {
     // The user is not allowed to get stuck without navigation UI. Upon the slightest user
     // interaction we bring the navigation back.
     public void userActivity() {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.setHidden(false);
+        if (0 != (mSystemUiVisibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)) {
+            try {
+                mBarService.setSystemUiVisibility(
+                    mSystemUiVisibility & ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            } catch (RemoteException ex) {
+                // weep softly
+            }
         }
     }
 
