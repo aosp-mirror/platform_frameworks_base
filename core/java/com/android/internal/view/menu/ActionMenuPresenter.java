@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseBooleanArray;
+import android.view.ActionProvider;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 import android.view.View;
@@ -40,7 +41,8 @@ import java.util.ArrayList;
 /**
  * MenuPresenter for building action menus as seen in the action bar and action modes.
  */
-public class ActionMenuPresenter extends BaseMenuPresenter {
+public class ActionMenuPresenter extends BaseMenuPresenter
+        implements ActionProvider.SubUiVisibilityListener {
     private static final String TAG = "ActionMenuPresenter";
 
     private View mOverflowButton;
@@ -186,6 +188,17 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     @Override
     public void updateMenuView(boolean cleared) {
         super.updateMenuView(cleared);
+
+        if (mMenu != null) {
+            final ArrayList<MenuItemImpl> actionItems = mMenu.getActionItems();
+            final int count = actionItems.size();
+            for (int i = 0; i < count; i++) {
+                final ActionProvider provider = actionItems.get(i).getActionProvider();
+                if (provider != null) {
+                    provider.setSubUiVisibilityListener(this);
+                }
+            }
+        }
 
         final boolean hasOverflow = mReserveOverflow && mMenu != null &&
                 mMenu.getNonActionItems().size() > 0;
@@ -483,6 +496,16 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         }
     }
 
+    @Override
+    public void onSubUiVisibilityChanged(boolean isVisible) {
+        if (isVisible) {
+            // Not a submenu, but treat it like one.
+            super.onSubMenuSelected(null);
+        } else {
+            mMenu.close(false);
+        }
+    }
+
     private static class SavedState implements Parcelable {
         public int openSubMenuId;
 
@@ -590,7 +613,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         @Override
         public void onDismiss() {
             super.onDismiss();
-            mSubMenu.close();
             mActionButtonPopup = null;
             mOpenSubMenuId = 0;
         }
@@ -600,12 +622,17 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
         @Override
         public boolean onOpenSubMenu(MenuBuilder subMenu) {
+            if (subMenu == null) return false;
+
             mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
             return false;
         }
 
         @Override
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+            if (menu instanceof SubMenuBuilder) {
+                ((SubMenuBuilder) menu).getRootMenu().close(false);
+            }
         }
     }
 

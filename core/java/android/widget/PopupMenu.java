@@ -157,6 +157,8 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
      * @hide
      */
     public boolean onOpenSubMenu(MenuBuilder subMenu) {
+        if (subMenu == null) return false;
+
         if (!subMenu.hasVisibleItems()) {
             return true;
         }

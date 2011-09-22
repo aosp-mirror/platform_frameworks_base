@@ -187,7 +187,9 @@ public class IconMenuPresenter extends BaseMenuPresenter {
 
         @Override
         public boolean onOpenSubMenu(MenuBuilder subMenu) {
-            mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
+            if (subMenu != null) {
+                mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
+            }
             return false;
         }
 

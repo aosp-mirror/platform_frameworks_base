@@ -58,6 +58,7 @@ import android.content.Context;
  * @see MenuItem#getActionProvider()
  */
 public abstract class ActionProvider {
+    private SubUiVisibilityListener mSubUiVisibilityListener;
 
     /**
      * Creates a new instance.
@@ -137,5 +138,32 @@ public abstract class ActionProvider {
      * @param subMenu Submenu that will be displayed
      */
     public void onPrepareSubMenu(SubMenu subMenu) {
+    }
+
+    /**
+     * Notify the system that the visibility of an action view's sub-UI such as
+     * an anchored popup has changed. This will affect how other system
+     * visibility notifications occur.
+     *
+     * @hide Pending future API approval
+     */
+    public void subUiVisibilityChanged(boolean isVisible) {
+        if (mSubUiVisibilityListener != null) {
+            mSubUiVisibilityListener.onSubUiVisibilityChanged(isVisible);
+        }
+    }
+
+    /**
+     * @hide Internal use only
+     */
+    public void setSubUiVisibilityListener(SubUiVisibilityListener listener) {
+        mSubUiVisibilityListener = listener;
+    }
+
+    /**
+     * @hide Internal use only
+     */
+    public interface SubUiVisibilityListener {
+        public void onSubUiVisibilityChanged(boolean isVisible);
     }
 }
