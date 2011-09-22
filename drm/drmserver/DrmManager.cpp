@@ -98,21 +98,27 @@ void DrmManager::removeUniqueId(int uniqueId) {
 }
 
 status_t DrmManager::loadPlugIns() {
+
+    String8 vendorPluginDirPath("/vendor/lib/drm");
+    loadPlugIns(vendorPluginDirPath);
+
     String8 pluginDirPath("/system/lib/drm");
-    return loadPlugIns(pluginDirPath);
+    loadPlugIns(pluginDirPath);
+    return DRM_NO_ERROR;
+
 }
 
 status_t DrmManager::loadPlugIns(const String8& plugInDirPath) {
-    if (mSupportInfoToPlugInIdMap.isEmpty()) {
-        mPlugInManager.loadPlugIns(plugInDirPath);
-        Vector<String8> plugInPathList = mPlugInManager.getPlugInIdList();
-        for (unsigned int i = 0; i < plugInPathList.size(); ++i) {
-            String8 plugInPath = plugInPathList[i];
-            DrmSupportInfo* info = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(0);
-            if (NULL != info) {
+    mPlugInManager.loadPlugIns(plugInDirPath);
+    Vector<String8> plugInPathList = mPlugInManager.getPlugInIdList();
+    for (unsigned int i = 0; i < plugInPathList.size(); ++i) {
+        String8 plugInPath = plugInPathList[i];
+        DrmSupportInfo* info = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(0);
+        if (NULL != info) {
+            if (mSupportInfoToPlugInIdMap.indexOfKey(*info) < 0) {
                 mSupportInfoToPlugInIdMap.add(*info, plugInPath);
-                delete info;
             }
+            delete info;
         }
     }
     return DRM_NO_ERROR;
