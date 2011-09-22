@@ -376,6 +376,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         initGestureDetector();
     }
 
+
     private void initGestureDetector() {
         mGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -615,6 +616,9 @@ public class KeyboardView extends View implements View.OnClickListener {
     @Override
     public void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        if (mKeyboard != null) {
+            mKeyboard.resize(w, h);
+        }
         // Release the buffer, if any and it will be reallocated on the next draw
         mBuffer = null;
     }
