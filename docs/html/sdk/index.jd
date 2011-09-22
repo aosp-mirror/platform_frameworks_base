@@ -1,21 +1,21 @@
 page.title=Android SDK
 sdk.redirect=0
 
-sdk.win_installer=installer_r12-windows.exe
-sdk.win_installer_bytes=36531492
-sdk.win_installer_checksum=367f0ed4ecd70aefc290d1f7dcb578ab
+sdk.win_installer=installer_r13-windows.exe
+sdk.win_installer_bytes=36533357
+sdk.win_installer_checksum=cd3a76fe2b8ed62b2d03cf1851692e2d
 
-sdk.win_download=android-sdk_r12-windows.zip
-sdk.win_bytes=36486190
-sdk.win_checksum=8d6c104a34cd2577c5506c55d981aebf
+sdk.win_download=android-sdk_r13-windows.zip
+sdk.win_bytes=36487911
+sdk.win_checksum=de8a039891e5e65b7742f188f07b992d
 
-sdk.mac_download=android-sdk_r12-mac_x86.zip
-sdk.mac_bytes=30231118
-sdk.mac_checksum=341544e4572b4b1afab123ab817086e7
+sdk.mac_download=android-sdk_r13-mac_x86.zip
+sdk.mac_bytes=30233944
+sdk.mac_checksum=f4002a0344b48856c09dec796acecd4d
 
-sdk.linux_download=android-sdk_r12-linux_x86.tgz
-sdk.linux_bytes=30034243
-sdk.linux_checksum=f8485275a8dee3d1929936ed538ee99a
+sdk.linux_download=android-sdk_r13-linux_x86.tgz
+sdk.linux_bytes=30034328
+sdk.linux_checksum=d80d7530a46c665644ae76084a9a0dc4
 
 @jd:body
 
