@@ -222,8 +222,7 @@
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a>
-              <span class="new">updated</span></li>  <!-- ##api level 4## -->
+          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></li><!-- ##api level 4## -->
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></li> <!-- ##api level 4## -->
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
@@ -244,7 +243,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
                 <span class="en">3D with OpenGL</span>
-              </a><span class="new">updated</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
                 <span class="en">Property Animation</span>
               </a></li>
@@ -271,7 +270,7 @@
 
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
             <span class="en">Media</span>
-          </a><span class="new">updated</span></li>
+          </a></li>
       <li>
         <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
             <span class="en">Copy and Paste</span>
@@ -408,7 +407,6 @@
       </li>
       <li><a href="<?cs var:toroot ?>guide/market/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
-          <span class="new">new!</span>
       </li>
     </ul>
   </li>
@@ -569,7 +567,7 @@
           </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT</a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/android.html">android</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/dmtracedump.html">dmtracedump</a></li>
@@ -672,14 +670,14 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
           <span class="en">Supporting Multiple Screens</span>
-        </a> <span class="new">updated</span></div>
+        </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/practices/screens-distribution.html">
             <span class="en">Distributing to Specific Screens</span>
           </a></li>
           <li><a href="<?cs var:toroot ?>guide/practices/screen-compat-mode.html">
             <span class="en">Screen Compatibility Mode</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
           <li><a href="<?cs var:toroot ?>guide/practices/screens-support-1.5.html">
             <span class="en">Strategies for Android 1.5</span>
           </a></li>
@@ -737,11 +735,11 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>
-          </a> <span class="new-child">new!</span></div>
+          </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/practices/design/jni.html">
                 <span class="en">JNI Tips</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/responsiveness.html">
