@@ -245,7 +245,7 @@ private:
         }
         LayerVector     layersSortedByZ;
         uint8_t         orientation;
-        uint8_t         orientationType;
+        uint8_t         orientationFlags;
         uint8_t         freezeDisplay;
     };
 

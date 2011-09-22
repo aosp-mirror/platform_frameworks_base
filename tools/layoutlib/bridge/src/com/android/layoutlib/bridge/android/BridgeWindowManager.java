@@ -396,7 +396,7 @@ public class BridgeWindowManager implements IWindowManager {
 
     }
 
-    public void setRotation(int arg0, boolean arg1, int arg2) throws RemoteException {
+    public void updateRotation(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }

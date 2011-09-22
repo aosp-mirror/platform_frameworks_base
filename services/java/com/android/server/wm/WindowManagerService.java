@@ -430,14 +430,11 @@ public class WindowManagerService extends IWindowManager.Stub
     int mAppDisplayWidth = 0;
     int mAppDisplayHeight = 0;
     int mRotation = 0;
-    int mRequestedRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
-    int mLastRotationFlags;
     ArrayList<IRotationWatcher> mRotationWatchers
             = new ArrayList<IRotationWatcher>();
-    int mDeferredRotation;
-    int mDeferredRotationAnimFlags;
+    int mDeferredRotationPauseCount;
 
     boolean mLayoutNeeded = true;
     boolean mAnimationPending = false;
@@ -3418,9 +3415,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
                 mPolicy.setCurrentOrientationLw(req);
-                if (setRotationUncheckedLocked(WindowManagerPolicy.USE_LAST_ROTATION,
-                        mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE,
-                        inTransaction)) {
+                if (updateRotationUncheckedLocked(inTransaction)) {
                     changed = true;
                 }
             }
@@ -4827,8 +4822,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.enableScreenAfterBoot();
 
         // Make sure the last requested orientation has been applied.
-        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false,
-                mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
+        updateRotationUnchecked(false);
     }
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -5049,6 +5043,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return bm;
     }
 
+    /**
+     * Freeze rotation changes.  (Enable "rotation lock".)
+     * Persists across reboots.
+     */
     public void freezeRotation() {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "freezeRotation()")) {
@@ -5058,9 +5056,13 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ORIENTATION) Slog.v(TAG, "freezeRotation: mRotation=" + mRotation);
 
         mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED, mRotation);
-        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+        updateRotationUnchecked(false);
     }
 
+    /**
+     * Thaw rotation changes.  (Disable "rotation lock".)
+     * Persists across reboots.
+     */
     public void thawRotation() {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "thawRotation()")) {
@@ -5070,30 +5072,56 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ORIENTATION) Slog.v(TAG, "thawRotation: mRotation=" + mRotation);
 
         mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 777); // rot not used
-        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+        updateRotationUnchecked(false);
     }
 
-    public void setRotation(int rotation,
-            boolean alwaysSendConfiguration, int animFlags) {
-        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
-                "setRotation()")) {
-            throw new SecurityException("Requires SET_ORIENTATION permission");
+    /**
+     * Recalculate the current rotation.
+     *
+     * Called by the window manager policy whenever the state of the system changes
+     * such that the current rotation might need to be updated, such as when the
+     * device is docked or rotated into a new posture.
+     */
+    public void updateRotation(boolean alwaysSendConfiguration) {
+        updateRotationUnchecked(alwaysSendConfiguration);
+    }
+
+    /**
+     * Temporarily pauses rotation changes until resumed.
+     *
+     * This can be used to prevent rotation changes from occurring while the user is
+     * performing certain operations, such as drag and drop.
+     *
+     * This call nests and must be matched by an equal number of calls to {@link #resumeRotation}.
+     */
+    void pauseRotationLocked() {
+        mDeferredRotationPauseCount += 1;
+    }
+
+    /**
+     * Resumes normal rotation changes after being paused.
+     */
+    void resumeRotationLocked() {
+        if (mDeferredRotationPauseCount > 0) {
+            mDeferredRotationPauseCount -= 1;
+            if (mDeferredRotationPauseCount == 0) {
+                boolean changed = updateRotationUncheckedLocked(false);
+                if (changed) {
+                    mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
+                }
+            }
         }
-
-        setRotationUnchecked(rotation, alwaysSendConfiguration, animFlags);
     }
 
-    public void setRotationUnchecked(int rotation,
-            boolean alwaysSendConfiguration, int animFlags) {
-        if(DEBUG_ORIENTATION) Slog.v(TAG,
-                   "setRotationUnchecked(rotation=" + rotation +
-                   " alwaysSendConfiguration=" + alwaysSendConfiguration +
-                   " animFlags=" + animFlags);
+    public void updateRotationUnchecked(
+            boolean alwaysSendConfiguration) {
+        if(DEBUG_ORIENTATION) Slog.v(TAG, "updateRotationUnchecked("
+                   + "alwaysSendConfiguration=" + alwaysSendConfiguration + ")");
 
         long origId = Binder.clearCallingIdentity();
         boolean changed;
         synchronized(mWindowMap) {
-            changed = setRotationUncheckedLocked(rotation, animFlags, false);
+            changed = updateRotationUncheckedLocked(false);
         }
 
         if (changed || alwaysSendConfiguration) {
@@ -5104,152 +5132,113 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Apply a new rotation to the screen, respecting the requests of
-     * applications.  Use WindowManagerPolicy.USE_LAST_ROTATION to simply
-     * re-evaluate the desired rotation.
-     * 
-     * Returns null if the rotation has been changed.  In this case YOU
-     * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
+     * Updates the current rotation.
+     *
+     * Returns true if the rotation has been changed.  In this case YOU
+     * MUST CALL sendNewConfiguration() TO UNFREEZE THE SCREEN.
      */
-    public boolean setRotationUncheckedLocked(int rotation, int animFlags, boolean inTransaction) {
-        if (mDragState != null
-                || (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating())) {
-            // Potential rotation during a drag or while waiting for a previous orientation
-            // change to finish (rotation animation will be dismissed).
-            // Don't do the rotation now, but make a note to perform the rotation later.
-            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation.");
-            if (rotation != WindowManagerPolicy.USE_LAST_ROTATION) {
-                mDeferredRotation = rotation;
-                mDeferredRotationAnimFlags = animFlags;
-            }
+    public boolean updateRotationUncheckedLocked(boolean inTransaction) {
+        if (mDeferredRotationPauseCount > 0) {
+            // Rotation updates have been paused temporarily.  Defer the update until
+            // updates have been resumed.
+            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, rotation is paused.");
             return false;
         }
 
-        boolean changed;
-        if (rotation == WindowManagerPolicy.USE_LAST_ROTATION) {
-            if (mDeferredRotation != WindowManagerPolicy.USE_LAST_ROTATION) {
-                rotation = mDeferredRotation;
-                mRequestedRotation = rotation;
-                mLastRotationFlags = mDeferredRotationAnimFlags;
+        if (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating()) {
+            // Rotation updates cannot be performed while the previous rotation change
+            // animation is still in progress.  Skip this update.  We will try updating
+            // again after the animation is finished and the display is unfrozen.
+            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, animation in progress.");
+            return false;
+        }
+
+        if (!mDisplayEnabled) {
+            // No point choosing a rotation if the display is not enabled.
+            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, display is not enabled.");
+            return false;
+        }
+
+        // TODO: Implement forced rotation changes.
+        //       Set mAltOrientation to indicate that the application is receiving
+        //       an orientation that has different metrics than it expected.
+        //       eg. Portrait instead of Landscape.
+
+        int rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation, mRotation);
+        boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
+                mForcedAppOrientation, rotation);
+
+        if (DEBUG_ORIENTATION) {
+            Slog.v(TAG, "Application requested orientation "
+                    + mForcedAppOrientation + ", got rotation " + rotation
+                    + " which has " + (altOrientation ? "incompatible" : "compatible")
+                    + " metrics");
+        }
+
+        if (mRotation == rotation && mAltOrientation == altOrientation) {
+            // No change.
+            return false;
+        }
+
+        if (DEBUG_ORIENTATION) {
+            Slog.v(TAG,
+                "Rotation changed to " + rotation + (altOrientation ? " (alt)" : "")
+                + " from " + mRotation + (mAltOrientation ? " (alt)" : "")
+                + ", forceApp=" + mForcedAppOrientation);
+        }
+
+        mRotation = rotation;
+        mAltOrientation = altOrientation;
+
+        mWindowsFreezingScreen = true;
+        mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
+        mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT), 2000);
+        mWaitingForConfig = true;
+        mLayoutNeeded = true;
+        startFreezingDisplayLocked(inTransaction);
+        mInputManager.setDisplayOrientation(0, rotation);
+
+        // NOTE: We disable the rotation in the emulator because
+        //       it doesn't support hardware OpenGL emulation yet.
+        if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
+                && mScreenRotationAnimation.hasScreenshot()) {
+            Surface.freezeDisplay(0);
+            if (!inTransaction) {
+                if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                        ">>> OPEN TRANSACTION setRotationUnchecked");
+                Surface.openTransaction();
             }
-            rotation = mRequestedRotation;
+            try {
+                if (mScreenRotationAnimation != null) {
+                    mScreenRotationAnimation.setRotation(rotation);
+                }
+            } finally {
+                if (!inTransaction) {
+                    Surface.closeTransaction();
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                            "<<< CLOSE TRANSACTION setRotationUnchecked");
+                }
+            }
+            Surface.setOrientation(0, rotation);
+            Surface.unfreezeDisplay(0);
         } else {
-            mRequestedRotation = rotation;
-            mLastRotationFlags = animFlags;
+            Surface.setOrientation(0, rotation);
         }
-        mDeferredRotation = WindowManagerPolicy.USE_LAST_ROTATION;
-        if (DEBUG_ORIENTATION) Slog.v(TAG, "Overwriting rotation value from " + rotation);
-        rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation,
-                mRotation, mDisplayEnabled);
-        if (DEBUG_ORIENTATION) Slog.v(TAG, "new rotation is set to " + rotation);
+        rebuildBlackFrame(inTransaction);
 
-        int desiredRotation = rotation;
-        int lockedRotation = mPolicy.getLockedRotationLw();
-        if (lockedRotation >= 0 && rotation != lockedRotation) {
-            // We are locked in a rotation but something is requesting
-            // a different rotation...  we will either keep the locked
-            // rotation if it results in the same orientation, or have to
-            // switch into an emulated orientation mode.
-
-            // First, we know that our rotation is actually going to be
-            // the locked rotation.
-            rotation = lockedRotation;
-
-            // Now the difference between the desired and lockedRotation
-            // may mean that the orientation is different...  if that is
-            // not the case, we can just make the desired rotation be the
-            // same as the new locked rotation.
-            switch (lockedRotation) {
-                case Surface.ROTATION_0:
-                    if (rotation == Surface.ROTATION_180) {
-                        desiredRotation = lockedRotation;
-                    }
-                    break;
-                case Surface.ROTATION_90:
-                    if (rotation == Surface.ROTATION_270) {
-                        desiredRotation = lockedRotation;
-                    }
-                    break;
-                case Surface.ROTATION_180:
-                    if (rotation == Surface.ROTATION_0) {
-                        desiredRotation = lockedRotation;
-                    }
-                    break;
-                case Surface.ROTATION_270:
-                    if (rotation == Surface.ROTATION_90) {
-                        desiredRotation = lockedRotation;
-                    }
-                    break;
+        for (int i=mWindows.size()-1; i>=0; i--) {
+            WindowState w = mWindows.get(i);
+            if (w.mSurface != null) {
+                w.mOrientationChanging = true;
             }
         }
-
-        changed = mDisplayEnabled && mRotation != rotation;
-        if (mAltOrientation != (rotation != desiredRotation)) {
-            changed = true;
-            mAltOrientation = rotation != desiredRotation;
+        for (int i=mRotationWatchers.size()-1; i>=0; i--) {
+            try {
+                mRotationWatchers.get(i).onRotationChanged(rotation);
+            } catch (RemoteException e) {
+            }
         }
-
-        if (changed) {
-            if (DEBUG_ORIENTATION) Slog.v(TAG,
-                    "Rotation changed to " + rotation
-                    + " from " + mRotation
-                    + " (forceApp=" + mForcedAppOrientation
-                    + ", req=" + mRequestedRotation + ")");
-            mRotation = rotation;
-            mWindowsFreezingScreen = true;
-            mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-            mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
-                    2000);
-            mWaitingForConfig = true;
-            mLayoutNeeded = true;
-            startFreezingDisplayLocked(inTransaction);
-            //Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
-            mInputManager.setDisplayOrientation(0, rotation);
-            if (mDisplayEnabled) {
-                // NOTE: We disable the rotation in the emulator because
-                //       it doesn't support hardware OpenGL emulation yet.
-                if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
-                        && mScreenRotationAnimation.hasScreenshot()) {
-                    Surface.freezeDisplay(0);
-                    if (!inTransaction) {
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                                ">>> OPEN TRANSACTION setRotationUnchecked");
-                        Surface.openTransaction();
-                    }
-                    try {
-                        if (mScreenRotationAnimation != null) {
-                            mScreenRotationAnimation.setRotation(rotation);
-                        }
-                    } finally {
-                        if (!inTransaction) {
-                            Surface.closeTransaction();
-                            if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                                    "<<< CLOSE TRANSACTION setRotationUnchecked");
-                        }
-                    }
-                    Surface.setOrientation(0, rotation, animFlags);
-                    Surface.unfreezeDisplay(0);
-                } else {
-                    Surface.setOrientation(0, rotation, animFlags);
-                }
-                rebuildBlackFrame(inTransaction);
-            }
-
-            for (int i=mWindows.size()-1; i>=0; i--) {
-                WindowState w = mWindows.get(i);
-                if (w.mSurface != null) {
-                    w.mOrientationChanging = true;
-                }
-            }
-            for (int i=mRotationWatchers.size()-1; i>=0; i--) {
-                try {
-                    mRotationWatchers.get(i).onRotationChanged(rotation);
-                } catch (RemoteException e) {
-                }
-            }
-        } //end if changed
-
-        return changed;
+        return true;
     }
 
     public int getRotation() {
@@ -8607,8 +8596,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (updateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            boolean changed = setRotationUncheckedLocked(
-                    WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
+            boolean changed = updateRotationUncheckedLocked(false);
             if (changed) {
                 mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             } else {
@@ -9035,8 +9023,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         if (updateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            configChanged |= setRotationUncheckedLocked(
-                    WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
+            configChanged |= updateRotationUncheckedLocked(false);
         }
         
         if (configChanged) {
@@ -9409,12 +9396,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
                     pw.print(" mWaitingForConfig="); pw.println(mWaitingForConfig);
             pw.print("  mRotation="); pw.print(mRotation);
-                    pw.print(" mRequestedRotation="); pw.print(mRequestedRotation);
                     pw.print(" mAltOrientation="); pw.println(mAltOrientation);
             pw.print("  mLastWindowForcedOrientation"); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
-            pw.print("  mDeferredRotation="); pw.print(mDeferredRotation);
-                    pw.print(", mDeferredRotationAnimFlags="); pw.println(mDeferredRotationAnimFlags);
+            pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
             pw.print("  mAnimationPending="); pw.print(mAnimationPending);
                     pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
