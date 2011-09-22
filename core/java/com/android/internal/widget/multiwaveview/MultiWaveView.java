@@ -114,6 +114,13 @@ public class MultiWaveView extends View {
         }
     };
 
+    private AnimatorListener mResetListenerWithPing = new AnimatorListenerAdapter() {
+        public void onAnimationEnd(Animator animator) {
+            ping();
+            switchToState(STATE_IDLE, mWaveCenterX, mWaveCenterY);
+        }
+    };
+
     private AnimatorUpdateListener mUpdateListener = new AnimatorUpdateListener() {
         public void onAnimationUpdate(ValueAnimator animation) {
             invalidateGlobalRegion(mHandleDrawable);
@@ -417,7 +424,7 @@ public class MultiWaveView extends View {
                     "x", mWaveCenterX,
                     "y", mWaveCenterY,
                     "onUpdate", mUpdateListener,
-                    "onComplete", mResetListener);
+                    "onComplete", mResetListenerWithPing);
         }
 
         setGrabbedState(OnTriggerListener.NO_HANDLE);
