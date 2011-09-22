@@ -66,7 +66,6 @@ public interface BluetoothProfile {
 
     /**
      * Health Profile
-     * @hide
      */
     public static final int HEALTH = 3;
 
