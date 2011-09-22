@@ -375,12 +375,6 @@ public interface WindowManagerPolicy {
     /** Screen turned off because of proximity sensor */
     public final int OFF_BECAUSE_OF_PROX_SENSOR = 4;
 
-    /**
-     * Magic constant to {@link IWindowManager#setRotation} to not actually
-     * modify the rotation.
-     */
-    public final int USE_LAST_ROTATION = -1000;
-
     /** When not otherwise specified by the activity's screenOrientation, rotation should be
      * determined by the system (that is, using sensors). */
     public final int USER_ROTATION_FREE = 0;
@@ -856,22 +850,30 @@ public interface WindowManagerPolicy {
     public boolean inKeyguardRestrictedKeyInputMode();
 
     /**
-     * Given an orientation constant
-     * ({@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE
-     * ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE} or
-     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_PORTRAIT
-     * ActivityInfo.SCREEN_ORIENTATION_PORTRAIT}), return a surface
-     * rotation.
+     * Given an orientation constant, returns the appropriate surface rotation,
+     * taking into account sensors, docking mode, rotation lock, and other factors.
+     *
+     * @param orientation An orientation constant, such as
+     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
+     * @param lastRotation The most recently used rotation.
+     * @return The surface rotation to use.
      */
-    public int rotationForOrientationLw(int orientation, int lastRotation,
-            boolean displayEnabled);
-    
+    public int rotationForOrientationLw(int orientation, int lastRotation);
+
     /**
-     * Return the currently locked screen rotation, if any.  Return
-     * Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_180, or
-     * Surface.ROTATION_270 if locked; return -1 if not locked.
+     * Given an orientation constant and a rotation, returns true if the rotation
+     * has compatible metrics to the requested orientation.  For example, if
+     * the application requested landscape and got seascape, then the rotation
+     * has compatible metrics; if the application requested portrait and got landscape,
+     * then the rotation has incompatible metrics; if the application did not specify
+     * a preference, then anything goes.
+     *
+     * @param orientation An orientation constant, such as
+     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
+     * @param rotation The rotation to check.
+     * @return True if the rotation is compatible with the requested orientation.
      */
-    public int getLockedRotationLw();
+    public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation);
 
     /**
      * Called when the system is mostly done booting to determine whether

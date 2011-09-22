@@ -118,14 +118,13 @@ public abstract class WindowOrientationListener {
 
     /**
      * Gets the current orientation.
-     * @param lastRotation
-     * @return
+     * @return The current rotation, or -1 if unknown.
      */
-    public int getCurrentRotation(int lastRotation) {
+    public int getCurrentRotation() {
         if (mEnabled) {
-            return mSensorEventListener.getCurrentRotation(lastRotation);
+            return mSensorEventListener.getCurrentRotation();
         }
-        return lastRotation;
+        return -1;
     }
 
     /**
@@ -342,8 +341,8 @@ public abstract class WindowOrientationListener {
             mOrientationListener = orientationListener;
         }
 
-        public int getCurrentRotation(int lastRotation) {
-            return mRotation != ROTATION_UNKNOWN ? mRotation : lastRotation;
+        public int getCurrentRotation() {
+            return mRotation; // may be -1, if unknown
         }
 
         @Override

@@ -566,7 +566,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
 
             const int dpy = 0;
             const int orientation = mCurrentState.orientation;
-            const uint32_t type = mCurrentState.orientationType;
+            // Currently unused: const uint32_t flags = mCurrentState.orientationFlags;
             GraphicPlane& plane(graphicPlane(dpy));
             plane.setOrientation(orientation);
 
@@ -1299,7 +1299,7 @@ int SurfaceFlinger::setOrientation(DisplayID dpy,
     Mutex::Autolock _l(mStateLock);
     if (mCurrentState.orientation != orientation) {
         if (uint32_t(orientation)<=eOrientation270 || orientation==42) {
-            mCurrentState.orientationType = flags;
+            mCurrentState.orientationFlags = flags;
             mCurrentState.orientation = orientation;
             setTransactionFlags(eTransactionNeeded);
             mTransactionCV.wait(mStateLock);

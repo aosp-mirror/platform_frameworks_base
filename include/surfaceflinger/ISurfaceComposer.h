@@ -88,11 +88,6 @@ public:
         eElectronBeamAnimationOff = 0x10
     };
 
-    // flags for setOrientation
-    enum {
-        eOrientationAnimationDisable = 0x00000001
-    };
-
     /* create connection with surface flinger, requires
      * ACCESS_SURFACE_FLINGER permission
      */
@@ -112,7 +107,8 @@ public:
     virtual status_t freezeDisplay(DisplayID dpy, uint32_t flags) = 0;
     virtual status_t unfreezeDisplay(DisplayID dpy, uint32_t flags) = 0;
 
-    /* Set display orientation. requires ACCESS_SURFACE_FLINGER permission */
+    /* Set display orientation. requires ACCESS_SURFACE_FLINGER permission
+     * No flags are currently defined.  Set flags to 0. */
     virtual int setOrientation(DisplayID dpy, int orientation, uint32_t flags) = 0;
 
     /* signal that we're done booting.
