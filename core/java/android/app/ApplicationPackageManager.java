@@ -954,9 +954,9 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void verifyPendingInstall(int id, boolean verified, String failureMessage) {
+    public void verifyPendingInstall(int id, int response) {
         try {
-            mPM.verifyPendingInstall(id, verified, failureMessage);
+            mPM.verifyPendingInstall(id, response);
         } catch (RemoteException e) {
             // Should never happen!
         }

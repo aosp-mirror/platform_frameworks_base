@@ -359,7 +359,7 @@ interface IPackageManager {
             int flags, in String installerPackageName, in Uri verificationURI,
             in ManifestDigest manifestDigest);
 
-    void verifyPendingInstall(int id, boolean verified, in String message);
+    void verifyPendingInstall(int id, int verificationCode);
 
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 }
