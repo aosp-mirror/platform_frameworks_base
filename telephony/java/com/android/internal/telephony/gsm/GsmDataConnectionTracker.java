@@ -1768,8 +1768,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             ApnSetting apn = apnContext.getApnSetting();
             if (apn.proxy != null && apn.proxy.length() != 0) {
                 try {
+                    String port = apn.port;
+                    if (TextUtils.isEmpty(port)) port = "8080";
                     ProxyProperties proxy = new ProxyProperties(apn.proxy,
-                            Integer.parseInt(apn.port), null);
+                            Integer.parseInt(port), null);
                     dcac.setLinkPropertiesHttpProxySync(proxy);
                 } catch (NumberFormatException e) {
                     loge("onDataSetupComplete: NumberFormatException making ProxyProperties (" +

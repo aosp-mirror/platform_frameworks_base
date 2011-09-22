@@ -2618,7 +2618,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         if (VDBG) log("changing default proxy to " + proxy);
-        if ((proxy == null && mGlobalProxy == null) || proxy.equals(mGlobalProxy)) return;
+
+        // global trumps default, if set, ignore this.
         if (mGlobalProxy != null) return;
         sendProxyBroadcast(proxy);
     }
