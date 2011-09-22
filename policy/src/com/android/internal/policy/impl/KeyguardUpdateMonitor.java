@@ -484,6 +484,9 @@ public class KeyguardUpdateMonitor {
     public void registerInfoCallback(InfoCallback callback) {
         if (!mInfoCallbacks.contains(callback)) {
             mInfoCallbacks.add(callback);
+            // notify the register the current state right away
+            // TODO: need call other callback methods
+            callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         } else {
             if (DEBUG) Log.e(TAG, "Object tried to add another INFO callback",
                     new Exception("Whoops"));
@@ -497,6 +500,10 @@ public class KeyguardUpdateMonitor {
     public void registerSimStateCallback(SimStateCallback callback) {
         if (!mSimStateCallbacks.contains(callback)) {
             mSimStateCallbacks.add(callback);
+            // notify the register the current sim state right away,
+            // otherwise the register won't receive any state until
+            // sim state gets changed again.
+            callback.onSimStateChanged(mSimState);
         } else {
             if (DEBUG) Log.e(TAG, "Object tried to add another SIM callback",
                     new Exception("Whoops"));
