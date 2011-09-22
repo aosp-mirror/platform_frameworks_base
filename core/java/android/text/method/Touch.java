@@ -35,43 +35,38 @@ public class Touch {
      * Y position.
      */
     public static void scrollTo(TextView widget, Layout layout, int x, int y) {
-        int padding = widget.getTotalPaddingTop() +
-                      widget.getTotalPaddingBottom();
-        int top = layout.getLineForVertical(y);
-        int bottom = layout.getLineForVertical(y + widget.getHeight() -
-                                               padding);
+        final int verticalPadding = widget.getTotalPaddingTop() + widget.getTotalPaddingBottom();
+        final int top = layout.getLineForVertical(y);
+        final int bottom = layout.getLineForVertical(y + widget.getHeight() - verticalPadding);
 
         int left = Integer.MAX_VALUE;
         int right = 0;
-        Alignment a = null;
-        boolean ltr = true;
+        Alignment a = layout.getParagraphAlignment(top);
+        boolean ltr = layout.getParagraphDirection(top) > 0;
 
         for (int i = top; i <= bottom; i++) {
             left = (int) Math.min(left, layout.getLineLeft(i));
             right = (int) Math.max(right, layout.getLineRight(i));
-
-            if (a == null) {
-                a = layout.getParagraphAlignment(i);
-                ltr = layout.getParagraphDirection(i) > 0;
-            }
         }
 
-        padding = widget.getTotalPaddingLeft() + widget.getTotalPaddingRight();
-        int width = widget.getWidth();
-        int diff = 0;
+        final int hoizontalPadding = widget.getTotalPaddingLeft() + widget.getTotalPaddingRight();
+        final int availableWidth = widget.getWidth() - hoizontalPadding;
+        final int actualWidth = right - left;
 
-        // align_opposite does NOT mean align_right, we need the paragraph
-        // direction to resolve it to left or right
-        if (right - left < width - padding) {
+        if (actualWidth < availableWidth) {
             if (a == Alignment.ALIGN_CENTER) {
-                diff = (width - padding - (right - left)) / 2;
-            } else if (ltr == (a == Alignment.ALIGN_OPPOSITE)) {
-                diff = width - padding - (right - left);
+                x = left - ((availableWidth - actualWidth) / 2);
+            } else if ((ltr && (a == Alignment.ALIGN_OPPOSITE)) || (a == Alignment.ALIGN_RIGHT)) {
+                // align_opposite does NOT mean align_right, we need the paragraph
+                // direction to resolve it to left or right
+                x = left - (availableWidth - actualWidth);
+            } else {
+                x = left;
             }
+        } else {
+            x = Math.min(x, right - availableWidth);
+            x = Math.max(x, left);
         }
-
-        x = Math.min(x, right - (width - padding) - diff);
-        x = Math.max(x, left - diff);
 
         widget.scrollTo(x, y);
     }
