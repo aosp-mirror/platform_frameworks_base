@@ -259,6 +259,11 @@ final class ActivityStack {
      */
     boolean mSleepTimeout = false;
 
+    /**
+     * Dismiss the keyguard after the next activity is displayed?
+     */
+    boolean mDismissKeyguardOnNextActivity = false;
+
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
 
@@ -2169,7 +2174,7 @@ final class ActivityStack {
         }
 
         if (err == START_SUCCESS) {
-            Slog.i(TAG, "Starting: " + intent + " from pid "
+            Slog.i(TAG, "START {" + intent.toShortString(true, true, true) + "} from pid "
                     + (callerApp != null ? callerApp.pid : callingPid));
         }
 
@@ -2224,6 +2229,7 @@ final class ActivityStack {
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
+            mDismissKeyguardOnNextActivity = false;
             return err;
         }
 
@@ -2235,6 +2241,7 @@ final class ActivityStack {
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
+            mDismissKeyguardOnNextActivity = false;
             String msg;
             if (!aInfo.exported) {
                 msg = "Permission Denial: starting " + intent.toString()
@@ -2272,6 +2279,7 @@ final class ActivityStack {
                     }
                     // We pretend to the caller that it was really started, but
                     // they will just get a cancel result.
+                    mDismissKeyguardOnNextActivity = false;
                     return START_SUCCESS;
                 }
             }
@@ -2295,6 +2303,7 @@ final class ActivityStack {
                     pal.grantedMode = grantedMode;
                     pal.onlyIfNeeded = onlyIfNeeded;
                     mService.mPendingActivityLaunches.add(pal);
+                    mDismissKeyguardOnNextActivity = false;
                     return START_SWITCHES_CANCELED;
                 }
             }
@@ -2313,8 +2322,17 @@ final class ActivityStack {
             mService.doPendingActivityLaunchesLocked(false);
         }
         
-        return startActivityUncheckedLocked(r, sourceRecord,
+        err = startActivityUncheckedLocked(r, sourceRecord,
                 grantedUriPermissions, grantedMode, onlyIfNeeded, true);
+        if (mDismissKeyguardOnNextActivity && mPausingActivity == null) {
+            // Someone asked to have the keyguard dismissed on the next
+            // activity start, but we are not actually doing an activity
+            // switch...  just dismiss the keyguard now, because we
+            // probably want to see whatever is behind it.
+            mDismissKeyguardOnNextActivity = false;
+            mService.mWindowManager.dismissKeyguard();
+        }
+        return err;
     }
   
     final void moveHomeToFrontFromLaunchLocked(int launchFlags) {
@@ -2983,6 +3001,11 @@ final class ActivityStack {
             w.thisTime = w.totalTime;
         }
         mService.notifyAll();
+
+        if (mDismissKeyguardOnNextActivity) {
+            mDismissKeyguardOnNextActivity = false;
+            mService.mWindowManager.dismissKeyguard();
+        }
     }
 
     void sendActivityResultLocked(int callingUid, ActivityRecord r,
@@ -4125,5 +4148,9 @@ final class ActivityStack {
         }
 
         return true;
+    }
+    
+    public void dismissKeyguardOnNextActivityLocked() {
+        mDismissKeyguardOnNextActivity = true;
     }
 }

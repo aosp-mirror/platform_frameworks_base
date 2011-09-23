@@ -353,6 +353,48 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public abstract String toString();
 
     /**
+     * Return a string representation of the URI that is safe to print
+     * to logs and other places where PII should be avoided.
+     * @hide
+     */
+    public String toSafeString() {
+        String scheme = getScheme();
+        String ssp = getSchemeSpecificPart();
+        if (scheme != null) {
+            if (scheme.equalsIgnoreCase("tel") || scheme.equalsIgnoreCase("sip")
+                    || scheme.equalsIgnoreCase("sms") || scheme.equalsIgnoreCase("smsto")
+                    || scheme.equalsIgnoreCase("mailto")) {
+                StringBuilder builder = new StringBuilder(64);
+                builder.append(scheme);
+                builder.append(':');
+                if (ssp != null) {
+                    for (int i=0; i<ssp.length(); i++) {
+                        char c = ssp.charAt(i);
+                        if (c == '-' || c == '@' || c == '.') {
+                            builder.append(c);
+                        } else {
+                            builder.append('x');
+                        }
+                    }
+                }
+                return builder.toString();
+            }
+        }
+        // Not a sensitive scheme, but let's still be conservative about
+        // the data we include -- only the ssp, not the query params or
+        // fragment, because those can often have sensitive info.
+        StringBuilder builder = new StringBuilder(64);
+        if (scheme != null) {
+            builder.append(scheme);
+            builder.append(':');
+        }
+        if (ssp != null) {
+            builder.append(ssp);
+        }
+        return builder.toString();
+    }
+
+    /**
      * Constructs a new builder, copying the attributes from this Uri.
      */
     public abstract Builder buildUpon();

@@ -3784,6 +3784,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         mWindowManager.showBootMessage(msg, always);
     }
 
+    public void dismissKeyguardOnNextActivity() {
+        synchronized (this) {
+            mMainStack.dismissKeyguardOnNextActivityLocked();
+        }
+    }
+
     final void finishBooting() {
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
@@ -7907,6 +7913,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (dumpAll) {
             pw.println("  mLastPausedActivity: " + mMainStack.mLastPausedActivity);
             pw.println("  mSleepTimeout: " + mMainStack.mSleepTimeout);
+            pw.println("  mDismissKeyguardOnNextActivity: "
+                    + mMainStack.mDismissKeyguardOnNextActivity);
         }
 
         if (mRecentTasks.size() > 0) {
@@ -8547,7 +8555,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     for (int i=0; i<N; i++) {
                         sb.setLength(0);
                         sb.append("    Intent: ");
-                        intents.get(i).toShortString(sb, true, false);
+                        intents.get(i).toShortString(sb, false, true, false);
                         pw.println(sb.toString());
                         Bundle bundle = intents.get(i).getExtras();
                         if (bundle != null) {
@@ -8840,7 +8848,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } else if (complete) {
                     // Complete + brief == give a summary.  Isn't that obvious?!?
                     if (lastTask.intent != null) {
-                        pw.print(prefix); pw.print("  "); pw.println(lastTask.intent);
+                        pw.print(prefix); pw.print("  ");
+                                pw.println(lastTask.intent.toInsecureString());
                     }
                 }
             }
@@ -8851,7 +8860,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r.dump(pw, innerPrefix);
             } else if (complete) {
                 // Complete + brief == give a summary.  Isn't that obvious?!?
-                pw.print(innerPrefix); pw.println(r.intent);
+                pw.print(innerPrefix); pw.println(r.intent.toInsecureString());
                 if (r.app != null) {
                     pw.print(innerPrefix); pw.println(r.app);
                 }
@@ -10053,7 +10062,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean created = false;
         try {
             mStringBuilder.setLength(0);
-            r.intent.getIntent().toShortString(mStringBuilder, false, true);
+            r.intent.getIntent().toShortString(mStringBuilder, true, false, true);
             EventLog.writeEvent(EventLogTags.AM_CREATE_SERVICE,
                     System.identityHashCode(r), r.shortName,
                     mStringBuilder.toString(), r.app.pid);

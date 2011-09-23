@@ -192,7 +192,7 @@ class ServiceRecord extends Binder {
     
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("intent={");
-                pw.print(intent.getIntent().toShortString(true, false));
+                pw.print(intent.getIntent().toShortString(false, true, false));
                 pw.println('}');
         pw.print(prefix); pw.print("packageName="); pw.println(packageName);
         pw.print(prefix); pw.print("processName="); pw.println(processName);

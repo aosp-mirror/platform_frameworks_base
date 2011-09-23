@@ -54,7 +54,7 @@ class IntentBindRecord {
 
     void dumpInService(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("intent={");
-                pw.print(intent.getIntent().toShortString(true, false));
+                pw.print(intent.getIntent().toShortString(false, true, false));
                 pw.println('}');
         pw.print(prefix); pw.print("binder="); pw.println(binder);
         pw.print(prefix); pw.print("requested="); pw.print(requested);
@@ -89,7 +89,7 @@ class IntentBindRecord {
         sb.append(service.shortName);
         sb.append(':');
         if (intent != null) {
-            intent.getIntent().toShortString(sb, false, false);
+            intent.getIntent().toShortString(sb, false, false, false);
         }
         sb.append('}');
         return stringName = sb.toString();

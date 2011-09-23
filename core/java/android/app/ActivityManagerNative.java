@@ -1550,6 +1550,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            dismissKeyguardOnNextActivity();
+            reply.writeNoException();
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -3499,6 +3506,16 @@ class ActivityManagerProxy implements IActivityManager
         TextUtils.writeToParcel(msg, data, 0);
         data.writeInt(always ? 1 : 0);
         mRemote.transact(SHOW_BOOT_MESSAGE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void dismissKeyguardOnNextActivity() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
