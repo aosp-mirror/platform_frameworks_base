@@ -68,9 +68,7 @@ class TextLayoutCacheKey {
 public:
     TextLayoutCacheKey();
 
-    TextLayoutCacheKey(const SkPaint* paint,
-            const UChar* text, size_t start, size_t count,
-            size_t contextCount, int dirFlags);
+    TextLayoutCacheKey(const SkPaint* paint, const UChar* text, size_t count, int dirFlags);
 
     TextLayoutCacheKey(const TextLayoutCacheKey& other);
 
@@ -90,9 +88,7 @@ public:
 private:
     const UChar* text; // if text is NULL, use textCopy
     String16 textCopy;
-    size_t start;
     size_t count;
-    size_t contextCount;
     int dirFlags;
     SkTypeface* typeface;
     SkScalar textSize;
@@ -116,14 +112,13 @@ public:
     void setElapsedTime(uint32_t time);
     uint32_t getElapsedTime();
 
-    void computeValues(SkPaint* paint, const UChar* chars, size_t start, size_t count,
-            size_t contextCount, int dirFlags);
+    void computeValues(SkPaint* paint, const UChar* chars, size_t contextCount, int dirFlags);
 
-    inline const jfloat* getAdvances() const { return mAdvances.array(); }
-    inline size_t getAdvancesCount() const { return mAdvances.size(); }
-    inline jfloat getTotalAdvance() const { return mTotalAdvance; }
-    inline const jchar* getGlyphs() const { return mGlyphs.array(); }
-    inline size_t getGlyphsCount() const { return mGlyphs.size(); }
+    void    getAdvances(size_t start, size_t count, jfloat* outAdvances) const;
+    jfloat  getTotalAdvance(size_t start, size_t count) const;
+    void    getGlyphsIndexAndCount(size_t start, size_t count, size_t* outStartIndex,
+                size_t* outGlyphsCount) const;
+    const jchar*  getGlyphs(size_t startIndex, size_t count);
 
     /**
      * Get the size of the Cache entry
@@ -138,14 +133,10 @@ public:
             SkPaint* paint, const UChar* chars, size_t start, size_t count, size_t contextCount,
             bool isRTL);
 
-    static void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
-            size_t count, size_t contextCount, int dirFlags,
+    static void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+            size_t contextCount, int dirFlags,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-            Vector<jchar>* const outGlyphs);
-
-    static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars, size_t start,
-            size_t count, size_t contextCount, int dirFlags,
-            jfloat* outAdvances, jfloat* outTotalAdvance);
+            Vector<jchar>* const outGlyphs, Vector<unsigned short>* const outLogClusters);
 
 private:
     /**
@@ -164,6 +155,11 @@ private:
     Vector<jchar> mGlyphs;
 
     /**
+     * Harfbuzz Log Clusters
+     */
+    Vector<unsigned short> mLogClusters;
+
+    /**
      * Time for computing the values (in milliseconds)
      */
     uint32_t mElapsedTime;
@@ -175,7 +171,7 @@ private:
     static void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, bool isRTL,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-            Vector<jchar>* const outGlyphs);
+            Vector<jchar>* const outGlyphs, Vector<unsigned short>* const outLogClusters);
 }; // TextLayoutCacheValue
 
 /**
@@ -199,8 +195,8 @@ public:
      */
     void operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc);
 
-    sp<TextLayoutCacheValue> getValue(SkPaint* paint,
-            const jchar* text, jint start, jint count, jint contextCount, jint dirFlags);
+    sp<TextLayoutCacheValue> getValue(SkPaint* paint, const jchar* text, jint count,
+            jint dirFlags);
 
     /**
      * Clear the cache
