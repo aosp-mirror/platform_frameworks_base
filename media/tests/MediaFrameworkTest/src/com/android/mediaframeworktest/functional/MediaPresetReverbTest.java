@@ -43,6 +43,14 @@ import java.util.UUID;
  */
 public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaPresetReverbTest";
+    // Implementor UUID for volume controller effect defined in
+    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
+    private final static UUID VOLUME_EFFECT_UUID =
+        UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
+    // Implementor UUID for preset reverb effect defined in
+    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
+    private final static UUID PRESET_REVERB_EFFECT_UUID =
+        UUID.fromString("172cdf00-a3bc-11df-a72f-0002a5d5c51b");
 
     private PresetReverb mReverb = null;
     private int mSession = -1;
@@ -199,10 +207,10 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
-                    AudioEffect.EFFECT_TYPE_NULL,
-                    UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b"),
-                      0,
-                      0);
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
             vc.setEnabled(true);
 
             mp = new MediaPlayer();
@@ -267,24 +275,21 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
-                    AudioEffect.EFFECT_TYPE_NULL,
-                    UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b"),
-                      0,
-                      0);
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
             vc.setEnabled(true);
 
             mp = new MediaPlayer();
             mp.setDataSource(MediaNames.SINE_200_1000);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getReverb(mp.getAudioSessionId());
-            mReverb.setPreset((short)PresetReverb.PRESET_PLATE);
-            mReverb.setEnabled(true);
 
             // create reverb with UUID instead of PresetReverb constructor otherwise an auxiliary
             // reverb will be chosen by the effect framework as we are on session 0
             rvb = new AudioEffect(
                         AudioEffect.EFFECT_TYPE_NULL,
-                        UUID.fromString("172cdf00-a3bc-11df-a72f-0002a5d5c51b"),
+                        PRESET_REVERB_EFFECT_UUID,
                         0,
                         0);
 
@@ -317,7 +322,6 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
             loge(msg, "sleep() interrupted");
         }
         finally {
-            releaseReverb();
             if (mp != null) {
                 mp.release();
             }

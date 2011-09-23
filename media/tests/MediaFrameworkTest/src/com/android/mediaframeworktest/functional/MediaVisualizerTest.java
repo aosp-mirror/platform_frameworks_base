@@ -47,6 +47,10 @@ public class MediaVisualizerTest extends ActivityInstrumentationTestCase2<MediaF
     private final static int MAX_SAMPLING_RATE = 48000000;
     private final static int MIN_CAPTURE_SIZE_MAX = 1024;
     private final static int MAX_CAPTURE_SIZE_MIN = 128;
+    // Implementor UUID for volume controller effect defined in
+    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
+    private final static UUID VOLUME_EFFECT_UUID =
+        UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
 
     private Visualizer mVisualizer = null;
     private int mSession = -1;
@@ -205,10 +209,10 @@ public class MediaVisualizerTest extends ActivityInstrumentationTestCase2<MediaF
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
-                    AudioEffect.EFFECT_TYPE_NULL,
-                    UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b"),
-                      0,
-                      0);
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
             vc.setEnabled(true);
 
             mp = new MediaPlayer();
@@ -281,10 +285,10 @@ public class MediaVisualizerTest extends ActivityInstrumentationTestCase2<MediaF
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
-                    AudioEffect.EFFECT_TYPE_NULL,
-                    UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b"),
-                      0,
-                      0);
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
             vc.setEnabled(true);
 
             mp = new MediaPlayer();

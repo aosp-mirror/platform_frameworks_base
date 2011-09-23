@@ -49,6 +49,11 @@ public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFr
     private final static int TEST_FREQUENCY_MILLIHERTZ = 1000000;
     private final static int MIN_NUMBER_OF_PRESETS = 4;
     private final static int TEST_VOLUME = 4;
+    // Implementor UUID for volume controller effect defined in
+    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
+    private final static UUID VOLUME_EFFECT_UUID =
+        UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
+
     private Equalizer mEqualizer = null;
     private int mSession = -1;
 
@@ -267,10 +272,10 @@ public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFr
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
-                    AudioEffect.EFFECT_TYPE_NULL,
-                    UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b"),
-                      0,
-                      0);
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
             vc.setEnabled(true);
 
             mp = new MediaPlayer();
