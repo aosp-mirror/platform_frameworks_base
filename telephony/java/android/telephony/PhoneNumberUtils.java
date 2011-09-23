@@ -1567,6 +1567,14 @@ public class PhoneNumberUtils
         // that has been collected.
         if (util.isValidNumber(pn)) {
           return false;
+        } else if ("BR".equalsIgnoreCase(defaultCountryIso) && number.length() >= 8) {
+          // This is to prevent Brazilian local numbers which start with 911 being incorrectly
+          // classified as emergency numbers. 911 is not an emergency number in Brazil; it is also
+          // not possible to append additional digits to an emergency number to dial the number in
+          // Brazil - it won't connect.
+          // TODO: Clean this up once a list of country-specific known emergency numbers is
+          // collected.
+          return false;
         }
       } catch (NumberParseException e) {
       }
