@@ -113,10 +113,18 @@ public class SerialPort {
         }
     }
 
+    /**
+     * Sends a stream of zero valued bits for 0.25 to 0.5 seconds
+     */
+    public void sendBreak() {
+        native_send_break();
+    }
+
     private native void native_open(FileDescriptor pfd, int speed) throws IOException;
     private native void native_close();
     private native int native_read_array(byte[] buffer, int length) throws IOException;
     private native int native_read_direct(ByteBuffer buffer, int length) throws IOException;
     private native void native_write_array(byte[] buffer, int length) throws IOException;
     private native void native_write_direct(ByteBuffer buffer, int length) throws IOException;
+    private native void native_send_break();
 }
