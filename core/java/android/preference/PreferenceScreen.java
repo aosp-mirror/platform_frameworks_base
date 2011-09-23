@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.Window;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
@@ -156,13 +157,13 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
 
         // Set the title bar if title is available, else no title bar
         final CharSequence title = getTitle();
-        Dialog dialog = mDialog = new Dialog(context, TextUtils.isEmpty(title)
-                ? com.android.internal.R.style.Theme_NoTitleBar
-                : com.android.internal.R.style.Theme);
-        dialog.setContentView(mListView);
-        if (!TextUtils.isEmpty(title)) {
+        Dialog dialog = mDialog = new Dialog(context, context.getThemeResId());
+        if (TextUtils.isEmpty(title)) {
+            dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        } else {
             dialog.setTitle(title);
         }
+        dialog.setContentView(mListView);
         dialog.setOnDismissListener(this);
         if (state != null) {
             dialog.onRestoreInstanceState(state);
