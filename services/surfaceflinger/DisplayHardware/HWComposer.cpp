@@ -176,7 +176,7 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE,
                 mList->numHwLayers, mList->flags);
         result.append(buffer);
         result.append(
-                "    type   |   hints  |   flags  | tr | blend |  format  |     source rectangle      |      crop rectangle       name \n"
+                "    type   |   hints  |   flags  | tr | blend |  format  |       source crop         |           frame           name \n"
                 "-----------+----------+----------+----+-------+----------+---------------------------+--------------------------------\n");
         //      "  ________ | ________ | ________ | __ | _____ | ________ | [_____,_____,_____,_____] | [_____,_____,_____,_____]
         for (size_t i=0 ; i<mList->numHwLayers ; i++) {
