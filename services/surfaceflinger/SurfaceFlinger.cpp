@@ -986,19 +986,20 @@ void SurfaceFlinger::setupHardwareComposer(Region& dirtyInOut)
 
 void SurfaceFlinger::composeSurfaces(const Region& dirty)
 {
-    if (UNLIKELY(!mWormholeRegion.isEmpty())) {
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    HWComposer& hwc(hw.getHwComposer());
+
+    const size_t fbLayerCount = hwc.getLayerCount(HWC_FRAMEBUFFER);
+    if (UNLIKELY(fbLayerCount && !mWormholeRegion.isEmpty())) {
         // should never happen unless the window manager has a bug
         // draw something...
         drawWormhole();
     }
 
-    const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    HWComposer& hwc(hw.getHwComposer());
-    hwc_layer_t* const cur(hwc.getLayers());
-
     /*
      * and then, render the layers targeted at the framebuffer
      */
+    hwc_layer_t* const cur(hwc.getLayers());
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
     size_t count = layers.size();
     for (size_t i=0 ; i<count ; i++) {
