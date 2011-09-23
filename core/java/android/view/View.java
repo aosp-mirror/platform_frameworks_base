@@ -12263,7 +12263,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     + "resource id.");
         }
 
-        setKeyedTag(this, key, tag);
+        setKeyedTag(key, tag);
     }
 
     /**
@@ -12278,10 +12278,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     + "resource id.");
         }
 
-        setKeyedTag(this, key, tag);
+        setKeyedTag(key, tag);
     }
 
-    private void setKeyedTag(View view, int key, Object tag) {
+    private void setKeyedTag(int key, Object tag) {
         if (mKeyedTags == null) {
             mKeyedTags = new SparseArray<Object>();
         }
