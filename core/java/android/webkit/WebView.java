@@ -1808,6 +1808,8 @@ public class WebView extends AbsoluteLayout
     /**
      * Restore the display data that was save in {@link #savePicture}. Used in
      * conjunction with {@link #restoreState}.
+     *
+     * Note that this will not work if the WebView is hardware accelerated.
      * @param b A Bundle containing the saved display data.
      * @param src The file where the picture data was stored.
      * @return True if the picture was successfully restored.
