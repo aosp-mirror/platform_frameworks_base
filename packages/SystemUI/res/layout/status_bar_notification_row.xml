@@ -23,6 +23,7 @@
         android:layout_alignParentLeft="true"
         android:scaleType="center"
         android:clickable="true"
+        android:background="@*android:drawable/notify_panel_notification_icon_bg_tile"
         />
 
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
@@ -33,14 +34,14 @@
         android:layout_alignParentRight="true"
         android:focusable="true"
         android:clickable="true"
-        android:background="@drawable/notification_item_background_color"
+        android:background="@drawable/notification_row_bg"
         />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/status_bar_notification_row_background_color"
+        android:background="@drawable/notification_item_background_color"
         />
 
 </RelativeLayout>
