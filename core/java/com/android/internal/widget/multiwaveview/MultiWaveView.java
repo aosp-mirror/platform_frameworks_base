@@ -297,7 +297,7 @@ public class MultiWaveView extends View {
      */
     private void startChevronAnimation() {
         final float r = mHandleDrawable.getWidth() * 0.4f;
-        final float chevronAnimationDistance = mOuterRadius * 1.0f;
+        final float chevronAnimationDistance = mOuterRadius * 0.9f;
         final float from[][] = {
                 {mWaveCenterX - r, mWaveCenterY},  // left
                 {mWaveCenterX + r, mWaveCenterY},  // right
