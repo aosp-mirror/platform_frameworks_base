@@ -9614,6 +9614,7 @@ package android.hardware {
     method public void close() throws java.io.IOException;
     method public java.lang.String getName();
     method public int read(java.nio.ByteBuffer) throws java.io.IOException;
+    method public void sendBreak();
     method public void write(java.nio.ByteBuffer, int) throws java.io.IOException;
   }
 
