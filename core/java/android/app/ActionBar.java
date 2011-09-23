@@ -29,16 +29,29 @@ import android.view.Window;
 import android.widget.SpinnerAdapter;
 
 /**
- * Acts as a replacement for the title bar in Activities.
- * The action bar provides facilities for creating toolbar actions as well as
- * methods of navigating the application.
- * <p>By default, the action bar appears at the top of every activity, with the application icon on
- * the left, followed by the activity title. Items from the activity's options menu are also
- * accessible from the action bar.</p>
+ * A window feature at the top of the activity that may display the activity title, navigation
+ * modes, and other interactive items.
+ * <p>Beginning with Android 3.0 (API level 11), the action bar appears at the top of an
+ * activity's window when the activity uses the system's {@link
+ * android.R.style#Theme_Holo Holo} theme (or one of its descendant themes), which is the default.
+ * You may otherwise add the action bar by calling {@link
+ * android.view.Window#requestFeature requestFeature(FEATURE_ACTION_BAR)} or by declaring it in a
+ * custom theme with the {@link android.R.styleable#Theme_windowActionBar windowActionBar} property.
+ * <p>By default, the action bar shows the application icon on
+ * the left, followed by the activity title. If your activity has an options menu, you can make
+ * select items accessible directly from the action bar as "action items". You can also
+ * modify various characteristics of the action bar or remove it completely.</p>
  * <p>From your activity, you can retrieve an instance of {@link ActionBar} by calling {@link
  * android.app.Activity#getActionBar getActionBar()}.</p>
- * <p>For more information, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+ * <p>For information about how to use the action bar, including how to add action items, navigation
+ * modes and more, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
  * Bar</a> developer guide.</p>
+ * <p>In some cases, the action bar may be overlayed by another bar that enables contextual actions,
+ * using an {@link android.view.ActionMode}. For example, when the user selects one or more items in
+ * your activity, you can enable an action mode that offers actions specific to the selected
+ * items, with a UI that temporarily replaces the action bar. Although the UI may occupy the
+ * same space, the {@link android.view.ActionMode} APIs are distinct and independent from those for
+ * {@link ActionBar}.
  */
 public abstract class ActionBar {
     /**
@@ -423,6 +436,7 @@ public abstract class ActionBar {
      * Set the ActionBar's split background. This will appear in
      * the split action bar containing menu-provided action buttons
      * on some devices and configurations.
+     * <p>You can enable split action bar with {@link android.R.attr#uiOptions}
      *
      * @param d Background drawable for the split bar
      */
@@ -460,13 +474,6 @@ public abstract class ActionBar {
      * </ul>
      *
      * @return The current navigation mode.
-     * 
-     * @see #setStandardNavigationMode()
-     * @see #setStandardNavigationMode(CharSequence)
-     * @see #setStandardNavigationMode(CharSequence, CharSequence)
-     * @see #setDropdownNavigationMode(SpinnerAdapter)
-     * @see #setTabNavigationMode()
-     * @see #setCustomNavigationMode(View)
      */
     public abstract int getNavigationMode();
 
@@ -498,7 +505,6 @@ public abstract class ActionBar {
      * @return A new Tab
      *
      * @see #addTab(Tab)
-     * @see #insertTab(Tab, int)
      */
     public abstract Tab newTab();
 
@@ -606,7 +612,7 @@ public abstract class ActionBar {
     public abstract void show();
 
     /**
-     * Hide the ActionBar if it is not currently showing.
+     * Hide the ActionBar if it is currently showing.
      * If the window hosting the ActionBar does not have the feature
      * {@link Window#FEATURE_ACTION_BAR_OVERLAY} it will resize application
      * content to fit the new space available.

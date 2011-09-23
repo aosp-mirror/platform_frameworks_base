@@ -710,11 +710,12 @@
         <enum name="preferExternal" value="2" />
     </attr>
 
-    <!-- Extra options for an activity's UI. If specified on the application
+    <!-- Extra options for an activity's UI. Applies to either the {@code &lt;activity&gt;} or
+         {@code &lt;application&gt;} tag. If specified on the {@code &lt;application&gt;}
          tag these will be considered defaults for all activities in the
          application. -->
     <attr name="uiOptions">
-        <!-- No extra UI options. -->
+        <!-- No extra UI options. This is the default. -->
         <flag name="none" value="0" />
         <!-- Split the options menu into a separate bar at the bottom of
              the screen when severely constrained for horizontal space.
