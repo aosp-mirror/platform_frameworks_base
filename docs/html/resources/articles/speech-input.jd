@@ -87,8 +87,8 @@ while the "web search" model is used when users want to search by voice. </p>
 regularly. You can use the
 {@link android.speech.RecognizerIntent#ACTION_GET_LANGUAGE_DETAILS}
 broadcast intent to query for the list of supported languages.
-The web search model is available in all three languages, while free-form has
-primarily been optimized for English. As we work hard to support more models in
+The web search model is available for all languages, while the free-form model
+may not be optimized for all languages. As we work hard to support more models in
 more languages, and to improve the accuracy of the speech recognition technology
 we use in our products, Android developers who integrate speech capabilities
 directly into their applications can reap the benefits as well. </p>
