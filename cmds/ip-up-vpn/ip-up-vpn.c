@@ -40,6 +40,7 @@ static const char *env(const char *name) {
 
 static int set_address(struct sockaddr *sa, const char *address) {
     sa->sa_family = AF_INET;
+    errno = EINVAL;
     return inet_pton(AF_INET, address, &((struct sockaddr_in *)sa)->sin_addr);
 }
 
@@ -124,10 +125,11 @@ int main(int argc, char **argv)
         }
 
         /* Set the netmask. */
-        if (!set_address(&ifr.ifr_netmask, env("INTERNAL_NETMASK4")) ||
-                ioctl(s, SIOCSIFNETMASK, &ifr)) {
-            LOGE("Cannot set netmask: %s", strerror(errno));
-            return 1;
+        if (set_address(&ifr.ifr_netmask, env("INTERNAL_NETMASK4"))) {
+            if (ioctl(s, SIOCSIFNETMASK, &ifr)) {
+                LOGE("Cannot set netmask: %s", strerror(errno));
+                return 1;
+            }
         }
 
         /* TODO: Send few packets to trigger phase 2? */
