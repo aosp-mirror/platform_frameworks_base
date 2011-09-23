@@ -850,6 +850,11 @@ public interface WindowManagerPolicy {
     public boolean inKeyguardRestrictedKeyInputMode();
 
     /**
+     * Ask the policy to dismiss the keyguard, if it is currently shown.
+     */
+    public void dismissKeyguardLw();
+
+    /**
      * Given an orientation constant, returns the appropriate surface rotation,
      * taking into account sensors, docking mode, rotation lock, and other factors.
      *

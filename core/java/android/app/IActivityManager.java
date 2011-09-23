@@ -372,6 +372,8 @@ public interface IActivityManager extends IInterface {
 
     public void showBootMessage(CharSequence msg, boolean always) throws RemoteException;
 
+    public void dismissKeyguardOnNextActivity() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -602,4 +604,5 @@ public interface IActivityManager extends IInterface {
     int UPDATE_PERSISTENT_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+135;
     int GET_PROCESS_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+136;
     int SHOW_BOOT_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+137;
+    int DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+138;
 }
