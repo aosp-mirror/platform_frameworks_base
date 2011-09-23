@@ -71,7 +71,7 @@ public class MultiWaveView extends View {
 
     // Tune-able parameters
     private static final int CHEVRON_INCREMENTAL_DELAY = 160;
-    private static final int CHEVRON_ANIMATION_DURATION = 650;
+    private static final int CHEVRON_ANIMATION_DURATION = 850;
     private static final int RETURN_TO_HOME_DELAY = 1200;
     private static final int RETURN_TO_HOME_DURATION = 300;
     private static final int HIDE_ANIMATION_DELAY = 200;
@@ -297,7 +297,7 @@ public class MultiWaveView extends View {
      */
     private void startChevronAnimation() {
         final float r = mHandleDrawable.getWidth() * 0.4f;
-        final float chevronAnimationDistance = mOuterRadius * 0.8f;
+        final float chevronAnimationDistance = mOuterRadius * 1.0f;
         final float from[][] = {
                 {mWaveCenterX - r, mWaveCenterY},  // left
                 {mWaveCenterX + r, mWaveCenterY},  // right
@@ -310,6 +310,8 @@ public class MultiWaveView extends View {
                 {mWaveCenterX, mWaveCenterY + chevronAnimationDistance} }; // bottom
 
         mChevronAnimations.clear();
+        final float startScale = 0.5f;
+        final float endScale = 2.0f;
         for (int direction = 0; direction < 4; direction++) {
             for (int count = 0; count < mFeedbackCount; count++) {
                 int delay = count * CHEVRON_INCREMENTAL_DELAY;
@@ -323,6 +325,8 @@ public class MultiWaveView extends View {
                         "x", new float[] { from[direction][0], to[direction][0] },
                         "y", new float[] { from[direction][1], to[direction][1] },
                         "alpha", new float[] {1.0f, 0.0f},
+                        "scaleX", new float[] {startScale, endScale},
+                        "scaleY", new float[] {startScale, endScale},
                         "onUpdate", mUpdateListener));
             }
         }
