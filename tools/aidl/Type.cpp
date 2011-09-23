@@ -26,13 +26,9 @@ Type* CONTEXT_TYPE;
 Type* MAP_TYPE;
 Type* LIST_TYPE;
 Type* CLASSLOADER_TYPE;
-Type* RPC_SERVICE_BASE_TYPE;
 Type* RPC_DATA_TYPE;
-Type* RPC_BROKER_TYPE;
-Type* RPC_ENDPOINT_INFO_TYPE;
-Type* RPC_RESULT_HANDLER_TYPE;
 Type* RPC_ERROR_TYPE;
-Type* RPC_ERROR_LISTENER_TYPE;
+Type* EVENT_FAKE_TYPE;
 
 Expression* NULL_VALUE;
 Expression* THIS_VALUE;
@@ -124,32 +120,15 @@ register_base_types()
     CONTEXT_TYPE = new Type("android.content", "Context", Type::BUILT_IN, false, false, false);
     NAMES.Add(CONTEXT_TYPE);
 
-    RPC_SERVICE_BASE_TYPE = new Type("com.android.athome.service", "AndroidAtHomeService",
-                                    Type::BUILT_IN, false, false, false);
-    NAMES.Add(RPC_SERVICE_BASE_TYPE);
-
     RPC_DATA_TYPE = new RpcDataType();
     NAMES.Add(RPC_DATA_TYPE);
-
-    RPC_BROKER_TYPE = new Type("com.android.athome.utils", "AndroidAtHomeBroker",
-                                    Type::BUILT_IN, false, false, false);
-    NAMES.Add(RPC_BROKER_TYPE);
-
-    RPC_ENDPOINT_INFO_TYPE = new ParcelableType("com.android.athome.rpc", "EndpointInfo",
-                                    true, __FILE__, __LINE__);
-    NAMES.Add(RPC_ENDPOINT_INFO_TYPE);
-
-    RPC_RESULT_HANDLER_TYPE = new ParcelableType("com.android.athome.rpc", "RpcResultHandler",
-                                    true, __FILE__, __LINE__);
-    NAMES.Add(RPC_RESULT_HANDLER_TYPE);
 
     RPC_ERROR_TYPE = new ParcelableType("com.android.athome.rpc", "RpcError",
                                     true, __FILE__, __LINE__);
     NAMES.Add(RPC_ERROR_TYPE);
 
-    RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
-                                    Type::BUILT_IN, false, false, false);
-    NAMES.Add(RPC_ERROR_LISTENER_TYPE);
+    EVENT_FAKE_TYPE = new Type("event", Type::BUILT_IN, false, false, false);
+    NAMES.Add(EVENT_FAKE_TYPE);
 
     CLASSLOADER_TYPE = new ClassLoaderType();
     NAMES.Add(CLASSLOADER_TYPE);
