@@ -859,12 +859,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"کپی URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"انتخاب متن..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"افزودن به فرهنگ لغت"</string>
+    <string name="deleteText" msgid="7070985395199629156">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"فضا کم است"</string>
@@ -1113,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"لغو موارد حذف شده."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"اکنون هیچ کاری انجام نشود."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"انتخاب یک حساب"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"افزودن یک حساب"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"از کدام حساب می‌خواهید استفاده کنید؟"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"افزودن حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> ضربه بزنید و نگه دارید."</string>
@@ -1168,10 +1161,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"حافظه USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"ویرایش..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"هشدار میزان استفاده از داده"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"لمس برای مشاهده استفاده و تنظیمات"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"داده های 2G-3G غیرفعال شد"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"داده 4G غیر فعال شده است"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"داده های تلفن همراه غیرفعال شد"</string>

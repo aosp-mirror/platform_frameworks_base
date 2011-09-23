@@ -29,7 +29,7 @@
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Als u de gegevens van de volledige back-up wilt coderen, geeft u daarvoor hieronder een wachtwoord op:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Als deze herstelgegevens zijn gecodeerd, geeft u hieronder het wachtwoord op:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Back-up starten..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Back-up klaar"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Back-up voltooid"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Herstel starten..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"Herstellen beëindigd"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Time-out voor bewerking"</string>
