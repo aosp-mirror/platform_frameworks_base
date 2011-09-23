@@ -46,6 +46,10 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
     private final static int MIN_ENERGY_RATIO_2 = 3;
     private final static short TEST_STRENGTH = 500;
     private final static int TEST_VOLUME = 4;
+    // Implementor UUID for volume controller effect defined in
+    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
+    private final static UUID VOLUME_EFFECT_UUID =
+        UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
 
     private BassBoost mBassBoost = null;
     private int mSession = -1;
@@ -201,14 +205,15 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
-                    AudioEffect.EFFECT_TYPE_NULL,
-                    UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b"),
-                      0,
-                      0);
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
             vc.setEnabled(true);
 
             mp = new MediaPlayer();
             mp.setDataSource(MediaNames.SINE_200_1000);
+            mp.setLooping(true);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
             getBassBoost(mp.getAudioSessionId());
             mp.prepare();
@@ -219,7 +224,7 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
             int refEnergy1000 = probe.capture(1000);
             mBassBoost.setStrength((short)1000);
             mBassBoost.setEnabled(true);
-            Thread.sleep(500);
+            Thread.sleep(4000);
             // measure energy around 1kHz with band level at min
             int energy200 = probe.capture(200);
             int energy1000 = probe.capture(1000);
