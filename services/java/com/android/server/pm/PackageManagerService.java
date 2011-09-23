@@ -4352,7 +4352,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 PackageSetting ps = (PackageSetting)p.mExtras;
                 if (ps != null) {
-                    return ps.stopped;
+                    // System apps are never considered stopped for purposes of
+                    // filtering, because there may be no way for the user to
+                    // actually re-launch them.
+                    return ps.stopped && (ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0;
                 }
             }
             return false;
@@ -4524,7 +4527,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 PackageSetting ps = (PackageSetting)p.mExtras;
                 if (ps != null) {
-                    return ps.stopped;
+                    // System apps are never considered stopped for purposes of
+                    // filtering, because there may be no way for the user to
+                    // actually re-launch them.
+                    return ps.stopped && (ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0;
                 }
             }
             return false;
