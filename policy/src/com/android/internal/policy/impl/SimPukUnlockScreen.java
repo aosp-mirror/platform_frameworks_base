@@ -27,6 +27,7 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.text.Editable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,21 +41,20 @@ import com.android.internal.R;
  * Displays a dialer like interface to unlock the SIM PUK.
  */
 public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
-        View.OnClickListener {
+        View.OnClickListener, View.OnFocusChangeListener {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
+    private KeyguardStatusViewManager mKeyguardStatusViewManager;
 
     private TextView mHeaderText;
     private TextView mPukText;
     private TextView mPinText;
-
     private TextView mFocusedEntry;
 
-    private TextView mOkButton;
-
+    private View mOkButton;
     private View mDelPukButton;
     private View mDelPinButton;
 
@@ -65,8 +65,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
     private int mCreationOrientation;
 
     private int mKeyboardHidden;
-
-    private KeyguardStatusViewManager mKeyguardStatusViewManager;
 
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
@@ -92,44 +90,33 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         }
 
         mHeaderText = (TextView) findViewById(R.id.headerText);
+
         mPukText = (TextView) findViewById(R.id.pukDisplay);
-        mPukText.setOnClickListener(new OnClickListener() {
-           public void onClick(View v) {
-               requestFocus(mPukText);
-               mCallback.pokeWakelock();
-           }
-        });
         mPinText = (TextView) findViewById(R.id.pinDisplay);
-        mPinText.setOnClickListener(this);
-
         mDelPukButton = findViewById(R.id.pukDel);
-        mDelPukButton.setOnClickListener(this);
         mDelPinButton = findViewById(R.id.pinDel);
+        mOkButton = findViewById(R.id.ok);
+
         mDelPinButton.setOnClickListener(this);
-
-        mOkButton = (TextView) findViewById(R.id.ok);
-
-        mHeaderText.setText(R.string.keyguard_password_enter_puk_code);
-        mPukText.setFocusable(false);
-        mPinText.setFocusable(false);
+        mDelPukButton.setOnClickListener(this);
         mOkButton.setOnClickListener(this);
 
-        requestFocus(mPukText);
+        mHeaderText.setText(R.string.keyguard_password_enter_puk_code);
+        // To make marquee work
+        mHeaderText.setSelected(true);
 
         mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, updateMonitor,
                 lockpatternutils, callback, true);
 
-        setFocusableInTouchMode(true);
-    }
-
-    private void requestFocus(TextView entry) {
-        mFocusedEntry = entry;
-        mFocusedEntry.setText("");
+        mPinText.setFocusableInTouchMode(true);
+        mPinText.setOnFocusChangeListener(this);
+        mPukText.setFocusableInTouchMode(true);
+        mPukText.setOnFocusChangeListener(this);
     }
 
     /** {@inheritDoc} */
     public boolean needsInput() {
-        return true;
+        return false;
     }
 
     /** {@inheritDoc} */
@@ -141,9 +128,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
     public void onResume() {
         // start fresh
         mHeaderText.setText(R.string.keyguard_password_enter_puk_code);
-        requestFocus(mPukText);
-        mPinText.setText("");
-
         mKeyguardStatusViewManager.onResume();
     }
 
@@ -196,25 +180,32 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
 
     public void onClick(View v) {
         if (v == mDelPukButton) {
+            if (mFocusedEntry != mPukText)
+                mPukText.requestFocus();
             final Editable digits = mPukText.getEditableText();
             final int len = digits.length();
             if (len > 0) {
                 digits.delete(len-1, len);
             }
-            mCallback.pokeWakelock();
         } else if (v == mDelPinButton) {
+            if (mFocusedEntry != mPinText)
+                mPinText.requestFocus();
             final Editable digits = mPinText.getEditableText();
             final int len = digits.length();
             if (len > 0) {
                 digits.delete(len-1, len);
             }
-            mCallback.pokeWakelock();
-        } else if (v == mPinText) {
-            requestFocus(mPinText);
-            mCallback.pokeWakelock();
         } else if (v == mOkButton) {
             checkPuk();
         }
+        mCallback.pokeWakelock(DIGIT_PRESS_WAKE_MILLIS);
+
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus)
+            mFocusedEntry = (TextView)v;
     }
 
     private Dialog getSimUnlockProgressDialog() {
@@ -236,7 +227,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
             // otherwise, display a message to the user, and don't submit.
             mHeaderText.setText(R.string.invalidPuk);
             mPukText.setText("");
-            mCallback.pokeWakelock();
             return;
         }
 
@@ -245,7 +235,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
             // otherwise, display a message to the user, and don't submit.
             mHeaderText.setText(R.string.invalidPin);
             mPinText.setText("");
-            mCallback.pokeWakelock();
             return;
         }
 
@@ -267,7 +256,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
                     mPukText.setText("");
                     mPinText.setText("");
                 }
-                mCallback.pokeWakelock();
             }
         }.start();
     }
@@ -290,7 +278,7 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
             if (len > 0) {
                 digits.delete(len-1, len);
             }
-            mCallback.pokeWakelock();
+            mCallback.pokeWakelock(DIGIT_PRESS_WAKE_MILLIS);
             return true;
         }
 
