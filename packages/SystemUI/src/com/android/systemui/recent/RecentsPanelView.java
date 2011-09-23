@@ -68,10 +68,11 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     private View mRecentsScrim;
     private View mRecentsNoApps;
     private ViewGroup mRecentsContainer;
+    private StatusBarTouchProxy mStatusBarTouchProxy;
 
     private boolean mShowing;
     private Choreographer mChoreo;
-    private View mRecentsDismissButton;
+    OnRecentsPanelVisibilityChangedListener mVisibilityChangedListener;
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
@@ -81,8 +82,8 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     private int mThumbnailWidth;
     private boolean mFitThumbnailToXY;
 
-    public void setRecentTasksLoader(RecentTasksLoader loader) {
-        mRecentTasksLoader = loader;
+    public static interface OnRecentsPanelVisibilityChangedListener {
+        public void onRecentsPanelVisibilityChanged(boolean visible);
     }
 
     private final class OnLongClickDelegate implements View.OnLongClickListener {
@@ -171,13 +172,16 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         return super.onKeyUp(keyCode, event);
     }
 
-    public boolean isInContentArea(int x, int y) {
-        // use mRecentsContainer's exact bounds to determine horizontal position
-        final int l = mRecentsContainer.getLeft();
-        final int r = mRecentsContainer.getRight();
-        final int t = mRecentsContainer.getTop();
-        final int b = mRecentsContainer.getBottom();
+    private boolean pointInside(int x, int y, View v) {
+        final int l = v.getLeft();
+        final int r = v.getRight();
+        final int t = v.getTop();
+        final int b = v.getBottom();
         return x >= l && x < r && y >= t && y < b;
+    }
+
+    public boolean isInContentArea(int x, int y) {
+        return pointInside(x, y, mRecentsContainer) || pointInside(x, y, mStatusBarTouchProxy);
     }
 
     public void show(boolean show, boolean animate) {
@@ -278,7 +282,6 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     public void onAnimationStart(Animator animation) {
     }
 
-
     /**
      * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
      * let LinearLayout do all the hard work, and then shift everything down to the bottom.
@@ -312,6 +315,29 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
 
     public void setBar(StatusBar bar) {
         mBar = bar;
+
+    }
+
+    public void setStatusBarView(View statusBarView) {
+        if (mStatusBarTouchProxy != null) {
+            mStatusBarTouchProxy.setStatusBar(statusBarView);
+        }
+    }
+
+    public void setRecentTasksLoader(RecentTasksLoader loader) {
+        mRecentTasksLoader = loader;
+    }
+
+    public void setOnVisibilityChangedListener(OnRecentsPanelVisibilityChangedListener l) {
+        mVisibilityChangedListener = l;
+
+    }
+
+    public void setVisibility(int visibility) {
+        if (mVisibilityChangedListener != null) {
+            mVisibilityChangedListener.onRecentsPanelVisibilityChanged(visibility == VISIBLE);
+        }
+        super.setVisibility(visibility);
     }
 
     public RecentsPanelView(Context context, AttributeSet attrs) {
@@ -335,6 +361,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
+        mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         mListAdapter = new TaskDescriptionAdapter(mContext);
         if (mRecentsContainer instanceof RecentsHorizontalScrollView){
             RecentsHorizontalScrollView scrollView
@@ -355,14 +382,6 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsContainer, mRecentsNoApps, this);
-        mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
-        if (mRecentsDismissButton != null) {
-            mRecentsDismissButton.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    hide(true);
-                }
-            });
-        }
 
         // In order to save space, we make the background texture repeat in the Y direction
         if (mRecentsScrim != null && mRecentsScrim.getBackground() instanceof BitmapDrawable) {

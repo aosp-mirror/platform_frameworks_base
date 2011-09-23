@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:paddingBottom="@*android:dimen/status_bar_height"
+        android:layout_marginBottom="@*android:dimen/status_bar_height"
         android:clipToPadding="false"
         android:clipChildren="false">
 
@@ -69,13 +69,12 @@
 
     </FrameLayout>
 
-    <View android:id="@+id/recents_dismiss_button"
-        android:layout_width="80px"
+    <com.android.systemui.recent.StatusBarTouchProxy
+        android:id="@+id/status_bar_touch_proxy"
+        android:layout_width="match_parent"
         android:layout_height="@*android:dimen/status_bar_height"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:background="@drawable/ic_sysbar_back_ime"
-        android:contentDescription="@string/status_bar_accessibility_dismiss_recents"
     />
 
 
