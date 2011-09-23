@@ -859,7 +859,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"คัดลอก URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"เลือกข้อความ..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"การเลือกข้อความ"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"เพิ่มลงในพจนานุกรม"</string>
+    <string name="addToDictionary" msgid="9090375111134433012">"เพิ่มในพจนานุกรม"</string>
     <string name="deleteText" msgid="7070985395199629156">"ลบ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
@@ -1109,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"เลิกทำการลบ"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"ไม่ต้องทำอะไรในขณะนี้"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"เลือกบัญชี"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"เพิ่มบัญชี"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"คุณต้องการใช้บัญชีใด"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"เพิ่มบัญชี"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"การเพิ่ม"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"การลด"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"แตะ <xliff:g id="VALUE">%s</xliff:g> ค้างไว้"</string>

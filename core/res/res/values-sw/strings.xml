@@ -49,7 +49,7 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Andika PUK ambayo ina urefu wa nambari 8 au zaidi."</string>
     <string name="needPuk" msgid="919668385956251611">"Kadi yako ya SIM imefungwa na PUK. Anika msimbo wa PUK ili kuifungua."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Chapisha PUK2 ili kufungua kadi ya SIM."</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"ID ya Mpigaji simu Inayoingia"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Kitambulisho cha Mpigaji wa Simu Inayoingia"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"ID ya Mpigaji simu Inayotoka nje"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Kusambaza simu"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Simu inasubiriwa"</string>
@@ -63,7 +63,7 @@
     <string name="CndMmi" msgid="3116446237081575808">"Uwasilishaji nambari ya kupiga simu"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Usisumbue"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguo-msingi za kitambulisho cha mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguo-msingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Huduma haitathminiwi."</string>
@@ -131,8 +131,8 @@
     <string name="me" msgid="6545696007631404292">"Mimi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Chaguo za kompyuta ndogo"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Machaguo ya simu"</string>
-    <string name="silent_mode" msgid="7167703389802618663">"Muundo wa kimya"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"Fungua bila waya"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Hali ya kimya"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandao-hewa"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Zima pasiwaya"</string>
     <string name="screen_lock" msgid="799094655496098153">"Funga skrini"</string>
     <string name="power_off" msgid="4266614107412865048">"Nishati imezimwa"</string>
@@ -148,7 +148,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Nishati imezimwa"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sauti Imezimwa"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imefunguliwa"</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imewashwa"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"gumzo ya ndege"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndege IMEWASHWA"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"gumzo ya ndege IMEZIMWA"</string>
@@ -662,7 +662,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Kadi yako ya SIM imelemazwa kabisa. "\n" tafadhali wasiliana na mtoa huduma wako wa psiwaya ili kupata kadi nyingine ya SIM."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Simu za dharura pekee"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Mtandao umefungwa"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Kadi ya SIM imefungwana PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Kadi ya SIM imefungwa na PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Tafadhali angalia Mwongozo wa Mtumiaji au wasiliana na Huduma kwa Wateja."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Kadi ya SIM imefungwa."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Inafungua kadi ya SIM..."</string>
@@ -680,7 +680,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Fungua akaunti"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Majaribio mengi ya mchoro!"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Kufungua, ingia na akaunti yako ya Google"</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Jina la mtumiaji/Barua pepe)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Jina la mtumiaji (barua pepe)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Nenosiri"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Ingia"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Jina batili la mtumiaji au nywila"</string>
@@ -697,7 +697,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"Jaribio la kiwanda limeshindikana"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Tendo la JARIBIO_LA KIWANDA  linahimiliwa tu kwa furushi zilizosakinishwa katika /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Hakuna furushi lililopatikana ambalo linatoa tendo la JARIBIO_LA KIWANDA."</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"Fungua upya"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Washa tena"</string>
     <string name="js_dialog_title" msgid="8143918455087008109">"Ukurasa ulio \'<xliff:g id="TITLE">%s</xliff:g>\' unasema:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"HatiJava"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Toka kwa ukurasa huu?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Chagua Sawa ili kuendelea, au Ghairi ili kubaki kwenye ukurasa wa sasa."</string>
@@ -740,7 +740,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"Si Sasa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kumbuka"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Katu"</string>
-    <string name="open_permission_deny" msgid="5661861460947222274">"Huna idhini ya kuona ukurasa huu."</string>
+    <string name="open_permission_deny" msgid="5661861460947222274">"Huna idhini ya kufungua ukurasa huu."</string>
     <string name="text_copied" msgid="4985729524670131385">"Maandishi yamenakiliwa kwenye ubao klipu."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Zaidi"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menyu+"</string>
@@ -830,7 +830,7 @@
     <string name="day" msgid="8144195776058119424">"siku"</string>
     <string name="days" msgid="4774547661021344602">"siku"</string>
     <string name="hour" msgid="2126771916426189481">"saa"</string>
-    <string name="hours" msgid="894424005266852993">"saa"</string>
+    <string name="hours" msgid="894424005266852993">"masaa"</string>
     <string name="minute" msgid="9148878657703769868">"dakika"</string>
     <string name="minutes" msgid="5646001005827034509">"Dakika"</string>
     <string name="second" msgid="3184235808021478">"sekunde"</string>
@@ -859,15 +859,11 @@
     <string name="copyUrl" msgid="2538211579596067402">"Nakili URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Chagua maandishi"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Uchaguzi wa maandishi?"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"ongeza kwa kamusi"</string>
+    <string name="deleteText" msgid="7070985395199629156">"futa"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mbinu ya uingizaji"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Vitendo vya maandishi"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Nafasi kidogo"</string>
+    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Nafasi ni ndogo"</string>
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">" Nafasi ya hifadhi ya kompyuta ndogo inaisha."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Nafasi ya hifadhi ya simu inaisha."</string>
     <string name="ok" msgid="5970060430562524910">"Sawa"</string>
@@ -934,7 +930,7 @@
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Toni mlio chaguo-msingi  (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Kimya"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Toni za mlio"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"Mkirizo amabo haujulikani"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"Mlio amabo haujulikani"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"Mtandao wa Wi-Fi unapatikana"</item>
     <item quantity="other" msgid="4192424489168397386">"Mitandao ya Wi-Fi inapatikana"</item>
@@ -1113,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Tendua ufutaji."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Usifanye chochote kwa sasa."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Chagua akaunti"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Ongeza akaunti"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Akaunti gani ungependa kutumia?"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Ongeza akaunti"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Ongezeko"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Punguza"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> gonga na shikilia"</string>
@@ -1168,10 +1161,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Hifadhi ya USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Hariri..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Onyo la matumizi ya data"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Gusa ili kuangalia matumizi na mipangilio"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Data ya 2G-3G imelemazwa"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data ya 4G imelemazwa"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data ya simu imelemazwa"</string>

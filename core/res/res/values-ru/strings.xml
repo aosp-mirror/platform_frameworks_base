@@ -1109,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Отменить удаления."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ничего не делать сейчас."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Выберите аккаунт"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Добавить аккаунт"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Какой аккаунт хотите использовать?"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Добавить аккаунт"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Увеличить"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Уменьшить"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Нажмите и удерживайте <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1164,7 +1161,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Изменить..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Осталось мало трафика"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Посмотрите трафик и настройки"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Проверить трафик и настройки"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Передача данных 2G/3G отключена"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Передача данных 4G отключена"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобильный Интернет отключен"</string>

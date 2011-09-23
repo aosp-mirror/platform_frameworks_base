@@ -1109,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Опозови брисања."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Не ради ништа за сада."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Избор налога"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Додавање налога"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Који налог желите да користите?"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Додај налог"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Повећање"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Смањење"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> додирните и задржите."</string>

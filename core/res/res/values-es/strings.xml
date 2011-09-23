@@ -1109,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Deshacer las eliminaciones"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"No hacer nada por ahora"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Seleccionar una cuenta"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Añadir una cuenta"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"¿Qué cuenta quieres usar?"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Añadir cuenta"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminuir"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Mantén pulsado <xliff:g id="VALUE">%s</xliff:g>"</string>

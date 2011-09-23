@@ -62,7 +62,7 @@
     <string name="RuacMmi" msgid="7827887459138308886">"የሚያበሳጭ የማይፈለጉ ጥሪዎች አለመቀበል።"</string>
     <string name="CndMmi" msgid="3116446237081575808">"መደወያ ቁጥር አስረከበ"</string>
     <string name="DndMmi" msgid="1265478932418334331">"አትረብሽ"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች።ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች። ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች።ቀጥሎ ጥሪ፡ አልተከለከለም"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"የደዋይ  ID  ወደ አልተከለከለም ነባሪዎች።ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"የደዋይ ID ነባሪዎች ወደአልተከለከለም። ቀጥሎ ጥሪ፡አልተከለከለም"</string>
@@ -221,7 +221,7 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"ትግበራ ምንም እንኳ ማህደረ ትውስታ አነስተኛ ባይሆንም ሌላ ትግበራዎች የዳራ ሂደታቸውን ለማቆም ይፈቅዳል።"</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"ሌላ ትግበራዎችን በኃይል አቁም"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"ትግበራ ሌሎች ትግበራዎችን በኃይል ለማስቆም ይፈቅዳል።"</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"ትግበራ  እንዲዘጋአስገድድ"</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"ትግበራ  እንዲዘጋ አስገድድ"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"ትግበራ ማንኛውም ቅድመገፅ እንቅስቃሴ በግድ ለመዝጋት እና ለመመለስ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_dump" msgid="1681799862438954752">"የስርዓት የውስጥ ሁኔታን ሰርስረህ አውጣ"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"ትግበራ የስረዓት ውስጣዊ ሁኔታ ሰርስረው ሊያወጡ ይፈቅዳል። ተንኮል አዘል ትግበራዎች በፍፁም የማያስፈልጋቸውን የተለያዩ ሰፋ ያለ የግል እና የተጠበቀ መረጃ ሰርስረ ው ሊያወጡይችላሉ።"</string>
@@ -841,7 +841,7 @@
     <string name="years" msgid="6881577717993213522">"ዓመታት"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"ቪዲዮ ማጫወት አልተቻለም።"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"ይቅርታ፣ ይህ ቪዲዮ በዚህ መሣሪያ ለመልቀቅ ትክክል አይደለም።"</string>
-    <string name="VideoView_error_text_unknown" msgid="710301040038083944">"ይቅርታ፣ ይህ ቪዲዮመጫወት አልቻለም።"</string>
+    <string name="VideoView_error_text_unknown" msgid="710301040038083944">"ይቅርታ፣ ይህ ቪዲዮ መጫወት አልቻለም።"</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"እሺ"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"ቀትር"</string>
@@ -1109,12 +1109,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"ስርዞቹን ቀልብስ።"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"ለአሁን ምንም አታድርግ።"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"መለያ ምረጥ"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"መለያ አክል"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"የትኛውን መለያ መጠቀም ትፈልጋለህ?"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"መለያ አክል"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"ጨምር"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"ቀንስ"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> አንዴ ንካ እና ያዝ"</string>
