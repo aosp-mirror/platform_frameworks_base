@@ -896,14 +896,6 @@ public class PhoneStatusBar extends StatusBar {
         }
     }
 
-    void workAroundBadLayerDrawableOpacity(View v) {
-        LayerDrawable d = (LayerDrawable)v.getBackground();
-        if (d == null) return;
-        v.setBackgroundDrawable(null);
-        d.setOpacity(PixelFormat.TRANSLUCENT);
-        v.setBackgroundDrawable(d);
-    }
-
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
         StatusBarNotification sbn = entry.notification;
         RemoteViews remoteViews = sbn.notification.contentView;
@@ -915,7 +907,6 @@ public class PhoneStatusBar extends StatusBar {
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
-        workAroundBadLayerDrawableOpacity(row);
         View vetoButton = row.findViewById(R.id.veto);
         if (entry.notification.isClearable()) {
             final String _pkg = sbn.pkg;
