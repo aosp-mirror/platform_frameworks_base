@@ -93,6 +93,39 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         a.recycle();
     }
 
+    @Override
+    public void setSplitActionBar(boolean split) {
+        if (mSplitActionBar != split) {
+            if (mActionMenuPresenter != null) {
+                // Mode is already active; move everything over and adjust the menu itself.
+                final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                        LayoutParams.MATCH_PARENT);
+                if (!split) {
+                    mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+                    mMenuView.setBackgroundDrawable(null);
+                    final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
+                    if (oldParent != null) oldParent.removeView(mMenuView);
+                    addView(mMenuView, layoutParams);
+                } else {
+                    // Allow full screen width in split mode.
+                    mActionMenuPresenter.setWidthLimit(
+                            getContext().getResources().getDisplayMetrics().widthPixels, true);
+                    // No limit to the item count; use whatever will fit.
+                    mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+                    // Span the whole width
+                    layoutParams.width = LayoutParams.MATCH_PARENT;
+                    layoutParams.height = mContentHeight;
+                    mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+                    mMenuView.setBackgroundDrawable(mSplitBackground);
+                    final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
+                    if (oldParent != null) oldParent.removeView(mMenuView);
+                    mSplitView.addView(mMenuView, layoutParams);
+                }
+            }
+            super.setSplitActionBar(split);
+        }
+    }
+
     public void setContentHeight(int height) {
         mContentHeight = height;
     }
@@ -179,7 +212,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
-        if (mSplitView == null) {
+        if (!mSplitActionBar) {
             menu.addMenuPresenter(mActionMenuPresenter);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             mMenuView.setBackgroundDrawable(null);
