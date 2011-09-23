@@ -4300,6 +4300,7 @@ public class WebView extends AbsoluteLayout
             selectionDone();
         }
         mOrientation = newConfig.orientation;
+        contentInvalidateAll();
     }
 
     /**
