@@ -947,9 +947,11 @@ public class LockPatternUtils {
      *
      * If there's currently a call in progress, the button will take them to the call
      * @param button the button to update
+     * @param showIfCapable indicates whether the button should be shown if emergency calls are
+     *                      possible on the device
      */
-    public void updateEmergencyCallButtonState(Button button) {
-        if (isEmergencyCallCapable()) {
+    public void updateEmergencyCallButtonState(Button button, boolean showIfCapable) {
+        if (isEmergencyCallCapable() && showIfCapable) {
             button.setVisibility(View.VISIBLE);
         } else {
             button.setVisibility(View.GONE);
