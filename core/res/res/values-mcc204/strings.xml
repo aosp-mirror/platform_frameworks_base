@@ -20,6 +20,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- A string used to replace %s in a URL to fill in the locale for countries  -->
-    <!-- whose locale we don't natively support.  A 0 length string triggers no replacement -->
+    <!-- whose locale we don't natively support.  A 0 length string triggers no replacement.  Do not translate -->
     <string name="locale_replacement">nl_nl</string>    
 </resources>
