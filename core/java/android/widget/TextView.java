@@ -9996,7 +9996,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 intent.putExtra("word", originalText);
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 getContext().startActivity(intent);
-                suggestionInfo.removeMisspelledFlag();
+                // There is no way to know if the word was indeed added. Re-check.
+                editable.removeSpan(suggestionInfo.suggestionSpan);
+                updateSpellCheckSpans(spanStart, spanEnd);
             } else {
                 // SuggestionSpans are removed by replace: save them before
                 SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
