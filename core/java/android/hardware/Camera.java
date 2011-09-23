@@ -480,6 +480,12 @@ public class Camera {
     public final void stopPreview() {
         _stopPreview();
         mFaceDetectionRunning = false;
+
+        mShutterCallback = null;
+        mRawImageCallback = null;
+        mPostviewCallback = null;
+        mJpegCallback = null;
+        mAutoFocusCallback = null;
     }
 
     private native final void _stopPreview();
