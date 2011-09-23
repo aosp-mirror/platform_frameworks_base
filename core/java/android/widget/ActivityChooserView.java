@@ -304,9 +304,13 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         mAdapter.setMaxActivityCount(maxActivityCount);
 
+        final boolean defaultActivityButtonShown =
+            mDefaultActivityButton.getVisibility() == VISIBLE;
+
         final int activityCount = mAdapter.getActivityCount();
+        final int maxActivityCountOffset = defaultActivityButtonShown ? 1 : 0;
         if (maxActivityCount != ActivityChooserViewAdapter.MAX_ACTIVITY_COUNT_UNLIMITED
-                && activityCount > maxActivityCount + 1) {
+                && activityCount > maxActivityCount + maxActivityCountOffset) {
             mAdapter.setShowFooterView(true);
         } else {
             mAdapter.setShowFooterView(false);
@@ -314,8 +318,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         ListPopupWindow popupWindow = getListPopupWindow();
         if (!popupWindow.isShowing()) {
-            final boolean defaultActivityButtonShown =
-                mDefaultActivityButton.getVisibility() == VISIBLE;
             if (mIsSelectingDefaultActivity || !defaultActivityButtonShown) {
                 mAdapter.setShowDefaultActivity(true, defaultActivityButtonShown);
             } else {
