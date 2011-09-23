@@ -1304,16 +1304,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
-    @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        // Do not append text content to scroll events they are fired frequently
-        // and the client has already received another event type with the text.
-        if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            super.dispatchPopulateAccessibilityEvent(event);
-        }
-        return false;
-    }
-
     /**
      * Indicates whether the children's drawing cache is used during a scroll.
      * By default, the drawing cache is enabled but this will consume more memory.
