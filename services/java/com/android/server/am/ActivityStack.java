@@ -765,9 +765,7 @@ final class ActivityStack {
                 // Still need to tell some activities to stop; can't sleep yet.
                 if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to stop "
                         + mStoppingActivities.size() + " activities");
-                Message msg = Message.obtain();
-                msg.what = IDLE_NOW_MSG;
-                mHandler.sendMessage(msg);
+                scheduleIdleLocked();
                 return;
             }
 
@@ -978,9 +976,7 @@ final class ActivityStack {
                         // then give up on things going idle and start clearing
                         // them out.
                         if (DEBUG_PAUSE) Slog.v(TAG, "To many pending stops, forcing idle");
-                        Message msg = Message.obtain();
-                        msg.what = IDLE_NOW_MSG;
-                        mHandler.sendMessage(msg);
+                        scheduleIdleLocked();
                     } else {
                         checkReadyForSleepLocked();
                     }
@@ -3103,6 +3099,12 @@ final class ActivityStack {
         return stops;
     }
 
+    final void scheduleIdleLocked() {
+        Message msg = Message.obtain();
+        msg.what = IDLE_NOW_MSG;
+        mHandler.sendMessage(msg);
+    }
+
     final ActivityRecord activityIdleInternal(IBinder token, boolean fromTimeout,
             Configuration config) {
         if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
@@ -3413,9 +3415,7 @@ final class ActivityStack {
                     // If we already have a few activities waiting to stop,
                     // then give up on things going idle and start clearing
                     // them out.
-                    Message msg = Message.obtain();
-                    msg.what = IDLE_NOW_MSG;
-                    mHandler.sendMessage(msg);
+                    scheduleIdleLocked();
                 } else {
                     checkReadyForSleepLocked();
                 }

@@ -3344,6 +3344,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ((samePackage || r.task == lastTask)
                     && (r.app == null || evenPersistent || !r.app.persistent)) {
                 if (!doit) {
+                    if (r.finishing) {
+                        // If this activity is just finishing, then it is not
+                        // interesting as far as something to stop.
+                        continue;
+                    }
                     return true;
                 }
                 didSomething = true;
@@ -3409,6 +3414,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             mMainStack.resumeTopActivityLocked(null);
+            mMainStack.scheduleIdleLocked();
         }
         
         return didSomething;
