@@ -81,7 +81,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -1497,12 +1496,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Map used to store views' tags.
      */
-    private static WeakHashMap<View, SparseArray<Object>> sTags;
-
-    /**
-     * Lock used to access sTags.
-     */
-    private static final Object sTagsLock = new Object();
+    private SparseArray<Object> mKeyedTags;
 
     /**
      * The next available accessiiblity id.
@@ -12236,14 +12230,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getTag()
      */
     public Object getTag(int key) {
-        SparseArray<Object> tags = null;
-        synchronized (sTagsLock) {
-            if (sTags != null) {
-                tags = sTags.get(this);
-            }
-        }
-
-        if (tags != null) return tags.get(key);
+        if (mKeyedTags != null) return mKeyedTags.get(key);
         return null;
     }
 
@@ -12276,7 +12263,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     + "resource id.");
         }
 
-        setTagInternal(this, key, tag);
+        setKeyedTag(this, key, tag);
     }
 
     /**
@@ -12291,27 +12278,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     + "resource id.");
         }
 
-        setTagInternal(this, key, tag);
+        setKeyedTag(this, key, tag);
     }
 
-    private static void setTagInternal(View view, int key, Object tag) {
-        SparseArray<Object> tags = null;
-        synchronized (sTagsLock) {
-            if (sTags == null) {
-                sTags = new WeakHashMap<View, SparseArray<Object>>();
-            } else {
-                tags = sTags.get(view);
-            }
+    private void setKeyedTag(View view, int key, Object tag) {
+        if (mKeyedTags == null) {
+            mKeyedTags = new SparseArray<Object>();
         }
 
-        if (tags == null) {
-            tags = new SparseArray<Object>(2);
-            synchronized (sTagsLock) {
-                sTags.put(view, tags);
-            }
-        }
-
-        tags.put(key, tag);
+        mKeyedTags.put(key, tag);
     }
 
     /**
