@@ -122,7 +122,7 @@ final class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
                 pw.print(" app="); pw.println(app);
-        pw.print(prefix); pw.println(intent);
+        pw.print(prefix); pw.println(intent.toInsecureString());
         pw.print(prefix); pw.print("frontOfTask="); pw.print(frontOfTask);
                 pw.print(" task="); pw.println(task);
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);

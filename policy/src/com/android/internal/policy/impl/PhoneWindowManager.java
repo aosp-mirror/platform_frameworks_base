@@ -2890,6 +2890,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mKeyguardMediator.isInputRestricted();
     }
 
+    public void dismissKeyguardLw() {
+        if (!mKeyguardMediator.isSecure()) {
+            if (mKeyguardMediator.isShowing()) {
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        mKeyguardMediator.keyguardDone(false, true);
+                    }
+                });
+            }
+        }
+    }
+
     void sendCloseSystemWindows() {
         sendCloseSystemWindows(mContext, null);
     }

@@ -5577,24 +5577,35 @@ public class Intent implements Parcelable, Cloneable {
 
     @Override
     public String toString() {
-        StringBuilder   b = new StringBuilder(128);
+        StringBuilder b = new StringBuilder(128);
 
         b.append("Intent { ");
-        toShortString(b, true, true);
+        toShortString(b, true, true, true);
         b.append(" }");
 
         return b.toString();
     }
 
     /** @hide */
-    public String toShortString(boolean comp, boolean extras) {
-        StringBuilder   b = new StringBuilder(128);
-        toShortString(b, comp, extras);
+    public String toInsecureString() {
+        StringBuilder b = new StringBuilder(128);
+
+        b.append("Intent { ");
+        toShortString(b, false, true, true);
+        b.append(" }");
+
         return b.toString();
     }
 
     /** @hide */
-    public void toShortString(StringBuilder b, boolean comp, boolean extras) {
+    public String toShortString(boolean secure, boolean comp, boolean extras) {
+        StringBuilder b = new StringBuilder(128);
+        toShortString(b, secure, comp, extras);
+        return b.toString();
+    }
+
+    /** @hide */
+    public void toShortString(StringBuilder b, boolean secure, boolean comp, boolean extras) {
         boolean first = true;
         if (mAction != null) {
             b.append("act=").append(mAction);
@@ -5621,19 +5632,8 @@ public class Intent implements Parcelable, Cloneable {
             }
             first = false;
             b.append("dat=");
-            String scheme = mData.getScheme();
-            if (scheme != null) {
-                if (scheme.equalsIgnoreCase("tel")) {
-                    b.append("tel:xxx-xxx-xxxx");
-                } else if (scheme.equalsIgnoreCase("sip")) {
-                    b.append("sip:xxxxxxxxxx");
-                } else if (scheme.equalsIgnoreCase("sms")) {
-                    b.append("sms:xxx-xxx-xxxx");
-                } else if (scheme.equalsIgnoreCase("smsto")) {
-                    b.append("smsto:xxx-xxx-xxxx");
-                } else {
-                    b.append(mData);
-                }
+            if (secure) {
+                b.append(mData.toSafeString());
             } else {
                 b.append(mData);
             }

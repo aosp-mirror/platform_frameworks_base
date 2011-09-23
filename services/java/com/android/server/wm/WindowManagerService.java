@@ -4529,6 +4529,16 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.isKeyguardSecure();
     }
 
+    public void dismissKeyguard() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires DISABLE_KEYGUARD permission");
+        }
+        synchronized(mWindowMap) {
+            mPolicy.dismissKeyguardLw();
+        }
+    }
+
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
             for (int i=mWindows.size()-1; i>=0; i--) {
