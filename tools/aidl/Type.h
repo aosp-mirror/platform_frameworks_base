@@ -535,13 +535,9 @@ extern Type* PARCELABLE_INTERFACE_TYPE;
 
 extern Type* CONTEXT_TYPE;
 
-extern Type* RPC_SERVICE_BASE_TYPE;
 extern Type* RPC_DATA_TYPE;
-extern Type* RPC_BROKER_TYPE;
-extern Type* RPC_ENDPOINT_INFO_TYPE;
-extern Type* RPC_RESULT_HANDLER_TYPE;
 extern Type* RPC_ERROR_TYPE;
-extern Type* RPC_ERROR_LISTENER_TYPE;
+extern Type* EVENT_FAKE_TYPE;
 
 extern Expression* NULL_VALUE;
 extern Expression* THIS_VALUE;
