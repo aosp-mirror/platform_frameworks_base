@@ -98,7 +98,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         }
 
         mStatusViewManager = new KeyguardStatusViewManager(this, mUpdateMonitor, mLockPatternUtils,
-                mCallback);
+                mCallback, true);
 
         final int quality = lockPatternUtils.getKeyguardStoredPasswordQuality();
         mIsAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality

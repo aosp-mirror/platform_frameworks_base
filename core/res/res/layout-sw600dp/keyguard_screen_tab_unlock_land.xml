@@ -80,7 +80,8 @@
             android:layout_alignParentBottom="true"
             android:drawableLeft="@drawable/ic_emergency"
             style="@style/Widget.Button.Transparent"
-            android:drawablePadding="8dip"/>
+            android:drawablePadding="8dip"
+            android:visibility="gone"/>
 
     </RelativeLayout>>
 

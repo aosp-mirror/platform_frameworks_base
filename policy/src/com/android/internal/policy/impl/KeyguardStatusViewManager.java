@@ -87,7 +87,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mUpdateMonitor;
     private Button mEmergencyCallButton;
-    private boolean mShouldEnableUnlock;
+    private boolean mUnlockDisabledDueToSimState;
 
     // Shadowed text values
     private CharSequence mCarrierText;
@@ -97,7 +97,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private CharSequence mOwnerInfoText;
     private boolean mShowingStatus;
     private KeyguardScreenCallback mCallback;
-    private boolean mHideEmergencyCallButton = false;
+    private final boolean mShowEmergencyButtonByDefault;
 
     private class TransientTextManager {
         private TextView mTextView;
@@ -149,7 +149,8 @@ class KeyguardStatusViewManager implements OnClickListener {
     };
 
     public KeyguardStatusViewManager(View view, KeyguardUpdateMonitor updateMonitor,
-                LockPatternUtils lockPatternUtils, KeyguardScreenCallback callback) {
+                LockPatternUtils lockPatternUtils, KeyguardScreenCallback callback,
+                boolean showEmergencyButtonByDefault) {
         mContainer = view;
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         mLockPatternUtils = lockPatternUtils;
@@ -163,6 +164,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         mOwnerInfoView = (TextView) findViewById(R.id.propertyOf);
         mTransportView = (TransportControlView) findViewById(R.id.transport);
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
+        mShowEmergencyButtonByDefault = showEmergencyButtonByDefault;
         if (mEmergencyCallButton != null) {
             mEmergencyCallButton.setText(R.string.lockscreen_emergency_call);
             mEmergencyCallButton.setOnClickListener(this);
@@ -393,10 +395,6 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
     }
 
-    boolean shouldEnableUnlock() {
-        return mShouldEnableUnlock;
-    }
-
     /**
      * Determine the current status of the lock screen given the sim state and other stuff.
      */
@@ -443,9 +441,8 @@ class KeyguardStatusViewManager implements OnClickListener {
 
         CharSequence carrierText = null;
         int carrierHelpTextId = 0;
-        mShouldEnableUnlock = true;
+        mUnlockDisabledDueToSimState = false;
         mStatus = getStatusForIccState(simState);
-
         switch (mStatus) {
             case Normal:
                 carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
@@ -466,13 +463,14 @@ class KeyguardStatusViewManager implements OnClickListener {
             case SimPermDisabled:
                 carrierText = getContext().getText(R.string.lockscreen_missing_sim_message_short);
                 carrierHelpTextId = R.string.lockscreen_permanent_disabled_sim_instructions;
+                mUnlockDisabledDueToSimState = true;
                 break;
 
             case SimMissingLocked:
                 carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
                         getContext().getText(R.string.lockscreen_missing_sim_message_short));
                 carrierHelpTextId = R.string.lockscreen_missing_sim_instructions;
-                mShouldEnableUnlock = false;
+                mUnlockDisabledDueToSimState = true;
                 break;
 
             case SimLocked:
@@ -484,7 +482,7 @@ class KeyguardStatusViewManager implements OnClickListener {
                 carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
                         getContext().getText(R.string.lockscreen_sim_puk_locked_message));
                 if (!mLockPatternUtils.isPukUnlockScreenEnable()) {
-                    mShouldEnableUnlock = false;
+                    mUnlockDisabledDueToSimState = true;
                 }
                 break;
         }
@@ -556,10 +554,8 @@ class KeyguardStatusViewManager implements OnClickListener {
 
     private void updateEmergencyCallButtonState() {
         if (mEmergencyCallButton != null) {
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-            if (mHideEmergencyCallButton) {
-                mEmergencyCallButton.setVisibility(View.GONE);
-            }
+            boolean showIfCapable = mShowEmergencyButtonByDefault || mUnlockDisabledDueToSimState;
+            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton, showIfCapable);
         }
     }
 
@@ -608,9 +604,4 @@ class KeyguardStatusViewManager implements OnClickListener {
             mCallback.takeEmergencyCallAction();
         }
     }
-
-    public void hideEmergencyCallButton() {
-        mHideEmergencyCallButton = true;
-    }
-
 }
