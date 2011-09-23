@@ -317,18 +317,13 @@ public:
     // recalculate exposure values). Changing exposure compensation
     // settings will still affect the exposure settings while
     // auto-exposure is locked. Stopping preview or taking a still
-    // image will release the lock. However, the lock can be
-    // re-enabled prior to preview being re-started, to keep the
-    // exposure values from the previous lock. In conjunction with
+    // image will not change the lock. In conjunction with
     // exposure compensation, this allows for capturing multi-exposure
     // brackets with known relative exposure values. Locking
     // auto-exposure after open but before the first call to
     // startPreview may result in severely over- or under-exposed
-    // images.  The driver may independently enable the AE lock after
-    // auto-focus completes. If it does so, this key must have its
-    // value updated to reflect the lock's existence. Applications are
-    // free to release such a lock, to re-enable AE without restarting
-    // preview.
+    // images.  The driver will not change the AE lock after
+    // auto-focus completes.
     static const char KEY_AUTO_EXPOSURE_LOCK[];
     // Whether locking the auto-exposure is supported. "true" means it is, and
     // "false" or this key not existing means it is not supported.
@@ -339,18 +334,13 @@ public:
     // change white balance values. If auto-white balance is already
     // locked, setting this to true again has no effect (the driver
     // will not recalculate white balance values). Stopping preview or
-    // taking a still image will release the lock. However, the lock
-    // can be re-enabled prior to preview being re-started, to keep
-    // the white balance values from the previous lock. In conjunction
+    // taking a still image will not change the lock. In conjunction
     // with exposure compensation, this allows for capturing
     // multi-exposure brackets with fixed white balance. Locking
     // auto-white balance after open but before the first call to
     // startPreview may result in severely incorrect color.  The
-    // driver may independently enable the AWB lock after auto-focus
-    // completes. If it does so, this key must have its value updated
-    // to reflect the lock's existence. Applications are free to
-    // release such a lock, to re-enable AWB without restarting
-    // preview.
+    // driver will not change the AWB lock after auto-focus
+    // completes.
     static const char KEY_AUTO_WHITEBALANCE_LOCK[];
     // Whether locking the auto-white balance is supported. "true"
     // means it is, and "false" or this key not existing means it is
