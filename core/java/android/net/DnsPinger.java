@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class DnsPinger extends Handler {
     private static final boolean V = true;
 
-    private static final int RECEIVE_POLL_INTERVAL_MS = 30;
+    private static final int RECEIVE_POLL_INTERVAL_MS = 200;
     private static final int DNS_PORT = 53;
 
     /** Short socket timeout so we don't block one any 'receive' call */
@@ -69,6 +69,9 @@ public final class DnsPinger extends Handler {
     private final Handler mTarget;
     private final ArrayList<InetAddress> mDefaultDns;
     private String TAG;
+
+    //Invalidates old dns requests upon a cancel
+    private AtomicInteger mCurrentToken = new AtomicInteger();
 
     private static final int BASE = Protocol.BASE_DNS_PINGER;
 
@@ -102,6 +105,17 @@ public final class DnsPinger extends Handler {
         long start = SystemClock.elapsedRealtime();
     }
 
+    /* Message argument for ACTION_PING_DNS */
+    private class DnsArg {
+        InetAddress dns;
+        int seq;
+
+        DnsArg(InetAddress d, int s) {
+            dns = d;
+            seq = s;
+        }
+    }
+
     public DnsPinger(Context context, String TAG, Looper looper,
             Handler target, int connectionType) {
         super(looper);
@@ -122,9 +136,13 @@ public final class DnsPinger extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case ACTION_PING_DNS:
+                DnsArg dnsArg = (DnsArg) msg.obj;
+                if (dnsArg.seq != mCurrentToken.get()) {
+                    break;
+                }
                 try {
                     ActivePing newActivePing = new ActivePing();
-                    InetAddress dnsAddress = (InetAddress) msg.obj;
+                    InetAddress dnsAddress = dnsArg.dns;
                     newActivePing.internalId = msg.arg1;
                     newActivePing.timeout = msg.arg2;
                     newActivePing.socket = new DatagramSocket();
@@ -248,11 +266,13 @@ public final class DnsPinger extends Handler {
      */
     public int pingDnsAsync(InetAddress dns, int timeout, int delay) {
         int id = sCounter.incrementAndGet();
-        sendMessageDelayed(obtainMessage(ACTION_PING_DNS, id, timeout, dns), delay);
+        sendMessageDelayed(obtainMessage(ACTION_PING_DNS, id, timeout,
+                new DnsArg(dns, mCurrentToken.get())), delay);
         return id;
     }
 
     public void cancelPings() {
+        mCurrentToken.incrementAndGet();
         obtainMessage(ACTION_CANCEL_ALL_PINGS).sendToTarget();
     }
 
