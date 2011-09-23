@@ -113,7 +113,6 @@ public class ActionBarView extends AbsActionBarView {
     private int mProgressStyle;
     private int mIndeterminateProgressStyle;
 
-    private boolean mSplitActionBar;
     private boolean mUserTitle;
     private boolean mIncludeTabs;
     private boolean mIsCollapsable;
@@ -301,6 +300,7 @@ public class ActionBarView extends AbsActionBarView {
         addView(mIndeterminateProgressView);
     }
 
+    @Override
     public void setSplitActionBar(boolean splitActionBar) {
         if (mSplitActionBar != splitActionBar) {
             if (mMenuView != null) {
@@ -316,7 +316,10 @@ public class ActionBarView extends AbsActionBarView {
                     addView(mMenuView);
                 }
             }
-            mSplitActionBar = splitActionBar;
+            if (mSplitView != null) {
+                mSplitView.setVisibility(splitActionBar ? VISIBLE : GONE);
+            }
+            super.setSplitActionBar(splitActionBar);
         }
     }
 
