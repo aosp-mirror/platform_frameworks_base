@@ -551,5 +551,8 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
       // A valid fixed-line phone number from Brazil shouldn't be classified as an emergency number
       // in Brazil, as 112 is not an emergency number there.
       assertFalse(PhoneNumberUtils.isEmergencyNumber("1121234567", "BR"));
+      // A valid local phone number from Brazil shouldn't be classified as an emergency number in
+      // Brazil.
+      assertFalse(PhoneNumberUtils.isEmergencyNumber("91112345", "BR"));
     }
 }
