@@ -253,21 +253,22 @@ void TextLayout::drawTextRun(SkPaint* paint, const jchar* chars,
 
 void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
                                     jint count, jint contextCount, jint dirFlags,
-                                    jfloat* resultAdvances, jfloat& resultTotalAdvance) {
+                                    jfloat* resultAdvances, jfloat* resultTotalAdvance) {
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     // Return advances from the cache. Compute them if needed
-    value = TextLayoutCache::getInstance().getValue(
-            paint, chars, start, count, contextCount, dirFlags);
+    value = TextLayoutCache::getInstance().getValue(paint, chars, contextCount, dirFlags);
 #else
     value = new TextLayoutCacheValue();
-    value->computeValues(paint, chars, start, count, contextCount, dirFlags);
+    value->computeValues(paint, chars, contextCount, dirFlags);
 #endif
     if (value != NULL) {
         if (resultAdvances != NULL) {
-            memcpy(resultAdvances, value->getAdvances(), value->getAdvancesCount() * sizeof(jfloat));
+            value->getAdvances(start, count, resultAdvances);
         }
-        resultTotalAdvance = value->getTotalAdvance();
+        if (resultTotalAdvance) {
+            *resultTotalAdvance = value->getTotalAdvance(start, count);
+        }
     }
 }
 
