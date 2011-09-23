@@ -133,6 +133,39 @@ static void displayAVCProfileLevelIfPossible(const sp<MetaData>& meta) {
     }
 }
 
+static void dumpSource(const sp<MediaSource> &source, const String8 &filename) {
+    FILE *out = fopen(filename.string(), "wb");
+
+    CHECK_EQ((status_t)OK, source->start());
+
+    status_t err;
+    for (;;) {
+        MediaBuffer *mbuf;
+        err = source->read(&mbuf);
+
+        if (err == INFO_FORMAT_CHANGED) {
+            continue;
+        } else if (err != OK) {
+            break;
+        }
+
+        CHECK_EQ(
+                fwrite((const uint8_t *)mbuf->data() + mbuf->range_offset(),
+                       1,
+                       mbuf->range_length(),
+                       out),
+                (ssize_t)mbuf->range_length());
+
+        mbuf->release();
+        mbuf = NULL;
+    }
+
+    CHECK_EQ((status_t)OK, source->stop());
+
+    fclose(out);
+    out = NULL;
+}
+
 static void playSource(OMXClient *client, sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
@@ -578,6 +611,7 @@ static void usage(const char *me) {
                     "(video only)\n");
     fprintf(stderr, "       -S allocate buffers from a surface\n");
     fprintf(stderr, "       -T allocate buffers from a surface texture\n");
+    fprintf(stderr, "       -d(ump) filename (raw stream data to a file)\n");
 }
 
 int main(int argc, char **argv) {
@@ -590,6 +624,8 @@ int main(int argc, char **argv) {
     bool seekTest = false;
     bool useSurfaceAlloc = false;
     bool useSurfaceTexAlloc = false;
+    bool dumpStream = false;
+    String8 dumpStreamFilename;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
     gReproduceBug = -1;
@@ -604,11 +640,18 @@ int main(int argc, char **argv) {
     sp<LiveSession> liveSession;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptsrow:kxST")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsrow:kxSTd:")) >= 0) {
         switch (res) {
             case 'a':
             {
                 audioOnly = true;
+                break;
+            }
+
+            case 'd':
+            {
+                dumpStream = true;
+                dumpStreamFilename.setTo(optarg);
                 break;
             }
 
@@ -1062,6 +1105,8 @@ int main(int argc, char **argv) {
 
         if (gWriteMP4) {
             writeSourcesToMP4(mediaSources, syncInfoPresent);
+        } else if (dumpStream) {
+            dumpSource(mediaSource, dumpStreamFilename);
         } else if (seekTest) {
             performSeekTest(mediaSource);
         } else {
