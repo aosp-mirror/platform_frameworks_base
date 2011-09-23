@@ -62,6 +62,8 @@ public class CommandQueue extends IStatusBar.Stub {
     
     private static final int MSG_TOGGLE_RECENT_APPS       = 11 << MSG_SHIFT;
 
+    private static final int MSG_SET_NAVIGATION_ICON_HINTS = 13 << MSG_SHIFT;
+
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
@@ -90,6 +92,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
         public void toggleRecentApps();
+        public void setNavigationIconHints(int hints);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -196,6 +199,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void setNavigationIconHints(int hints) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SET_NAVIGATION_ICON_HINTS);
+            mHandler.obtainMessage(MSG_SET_NAVIGATION_ICON_HINTS, hints, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -264,6 +274,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
                     mCallbacks.toggleRecentApps();
+                    break;
+                case MSG_SET_NAVIGATION_ICON_HINTS:
+                    mCallbacks.setNavigationIconHints(msg.arg1);
                     break;
             }
         }
