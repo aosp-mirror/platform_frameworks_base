@@ -522,13 +522,10 @@ public class RenderScript {
                                      dstMode, depthFunc);
     }
 
-    native int  rsnProgramRasterCreate(int con, boolean pointSmooth, boolean lineSmooth,
-                                       boolean pointSprite, float lineWidth, int cullMode);
-    synchronized int nProgramRasterCreate(boolean pointSmooth, boolean lineSmooth,
-                                          boolean pointSprite, float lineWidth, int cullMode) {
+    native int  rsnProgramRasterCreate(int con, boolean pointSprite, int cullMode);
+    synchronized int nProgramRasterCreate(boolean pointSprite, int cullMode) {
         validate();
-        return rsnProgramRasterCreate(mContext, pointSmooth, lineSmooth, pointSprite, lineWidth,
-                                      cullMode);
+        return rsnProgramRasterCreate(mContext, pointSprite, cullMode);
     }
 
     native void rsnProgramBindConstants(int con, int pv, int slot, int mID);
