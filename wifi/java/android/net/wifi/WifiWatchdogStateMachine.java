@@ -589,12 +589,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
                             updateBssids();
                             transitionTo(mDnsCheckingState);
                             mNetEventCounter++;
-                            return HANDLED;
-                        case DISCONNECTED:
-                        case DISCONNECTING:
+                            break;
+                        default:
                             mNetEventCounter++;
                             transitionTo(mNotConnectedState);
-                            return HANDLED;
+                            break;
                     }
                     return HANDLED;
                 case EVENT_WIFI_RADIO_STATE_CHANGE:
