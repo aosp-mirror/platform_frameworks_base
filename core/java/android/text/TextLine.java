@@ -679,6 +679,12 @@ class TextLine {
 
         wp.getFontMetricsInt(fmi);
 
+        updateMetrics(fmi, previousTop, previousAscent, previousDescent, previousBottom,
+                previousLeading);
+    }
+
+    static void updateMetrics(FontMetricsInt fmi, int previousTop, int previousAscent,
+            int previousDescent, int previousBottom, int previousLeading) {
         fmi.top     = Math.min(fmi.top,     previousTop);
         fmi.ascent  = Math.min(fmi.ascent,  previousAscent);
         fmi.descent = Math.max(fmi.descent, previousDescent);
@@ -809,7 +815,28 @@ class TextLine {
         int textLimit = mStart + limit;
 
         if (needWidth || (c != null && runIsRtl)) {
+            int previousTop = 0;
+            int previousAscent = 0;
+            int previousDescent = 0;
+            int previousBottom = 0;
+            int previousLeading = 0;
+
+            boolean needUpdateMetrics = (fmi != null);
+
+            if (needUpdateMetrics) {
+                previousTop     = fmi.top;
+                previousAscent  = fmi.ascent;
+                previousDescent = fmi.descent;
+                previousBottom  = fmi.bottom;
+                previousLeading = fmi.leading;
+            }
+
             ret = replacement.getSize(wp, mText, textStart, textLimit, fmi);
+
+            if (needUpdateMetrics) {
+                updateMetrics(fmi, previousTop, previousAscent, previousDescent, previousBottom,
+                        previousLeading);
+            }
         }
 
         if (c != null) {
