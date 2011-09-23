@@ -764,8 +764,8 @@ status_t SurfaceMediaSource::read( MediaBuffer **buffer,
     // If the loop was exited as a result of stopping the recording,
     // it is OK
     if (mStopped) {
-        LOGV("Read: SurfaceMediaSource is stopped. Returning NO_INIT;");
-        return NO_INIT;
+        LOGV("Read: SurfaceMediaSource is stopped. Returning ERROR_END_OF_STREAM.");
+        return ERROR_END_OF_STREAM;
     }
 
     // Update the current buffer info
