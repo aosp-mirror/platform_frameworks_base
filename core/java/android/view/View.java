@@ -3900,6 +3900,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
     boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+        // Do not populate text to scroll events. They describe position change
+        // and usually come from container with a lot of text which is not very
+        // informative for accessibility purposes. Also they are fired frequently.
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            return true;
+        }
         onPopulateAccessibilityEvent(event);
         return false;
     }
