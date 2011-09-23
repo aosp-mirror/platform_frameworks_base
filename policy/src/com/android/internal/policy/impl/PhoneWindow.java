@@ -2762,28 +2762,30 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
 
                     boolean splitActionBar = false;
-                    if ((mUiOptions & ActivityInfo.UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW) != 0) {
+                    final boolean splitWhenNarrow =
+                            (mUiOptions & ActivityInfo.UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW) != 0;
+                    if (splitWhenNarrow) {
                         splitActionBar = getContext().getResources().getBoolean(
                                 com.android.internal.R.bool.split_action_bar_is_narrow);
                     } else {
                         splitActionBar = getWindowStyle().getBoolean(
                                 com.android.internal.R.styleable.Window_windowSplitActionBar, false);
                     }
-                    if (splitActionBar) {
-                        final ActionBarContainer splitView = (ActionBarContainer) findViewById(
-                                com.android.internal.R.id.split_action_bar);
-                        if (splitView != null) {
-                            splitView.setVisibility(View.VISIBLE);
-                            mActionBar.setSplitActionBar(splitActionBar);
-                            mActionBar.setSplitView(splitView);
+                    final ActionBarContainer splitView = (ActionBarContainer) findViewById(
+                            com.android.internal.R.id.split_action_bar);
+                    if (splitView != null) {
+                        mActionBar.setSplitView(splitView);
+                        mActionBar.setSplitActionBar(splitActionBar);
+                        mActionBar.setSplitWhenNarrow(splitWhenNarrow);
 
-                            final ActionBarContextView cab = (ActionBarContextView) findViewById(
-                                    com.android.internal.R.id.action_context_bar);
-                            cab.setSplitView(splitView);
-                        } else {
-                            Log.e(TAG, "Requested split action bar with " +
-                                    "incompatible window decor! Ignoring request.");
-                        }
+                        final ActionBarContextView cab = (ActionBarContextView) findViewById(
+                                com.android.internal.R.id.action_context_bar);
+                        cab.setSplitView(splitView);
+                        cab.setSplitActionBar(splitActionBar);
+                        cab.setSplitWhenNarrow(splitWhenNarrow);
+                    } else if (splitActionBar) {
+                        Log.e(TAG, "Requested split action bar with " +
+                                "incompatible window decor! Ignoring request.");
                     }
 
                     // Post the panel invalidate for later; avoid application onCreateOptionsMenu

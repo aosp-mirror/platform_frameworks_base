@@ -35,6 +35,8 @@ public abstract class AbsActionBarView extends ViewGroup {
     protected ActionMenuView mMenuView;
     protected ActionMenuPresenter mActionMenuPresenter;
     protected ActionBarContainer mSplitView;
+    protected boolean mSplitActionBar;
+    protected boolean mSplitWhenNarrow;
     protected int mContentHeight;
 
     protected Animator mVisibilityAnim;
@@ -66,9 +68,29 @@ public abstract class AbsActionBarView extends ViewGroup {
                 com.android.internal.R.attr.actionBarStyle, 0);
         setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
         a.recycle();
+        if (mSplitWhenNarrow) {
+            setSplitActionBar(getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.split_action_bar_is_narrow));
+        }
         if (mActionMenuPresenter != null) {
             mActionMenuPresenter.onConfigurationChanged(newConfig);
         }
+    }
+
+    /**
+     * Sets whether the bar should be split right now, no questions asked.
+     * @param split true if the bar should split
+     */
+    public void setSplitActionBar(boolean split) {
+        mSplitActionBar = split;
+    }
+
+    /**
+     * Sets whether the bar should split if we enter a narrow screen configuration.
+     * @param splitWhenNarrow true if the bar should check to split after a config change
+     */
+    public void setSplitWhenNarrow(boolean splitWhenNarrow) {
+        mSplitWhenNarrow = splitWhenNarrow;
     }
 
     public void setContentHeight(int height) {
