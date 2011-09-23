@@ -945,7 +945,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } catch (FileNotFoundException e) {
                         Slog.w(TAG, "Boot class path not found: " + paths[i]);
                     } catch (IOException e) {
-                        Slog.w(TAG, "Exception reading boot class path: " + paths[i], e);
+                        Slog.w(TAG, "Cannot dexopt " + paths[i] + "; is it an APK or JAR? "
+                                + e.getMessage());
                     }
                 }
             } else {
@@ -968,7 +969,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } catch (FileNotFoundException e) {
                         Slog.w(TAG, "Library not found: " + lib);
                     } catch (IOException e) {
-                        Slog.w(TAG, "Exception reading library: " + lib, e);
+                        Slog.w(TAG, "Cannot dexopt " + lib + "; is it an APK or JAR? "
+                                + e.getMessage());
                     }
                 }
             }
