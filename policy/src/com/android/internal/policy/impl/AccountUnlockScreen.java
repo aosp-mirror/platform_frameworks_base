@@ -54,7 +54,7 @@ import java.io.IOException;
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
         View.OnClickListener, TextWatcher {
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
-    private static final String LOCK_PATTERN_CLASS = LOCK_PATTERN_PACKAGE + ".ChooseLockPattern";
+    private static final String LOCK_PATTERN_CLASS = LOCK_PATTERN_PACKAGE + ".ChooseLockGeneric";
 
     /**
      * The amount of millis to stay awake once this screen detects activity
