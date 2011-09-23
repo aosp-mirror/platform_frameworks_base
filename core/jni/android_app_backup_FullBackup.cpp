@@ -76,10 +76,10 @@ static int backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
     int ret;
 
     // Extract the various strings, allowing for null object pointers
-    const char* packagenamechars = env->GetStringUTFChars(packageNameObj, NULL);
-    const char* rootchars = env->GetStringUTFChars(rootpathObj, NULL);
-    const char* pathchars = env->GetStringUTFChars(pathObj, NULL);
-    const char* domainchars = env->GetStringUTFChars(domainObj, NULL);
+    const char* packagenamechars = (packageNameObj) ? env->GetStringUTFChars(packageNameObj, NULL) : NULL;
+    const char* rootchars = (rootpathObj) ? env->GetStringUTFChars(rootpathObj, NULL) : NULL;
+    const char* pathchars = (pathObj) ? env->GetStringUTFChars(pathObj, NULL) : NULL;
+    const char* domainchars = (domainObj) ? env->GetStringUTFChars(domainObj, NULL) : NULL;
 
     String8 packageName(packagenamechars ? packagenamechars : "");
     String8 rootpath(rootchars ? rootchars : "");
