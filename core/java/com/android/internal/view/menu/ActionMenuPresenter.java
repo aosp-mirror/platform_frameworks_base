@@ -200,8 +200,19 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             }
         }
 
-        final boolean hasOverflow = mReserveOverflow && mMenu != null &&
-                mMenu.getNonActionItems().size() > 0;
+        final ArrayList<MenuItemImpl> nonActionItems = mMenu != null ?
+                mMenu.getNonActionItems() : null;
+
+        boolean hasOverflow = false;
+        if (mReserveOverflow && nonActionItems != null) {
+            final int count = nonActionItems.size();
+            if (count == 1) {
+                hasOverflow = !nonActionItems.get(0).isActionViewExpanded();
+            } else {
+                hasOverflow = count > 0;
+            }
+        }
+
         if (hasOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mContext);

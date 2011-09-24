@@ -18,6 +18,7 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.DataSetObserver;
 import android.os.Parcelable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -286,22 +287,45 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         return false;
     }
 
+    @Override
+    public int getId() {
+        return 0;
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        return null;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+    }
+
     private class MenuAdapter extends BaseAdapter {
         private MenuBuilder mAdapterMenu;
+        private int mExpandedIndex = -1;
 
         public MenuAdapter(MenuBuilder menu) {
             mAdapterMenu = menu;
+            registerDataSetObserver(new ExpandedIndexObserver());
+            findExpandedIndex();
         }
 
         public int getCount() {
             ArrayList<MenuItemImpl> items = mOverflowOnly ?
                     mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
-            return items.size();
+            if (mExpandedIndex < 0) {
+                return items.size();
+            }
+            return items.size() - 1;
         }
 
         public MenuItemImpl getItem(int position) {
             ArrayList<MenuItemImpl> items = mOverflowOnly ?
                     mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
+            if (mExpandedIndex >= 0 && position >= mExpandedIndex) {
+                position++;
+            }
             return items.get(position);
         }
 
@@ -323,19 +347,28 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             itemView.initialize(getItem(position), 0);
             return convertView;
         }
+
+        void findExpandedIndex() {
+            final MenuItemImpl expandedItem = mMenu.getExpandedItem();
+            if (expandedItem != null) {
+                final ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
+                final int count = items.size();
+                for (int i = 0; i < count; i++) {
+                    final MenuItemImpl item = items.get(i);
+                    if (item == expandedItem) {
+                        mExpandedIndex = i;
+                        return;
+                    }
+                }
+            }
+            mExpandedIndex = -1;
+        }
     }
 
-    @Override
-    public int getId() {
-        return 0;
-    }
-
-    @Override
-    public Parcelable onSaveInstanceState() {
-        return null;
-    }
-
-    @Override
-    public void onRestoreInstanceState(Parcelable state) {
+    private class ExpandedIndexObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            mAdapter.findExpandedIndex();
+        }
     }
 }

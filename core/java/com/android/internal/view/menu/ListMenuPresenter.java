@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -47,7 +48,7 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
     int mItemLayoutRes;
 
     private Callback mCallback;
-    private MenuAdapter mAdapter;
+    MenuAdapter mAdapter;
 
     private int mId;
 
@@ -216,14 +217,29 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
     }
 
     private class MenuAdapter extends BaseAdapter {
+        private int mExpandedIndex = -1;
+
+        public MenuAdapter() {
+            registerDataSetObserver(new ExpandedIndexObserver());
+            findExpandedIndex();
+        }
+
         public int getCount() {
             ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
-            return items.size() - mItemIndexOffset;
+            int count = items.size() - mItemIndexOffset;
+            if (mExpandedIndex < 0) {
+                return count;
+            }
+            return count - 1;
         }
 
         public MenuItemImpl getItem(int position) {
             ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
-            return items.get(position + mItemIndexOffset);
+            position += mItemIndexOffset;
+            if (mExpandedIndex >= 0 && position >= mExpandedIndex) {
+                position++;
+            }
+            return items.get(position);
         }
 
         public long getItemId(int position) {
@@ -240,6 +256,29 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
             MenuView.ItemView itemView = (MenuView.ItemView) convertView;
             itemView.initialize(getItem(position), 0);
             return convertView;
+        }
+
+        void findExpandedIndex() {
+            final MenuItemImpl expandedItem = mMenu.getExpandedItem();
+            if (expandedItem != null) {
+                final ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
+                final int count = items.size();
+                for (int i = 0; i < count; i++) {
+                    final MenuItemImpl item = items.get(i);
+                    if (item == expandedItem) {
+                        mExpandedIndex = i;
+                        return;
+                    }
+                }
+            }
+            mExpandedIndex = -1;
+        }
+    }
+
+    private class ExpandedIndexObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            mAdapter.findExpandedIndex();
         }
     }
 }
