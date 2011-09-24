@@ -7,6 +7,26 @@
 
 Type* SERVICE_CONTAINER_TYPE = new Type("com.android.athome.service",
         "AndroidAtHomeServiceContainer", Type::BUILT_IN, false, false, false);
+Type* PRESENTER_BASE_TYPE = new Type("com.android.athome.service",
+        "AndroidAtHomePresenter", Type::BUILT_IN, false, false, false);
+Type* PRESENTER_LISTENER_BASE_TYPE = new Type("com.android.athome.service",
+        "AndroidAtHomePresenter.Listener", Type::BUILT_IN, false, false, false);
+Type* RPC_BROKER_TYPE = new Type("com.android.athome.utils", "AndroidAtHomeBroker",
+        Type::BUILT_IN, false, false, false);
+Type* RPC_SERVICE_BASE_TYPE = new Type("com.android.athome.service", "AndroidAtHomeService",
+        Type::BUILT_IN, false, false, false);
+Type* RPC_SERVICE_INFO_TYPE = new ParcelableType("com.android.athome.stubs",
+        "AndroidAtHomeServiceInfo", true, __FILE__, __LINE__);
+Type* RPC_RESULT_HANDLER_TYPE = new ParcelableType("com.android.athome.rpc", "RpcResultHandler",
+        true, __FILE__, __LINE__);
+Type* RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
+        Type::BUILT_IN, false, false, false);
+
+static void generate_create_from_data(Type* t, StatementBlock* addTo, const string& key,
+        Variable* v, Variable* data, Variable** cl);
+static void generate_new_array(Type* t, StatementBlock* addTo, Variable* v, Variable* from);
+static void generate_write_to_data(Type* t, StatementBlock* addTo, Expression* k, Variable* v,
+        Variable* data);
 
 static string
 format_int(int n)
@@ -25,6 +45,226 @@ class_name_leaf(const string& str)
     } else {
         return string(str, pos+1);
     }
+}
+
+static string
+results_class_name(const string& n)
+{
+    string str = n;
+    str[0] = toupper(str[0]);
+    str.insert(0, "On");
+    return str;
+}
+
+static string
+results_method_name(const string& n)
+{
+    string str = n;
+    str[0] = toupper(str[0]);
+    str.insert(0, "on");
+    return str;
+}
+
+static string
+push_method_name(const string& n)
+{
+    string str = n;
+    str[0] = toupper(str[0]);
+    str.insert(0, "push");
+    return str;
+}
+
+// =================================================
+class DispatcherClass : public Class
+{
+public:
+    DispatcherClass(const interface_type* iface, Expression* target);
+    virtual ~DispatcherClass();
+
+    void AddMethod(const method_type* method);
+    void DoneWithMethods();
+
+    Method* processMethod;
+    Variable* actionParam;
+    Variable* requestParam;
+    Variable* errorParam;
+    Variable* requestData;
+    Variable* resultData;
+    IfStatement* dispatchIfStatement;
+    Expression* targetExpression;
+
+private:
+    void generate_process();
+};
+
+DispatcherClass::DispatcherClass(const interface_type* iface, Expression* target)
+    :Class(),
+     dispatchIfStatement(NULL),
+     targetExpression(target)
+{
+    generate_process();
+}
+
+DispatcherClass::~DispatcherClass()
+{
+}
+
+void
+DispatcherClass::generate_process()
+{
+    // byte[] process(String action, byte[] params, RpcError status)
+    this->processMethod = new Method;
+        this->processMethod->modifiers = PUBLIC;
+        this->processMethod->returnType = BYTE_TYPE;
+        this->processMethod->returnTypeDimension = 1;
+        this->processMethod->name = "process";
+        this->processMethod->statements = new StatementBlock;
+
+    this->actionParam = new Variable(STRING_TYPE, "action");
+    this->processMethod->parameters.push_back(this->actionParam);
+
+    this->requestParam = new Variable(BYTE_TYPE, "requestParam", 1);
+    this->processMethod->parameters.push_back(this->requestParam);
+
+    this->errorParam = new Variable(RPC_ERROR_TYPE, "errorParam", 0);
+    this->processMethod->parameters.push_back(this->errorParam);
+
+    this->requestData = new Variable(RPC_DATA_TYPE, "request");
+    this->processMethod->statements->Add(new VariableDeclaration(requestData,
+                new NewExpression(RPC_DATA_TYPE, 1, this->requestParam)));
+
+    this->resultData = new Variable(RPC_DATA_TYPE, "resultData");
+    this->processMethod->statements->Add(new VariableDeclaration(this->resultData,
+                NULL_VALUE));
+}
+
+void
+DispatcherClass::AddMethod(const method_type* method)
+{
+    arg_type* arg;
+
+    // The if/switch statement
+    IfStatement* ifs = new IfStatement();
+        ifs->expression = new MethodCall(new StringLiteralExpression(method->name.data), "equals",
+                1, this->actionParam);
+    StatementBlock* block = ifs->statements = new StatementBlock;
+    if (this->dispatchIfStatement == NULL) {
+        this->dispatchIfStatement = ifs;
+        this->processMethod->statements->Add(dispatchIfStatement);
+    } else {
+        this->dispatchIfStatement->elseif = ifs;
+        this->dispatchIfStatement = ifs;
+    }
+    
+    // The call to decl (from above)
+    MethodCall* realCall = new MethodCall(this->targetExpression, method->name.data);
+
+    // args
+    Variable* classLoader = NULL;
+    VariableFactory stubArgs("_arg");
+    arg = method->args;
+    while (arg != NULL) {
+        Type* t = NAMES.Search(arg->type.type.data);
+        Variable* v = stubArgs.Get(t);
+        v->dimension = arg->type.dimension;
+
+        // Unmarshall the parameter
+        block->Add(new VariableDeclaration(v));
+        if (convert_direction(arg->direction.data) & IN_PARAMETER) {
+            generate_create_from_data(t, block, arg->name.data, v,
+                    this->requestData, &classLoader);
+        } else {
+            if (arg->type.dimension == 0) {
+                block->Add(new Assignment(v, new NewExpression(v->type)));
+            }
+            else if (arg->type.dimension == 1) {
+                generate_new_array(v->type, block, v, this->requestData);
+            }
+            else {
+                fprintf(stderr, "aidl:internal error %s:%d\n", __FILE__,
+                        __LINE__);
+            }
+        }
+
+        // Add that parameter to the method call
+        realCall->arguments.push_back(v);
+
+        arg = arg->next;
+    }
+
+
+    Type* returnType = NAMES.Search(method->type.type.data);
+    if (returnType == EVENT_FAKE_TYPE) {
+        returnType = VOID_TYPE;
+    }
+    
+    // the real call
+    bool first = true;
+    Variable* _result = NULL;
+    if (returnType == VOID_TYPE) {
+        block->Add(realCall);
+    } else {
+        _result = new Variable(returnType, "_result",
+                                method->type.dimension);
+        block->Add(new VariableDeclaration(_result, realCall));
+
+        // need the result RpcData
+        if (first) {
+            block->Add(new Assignment(this->resultData,
+                        new NewExpression(RPC_DATA_TYPE)));
+            first = false;
+        }
+
+        // marshall the return value
+        generate_write_to_data(returnType, block,
+                new StringLiteralExpression("_result"), _result, this->resultData);
+    }
+
+    // out parameters
+    int i = 0;
+    arg = method->args;
+    while (arg != NULL) {
+        Type* t = NAMES.Search(arg->type.type.data);
+        Variable* v = stubArgs.Get(i++);
+
+        if (convert_direction(arg->direction.data) & OUT_PARAMETER) {
+            // need the result RpcData
+            if (first) {
+                block->Add(new Assignment(this->resultData, new NewExpression(RPC_DATA_TYPE)));
+                first = false;
+            }
+
+            generate_write_to_data(t, block, new StringLiteralExpression(arg->name.data),
+                    v, this->resultData);
+        }
+
+        arg = arg->next;
+    }
+}
+
+void
+DispatcherClass::DoneWithMethods()
+{
+    if (this->dispatchIfStatement == NULL) {
+        return;
+    }
+
+    this->elements.push_back(this->processMethod);
+
+    IfStatement* fallthrough = new IfStatement();
+        fallthrough->statements = new StatementBlock;
+        fallthrough->statements->Add(new ReturnStatement(
+                    new MethodCall(SUPER_VALUE, "process", 3, this->actionParam, this->requestParam,
+                        this->errorParam)));
+    this->dispatchIfStatement->elseif = fallthrough;
+    IfStatement* s = new IfStatement;
+        s->statements = new StatementBlock;
+    this->processMethod->statements->Add(s);
+    s->expression = new Comparison(this->resultData, "!=", NULL_VALUE);
+    s->statements->Add(new ReturnStatement(new MethodCall(this->resultData, "serialize")));
+    s->elseif = new IfStatement;
+    s = s->elseif;
+    s->statements->Add(new ReturnStatement(NULL_VALUE));
 }
 
 // =================================================
@@ -53,7 +293,7 @@ RpcProxyClass::RpcProxyClass(const interface_type* iface, InterfaceType* interfa
     this->context = new Variable(CONTEXT_TYPE, "_context");
     this->elements.push_back(new Field(PRIVATE, this->context));
     // endpoint
-    this->endpoint = new Variable(RPC_ENDPOINT_INFO_TYPE, "_endpoint");
+    this->endpoint = new Variable(RPC_SERVICE_INFO_TYPE, "_endpoint");
     this->elements.push_back(new Field(PRIVATE, this->endpoint));
 
     // methods
@@ -68,10 +308,10 @@ void
 RpcProxyClass::generate_ctor()
 {
     Variable* context = new Variable(CONTEXT_TYPE, "context");
-    Variable* endpoint = new Variable(RPC_ENDPOINT_INFO_TYPE, "endpoint");
+    Variable* endpoint = new Variable(RPC_SERVICE_INFO_TYPE, "endpoint");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
-        ctor->name = this->type->Name();
+        ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
         ctor->parameters.push_back(context);
         ctor->parameters.push_back(endpoint);
@@ -82,43 +322,120 @@ RpcProxyClass::generate_ctor()
 }
 
 // =================================================
-class ServiceBaseClass : public Class
+class PresenterClass : public DispatcherClass
+{
+public:
+    PresenterClass(const interface_type* iface, Type* listenerType);
+    virtual ~PresenterClass();
+
+    Variable* _listener;
+
+private:
+    void generate_ctor();
+};
+
+Expression*
+generate_get_listener_expression(Type* cast)
+{
+    return new Cast(cast, new MethodCall(THIS_VALUE, "getView"));
+}
+
+PresenterClass::PresenterClass(const interface_type* iface, Type* listenerType)
+    :DispatcherClass(iface, generate_get_listener_expression(listenerType))
+{
+    this->modifiers = PRIVATE;
+    this->what = Class::CLASS;
+    this->type = new Type(iface->package ? iface->package : "",
+                        append(iface->name.data, ".Presenter"),
+                        Type::GENERATED, false, false, false);
+    this->extends = PRESENTER_BASE_TYPE;
+
+    this->_listener = new Variable(listenerType, "_listener");
+
+    // methods
+    generate_ctor();
+}
+
+PresenterClass::~PresenterClass()
+{
+}
+
+void
+PresenterClass::generate_ctor()
+{
+    Variable* context = new Variable(CONTEXT_TYPE, "context");
+    Variable* endpoint = new Variable(RPC_SERVICE_INFO_TYPE, "endpoint");
+    Variable* listener = new Variable(this->_listener->type, "listener");
+    Method* ctor = new Method;
+        ctor->modifiers = PUBLIC;
+        ctor->name = class_name_leaf(this->type->Name());
+        ctor->statements = new StatementBlock;
+        ctor->parameters.push_back(context);
+        ctor->parameters.push_back(endpoint);
+        ctor->parameters.push_back(listener);
+    this->elements.push_back(ctor);
+
+    ctor->statements->Add(new MethodCall("super", 3, context, endpoint, listener));
+    ctor->statements->Add(new Assignment(this->_listener, listener));
+}
+
+// =================================================
+class ListenerClass : public Class
+{
+public:
+    ListenerClass(const interface_type* iface);
+    virtual ~ListenerClass();
+
+    bool needed;
+
+private:
+    void generate_ctor();
+};
+
+ListenerClass::ListenerClass(const interface_type* iface)
+    :Class(),
+     needed(false)
+{
+    this->comment = "/** Extend this to listen to the events from this class. */";
+    this->modifiers = STATIC | PUBLIC ;
+    this->what = Class::CLASS;
+    this->type = new Type(iface->package ? iface->package : "",
+                        append(iface->name.data, ".Listener"),
+                        Type::GENERATED, false, false, false);
+    this->extends = PRESENTER_LISTENER_BASE_TYPE;
+}
+
+ListenerClass::~ListenerClass()
+{
+}
+
+// =================================================
+class ServiceBaseClass : public DispatcherClass
 {
 public:
     ServiceBaseClass(const interface_type* iface);
     virtual ~ServiceBaseClass();
 
-    void AddMethod(const string& methodName, StatementBlock** statements);
-    void DoneWithMethods();
-
     bool needed;
-    Method* processMethod;
-    Variable* actionParam;
-    Variable* requestParam;
-    Variable* errorParam;
-    Variable* requestData;
-    Variable* resultData;
-    IfStatement* dispatchIfStatement;
 
 private:
     void generate_ctor();
-    void generate_process();
 };
 
 ServiceBaseClass::ServiceBaseClass(const interface_type* iface)
-    :Class(),
-     needed(false),
-     dispatchIfStatement(NULL)
+    :DispatcherClass(iface, THIS_VALUE),
+     needed(false)
 {
     this->comment = "/** Extend this to implement a link service. */";
     this->modifiers = STATIC | PUBLIC | ABSTRACT;
     this->what = Class::CLASS;
-    this->type = NAMES.Find(iface->package, append(iface->name.data, ".ServiceBase").c_str());
+    this->type = new Type(iface->package ? iface->package : "",
+                        append(iface->name.data, ".ServiceBase"),
+                        Type::GENERATED, false, false, false);
     this->extends = RPC_SERVICE_BASE_TYPE;
 
     // methods
     generate_ctor();
-    generate_process();
 }
 
 ServiceBaseClass::~ServiceBaseClass()
@@ -143,71 +460,6 @@ ServiceBaseClass::generate_ctor()
     this->elements.push_back(ctor);
 
     ctor->statements->Add(new MethodCall("super", 4, container, name, type, version));
-}
-
-void
-ServiceBaseClass::generate_process()
-{
-    // byte[] process(String action, byte[] params, RpcError status)
-    this->processMethod = new Method;
-        this->processMethod->modifiers = PUBLIC;
-        this->processMethod->returnType = BYTE_TYPE;
-        this->processMethod->returnTypeDimension = 1;
-        this->processMethod->name = "process";
-        this->processMethod->statements = new StatementBlock;
-    this->elements.push_back(this->processMethod);
-
-    this->actionParam = new Variable(STRING_TYPE, "action");
-    this->processMethod->parameters.push_back(this->actionParam);
-
-    this->requestParam = new Variable(BYTE_TYPE, "requestParam", 1);
-    this->processMethod->parameters.push_back(this->requestParam);
-
-    this->errorParam = new Variable(RPC_ERROR_TYPE, "errorParam", 0);
-    this->processMethod->parameters.push_back(this->errorParam);
-
-    this->requestData = new Variable(RPC_DATA_TYPE, "request");
-    this->processMethod->statements->Add(new VariableDeclaration(requestData,
-                new NewExpression(RPC_DATA_TYPE, 1, this->requestParam)));
-
-    this->resultData = new Variable(RPC_DATA_TYPE, "resultData");
-    this->processMethod->statements->Add(new VariableDeclaration(this->resultData,
-                NULL_VALUE));
-}
-
-void
-ServiceBaseClass::AddMethod(const string& methodName, StatementBlock** statements)
-{
-    IfStatement* ifs = new IfStatement();
-        ifs->expression = new MethodCall(new StringLiteralExpression(methodName), "equals", 1,
-                this->actionParam);
-        ifs->statements = *statements = new StatementBlock;
-    if (this->dispatchIfStatement == NULL) {
-        this->dispatchIfStatement = ifs;
-        this->processMethod->statements->Add(dispatchIfStatement);
-    } else {
-        this->dispatchIfStatement->elseif = ifs;
-        this->dispatchIfStatement = ifs;
-    }
-}
-
-void
-ServiceBaseClass::DoneWithMethods()
-{
-    IfStatement* fallthrough = new IfStatement();
-        fallthrough->statements = new StatementBlock;
-        fallthrough->statements->Add(new ReturnStatement(
-                    new MethodCall(SUPER_VALUE, "process", 3, this->actionParam, this->requestParam,
-                        this->errorParam)));
-    this->dispatchIfStatement->elseif = fallthrough;
-    IfStatement* s = new IfStatement;
-        s->statements = new StatementBlock;
-    this->processMethod->statements->Add(s);
-    s->expression = new Comparison(this->resultData, "!=", NULL_VALUE);
-    s->statements->Add(new ReturnStatement(new MethodCall(this->resultData, "serialize")));
-    s->elseif = new IfStatement;
-    s = s->elseif;
-    s->statements->Add(new ReturnStatement(NULL_VALUE));
 }
 
 // =================================================
@@ -262,7 +514,7 @@ ResultDispatcherClass::generate_ctor()
     Variable* callbackParam = new Variable(OBJECT_TYPE, "cbObj");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
-        ctor->name = this->type->Name();
+        ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
         ctor->parameters.push_back(methodIdParam);
         ctor->parameters.push_back(callbackParam);
@@ -348,24 +600,6 @@ generate_write_to_data(Type* t, StatementBlock* addTo, Expression* k, Variable* 
 }
 
 // =================================================
-static string
-results_class_name(const string& n)
-{
-    string str = n;
-    str[0] = toupper(str[0]);
-    str.insert(0, "On");
-    return str;
-}
-
-static string
-results_method_name(const string& n)
-{
-    string str = n;
-    str[0] = toupper(str[0]);
-    str.insert(0, "on");
-    return str;
-}
-
 static Type*
 generate_results_method(const method_type* method, RpcProxyClass* proxyClass)
 {
@@ -526,118 +760,13 @@ generate_result_dispatcher_method(const method_type* method,
 }
 
 static void
-generate_service_base_methods(const method_type* method, ServiceBaseClass* serviceBaseClass)
-{
-    arg_type* arg;
-    StatementBlock* block;
-    serviceBaseClass->AddMethod(method->name.data, &block);
-
-    // The abstract method that the service developers implement
-    Method* decl = new Method;
-        decl->comment = gather_comments(method->comments_token->extra);
-        decl->modifiers = PUBLIC | ABSTRACT;
-        decl->returnType = NAMES.Search(method->type.type.data);
-        decl->returnTypeDimension = method->type.dimension;
-        decl->name = method->name.data;
-
-    arg = method->args;
-    while (arg != NULL) {
-        decl->parameters.push_back(new Variable(
-                            NAMES.Search(arg->type.type.data), arg->name.data,
-                            arg->type.dimension));
-        arg = arg->next;
-    }
-
-    serviceBaseClass->elements.push_back(decl);
-    
-    // The call to decl (from above)
-    MethodCall* realCall = new MethodCall(THIS_VALUE, method->name.data);
-    
-    // args
-    Variable* classLoader = NULL;
-    VariableFactory stubArgs("_arg");
-    arg = method->args;
-    while (arg != NULL) {
-        Type* t = NAMES.Search(arg->type.type.data);
-        Variable* v = stubArgs.Get(t);
-        v->dimension = arg->type.dimension;
-
-        // Unmarshall the parameter
-        block->Add(new VariableDeclaration(v));
-        if (convert_direction(arg->direction.data) & IN_PARAMETER) {
-            generate_create_from_data(t, block, arg->name.data, v,
-                    serviceBaseClass->requestData, &classLoader);
-        } else {
-            if (arg->type.dimension == 0) {
-                block->Add(new Assignment(v, new NewExpression(v->type)));
-            }
-            else if (arg->type.dimension == 1) {
-                generate_new_array(v->type, block, v, serviceBaseClass->requestData);
-            }
-            else {
-                fprintf(stderr, "aidl:internal error %s:%d\n", __FILE__,
-                        __LINE__);
-            }
-        }
-
-        // Add that parameter to the method call
-        realCall->arguments.push_back(v);
-
-        arg = arg->next;
-    }
-
-    // the real call
-    bool first = true;
-    Variable* _result = NULL;
-    if (0 == strcmp(method->type.type.data, "void")) {
-        block->Add(realCall);
-    } else {
-        _result = new Variable(decl->returnType, "_result",
-                                decl->returnTypeDimension);
-        block->Add(new VariableDeclaration(_result, realCall));
-
-        // need the result RpcData
-        if (first) {
-            block->Add(new Assignment(serviceBaseClass->resultData,
-                        new NewExpression(RPC_DATA_TYPE)));
-            first = false;
-        }
-
-        // marshall the return value
-        generate_write_to_data(decl->returnType, block,
-                new StringLiteralExpression("_result"), _result, serviceBaseClass->resultData);
-    }
-
-    // out parameters
-    int i = 0;
-    arg = method->args;
-    while (arg != NULL) {
-        Type* t = NAMES.Search(arg->type.type.data);
-        Variable* v = stubArgs.Get(i++);
-
-        if (convert_direction(arg->direction.data) & OUT_PARAMETER) {
-            // need the result RpcData
-            if (first) {
-                block->Add(new Assignment(serviceBaseClass->resultData,
-                            new NewExpression(RPC_DATA_TYPE)));
-                first = false;
-            }
-
-
-            generate_write_to_data(t, block, new StringLiteralExpression(arg->name.data),
-                    v, serviceBaseClass->resultData);
-        }
-
-        arg = arg->next;
-    }
-}
-
-static void
-generate_method(const method_type* method, RpcProxyClass* proxyClass,
+generate_regular_method(const method_type* method, RpcProxyClass* proxyClass,
         ServiceBaseClass* serviceBaseClass, ResultDispatcherClass* resultsDispatcherClass,
         int index)
 {
-    // == the callback interface for results =================================
+    arg_type* arg;
+
+    // == the callback interface for results ================================
     // the service base class
     Type* resultsInterfaceType = generate_results_method(method, proxyClass);
     
@@ -650,8 +779,132 @@ generate_method(const method_type* method, RpcProxyClass* proxyClass,
                 index);
     }
 
+    // == The abstract method that the service developers implement ==========
+    Method* decl = new Method;
+        decl->comment = gather_comments(method->comments_token->extra);
+        decl->modifiers = PUBLIC | ABSTRACT;
+        decl->returnType = NAMES.Search(method->type.type.data);
+        decl->returnTypeDimension = method->type.dimension;
+        decl->name = method->name.data;
+    arg = method->args;
+    while (arg != NULL) {
+        decl->parameters.push_back(new Variable(
+                            NAMES.Search(arg->type.type.data), arg->name.data,
+                            arg->type.dimension));
+        arg = arg->next;
+    }
+    serviceBaseClass->elements.push_back(decl);
+    
+
     // == the dispatch method in the service base class ======================
-    generate_service_base_methods(method, serviceBaseClass);
+    serviceBaseClass->AddMethod(method);
+}
+
+static void
+generate_event_method(const method_type* method, RpcProxyClass* proxyClass,
+        ServiceBaseClass* serviceBaseClass, ListenerClass* listenerClass,
+        PresenterClass* presenterClass, int index)
+{
+    arg_type* arg;
+    listenerClass->needed = true;
+
+    // == the push method in the service base class =========================
+    Method* push = new Method;
+        push->modifiers = PUBLIC;
+        push->name = push_method_name(method->name.data);
+        push->statements = new StatementBlock;
+        push->returnType = VOID_TYPE;
+    serviceBaseClass->elements.push_back(push);
+
+    // The local variables
+    Variable* _data = new Variable(RPC_DATA_TYPE, "_data");
+    push->statements->Add(new VariableDeclaration(_data, new NewExpression(RPC_DATA_TYPE)));
+
+    // Add the arguments
+    arg = method->args;
+    while (arg != NULL) {
+        // Function signature
+        Type* t = NAMES.Search(arg->type.type.data);
+        Variable* v = new Variable(t, arg->name.data, arg->type.dimension);
+        push->parameters.push_back(v);
+
+        // Input parameter marshalling
+        generate_write_to_data(t, push->statements,
+                new StringLiteralExpression(arg->name.data), v, _data);
+
+        arg = arg->next;
+    }
+
+    // Send the notifications
+    push->statements->Add(new MethodCall("pushEvent", 2,
+                new StringLiteralExpression(method->name.data),
+                new MethodCall(_data, "serialize")));
+
+    // == the event callback dispatcher method  ====================================
+    presenterClass->AddMethod(method);
+
+    // == the event method in the listener base class =====================
+    Method* event = new Method;
+        event->modifiers = PUBLIC;
+        event->name = method->name.data;
+        event->statements = new StatementBlock;
+        event->returnType = VOID_TYPE;
+    listenerClass->elements.push_back(event);
+    arg = method->args;
+    while (arg != NULL) {
+        event->parameters.push_back(new Variable(
+                            NAMES.Search(arg->type.type.data), arg->name.data,
+                            arg->type.dimension));
+        arg = arg->next;
+    }
+}
+
+static void
+generate_listener_methods(RpcProxyClass* proxyClass, Type* presenterType, Type* listenerType)
+{
+    // AndroidAtHomePresenter _presenter;
+    // void registerListener(Listener listener) {
+    //     unregisterListener();
+    //     _presenter = new Presenter(_context, _endpoint, listener);
+    //     _presenter.attachToModel();
+    // }
+    // void unregisterListener() {
+    //     if (_presenter != null) {
+    //         _presenter.detachFromModel();
+    //     }
+    // }
+
+    Variable* _presenter = new Variable(presenterType, "_presenter");
+    proxyClass->elements.push_back(new Field(PRIVATE, _presenter));
+
+    Variable* listener = new Variable(listenerType, "listener");
+
+    Method* registerMethod = new Method;
+        registerMethod->modifiers = PUBLIC;
+        registerMethod->returnType = VOID_TYPE;
+        registerMethod->name = "registerListener";
+        registerMethod->statements = new StatementBlock;
+        registerMethod->parameters.push_back(listener);
+    proxyClass->elements.push_back(registerMethod);
+
+    registerMethod->statements->Add(new MethodCall(THIS_VALUE, "unregisterListener"));
+    registerMethod->statements->Add(new Assignment(_presenter, new NewExpression(presenterType,
+                    3, proxyClass->context, proxyClass->endpoint, listener)));
+    registerMethod->statements->Add(new MethodCall(_presenter, "attachToModel"));
+
+    Method* unregisterMethod = new Method;
+        unregisterMethod->modifiers = PUBLIC;
+        unregisterMethod->returnType = VOID_TYPE;
+        unregisterMethod->name = "unregisterListener";
+        unregisterMethod->statements = new StatementBlock;
+    proxyClass->elements.push_back(unregisterMethod);
+
+    IfStatement* ifst = new IfStatement;
+        ifst->expression = new Comparison(_presenter, "!=", NULL_VALUE);
+    unregisterMethod->statements->Add(ifst);
+
+    ifst->statements->Add(new MethodCall(_presenter, "detachFromModel"));
+    ifst->statements->Add(new Assignment(_presenter, NULL_VALUE));
 }
 
 Class*
@@ -661,6 +914,12 @@ generate_rpc_interface_class(const interface_type* iface)
     InterfaceType* interfaceType = static_cast<InterfaceType*>(
         NAMES.Find(iface->package, iface->name.data));
     RpcProxyClass* proxy = new RpcProxyClass(iface, interfaceType);
+
+    // the listener class
+    ListenerClass* listener = new ListenerClass(iface);
+
+    // the presenter class
+    PresenterClass* presenter = new PresenterClass(iface, listener->type);
 
     // the service base class
     ServiceBaseClass* base = new ServiceBaseClass(iface);
@@ -674,16 +933,26 @@ generate_rpc_interface_class(const interface_type* iface)
     interface_item_type* item = iface->interface_items;
     while (item != NULL) {
         if (item->item_type == METHOD_TYPE) {
-            generate_method((method_type*)item, proxy, base, results, index);
+            if (NAMES.Search(((method_type*)item)->type.type.data) == EVENT_FAKE_TYPE) {
+                generate_event_method((method_type*)item, proxy, base, listener, presenter, index);
+            } else {
+                generate_regular_method((method_type*)item, proxy, base, results, index);
+            }
         }
         item = item->next;
         index++;
     }
+    presenter->DoneWithMethods();
     base->DoneWithMethods();
 
     // only add this if there are methods with results / out parameters
     if (results->needed) {
         proxy->elements.push_back(results);
+    }
+    if (listener->needed) {
+        proxy->elements.push_back(listener);
+        proxy->elements.push_back(presenter);
+        generate_listener_methods(proxy, presenter->type, listener->type);
     }
 
     return proxy;

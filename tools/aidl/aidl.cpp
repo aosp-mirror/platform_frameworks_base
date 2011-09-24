@@ -419,11 +419,19 @@ check_method(const char* filename, int kind, method_type* m)
         return err;
     }
 
-    if (!(kind == INTERFACE_TYPE_BINDER ? returnType->CanWriteToParcel()
-                : returnType->CanWriteToRpcData())) {
-        fprintf(stderr, "%s:%d return type %s can't be marshalled.\n", filename,
-                    m->type.type.lineno, m->type.type.data);
-        err = 1;
+    if (returnType == EVENT_FAKE_TYPE) {
+        if (kind != INTERFACE_TYPE_RPC) {
+            fprintf(stderr, "%s:%d event methods only supported for rpc interfaces\n",
+                    filename, m->type.type.lineno);
+            err = 1;
+        }
+    } else {
+        if (!(kind == INTERFACE_TYPE_BINDER ? returnType->CanWriteToParcel()
+                    : returnType->CanWriteToRpcData())) {
+            fprintf(stderr, "%s:%d return type %s can't be marshalled.\n", filename,
+                        m->type.type.lineno, m->type.type.data);
+            err = 1;
+        }
     }
 
     if (m->type.dimension > 0 && !returnType->CanBeArray()) {
@@ -450,6 +458,14 @@ check_method(const char* filename, int kind, method_type* m)
         // check the arg type
         if (t == NULL) {
             fprintf(stderr, "%s:%d parameter %s (%d) unknown type %s\n",
+                    filename, m->type.type.lineno, arg->name.data, index,
+                    arg->type.type.data);
+            err = 1;
+            goto next;
+        }
+
+        if (t == EVENT_FAKE_TYPE) {
+            fprintf(stderr, "%s:%d parameter %s (%d) event can not be used as a parameter %s\n",
                     filename, m->type.type.lineno, arg->name.data, index,
                     arg->type.type.data);
             err = 1;
@@ -505,7 +521,7 @@ check_method(const char* filename, int kind, method_type* m)
         // check that the name doesn't match a keyword
         if (matches_keyword(arg->name.data)) {
             fprintf(stderr, "%s:%d parameter %d %s is named the same as a"
-                    " Java keyword\n",
+                    " Java or aidl keyword\n",
                     filename, m->name.lineno, index, arg->name.data);
             err = 1;
         }
