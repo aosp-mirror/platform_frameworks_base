@@ -1061,7 +1061,7 @@ public final class Bitmap implements Parcelable {
      * No special parcel contents.
      */
     public int describeContents() {
-        return 0;
+        return Parcelable.CONTENTS_FILE_DESCRIPTOR; // uses parcel blobs
     }
 
     /**
