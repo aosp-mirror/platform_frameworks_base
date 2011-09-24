@@ -323,6 +323,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['article', 'accountsync', 'data'],
+    path: 'articles/contacts.html',
+    title: {
+      en: 'Using the Contacts API'
+    },
+    description: {
+      en: 'Android provides a Contacts API for managing and integrating contacts from multiple accounts and data sources and allows apps to read various information about individual contacts.'
+    }
+  },
+  {
     tags: ['article', 'ui', 'web'],
     path: 'articles/using-webviews.html',
     title: {
