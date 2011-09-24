@@ -1258,4 +1258,8 @@ public class MenuBuilder implements Menu {
         }
         return collapsed;
     }
+
+    public MenuItemImpl getExpandedItem() {
+        return mExpandedItem;
+    }
 }
