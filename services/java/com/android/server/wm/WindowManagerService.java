@@ -5183,6 +5183,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mRotation = rotation;
         mAltOrientation = altOrientation;
+        mPolicy.setRotationLw(mRotation);
 
         mWindowsFreezingScreen = true;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
