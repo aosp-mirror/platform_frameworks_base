@@ -131,42 +131,28 @@ class Plotter:
         self.orientation_angle_axes, 'orientation', 'black')
     self._add_timeseries_legend(self.orientation_angle_axes)
 
-    self.actual_orientation = self._make_timeseries()
-    self.proposed_orientation = self._make_timeseries()
+    self.current_rotation = self._make_timeseries()
+    self.proposed_rotation = self._make_timeseries()
+    self.proposal_rotation = self._make_timeseries()
     self.orientation_axes = self._add_timeseries_axes(
-        5, 'Actual / Proposed Orientation and Confidence', 'rotation', [-1, 4],
+        5, 'Current / Proposed Orientation and Confidence', 'rotation', [-1, 4],
         sharex=shared_axis,
         yticks=range(0, 4))
-    self.actual_orientation_line = self._add_timeseries_line(
-        self.orientation_axes, 'actual', 'black', linewidth=2)
-    self.proposed_orientation_line = self._add_timeseries_line(
-        self.orientation_axes, 'proposed', 'purple', linewidth=3)
+    self.current_rotation_line = self._add_timeseries_line(
+        self.orientation_axes, 'current', 'black', linewidth=2)
+    self.proposal_rotation_line = self._add_timeseries_line(
+        self.orientation_axes, 'proposal', 'purple', linewidth=3)
+    self.proposed_rotation_line = self._add_timeseries_line(
+        self.orientation_axes, 'proposed', 'green', linewidth=3)
     self._add_timeseries_legend(self.orientation_axes)
 
-    self.confidence = [[self._make_timeseries(), self._make_timeseries()] for i in range(0, 4)]
-    self.confidence_polys = []
-
-    self.combined_confidence = self._make_timeseries()
-    self.orientation_confidence = self._make_timeseries()
-    self.tilt_confidence = self._make_timeseries()
-    self.magnitude_confidence = self._make_timeseries()
-    self.confidence_axes = self._add_timeseries_axes(
-        6, 'Proposed Orientation Confidence Factors', 'confidence', [-0.1, 1.1],
-        sharex=shared_axis,
-        yticks=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
-    self.combined_confidence_line = self._add_timeseries_line(
-        self.confidence_axes, 'combined', 'purple', linewidth=2)
-    self.orientation_confidence_line = self._add_timeseries_line(
-        self.confidence_axes, 'orientation', 'black')
-    self.tilt_confidence_line = self._add_timeseries_line(
-        self.confidence_axes, 'tilt', 'brown')
-    self.magnitude_confidence_line = self._add_timeseries_line(
-        self.confidence_axes, 'magnitude', 'orange')
-    self._add_timeseries_legend(self.confidence_axes)
+    self.proposal_confidence = [[self._make_timeseries(), self._make_timeseries()]
+      for i in range(0, 4)]
+    self.proposal_confidence_polys = []
 
     self.sample_latency = self._make_timeseries()
     self.sample_latency_axes = self._add_timeseries_axes(
-        7, 'Accelerometer Sampling Latency', 'ms', [-10, 500],
+        6, 'Accelerometer Sampling Latency', 'ms', [-10, 500],
         sharex=shared_axis,
         yticks=range(0, 500, 100))
     self.sample_latency_line = self._add_timeseries_line(
@@ -186,7 +172,7 @@ class Plotter:
 
   # Add a subplot to the figure for a time series.
   def _add_timeseries_axes(self, index, title, ylabel, ylim, yticks, sharex=None):
-    num_graphs = 7
+    num_graphs = 6
     height = 0.9 / num_graphs
     top = 0.95 - height * index
     axes = self.fig.add_axes([0.1, top, 0.8, height],
@@ -234,13 +220,10 @@ class Plotter:
     self.parse_magnitude = None
     self.parse_tilt_angle = None
     self.parse_orientation_angle = None
-    self.parse_proposed_orientation = None
-    self.parse_combined_confidence = None
-    self.parse_orientation_confidence = None
-    self.parse_tilt_confidence = None
-    self.parse_magnitude_confidence = None
-    self.parse_actual_orientation = None
-    self.parse_confidence = None
+    self.parse_current_rotation = None
+    self.parse_proposed_rotation = None
+    self.parse_proposal_rotation = None
+    self.parse_proposal_confidence = None
     self.parse_sample_latency = None
 
   # Update samples.
@@ -284,25 +267,12 @@ class Plotter:
       if line.find('orientationAngle=') != -1:
         self.parse_orientation_angle = self._get_following_number(line, 'orientationAngle=')
 
-      if line.find('Proposal:') != -1:
-        self.parse_proposed_orientation = self._get_following_number(line, 'proposedOrientation=')
-        self.parse_combined_confidence = self._get_following_number(line, 'combinedConfidence=')
-        self.parse_orientation_confidence = self._get_following_number(line, 'orientationConfidence=')
-        self.parse_tilt_confidence = self._get_following_number(line, 'tiltConfidence=')
-        self.parse_magnitude_confidence = self._get_following_number(line, 'magnitudeConfidence=')
-
       if line.find('Result:') != -1:
-        self.parse_actual_orientation = self._get_following_number(line, 'rotation=')
-        self.parse_confidence = self._get_following_array_of_numbers(line, 'confidence=')
+        self.parse_current_rotation = self._get_following_number(line, 'currentRotation=')
+        self.parse_proposed_rotation = self._get_following_number(line, 'proposedRotation=')
+        self.parse_proposal_rotation = self._get_following_number(line, 'proposalRotation=')
+        self.parse_proposal_confidence = self._get_following_number(line, 'proposalConfidence=')
         self.parse_sample_latency = self._get_following_number(line, 'timeDeltaMS=')
-
-        for i in range(0, 4):
-          if self.parse_confidence is not None:
-            self._append(self.confidence[i][0], timeindex, i)
-            self._append(self.confidence[i][1], timeindex, i + self.parse_confidence[i])
-          else:
-            self._append(self.confidence[i][0], timeindex, None)
-            self._append(self.confidence[i][1], timeindex, None)
 
         self._append(self.raw_acceleration_x, timeindex, self.parse_raw_acceleration_x)
         self._append(self.raw_acceleration_y, timeindex, self.parse_raw_acceleration_y)
@@ -313,12 +283,22 @@ class Plotter:
         self._append(self.magnitude, timeindex, self.parse_magnitude)
         self._append(self.tilt_angle, timeindex, self.parse_tilt_angle)
         self._append(self.orientation_angle, timeindex, self.parse_orientation_angle)
-        self._append(self.actual_orientation, timeindex, self.parse_actual_orientation)
-        self._append(self.proposed_orientation, timeindex, self.parse_proposed_orientation)
-        self._append(self.combined_confidence, timeindex, self.parse_combined_confidence)
-        self._append(self.orientation_confidence, timeindex, self.parse_orientation_confidence)
-        self._append(self.tilt_confidence, timeindex, self.parse_tilt_confidence)
-        self._append(self.magnitude_confidence, timeindex, self.parse_magnitude_confidence)
+        self._append(self.current_rotation, timeindex, self.parse_current_rotation)
+        if self.parse_proposed_rotation >= 0:
+          self._append(self.proposed_rotation, timeindex, self.parse_proposed_rotation)
+        else:
+          self._append(self.proposed_rotation, timeindex, None)
+        if self.parse_proposal_rotation >= 0:
+          self._append(self.proposal_rotation, timeindex, self.parse_proposal_rotation)
+        else:
+          self._append(self.proposal_rotation, timeindex, None)
+        for i in range(0, 4):
+          self._append(self.proposal_confidence[i][0], timeindex, i)
+          if i == self.parse_proposal_rotation:
+            self._append(self.proposal_confidence[i][1], timeindex,
+              i + self.parse_proposal_confidence)
+          else:
+            self._append(self.proposal_confidence[i][1], timeindex, i)
         self._append(self.sample_latency, timeindex, self.parse_sample_latency)
         self._reset_parse_state()
 
@@ -335,16 +315,13 @@ class Plotter:
       self._scroll(self.magnitude, bottom)
       self._scroll(self.tilt_angle, bottom)
       self._scroll(self.orientation_angle, bottom)
-      self._scroll(self.actual_orientation, bottom)
-      self._scroll(self.proposed_orientation, bottom)
-      self._scroll(self.combined_confidence, bottom)
-      self._scroll(self.orientation_confidence, bottom)
-      self._scroll(self.tilt_confidence, bottom)
-      self._scroll(self.magnitude_confidence, bottom)
-      self._scroll(self.sample_latency, bottom)
+      self._scroll(self.current_rotation, bottom)
+      self._scroll(self.proposed_rotation, bottom)
+      self._scroll(self.proposal_rotation, bottom)
       for i in range(0, 4):
-        self._scroll(self.confidence[i][0], bottom)
-        self._scroll(self.confidence[i][1], bottom)
+        self._scroll(self.proposal_confidence[i][0], bottom)
+        self._scroll(self.proposal_confidence[i][1], bottom)
+      self._scroll(self.sample_latency, bottom)
 
     # Redraw the plots.
     self.raw_acceleration_line_x.set_data(self.raw_acceleration_x)
@@ -356,20 +333,19 @@ class Plotter:
     self.magnitude_line.set_data(self.magnitude)
     self.tilt_angle_line.set_data(self.tilt_angle)
     self.orientation_angle_line.set_data(self.orientation_angle)
-    self.actual_orientation_line.set_data(self.actual_orientation)
-    self.proposed_orientation_line.set_data(self.proposed_orientation)
-    self.combined_confidence_line.set_data(self.combined_confidence)
-    self.orientation_confidence_line.set_data(self.orientation_confidence)
-    self.tilt_confidence_line.set_data(self.tilt_confidence)
-    self.magnitude_confidence_line.set_data(self.magnitude_confidence)
+    self.current_rotation_line.set_data(self.current_rotation)
+    self.proposed_rotation_line.set_data(self.proposed_rotation)
+    self.proposal_rotation_line.set_data(self.proposal_rotation)
     self.sample_latency_line.set_data(self.sample_latency)
 
-    for poly in self.confidence_polys:
+    for poly in self.proposal_confidence_polys:
       poly.remove()
-    self.confidence_polys = []
+    self.proposal_confidence_polys = []
     for i in range(0, 4):
-      self.confidence_polys.append(self.orientation_axes.fill_between(self.confidence[i][0][0],
-        self.confidence[i][0][1], self.confidence[i][1][1],
+      self.proposal_confidence_polys.append(self.orientation_axes.fill_between(
+        self.proposal_confidence[i][0][0],
+        self.proposal_confidence[i][0][1],
+        self.proposal_confidence[i][1][1],
         facecolor='goldenrod', edgecolor='goldenrod'))
 
     self.fig.canvas.draw_idle()

@@ -881,6 +881,13 @@ public interface WindowManagerPolicy {
     public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation);
 
     /**
+     * Called by the window manager when the rotation changes.
+     *
+     * @param rotation The new rotation.
+     */
+    public void setRotationLw(int rotation);
+
+    /**
      * Called when the system is mostly done booting to determine whether
      * the system should go into safe mode.
      */

@@ -447,9 +447,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         
         @Override
-        public void onOrientationChanged(int rotation) {
-            // Send updates based on orientation value
-            if (localLOGV) Log.v(TAG, "onOrientationChanged, rotation changed to " +rotation);
+        public void onProposedRotationChanged(int rotation) {
+            if (localLOGV) Log.v(TAG, "onProposedRotationChanged, rotation=" + rotation);
             updateRotation(false);
         }
     }
@@ -659,6 +658,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mHandler = new Handler();
         mOrientationListener = new MyOrientationListener(mContext);
+        try {
+            mOrientationListener.setCurrentRotation(windowManager.getRotation());
+        } catch (RemoteException ex) { }
         SettingsObserver settingsObserver = new SettingsObserver(mHandler);
         settingsObserver.observe();
         mShortcutManager = new ShortcutManager(context, mHandler);
@@ -2931,7 +2933,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         synchronized (mLock) {
-            int sensorRotation = mOrientationListener.getCurrentRotation(); // may be -1
+            int sensorRotation = mOrientationListener.getProposedRotation(); // may be -1
+            if (sensorRotation < 0) {
+                sensorRotation = lastRotation;
+            }
 
             int preferredRotation = -1;
             if (mHdmiPlugged) {
@@ -2941,20 +2946,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Ignore sensor when lid switch is open and rotation is forced.
                 preferredRotation = mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR
-                    && ((mCarDockEnablesAccelerometer && sensorRotation >= 0)
-                            || mCarDockRotation >= 0)) {
+                    && (mCarDockEnablesAccelerometer || mCarDockRotation >= 0)) {
                 // Ignore sensor when in car dock unless explicitly enabled.
                 // This case can override the behavior of NOSENSOR, and can also
                 // enable 180 degree rotation while docked.
-                preferredRotation = mCarDockEnablesAccelerometer && sensorRotation >= 0
+                preferredRotation = mCarDockEnablesAccelerometer
                         ? sensorRotation : mCarDockRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_DESK
-                    && ((mDeskDockEnablesAccelerometer && sensorRotation >= 0)
-                            || mDeskDockRotation >= 0)) {
+                    && (mDeskDockEnablesAccelerometer || mDeskDockRotation >= 0)) {
                 // Ignore sensor when in desk dock unless explicitly enabled.
                 // This case can override the behavior of NOSENSOR, and can also
                 // enable 180 degree rotation while docked.
-                preferredRotation = mDeskDockEnablesAccelerometer && sensorRotation >= 0
+                preferredRotation = mDeskDockEnablesAccelerometer
                         ? sensorRotation : mDeskDockRotation;
             } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
                 // Ignore sensor when user locked rotation.
@@ -3053,6 +3056,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 return true;
         }
+    }
+
+    @Override
+    public void setRotationLw(int rotation) {
+        mOrientationListener.setCurrentRotation(rotation);
     }
 
     private boolean isLandscapeOrSeascape(int rotation) {
