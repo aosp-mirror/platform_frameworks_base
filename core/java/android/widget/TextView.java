@@ -6130,7 +6130,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         TruncateAt effectiveEllipsize = mEllipsize;
         if (mEllipsize == TruncateAt.MARQUEE &&
                 mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
-            effectiveEllipsize = TruncateAt.END;
+            effectiveEllipsize = TruncateAt.END_SMALL;
         }
 
         if (mTextDir == null) {
