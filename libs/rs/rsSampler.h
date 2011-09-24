@@ -27,23 +27,16 @@ namespace renderscript {
 const static uint32_t RS_MAX_SAMPLER_SLOT = 16;
 
 class SamplerState;
-
+/*****************************************************************************
+ * CAUTION
+ *
+ * Any layout changes for this class may require a corresponding change to be
+ * made to frameworks/compile/libbcc/lib/ScriptCRT/rs_core.c, which contains
+ * a partial copy of the information below.
+ *
+ *****************************************************************************/
 class Sampler : public ObjectBase {
 public:
-    static ObjectBaseRef<Sampler> getSampler(Context *,
-                                             RsSamplerValue magFilter,
-                                             RsSamplerValue minFilter,
-                                             RsSamplerValue wrapS,
-                                             RsSamplerValue wrapT,
-                                             RsSamplerValue wrapR,
-                                             float aniso = 1.0f);
-    void bindToContext(SamplerState *, uint32_t slot);
-    void unbindFromContext(SamplerState *);
-
-    virtual void serialize(OStream *stream) const;
-    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_SAMPLER; }
-    static Sampler *createFromStream(Context *rsc, IStream *stream);
-
     struct Hal {
         mutable void *drv;
 
@@ -58,6 +51,20 @@ public:
         State state;
     };
     Hal mHal;
+
+    static ObjectBaseRef<Sampler> getSampler(Context *,
+                                             RsSamplerValue magFilter,
+                                             RsSamplerValue minFilter,
+                                             RsSamplerValue wrapS,
+                                             RsSamplerValue wrapT,
+                                             RsSamplerValue wrapR,
+                                             float aniso = 1.0f);
+    void bindToContext(SamplerState *, uint32_t slot);
+    void unbindFromContext(SamplerState *);
+
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_SAMPLER; }
+    static Sampler *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     int32_t mBoundSlot;

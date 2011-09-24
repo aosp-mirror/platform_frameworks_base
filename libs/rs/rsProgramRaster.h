@@ -24,17 +24,16 @@ namespace android {
 namespace renderscript {
 
 class ProgramRasterState;
-
+/*****************************************************************************
+ * CAUTION
+ *
+ * Any layout changes for this class may require a corresponding change to be
+ * made to frameworks/compile/libbcc/lib/ScriptCRT/rs_core.c, which contains
+ * a partial copy of the information below.
+ *
+ *****************************************************************************/
 class ProgramRaster : public ProgramBase {
 public:
-    virtual void setup(const Context *, ProgramRasterState *);
-    virtual void serialize(OStream *stream) const;
-    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }
-    static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
-
-    static ObjectBaseRef<ProgramRaster> getProgramRaster(Context *rsc,
-                                                         bool pointSprite,
-                                                         RsCullMode cull);
     struct Hal {
         mutable void *drv;
 
@@ -46,6 +45,14 @@ public:
     };
     Hal mHal;
 
+    virtual void setup(const Context *, ProgramRasterState *);
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }
+    static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
+
+    static ObjectBaseRef<ProgramRaster> getProgramRaster(Context *rsc,
+                                                         bool pointSprite,
+                                                         RsCullMode cull);
 protected:
     virtual void preDestroy() const;
     virtual ~ProgramRaster();
