@@ -428,7 +428,7 @@ public class MultiWaveView extends View {
                     "x", mWaveCenterX,
                     "y", mWaveCenterY,
                     "onUpdate", mUpdateListener,
-                    "onComplete", mResetListenerWithPing);
+                    "onComplete", mDragging ? mResetListenerWithPing : mResetListener);
         }
 
         setGrabbedState(OnTriggerListener.NO_HANDLE);
