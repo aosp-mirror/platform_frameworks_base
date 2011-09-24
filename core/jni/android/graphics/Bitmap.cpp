@@ -392,10 +392,20 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     SkSafeUnref(ctable);
 
     size_t size = bitmap->getSize();
+
+    android::Parcel::ReadableBlob blob;
+    android::status_t status = p->readBlob(size, &blob);
+    if (status) {
+        doThrowRE(env, "Could not read bitmap from parcel blob.");
+        delete bitmap;
+        return NULL;
+    }
+
     bitmap->lockPixels();
-    memcpy(bitmap->getPixels(), p->readInplace(size), size);
+    memcpy(bitmap->getPixels(), blob.data(), size);
     bitmap->unlockPixels();
 
+    blob.release();
     return GraphicsJNI::createBitmap(env, bitmap, buffer, isMutable, NULL, density);
 }
 
@@ -431,17 +441,24 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     }
 
     size_t size = bitmap->getSize();
+
+    android::Parcel::WritableBlob blob;
+    android::status_t status = p->writeBlob(size, &blob);
+    if (status) {
+        doThrowRE(env, "Could not write bitmap to parcel blob.");
+        return false;
+    }
+
     bitmap->lockPixels();
-    void* pDst = p->writeInplace(size);
-
     const void* pSrc =  bitmap->getPixels();
-
     if (pSrc == NULL) {
-        memset(pDst, 0, size);
+        memset(blob.data(), 0, size);
     } else {
-        memcpy(pDst, pSrc, size);
+        memcpy(blob.data(), pSrc, size);
     }
     bitmap->unlockPixels();
+
+    blob.release();
     return true;
 }
 
