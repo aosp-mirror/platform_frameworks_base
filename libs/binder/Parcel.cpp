@@ -30,12 +30,14 @@
 #include <utils/TextOutput.h>
 #include <utils/misc.h>
 #include <utils/Flattenable.h>
+#include <cutils/ashmem.h>
 
 #include <private/binder/binder_module.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/mman.h>
 
 #ifndef INT32_MAX
 #define INT32_MAX ((int32_t)(2147483647))
@@ -53,6 +55,9 @@
 
 // Note: must be kept in sync with android/os/Parcel.java's EX_HAS_REPLY_HEADER
 #define EX_HAS_REPLY_HEADER -128
+
+// Maximum size of a blob to transfer in-place.
+static const size_t IN_PLACE_BLOB_LIMIT = 40 * 1024;
 
 // XXX This can be made public if we want to provide
 // support for typed data.
@@ -706,6 +711,47 @@ status_t Parcel::writeDupFileDescriptor(int fd)
     return writeObject(obj, true);
 }
 
+status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)
+{
+    if (len <= IN_PLACE_BLOB_LIMIT) {
+        LOGV("writeBlob: write in place");
+        void* ptr = writeInplace(len);
+        if (!ptr) return NO_MEMORY;
+
+        outBlob->init(false /*mapped*/, ptr, len);
+        return NO_ERROR;
+    }
+
+    LOGV("writeBlob: write to ashmem");
+    int fd = ashmem_create_region("Parcel Blob", len);
+    if (fd < 0) return NO_MEMORY;
+
+    status_t status;
+    int result = ashmem_set_prot_region(fd, PROT_READ | PROT_WRITE);
+    if (result < 0) {
+        status = -result;
+    } else {
+        void* ptr = ::mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (ptr == MAP_FAILED) {
+            status = -errno;
+        } else {
+            result = ashmem_set_prot_region(fd, PROT_READ);
+            if (result < 0) {
+                status = -result;
+            } else {
+                status = writeFileDescriptor(fd);
+                if (!status) {
+                    outBlob->init(true /*mapped*/, ptr, len);
+                    return NO_ERROR;
+                }
+            }
+        }
+        ::munmap(ptr, len);
+    }
+    ::close(fd);
+    return status;
+}
+
 status_t Parcel::write(const Flattenable& val)
 {
     status_t err;
@@ -1023,6 +1069,28 @@ int Parcel::readFileDescriptor() const
         }        
     }
     return BAD_TYPE;
+}
+
+status_t Parcel::readBlob(size_t len, ReadableBlob* outBlob) const
+{
+    if (len <= IN_PLACE_BLOB_LIMIT) {
+        LOGV("readBlob: read in place");
+        const void* ptr = readInplace(len);
+        if (!ptr) return BAD_VALUE;
+
+        outBlob->init(false /*mapped*/, const_cast<void*>(ptr), len);
+        return NO_ERROR;
+    }
+
+    LOGV("readBlob: read from ashmem");
+    int fd = readFileDescriptor();
+    if (fd == int(BAD_TYPE)) return BAD_VALUE;
+
+    void* ptr = ::mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+    if (!ptr) return NO_MEMORY;
+
+    outBlob->init(true /*mapped*/, ptr, len);
+    return NO_ERROR;
 }
 
 status_t Parcel::read(Flattenable& val) const
@@ -1450,6 +1518,35 @@ void Parcel::scanForFds() const
     }
     mHasFds = hasFds;
     mFdsKnown = true;
+}
+
+// --- Parcel::Blob ---
+
+Parcel::Blob::Blob() :
+        mMapped(false), mData(NULL), mSize(0) {
+}
+
+Parcel::Blob::~Blob() {
+    release();
+}
+
+void Parcel::Blob::release() {
+    if (mMapped && mData) {
+        ::munmap(mData, mSize);
+    }
+    clear();
+}
+
+void Parcel::Blob::init(bool mapped, void* data, size_t size) {
+    mMapped = mapped;
+    mData = data;
+    mSize = size;
+}
+
+void Parcel::Blob::clear() {
+    mMapped = false;
+    mData = NULL;
+    mSize = 0;
 }
 
 }; // namespace android

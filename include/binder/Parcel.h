@@ -38,6 +38,9 @@ struct flat_binder_object;  // defined in support_p/binder_module.h
 class Parcel
 {
 public:
+    class ReadableBlob;
+    class WritableBlob;
+
                         Parcel();
                         ~Parcel();
     
@@ -109,7 +112,13 @@ public:
     // Place a file descriptor into the parcel.  A dup of the fd is made, which
     // will be closed once the parcel is destroyed.
     status_t            writeDupFileDescriptor(int fd);
-    
+
+    // Writes a blob to the parcel.
+    // If the blob is small, then it is stored in-place, otherwise it is
+    // transferred by way of an anonymous shared memory region.
+    // The caller should call release() on the blob after writing its contents.
+    status_t            writeBlob(size_t len, WritableBlob* outBlob);
+
     status_t            writeObject(const flat_binder_object& val, bool nullMetaData);
 
     // Like Parcel.java's writeNoException().  Just writes a zero int32.
@@ -157,7 +166,11 @@ public:
     // Retrieve a file descriptor from the parcel.  This returns the raw fd
     // in the parcel, which you do not own -- use dup() to get your own copy.
     int                 readFileDescriptor() const;
-    
+
+    // Reads a blob from the parcel.
+    // The caller should call release() on the blob after reading its contents.
+    status_t            readBlob(size_t len, ReadableBlob* outBlob) const;
+
     const flat_binder_object* readObject(bool nullMetaData) const;
 
     // Explicitly close all file descriptors in the parcel.
@@ -177,7 +190,7 @@ public:
                                             release_func relFunc, void* relCookie);
     
     void                print(TextOutput& to, uint32_t flags = 0) const;
-        
+
 private:
                         Parcel(const Parcel& o);
     Parcel&             operator=(const Parcel& o);
@@ -215,6 +228,36 @@ private:
     
     release_func        mOwner;
     void*               mOwnerCookie;
+
+    class Blob {
+    public:
+        Blob();
+        ~Blob();
+
+        void release();
+        inline size_t size() const { return mSize; }
+
+    protected:
+        void init(bool mapped, void* data, size_t size);
+        void clear();
+
+        bool mMapped;
+        void* mData;
+        size_t mSize;
+    };
+
+public:
+    class ReadableBlob : public Blob {
+        friend class Parcel;
+    public:
+        inline const void* data() const { return mData; }
+    };
+
+    class WritableBlob : public Blob {
+        friend class Parcel;
+    public:
+        inline void* data() { return mData; }
+    };
 };
 
 // ---------------------------------------------------------------------------
