@@ -262,20 +262,20 @@
         </ul>
       </li>
       <li class="toggle-list">
-	        <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
-	            <span class="en">RenderScript</span>
-	          </a></div>
-	        <ul>
-	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
-	                <span class="en">Graphics</span>
-	              </a>
-	          </li>
-	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
-	                <span class="en">Compute</span>
-	              </a>
-	          </li>
-	        </ul>
-  	  </li>
+        <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
+          <span class="en">RenderScript</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
+                <span class="en">Graphics</span>
+              </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
+                <span class="en">Compute</span>
+              </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="toggle-list">
           <div><a href="<?cs var:toroot ?>guide/topics/media/index.html">
@@ -332,9 +332,15 @@
       <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
             <span class="en">Bluetooth</span></a>
           </li>
-      <li><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
-            <span class="en">Near Field Communication</span>
-          </a></li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
+          <span class="en">Near Field Communication</span></a> <span class="new">updated</span>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/nfc/nfc.html">NFC Basics</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/nfc/advanced-nfc.html">Advanced NFC</a></li>
+        </ul>
+      </li>
       <li class="toggle-list">
           <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
             <span class="en">USB</span></a>
@@ -715,7 +721,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>
-             </a></div>
+             </a> <span class="new-child">updated</span></div>
         <ul>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
