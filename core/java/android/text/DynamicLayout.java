@@ -275,7 +275,7 @@ extends Layout
         }
 
         if (reflowed == null) {
-            reflowed = new StaticLayout(getText());
+            reflowed = new StaticLayout(null);
         } else {
             reflowed.prepare();
         }
@@ -488,7 +488,7 @@ extends Layout
 
     private int mTopPadding, mBottomPadding;
 
-    private static StaticLayout sStaticLayout = null;
+    private static StaticLayout sStaticLayout = new StaticLayout(null);
 
     private static final Object[] sLock = new Object[0];
 
