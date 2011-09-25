@@ -719,28 +719,19 @@ public class NetworkController extends BroadcastReceiver {
             Slog.d(TAG, "updateConnectivity: connectionStatus=" + connectionStatus);
         }
 
-        int inetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
+        mInetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
 
-        switch (info.getType()) {
-            case ConnectivityManager.TYPE_MOBILE:
-                mInetCondition = inetCondition;
-                updateDataNetType();
-                updateDataIcon();
-                updateTelephonySignalStrength(); // apply any change in connectionStatus
-                break;
-            case ConnectivityManager.TYPE_WIFI:
-                mInetCondition = inetCondition;
-                updateWifiIcons();
-                break;
-            case ConnectivityManager.TYPE_BLUETOOTH:
-                mInetCondition = inetCondition;
-                if (info != null) {
-                    mBluetoothTethered = info.isConnected() ? true: false;
-                } else {
-                    mBluetoothTethered = false;
-                }
-                break;
+        if (info != null && info.getType() == ConnectivityManager.TYPE_BLUETOOTH) {
+            mBluetoothTethered = info.isConnected() ? true: false;
+        } else {
+            mBluetoothTethered = false;
         }
+
+        // We want to update all the icons, all at once, for any condition change
+        updateDataNetType();
+        updateDataIcon();
+        updateTelephonySignalStrength();
+        updateWifiIcons();
     }
 
 
@@ -1033,8 +1024,8 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(mWifiLevel);
         pw.print("  mWifiSsid=");
         pw.println(mWifiSsid);
-        pw.print("  mWifiIconId=");
-        pw.println(mWifiIconId);
+        pw.print(String.format("  mWifiIconId=0x%08x/%s",
+                    mWifiIconId, getResourceName(mWifiIconId)));
         pw.print("  mWifiActivity=");
         pw.println(mWifiActivity);
 
