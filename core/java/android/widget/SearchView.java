@@ -120,6 +120,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     private CharSequence mOldQueryText;
     private CharSequence mUserQuery;
     private boolean mExpandedInActionView;
+    private int mCollapsedImeOptions;
 
     private SearchableInfo mSearchable;
     private Bundle mAppSearchData;
@@ -1166,6 +1167,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         clearFocus();
         updateViewsVisibility(true);
         mQueryTextView.setText("");
+        mQueryTextView.setImeOptions(mCollapsedImeOptions);
         mExpandedInActionView = false;
     }
 
@@ -1175,6 +1177,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     @Override
     public void onActionViewExpanded() {
         mExpandedInActionView = true;
+        mCollapsedImeOptions = mQueryTextView.getImeOptions();
+        mQueryTextView.setImeOptions(mCollapsedImeOptions | EditorInfo.IME_FLAG_NO_FULLSCREEN);
         setIconified(false);
     }
 
