@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
     CHECK(control->isValid());
 
     SurfaceComposerClient::openGlobalTransaction();
-    CHECK_EQ(control->setLayer(30000), (status_t)OK);
+    CHECK_EQ(control->setLayer(INT_MAX), (status_t)OK);
     CHECK_EQ(control->show(), (status_t)OK);
     SurfaceComposerClient::closeGlobalTransaction();
 

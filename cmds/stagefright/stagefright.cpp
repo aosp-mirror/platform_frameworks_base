@@ -917,7 +917,7 @@ int main(int argc, char **argv) {
             CHECK(control->isValid());
 
             SurfaceComposerClient::openGlobalTransaction();
-            CHECK_EQ(control->setLayer(30000), (status_t)OK);
+            CHECK_EQ(control->setLayer(INT_MAX), (status_t)OK);
             CHECK_EQ(control->show(), (status_t)OK);
             SurfaceComposerClient::closeGlobalTransaction();
 
@@ -929,6 +929,10 @@ int main(int argc, char **argv) {
             sp<SurfaceTexture> texture = new SurfaceTexture(0 /* tex */);
             gSurface = new SurfaceTextureClient(texture);
         }
+
+        CHECK_EQ((status_t)OK,
+                 native_window_api_connect(
+                     gSurface.get(), NATIVE_WINDOW_API_MEDIA));
     }
 
     DataSource::RegisterDefaultSniffers();
@@ -1122,6 +1126,10 @@ int main(int argc, char **argv) {
     }
 
     if ((useSurfaceAlloc || useSurfaceTexAlloc) && !audioOnly) {
+        CHECK_EQ((status_t)OK,
+                 native_window_api_disconnect(
+                     gSurface.get(), NATIVE_WINDOW_API_MEDIA));
+
         gSurface.clear();
 
         if (useSurfaceAlloc) {
