@@ -776,6 +776,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private void expectNetworkStatsPoll() throws Exception {
         mNetManager.setGlobalAlert(anyLong());
         expectLastCall().anyTimes();
+        expect(mConnManager.getTetheredIfacePairs()).andReturn(null).anyTimes();
     }
 
     private void assertStatsFilesExist(boolean exist) {

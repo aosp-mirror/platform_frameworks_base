@@ -24,8 +24,8 @@ import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -43,9 +43,12 @@ import static android.provider.Settings.Secure.NETSTATS_POLL_INTERVAL;
 import static android.provider.Settings.Secure.NETSTATS_TAG_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_UID_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_UID_MAX_HISTORY;
+import static android.telephony.PhoneStateListener.LISTEN_DATA_CONNECTION_STATE;
+import static android.telephony.PhoneStateListener.LISTEN_NONE;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
@@ -80,6 +83,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
@@ -121,7 +125,7 @@ import libcore.io.IoUtils;
  */
 public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final String TAG = "NetworkStats";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
     private static final boolean LOGV = false;
 
     /** File header magic number: "ANET" */
@@ -132,7 +136,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int VERSION_UID_WITH_TAG = 3;
     private static final int VERSION_UID_WITH_SET = 4;
 
-    private static final int MSG_PERFORM_POLL = 0x1;
+    private static final int MSG_PERFORM_POLL = 1;
+    private static final int MSG_UPDATE_IFACES = 2;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x10;
@@ -144,6 +149,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final INetworkManagementService mNetworkManager;
     private final IAlarmManager mAlarmManager;
     private final TrustedTime mTime;
+    private final TelephonyManager mTeleManager;
     private final NetworkStatsSettings mSettings;
 
     private final PowerManager.WakeLock mWakeLock;
@@ -227,6 +233,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mNetworkManager = checkNotNull(networkManager, "missing INetworkManagementService");
         mAlarmManager = checkNotNull(alarmManager, "missing IAlarmManager");
         mTime = checkNotNull(time, "missing TrustedTime");
+        mTeleManager = checkNotNull(TelephonyManager.getDefault(), "missing TelephonyManager");
         mSettings = checkNotNull(settings, "missing NetworkStatsSettings");
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
@@ -279,6 +286,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // ignored; service lives in system_server
         }
 
+        // watch for networkType changes that aren't broadcast through
+        // CONNECTIVITY_ACTION_IMMEDIATE above.
+        mTeleManager.listen(mPhoneListener, LISTEN_DATA_CONNECTION_STATE);
+
         registerPollAlarmLocked();
         registerGlobalAlert();
 
@@ -288,9 +299,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void shutdownLocked() {
         mContext.unregisterReceiver(mConnReceiver);
+        mContext.unregisterReceiver(mTetherReceiver);
         mContext.unregisterReceiver(mPollReceiver);
         mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mShutdownReceiver);
+
+        mTeleManager.listen(mPhoneListener, LISTEN_NONE);
 
         writeNetworkStatsLocked();
         if (mUidStatsLoaded) {
@@ -535,14 +549,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
-            synchronized (mStatsLock) {
-                mWakeLock.acquire();
-                try {
-                    updateIfacesLocked();
-                } finally {
-                    mWakeLock.release();
-                }
-            }
+            updateIfaces();
         }
     };
 
@@ -618,6 +625,46 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
     };
+
+    private int mLastPhoneState = TelephonyManager.DATA_UNKNOWN;
+    private int mLastPhoneNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
+    /**
+     * Receiver that watches for {@link TelephonyManager} changes, such as
+     * transitioning between network types.
+     */
+    private PhoneStateListener mPhoneListener = new PhoneStateListener() {
+        @Override
+        public void onDataConnectionStateChanged(int state, int networkType) {
+            final boolean stateChanged = state != mLastPhoneState;
+            final boolean networkTypeChanged = networkType != mLastPhoneNetworkType;
+
+            if (networkTypeChanged && !stateChanged) {
+                // networkType changed without a state change, which means we
+                // need to roll our own update. delay long enough for
+                // ConnectivityManager to process.
+                // TODO: add direct event to ConnectivityService instead of
+                // relying on this delay.
+                if (LOGV) Slog.v(TAG, "triggering delayed updateIfaces()");
+                mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(MSG_UPDATE_IFACES), SECOND_IN_MILLIS);
+            }
+
+            mLastPhoneState = state;
+            mLastPhoneNetworkType = networkType;
+        }
+    };
+
+    private void updateIfaces() {
+        synchronized (mStatsLock) {
+            mWakeLock.acquire();
+            try {
+                updateIfacesLocked();
+            } finally {
+                mWakeLock.release();
+            }
+        }
+    }
 
     /**
      * Inspect all current {@link NetworkState} to derive mapping from {@code
@@ -713,19 +760,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final long threshold = mSettings.getPersistThreshold();
 
         try {
-            // record network stats
-            final NetworkStats networkSnapshot = mNetworkManager.getNetworkStatsSummary();
-            performNetworkPollLocked(networkSnapshot, currentTime);
-
-            // persist when enough network data has occurred
-            final NetworkStats persistNetworkDelta = computeStatsDelta(
-                    mLastPersistNetworkSnapshot, networkSnapshot, true);
-            final boolean networkPastThreshold = persistNetworkDelta.getTotalBytes() > threshold;
-            if (persistForce || (persistNetwork && networkPastThreshold)) {
-                writeNetworkStatsLocked();
-                mLastPersistNetworkSnapshot = networkSnapshot;
-            }
-
             // record tethering stats; persisted during normal UID cycle below
             final String[] ifacePairs = mConnManager.getTetheredIfacePairs();
             final NetworkStats tetherSnapshot = mNetworkManager.getNetworkStatsTethering(
@@ -743,6 +777,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             if (persistForce || (persistUid && uidPastThreshold)) {
                 writeUidStatsLocked();
                 mLastPersistUidSnapshot = uidSnapshot;
+            }
+
+            // record network stats
+            final NetworkStats networkSnapshot = mNetworkManager.getNetworkStatsSummary();
+            performNetworkPollLocked(networkSnapshot, currentTime);
+
+            // persist when enough network data has occurred
+            final NetworkStats persistNetworkDelta = computeStatsDelta(
+                    mLastPersistNetworkSnapshot, networkSnapshot, true);
+            final boolean networkPastThreshold = persistNetworkDelta.getTotalBytes() > threshold;
+            if (persistForce || (persistNetwork && networkPastThreshold)) {
+                writeNetworkStatsLocked();
+                mLastPersistNetworkSnapshot = networkSnapshot;
             }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
@@ -1354,6 +1401,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 case MSG_PERFORM_POLL: {
                     final int flags = msg.arg1;
                     performPoll(flags);
+                    return true;
+                }
+                case MSG_UPDATE_IFACES: {
+                    updateIfaces();
                     return true;
                 }
                 default: {
