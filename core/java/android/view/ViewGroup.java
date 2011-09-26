@@ -2824,6 +2824,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (hasDisplayList) {
             displayList = child.getDisplayList();
+            if (!displayList.isValid()) {
+                // Uncommon, but possible. If a view is removed from the hierarchy during the call
+                // to getDisplayList(), the display list will be marked invalid and we should not
+                // try to use it again.
+                displayList = null;
+                hasDisplayList = false;
+            }
         }
 
         if (hasNoCache) {
