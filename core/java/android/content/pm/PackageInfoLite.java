@@ -41,6 +41,8 @@ public class PackageInfoLite implements Parcelable {
     public int recommendedInstallLocation;
     public int installLocation;
 
+    public VerifierInfo[] verifiers;
+
     public PackageInfoLite() {
     }
 
@@ -58,6 +60,13 @@ public class PackageInfoLite implements Parcelable {
         dest.writeString(packageName);
         dest.writeInt(recommendedInstallLocation);
         dest.writeInt(installLocation);
+
+        if (verifiers == null || verifiers.length == 0) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(verifiers.length);
+            dest.writeTypedArray(verifiers, parcelableFlags);
+        }
     }
 
     public static final Parcelable.Creator<PackageInfoLite> CREATOR
@@ -75,5 +84,13 @@ public class PackageInfoLite implements Parcelable {
         packageName = source.readString();
         recommendedInstallLocation = source.readInt();
         installLocation = source.readInt();
+
+        final int verifiersLength = source.readInt();
+        if (verifiersLength == 0) {
+            verifiers = new VerifierInfo[0];
+        } else {
+            verifiers = new VerifierInfo[verifiersLength];
+            source.readTypedArray(verifiers, VerifierInfo.CREATOR);
+        }
     }
 }
