@@ -2527,6 +2527,7 @@ public abstract class PackageManager {
      * {@link #COMPONENT_ENABLED_STATE_DEFAULT}.  The last one means the
      * application's enabled state is based on the original information in
      * the manifest as found in {@link ComponentInfo}.
+     * @throws IllegalArgumentException if the named package does not exist.
      */
     public abstract int getApplicationEnabledSetting(String packageName);
 
