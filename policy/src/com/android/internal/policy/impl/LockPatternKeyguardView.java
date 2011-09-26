@@ -114,6 +114,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     private final int MSG_SHOW_FACELOCK_AREA_VIEW = 0;
     private final int MSG_HIDE_FACELOCK_AREA_VIEW = 1;
 
+    // Long enough to stay black while dialer comes up
+    // Short enough to not be black if the user goes back immediately
+    private final int FACELOCK_VIEW_AREA_EMERGENCY_HIDE_TIMEOUT = 1000;
+
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
      */
@@ -311,6 +315,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             }
 
             public void takeEmergencyCallAction() {
+                // FaceLock must be stopped if it is running when emergency call is pressed
+                stopAndUnbindFromFaceLock();
+
+                // Delay hiding FaceLock area so unlock doesn't display while dialer is coming up
+                mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACELOCK_AREA_VIEW,
+                        FACELOCK_VIEW_AREA_EMERGENCY_HIDE_TIMEOUT);
+
                 pokeWakelock(EMERGENCY_CALL_TIMEOUT);
                 if (TelephonyManager.getDefault().getCallState()
                         == TelephonyManager.CALL_STATE_OFFHOOK) {
