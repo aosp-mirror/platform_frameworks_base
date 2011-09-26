@@ -37,11 +37,16 @@ page.title=Android Supported Media Formats
 
 <ul>
   <li>RTSP (RTP, SDP)</li>
-  <li>HTTP progressive streaming</li>
-  <li>HTTP live streaming <a href="http://tools.ietf.org/html/draft-pantos-http-live-streaming-05">draft protocol</a> (Android 3.0 and above)</li>
+  <li>HTTP/HTTPS progressive streaming</li>
+  <li>HTTP/HTTPS live streaming <a href="http://tools.ietf.org/html/draft-pantos-http-live-streaming">draft protocol</a>: <ul>
+    <li>MPEG-2 TS media files only</li>
+    <li>Protocol version 3 (Android 4.0 and above)</li>
+    <li>Protocol version 2 (Android 3.x)</li>
+    <li>Not supported before Android 3.0</li>
+  </ul></li>
 </ul>
 
-<p class="note"><strong>Note:</strong> HTTPS is not supported at this time.</p>
+<p class="note"><strong>Note:</strong> HTTPS is not supported before Android 3.1.</p>
 
 
 <h2 id="core">Core Media Formats</h2>
@@ -71,7 +76,11 @@ page.title=Android Supported Media Formats
 <td style="text-align: center;"><big>&bull;</big></td>
 <td rowspan="3">Mono/Stereo content in any combination of standard bit
 rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
-<td rowspan="3">3GPP (.3gp), and MPEG-4 (.mp4, .m4a). ADTS raw AAC (.aac, decode only, ADIF not supported, Android 3.1+). </td>
+<td rowspan="3">
+  &bull; 3GPP (.3gp)<br>
+  &bull; MPEG-4 (.mp4, .m4a)<br>
+  &bull; ADTS raw AAC (.aac, decode in Android 3.1+, encode in Android 4.0+, ADIF not supported)<br>
+  &bull; MPEG-TS (.ts, not seekable, Android 3.0+)</td>
 </tr>
 
 <tr>
@@ -91,8 +100,8 @@ rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>4.75 to 12.2 kbps sampled @ 8kHz</td>
-<td>3GPP (.3gp)
-</td>
+<td>
+  3GPP (.3gp)</td>
 </tr>
 
 <tr>
@@ -100,19 +109,21 @@ rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>9 rates from 6.60 kbit/s to 23.85 kbit/s sampled @ 16kHz</td>
-<td>3GPP (.3gp)</td>
+<td>
+  3GPP (.3gp)</td>
 </tr>
 
 <tr>
 <td>FLAC</td>
 <td>&nbsp;</td>
-<td style="text-align: center;"><big>&bull;</big><br><small>(Android 3.1+)</small></td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 3.1+)</small></td>
 <td>Mono/Stereo (no multichannel). Sample rates up to 48 kHz (but up to 44.1
 kHz is recommended on devices with 44.1 kHz output, as the 48 to 44.1 kHz
 downsampler does not include a low-pass filter). 16-bit recommended;
 no dither applied for 24-bit.
 </td>
-<td>FLAC (.flac) only</td>
+<td>
+  FLAC (.flac) only</td>
 </tr>
 
 <tr>
@@ -121,7 +132,8 @@ no dither applied for 24-bit.
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>Mono/Stereo 8-320Kbps constant (CBR) or variable bit-rate (VBR)
 </td>
-<td>MP3 (.mp3)</td>
+<td>
+  MP3 (.mp3)</td>
 </tr>
 
 <tr>
@@ -129,15 +141,21 @@ no dither applied for 24-bit.
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>MIDI Type 0 and 1. DLS Version 1 and 2. XMF and Mobile XMF. Support for ringtone formats RTTTL/RTX, OTA, and iMelody </td>
-<td>Type 0 and 1 (.mid, .xmf, .mxmf). Also RTTTL/RTX (.rtttl, .rtx), OTA (.ota), and iMelody (.imy)</td>
+<td>
+  &bull; Type 0 and 1 (.mid, .xmf, .mxmf)<br>
+  &bull; RTTTL/RTX (.rtttl, .rtx)<br>
+  &bull; OTA (.ota)<br>
+  &bull; iMelody (.imy)</td>
 </tr>
 
 <tr>
-<td>Ogg Vorbis</td>
+<td>Vorbis</td>
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
-<td>Ogg (.ogg)</td>
+<td>
+  &bull; Ogg (.ogg)<br>
+  &bull; Matroska (.mkv, Android 4.0+)</td>
 </tr>
 
 <tr>
@@ -145,16 +163,18 @@ no dither applied for 24-bit.
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>8- and 16-bit linear PCM (rates up to limit of hardware)</td>
-<td>WAVE (.wav)</td>
+<td>
+  WAVE (.wav)</td>
 </tr>
 
 <tr>
-<td rowspan="4">Image</td>
+<td rowspan="5">Image</td>
 <td>JPEG</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>Base+progressive</td>
-<td>JPEG (.jpg)</td>
+<td>
+  JPEG (.jpg)</td>
 </tr>
 
 <tr>
@@ -162,7 +182,8 @@ no dither applied for 24-bit.
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
-<td>GIF (.gif)</td>
+<td>
+  GIF (.gif)</td>
 </tr>
 
 <tr>
@@ -170,7 +191,8 @@ no dither applied for 24-bit.
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
-<td>PNG (.png)</td>
+<td>
+  PNG (.png)</td>
 </tr>
 
 <tr>
@@ -178,7 +200,17 @@ no dither applied for 24-bit.
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
-<td>BMP (.bmp)</td>
+<td>
+  BMP (.bmp)</td>
+</tr>
+
+<tr>
+<td>WEBP</td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.0+)</small></td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.0+)</small></td>
+<td>&nbsp;</td>
+<td>
+  WebP (.webp)</td>
 </tr>
 
 
@@ -188,15 +220,20 @@ no dither applied for 24-bit.
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
-<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
+<td>
+  &bull; 3GPP (.3gp)<br>
+  &bull; MPEG-4 (.mp4)</td>
 </tr>
 
 <tr>
 <td>H.264 AVC</td>
 <td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 3.0+)</small></td>
-<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;" nowrap><big>&bull;</big></td>
 <td>Baseline Profile (BP)</td>
-<td>3GPP (.3gp) and MPEG-4 (.mp4). MPEG-TS (.ts, AAC audio only, not seekable, Android 3.0+)</td>
+<td>
+  &bull; 3GPP (.3gp)<br>
+  &bull; MPEG-4 (.mp4)<br>
+  &bull; MPEG-TS (.ts, AAC audio only, not seekable, Android 3.0+)</td>
 </tr>
 
 <tr>
@@ -204,15 +241,18 @@ no dither applied for 24-bit.
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
-<td>3GPP (.3gp)</td>
+<td>
+  3GPP (.3gp)</td>
 </tr>
 
 <tr>
 <td>VP8</td>
 <td>&nbsp;</td>
-<td style="text-align: center;"><big>&bull;</big><br><small>(Android 2.3.3+)</small></td>
-<td>&nbsp;</td>
-<td><a href="http://www.webmproject.org/">WebM</a> (.webm)</td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 2.3.3+)</small></td>
+<td>Streamable only in Android 4.0 and above</td>
+<td>
+  &bull; <a href="http://www.webmproject.org/">WebM</a> (.webm)<br>
+  &bull; Matroska (.mkv, Android 4.0+)</td>
 </tr>
 
 </tbody></table>
@@ -220,7 +260,7 @@ no dither applied for 24-bit.
 
 <h2 id="recommendations">Video Encoding Recommendations</h2>
 
-<p>Table 2, below, lists examples of video encoding profiles and parameters that the Android media framework supports for playback. In addition to these encoding parameter recommendations, a device's available video recording profiles can be used as a proxy for media playback capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile CamcorderProfile} class, which is available since API level 8.</p>
+<p>Table 2, below, lists examples of video encoding profiles and parameters that the Android media framework supports for playback. In addition to these encoding parameter recommendations, a device's available <em>video recording</em> profiles can be used as a proxy for media playback capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile CamcorderProfile} class, which is available since API level 8.</p>
 
 <p class="table-caption" id="encoding-recommendations-table"><strong>Table 2.</strong> Examples of supported video encoding parameters.</p>
 
@@ -228,45 +268,53 @@ no dither applied for 24-bit.
   <thead>
   <tr>
     <th>&nbsp;</th>
-    <th style="background-color:#f3f3f3;font-weight:normal">Lower quality</th>
-    <th style="background-color:#f3f3f3;font-weight:normal">Higher quality</th>
+    <th style="background-color:#f3f3f3;font-weight:normal"><acronym title="Standard definition">SD</a> (Low quality)</th>
+    <th style="background-color:#f3f3f3;font-weight:normal"><acronym title="Standard definition">SD</a> (High quality)</th>
+    <th style="background-color:#f3f3f3;font-weight:normal"><acronym title="High definition">HD</a> (Not available on all devices)</th>
   </tr>
   </thead>
   <tbody>
   <tr>
     <th>Video codec</th>
-    <td>H.264 Baseline Profile</th>
-    <td>H.264 Baseline Profile</th>
+    <td>H.264 Baseline Profile</td>
+    <td>H.264 Baseline Profile</td>
+    <td>H.264 Baseline Profile</td>
   </tr>
   <tr>
     <th>Video resolution</th>
-    <td>176 x 144 px</th>
-    <td>480 x 360 px</th>
+    <td>176 x 144 px</td>
+    <td>480 x 360 px</td>
+    <td>1280 x 720 px</td>
   </tr>
   <tr>
     <th>Video frame rate</th>
-    <td>12 fps</th>
-    <td>30 fps</th>
+    <td>12 fps</td>
+    <td>30 fps</td>
+    <td>30 fps</td>
   </tr>
   <tr>
     <th>Video bitrate</th>
-    <td>56 Kbps</th>
-    <td>500 Kbps</th>
+    <td>56 Kbps</td>
+    <td>500 Kbps</td>
+    <td>2 Mbps</td>
   </tr>
   <tr>
     <th>Audio codec</th>
-    <td>AAC-LC</th>
-    <td>AAC-LC</th>
+    <td>AAC-LC</td>
+    <td>AAC-LC</td>
+    <td>AAC-LC</td>
   </tr>
   <tr>
     <th>Audio channels</th>
-    <td>1 (mono)</th>
-    <td>2 (stereo)</th>
+    <td>1 (mono)</td>
+    <td>2 (stereo)</td>
+    <td>2 (stereo)</td>
   </tr>
   <tr>
     <th>Audio bitrate</th>
-    <td>24 Kbps</th>
-    <td>128 Kbps</th>
+    <td>24 Kbps</td>
+    <td>128 Kbps</td>
+    <td>192 Kbps</td>
   </tr>
   </tbody>
 </table>
@@ -274,7 +322,8 @@ no dither applied for 24-bit.
 <p style="margin-top: 2em">For video content that is streamed over HTTP or RTSP, there are additional requirements:</p>
 
 <ul>
-  <li>For 3GPP and MPEG-4 containers, the <code>moov</code> atom must precede any <code>mdat</code> atoms.</li>
+  <li>For 3GPP and MPEG-4 containers, the <code>moov</code> atom must precede any <code>mdat</code> atoms, but must succeed the
+      <code>ftyp</code> atom.</li>
   <li>For 3GPP, MPEG-4, and WebM containers, audio and video samples corresponding to the same time offset may be no more than 500 KB apart.
       To minimize this audio/video drift, consider interleaving audio and video in smaller chunk sizes.</li>
 </ul>
