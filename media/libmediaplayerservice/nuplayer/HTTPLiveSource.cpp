@@ -110,7 +110,11 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
         if (n == -EWOULDBLOCK) {
             break;
         } else if (n < 0) {
-            LOGI("input data EOS reached.");
+            if (n != ERROR_END_OF_STREAM) {
+                LOGI("input data EOS reached, error %d", n);
+            } else {
+                LOGI("input data EOS reached.");
+            }
             mTSParser->signalEOS(n);
             mEOS = true;
             break;

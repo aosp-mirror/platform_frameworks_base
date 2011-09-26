@@ -272,7 +272,18 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                     }
                 }
             } else if (what == ACodec::kWhatEOS) {
-                mRenderer->queueEOS(audio, ERROR_END_OF_STREAM);
+                int32_t err;
+                CHECK(codecRequest->findInt32("err", &err));
+
+                if (err == ERROR_END_OF_STREAM) {
+                    LOGV("got %s decoder EOS", audio ? "audio" : "video");
+                } else {
+                    LOGV("got %s decoder EOS w/ error %d",
+                         audio ? "audio" : "video",
+                         err);
+                }
+
+                mRenderer->queueEOS(audio, err);
             } else if (what == ACodec::kWhatFlushCompleted) {
                 bool needShutdown;
 
@@ -397,7 +408,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 if (finalResult == ERROR_END_OF_STREAM) {
                     LOGV("reached %s EOS", audio ? "audio" : "video");
                 } else {
-                    LOGE("%s track encountered an error (0x%08x)",
+                    LOGE("%s track encountered an error (%d)",
                          audio ? "audio" : "video", finalResult);
 
                     notifyListener(
