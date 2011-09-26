@@ -1407,6 +1407,20 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
+    public void
+    acknowledgeIncomingGsmSmsWithPdu(boolean success, String ackPdu, Message result) {
+        RILRequest rr
+                = RILRequest.obtain(RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU, result);
+
+        rr.mp.writeInt(2);
+        rr.mp.writeString(success ? "1" : "0");
+        rr.mp.writeString(ackPdu);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                + ' ' + success + " [" + ackPdu + ']');
+
+        send(rr);
+    }
 
     public void
     iccIO (int command, int fileid, String path, int p1, int p2, int p3,
@@ -1769,6 +1783,20 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 RILConstants.RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND, response);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        rr.mp.writeString(contents);
+        send(rr);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void sendEnvelopeWithStatus(String contents, Message response) {
+        RILRequest rr = RILRequest.obtain(
+                RILConstants.RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS, response);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                + '[' + contents + ']');
 
         rr.mp.writeString(contents);
         send(rr);
@@ -2245,6 +2273,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: ret = responseVoid(p); break;
             case RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: ret =  responseInts(p); break;
             case RIL_REQUEST_ISIM_AUTHENTICATION: ret =  responseString(p); break;
+            case RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU: ret = responseVoid(p); break;
+            case RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS: ret = responseICC_IO(p); break;
             default:
                 throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
             //break;
@@ -2870,7 +2900,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
 
     private Object
-     responseICC_IO(Parcel p) {
+    responseICC_IO(Parcel p) {
         int sw1, sw2;
         byte data[] = null;
         Message ret;
@@ -3112,8 +3142,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         return ret;
     }
 
-   private Object
-   responseCellList(Parcel p) {
+    private Object
+    responseCellList(Parcel p) {
        int num, rssi;
        String location;
        ArrayList<NeighboringCellInfo> response;
@@ -3452,6 +3482,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: return "RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING";
             case RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: return "RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE";
             case RIL_REQUEST_ISIM_AUTHENTICATION: return "RIL_REQUEST_ISIM_AUTHENTICATION";
+            case RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU: return "RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU";
+            case RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS: return "RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS";
             default: return "<unknown request>";
         }
     }
