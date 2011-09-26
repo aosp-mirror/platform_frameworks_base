@@ -329,10 +329,7 @@ ProgramStoreCreate {
 
 ProgramRasterCreate {
 	direct
-	param bool pointSmooth
-	param bool lineSmooth
 	param bool pointSprite
-	param float lineWidth
 	param RsCullMode cull
 	ret RsProgramRaster
 }

@@ -84,14 +84,10 @@ public class ProgramRaster extends BaseObj {
     public static class Builder {
         RenderScript mRS;
         boolean mPointSprite;
-        boolean mPointSmooth;
-        boolean mLineSmooth;
         CullMode mCullMode;
 
         public Builder(RenderScript rs) {
             mRS = rs;
-            mPointSmooth = false;
-            mLineSmooth = false;
             mPointSprite = false;
             mCullMode = CullMode.BACK;
         }
@@ -108,8 +104,7 @@ public class ProgramRaster extends BaseObj {
 
         public ProgramRaster create() {
             mRS.validate();
-            int id = mRS.nProgramRasterCreate(mPointSmooth, mLineSmooth, mPointSprite,
-                                             1.f, mCullMode.mID);
+            int id = mRS.nProgramRasterCreate(mPointSprite, mCullMode.mID);
             return new ProgramRaster(id, mRS);
         }
     }

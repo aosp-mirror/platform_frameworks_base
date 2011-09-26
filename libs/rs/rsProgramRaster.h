@@ -33,19 +33,13 @@ public:
     static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
 
     static ObjectBaseRef<ProgramRaster> getProgramRaster(Context *rsc,
-                                                         bool pointSmooth,
-                                                         bool lineSmooth,
                                                          bool pointSprite,
-                                                         float lineWidth,
                                                          RsCullMode cull);
     struct Hal {
         mutable void *drv;
 
         struct State {
-            bool pointSmooth;
-            bool lineSmooth;
             bool pointSprite;
-            float lineWidth;
             RsCullMode cull;
         };
         State state;
@@ -58,10 +52,7 @@ protected:
 
 private:
     ProgramRaster(Context *rsc,
-                  bool pointSmooth,
-                  bool lineSmooth,
                   bool pointSprite,
-                  float lineWidth,
                   RsCullMode cull);
 
 };
