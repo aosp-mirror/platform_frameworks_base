@@ -636,7 +636,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 final boolean isHwAccelerated = (mAttrs.flags &
                         WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
                 final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : mAttrs.format;
-                if (isHwAccelerated && mAttrs.format == PixelFormat.OPAQUE) {
+                if (!PixelFormat.formatHasAlpha(mAttrs.format)) {
                     flags |= Surface.OPAQUE;
                 }
                 mSurface = new Surface(
