@@ -569,12 +569,16 @@ int main(int argc, char **argv) {
         CHECK(control->isValid());
 
         SurfaceComposerClient::openGlobalTransaction();
-        CHECK_EQ(control->setLayer(30000), (status_t)OK);
+        CHECK_EQ(control->setLayer(INT_MAX), (status_t)OK);
         CHECK_EQ(control->show(), (status_t)OK);
         SurfaceComposerClient::closeGlobalTransaction();
 
         surface = control->getSurface();
         CHECK(surface != NULL);
+
+        CHECK_EQ((status_t)OK,
+                 native_window_api_connect(
+                     surface.get(), NATIVE_WINDOW_API_MEDIA));
     }
 
     sp<Controller> controller =
@@ -589,6 +593,10 @@ int main(int argc, char **argv) {
     looper->unregisterHandler(controller->id());
 
     if (!decodeAudio && useSurface) {
+        CHECK_EQ((status_t)OK,
+                 native_window_api_disconnect(
+                     surface.get(), NATIVE_WINDOW_API_MEDIA));
+
         composerClient->dispose();
     }
 
