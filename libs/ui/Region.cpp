@@ -482,6 +482,7 @@ void Region::boolean_operation(int op, Region& dst,
     if (!rhs.isValid()) {
         LOGE("Region::boolean_operation(op=%d) invalid Rect={%d,%d,%d,%d}",
                 op, rhs.left, rhs.top, rhs.right, rhs.bottom);
+        return;
     }
 
 #if VALIDATE_WITH_CORECG || VALIDATE_REGIONS
