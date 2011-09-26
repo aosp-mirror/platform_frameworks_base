@@ -29,6 +29,7 @@ import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -88,7 +89,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // upstream type list and the DUN_REQUIRED secure-setting
     private int mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_NONE;
 
-    private INetworkManagementService mNMService;
+    private final INetworkManagementService mNMService;
+    private final INetworkStatsService mStatsService;
     private Looper mLooper;
     private HandlerThread mThread;
 
@@ -124,9 +126,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean mUsbTetherRequested; // true if USB tethering should be started
                                          // when RNDIS is enabled
 
-    public Tethering(Context context, INetworkManagementService nmService, Looper looper) {
+    public Tethering(Context context, INetworkManagementService nmService,
+            INetworkStatsService statsService, Looper looper) {
         mContext = context;
         mNMService = nmService;
+        mStatsService = statsService;
         mLooper = looper;
 
         mIfaces = new HashMap<String, TetherInterfaceSM>();
@@ -913,6 +917,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     case CMD_INTERFACE_DOWN:
                         if (mMyUpstreamIfaceName != null) {
                             try {
+                                // about to tear down NAT; gather remaining statistics
+                                mStatsService.forceUpdate();
+
                                 mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
                                 mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
@@ -957,6 +964,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         if (mMyUpstreamIfaceName != null) {
                             try {
+                                // about to tear down NAT; gather remaining statistics
+                                mStatsService.forceUpdate();
+
                                 mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
                                 mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
@@ -995,6 +1005,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     case CMD_TETHER_MODE_DEAD:
                         if (mMyUpstreamIfaceName != null) {
                             try {
+                                // about to tear down NAT; gather remaining statistics
+                                mStatsService.forceUpdate();
+
                                 mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
                                 mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
