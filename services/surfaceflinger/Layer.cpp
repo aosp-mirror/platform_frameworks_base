@@ -371,11 +371,12 @@ uint32_t Layer::doTransaction(uint32_t flags)
             Layer::State& editDraw(mDrawingState);
             editDraw.requested_w = temp.requested_w;
             editDraw.requested_h = temp.requested_h;
-
-            // record the new size, form this point on, when the client request
-            // a buffer, it'll get the new size.
-            mSurfaceTexture->setDefaultBufferSize(temp.requested_w, temp.requested_h);
         }
+
+        // record the new size, form this point on, when the client request
+        // a buffer, it'll get the new size.
+        mSurfaceTexture->setDefaultBufferSize(temp.requested_w,
+                temp.requested_h);
     }
 
     if (temp.sequence != front.sequence) {
