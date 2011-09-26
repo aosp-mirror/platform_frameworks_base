@@ -106,12 +106,6 @@ public class WifiNative {
 
     public native static String statusCommand();
 
-    public native static int getRssiCommand();
-
-    public native static int getRssiApproxCommand();
-
-    public native static int getLinkSpeedCommand();
-
     public native static String getMacAddressCommand();
 
     public native static String scanResultsCommand();
@@ -208,6 +202,16 @@ public class WifiNative {
     private native static int doIntCommand(String command);
 
     private native static String doStringCommand(String command);
+
+    /** Example output:
+     * RSSI=-65
+     * LINKSPEED=48
+     * NOISE=9999
+     * FREQUENCY=0
+     */
+    public static String signalPoll() {
+        return doStringCommand("SIGNAL_POLL");
+    }
 
     public static boolean wpsPbc() {
         return doBooleanCommand("WPS_PBC");
