@@ -593,4 +593,7 @@ public class KeyguardUpdateMonitor {
         return mClockVisible;
     }
 
+    public int getPhoneState() {
+        return mPhoneState;
+    }
 }
