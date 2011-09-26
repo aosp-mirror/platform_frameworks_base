@@ -936,10 +936,15 @@ public class LockPatternUtils {
      *
      * If there's currently a call in progress, the button will take them to the call
      * @param button the button to update
+     * @param the phone state:
+     *  {@link TelephonyManager#CALL_STATE_IDLE}
+     *  {@link TelephonyManager#CALL_STATE_RINGING}
+     *  {@link TelephonyManager#CALL_STATE_OFFHOOK}
      * @param showIfCapable indicates whether the button should be shown if emergency calls are
      *                      possible on the device
      */
-    public void updateEmergencyCallButtonState(Button button, boolean showIfCapable) {
+    public void updateEmergencyCallButtonState(Button button, int  phoneState,
+            boolean showIfCapable) {
         if (isEmergencyCallCapable() && showIfCapable) {
             button.setVisibility(View.VISIBLE);
         } else {
@@ -947,9 +952,8 @@ public class LockPatternUtils {
             return;
         }
 
-        int newState = TelephonyManager.getDefault().getCallState();
         int textId;
-        if (newState == TelephonyManager.CALL_STATE_OFFHOOK) {
+        if (phoneState == TelephonyManager.CALL_STATE_OFFHOOK) {
             // show "return to call" text and show phone icon
             textId = R.string.lockscreen_return_to_call;
             int phoneCallIcon = R.drawable.stat_sys_phone_call;
@@ -978,23 +982,5 @@ public class LockPatternUtils {
             // What can we do?
         }
         return false;
-    }
-
-    /**
-     * Performs concentenation of PLMN/SPN
-     * @param plmn
-     * @param spn
-     * @return
-     */
-    public static CharSequence getCarrierString(CharSequence plmn, CharSequence spn) {
-        if (plmn != null && spn == null) {
-            return plmn;
-        } else if (plmn != null && spn != null) {
-            return plmn + "|" + spn;
-        } else if (plmn == null && spn != null) {
-            return spn;
-        } else {
-            return "";
-        }
     }
 }
