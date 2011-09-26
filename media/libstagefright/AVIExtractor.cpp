@@ -56,7 +56,32 @@ private:
     MediaBufferGroup *mBufferGroup;
     size_t mSampleIndex;
 
+    sp<MP3Splitter> mSplitter;
+
     DISALLOW_EVIL_CONSTRUCTORS(AVISource);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct AVIExtractor::MP3Splitter : public RefBase {
+    MP3Splitter();
+
+    void clear();
+    void append(MediaBuffer *buffer);
+    status_t read(MediaBuffer **buffer);
+
+protected:
+    virtual ~MP3Splitter();
+
+private:
+    bool mFindSync;
+    int64_t mBaseTimeUs;
+    int64_t mNumSamplesRead;
+    sp<ABuffer> mBuffer;
+
+    bool resync();
+
+    DISALLOW_EVIL_CONSTRUCTORS(MP3Splitter);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,6 +109,15 @@ status_t AVIExtractor::AVISource::start(MetaData *params) {
     mBufferGroup->add_buffer(new MediaBuffer(mTrack.mMaxSampleSize));
     mSampleIndex = 0;
 
+    const char *mime;
+    CHECK(mTrack.mMeta->findCString(kKeyMIMEType, &mime));
+
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
+        mSplitter = new MP3Splitter;
+    } else {
+        mSplitter.clear();
+    }
+
     return OK;
 }
 
@@ -92,6 +126,8 @@ status_t AVIExtractor::AVISource::stop() {
 
     delete mBufferGroup;
     mBufferGroup = NULL;
+
+    mSplitter.clear();
 
     return OK;
 }
@@ -116,39 +152,213 @@ status_t AVIExtractor::AVISource::read(
         if (err != OK) {
             return ERROR_END_OF_STREAM;
         }
+
+        if (mSplitter != NULL) {
+            mSplitter->clear();
+        }
     }
 
-    off64_t offset;
-    size_t size;
-    bool isKey;
-    int64_t timeUs;
-    status_t err = mExtractor->getSampleInfo(
-            mTrackIndex, mSampleIndex, &offset, &size, &isKey, &timeUs);
+    for (;;) {
+        if (mSplitter != NULL) {
+            status_t err = mSplitter->read(buffer);
 
-    ++mSampleIndex;
+            if (err == OK) {
+                break;
+            } else if (err != -EAGAIN) {
+                return err;
+            }
+        }
 
-    if (err != OK) {
-        return ERROR_END_OF_STREAM;
+        off64_t offset;
+        size_t size;
+        bool isKey;
+        int64_t timeUs;
+        status_t err = mExtractor->getSampleInfo(
+                mTrackIndex, mSampleIndex, &offset, &size, &isKey, &timeUs);
+
+        ++mSampleIndex;
+
+        if (err != OK) {
+            return ERROR_END_OF_STREAM;
+        }
+
+        MediaBuffer *out;
+        CHECK_EQ(mBufferGroup->acquire_buffer(&out), (status_t)OK);
+
+        ssize_t n = mExtractor->mDataSource->readAt(offset, out->data(), size);
+
+        if (n < (ssize_t)size) {
+            return n < 0 ? (status_t)n : (status_t)ERROR_MALFORMED;
+        }
+
+        out->set_range(0, size);
+
+        out->meta_data()->setInt64(kKeyTime, timeUs);
+
+        if (isKey) {
+            out->meta_data()->setInt32(kKeyIsSyncFrame, 1);
+        }
+
+        if (mSplitter == NULL) {
+            *buffer = out;
+            break;
+        }
+
+        mSplitter->append(out);
+        out->release();
+        out = NULL;
     }
 
-    MediaBuffer *out;
-    CHECK_EQ(mBufferGroup->acquire_buffer(&out), (status_t)OK);
+    return OK;
+}
 
-    ssize_t n = mExtractor->mDataSource->readAt(offset, out->data(), size);
+////////////////////////////////////////////////////////////////////////////////
 
-    if (n < (ssize_t)size) {
-        return n < 0 ? (status_t)n : (status_t)ERROR_MALFORMED;
+AVIExtractor::MP3Splitter::MP3Splitter()
+    : mFindSync(true),
+      mBaseTimeUs(-1ll),
+      mNumSamplesRead(0) {
+}
+
+AVIExtractor::MP3Splitter::~MP3Splitter() {
+}
+
+void AVIExtractor::MP3Splitter::clear() {
+    mFindSync = true;
+    mBaseTimeUs = -1ll;
+    mNumSamplesRead = 0;
+
+    if (mBuffer != NULL) {
+        mBuffer->setRange(0, 0);
+    }
+}
+
+void AVIExtractor::MP3Splitter::append(MediaBuffer *buffer) {
+    size_t prevCapacity = (mBuffer != NULL) ? mBuffer->capacity() : 0;
+
+    if (mBaseTimeUs < 0) {
+        CHECK(mBuffer == NULL || mBuffer->size() == 0);
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &mBaseTimeUs));
+        mNumSamplesRead = 0;
     }
 
-    out->set_range(0, size);
-
-    out->meta_data()->setInt64(kKeyTime, timeUs);
-
-    if (isKey) {
-        out->meta_data()->setInt32(kKeyIsSyncFrame, 1);
+    if (mBuffer != NULL && mBuffer->offset() > 0) {
+        memmove(mBuffer->base(), mBuffer->data(), mBuffer->size());
+        mBuffer->setRange(0, mBuffer->size());
     }
 
-    *buffer = out;
+    if (mBuffer == NULL
+            || mBuffer->size() + buffer->range_length() > prevCapacity) {
+        size_t newCapacity =
+            (prevCapacity + buffer->range_length() + 1023) & ~1023;
+
+        sp<ABuffer> newBuffer = new ABuffer(newCapacity);
+        if (mBuffer != NULL) {
+            memcpy(newBuffer->data(), mBuffer->data(), mBuffer->size());
+            newBuffer->setRange(0, mBuffer->size());
+        } else {
+            newBuffer->setRange(0, 0);
+        }
+        mBuffer = newBuffer;
+    }
+
+    memcpy(mBuffer->data() + mBuffer->size(),
+           (const uint8_t *)buffer->data() + buffer->range_offset(),
+           buffer->range_length());
+
+    mBuffer->setRange(0, mBuffer->size() + buffer->range_length());
+}
+
+bool AVIExtractor::MP3Splitter::resync() {
+    if (mBuffer == NULL) {
+        return false;
+    }
+
+    bool foundSync = false;
+    for (size_t offset = 0; offset + 3 < mBuffer->size(); ++offset) {
+        uint32_t firstHeader = U32_AT(mBuffer->data() + offset);
+
+        size_t frameSize;
+        if (!GetMPEGAudioFrameSize(firstHeader, &frameSize)) {
+            continue;
+        }
+
+        size_t subsequentOffset = offset + frameSize;
+        size_t i = 3;
+        while (i > 0) {
+            if (subsequentOffset + 3 >= mBuffer->size()) {
+                break;
+            }
+
+            static const uint32_t kMask = 0xfffe0c00;
+
+            uint32_t header = U32_AT(mBuffer->data() + subsequentOffset);
+            if ((header & kMask) != (firstHeader & kMask)) {
+                break;
+            }
+
+            if (!GetMPEGAudioFrameSize(header, &frameSize)) {
+                break;
+            }
+
+            subsequentOffset += frameSize;
+            --i;
+        }
+
+        if (i == 0) {
+            foundSync = true;
+            memmove(mBuffer->data(),
+                    mBuffer->data() + offset,
+                    mBuffer->size() - offset);
+
+            mBuffer->setRange(0, mBuffer->size() - offset);
+            break;
+        }
+    }
+
+    return foundSync;
+}
+
+status_t AVIExtractor::MP3Splitter::read(MediaBuffer **out) {
+    *out = NULL;
+
+    if (mFindSync) {
+        if (!resync()) {
+            return -EAGAIN;
+        }
+
+        mFindSync = false;
+    }
+
+    if (mBuffer->size() < 4) {
+        return -EAGAIN;
+    }
+
+    uint32_t header = U32_AT(mBuffer->data());
+    size_t frameSize;
+    int sampleRate;
+    int numSamples;
+    if (!GetMPEGAudioFrameSize(
+                header, &frameSize, &sampleRate, NULL, NULL, &numSamples)) {
+        return ERROR_MALFORMED;
+    }
+
+    if (mBuffer->size() < frameSize) {
+        return -EAGAIN;
+    }
+
+    MediaBuffer *mbuf = new MediaBuffer(frameSize);
+    memcpy(mbuf->data(), mBuffer->data(), frameSize);
+
+    int64_t timeUs = mBaseTimeUs + (mNumSamplesRead * 1000000ll) / sampleRate;
+    mNumSamplesRead += numSamples;
+
+    mbuf->meta_data()->setInt64(kKeyTime, timeUs);
+
+    mBuffer->setRange(
+            mBuffer->offset() + frameSize, mBuffer->size() - frameSize);
+
+    *out = mbuf;
 
     return OK;
 }
@@ -449,6 +659,8 @@ status_t AVIExtractor::parseStreamHeader(off64_t offset, size_t size) {
     track->mThumbnailSampleSize = 0;
     track->mThumbnailSampleIndex = -1;
     track->mMaxSampleSize = 0;
+    track->mAvgChunkSize = 1.0;
+    track->mFirstChunkSize = 0;
 
     return OK;
 }
@@ -467,8 +679,8 @@ status_t AVIExtractor::parseStreamFormat(off64_t offset, size_t size) {
 
     bool isVideo = (track->mKind == Track::VIDEO);
 
-    if ((isVideo && size < 40) || (!isVideo && size < 18)) {
-        // Expected a BITMAPINFO or WAVEFORMATEX structure, respectively.
+    if ((isVideo && size < 40) || (!isVideo && size < 16)) {
+        // Expected a BITMAPINFO or WAVEFORMAT(EX) structure, respectively.
         return ERROR_MALFORMED;
     }
 
@@ -651,6 +863,47 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
     for (size_t i = 0; i < mTracks.size(); ++i) {
         Track *track = &mTracks.editItemAt(i);
 
+        if (track->mBytesPerSample > 0) {
+            // Assume all chunks are roughly the same size for now.
+
+            // Compute the avg. size of the first 128 chunks (if there are
+            // that many), but exclude the size of the first one, since
+            // it may be an outlier.
+            size_t numSamplesToAverage = track->mSamples.size();
+            if (numSamplesToAverage > 256) {
+                numSamplesToAverage = 256;
+            }
+
+            double avgChunkSize = 0;
+            size_t j;
+            for (j = 0; j <= numSamplesToAverage; ++j) {
+                off64_t offset;
+                size_t size;
+                bool isKey;
+                int64_t dummy;
+
+                status_t err =
+                    getSampleInfo(
+                            i, j,
+                            &offset, &size, &isKey, &dummy);
+
+                if (err != OK) {
+                    return err;
+                }
+
+                if (j == 0) {
+                    track->mFirstChunkSize = size;
+                    continue;
+                }
+
+                avgChunkSize += size;
+            }
+
+            avgChunkSize /= numSamplesToAverage;
+
+            track->mAvgChunkSize = avgChunkSize;
+        }
+
         int64_t durationUs;
         CHECK_EQ((status_t)OK,
                  getSampleTime(i, track->mSamples.size() - 1, &durationUs));
@@ -686,21 +939,6 @@ status_t AVIExtractor::parseIndex(off64_t offset, size_t size) {
             if (err != OK) {
                 return err;
             }
-        }
-
-        if (track->mBytesPerSample != 0) {
-            // Assume all chunks are the same size for now.
-
-            off64_t offset;
-            size_t size;
-            bool isKey;
-            int64_t sampleTimeUs;
-            CHECK_EQ((status_t)OK,
-                     getSampleInfo(
-                         i, 0,
-                         &offset, &size, &isKey, &sampleTimeUs));
-
-            track->mRate *= size / track->mBytesPerSample;
         }
     }
 
@@ -904,6 +1142,18 @@ status_t AVIExtractor::getSampleInfo(
 
     *isKey = info.mIsKey;
 
+    if (track.mBytesPerSample > 0) {
+        size_t sampleStartInBytes;
+        if (sampleIndex == 0) {
+            sampleStartInBytes = 0;
+        } else {
+            sampleStartInBytes =
+                track.mFirstChunkSize + track.mAvgChunkSize * (sampleIndex - 1);
+        }
+
+        sampleIndex = sampleStartInBytes / track.mBytesPerSample;
+    }
+
     *sampleTimeUs = (sampleIndex * 1000000ll * track.mRate) / track.mScale;
 
     return OK;
@@ -928,8 +1178,24 @@ status_t AVIExtractor::getSampleIndexAtTime(
 
     const Track &track = mTracks.itemAt(trackIndex);
 
-    ssize_t closestSampleIndex =
-        timeUs / track.mRate * track.mScale / 1000000ll;
+    ssize_t closestSampleIndex;
+
+    if (track.mBytesPerSample > 0) {
+        size_t closestByteOffset =
+            (timeUs * track.mBytesPerSample)
+                / track.mRate * track.mScale / 1000000ll;
+
+        if (closestByteOffset <= track.mFirstChunkSize) {
+            closestSampleIndex = 0;
+        } else {
+            closestSampleIndex =
+                (closestByteOffset - track.mFirstChunkSize)
+                    / track.mAvgChunkSize;
+        }
+    } else {
+        // Each chunk contains a single sample.
+        closestSampleIndex = timeUs / track.mRate * track.mScale / 1000000ll;
+    }
 
     ssize_t numSamples = track.mSamples.size();
 

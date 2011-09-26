@@ -42,6 +42,7 @@ protected:
 
 private:
     struct AVISource;
+    struct MP3Splitter;
 
     struct SampleInfo {
         uint32_t mOffset;
@@ -70,6 +71,10 @@ private:
         size_t mThumbnailSampleSize;
         ssize_t mThumbnailSampleIndex;
         size_t mMaxSampleSize;
+
+        // If mBytesPerSample > 0:
+        double mAvgChunkSize;
+        size_t mFirstChunkSize;
     };
 
     sp<DataSource> mDataSource;
