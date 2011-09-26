@@ -725,6 +725,16 @@ public abstract class PackageManager {
     public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
 
     /**
+     * Usable by the required verifier as the {@code verificationCode} argument
+     * for {@link PackageManager#verifyPendingInstall} to indicate that it will
+     * allow the installation to proceed without any of the optional verifiers
+     * needing to vote.
+     *
+     * @hide
+     */
+    public static final int VERIFICATION_ALLOW_WITHOUT_SUFFICIENT = 2;
+
+    /**
      * Used as the {@code verificationCode} argument for
      * {@link PackageManager#verifyPendingInstall} to indicate that the calling
      * package verifier allows the installation to proceed.

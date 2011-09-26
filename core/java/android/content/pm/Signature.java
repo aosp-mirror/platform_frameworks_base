@@ -19,7 +19,12 @@ package android.content.pm;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.ByteArrayInputStream;
 import java.lang.ref.SoftReference;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 
 /**
@@ -133,6 +138,20 @@ public class Signature implements Parcelable {
         byte[] bytes = new byte[mSignature.length];
         System.arraycopy(mSignature, 0, bytes, 0, mSignature.length);
         return bytes;
+    }
+
+    /**
+     * Returns the public key for this signature.
+     *
+     * @throws CertificateException when Signature isn't a valid X.509
+     *             certificate; shouldn't happen.
+     * @hide
+     */
+    public PublicKey getPublicKey() throws CertificateException {
+        final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        final ByteArrayInputStream bais = new ByteArrayInputStream(mSignature);
+        final Certificate cert = certFactory.generateCertificate(bais);
+        return cert.getPublicKey();
     }
 
     @Override

@@ -156,6 +156,7 @@ public class DefaultContainerService extends IntentService {
             }
             ret.packageName = pkg.packageName;
             ret.installLocation = pkg.installLocation;
+            ret.verifiers = pkg.verifiers;
 
             ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation,
                     archiveFilePath, flags, threshold);
