@@ -53,9 +53,8 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 public class TextUtils {
-    private TextUtils() { /* cannot be instantiated */ }
 
-    private static String[] EMPTY_STRING_ARRAY = new String[]{};
+    private TextUtils() { /* cannot be instantiated */ }
 
     public static void getChars(CharSequence s, int start, int end,
                                 char[] dest, int destoff) {
@@ -1000,6 +999,10 @@ public class TextUtils {
         MIDDLE,
         END,
         MARQUEE,
+        /**
+         * @hide
+         */
+        END_SMALL
     }
 
     public interface EllipsizeCallback {
@@ -1009,8 +1012,6 @@ public class TextUtils {
          */
         public void ellipsized(int start, int end);
     }
-
-    private static String sEllipsis = null;
 
     /**
      * Returns the original text if it fits in the specified width
@@ -1042,7 +1043,8 @@ public class TextUtils {
                                          boolean preserveLength,
                                          EllipsizeCallback callback) {
         return ellipsize(text, paint, avail, where, preserveLength, callback,
-                TextDirectionHeuristics.FIRSTSTRONG_LTR);
+                TextDirectionHeuristics.FIRSTSTRONG_LTR,
+                (where == TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL);
     }
 
     /**
@@ -1063,11 +1065,7 @@ public class TextUtils {
             float avail, TruncateAt where,
             boolean preserveLength,
             EllipsizeCallback callback,
-            TextDirectionHeuristic textDir) {
-        if (sEllipsis == null) {
-            Resources r = Resources.getSystem();
-            sEllipsis = r.getString(R.string.ellipsis);
-        }
+            TextDirectionHeuristic textDir, String ellipsis) {
 
         int len = text.length();
 
@@ -1085,7 +1083,7 @@ public class TextUtils {
 
             // XXX assumes ellipsis string does not require shaping and
             // is unaffected by style
-            float ellipsiswid = paint.measureText(sEllipsis);
+            float ellipsiswid = paint.measureText(ellipsis);
             avail -= ellipsiswid;
 
             int left = 0;
@@ -1094,7 +1092,7 @@ public class TextUtils {
                 // it all goes
             } else if (where == TruncateAt.START) {
                 right = len - mt.breakText(0, len, false, avail);
-            } else if (where == TruncateAt.END) {
+            } else if (where == TruncateAt.END || where == TruncateAt.END_SMALL) {
                 left = mt.breakText(0, len, true, avail);
             } else {
                 right = len - mt.breakText(0, len, false, avail / 2);
@@ -1112,10 +1110,10 @@ public class TextUtils {
             int remaining = len - (right - left);
             if (preserveLength) {
                 if (remaining > 0) { // else eliminate the ellipsis too
-                    buf[left++] = '\u2026';
+                    buf[left++] = ellipsis.charAt(0);
                 }
                 for (int i = left; i < right; i++) {
-                    buf[i] = '\uFEFF';
+                    buf[i] = ZWNBS_CHAR;
                 }
                 String s = new String(buf, 0, len);
                 if (sp == null) {
@@ -1131,16 +1129,16 @@ public class TextUtils {
             }
 
             if (sp == null) {
-                StringBuilder sb = new StringBuilder(remaining + sEllipsis.length());
+                StringBuilder sb = new StringBuilder(remaining + ellipsis.length());
                 sb.append(buf, 0, left);
-                sb.append(sEllipsis);
+                sb.append(ellipsis);
                 sb.append(buf, right, len - right);
                 return sb.toString();
             }
 
             SpannableStringBuilder ssb = new SpannableStringBuilder();
             ssb.append(text, 0, left);
-            ssb.append(sEllipsis);
+            ssb.append(ellipsis);
             ssb.append(text, right, len);
             return ssb;
         } finally {
@@ -1664,4 +1662,13 @@ public class TextUtils {
 
     private static Object sLock = new Object();
     private static char[] sTemp = null;
+
+    private static String[] EMPTY_STRING_ARRAY = new String[]{};
+
+    private static final char ZWNBS_CHAR = '\uFEFF';
+
+    private static final String ELLIPSIS_NORMAL = Resources.getSystem().getString(
+            R.string.ellipsis);
+    private static final String ELLIPSIS_TWO_DOTS = Resources.getSystem().getString(
+            R.string.ellipsis_two_dots);
 }
