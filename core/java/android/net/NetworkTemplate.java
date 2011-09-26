@@ -19,14 +19,15 @@ package android.net;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
-import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkIdentity.scrubSubscriberId;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_UNKNOWN;
 import static android.telephony.TelephonyManager.getNetworkClass;
+import static com.android.internal.util.ArrayUtils.contains;
 
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -50,6 +51,16 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_WIFI = 4;
     /** {@hide} */
     public static final int MATCH_ETHERNET = 5;
+
+    /**
+     * Set of {@link NetworkInfo#getType()} that reflect data usage.
+     */
+    private static final int[] DATA_USAGE_NETWORK_TYPES;
+
+    static {
+        DATA_USAGE_NETWORK_TYPES = Resources.getSystem().getIntArray(
+                com.android.internal.R.array.config_data_usage_network_types);
+    }
 
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
@@ -151,7 +162,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Test if this network matches the given template and IMSI.
+     * Test if given {@link NetworkIdentity} matches this template.
      */
     public boolean matches(NetworkIdentity ident) {
         switch (mMatchRule) {
@@ -171,23 +182,25 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Check if mobile network with matching IMSI. Also matches
-     * {@link #TYPE_WIMAX}.
+     * Check if mobile network with matching IMSI.
      */
     private boolean matchesMobile(NetworkIdentity ident) {
-        if (isNetworkTypeMobile(ident.mType) && Objects.equal(mSubscriberId, ident.mSubscriberId)) {
+        if (ident.mType == TYPE_WIMAX) {
+            // TODO: consider matching against WiMAX subscriber identity
             return true;
-        } else if (ident.mType == TYPE_WIMAX) {
-            return true;
+        } else {
+            return (contains(DATA_USAGE_NETWORK_TYPES, ident.mType)
+                    && Objects.equal(mSubscriberId, ident.mSubscriberId));
         }
-        return false;
     }
 
     /**
      * Check if mobile network classified 3G or lower with matching IMSI.
      */
     private boolean matchesMobile3gLower(NetworkIdentity ident) {
-        if (isNetworkTypeMobile(ident.mType) && Objects.equal(mSubscriberId, ident.mSubscriberId)) {
+        if (ident.mType == TYPE_WIMAX) {
+            return false;
+        } else if (matchesMobile(ident)) {
             switch (getNetworkClass(ident.mSubType)) {
                 case NETWORK_CLASS_UNKNOWN:
                 case NETWORK_CLASS_2_G:
@@ -199,17 +212,17 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Check if mobile network classified 4G with matching IMSI. Also matches
-     * {@link #TYPE_WIMAX}.
+     * Check if mobile network classified 4G with matching IMSI.
      */
     private boolean matchesMobile4g(NetworkIdentity ident) {
-        if (isNetworkTypeMobile(ident.mType) && Objects.equal(mSubscriberId, ident.mSubscriberId)) {
+        if (ident.mType == TYPE_WIMAX) {
+            // TODO: consider matching against WiMAX subscriber identity
+            return true;
+        } else if (matchesMobile(ident)) {
             switch (getNetworkClass(ident.mSubType)) {
                 case NETWORK_CLASS_4_G:
                     return true;
             }
-        } else if (ident.mType == TYPE_WIMAX) {
-            return true;
         }
         return false;
     }

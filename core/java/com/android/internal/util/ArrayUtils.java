@@ -133,4 +133,13 @@ public class ArrayUtils
         }
         return false;
     }
+
+    public static boolean contains(int[] array, int value) {
+        for (int element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
