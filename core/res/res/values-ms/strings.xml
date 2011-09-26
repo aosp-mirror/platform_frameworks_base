@@ -859,10 +859,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
+    <!-- outdated translation 2839899368418071843 -->     <string name="addToDictionary" msgid="9090375111134433012">"+ tambah ke kamus"</string>
     <!-- no translation found for deleteText (7070985395199629156) -->
     <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Kaedah input"</string>
