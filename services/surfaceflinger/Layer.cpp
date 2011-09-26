@@ -404,7 +404,9 @@ bool Layer::isCropped() const {
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
     if (mQueuedFrames > 0) {
+        // Capture the old state of the layer for comparisons later
         const bool oldOpacity = isOpaque();
+        sp<GraphicBuffer> oldActiveBuffer = mActiveBuffer;
 
         // signal another event if we have more frames pending
         if (android_atomic_dec(&mQueuedFrames) > 1) {
@@ -417,7 +419,8 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             return;
         }
 
-        sp<GraphicBuffer> newFrontBuffer(mSurfaceTexture->getCurrentBuffer());
+        // update the active buffer
+        mActiveBuffer = mSurfaceTexture->getCurrentBuffer();
 
         const Rect crop(mSurfaceTexture->getCurrentCrop());
         const uint32_t transform(mSurfaceTexture->getCurrentTransform());
@@ -439,16 +442,16 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             mFlinger->invalidateHwcGeometry();
         }
 
-        uint32_t bufWidth  = newFrontBuffer->getWidth();
-        uint32_t bufHeight = newFrontBuffer->getHeight();
-        if (mActiveBuffer != NULL) {
-            if (bufWidth != uint32_t(mActiveBuffer->width) ||
-                bufHeight != uint32_t(mActiveBuffer->height)) {
+        uint32_t bufWidth  = mActiveBuffer->getWidth();
+        uint32_t bufHeight = mActiveBuffer->getHeight();
+        if (oldActiveBuffer != NULL) {
+            if (bufWidth != uint32_t(oldActiveBuffer->width) ||
+                bufHeight != uint32_t(oldActiveBuffer->height)) {
                 mFlinger->invalidateHwcGeometry();
             }
         }
 
-        mCurrentOpacity = getOpacityForFormat(newFrontBuffer->format);
+        mCurrentOpacity = getOpacityForFormat(mActiveBuffer->format);
         if (oldOpacity != isOpaque()) {
             recomputeVisibleRegions = true;
         }
@@ -461,9 +464,6 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
         // FIXME: mPostedDirtyRegion = dirty & bounds
         mPostedDirtyRegion.set(front.w, front.h);
-
-        // update active buffer
-        mActiveBuffer = newFrontBuffer;
 
         if ((front.w != front.requested_w) ||
             (front.h != front.requested_h))
