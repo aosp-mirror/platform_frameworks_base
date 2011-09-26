@@ -709,8 +709,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         T ret1 = null;
 
         for (int i = 0; i < spanCount; i++) {
-            if (!kind.isInstance(spans[i])) continue;
-
             int spanStart = starts[i];
             int spanEnd = ends[i];
 
@@ -734,6 +732,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 if (spanEnd == queryStart)
                     continue;
             }
+
+            // Expensive test, should be performed after the previous tests
+            if (!kind.isInstance(spans[i])) continue;
 
             if (count == 0) {
                 // Safe conversion thanks to the isInstance test above
