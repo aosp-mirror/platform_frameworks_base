@@ -1053,12 +1053,10 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader,
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramRasterCreate(JNIEnv *_env, jobject _this, RsContext con, jboolean pointSmooth,
-                     jboolean lineSmooth, jboolean pointSprite, jfloat lineWidth, jint cull)
+nProgramRasterCreate(JNIEnv *_env, jobject _this, RsContext con, jboolean pointSprite, jint cull)
 {
-    LOG_API("nProgramRasterCreate, con(%p), pointSmooth(%i), lineSmooth(%i), pointSprite(%i)",
-            con, pointSmooth, lineSmooth, pointSprite);
-    return (jint)rsProgramRasterCreate(con, pointSmooth, lineSmooth, pointSprite, lineWidth, (RsCullMode)cull);
+    LOG_API("nProgramRasterCreate, con(%p), pointSprite(%i), cull(%i)", con, pointSprite, cull);
+    return (jint)rsProgramRasterCreate(con, pointSprite, (RsCullMode)cull);
 }
 
 
@@ -1295,7 +1293,7 @@ static JNINativeMethod methods[] = {
 {"rsnProgramBindSampler",            "(IIII)V",                               (void*)nProgramBindSampler },
 
 {"rsnProgramFragmentCreate",         "(ILjava/lang/String;[I)I",              (void*)nProgramFragmentCreate },
-{"rsnProgramRasterCreate",           "(IZZZFI)I",                             (void*)nProgramRasterCreate },
+{"rsnProgramRasterCreate",           "(IZI)I",                                (void*)nProgramRasterCreate },
 {"rsnProgramVertexCreate",           "(ILjava/lang/String;[I)I",              (void*)nProgramVertexCreate },
 
 {"rsnContextBindRootScript",         "(II)V",                                 (void*)nContextBindRootScript },
