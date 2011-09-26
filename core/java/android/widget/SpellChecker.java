@@ -75,6 +75,20 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mLength = 0;
     }
 
+    /**
+     * @return true if a spell checker session has successfully been created. Returns false if not,
+     * for instance when spell checking has been disabled in settings.
+     */
+    public boolean isSessionActive() {
+        return mSpellCheckerSession != null;
+    }
+
+    public void closeSession() {
+        if (mSpellCheckerSession != null) {
+            mSpellCheckerSession.close();
+        }
+    }
+
     public void addSpellCheckSpan(SpellCheckSpan spellCheckSpan) {
         int length = mIds.length;
         if (mLength >= length) {
