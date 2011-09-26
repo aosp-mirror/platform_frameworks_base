@@ -30,6 +30,8 @@ import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.lang.reflect.Array;
+
 /**
  * Represents a line of styled text, for measuring in visual order and
  * for rendering.
@@ -850,6 +852,73 @@ class TextLine {
         return runIsRtl ? -ret : ret;
     }
 
+    private static class SpanSet<E> {
+        final int numberOfSpans;
+        final E[] spans;
+        final int[] spanStarts;
+        final int[] spanEnds;
+        final int[] spanFlags;
+
+        @SuppressWarnings("unchecked")
+        SpanSet(Spanned spanned, int start, int limit, Class<? extends E> type) {
+            final E[] allSpans = spanned.getSpans(start, limit, type);
+            final int length = allSpans.length;
+            // These arrays may end up being too large because of empty spans
+            spans = (E[]) Array.newInstance(type, length);
+            spanStarts = new int[length];
+            spanEnds = new int[length];
+            spanFlags = new int[length];
+
+            int count = 0;
+            for (int i = 0; i < length; i++) {
+                final E span = allSpans[i];
+
+                final int spanStart = spanned.getSpanStart(span);
+                final int spanEnd = spanned.getSpanEnd(span);
+                if (spanStart == spanEnd) continue;
+
+                final int spanFlag = spanned.getSpanFlags(span);
+                final int priority = spanFlag & Spanned.SPAN_PRIORITY;
+                if (priority != 0 && count != 0) {
+                    int j;
+
+                    for (j = 0; j < count; j++) {
+                        final int otherPriority = spanFlags[j] & Spanned.SPAN_PRIORITY;
+                        if (priority > otherPriority) break;
+                    }
+
+                    System.arraycopy(spans, j, spans, j + 1, count - j);
+                    System.arraycopy(spanStarts, j, spanStarts, j + 1, count - j);
+                    System.arraycopy(spanEnds, j, spanEnds, j + 1, count - j);
+                    System.arraycopy(spanFlags, j, spanFlags, j + 1, count - j);
+
+                    spans[j] = span;
+                    spanStarts[j] = spanStart;
+                    spanEnds[j] = spanEnd;
+                    spanFlags[j] = spanFlag;
+                } else {
+                    spans[i] = span;
+                    spanStarts[i] = spanStart;
+                    spanEnds[i] = spanEnd;
+                    spanFlags[i] = spanFlag;
+                }
+
+                count++;
+            }
+            numberOfSpans = count;
+        }
+
+        int getNextTransition(int start, int limit) {
+            for (int i = 0; i < numberOfSpans; i++) {
+                final int spanStart = spanStarts[i];
+                final int spanEnd = spanEnds[i];
+                if (spanStart > start && spanStart < limit) limit = spanStart;
+                if (spanEnd > start && spanEnd < limit) limit = spanEnd;
+            }
+            return limit;
+        }
+    }
+
     /**
      * Utility function for handling a unidirectional run.  The run must not
      * contain tabs or emoji but can contain styles.
@@ -883,66 +952,70 @@ class TextLine {
             return 0f;
         }
 
+        if (mSpanned == null) {
+            TextPaint wp = mWorkPaint;
+            wp.set(mPaint);
+            final int mlimit = measureLimit;
+            return handleText(wp, start, mlimit, start, limit, runIsRtl, c, x, top,
+                    y, bottom, fmi, needWidth || mlimit < measureLimit);
+        }
+
+        final SpanSet<MetricAffectingSpan> metricAffectingSpans = new SpanSet<MetricAffectingSpan>(
+                mSpanned, mStart + start, mStart + limit, MetricAffectingSpan.class);
+        final SpanSet<CharacterStyle> characterStyleSpans = new SpanSet<CharacterStyle>(
+                    mSpanned, mStart + start, mStart + limit, CharacterStyle.class);
+
         // Shaping needs to take into account context up to metric boundaries,
         // but rendering needs to take into account character style boundaries.
         // So we iterate through metric runs to get metric bounds,
         // then within each metric run iterate through character style runs
         // for the run bounds.
-        float ox = x;
+        final float originalX = x;
         for (int i = start, inext; i < measureLimit; i = inext) {
             TextPaint wp = mWorkPaint;
             wp.set(mPaint);
 
-            int mlimit;
-            if (mSpanned == null) {
-                inext = limit;
-                mlimit = measureLimit;
-            } else {
-                inext = mSpanned.nextSpanTransition(mStart + i, mStart + limit,
-                        MetricAffectingSpan.class) - mStart;
+            inext = metricAffectingSpans.getNextTransition(mStart + i, mStart + limit) - mStart;
+            int mlimit = Math.min(inext, measureLimit);
 
-                mlimit = inext < measureLimit ? inext : measureLimit;
-                MetricAffectingSpan[] spans = mSpanned.getSpans(mStart + i,
-                        mStart + mlimit, MetricAffectingSpan.class);
-                spans = TextUtils.removeEmptySpans(spans, mSpanned, MetricAffectingSpan.class);
+            ReplacementSpan replacement = null;
 
-                if (spans.length > 0) {
-                    ReplacementSpan replacement = null;
-                    for (int j = 0; j < spans.length; j++) {
-                        MetricAffectingSpan span = spans[j];
-                        if (span instanceof ReplacementSpan) {
-                            replacement = (ReplacementSpan)span;
-                        } else {
-                            // We might have a replacement that uses the draw
-                            // state, otherwise measure state would suffice.
-                            span.updateDrawState(wp);
-                        }
-                    }
-
-                    if (replacement != null) {
-                        x += handleReplacement(replacement, wp, i,
-                                mlimit, runIsRtl, c, x, top, y, bottom, fmi,
-                                needWidth || mlimit < measureLimit);
-                        continue;
-                    }
+            for (int j = 0; j < metricAffectingSpans.numberOfSpans; j++) {
+                // Both intervals [spanStarts..spanEnds] and [mStart + i..mStart + mlimit] are NOT
+                // empty by construction. This special case in getSpans() explains the >= & <= tests
+                if ((metricAffectingSpans.spanStarts[j] >= mStart + mlimit) ||
+                        (metricAffectingSpans.spanEnds[j] <= mStart + i)) continue;
+                MetricAffectingSpan span = metricAffectingSpans.spans[j];
+                if (span instanceof ReplacementSpan) {
+                    replacement = (ReplacementSpan)span;
+                } else {
+                    // We might have a replacement that uses the draw
+                    // state, otherwise measure state would suffice.
+                    span.updateDrawState(wp);
                 }
             }
 
-            if (mSpanned == null || c == null) {
+            if (replacement != null) {
+                x += handleReplacement(replacement, wp, i, mlimit, runIsRtl, c, x, top, y,
+                        bottom, fmi, needWidth || mlimit < measureLimit);
+                continue;
+            }
+
+            if (c == null) {
                 x += handleText(wp, i, mlimit, i, inext, runIsRtl, c, x, top,
                         y, bottom, fmi, needWidth || mlimit < measureLimit);
             } else {
                 for (int j = i, jnext; j < mlimit; j = jnext) {
-                    jnext = mSpanned.nextSpanTransition(mStart + j,
-                            mStart + mlimit, CharacterStyle.class) - mStart;
-
-                    CharacterStyle[] spans = mSpanned.getSpans(mStart + j,
-                            mStart + jnext, CharacterStyle.class);
-                    spans = TextUtils.removeEmptySpans(spans, mSpanned, CharacterStyle.class);
+                    jnext = characterStyleSpans.getNextTransition(mStart + j, mStart + mlimit) -
+                            mStart;
 
                     wp.set(mPaint);
-                    for (int k = 0; k < spans.length; k++) {
-                        CharacterStyle span = spans[k];
+                    for (int k = 0; k < characterStyleSpans.numberOfSpans; k++) {
+                        // Intentionally using >= and <= as explained above
+                        if ((characterStyleSpans.spanStarts[k] >= mStart + jnext) ||
+                                (characterStyleSpans.spanEnds[k] <= mStart + j)) continue;
+
+                        CharacterStyle span = characterStyleSpans.spans[k];
                         span.updateDrawState(wp);
                     }
 
@@ -952,7 +1025,7 @@ class TextLine {
             }
         }
 
-        return x - ox;
+        return x - originalX;
     }
 
     /**
@@ -997,8 +1070,7 @@ class TextLine {
         }
 
         pos += mStart;
-        MetricAffectingSpan[] spans = mSpanned.getSpans(pos, pos + 1,
-                MetricAffectingSpan.class);
+        MetricAffectingSpan[] spans = mSpanned.getSpans(pos, pos + 1, MetricAffectingSpan.class);
         if (spans.length == 0) {
             return mPaint.ascent();
         }
