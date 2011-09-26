@@ -323,6 +323,7 @@ ACodec::ACodec()
     mFlushingState = new FlushingState(this);
 
     mPortEOS[kPortIndexInput] = mPortEOS[kPortIndexOutput] = false;
+    mInputEOSResult = OK;
 
     changeState(mUninitializedState);
 }
@@ -1347,7 +1348,10 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
         case KEEP_BUFFERS:
         {
             if (buffer == NULL) {
-                mCodec->mPortEOS[kPortIndexInput] = true;
+                if (!mCodec->mPortEOS[kPortIndexInput]) {
+                    mCodec->mPortEOS[kPortIndexInput] = true;
+                    mCodec->mInputEOSResult = err;
+                }
             }
             break;
         }
@@ -1398,8 +1402,14 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
 
                 getMoreInputDataIfPossible();
             } else if (!mCodec->mPortEOS[kPortIndexInput]) {
-                LOGV("[%s] Signalling EOS on the input port",
-                     mCodec->mComponentName.c_str());
+                if (err != ERROR_END_OF_STREAM) {
+                    LOGV("[%s] Signalling EOS on the input port "
+                         "due to error %d",
+                         mCodec->mComponentName.c_str(), err);
+                } else {
+                    LOGV("[%s] Signalling EOS on the input port",
+                         mCodec->mComponentName.c_str());
+                }
 
                 LOGV("[%s] calling emptyBuffer %p signalling EOS",
                      mCodec->mComponentName.c_str(), bufferID);
@@ -1416,6 +1426,7 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
                 info->mStatus = BufferInfo::OWNED_BY_COMPONENT;
 
                 mCodec->mPortEOS[kPortIndexInput] = true;
+                mCodec->mInputEOSResult = err;
             }
             break;
 
@@ -1523,6 +1534,7 @@ bool ACodec::BaseState::onOMXFillBufferDone(
             if (flags & OMX_BUFFERFLAG_EOS) {
                 sp<AMessage> notify = mCodec->mNotify->dup();
                 notify->setInt32("what", ACodec::kWhatEOS);
+                notify->setInt32("err", mCodec->mInputEOSResult);
                 notify->post();
 
                 mCodec->mPortEOS[kPortIndexOutput] = true;
@@ -1720,6 +1732,8 @@ void ACodec::UninitializedState::onSetup(
 
     mCodec->mPortEOS[kPortIndexInput] =
         mCodec->mPortEOS[kPortIndexOutput] = false;
+
+    mCodec->mInputEOSResult = OK;
 
     mCodec->configureCodec(mime.c_str(), msg);
 
@@ -2370,6 +2384,8 @@ void ACodec::FlushingState::changeStateIfWeOwnAllBuffers() {
 
         mCodec->mPortEOS[kPortIndexInput] =
             mCodec->mPortEOS[kPortIndexOutput] = false;
+
+        mCodec->mInputEOSResult = OK;
 
         mCodec->changeState(mCodec->mExecutingState);
     }
