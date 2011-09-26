@@ -182,9 +182,4 @@ public interface TelephonyProperties
      * in commercial configuration.
      */
     static final String PROPERTY_TEST_CSIM = "persist.radio.test-csim";
-
-    /**
-     * Set to true to indicate a test ims registration required.
-     */
-    static final String PROPERTY_IMS_REG_REQUIRED = "persist.radio.imsregrequired";
 }
