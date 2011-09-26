@@ -9280,13 +9280,13 @@ public class WebView extends AbsoluteLayout
 
     private static void checkThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            RuntimeException exception = new RuntimeException(
-                    "A WebView method was called on thread '" +
+            Throwable throwable = new Throwable(
+                    "Warning: A WebView method was called on thread '" +
                     Thread.currentThread().getName() + "'. " +
                     "All WebView methods must be called on the UI thread. " +
                     "Future versions of WebView may not support use on other threads.");
-            Log.e(LOGTAG, Log.getStackTraceString(exception));
-            StrictMode.onWebViewMethodCalledOnWrongThread(exception);
+            Log.w(LOGTAG, Log.getStackTraceString(throwable));
+            StrictMode.onWebViewMethodCalledOnWrongThread(throwable);
         }
     }
 
