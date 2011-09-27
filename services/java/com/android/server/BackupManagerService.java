@@ -4372,8 +4372,13 @@ class BackupManagerService extends IBackupManager.Stub {
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
                 if (mTransport.getRestoreData(mBackupData) != BackupConstants.TRANSPORT_OK) {
+                    // Transport-level failure, so we wind everything up and
+                    // terminate the restore operation.
                     Slog.e(TAG, "Error getting restore data for " + packageName);
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
+                    mBackupData.close();
+                    mBackupDataName.delete();
+                    executeNextState(RestoreState.FINAL);
                     return;
                 }
 
