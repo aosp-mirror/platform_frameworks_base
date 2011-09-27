@@ -985,6 +985,10 @@ AudioFlinger::ThreadBase::~ThreadBase()
     mNewParameters.clear();
     // do not lock the mutex in destructor
     releaseWakeLock_l();
+    if (mPowerManager != 0) {
+        sp<IBinder> binder = mPowerManager->asBinder();
+        binder->unlinkToDeath(mDeathRecipient);
+    }
 }
 
 void AudioFlinger::ThreadBase::exit()
