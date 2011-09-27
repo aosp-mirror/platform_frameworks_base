@@ -251,26 +251,32 @@ TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
     }
 }
 
-bool TextLayoutCacheKey::operator<(const TextLayoutCacheKey& rhs) const {
-    LTE_INT(count) {
-        LTE_INT(typeface) {
-            LTE_FLOAT(textSize) {
-                LTE_FLOAT(textSkewX) {
-                    LTE_FLOAT(textScaleX) {
-                        LTE_INT(flags) {
-                            LTE_INT(hinting) {
-                                LTE_INT(dirFlags) {
-                                    return memcmp(getText(), rhs.getText(),
-                                            count * sizeof(UChar)) < 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return false;
+int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs) {
+    int deltaInt = lhs.count - rhs.count;
+    if (deltaInt != 0) return (deltaInt);
+
+    if (lhs.typeface < rhs.typeface) return -1;
+    if (lhs.typeface > rhs.typeface) return +1;
+
+    if (lhs.textSize < rhs.textSize) return -1;
+    if (lhs.textSize > rhs.textSize) return +1;
+
+    if (lhs.textSkewX < rhs.textSkewX) return -1;
+    if (lhs.textSkewX > rhs.textSkewX) return +1;
+
+    if (lhs.textScaleX < rhs.textScaleX) return -1;
+    if (lhs.textScaleX > rhs.textScaleX) return +1;
+
+    deltaInt = lhs.flags - rhs.flags;
+    if (deltaInt != 0) return (deltaInt);
+
+    deltaInt = lhs.hinting - rhs.hinting;
+    if (deltaInt != 0) return (deltaInt);
+
+    deltaInt = lhs.dirFlags - rhs.dirFlags;
+    if (deltaInt) return (deltaInt);
+
+    return memcmp(lhs.getText(), rhs.getText(), lhs.count * sizeof(UChar));
 }
 
 void TextLayoutCacheKey::internalTextCopy() {

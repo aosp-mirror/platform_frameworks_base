@@ -72,8 +72,6 @@ public:
 
     TextLayoutCacheKey(const TextLayoutCacheKey& other);
 
-    bool operator<(const TextLayoutCacheKey& rhs) const;
-
     /**
      * We need to copy the text when we insert the key into the cache itself.
      * We don't need to copy the text when we are only comparing keys.
@@ -84,6 +82,8 @@ public:
      * Get the size of the Cache key.
      */
     size_t getSize();
+
+    static int compare(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs);
 
 private:
     const UChar* text; // if text is NULL, use textCopy
@@ -97,10 +97,17 @@ private:
     uint32_t flags;
     SkPaint::Hinting hinting;
 
-    inline const UChar* getText() const {
-        return text ? text : textCopy.string();
-    }
+    inline const UChar* getText() const { return text ? text : textCopy.string(); }
+
 }; // TextLayoutCacheKey
+
+inline int strictly_order_type(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs) {
+    return TextLayoutCacheKey::compare(lhs, rhs) < 0;
+}
+
+inline int compare_type(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs) {
+    return TextLayoutCacheKey::compare(lhs, rhs);
+}
 
 /*
  * TextLayoutCacheValue is the Cache value
