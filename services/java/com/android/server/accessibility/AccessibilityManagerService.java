@@ -298,16 +298,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     super.onChange(selfChange);
 
                     synchronized (mLock) {
-                        mIsAccessibilityEnabled = Settings.Secure.getInt(
-                                mContext.getContentResolver(),
-                                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
-                        if (mIsAccessibilityEnabled) {
-                            manageServicesLocked();
-                        } else {
-                            unbindAllServicesLocked();
-                        }
-                        updateInputFilterLocked();
-                        sendStateToClientsLocked();
+                        handleAccessibilityEnabledSettingChangedLocked();
                     }
                 }
             });
@@ -354,6 +345,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             client.asBinder().linkToDeath(new DeathRecipient() {
                 public void binderDied() {
                     synchronized (mLock) {
+                        addedClient.asBinder().unlinkToDeath(this, 0);
                         mClients.remove(addedClient);
                     }
                 }
@@ -445,10 +437,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             IAccessibilityInteractionConnection connection) throws RemoteException {
         synchronized (mLock) {
             final IWindow addedWindowToken = windowToken;
+            final IAccessibilityInteractionConnection addedConnection = connection;
             final int windowId = sNextWindowId++;
-            connection.asBinder().linkToDeath(new DeathRecipient() {
+            addedConnection.asBinder().linkToDeath(new DeathRecipient() {
                 public void binderDied() {
                     synchronized (mLock) {
+                        addedConnection.asBinder().unlinkToDeath(this, 0);
                         removeAccessibilityInteractionConnection(addedWindowToken);
                     }
                 }
@@ -485,21 +479,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         ComponentName componentName = new ComponentName("foo.bar",
                 "AutomationAccessibilityService");
         synchronized (mLock) {
-            Service oldService = mComponentNameToServiceMap.get(componentName);
-            if (oldService != null) {
-                tryRemoveServiceLocked(oldService);
+            // If an automation services is connected to the system all services are stopped
+            // so the automation one is the only one running. Settings are not changed so when
+            // the automation service goes away the state is restored from the settings.
+
+            // Disable all services.
+            final int runningServiceCount = mServices.size();
+            for (int i = 0; i < runningServiceCount; i++) {
+                Service runningService = mServices.get(i);
+                runningService.unbind();
             }
-            // Now this service is enabled.
-            mEnabledServices.add(componentName);
-            // Also make sure this service is the only one.
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                    componentName.flattenToString());
-            // This API is intended for testing so enable accessibility to make
-            // sure clients can start poking with the window content.
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_ENABLED, 1);
+            // If necessary enable accessibility and announce that.
+            if (!mIsAccessibilityEnabled) {
+                mIsAccessibilityEnabled = true;
+                sendStateToClientsLocked();
+            }
         }
+        // Hook the automation service up.
         AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
         accessibilityServiceInfo.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         accessibilityServiceInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
@@ -717,11 +713,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Manages services by starting enabled ones and stopping disabled ones.
      */
     private void manageServicesLocked() {
+        unbindAutomationService();
         populateEnabledServicesLocked(mEnabledServices);
         final int enabledInstalledServicesCount = updateServicesStateLocked(mInstalledServices,
                 mEnabledServices);
         // No enabled installed services => disable accessibility to avoid
-        // sending accessibility events with no recipient across processes. 
+        // sending accessibility events with no recipient across processes.
         if (mIsAccessibilityEnabled && enabledInstalledServicesCount == 0) {
             Settings.Secure.putInt(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_ENABLED, 0);
@@ -739,6 +736,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (service.unbind()) {
                 i--;
                 count--;
+            }
+        }
+    }
+
+    /**
+     * Unbinds the automation service if such is running.
+     */
+    private void unbindAutomationService() {
+        List<Service> runningServices = mServices;
+        int runningServiceCount = mServices.size();
+        for (int i = 0; i < runningServiceCount; i++) {
+            Service service = runningServices.get(i);
+            if (service.mIsAutomation) {
+                 service.unbind();
+                 return;
             }
         }
     }
@@ -865,6 +877,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mHasInputFilter = false;
             mWindowManagerService.setInputFilter(null);
         }
+    }
+
+    /**
+     * Updated the state based on the accessibility enabled setting.
+     */
+    private void handleAccessibilityEnabledSettingChangedLocked() {
+        mIsAccessibilityEnabled = Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
+        if (mIsAccessibilityEnabled) {
+            manageServicesLocked();
+        } else {
+            unbindAllServicesLocked();
+        }
+        updateInputFilterLocked();
+        sendStateToClientsLocked();
     }
 
     /**
@@ -1171,7 +1199,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public void binderDied() {
             synchronized (mLock) {
+                mService.unlinkToDeath(this, 0);
                 tryRemoveServiceLocked(this);
+                // We no longer have an automation service, so restore
+                // the state based on values in the settings database.
+                if (mIsAutomation) {
+                    handleAccessibilityEnabledSettingChangedLocked();
+                }
             }
         }
 
