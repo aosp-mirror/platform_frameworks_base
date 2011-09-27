@@ -64,6 +64,8 @@ public class PhoneStatusBarPolicy {
 
     private static final int INET_CONDITION_THRESHOLD = 50;
 
+    private static final boolean SHOW_SYNC_ICON = false;
+
     private final Context mContext;
     private final StatusBarManager mService;
     private final Handler mHandler = new Handler();
@@ -195,6 +197,7 @@ public class PhoneStatusBarPolicy {
     }
 
     private final void updateSyncState(Intent intent) {
+        if (!SHOW_SYNC_ICON) return;
         boolean isActive = intent.getBooleanExtra("active", false);
         boolean isFailing = intent.getBooleanExtra("failing", false);
         mService.setIconVisibility("sync_active", isActive);
