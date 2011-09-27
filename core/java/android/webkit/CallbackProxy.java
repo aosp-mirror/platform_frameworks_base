@@ -165,8 +165,6 @@ class CallbackProxy extends Handler {
     /**
      * Get the WebViewClient.
      * @return the current WebViewClient instance.
-     *
-     *@hide pending API council approval.
      */
     public WebViewClient getWebViewClient() {
        return mWebViewClient;
@@ -1013,10 +1011,6 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
-    /**
-     * @hide - hide this because it contains a parameter of type SslError.
-     * SslError is located in a hidden package.
-     */
     public void onReceivedSslError(SslErrorHandler handler, SslError error) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
@@ -1031,9 +1025,7 @@ class CallbackProxy extends Handler {
         msg.obj = map;
         sendMessage(msg);
     }
-    /**
-     * @hide
-     */
+
     public void onReceivedClientCertRequest(ClientCertRequestHandler handler, String host_and_port) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
@@ -1048,17 +1040,8 @@ class CallbackProxy extends Handler {
         msg.obj = map;
         sendMessage(msg);
     }
-    /**
-     * @hide - hide this because it contains a parameter of type SslCertificate,
-     * which is located in a hidden package.
-     */
 
     public void onReceivedCertificate(SslCertificate certificate) {
-        // Do an unsynchronized quick check to avoid posting if no callback has
-        // been set.
-        if (mWebViewClient == null) {
-            return;
-        }
         // here, certificate can be null (if the site is not secure)
         sendMessage(obtainMessage(RECEIVED_CERTIFICATE, certificate));
     }
