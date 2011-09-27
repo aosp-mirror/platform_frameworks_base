@@ -29,8 +29,9 @@ struct NuPlayer::Source : public RefBase {
 
     virtual void start() = 0;
 
-    // Returns true iff more data was available, false on EOS.
-    virtual bool feedMoreTSData() = 0;
+    // Returns OK iff more data was available,
+    // an error or ERROR_END_OF_STREAM if not.
+    virtual status_t feedMoreTSData() = 0;
 
     virtual sp<MetaData> getFormat(bool audio) = 0;
 

@@ -35,8 +35,7 @@ struct NuPlayer::HTTPLiveSource : public NuPlayer::Source {
 
     virtual void start();
 
-    // Returns true iff more data was available, false on EOS.
-    virtual bool feedMoreTSData();
+    virtual status_t feedMoreTSData();
 
     virtual sp<MetaData> getFormat(bool audio);
     virtual status_t dequeueAccessUnit(bool audio, sp<ABuffer> *accessUnit);
@@ -59,7 +58,7 @@ private:
     bool mUIDValid;
     uid_t mUID;
     uint32_t mFlags;
-    bool mEOS;
+    status_t mFinalResult;
     off64_t mOffset;
     sp<ALooper> mLiveLooper;
     sp<LiveSession> mLiveSession;
