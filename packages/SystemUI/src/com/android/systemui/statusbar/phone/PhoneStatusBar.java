@@ -316,12 +316,7 @@ public class PhoneStatusBar extends StatusBar {
         }
 
         // figure out which pixel-format to use for the status bar.
-        mPixelFormat = PixelFormat.TRANSLUCENT;
-        Drawable bg = sb.getBackground();
-        if (bg != null) {
-            mPixelFormat = bg.getOpacity();
-        }
-
+        mPixelFormat = PixelFormat.OPAQUE;
         mStatusIcons = (LinearLayout)sb.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)sb.findViewById(R.id.notificationIcons);
         mIcons = (LinearLayout)sb.findViewById(R.id.icons);
