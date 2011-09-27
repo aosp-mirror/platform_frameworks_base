@@ -9915,6 +9915,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            hide();
+
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
                 Editable editable = (Editable) mText;
@@ -9922,6 +9924,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 SuggestionInfo suggestionInfo = mSuggestionInfos[position];
                 final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
                 final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
+                if (spanStart < 0 || spanEnd < 0) return; // Span has been removed
                 final String originalText = mText.subSequence(spanStart, spanEnd).toString();
 
                 if (suggestionInfo.suggestionIndex < 0) {
@@ -9983,7 +9986,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Selection.setSelection(editable, spanEnd + lengthDifference);
                 }
             }
-            hide();
         }
     }
 
