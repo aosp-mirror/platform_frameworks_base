@@ -31,8 +31,7 @@ struct NuPlayer::StreamingSource : public NuPlayer::Source {
 
     virtual void start();
 
-    // Returns true iff more data was available, false on EOS.
-    virtual bool feedMoreTSData();
+    virtual status_t feedMoreTSData();
 
     virtual sp<MetaData> getFormat(bool audio);
     virtual status_t dequeueAccessUnit(bool audio, sp<ABuffer> *accessUnit);
@@ -42,7 +41,7 @@ protected:
 
 private:
     sp<IStreamSource> mSource;
-    bool mEOS;
+    status_t mFinalResult;
     sp<NuPlayerStreamListener> mStreamListener;
     sp<ATSParser> mTSParser;
 
