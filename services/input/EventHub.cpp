@@ -639,6 +639,8 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         sizeof(struct input_event) * capacity);
                 if (readSize == 0 || (readSize < 0 && errno == ENODEV)) {
                     // Device was removed before INotify noticed.
+                    LOGW("could not get event, removed? (fd: %d size: %d bufferSize: %d capacity: %d errno: %d)\n",
+                         device->fd, readSize, bufferSize, capacity, errno);
                     deviceChanged = true;
                     closeDeviceLocked(device);
                 } else if (readSize < 0) {
@@ -1254,6 +1256,7 @@ status_t EventHub::readNotifyLocked() {
             if(event->mask & IN_CREATE) {
                 openDeviceLocked(devname);
             } else {
+                LOGI("Removing device '%s' due to inotify event\n", devname);
                 closeDeviceByPathLocked(devname);
             }
         }
