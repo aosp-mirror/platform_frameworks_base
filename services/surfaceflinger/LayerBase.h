@@ -81,7 +81,7 @@ public:
                 Region          transparentRegion;
             };
 
-            void setName(const String8& name);
+    virtual void setName(const String8& name);
             String8 getName() const;
 
             // modify current state

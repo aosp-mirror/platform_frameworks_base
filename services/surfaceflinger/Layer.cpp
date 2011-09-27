@@ -112,6 +112,11 @@ void Layer::onRemoved()
     mSurfaceTexture->abandon();
 }
 
+void Layer::setName(const String8& name) {
+    LayerBase::setName(name);
+    mSurfaceTexture->setName(name);
+}
+
 sp<ISurface> Layer::createSurface()
 {
     class BSurface : public BnSurface, public LayerCleaner {

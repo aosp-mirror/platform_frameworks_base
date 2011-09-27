@@ -74,6 +74,7 @@ public:
     virtual bool isProtected() const;
     virtual void onRemoved();
     virtual sp<Layer> getLayer() const { return const_cast<Layer*>(this); }
+    virtual void setName(const String8& name);
 
     // LayerBaseClient interface
     virtual wp<IBinder> getSurfaceTextureBinder() const;
