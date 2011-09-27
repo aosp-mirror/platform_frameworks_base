@@ -671,10 +671,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Количество неудачных попыток ввода PIN-кода: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После нескольких неудачных попыток (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будет предложено разблокировать планшетный ПК с помощью учетных данных Google."\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.  "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Количество неудачных попыток разблокировать планшетный ПК: <xliff:g id="NUMBER_0">%d</xliff:g>. Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого настройки будут сброшены до заводских, а данные пользователя потеряны."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Количество неудачных попыток разблокировать телефон: <xliff:g id="NUMBER_0">%d</xliff:g>. Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого настройки будут сброшены до заводских, а данные пользователя потеряны."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Количество неудачных попыток разблокировать планшетный ПК: <xliff:g id="NUMBER">%d</xliff:g>. Настройки будут сброшены до заводских."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Количество неудачных попыток разблокировать телефон: <xliff:g id="NUMBER">%d</xliff:g>. Настройки будут сброшены до заводских."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Не удалось разблокировать телефон (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER">%d</xliff:g>). Будут установлены настройки по умолчанию."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Не удалось разблокировать телефон (число попыток: <xliff:g id="NUMBER">%d</xliff:g>). Будут установлены настройки по умолчанию."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забыли графический ключ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Снятие блокировки аккаунта"</string>
@@ -881,8 +881,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Выбор приложения для USB-устройства"</string>
     <string name="noApplications" msgid="1691104391758345586">"Это действие не может выполнять ни одно приложение."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> остановилось."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Процесс \"<xliff:g id="PROCESS">%1$s</xliff:g>\" остановился."</string>
+    <string name="aerr_application" msgid="932628488013092776">"В приложении \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" произошла ошибка."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"В приложении \"<xliff:g id="PROCESS">%1$s</xliff:g>\" произошла ошибка."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"Приложение \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" не отвечает."\n\n"Закрыть его?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Приложение \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\" не отвечает."\n\n"Закрыть его?"</string>
@@ -986,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Включение USB-накопителя"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"При включении USB-накопителя некоторые используемые приложения могут прекратить работу и оставаться недоступными до отключения USB-накопителя."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Сбой подключения USB"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Ошибка при подключении USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Подключен как устройство хранения данных"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Подключен как камера"</string>
@@ -1110,7 +1110,7 @@
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ничего не делать сейчас."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Выберите аккаунт"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Добавить аккаунт"</string>
-    <string name="choose_account_text" msgid="6891230675141555481">"Какой аккаунт хотите использовать?"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Выберите аккаунт"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Добавить аккаунт"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Увеличить"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Уменьшить"</string>
@@ -1136,7 +1136,7 @@
     <string name="switch_off" msgid="7249798614327155088">"Выкл."</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"нажато"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"не нажато"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Клавиша Alt"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Клавиша ALT"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Отмена"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Клавиша удаления"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Готово"</string>
