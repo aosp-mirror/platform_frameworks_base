@@ -2983,8 +2983,9 @@ public final class ContactsContract {
      * long streamItemId = ContentUris.parseId(streamItemUri);
      * </pre>
      * </dd>
-     * <dt>Via the {@link StreamItems#CONTENT_URI} URI:</dt>
+     * <dt>Via {@link StreamItems#CONTENT_URI}:</dt>
      * <dd>
+     *<pre>
      * ContentValues values = new ContentValues();
      * values.put(StreamItems.RAW_CONTACT_ID, rawContactId);
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
@@ -2992,6 +2993,7 @@ public final class ContactsContract {
      * values.put(StreamItems.COMMENTS, "3 people reshared this");
      * Uri streamItemUri = getContentResolver().insert(StreamItems.CONTENT_URI, values);
      * long streamItemId = ContentUris.parseId(streamItemUri);
+     *</pre>
      * </dd>
      * </dl>
      * </dd>
@@ -3012,7 +3014,7 @@ public final class ContactsContract {
      *     StreamItems.StreamItemPhotos.CONTENT_DIRECTORY), values);
      * </pre>
      * </dd>
-     * <dt>Via {@link ContactsContract.StreamItems#CONTENT_PHOTO_URI}</dt>
+     * <dt>Via {@link ContactsContract.StreamItems#CONTENT_PHOTO_URI}:</dt>
      * <dd>
      * <pre>
      * values.clear();
@@ -3021,7 +3023,7 @@ public final class ContactsContract {
      * values.put(StreamItemPhotos.PHOTO, photoData);
      * getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
      * </pre>
-     * Note that this latter form allows the insertion of a stream item and its
+     * <p>Note that this latter form allows the insertion of a stream item and its
      * photos in a single transaction, by using {@link ContentProviderOperation} with
      * back references to populate the stream item ID in the {@link ContentValues}.
      * </dd>
