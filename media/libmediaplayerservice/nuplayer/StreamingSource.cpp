@@ -34,7 +34,7 @@ namespace android {
 
 NuPlayer::StreamingSource::StreamingSource(const sp<IStreamSource> &source)
     : mSource(source),
-      mEOS(false) {
+      mFinalResult(OK) {
 }
 
 NuPlayer::StreamingSource::~StreamingSource() {
@@ -47,9 +47,9 @@ void NuPlayer::StreamingSource::start() {
     mStreamListener->start();
 }
 
-bool NuPlayer::StreamingSource::feedMoreTSData() {
-    if (mEOS) {
-        return false;
+status_t NuPlayer::StreamingSource::feedMoreTSData() {
+    if (mFinalResult != OK) {
+        return mFinalResult;
     }
 
     for (int32_t i = 0; i < 50; ++i) {
@@ -60,7 +60,7 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
         if (n == 0) {
             LOGI("input data EOS reached.");
             mTSParser->signalEOS(ERROR_END_OF_STREAM);
-            mEOS = true;
+            mFinalResult = ERROR_END_OF_STREAM;
             break;
         } else if (n == INFO_DISCONTINUITY) {
             ATSParser::DiscontinuityType type = ATSParser::DISCONTINUITY_SEEK;
@@ -92,14 +92,14 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
                     LOGE("TS Parser returned error %d", err);
 
                     mTSParser->signalEOS(err);
-                    mEOS = true;
+                    mFinalResult = err;
                     break;
                 }
             }
         }
     }
 
-    return true;
+    return OK;
 }
 
 sp<MetaData> NuPlayer::StreamingSource::getFormat(bool audio) {

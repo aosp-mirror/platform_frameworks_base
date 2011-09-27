@@ -235,11 +235,17 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 instantiateDecoder(true, &mAudioDecoder);
             }
 
-            if (!mSource->feedMoreTSData()) {
+            status_t err;
+            if ((err = mSource->feedMoreTSData()) != OK) {
                 if (mAudioDecoder == NULL && mVideoDecoder == NULL) {
                     // We're not currently decoding anything (no audio or
                     // video tracks found) and we just ran out of input data.
-                    notifyListener(MEDIA_PLAYBACK_COMPLETE, 0, 0);
+
+                    if (err == ERROR_END_OF_STREAM) {
+                        notifyListener(MEDIA_PLAYBACK_COMPLETE, 0, 0);
+                    } else {
+                        notifyListener(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+                    }
                 }
                 break;
             }
@@ -267,7 +273,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                         audio, codecRequest);
 
                 if (err == -EWOULDBLOCK) {
-                    if (mSource->feedMoreTSData()) {
+                    if (mSource->feedMoreTSData() == OK) {
                         msg->post();
                     }
                 }

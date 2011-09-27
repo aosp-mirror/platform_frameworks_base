@@ -41,7 +41,7 @@ NuPlayer::HTTPLiveSource::HTTPLiveSource(
       mUIDValid(uidValid),
       mUID(uid),
       mFlags(0),
-      mEOS(false),
+      mFinalResult(OK),
       mOffset(0) {
     if (headers) {
         mExtraHeaders = *headers;
@@ -95,9 +95,9 @@ sp<MetaData> NuPlayer::HTTPLiveSource::getFormat(bool audio) {
     return source->getFormat();
 }
 
-bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
-    if (mEOS) {
-        return false;
+status_t NuPlayer::HTTPLiveSource::feedMoreTSData() {
+    if (mFinalResult != OK) {
+        return mFinalResult;
     }
 
     sp<LiveDataSource> source =
@@ -111,12 +111,12 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
             break;
         } else if (n < 0) {
             if (n != ERROR_END_OF_STREAM) {
-                LOGI("input data EOS reached, error %d", n);
+                LOGI("input data EOS reached, error %ld", n);
             } else {
                 LOGI("input data EOS reached.");
             }
             mTSParser->signalEOS(n);
-            mEOS = true;
+            mFinalResult = n;
             break;
         } else {
             if (buffer[0] == 0x00) {
@@ -133,7 +133,7 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
                 if (err != OK) {
                     LOGE("TS Parser returned error %d", err);
                     mTSParser->signalEOS(err);
-                    mEOS = true;
+                    mFinalResult = err;
                     break;
                 }
             }
@@ -142,7 +142,7 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
         }
     }
 
-    return true;
+    return OK;
 }
 
 status_t NuPlayer::HTTPLiveSource::dequeueAccessUnit(
@@ -172,7 +172,7 @@ status_t NuPlayer::HTTPLiveSource::getDuration(int64_t *durationUs) {
 status_t NuPlayer::HTTPLiveSource::seekTo(int64_t seekTimeUs) {
     // We need to make sure we're not seeking until we have seen the very first
     // PTS timestamp in the whole stream (from the beginning of the stream).
-    while (!mTSParser->PTSTimeDeltaEstablished() && feedMoreTSData()) {
+    while (!mTSParser->PTSTimeDeltaEstablished() && feedMoreTSData() == OK) {
         usleep(100000);
     }
 
