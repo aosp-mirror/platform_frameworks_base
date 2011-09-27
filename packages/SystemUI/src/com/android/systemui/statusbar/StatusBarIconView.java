@@ -29,6 +29,7 @@ import android.util.Slog;
 import android.util.Log;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.ImageView;
 
 import java.text.NumberFormat;
 
@@ -70,6 +71,8 @@ public class StatusBarIconView extends AnimatedImageView {
             final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
             setAlpha(alpha);
         }
+
+        setScaleType(ImageView.ScaleType.CENTER);
     }
 
     private static boolean streq(String a, String b) {
