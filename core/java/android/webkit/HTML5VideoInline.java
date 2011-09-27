@@ -1,6 +1,8 @@
 
 package android.webkit;
 
+import android.Manifest.permission;
+import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.webkit.HTML5VideoView;
@@ -52,7 +54,12 @@ public class HTML5VideoInline extends HTML5VideoView{
     public void prepareDataAndDisplayMode(HTML5VideoViewProxy proxy) {
         super.prepareDataAndDisplayMode(proxy);
         setFrameAvailableListener(proxy);
-        mPlayer.setWakeMode(proxy.getContext(), PowerManager.FULL_WAKE_LOCK);
+        // TODO: This is a workaround, after b/5375681 fixed, we should switch
+        // to the better way.
+        if (mProxy.getContext().checkCallingOrSelfPermission(permission.WAKE_LOCK)
+                == PackageManager.PERMISSION_GRANTED) {
+            mPlayer.setWakeMode(proxy.getContext(), PowerManager.FULL_WAKE_LOCK);
+        }
     }
 
     // Pause the play and update the play/pause button
