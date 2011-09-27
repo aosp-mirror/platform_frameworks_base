@@ -14,7 +14,7 @@
   * the License.
   */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import android.content.Context;

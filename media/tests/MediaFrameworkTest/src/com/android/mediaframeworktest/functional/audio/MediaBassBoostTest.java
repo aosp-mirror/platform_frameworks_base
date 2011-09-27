@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.functional.EnergyProbe;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
-import android.media.audiofx.Virtualizer;
+import android.media.audiofx.BassBoost;
 import android.media.audiofx.Visualizer;
 import android.media.MediaPlayer;
 
@@ -41,16 +42,16 @@ import java.util.UUID;
  * Junit / Instrumentation test case for the media AudioTrack api
 
  */
-public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
-    private String TAG = "MediaVirtualizerTest";
+public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
+    private String TAG = "MediaBassBoostTest";
     private final static int MIN_ENERGY_RATIO_2 = 3;
     private final static short TEST_STRENGTH = 500;
     private final static int TEST_VOLUME = 4;
 
-    private Virtualizer mVirtualizer = null;
+    private BassBoost mBassBoost = null;
     private int mSession = -1;
 
-    public MediaVirtualizerTest() {
+    public MediaBassBoostTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
     }
 
@@ -62,7 +63,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        releaseVirtualizer();
+        releaseBassBoost();
     }
 
     private static void assumeTrue(String message, boolean cond) {
@@ -78,7 +79,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     }
 
     //-----------------------------------------------------------------
-    // VIRTUALIZER TESTS:
+    // BASS BOOST TESTS:
     //----------------------------------
 
 
@@ -91,28 +92,27 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     public void test0_0ConstructorAndRelease() throws Exception {
         boolean result = false;
         String msg = "test1_0ConstructorAndRelease()";
-        Virtualizer virtualizer = null;
+        BassBoost bb = null;
          try {
-            virtualizer = new Virtualizer(0, 0);
-            assertNotNull(msg + ": could not create Virtualizer", virtualizer);
+            bb = new BassBoost(0, 0);
+            assertNotNull(msg + ": could not create BassBoost", bb);
             try {
-                assertTrue(msg +": invalid effect ID", (virtualizer.getId() != 0));
+                assertTrue(msg +": invalid effect ID", (bb.getId() != 0));
             } catch (IllegalStateException e) {
-                msg = msg.concat(": Virtualizer not initialized");
+                msg = msg.concat(": BassBoost not initialized");
             }
             result = true;
         } catch (IllegalArgumentException e) {
-            msg = msg.concat(": Virtualizer not found");
+            msg = msg.concat(": BassBoost not found");
         } catch (UnsupportedOperationException e) {
             msg = msg.concat(": Effect library not loaded");
         } finally {
-            if (virtualizer != null) {
-                virtualizer.release();
+            if (bb != null) {
+                bb.release();
             }
         }
         assertTrue(msg, result);
     }
-
 
     //-----------------------------------------------------------------
     // 1 - get/set parameters
@@ -123,17 +123,17 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     public void test1_0Strength() throws Exception {
         boolean result = false;
         String msg = "test1_0Strength()";
-        getVirtualizer(0);
+        getBassBoost(0);
         try {
-            if (mVirtualizer.getStrengthSupported()) {
-                mVirtualizer.setStrength((short)TEST_STRENGTH);
-                short strength = mVirtualizer.getRoundedStrength();
+            if (mBassBoost.getStrengthSupported()) {
+                mBassBoost.setStrength((short)TEST_STRENGTH);
+                short strength = mBassBoost.getRoundedStrength();
                 // allow 10% difference between set strength and rounded strength
                 assertTrue(msg +": got incorrect strength",
                         ((float)strength > (float)TEST_STRENGTH * 0.9f) &&
                         ((float)strength < (float)TEST_STRENGTH * 1.1f));
             } else {
-                short strength = mVirtualizer.getRoundedStrength();
+                short strength = mBassBoost.getRoundedStrength();
                 assertTrue(msg +": got incorrect strength", strength >= 0 && strength <= 1000);
             }
             result = true;
@@ -147,7 +147,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             msg = msg.concat("get parameter() called in wrong state");
             loge(msg, "get parameter() called in wrong state");
         } finally {
-            releaseVirtualizer();
+            releaseBassBoost();
         }
         assertTrue(msg, result);
     }
@@ -157,12 +157,12 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     public void test1_1Properties() throws Exception {
         boolean result = false;
         String msg = "test1_1Properties()";
-        getVirtualizer(0);
+        getBassBoost(0);
         try {
-            Virtualizer.Settings settings = mVirtualizer.getProperties();
+            BassBoost.Settings settings = mBassBoost.getProperties();
             String str = settings.toString();
-            settings = new Virtualizer.Settings(str);
-            mVirtualizer.setProperties(settings);
+            settings = new BassBoost.Settings(str);
+            mBassBoost.setProperties(settings);
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -174,7 +174,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             msg = msg.concat("get parameter() called in wrong state");
             loge(msg, "get parameter() called in wrong state");
         } finally {
-            releaseVirtualizer();
+            releaseBassBoost();
         }
         assertTrue(msg, result);
     }
@@ -183,7 +183,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     // 2 - Effect action
     //----------------------------------
 
-    //Test case 2.0: test actual virtualizer influence on sound
+    //Test case 2.0: test actual bass boost influence on sound
     @LargeTest
     public void test2_0SoundModification() throws Exception {
         boolean result = false;
@@ -211,26 +211,22 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             mp = new MediaPlayer();
             mp.setDataSource(MediaNames.SINE_200_1000);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getVirtualizer(mp.getAudioSessionId());
+            getBassBoost(mp.getAudioSessionId());
             mp.prepare();
             mp.start();
             Thread.sleep(200);
             // measure reference energy around 1kHz
             int refEnergy200 = probe.capture(200);
             int refEnergy1000 = probe.capture(1000);
-            mVirtualizer.setStrength((short)1000);
-            mVirtualizer.setEnabled(true);
+            mBassBoost.setStrength((short)1000);
+            mBassBoost.setEnabled(true);
             Thread.sleep(500);
             // measure energy around 1kHz with band level at min
             int energy200 = probe.capture(200);
             int energy1000 = probe.capture(1000);
             // verify that the energy ration between low and high frequencies is at least
-            // MIN_ENERGY_RATIO_2 times higher with virtualizer on.
-            // NOTE: this is what is observed with current virtualizer implementation and the test
-            // audio file but is not the primary effect of the virtualizer. A better way would
-            // be to have a stereo PCM capture and check that a strongly paned input is centered
-            // when output. However, we cannot capture stereo with the visualizer.
-            assertTrue(msg + ": virtiualizer has no effect",
+            // MIN_ENERGY_RATIO_2 times higher with bassboost on.
+            assertTrue(msg + ": bass boost has no effect",
                     ((float)energy200/(float)energy1000) >
                     (MIN_ENERGY_RATIO_2 * ((float)refEnergy200/(float)refEnergy1000)));
             result = true;
@@ -247,7 +243,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             loge(msg, "sleep() interrupted");
         }
         finally {
-            releaseVirtualizer();
+            releaseBassBoost();
             if (mp != null) {
                 mp.release();
             }
@@ -265,30 +261,29 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     // private methods
     //----------------------------------
 
-    private void getVirtualizer(int session) {
-         if (mVirtualizer == null || session != mSession) {
-             if (session != mSession && mVirtualizer != null) {
-                 mVirtualizer.release();
-                 mVirtualizer = null;
+    private void getBassBoost(int session) {
+         if (mBassBoost == null || session != mSession) {
+             if (session != mSession && mBassBoost != null) {
+                 mBassBoost.release();
+                 mBassBoost = null;
              }
              try {
-                mVirtualizer = new Virtualizer(0, session);
+                mBassBoost = new BassBoost(0, session);
                 mSession = session;
             } catch (IllegalArgumentException e) {
-                Log.e(TAG, "getVirtualizer() Virtualizer not found exception: "+e);
+                Log.e(TAG, "getBassBoost() BassBoost not found exception: "+e);
             } catch (UnsupportedOperationException e) {
-                Log.e(TAG, "getVirtualizer() Effect library not loaded exception: "+e);
+                Log.e(TAG, "getBassBoost() Effect library not loaded exception: "+e);
             }
          }
-         assertNotNull("could not create mVirtualizer", mVirtualizer);
+         assertNotNull("could not create mBassBoost", mBassBoost);
     }
 
-    private void releaseVirtualizer() {
-        if (mVirtualizer != null) {
-            mVirtualizer.release();
-            mVirtualizer = null;
+    private void releaseBassBoost() {
+        if (mBassBoost != null) {
+            mBassBoost.release();
+            mBassBoost = null;
         }
    }
 
 }
-
