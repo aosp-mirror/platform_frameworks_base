@@ -16,6 +16,26 @@
 
 package android.content;
 
+import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.OnAccountsUpdateListener;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
+import android.content.pm.RegisteredServicesCache;
+import android.content.pm.RegisteredServicesCacheListener;
+import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -27,27 +47,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
-import com.android.internal.R;
-import com.android.internal.util.ArrayUtils;
-
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.OnAccountsUpdateListener;
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.RegisteredServicesCache;
-import android.content.pm.ProviderInfo;
-import android.content.pm.RegisteredServicesCacheListener;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -59,12 +58,15 @@ import android.util.Pair;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -1006,9 +1008,8 @@ public class SyncManager implements OnAccountsUpdateListener {
     }
 
     protected void dump(FileDescriptor fd, PrintWriter pw) {
-        StringBuilder sb = new StringBuilder();
-        dumpSyncState(pw, sb);
-        dumpSyncHistory(pw, sb);
+        dumpSyncState(pw);
+        dumpSyncHistory(pw);
 
         pw.println();
         pw.println("SyncAdapters:");
@@ -1023,7 +1024,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         return tobj.format("%Y-%m-%d %H:%M:%S");
     }
 
-    protected void dumpSyncState(PrintWriter pw, StringBuilder sb) {
+    protected void dumpSyncState(PrintWriter pw) {
         pw.print("data connected: "); pw.println(mDataConnectionIsConnected);
         pw.print("memory low: "); pw.println(mStorageIsLow);
 
@@ -1055,7 +1056,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
 
         pw.print("notification info: ");
-        sb.setLength(0);
+        final StringBuilder sb = new StringBuilder();
         mSyncHandler.mSyncNotificationInfo.toString(sb);
         pw.println(sb.toString());
 
@@ -1204,7 +1205,197 @@ public class SyncManager implements OnAccountsUpdateListener {
         pw.println(")");
     }
 
-    protected void dumpSyncHistory(PrintWriter pw, StringBuilder sb) {
+    protected void dumpSyncHistory(PrintWriter pw) {
+        dumpRecentHistory(pw);
+        dumpDayStatistics(pw);
+    }
+
+    private void dumpRecentHistory(PrintWriter pw) {
+        final ArrayList<SyncStorageEngine.SyncHistoryItem> items
+                = mSyncStorageEngine.getSyncHistory();
+        if (items != null && items.size() > 0) {
+            final Map<String, AuthoritySyncStats> authorityMap = Maps.newHashMap();
+            long totalElapsedTime = 0;
+            long totalTimes = 0;
+            final int N = items.size();
+
+            int maxAuthority = 0;
+            int maxAccount = 0;
+            for (SyncStorageEngine.SyncHistoryItem item : items) {
+                SyncStorageEngine.AuthorityInfo authority
+                        = mSyncStorageEngine.getAuthority(item.authorityId);
+                final String authorityName;
+                final String accountKey;
+                if (authority != null) {
+                    authorityName = authority.authority;
+                    accountKey = authority.account.name + "/" + authority.account.type;
+                } else {
+                    authorityName = "Unknown";
+                    accountKey = "Unknown";
+                }
+
+                int length = authorityName.length();
+                if (length > maxAuthority) {
+                    maxAuthority = length;
+                }
+                length = accountKey.length();
+                if (length > maxAccount) {
+                    maxAccount = length;
+                }
+
+                final long elapsedTime = item.elapsedTime;
+                totalElapsedTime += elapsedTime;
+                totalTimes++;
+                AuthoritySyncStats authoritySyncStats = authorityMap.get(authorityName);
+                if (authoritySyncStats == null) {
+                    authoritySyncStats = new AuthoritySyncStats(authorityName);
+                    authorityMap.put(authorityName, authoritySyncStats);
+                }
+                authoritySyncStats.elapsedTime += elapsedTime;
+                authoritySyncStats.times++;
+                final Map<String, AccountSyncStats> accountMap = authoritySyncStats.accountMap;
+                AccountSyncStats accountSyncStats = accountMap.get(accountKey);
+                if (accountSyncStats == null) {
+                    accountSyncStats = new AccountSyncStats(accountKey);
+                    accountMap.put(accountKey, accountSyncStats);
+                }
+                accountSyncStats.elapsedTime += elapsedTime;
+                accountSyncStats.times++;
+
+            }
+
+            pw.println();
+            pw.printf("Detailed Statistics (Recent history):  %d (# of times) %ds (sync time)\n",
+                    totalTimes, totalElapsedTime / 1000);
+
+            final List<AuthoritySyncStats> sortedAuthorities =
+                    new ArrayList<AuthoritySyncStats>(authorityMap.values());
+            Collections.sort(sortedAuthorities, new Comparator<AuthoritySyncStats>() {
+                @Override
+                public int compare(AuthoritySyncStats lhs, AuthoritySyncStats rhs) {
+                    // reverse order
+                    int compare = Integer.compare(rhs.times, lhs.times);
+                    if (compare == 0) {
+                        compare = Long.compare(rhs.elapsedTime, lhs.elapsedTime);
+                    }
+                    return compare;
+                }
+            });
+
+            final int maxLength = Math.max(maxAuthority, maxAccount + 3);
+            final int padLength = 2 + 2 + maxLength + 2 + 10 + 11;
+            final char chars[] = new char[padLength];
+            Arrays.fill(chars, '-');
+            final String separator = new String(chars);
+
+            final String authorityFormat = String.format("  %%-%ds: %%-9s  %%-11s\n", maxLength + 2);
+            final String accountFormat = String.format("    %%-%ds:   %%-9s  %%-11s\n", maxLength);
+
+            pw.println(separator);
+            for (AuthoritySyncStats authoritySyncStats : sortedAuthorities) {
+                String name = authoritySyncStats.name;
+                long elapsedTime;
+                int times;
+                String timeStr;
+                String timesStr;
+
+                elapsedTime = authoritySyncStats.elapsedTime;
+                times = authoritySyncStats.times;
+                timeStr = String.format("%d/%d%%",
+                        elapsedTime / 1000,
+                        elapsedTime * 100 / totalElapsedTime);
+                timesStr = String.format("%d/%d%%",
+                        times,
+                        times * 100 / totalTimes);
+                pw.printf(authorityFormat, name, timesStr, timeStr);
+
+                if (authoritySyncStats.accountMap.size() > 1) {
+                    final List<AccountSyncStats> sortedAccounts =
+                            new ArrayList<AccountSyncStats>(
+                                    authoritySyncStats.accountMap.values());
+                    Collections.sort(sortedAccounts, new Comparator<AccountSyncStats>() {
+                        @Override
+                        public int compare(AccountSyncStats lhs, AccountSyncStats rhs) {
+                            // reverse order
+                            int compare = Integer.compare(rhs.times, lhs.times);
+                            if (compare == 0) {
+                                compare = Long.compare(rhs.elapsedTime, lhs.elapsedTime);
+                            }
+                            return compare;
+                        }
+                    });
+                    for (AccountSyncStats stats: sortedAccounts) {
+                        elapsedTime = stats.elapsedTime;
+                        times = stats.times;
+                        timeStr = String.format("%d/%d%%",
+                                elapsedTime / 1000,
+                                elapsedTime * 100 / totalElapsedTime);
+                        timesStr = String.format("%d/%d%%",
+                                times,
+                                times * 100 / totalTimes);
+                        pw.printf(accountFormat, stats.name, timesStr, timeStr);
+                    }
+                }
+                pw.println(separator);
+            }
+
+            pw.println();
+            pw.println("Recent Sync History");
+            final String format = "  %-" + maxAccount + "s  %s\n";
+            String lastAuthorityName = null;
+            String lastAccountKey = null;
+            long lastEventTime = 0;
+            for (int i = 0; i < N; i++) {
+                SyncStorageEngine.SyncHistoryItem item = items.get(i);
+                SyncStorageEngine.AuthorityInfo authority
+                        = mSyncStorageEngine.getAuthority(item.authorityId);
+                final String authorityName;
+                final String accountKey;
+                if (authority != null) {
+                    authorityName = authority.authority;
+                    accountKey = authority.account.name + "/" + authority.account.type;
+                } else {
+                    authorityName = "Unknown";
+                    accountKey = "Unknown";
+                }
+                final long elapsedTime = item.elapsedTime;
+                final Time time = new Time();
+                final long eventTime = item.eventTime;
+                time.set(eventTime);
+
+                pw.printf("  #%-3d: %s %8s  %5.1fs",
+                        i + 1,
+                        formatTime(eventTime),
+                        SyncStorageEngine.SOURCES[item.source],
+                        ((float) elapsedTime) / 1000);
+                if (authorityName.equals(lastAuthorityName) && accountKey.equals(lastAccountKey)) {
+                    final long span = (lastEventTime - eventTime) / 1000;
+                    pw.printf("  %02d:%02d\n", span / 60, span % 60);
+                } else {
+                    pw.printf(format, accountKey, authorityName);
+                }
+
+                lastAuthorityName = authorityName;
+                lastAccountKey = accountKey;
+                lastEventTime = eventTime;
+
+                if (item.event != SyncStorageEngine.EVENT_STOP
+                        || item.upstreamActivity != 0
+                        || item.downstreamActivity != 0) {
+                    pw.printf("    event=%d upstreamActivity=%d downstreamActivity=%d\n",
+                            item.event,
+                            item.upstreamActivity,
+                            item.downstreamActivity);
+                }
+                if (item.mesg != null
+                        && !SyncStorageEngine.MESG_SUCCESS.equals(item.mesg)) {
+                    pw.printf("    mesg=%s\n", item.mesg);
+                }
+            }
+        }
+    }
+
+    private void dumpDayStatistics(PrintWriter pw) {
         SyncStorageEngine.DayStats dses[] = mSyncStorageEngine.getDayStatistics();
         if (dses != null && dses[0] != null) {
             pw.println();
@@ -1254,47 +1445,26 @@ public class SyncManager implements OnAccountsUpdateListener {
                 }
             }
         }
+    }
 
-        ArrayList<SyncStorageEngine.SyncHistoryItem> items
-                = mSyncStorageEngine.getSyncHistory();
-        if (items != null && items.size() > 0) {
-            pw.println();
-            pw.println("Recent Sync History");
-            final int N = items.size();
-            for (int i=0; i<N; i++) {
-                SyncStorageEngine.SyncHistoryItem item = items.get(i);
-                SyncStorageEngine.AuthorityInfo authority
-                        = mSyncStorageEngine.getAuthority(item.authorityId);
-                pw.print("  #"); pw.print(i+1); pw.print(": ");
-                        if (authority != null) {
-                            pw.print(authority.account.name);
-                            pw.print(":");
-                            pw.print(authority.account.type);
-                            pw.print(" ");
-                            pw.print(authority.authority);
-                        } else {
-                            pw.print("<no account>");
-                        }
-                Time time = new Time();
-                time.set(item.eventTime);
-                pw.print(" "); pw.print(SyncStorageEngine.SOURCES[item.source]);
-                        pw.print(" @ ");
-                        pw.print(formatTime(item.eventTime));
-                        pw.print(" for ");
-                        dumpTimeSec(pw, item.elapsedTime);
-                        pw.println();
-                if (item.event != SyncStorageEngine.EVENT_STOP
-                        || item.upstreamActivity !=0
-                        || item.downstreamActivity != 0) {
-                    pw.print("    event="); pw.print(item.event);
-                            pw.print(" upstreamActivity="); pw.print(item.upstreamActivity);
-                            pw.print(" downstreamActivity="); pw.println(item.downstreamActivity);
-                }
-                if (item.mesg != null
-                        && !SyncStorageEngine.MESG_SUCCESS.equals(item.mesg)) {
-                    pw.print("    mesg="); pw.println(item.mesg);
-                }
-            }
+    private static class AuthoritySyncStats {
+        String name;
+        long elapsedTime;
+        int times;
+        Map<String, AccountSyncStats> accountMap = Maps.newHashMap();
+
+        private AuthoritySyncStats(String name) {
+            this.name = name;
+        }
+    }
+
+    private static class AccountSyncStats {
+        String name;
+        long elapsedTime;
+        int times;
+
+        private AccountSyncStats(String name) {
+            this.name = name;
         }
     }
 
