@@ -20,14 +20,15 @@ import android.os.Bundle;
 import android.net.http.SslError;
 
 /**
- * A simple class to store the wrong certificates that user is aware but
- * chose to proceed.
+ * Stores the user's decision of whether to allow or deny an invalid certificate.
+ *
+ * This class is not threadsafe. It is used only on the WebCore thread.
  */
 final class SslCertLookupTable {
     private static SslCertLookupTable sTable;
     private final Bundle table;
 
-    public static synchronized SslCertLookupTable getInstance() {
+    public static SslCertLookupTable getInstance() {
         if (sTable == null) {
             sTable = new SslCertLookupTable();
         }
@@ -38,15 +39,11 @@ final class SslCertLookupTable {
         table = new Bundle();
     }
 
-    public void Allow(SslError ssl_error) {
-        table.putBoolean(ssl_error.toString(), true);
+    public void setIsAllowed(SslError sslError, boolean allow) {
+        table.putBoolean(sslError.toString(), allow);
     }
 
-    public void Deny(SslError ssl_error) {
-        table.putBoolean(ssl_error.toString(), false);
-    }
-
-    public boolean IsAllowed(SslError ssl_error) {
-        return table.getBoolean(ssl_error.toString());
+    public boolean isAllowed(SslError sslError) {
+        return table.getBoolean(sslError.toString());
     }
 }
