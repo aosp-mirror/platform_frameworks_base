@@ -219,6 +219,23 @@ public abstract class AbstractProxyTest extends TestCase {
         assertEquals("GET /bar HTTP/1.1", recordedRequest.getRequestLine());
     }
 
+    // http://b/5372438
+    public void testRetryWithProxy() throws Exception {
+        server.enqueue(new MockResponse()
+                .setSocketPolicy(SocketPolicy.DISCONNECT_AT_START));
+        server.play();
+
+        HttpClient httpProxyClient = newHttpClient();
+        HttpGet request = new HttpGet("http://android.com/foo");
+        ProxyConfig.REQUEST_PARAMETER.configure(server, httpProxyClient, request);
+
+        try {
+            httpProxyClient.execute(request);
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
     enum ProxyConfig {
         PROXY_SYSTEM_PROPERTY() {
             @Override void configure(MockWebServer server, HttpClient client, HttpRequest request) {
