@@ -3380,7 +3380,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 Uri packageUri = Uri.fromFile(apkFile);
                 mInstallObserver.reset();
                 mPackageManager.installPackage(packageUri, mInstallObserver,
-                        PackageManager.INSTALL_REPLACE_EXISTING, installerPackage);
+                        PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
+                        installerPackage);
                 mInstallObserver.waitForCompletion();
 
                 if (mInstallObserver.getResult() != PackageManager.INSTALL_SUCCEEDED) {
