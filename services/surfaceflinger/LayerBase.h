@@ -221,6 +221,7 @@ public:
     inline  State&          currentState()          { return mCurrentState; }
 
     int32_t  getOrientation() const { return mOrientation; }
+    int32_t  getPlaneOrientation() const { return mPlaneOrientation; }
     
 protected:
     const GraphicPlane& graphicPlane(int dpy) const;
@@ -254,6 +255,7 @@ private:
 protected:
                 // cached during validateVisibility()
                 int32_t         mOrientation;
+                int32_t         mPlaneOrientation;
                 Transform       mTransform;
                 GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;

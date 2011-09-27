@@ -578,7 +578,7 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
 uint32_t Layer::getTransformHint() const {
     uint32_t orientation = 0;
     if (!mFlinger->mDebugDisableTransformHint) {
-        orientation = getOrientation();
+        orientation = getPlaneOrientation();
         if (orientation & Transform::ROT_INVALID) {
             orientation = 0;
         }

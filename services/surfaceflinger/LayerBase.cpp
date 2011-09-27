@@ -45,6 +45,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mFlinger(flinger), mFiltering(false),
       mNeedsFiltering(false), mInOverlay(false),
       mOrientation(0),
+      mPlaneOrientation(0),
       mTransactionFlags(0),
       mPremultipliedAlpha(true), mName("unnamed"), mDebug(false),
       mInvalidate(0)
@@ -256,6 +257,7 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
 
     // cache a few things...
     mOrientation = tr.getOrientation();
+    mPlaneOrientation = planeTransform.getOrientation();
     mTransform = tr;
     mTransformedBounds = tr.makeBounds(w, h);
 }
