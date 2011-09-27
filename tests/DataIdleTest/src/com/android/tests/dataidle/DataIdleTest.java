@@ -89,18 +89,27 @@ public class DataIdleTest extends InstrumentationTestCase {
         Bundle result = new Bundle();
         long rxBytes = 0;
         long txBytes = 0;
+        long rxPackets = 0;
+        long txPackets = 0;
         for (int i = 0; i < stats.size(); ++i) {
             // Label will be iface_uid_tag_set
             Entry  statsEntry = stats.getValues(i, null);
+            // Debugging use.
+            /*
             String labelTemplate = String.format("%s_%d_%d_%d", statsEntry.iface, statsEntry.uid,
                     statsEntry.tag, statsEntry.set) + "_%s";
             result.putLong(String.format(labelTemplate, "rxBytes"), statsEntry.rxBytes);
             result.putLong(String.format(labelTemplate, "txBytes"), statsEntry.txBytes);
+            */
+            rxPackets += statsEntry.rxPackets;
             rxBytes += statsEntry.rxBytes;
+            txPackets += statsEntry.txPackets;
             txBytes += statsEntry.txBytes;
         }
-        result.putLong("Total rxBytes", rxBytes);
-        result.putLong("Total txBytes", txBytes);
+        result.putLong("Total rx Bytes", rxBytes);
+        result.putLong("Total tx Bytes", txBytes);
+        result.putLong("Total rx Packets", rxPackets);
+        result.putLong("Total tx Packets", txPackets);
         getInstrumentation().sendStatus(INSTRUMENTATION_IN_PROGRESS, result);
 
     }
