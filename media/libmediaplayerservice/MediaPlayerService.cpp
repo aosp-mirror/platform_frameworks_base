@@ -52,6 +52,7 @@
 #include <media/Metadata.h>
 #include <media/AudioTrack.h>
 #include <media/MemoryLeakTrackUtil.h>
+#include <media/stagefright/MediaErrors.h>
 
 #include <system/audio.h>
 
@@ -1165,7 +1166,11 @@ sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, i
     player->start();
 
     LOGV("wait for playback complete");
-    if (cache->wait() != NO_ERROR) goto Exit;
+    cache->wait();
+    // in case of error, return what was successfully decoded.
+    if (cache->size() == 0) {
+        goto Exit;
+    }
 
     mem = new MemoryBase(cache->getHeap(), 0, cache->size());
     *pSampleRate = cache->sampleRate();
@@ -1208,7 +1213,11 @@ sp<IMemory> MediaPlayerService::decode(int fd, int64_t offset, int64_t length, u
     player->start();
 
     LOGV("wait for playback complete");
-    if (cache->wait() != NO_ERROR) goto Exit;
+    cache->wait();
+    // in case of error, return what was successfully decoded.
+    if (cache->size() == 0) {
+        goto Exit;
+    }
 
     mem = new MemoryBase(cache->getHeap(), 0, cache->size());
     *pSampleRate = cache->sampleRate();
