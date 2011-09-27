@@ -58,6 +58,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private static final int CARRIER_HELP_TEXT = 12;
     private static final int HELP_MESSAGE_TEXT = 13;
     private static final int OWNER_INFO = 14;
+    private static final int BATTERY_INFO = 15;
 
     private StatusMode mStatus;
     private String mDateFormatString;
@@ -84,6 +85,9 @@ class KeyguardStatusViewManager implements OnClickListener {
     // last known battery level
     private int mBatteryLevel = 100;
 
+    // last known SIM state
+    protected State mSimState;
+
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mUpdateMonitor;
     private Button mEmergencyCallButton;
@@ -98,6 +102,8 @@ class KeyguardStatusViewManager implements OnClickListener {
     private boolean mShowingStatus;
     private KeyguardScreenCallback mCallback;
     private final boolean mShowEmergencyButtonByDefault;
+    private CharSequence mPlmn;
+    private CharSequence mSpn;
 
     private class TransientTextManager {
         private TextView mTextView;
@@ -151,6 +157,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     public KeyguardStatusViewManager(View view, KeyguardUpdateMonitor updateMonitor,
                 LockPatternUtils lockPatternUtils, KeyguardScreenCallback callback,
                 boolean showEmergencyButtonByDefault) {
+        if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         mLockPatternUtils = lockPatternUtils;
@@ -165,6 +172,12 @@ class KeyguardStatusViewManager implements OnClickListener {
         mTransportView = (TransportControlView) findViewById(R.id.transport);
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mShowEmergencyButtonByDefault = showEmergencyButtonByDefault;
+
+        // Hide transport control view until we know we need to show it.
+        if (mTransportView != null) {
+            mTransportView.setVisibility(View.GONE);
+        }
+
         if (mEmergencyCallButton != null) {
             mEmergencyCallButton.setText(R.string.lockscreen_emergency_call);
             mEmergencyCallButton.setOnClickListener(this);
@@ -172,8 +185,6 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
 
         mTransientTextManager = new TransientTextManager(mCarrierView);
-
-        updateEmergencyCallButtonState();
 
         resetStatusInfo();
         refreshDate();
@@ -187,10 +198,6 @@ class KeyguardStatusViewManager implements OnClickListener {
                 v.setSelected(true);
             }
         }
-
-        // until we get an update...
-        setCarrierText(LockPatternUtils.getCarrierString(
-                mUpdateMonitor.getTelephonyPlmn(), mUpdateMonitor.getTelephonySpn()));
     }
 
     private boolean inWidgetMode() {
@@ -248,6 +255,7 @@ class KeyguardStatusViewManager implements OnClickListener {
                 case INSTRUCTION_TEXT:
                 case CARRIER_HELP_TEXT:
                 case HELP_MESSAGE_TEXT:
+                case BATTERY_INFO:
                     mTransientTextManager.post(string, 0, INSTRUCTION_RESET_DELAY);
                     break;
 
@@ -262,15 +270,16 @@ class KeyguardStatusViewManager implements OnClickListener {
     }
 
     public void onPause() {
+        if (DEBUG) Log.v(TAG, "onPause()");
         mUpdateMonitor.removeCallback(mInfoCallback);
         mUpdateMonitor.removeCallback(mSimStateCallback);
     }
 
     /** {@inheritDoc} */
     public void onResume() {
+        if (DEBUG) Log.v(TAG, "onResume()");
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
         mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
-        updateEmergencyCallButtonState();
         resetStatusInfo();
     }
 
@@ -399,7 +408,12 @@ class KeyguardStatusViewManager implements OnClickListener {
      * Determine the current status of the lock screen given the sim state and other stuff.
      */
     public StatusMode getStatusForIccState(IccCard.State simState) {
-        boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
+        // Since reading the SIM may take a while, we assume it is present until told otherwise.
+        if (simState == null) {
+            return StatusMode.Normal;
+        }
+
+        final boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
                 && (simState == IccCard.State.ABSENT || simState == IccCard.State.PERM_DISABLED));
 
         // Assume we're NETWORK_LOCKED if not provisioned
@@ -435,22 +449,21 @@ class KeyguardStatusViewManager implements OnClickListener {
      *
      * @param simState
      */
-    private void updateWithSimStatus(State simState) {
-        // The emergency call button no longer appears on this screen.
-        if (DEBUG) Log.d(TAG, "updateLayout: status=" + mStatus);
+    private void updateCarrierTextWithSimStatus(State simState) {
+        if (DEBUG) Log.d(TAG, "updateCarrierTextWithSimStatus(), simState = " + simState);
 
         CharSequence carrierText = null;
         int carrierHelpTextId = 0;
         mUnlockDisabledDueToSimState = false;
         mStatus = getStatusForIccState(simState);
+        mSimState = simState;
         switch (mStatus) {
             case Normal:
-                carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
-                        mUpdateMonitor.getTelephonySpn());
+                carrierText = makeCarierString(mPlmn, mSpn);
                 break;
 
             case NetworkLocked:
-                carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
+                carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_network_locked_message));
                 carrierHelpTextId = R.string.lockscreen_instructions_when_pattern_disabled;
                 break;
@@ -467,19 +480,19 @@ class KeyguardStatusViewManager implements OnClickListener {
                 break;
 
             case SimMissingLocked:
-                carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
+                carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_missing_sim_message_short));
                 carrierHelpTextId = R.string.lockscreen_missing_sim_instructions;
                 mUnlockDisabledDueToSimState = true;
                 break;
 
             case SimLocked:
-                carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
+                carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_sim_locked_message));
                 break;
 
             case SimPukLocked:
-                carrierText = LockPatternUtils.getCarrierString(mUpdateMonitor.getTelephonyPlmn(),
+                carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_sim_puk_locked_message));
                 if (!mLockPatternUtils.isPukUnlockScreenEnable()) {
                     mUnlockDisabledDueToSimState = true;
@@ -489,7 +502,6 @@ class KeyguardStatusViewManager implements OnClickListener {
 
         setCarrierText(carrierText);
         setCarrierHelpText(carrierHelpTextId);
-        updateEmergencyCallButtonState();
     }
 
     private View findViewById(int id) {
@@ -552,10 +564,11 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
     }
 
-    private void updateEmergencyCallButtonState() {
+    private void updateEmergencyCallButtonState(int phoneState) {
         if (mEmergencyCallButton != null) {
             boolean showIfCapable = mShowEmergencyButtonByDefault || mUnlockDisabledDueToSimState;
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton, showIfCapable);
+            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton,
+                    phoneState, showIfCapable);
         }
     }
 
@@ -567,7 +580,8 @@ class KeyguardStatusViewManager implements OnClickListener {
             mShowingBatteryInfo = showBatteryInfo;
             mPluggedIn = pluggedIn;
             mBatteryLevel = batteryLevel;
-            updateStatusLines(true);
+            final MutableInt tmpIcon = new MutableInt(0);
+            update(BATTERY_INFO, getAltTextMessage(tmpIcon));
         }
 
         public void onTimeChanged() {
@@ -575,15 +589,17 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
 
         public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-            setCarrierText(LockPatternUtils.getCarrierString(plmn, spn));
+            mPlmn = plmn;
+            mSpn = spn;
+            updateCarrierTextWithSimStatus(mSimState);
         }
 
         public void onRingerModeChanged(int state) {
 
         }
 
-        public void onPhoneStateChanged(String newState) {
-            updateEmergencyCallButtonState();
+        public void onPhoneStateChanged(int phoneState) {
+            updateEmergencyCallButtonState(phoneState);
         }
 
         /** {@inheritDoc} */
@@ -595,13 +611,31 @@ class KeyguardStatusViewManager implements OnClickListener {
     private SimStateCallback mSimStateCallback = new SimStateCallback() {
 
         public void onSimStateChanged(State simState) {
-            updateWithSimStatus(simState);
+            updateCarrierTextWithSimStatus(simState);
         }
     };
 
     public void onClick(View v) {
         if (v == mEmergencyCallButton) {
             mCallback.takeEmergencyCallAction();
+        }
+    }
+
+    /**
+     * Performs concentenation of PLMN/SPN
+     * @param plmn
+     * @param spn
+     * @return
+     */
+    private static CharSequence makeCarierString(CharSequence plmn, CharSequence spn) {
+        if (plmn != null && spn == null) {
+            return plmn;
+        } else if (plmn != null && spn != null) {
+            return plmn + "|" + spn;
+        } else if (plmn == null && spn != null) {
+            return spn;
+        } else {
+            return "";
         }
     }
 }

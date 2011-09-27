@@ -88,6 +88,8 @@ public class KeyguardUpdateMonitor {
     private ArrayList<InfoCallback> mInfoCallbacks = Lists.newArrayList();
     private ArrayList<SimStateCallback> mSimStateCallbacks = Lists.newArrayList();
     private ContentObserver mContentObserver;
+    private int mRingMode;
+    private int mPhoneState;
 
     // messages for the handler
     private static final int MSG_TIME_UPDATE = 301;
@@ -271,13 +273,21 @@ public class KeyguardUpdateMonitor {
 
     protected void handlePhoneStateChanged(String newState) {
         if (DEBUG) Log.d(TAG, "handlePhoneStateChanged(" + newState + ")");
+        if (TelephonyManager.EXTRA_STATE_IDLE.equals(newState)) {
+            mPhoneState = TelephonyManager.CALL_STATE_IDLE;
+        } else if (TelephonyManager.EXTRA_STATE_OFFHOOK.equals(newState)) {
+            mPhoneState = TelephonyManager.CALL_STATE_OFFHOOK;
+        } else if (TelephonyManager.EXTRA_STATE_RINGING.equals(newState)) {
+            mPhoneState = TelephonyManager.CALL_STATE_RINGING;
+        }
         for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onPhoneStateChanged(newState);
+            mInfoCallbacks.get(i).onPhoneStateChanged(mPhoneState);
         }
     }
 
     protected void handleRingerModeChange(int mode) {
         if (DEBUG) Log.d(TAG, "handleRingerModeChange(" + mode + ")");
+        mRingMode = mode;
         for (int i = 0; i < mInfoCallbacks.size(); i++) {
             mInfoCallbacks.get(i).onRingerModeChanged(mode);
         }
@@ -459,7 +469,7 @@ public class KeyguardUpdateMonitor {
          * {@link TelephonyManager@EXTRA_STATE_RINGING}
          * {@link TelephonyManager#EXTRA_STATE_OFFHOOK
          */
-        void onPhoneStateChanged(String newState);
+        void onPhoneStateChanged(int phoneState);
 
         /**
          * Called when visibility of lockscreen clock changes, such as when
@@ -484,8 +494,12 @@ public class KeyguardUpdateMonitor {
     public void registerInfoCallback(InfoCallback callback) {
         if (!mInfoCallbacks.contains(callback)) {
             mInfoCallbacks.add(callback);
-            // notify the register the current state right away
-            // TODO: need call other callback methods
+            // Notify listener of the current state
+            callback.onRefreshBatteryInfo(shouldShowBatteryInfo(), isPluggedIn(mBatteryStatus),
+                    mBatteryLevel);
+            callback.onTimeChanged();
+            callback.onRingerModeChanged(mRingMode);
+            callback.onPhoneStateChanged(mPhoneState);
             callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         } else {
             if (DEBUG) Log.e(TAG, "Object tried to add another INFO callback",
@@ -500,9 +514,7 @@ public class KeyguardUpdateMonitor {
     public void registerSimStateCallback(SimStateCallback callback) {
         if (!mSimStateCallbacks.contains(callback)) {
             mSimStateCallbacks.add(callback);
-            // notify the register the current sim state right away,
-            // otherwise the register won't receive any state until
-            // sim state gets changed again.
+            // Notify listener of the current state
             callback.onSimStateChanged(mSimState);
         } else {
             if (DEBUG) Log.e(TAG, "Object tried to add another SIM callback",

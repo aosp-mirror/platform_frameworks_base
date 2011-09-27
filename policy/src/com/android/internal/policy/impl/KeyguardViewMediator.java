@@ -766,7 +766,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         // Don't play lockscreen SFX if the screen went off due to
                         // timeout.
                         mSuppressNextLockSound = true;
-    
+
                         doKeyguardLocked();
                     }
                 }
@@ -777,7 +777,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)  // call ending
                             && !mScreenOn                           // screen off
                             && mExternallyEnabled) {                // not disabled by any app
-    
+
                         // note: this is a way to gracefully reenable the keyguard when the call
                         // ends and the screen is off without always reenabling the keyguard
                         // each time the screen turns off while in call (and having an occasional ugly
@@ -1270,7 +1270,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /** {@inheritDoc} */
-    public void onPhoneStateChanged(String newState) {
+    public void onPhoneStateChanged(int phoneState) {
         // ignored
     }
 
