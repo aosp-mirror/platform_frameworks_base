@@ -905,11 +905,9 @@ class CallbackProxy extends Handler {
     */
 
     public void onPageStarted(String url, Bitmap favicon) {
-        // Do an unsynchronized quick check to avoid posting if no callback has
-        // been set.
-        if (mWebViewClient == null) {
-            return;
-        }
+        // We need to send the message even if no WebViewClient is set, because we need to call
+        // WebView.onPageStarted().
+
         // Performance probe
         if (PERF_PROBE) {
             mWebCoreThreadTime = SystemClock.currentThreadTimeMillis();
