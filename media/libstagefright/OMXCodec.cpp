@@ -1635,7 +1635,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return err;
     }
 
-    CODEC_LOGI("allocating %lu buffers of size %lu on %s port",
+    CODEC_LOGV("allocating %lu buffers of size %lu on %s port",
             def.nBufferCountActual, def.nBufferSize,
             portIndex == kPortIndexInput ? "input" : "output");
 
@@ -1876,7 +1876,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         return err;
     }
 
-    CODEC_LOGI("allocating %lu buffers from a native window of size %lu on "
+    CODEC_LOGV("allocating %lu buffers from a native window of size %lu on "
             "output port", def.nBufferCountActual, def.nBufferSize);
 
     // Dequeue buffers and send them to OMX
@@ -3654,7 +3654,7 @@ status_t OMXCodec::stop() {
 
     mSource->stop();
 
-    CODEC_LOGI("stopped in state %d", mState);
+    CODEC_LOGV("stopped in state %d", mState);
 
     return OK;
 }
@@ -4219,14 +4219,14 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                 inputFormat->findInt32(kKeySampleRate, &sampleRate);
 
                 if ((OMX_U32)numChannels != params.nChannels) {
-                    LOGW("Codec outputs a different number of channels than "
+                    LOGV("Codec outputs a different number of channels than "
                          "the input stream contains (contains %d channels, "
                          "codec outputs %ld channels).",
                          numChannels, params.nChannels);
                 }
 
                 if (sampleRate != (int32_t)params.nSamplingRate) {
-                    LOGW("Codec outputs at different sampling rate than "
+                    LOGV("Codec outputs at different sampling rate than "
                          "what the input stream contains (contains data at "
                          "%d Hz, codec outputs %lu Hz)",
                          sampleRate, params.nSamplingRate);

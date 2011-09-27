@@ -249,7 +249,7 @@ void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
 }
 
 void AwesomePlayer::setUID(uid_t uid) {
-    LOGI("AwesomePlayer running on behalf of uid %d", uid);
+    LOGV("AwesomePlayer running on behalf of uid %d", uid);
 
     mUID = uid;
     mUIDValid = true;
@@ -362,7 +362,7 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         if (!meta->findInt32(kKeyBitRate, &bitrate)) {
             const char *mime;
             CHECK(meta->findCString(kKeyMIMEType, &mime));
-            LOGW("track of type '%s' does not publish bitrate", mime);
+            LOGV("track of type '%s' does not publish bitrate", mime);
 
             totalBitRate = -1;
             break;
@@ -1192,7 +1192,7 @@ void AwesomePlayer::shutdownVideoDecoder_l() {
         usleep(1000);
     }
     IPCThreadState::self()->flushCommands();
-    LOGI("video decoder shutdown completed");
+    LOGV("video decoder shutdown completed");
 }
 
 status_t AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
@@ -1202,7 +1202,7 @@ status_t AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
         return OK;
     }
 
-    LOGI("attempting to reconfigure to use new surface");
+    LOGV("attempting to reconfigure to use new surface");
 
     bool wasPlaying = (mFlags & PLAYING) != 0;
 
