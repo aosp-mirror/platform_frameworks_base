@@ -402,30 +402,6 @@ static jint android_net_wifi_getRssiHelper(const char *cmd)
     return (jint)rssi;
 }
 
-static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject)
-{
-    return android_net_wifi_getRssiHelper("DRIVER RSSI");
-}
-
-static jint android_net_wifi_getRssiApproxCommand(JNIEnv* env, jobject)
-{
-    return android_net_wifi_getRssiHelper("DRIVER RSSI-APPROX");
-}
-
-static jint android_net_wifi_getLinkSpeedCommand(JNIEnv* env, jobject)
-{
-    char reply[BUF_SIZE];
-    int linkspeed;
-
-    if (doCommand("DRIVER LINKSPEED", reply, sizeof(reply)) != 0) {
-        return (jint)-1;
-    }
-    // reply comes back in the form "LinkSpeed XX" where XX is the
-    // number we're interested in.
-    sscanf(reply, "%*s %u", &linkspeed);
-    return (jint)linkspeed;
-}
-
 static jstring android_net_wifi_getMacAddressCommand(JNIEnv* env, jobject)
 {
     char reply[BUF_SIZE];
@@ -625,10 +601,6 @@ static JNINativeMethod gWifiMethods[] = {
     		(void*) android_net_wifi_setBluetoothCoexistenceModeCommand },
     { "setBluetoothCoexistenceScanModeCommand", "(Z)Z",
     		(void*) android_net_wifi_setBluetoothCoexistenceScanModeCommand },
-    { "getRssiCommand", "()I", (void*) android_net_wifi_getRssiCommand },
-    { "getRssiApproxCommand", "()I",
-            (void*) android_net_wifi_getRssiApproxCommand},
-    { "getLinkSpeedCommand", "()I", (void*) android_net_wifi_getLinkSpeedCommand },
     { "getMacAddressCommand", "()Ljava/lang/String;", (void*) android_net_wifi_getMacAddressCommand },
     { "saveConfigCommand", "()Z", (void*) android_net_wifi_saveConfigCommand },
     { "reloadConfigCommand", "()Z", (void*) android_net_wifi_reloadConfigCommand },
