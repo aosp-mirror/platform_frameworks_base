@@ -208,7 +208,9 @@ public final class NfcAdapter {
     final NfcActivityManager mNfcActivityManager;
 
     /**
-     * @see {@link #setNdefPushMessageCallback}
+     * A callback to be invoked when the system successfully delivers your {@link NdefMessage}
+     * to another device.
+     * @see #setOnNdefPushCompleteCallback
      */
     public interface OnNdefPushCompleteCallback {
         /**
@@ -217,13 +219,21 @@ public final class NfcAdapter {
          * <p>This callback is usually made on a binder thread (not the UI thread).
          *
          * @param event {@link NfcEvent} with the {@link NfcEvent#nfcAdapter} field set
-         * @see {@link #setNdefPushMessageCallback}
+         * @see #setNdefPushMessageCallback
          */
         public void onNdefPushComplete(NfcEvent event);
     }
 
     /**
-     * @see {@link #setCeateNdefMessageCallback}
+     * A callback to be invoked when another NFC device capable of NDEF push (Android Beam)
+     * is within range.
+     * <p>Implement this interface and pass it to {@link
+     * NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback()} in order to create an
+     * {@link NdefMessage} at the moment that another device is within range for NFC. Using this
+     * callback allows you to create a message with data that might vary based on the
+     * content currently visible to the user. Alternatively, you can call {@link
+     * #setNdefPushMessage setNdefPushMessage()} if the {@link NdefMessage} always contains the
+     * same data.
      */
     public interface CreateNdefMessageCallback {
         /**
@@ -507,13 +517,15 @@ public final class NfcAdapter {
      * <p>Pass a null NDEF message to disable foreground NDEF push in the
      * specified activities.
      *
-     * <p>One or more activities must be specified.
+     * <p>At least one activity must be specified, and usually only one is necessary.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param message NDEF message to push over NFC, or null to disable
-     * @param activity an activity to enable for NDEF push (at least one is required)
-     * @param activities zero or more additional activities to enable for NDEF Push
+     * @param activity an activity in which NDEF push should be enabled to share the provided
+     *                 NDEF message
+     * @param activities optional additional activities that should also enable NDEF push with
+     *                   the provided NDEF message
      */
     public void setNdefPushMessage(NdefMessage message, Activity activity,
             Activity ... activities) {
@@ -544,13 +556,15 @@ public final class NfcAdapter {
      * <p>Pass a null callback to disable the callback in the
      * specified activities.
      *
-     * <p>One or more activities must be specified.
+     * <p>At least one activity must be specified, and usually only one is necessary.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param callback callback, or null to disable
-     * @param activity an activity to enable for NDEF push (at least one is required)
-     * @param activities zero or more additional activities to enable for NDEF Push
+     * @param activity an activity in which NDEF push should be enabled to share an NDEF message
+     *                 that's retrieved from the provided callback
+     * @param activities optional additional activities that should also enable NDEF push using
+     *                   the provided callback
      */
     public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
             Activity ... activities) {
