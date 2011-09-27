@@ -81,10 +81,8 @@ public final class SipService extends ISipService.Stub {
     private String mNetworkType;
     private boolean mConnected;
     private SipWakeupTimer mTimer;
-    private WifiScanProcess mWifiScanProcess;
     private WifiManager.WifiLock mWifiLock;
-    private boolean mWifiOnly;
-    private BroadcastReceiver mWifiStateReceiver = null;
+    private boolean mSipOnWifiOnly;
 
     private IntervalMeasurementProcess mIntervalMeasurementProcess;
 
@@ -99,7 +97,6 @@ public final class SipService extends ISipService.Stub {
             new HashMap<String, ISipSession>();
 
     private ConnectivityReceiver mConnectivityReceiver;
-    private boolean mWifiEnabled;
     private SipWakeLock mMyWakeLock;
     private int mKeepAliveInterval;
     private int mLastGoodKeepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
@@ -120,55 +117,17 @@ public final class SipService extends ISipService.Stub {
         if (DEBUG) Log.d(TAG, " service started!");
         mContext = context;
         mConnectivityReceiver = new ConnectivityReceiver();
+
+        mWifiLock = ((WifiManager)
+                context.getSystemService(Context.WIFI_SERVICE))
+                .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
+        mWifiLock.setReferenceCounted(false);
+        mSipOnWifiOnly = SipManager.isSipWifiOnly(context);
+
         mMyWakeLock = new SipWakeLock((PowerManager)
                 context.getSystemService(Context.POWER_SERVICE));
 
         mTimer = new SipWakeupTimer(context, mExecutor);
-        mWifiOnly = SipManager.isSipWifiOnly(context);
-    }
-
-    private BroadcastReceiver createWifiBroadcastReceiver() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
-                    int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                            WifiManager.WIFI_STATE_UNKNOWN);
-                    synchronized (SipService.this) {
-                        switch (state) {
-                            case WifiManager.WIFI_STATE_ENABLED:
-                                mWifiEnabled = true;
-                                if (anyOpenedToReceiveCalls()) grabWifiLock();
-                                break;
-                            case WifiManager.WIFI_STATE_DISABLED:
-                                mWifiEnabled = false;
-                                releaseWifiLock();
-                                break;
-                        }
-                    }
-                }
-            }
-        };
-    };
-
-    private void registerReceivers() {
-        mContext.registerReceiver(mConnectivityReceiver,
-                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        if (SipManager.isSipWifiOnly(mContext)) {
-            mWifiStateReceiver = createWifiBroadcastReceiver();
-            mContext.registerReceiver(mWifiStateReceiver,
-                    new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
-        }
-        if (DEBUG) Log.d(TAG, " +++ register receivers");
-    }
-
-    private void unregisterReceivers() {
-        mContext.unregisterReceiver(mConnectivityReceiver);
-        if (SipManager.isSipWifiOnly(mContext)) {
-            mContext.unregisterReceiver(mWifiStateReceiver);
-        }
-        if (DEBUG) Log.d(TAG, " --- unregister receivers");
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
@@ -218,7 +177,6 @@ public final class SipService extends ISipService.Stub {
             if (addingFirstProfile && !mSipGroups.isEmpty()) registerReceivers();
             if (localProfile.getAutoRegistration()) {
                 group.openToReceiveCalls();
-                if (mWifiEnabled) grabWifiLock();
             }
         } catch (SipException e) {
             Log.e(TAG, "openToReceiveCalls()", e);
@@ -254,10 +212,9 @@ public final class SipService extends ISipService.Stub {
         group.close();
 
         if (!anyOpenedToReceiveCalls()) {
-            releaseWifiLock();
+            unregisterReceivers();
             mMyWakeLock.reset(); // in case there's leak
         }
-        if (mSipGroups.isEmpty()) unregisterReceivers();
     }
 
     public synchronized boolean isOpened(String localProfileUri) {
@@ -386,83 +343,6 @@ public final class SipService extends ISipService.Stub {
             if (group.isOpenedToReceiveCalls()) return true;
         }
         return false;
-    }
-
-    private void grabWifiLock() {
-        if (mWifiLock == null) {
-            if (DEBUG) Log.d(TAG, "acquire wifi lock");
-            mWifiLock = ((WifiManager)
-                    mContext.getSystemService(Context.WIFI_SERVICE))
-                    .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
-            mWifiLock.acquire();
-            if (!mConnected) startWifiScanner();
-        }
-    }
-
-    private void releaseWifiLock() {
-        if (mWifiLock != null) {
-            if (DEBUG) Log.d(TAG, "release wifi lock");
-            mWifiLock.release();
-            mWifiLock = null;
-            stopWifiScanner();
-        }
-    }
-
-    private synchronized void startWifiScanner() {
-        if (mWifiScanProcess == null) {
-            mWifiScanProcess = new WifiScanProcess();
-        }
-        mWifiScanProcess.start();
-    }
-
-    private synchronized void stopWifiScanner() {
-        if (mWifiScanProcess != null) {
-            mWifiScanProcess.stop();
-        }
-    }
-
-    private synchronized void onConnectivityChanged(
-            String type, boolean connected) {
-        if (DEBUG) Log.d(TAG, "onConnectivityChanged(): "
-                + mNetworkType + (mConnected? " CONNECTED" : " DISCONNECTED")
-                + " --> " + type + (connected? " CONNECTED" : " DISCONNECTED"));
-
-        boolean sameType = type.equals(mNetworkType);
-        if (!sameType && !connected) return;
-
-        boolean wasWifi = "WIFI".equalsIgnoreCase(mNetworkType);
-        boolean isWifi = "WIFI".equalsIgnoreCase(type);
-        boolean wifiOff = (isWifi && !connected) || (wasWifi && !sameType);
-        boolean wifiOn = isWifi && connected;
-
-        try {
-            boolean wasConnected = mConnected;
-            mNetworkType = type;
-            mConnected = connected;
-
-            if (wasConnected) {
-                mLocalIp = null;
-                stopPortMappingMeasurement();
-                for (SipSessionGroupExt group : mSipGroups.values()) {
-                    group.onConnectivityChanged(false);
-                }
-            }
-
-            if (connected) {
-                mLocalIp = determineLocalIp();
-                mKeepAliveInterval = -1;
-                mLastGoodKeepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
-                for (SipSessionGroupExt group : mSipGroups.values()) {
-                    group.onConnectivityChanged(true);
-                }
-                if (isWifi && (mWifiLock != null)) stopWifiScanner();
-            } else {
-                mMyWakeLock.reset(); // in case there's a leak
-                if (isWifi && (mWifiLock != null)) startWifiScanner();
-            }
-        } catch (SipException e) {
-            Log.e(TAG, "onConnectivityChanged()", e);
-        }
     }
 
     private void stopPortMappingMeasurement() {
@@ -744,36 +624,6 @@ public final class SipService extends ISipService.Stub {
 
         private String getUri() {
             return mSipGroup.getLocalProfileUri();
-        }
-    }
-
-    private class WifiScanProcess implements Runnable {
-        private static final String TAG = "\\WIFI_SCAN/";
-        private static final int INTERVAL = 60;
-        private boolean mRunning = false;
-
-        private WifiManager mWifiManager;
-
-        public void start() {
-            if (mRunning) return;
-            mRunning = true;
-            mTimer.set(INTERVAL * 1000, this);
-        }
-
-        WifiScanProcess() {
-            mWifiManager = (WifiManager)
-                    mContext.getSystemService(Context.WIFI_SERVICE);
-        }
-
-        public void run() {
-            // scan and associate now
-            if (DEBUGV) Log.v(TAG, "just wake up here for wifi scanning...");
-            mWifiManager.startScanActive();
-        }
-
-        public void stop() {
-            mRunning = false;
-            mTimer.cancel(this);
         }
     }
 
@@ -1254,138 +1104,103 @@ public final class SipService extends ISipService.Stub {
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
-        private Timer mTimer = new Timer();
-        private MyTimerTask mTask;
-
         @Override
-        public void onReceive(final Context context, final Intent intent) {
-            // Run the handler in MyExecutor to be protected by wake lock
-            mExecutor.execute(new Runnable() {
-                public void run() {
-                    onReceiveInternal(context, intent);
-                }
-            });
-        }
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                final NetworkInfo info = (NetworkInfo)
+                        bundle.get(ConnectivityManager.EXTRA_NETWORK_INFO);
 
-        private void onReceiveInternal(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                Bundle b = intent.getExtras();
-                if (b != null) {
-                    NetworkInfo netInfo = (NetworkInfo)
-                            b.get(ConnectivityManager.EXTRA_NETWORK_INFO);
-                    String type = netInfo.getTypeName();
-                    NetworkInfo.State state = netInfo.getState();
-
-                    if (mWifiOnly && (netInfo.getType() !=
-                            ConnectivityManager.TYPE_WIFI)) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Wifi only, other connectivity ignored: "
-                                    + type);
-                        }
-                        return;
-                    }
-
-                    NetworkInfo activeNetInfo = getActiveNetworkInfo();
-                    if (DEBUG) {
-                        if (activeNetInfo != null) {
-                            Log.d(TAG, "active network: "
-                                    + activeNetInfo.getTypeName()
-                                    + ((activeNetInfo.getState() == NetworkInfo.State.CONNECTED)
-                                            ? " CONNECTED" : " DISCONNECTED"));
-                        } else {
-                            Log.d(TAG, "active network: null");
-                        }
-                    }
-                    if ((state == NetworkInfo.State.CONNECTED)
-                            && (activeNetInfo != null)
-                            && (activeNetInfo.getType() != netInfo.getType())) {
-                        if (DEBUG) Log.d(TAG, "ignore connect event: " + type
-                                + ", active: " + activeNetInfo.getTypeName());
-                        return;
-                    }
-
-                    if (state == NetworkInfo.State.CONNECTED) {
-                        if (DEBUG) Log.d(TAG, "Connectivity alert: CONNECTED " + type);
-                        onChanged(type, true);
-                    } else if (state == NetworkInfo.State.DISCONNECTED) {
-                        if (DEBUG) Log.d(TAG, "Connectivity alert: DISCONNECTED " + type);
-                        onChanged(type, false);
-                    } else {
-                        if (DEBUG) Log.d(TAG, "Connectivity alert not processed: "
-                                + state + " " + type);
-                    }
-                }
-            }
-        }
-
-        private NetworkInfo getActiveNetworkInfo() {
-            ConnectivityManager cm = (ConnectivityManager)
-                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            return cm.getActiveNetworkInfo();
-        }
-
-        private void onChanged(String type, boolean connected) {
-            synchronized (SipService.this) {
-                // When turning on WIFI, it needs some time for network
-                // connectivity to get stabile so we defer good news (because
-                // we want to skip the interim ones) but deliver bad news
-                // immediately
-                if (connected) {
-                    if (mTask != null) {
-                        mTask.cancel();
-                        mMyWakeLock.release(mTask);
-                    }
-                    mTask = new MyTimerTask(type, connected);
-                    mTimer.schedule(mTask, 2 * 1000L);
-                    // hold wakup lock so that we can finish changes before the
-                    // device goes to sleep
-                    mMyWakeLock.acquire(mTask);
-                } else {
-                    if ((mTask != null) && mTask.mNetworkType.equals(type)) {
-                        mTask.cancel();
-                        mMyWakeLock.release(mTask);
-                    }
-                    onConnectivityChanged(type, false);
-                }
-            }
-        }
-
-        private class MyTimerTask extends TimerTask {
-            private boolean mConnected;
-            private String mNetworkType;
-
-            public MyTimerTask(String type, boolean connected) {
-                mNetworkType = type;
-                mConnected = connected;
-            }
-
-            // timeout handler
-            @Override
-            public void run() {
-                // delegate to mExecutor
+                // Run the handler in MyExecutor to be protected by wake lock
                 mExecutor.execute(new Runnable() {
                     public void run() {
-                        realRun();
+                        onConnectivityChanged(info);
                     }
                 });
             }
+        }
+    }
 
-            private void realRun() {
-                synchronized (SipService.this) {
-                    if (mTask != this) {
-                        Log.w(TAG, "  unexpected task: " + mNetworkType
-                                + (mConnected ? " CONNECTED" : "DISCONNECTED"));
-                        mMyWakeLock.release(this);
-                        return;
-                    }
-                    mTask = null;
-                    if (DEBUG) Log.d(TAG, " deliver change for " + mNetworkType
-                            + (mConnected ? " CONNECTED" : "DISCONNECTED"));
-                    onConnectivityChanged(mNetworkType, mConnected);
-                    mMyWakeLock.release(this);
+    private void registerReceivers() {
+        mContext.registerReceiver(mConnectivityReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        if (DEBUG) Log.d(TAG, " +++ register receivers");
+    }
+
+    private void unregisterReceivers() {
+        mContext.unregisterReceiver(mConnectivityReceiver);
+        if (DEBUG) Log.d(TAG, " --- unregister receivers");
+
+        // Reset variables maintained by ConnectivityReceiver.
+        mWifiLock.release();
+        mConnected = false;
+    }
+
+    private synchronized void onConnectivityChanged(NetworkInfo info) {
+        // We only care about the default network, and getActiveNetworkInfo()
+        // is the only way to distinguish them. However, as broadcasts are
+        // delivered asynchronously, we might miss DISCONNECTED events from
+        // getActiveNetworkInfo(), which is critical to our SIP stack. To
+        // solve this, if it is a DISCONNECTED event to our current network,
+        // respect it. Otherwise get a new one from getActiveNetworkInfo().
+        if (info == null || info.isConnected() ||
+                !info.getTypeName().equals(mNetworkType)) {
+            ConnectivityManager cm = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            info = cm.getActiveNetworkInfo();
+        }
+
+        // Some devices limit SIP on Wi-Fi. In this case, if we are not on
+        // Wi-Fi, treat it as a DISCONNECTED event.
+        boolean connected = (info != null && info.isConnected() &&
+                (!mSipOnWifiOnly || info.getType() == ConnectivityManager.TYPE_WIFI));
+        String networkType = connected ? info.getTypeName() : "null";
+
+        // Ignore the event if the current active network is not changed.
+        if (connected == mConnected && networkType.equals(mNetworkType)) {
+            return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "onConnectivityChanged(): " + mNetworkType +
+                    " -> " + networkType);
+        }
+
+        try {
+            if (mConnected) {
+                mLocalIp = null;
+                stopPortMappingMeasurement();
+                for (SipSessionGroupExt group : mSipGroups.values()) {
+                    group.onConnectivityChanged(false);
                 }
             }
+
+            mConnected = connected;
+            mNetworkType = networkType;
+
+            if (connected) {
+                mLocalIp = determineLocalIp();
+                mKeepAliveInterval = -1;
+                mLastGoodKeepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
+                for (SipSessionGroupExt group : mSipGroups.values()) {
+                    group.onConnectivityChanged(true);
+                }
+
+                // If we are on Wi-Fi, grab the WifiLock. Otherwise release it.
+                if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+                    mWifiLock.acquire();
+                } else {
+                    mWifiLock.release();
+                }
+            } else {
+                // Always grab the WifiLock when we are disconnected, so the
+                // system will keep trying to reconnect. We will release it
+                // if we eventually connect via something else.
+                mWifiLock.acquire();
+
+                mMyWakeLock.reset(); // in case there's a leak
+            }
+        } catch (SipException e) {
+            Log.e(TAG, "onConnectivityChanged()", e);
         }
     }
 
