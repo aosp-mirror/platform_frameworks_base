@@ -1159,51 +1159,49 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Called by JNI when the native HTTPS stack gets an invalid cert chain.
+     * Called by JNI when the Chromium HTTP stack gets an invalid certificate chain.
      *
      * We delegate the request to CallbackProxy, and route its response to
      * {@link #nativeSslCertErrorProceed(int)} or
      * {@link #nativeSslCertErrorCancel(int, int)}.
      */
-    private void reportSslCertError(
-            final int handle, final int cert_error, byte cert_der[], String url) {
-        final SslError ssl_error;
+    private void reportSslCertError(final int handle, final int certError, byte certDER[],
+            String url) {
+        final SslError sslError;
         try {
-            X509Certificate cert = new X509CertImpl(cert_der);
+            X509Certificate cert = new X509CertImpl(certDER);
             SslCertificate sslCert = new SslCertificate(cert);
             if (JniUtil.useChromiumHttpStack()) {
-                ssl_error = SslError.SslErrorFromChromiumErrorCode(cert_error, sslCert,
+                sslError = SslError.SslErrorFromChromiumErrorCode(certError, sslCert,
                         new URL(url).getHost());
             } else {
-                ssl_error = new SslError(cert_error, cert, url);
+                sslError = new SslError(certError, cert, url);
             }
         } catch (IOException e) {
             // Can't get the certificate, not much to do.
             Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");
-            nativeSslCertErrorCancel(handle, cert_error);
+            nativeSslCertErrorCancel(handle, certError);
+            return;
+        }
+
+        if (SslCertLookupTable.getInstance().isAllowed(sslError)) {
+            nativeSslCertErrorProceed(handle);
             return;
         }
 
         SslErrorHandler handler = new SslErrorHandler() {
-
             @Override
             public void proceed() {
-                SslCertLookupTable.getInstance().Allow(ssl_error);
+                SslCertLookupTable.getInstance().setIsAllowed(sslError, true);
                 nativeSslCertErrorProceed(handle);
             }
-
             @Override
             public void cancel() {
-                SslCertLookupTable.getInstance().Deny(ssl_error);
-                nativeSslCertErrorCancel(handle, cert_error);
+                SslCertLookupTable.getInstance().setIsAllowed(sslError, false);
+                nativeSslCertErrorCancel(handle, certError);
             }
         };
-
-        if (SslCertLookupTable.getInstance().IsAllowed(ssl_error)) {
-            nativeSslCertErrorProceed(handle);
-        } else {
-            mCallbackProxy.onReceivedSslError(handler, ssl_error);
-        }
+        mCallbackProxy.onReceivedSslError(handler, sslError);
     }
 
     /**
@@ -1416,7 +1414,7 @@ class BrowserFrame extends Handler {
     private native void nativeAuthenticationCancel(int handle);
 
     private native void nativeSslCertErrorProceed(int handle);
-    private native void nativeSslCertErrorCancel(int handle, int cert_error);
+    private native void nativeSslCertErrorCancel(int handle, int certError);
 
     native void nativeSslClientCert(int handle,
                                     byte[] pkcs8EncodedPrivateKey,
