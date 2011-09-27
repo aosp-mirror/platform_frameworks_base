@@ -15,46 +15,43 @@
      limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="3mm">
-
-    <ImageView android:id="@+id/icon"
-            android:layout_width="@android:dimen/app_icon_size"
-            android:layout_height="@android:dimen/app_icon_size"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginRight="1mm"/>
-
-    <TextView android:id="@+id/warning"
-            android:layout_width="fill_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/icon"
-            android:padding="3mm"
-            android:text="@string/warning"
-            android:textSize="18sp"/>
+            android:orientation="vertical"
+            android:padding="3mm">
 
-    <TextView android:id="@+id/prompt"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_toRightOf="@id/icon"
-            android:layout_above="@id/warning"
-            android:gravity="center_vertical"
-            android:textSize="20sp"/>
+        <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-    <CheckBox android:id="@+id/check"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/warning"
-            android:text="@string/accept"
-            android:textSize="20sp"
-            android:checked="false"/>
+            <ImageView android:id="@+id/icon"
+                    android:layout_width="@android:dimen/app_icon_size"
+                    android:layout_height="@android:dimen/app_icon_size"
+                    android:paddingRight="1mm"/>
 
-</RelativeLayout>
+            <TextView android:id="@+id/prompt"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"/>
+        </LinearLayout>
+
+        <TextView android:id="@+id/warning"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="1mm"
+                android:paddingBottom="1mm"
+                android:text="@string/warning"
+                android:textSize="18sp"/>
+
+        <CheckBox android:id="@+id/check"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/accept"
+                android:textSize="20sp"
+                android:checked="false"/>
+    </LinearLayout>
+</ScrollView>

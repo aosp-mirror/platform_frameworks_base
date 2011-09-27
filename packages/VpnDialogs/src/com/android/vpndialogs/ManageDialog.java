@@ -181,8 +181,10 @@ public class ManageDialog extends Activity implements Handler.Callback,
                 String line = in.readLine().trim();
                 if (line.startsWith(prefix)) {
                     String[] numbers = line.substring(prefix.length()).split(" +");
-                    if (numbers.length == 17) {
-                        return numbers;
+                    for (int i = 1; i < 17; ++i) {
+                        if (!numbers[i].equals("0")) {
+                            return numbers;
+                        }
                     }
                     break;
                 }
