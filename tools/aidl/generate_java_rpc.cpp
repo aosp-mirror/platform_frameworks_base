@@ -351,6 +351,7 @@ PresenterClass::PresenterClass(const interface_type* iface, Type* listenerType)
     this->extends = PRESENTER_BASE_TYPE;
 
     this->_listener = new Variable(listenerType, "_listener");
+    this->elements.push_back(new Field(PRIVATE, this->_listener));
 
     // methods
     generate_ctor();
@@ -957,4 +958,3 @@ generate_rpc_interface_class(const interface_type* iface)
 
     return proxy;
 }
-
