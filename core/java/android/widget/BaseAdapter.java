@@ -43,13 +43,18 @@ public abstract class BaseAdapter implements ListAdapter, SpinnerAdapter {
     }
     
     /**
-     * Notifies the attached View that the underlying data has been changed
-     * and it should refresh itself.
+     * Notifies the attached observers that the underlying data has been changed
+     * and any View reflecting the data set should refresh itself.
      */
     public void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
     }
-    
+
+    /**
+     * Notifies the attached observers that the underlying data is no longer valid
+     * or available. Once invoked this adapter is no longer valid and should
+     * not report further data set changes.
+     */
     public void notifyDataSetInvalidated() {
         mDataSetObservable.notifyInvalidated();
     }
