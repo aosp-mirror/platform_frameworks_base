@@ -161,9 +161,9 @@ public interface BluetoothProfile {
         /**
          * Called to notify the client when the proxy object has been
          * connected to the service.
-         * @param profile - One of {@link #HEADSET} or
+         * @param profile - One of {@link #HEALTH}, {@link #HEADSET} or
          *                  {@link #A2DP}
-         * @param proxy - One of {@link BluetoothHeadset} or
+         * @param proxy - One of {@link BluetoothHealth}, {@link BluetoothHeadset} or
          *                {@link BluetoothA2dp}
          */
         public void onServiceConnected(int profile, BluetoothProfile proxy);
@@ -171,7 +171,7 @@ public interface BluetoothProfile {
         /**
          * Called to notify the client that this proxy object has been
          * disconnected from the service.
-         * @param profile - One of {@link #HEADSET} or
+         * @param profile - One of {@link #HEALTH}, {@link #HEADSET} or
          *                  {@link #A2DP}
          */
         public void onServiceDisconnected(int profile);
