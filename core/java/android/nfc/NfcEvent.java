@@ -29,8 +29,8 @@ package android.nfc;
  * in the callback) because it allows new fields to be added without breaking
  * API compatibility.
  *
- * @see {@link NfcAdapter.OnNdefPushCompleteCallback#onNdefPushComplete}
- * @see {@link NfcAdapter.CreateNdefMessageCallback#createNdefMessage}
+ * @see NfcAdapter.OnNdefPushCompleteCallback#onNdefPushComplete
+ * @see NfcAdapter.CreateNdefMessageCallback#createNdefMessage
  */
 public final class NfcEvent {
     /**
