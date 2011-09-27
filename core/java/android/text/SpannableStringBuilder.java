@@ -710,17 +710,16 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         for (int i = 0; i < spanCount; i++) {
             int spanStart = starts[i];
-            int spanEnd = ends[i];
-
             if (spanStart > gapstart) {
                 spanStart -= gaplen;
             }
-            if (spanEnd > gapstart) {
-                spanEnd -= gaplen;
-            }
-
             if (spanStart > queryEnd) {
                 continue;
+            }
+
+            int spanEnd = ends[i];
+            if (spanEnd > gapstart) {
+                spanEnd -= gaplen;
             }
             if (spanEnd < queryStart) {
                 continue;

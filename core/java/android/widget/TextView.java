@@ -5537,7 +5537,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override public boolean onCheckIsTextEditor() {
         return mInputType != EditorInfo.TYPE_NULL;
     }
-    
+
     @Override public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (onCheckIsTextEditor() && isEnabled()) {
             if (mInputMethodState == null) {
@@ -7492,9 +7492,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
-        if (mSpellChecker != null) {
-            mSpellChecker.onSelectionChanged();
-        }
     }
 
     /**
@@ -7553,6 +7550,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         for (int i = 0; i < length; i++) {
             final int s = text.getSpanStart(spans[i]);
             final int e = text.getSpanEnd(spans[i]);
+            // Spans that are adjacent to the edited region will be handled in
+            // updateSpellCheckSpans. Result depends on what will be added (space or text)
             if (e == start || s == end) break;
             text.removeSpan(spans[i]);
         }
@@ -7735,12 +7734,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (what instanceof SpellCheckSpan) {
-            if (newStart < 0) {
-                getSpellChecker().removeSpellCheckSpan((SpellCheckSpan) what);
-            } else if (oldStart < 0) {
-                getSpellChecker().addSpellCheckSpan((SpellCheckSpan) what);
-            }
+        if (newStart < 0 && what instanceof SpellCheckSpan) {
+            getSpellChecker().removeSpellCheckSpan((SpellCheckSpan) what);
         }
     }
 
@@ -7750,8 +7745,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void updateSpellCheckSpans(int start, int end) {
         if (!isTextEditable() || !isSuggestionsEnabled() || !getSpellChecker().isSessionActive())
             return;
-        Editable text = (Editable) mText;
 
+        Editable text = (Editable) mText;
         WordIterator wordIterator = getWordIterator();
         wordIterator.setCharSequence(text);
 
@@ -7770,57 +7765,75 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
+        // We need to expand by one character because we want to include the spans that end/start
+        // at position start/end respectively.
+        SpellCheckSpan[] spellCheckSpans = text.getSpans(start - 1, end + 1, SpellCheckSpan.class);
+        SuggestionSpan[] suggestionSpans = text.getSpans(start - 1, end + 1, SuggestionSpan.class);
+        final int numberOfSpellCheckSpans = spellCheckSpans.length;
+
         // Iterate over the newly added text and schedule new SpellCheckSpans
         while (wordStart <= end) {
             if (wordEnd >= start) {
-                // A word across the interval boundaries must remove boundary edition spans
+                // A new word has been created across the interval boundaries. Remove previous spans
                 if (wordStart < start && wordEnd > start) {
-                    removeEditionSpansAt(start, text);
+                    removeSpansAt(start, spellCheckSpans, text);
+                    removeSpansAt(start, suggestionSpans, text);
                 }
 
                 if (wordStart < end && wordEnd > end) {
-                    removeEditionSpansAt(end, text);
+                    removeSpansAt(end, spellCheckSpans, text);
+                    removeSpansAt(end, suggestionSpans, text);
                 }
 
                 // Do not create new boundary spans if they already exist
                 boolean createSpellCheckSpan = true;
                 if (wordEnd == start) {
-                    SpellCheckSpan[] spellCheckSpans = text.getSpans(start, start,
-                            SpellCheckSpan.class);
-                    if (spellCheckSpans.length > 0) createSpellCheckSpan = false;
+                    for (int i = 0; i < numberOfSpellCheckSpans; i++) {
+                        final int spanEnd = text.getSpanEnd(spellCheckSpans[i]);
+                        if (spanEnd == start) {
+                            createSpellCheckSpan = false;
+                            break;
+                        }
+                    }
                 }
 
                 if (wordStart == end) {
-                    SpellCheckSpan[] spellCheckSpans = text.getSpans(end, end,
-                            SpellCheckSpan.class);
-                    if (spellCheckSpans.length > 0) createSpellCheckSpan = false;
+                    for (int i = 0; i < numberOfSpellCheckSpans; i++) {
+                        final int spanStart = text.getSpanEnd(spellCheckSpans[i]);
+                        if (spanStart == end) {
+                            createSpellCheckSpan = false;
+                            break;
+                        }
+                    }
                 }
 
                 if (createSpellCheckSpan) {
-                    text.setSpan(new SpellCheckSpan(), wordStart, wordEnd,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    mSpellChecker.addSpellCheckSpan(wordStart, wordEnd);
                 }
             }
 
             // iterate word by word
             wordEnd = wordIterator.following(wordEnd);
-            if (wordEnd == BreakIterator.DONE) return;
+            if (wordEnd == BreakIterator.DONE) break;
             wordStart = wordIterator.getBeginning(wordEnd);
             if (wordStart == BreakIterator.DONE) {
                 Log.e(LOG_TAG, "Unable to find word beginning from " + wordEnd + "in " + mText);
-                return;
+                break;
             }
         }
+
+        mSpellChecker.spellCheck();
     }
 
-    private static void removeEditionSpansAt(int offset, Editable text) {
-        SuggestionSpan[] suggestionSpans = text.getSpans(offset, offset, SuggestionSpan.class);
-        for (int i = 0; i < suggestionSpans.length; i++) {
-            text.removeSpan(suggestionSpans[i]);
-        }
-        SpellCheckSpan[] spellCheckSpans = text.getSpans(offset, offset, SpellCheckSpan.class);
-        for (int i = 0; i < spellCheckSpans.length; i++) {
-            text.removeSpan(spellCheckSpans[i]);
+    private static <T> void removeSpansAt(int offset, T[] spans, Editable text) {
+        final int length = spans.length;
+        for (int i = 0; i < length; i++) {
+            final T span = spans[i];
+            final int start = text.getSpanStart(span);
+            if (start > offset) continue;
+            final int end = text.getSpanEnd(span);
+            if (end < offset) continue;
+            text.removeSpan(span);
         }
     }
 
@@ -8381,6 +8394,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 boolean selectAllGotFocus = mSelectAllOnFocus && didTouchFocusSelect();
                 hideControllers();
                 if (!selectAllGotFocus && mText.length() > 0) {
+                    if (mSpellChecker != null) {
+                        // When the cursor moves, the word that was typed may need spell check
+                        mSpellChecker.onSelectionChanged();
+                    }
                     if (isCursorInsideEasyCorrectionSpan()) {
                         showSuggestions();
                     } else if (hasInsertionController()) {
