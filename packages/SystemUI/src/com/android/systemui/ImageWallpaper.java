@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.opengl.GLUtils;
+import android.os.SystemProperties;
 import android.renderscript.Matrix4f;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
@@ -56,6 +57,7 @@ public class ImageWallpaper extends WallpaperService {
     private static final String TAG = "ImageWallpaper";
     private static final String GL_LOG_TAG = "ImageWallpaperGL";
     private static final boolean DEBUG = false;
+    private static final String PROPERTY_KERNEL_QEMU = "ro.kernel.qemu";
 
     static final boolean FIXED_SIZED_SURFACE = true;
     static final boolean USE_OPENGL = true;
@@ -71,10 +73,17 @@ public class ImageWallpaper extends WallpaperService {
 
         //noinspection PointlessBooleanExpression,ConstantConditions
         if (FIXED_SIZED_SURFACE && USE_OPENGL) {
-            WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-            Display display = windowManager.getDefaultDisplay();
-            mIsHwAccelerated = ActivityManager.isHighEndGfx(display);
+            if (!isEmulator()) {
+                WindowManager windowManager =
+                        (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+                Display display = windowManager.getDefaultDisplay();
+                mIsHwAccelerated = ActivityManager.isHighEndGfx(display);
+            }
         }
+    }
+
+    private static boolean isEmulator() {
+        return "1".equals(SystemProperties.get(PROPERTY_KERNEL_QEMU, "0"));
     }
 
     public Engine onCreateEngine() {
