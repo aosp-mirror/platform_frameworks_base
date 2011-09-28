@@ -36,6 +36,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.android.internal.R;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,7 +45,8 @@ import java.util.Set;
 /**
  * @hide
  */
-public class ChooseTypeAndAccountActivity extends Activity {
+public class ChooseTypeAndAccountActivity extends Activity
+        implements AccountManagerCallback<Bundle> {
     private static final String TAG = "AccountManager";
 
     /**
@@ -211,10 +213,9 @@ public class ChooseTypeAndAccountActivity extends Activity {
     protected void onActivityResult(final int requestCode, final int resultCode,
             final Intent data) {
         if (resultCode == RESULT_OK && data != null) {
-            String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
             String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
-            if (accountName != null && accountType != null) {
-                setResultAndFinish(accountName, accountType);
+            if (accountType != null) {
+                runAddAccountForAuthenticator(accountType);
                 return;
             }
         }
@@ -223,6 +224,43 @@ public class ChooseTypeAndAccountActivity extends Activity {
         finish();
     }
 
+    protected void runAddAccountForAuthenticator(String type) {
+        Log.d(TAG, "selected account type " + type);
+        final Bundle options = getIntent().getBundleExtra(
+                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE);
+        final String[] requiredFeatures = getIntent().getStringArrayExtra(
+                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY);
+        final String authTokenType = getIntent().getStringExtra(
+                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING);
+        AccountManager.get(this).addAccount(type, authTokenType, requiredFeatures,
+                options, this, this, null /* Handler */);
+    }
+
+    public void run(final AccountManagerFuture<Bundle> accountManagerFuture) {
+        try {
+            final Bundle accountManagerResult = accountManagerFuture.getResult();
+            final String name = accountManagerResult.getString(AccountManager.KEY_ACCOUNT_NAME);
+            final String type = accountManagerResult.getString(AccountManager.KEY_ACCOUNT_TYPE);
+            if (name != null && type != null) {
+                final Bundle bundle = new Bundle();
+                bundle.putString(AccountManager.KEY_ACCOUNT_NAME, name);
+                bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, type);
+                setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
+                finish();
+                return;
+            }
+        } catch (OperationCanceledException e) {
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+            return;
+        } catch (IOException e) {
+        } catch (AuthenticatorException e) {
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString(AccountManager.KEY_ERROR_MESSAGE, "error communicating with server");
+        setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
+        finish();
+    }
 
     private Drawable getDrawableForType(
             final HashMap<String, AuthenticatorDescription> typeToAuthDescription,
@@ -266,6 +304,7 @@ public class ChooseTypeAndAccountActivity extends Activity {
 
     private void startChooseAccountTypeActivity() {
         final Intent intent = new Intent(this, ChooseAccountTypeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         intent.putExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
                 getIntent().getStringArrayExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY));
         intent.putExtra(EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
