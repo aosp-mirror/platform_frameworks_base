@@ -456,13 +456,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                     seekTo(mSeekWhenPrepared);
                 }
                 start();
-                if (mMediaController != null) {
-                    if (mMediaController.isShowing()) {
-                        // ensure the controller will get repositioned later
-                        mMediaController.hide();
-                    }
-                    mMediaController.show();
-                }
             }
         }
 
