@@ -2958,7 +2958,7 @@ public class AudioService extends IAudioService.Stub {
             Log.w(TAG, "  RemoteControlClient died");
             // remote control client died, make sure the displays don't use it anymore
             //  by setting its remote control client to null
-            registerRemoteControlClient(mMediaIntent, null, null/*ignored*/);
+            registerRemoteControlClient(mMediaIntent, null/*rcClient*/, null/*ignored*/);
         }
 
         public IBinder getBinder() {
@@ -3366,7 +3366,12 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...) */
+    /**
+     * see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...)
+     * Note: using this method with rcClient == null is a way to "disable" the IRemoteControlClient
+     *     without modifying the RC stack, but while still causing the display to refresh (will
+     *     become blank as a result of this)
+     */
     public void registerRemoteControlClient(PendingIntent mediaIntent,
             IRemoteControlClient rcClient, String callingPackageName) {
         if (DEBUG_RC) Log.i(TAG, "Register remote control client rcClient="+rcClient);
@@ -3384,6 +3389,15 @@ public class AudioService extends IAudioService.Stub {
                         }
                         // save the new remote control client
                         rcse.mRcClient = rcClient;
+                        rcse.mCallingPackageName = callingPackageName;
+                        rcse.mCallingUid = Binder.getCallingUid();
+                        if (rcClient == null) {
+                            rcse.mRcClientDeathHandler = null;
+                            break;
+                        }
+
+                        // there is a new (non-null) client:
+                        // 1/ give the new client the current display (if any)
                         if (mRcDisplay != null) {
                             try {
                                 rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
@@ -3392,14 +3406,8 @@ public class AudioService extends IAudioService.Stub {
                                 e.printStackTrace();
                             }
                         }
-                        rcse.mCallingPackageName = callingPackageName;
-                        rcse.mCallingUid = Binder.getCallingUid();
-                        if (rcClient == null) {
-                            rcse.mRcClientDeathHandler = null;
-                            break;
-                        }
-                        // monitor the new client's death
-                        IBinder b = rcClient.asBinder();
+                        // 2/ monitor the new client's death
+                        IBinder b = rcse.mRcClient.asBinder();
                         RcClientDeathHandler rcdh =
                                 new RcClientDeathHandler(b, rcse.mMediaIntent);
                         try {
