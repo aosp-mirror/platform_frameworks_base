@@ -2225,6 +2225,8 @@ public final class WebViewCore {
         mRepaintScheduled = false;
     }
 
+    // Gets the WebView corresponding to this WebViewCore. Note that the
+    // WebView object must only be used on the UI thread.
     /* package */ WebView getWebView() {
         return mWebView;
     }
@@ -2626,8 +2628,7 @@ public final class WebViewCore {
         }
     }
 
-    // called by JNI
-    private Context getContext() {
+    Context getContext() {
         return mContext;
     }
 
