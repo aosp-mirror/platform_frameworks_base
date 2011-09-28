@@ -29,8 +29,8 @@
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Jei norite užšifruoti visą atsarginę duomenų kopiją, įveskite slaptažodį:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Jei atkūrimo duomenys užšifruoti, įveskite toliau nurodytą slaptažodį:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Pradedama kurti atsarginę kopiją..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Atsarginės kopijos kūrimas baigtas"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Atsarginė kopija sukurta"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Pradedamas atkūrimas..."</string>
-    <string name="toast_restore_ended" msgid="1764041639199696132">"Atkūrimas baigtas"</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Atkurta"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Operacijos skirtasis laikas baigėsi"</string>
 </resources>

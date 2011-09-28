@@ -31,6 +31,6 @@
     <string name="toast_backup_started" msgid="550354281452756121">"Back-up starten..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Back-up voltooid"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Herstel starten..."</string>
-    <string name="toast_restore_ended" msgid="1764041639199696132">"Herstellen beëindigd"</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Herstellen voltooid"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Time-out voor bewerking"</string>
 </resources>
