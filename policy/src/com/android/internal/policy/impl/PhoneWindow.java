@@ -2750,6 +2750,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 mActionBar = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
                 if (mActionBar != null) {
+                    mActionBar.setWindowCallback(getCallback());
                     if (mActionBar.getTitle() == null) {
                         mActionBar.setWindowTitle(mTitle);
                     }
