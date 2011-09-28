@@ -20,6 +20,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <gui/ISurfaceTexture.h>
 
@@ -61,7 +62,8 @@ public:
 
     // tex indicates the name OpenGL texture to which images are to be streamed.
     // This texture name cannot be changed once the SurfaceTexture is created.
-    SurfaceTexture(GLuint tex, bool allowSynchronousMode = true);
+    SurfaceTexture(GLuint tex, bool allowSynchronousMode = true,
+            GLenum texTarget = GL_TEXTURE_EXTERNAL_OES);
 
     virtual ~SurfaceTexture();
 
@@ -458,6 +460,14 @@ private:
     // member variables are accessed.
     mutable Mutex mMutex;
 
+    // mTexTarget is the GL texture target with which the GL texture object is
+    // associated.  It is set in the constructor and never changed.  It is
+    // almost always GL_TEXTURE_EXTERNAL_OES except for one use case in Android
+    // Browser.  In that case it is set to GL_TEXTURE_2D to allow
+    // glCopyTexSubImage to read from the texture.  This is a hack to work
+    // around a GL driver limitation on the number of FBO attachments, which the
+    // browser's tile cache exceeds.
+    const GLenum mTexTarget;
 };
 
 // ----------------------------------------------------------------------------
