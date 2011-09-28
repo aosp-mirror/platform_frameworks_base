@@ -551,8 +551,7 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
     // Get LogClusters
     if (outLogClusters) {
         size_t countLogClusters = outLogClusters->size();
-        size_t countGlyphs = shaperItem.num_glyphs;
-        for (size_t i = 0; i < countGlyphs; i++) {
+        for (size_t i = 0; i < count; i++) {
             // As there may be successive runs, we need to shift the log clusters
             unsigned short logCluster = shaperItem.log_clusters[i] + countLogClusters;
 #if DEBUG_GLYPHS
@@ -620,25 +619,15 @@ void TextLayoutCacheValue::getGlyphsIndexAndCount(size_t start, size_t count, si
         *outGlyphsCount = 0;
         return;
     }
-    size_t endIndex = 0;
-    for(size_t i = 0; i < mGlyphs.size(); i++) {
-        if (mLogClusters[i] <= start) {
-            *outStartIndex = i;
-            endIndex = i;
-            continue;
-        }
-        if (mLogClusters[i] <= start + count) {
-            endIndex = i;
-        }
-    }
-    *outGlyphsCount = endIndex - *outStartIndex + 1;
+    *outStartIndex = mLogClusters[start];
+    *outGlyphsCount = mLogClusters[start + count - 1] - mLogClusters[start] + 1;
 #if DEBUG_GLYPHS
     LOGD("getGlyphsIndexes - start=%d count=%d - startIndex=%d count=%d", start, count,
             *outStartIndex, *outGlyphsCount);
     for(size_t i = 0; i < mGlyphs.size(); i++) {
         LOGD("getGlyphs - all - glyph[%d] = %d", i, mGlyphs[i]);
     }
-    for(size_t i = 0; i < mGlyphs.size(); i++) {
+    for(size_t i = 0; i < mAdvances.size(); i++) {
         LOGD("getGlyphs - all - logcl[%d] = %d", i, mLogClusters[i]);
     }
 #endif
