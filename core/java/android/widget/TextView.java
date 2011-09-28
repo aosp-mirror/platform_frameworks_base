@@ -9433,8 +9433,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return false;
             }
 
-            int posX = mPositionX + positionX;
-            int posY = mPositionY + positionY;
+            int posX = mPositionX + positionX - getScrollX();
+            int posY = mPositionY + positionY - getScrollY();
 
             // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
             return posX >= clip.left - 1 && posX <= clip.right + 1 &&
