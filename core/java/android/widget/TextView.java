@@ -9742,6 +9742,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             View view = null;
             for (int i = 0; i < mNumberOfSuggestions; i++) {
                 view = mSuggestionsAdapter.getView(i, view, mContentView);
+                view.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
                 view.measure(horizontalMeasure, verticalMeasure);
                 width = Math.max(width, view.getMeasuredWidth());
             }
