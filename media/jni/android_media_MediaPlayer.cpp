@@ -651,6 +651,10 @@ static void
 android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp != NULL) {
+        LOGW("MediaPlayer finalized without being released");
+    }
     android_media_MediaPlayer_release(env, thiz);
 }
 
