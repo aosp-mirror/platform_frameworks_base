@@ -513,7 +513,19 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         assertEquals("(650) 291-0000", PhoneNumberUtils.formatNumber("650 2910000", "US"));
         assertEquals("123-4567", PhoneNumberUtils.formatNumber("1234567", "US"));
         assertEquals("(800) 466-4114", PhoneNumberUtils.formatNumber("800-GOOG-114", "US"));
+    }
 
+    @SmallTest
+    public void testFormatNumber_LeadingStarAndHash() {
+        // Numbers with a leading '*' or '#' should be left unchanged.
+        assertEquals("*650 2910000", PhoneNumberUtils.formatNumber("*650 2910000", "US"));
+        assertEquals("#650 2910000", PhoneNumberUtils.formatNumber("#650 2910000", "US"));
+        assertEquals("*#650 2910000", PhoneNumberUtils.formatNumber("*#650 2910000", "US"));
+        assertEquals("#*650 2910000", PhoneNumberUtils.formatNumber("#*650 2910000", "US"));
+        assertEquals("#650*2910000", PhoneNumberUtils.formatNumber("#650*2910000", "US"));
+        assertEquals("#650*2910000", PhoneNumberUtils.formatNumber("#650*2910000", "US"));
+        assertEquals("##650 2910000", PhoneNumberUtils.formatNumber("##650 2910000", "US"));
+        assertEquals("**650 2910000", PhoneNumberUtils.formatNumber("**650 2910000", "US"));
     }
 
     @SmallTest
