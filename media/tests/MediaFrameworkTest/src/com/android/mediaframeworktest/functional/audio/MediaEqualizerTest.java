@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.functional.EnergyProbe;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
-import android.media.audiofx.BassBoost;
+import android.media.audiofx.Equalizer;
 import android.media.audiofx.Visualizer;
 import android.media.MediaPlayer;
 
@@ -41,20 +42,23 @@ import java.util.UUID;
  * Junit / Instrumentation test case for the media AudioTrack api
 
  */
-public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
-    private String TAG = "MediaBassBoostTest";
-    private final static int MIN_ENERGY_RATIO_2 = 3;
-    private final static short TEST_STRENGTH = 500;
+public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
+    private String TAG = "MediaEqualizerTest";
+    private final static int MIN_NUMBER_OF_BANDS = 4;
+    private final static int MIN_BAND_LEVEL = -1500;
+    private final static int MAX_BAND_LEVEL = 1500;
+    private final static int TEST_FREQUENCY_MILLIHERTZ = 1000000;
+    private final static int MIN_NUMBER_OF_PRESETS = 4;
     private final static int TEST_VOLUME = 4;
     // Implementor UUID for volume controller effect defined in
     // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
     private final static UUID VOLUME_EFFECT_UUID =
         UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
 
-    private BassBoost mBassBoost = null;
+    private Equalizer mEqualizer = null;
     private int mSession = -1;
 
-    public MediaBassBoostTest() {
+    public MediaEqualizerTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
     }
 
@@ -66,7 +70,7 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        releaseBassBoost();
+        releaseEqualizer();
     }
 
     private static void assumeTrue(String message, boolean cond) {
@@ -82,7 +86,7 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
     }
 
     //-----------------------------------------------------------------
-    // BASS BOOST TESTS:
+    // EQUALIZER TESTS:
     //----------------------------------
 
 
@@ -95,50 +99,53 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
     public void test0_0ConstructorAndRelease() throws Exception {
         boolean result = false;
         String msg = "test1_0ConstructorAndRelease()";
-        BassBoost bb = null;
+        Equalizer eq = null;
          try {
-            bb = new BassBoost(0, 0);
-            assertNotNull(msg + ": could not create BassBoost", bb);
+            eq = new Equalizer(0, 0);
+            assertNotNull(msg + ": could not create Equalizer", eq);
             try {
-                assertTrue(msg +": invalid effect ID", (bb.getId() != 0));
+                assertTrue(msg +": invalid effect ID", (eq.getId() != 0));
             } catch (IllegalStateException e) {
-                msg = msg.concat(": BassBoost not initialized");
+                msg = msg.concat(": Equalizer not initialized");
             }
             result = true;
         } catch (IllegalArgumentException e) {
-            msg = msg.concat(": BassBoost not found");
+            msg = msg.concat(": Equalizer not found");
         } catch (UnsupportedOperationException e) {
             msg = msg.concat(": Effect library not loaded");
         } finally {
-            if (bb != null) {
-                bb.release();
+            if (eq != null) {
+                eq.release();
             }
         }
         assertTrue(msg, result);
     }
+
 
     //-----------------------------------------------------------------
     // 1 - get/set parameters
     //----------------------------------
 
-    //Test case 1.0: test strength
+    //Test case 1.0: test setBandLevel() and getBandLevel()
     @LargeTest
-    public void test1_0Strength() throws Exception {
+    public void test1_0BandLevel() throws Exception {
         boolean result = false;
-        String msg = "test1_0Strength()";
-        getBassBoost(0);
+        String msg = "test1_0BandLevel()";
+        getEqualizer(0);
         try {
-            if (mBassBoost.getStrengthSupported()) {
-                mBassBoost.setStrength((short)TEST_STRENGTH);
-                short strength = mBassBoost.getRoundedStrength();
-                // allow 10% difference between set strength and rounded strength
-                assertTrue(msg +": got incorrect strength",
-                        ((float)strength > (float)TEST_STRENGTH * 0.9f) &&
-                        ((float)strength < (float)TEST_STRENGTH * 1.1f));
-            } else {
-                short strength = mBassBoost.getRoundedStrength();
-                assertTrue(msg +": got incorrect strength", strength >= 0 && strength <= 1000);
-            }
+            short numBands = mEqualizer.getNumberOfBands();
+            assertTrue(msg + ": not enough bands", numBands >= MIN_NUMBER_OF_BANDS);
+
+            short[] levelRange = mEqualizer.getBandLevelRange();
+            assertTrue(msg + ": min level too high", levelRange[0] <= MIN_BAND_LEVEL);
+            assertTrue(msg + ": max level too low", levelRange[1] >= MAX_BAND_LEVEL);
+
+            mEqualizer.setBandLevel((short)0, levelRange[1]);
+            short level = mEqualizer.getBandLevel((short)0);
+            // 10% margin on actual level compared to requested level
+            assertTrue(msg + ": setBandLevel failed",
+                    ((float)level > (float)levelRange[1] * 0.9f) &&
+                    ((float)level < (float)levelRange[1] * 1.1f));
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -150,22 +157,27 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
             msg = msg.concat("get parameter() called in wrong state");
             loge(msg, "get parameter() called in wrong state");
         } finally {
-            releaseBassBoost();
+            releaseEqualizer();
         }
         assertTrue(msg, result);
     }
 
-    //Test case 1.1: test properties
+    //Test case 1.1: test band frequency
     @LargeTest
-    public void test1_1Properties() throws Exception {
+    public void test1_1BandFrequency() throws Exception {
         boolean result = false;
-        String msg = "test1_1Properties()";
-        getBassBoost(0);
+        String msg = "test1_1BandFrequency()";
+        getEqualizer(0);
         try {
-            BassBoost.Settings settings = mBassBoost.getProperties();
-            String str = settings.toString();
-            settings = new BassBoost.Settings(str);
-            mBassBoost.setProperties(settings);
+            short band = mEqualizer.getBand(TEST_FREQUENCY_MILLIHERTZ);
+            assertTrue(msg + ": getBand failed", band >= 0);
+            int[] freqRange = mEqualizer.getBandFreqRange(band);
+            assertTrue(msg + ": getBandFreqRange failed",
+                    (freqRange[0] <= TEST_FREQUENCY_MILLIHERTZ) &&
+                    (freqRange[1] >= TEST_FREQUENCY_MILLIHERTZ));
+            int freq = mEqualizer.getCenterFreq(band);
+            assertTrue(msg + ": getCenterFreq failed",
+                    (freqRange[0] <= freq) && (freqRange[1] >= freq));
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -177,7 +189,64 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
             msg = msg.concat("get parameter() called in wrong state");
             loge(msg, "get parameter() called in wrong state");
         } finally {
-            releaseBassBoost();
+            releaseEqualizer();
+        }
+        assertTrue(msg, result);
+    }
+
+    //Test case 1.2: test presets
+    @LargeTest
+    public void test1_2Presets() throws Exception {
+        boolean result = false;
+        String msg = "test1_2Presets()";
+        getEqualizer(0);
+        try {
+            short numPresets = mEqualizer.getNumberOfPresets();
+            assertTrue(msg + ": getNumberOfPresets failed", numPresets >= MIN_NUMBER_OF_PRESETS);
+            mEqualizer.usePreset((short)(numPresets - 1));
+            short preset = mEqualizer.getCurrentPreset();
+            assertEquals(msg + ": usePreset failed", preset, (short)(numPresets - 1));
+            String name = mEqualizer.getPresetName(preset);
+            assertNotNull(msg + ": getPresetName failed", name);
+            result = true;
+        } catch (IllegalArgumentException e) {
+            msg = msg.concat(": Bad parameter value");
+            loge(msg, "Bad parameter value");
+        } catch (UnsupportedOperationException e) {
+            msg = msg.concat(": get parameter() rejected");
+            loge(msg, "get parameter() rejected");
+        } catch (IllegalStateException e) {
+            msg = msg.concat("get parameter() called in wrong state");
+            loge(msg, "get parameter() called in wrong state");
+        } finally {
+            releaseEqualizer();
+        }
+        assertTrue(msg, result);
+    }
+
+    //Test case 1.3: test properties
+    @LargeTest
+    public void test1_3Properties() throws Exception {
+        boolean result = false;
+        String msg = "test1_3Properties()";
+        getEqualizer(0);
+        try {
+            Equalizer.Settings settings = mEqualizer.getProperties();
+            String str = settings.toString();
+            settings = new Equalizer.Settings(str);
+            mEqualizer.setProperties(settings);
+            result = true;
+        } catch (IllegalArgumentException e) {
+            msg = msg.concat(": Bad parameter value");
+            loge(msg, "Bad parameter value");
+        } catch (UnsupportedOperationException e) {
+            msg = msg.concat(": get parameter() rejected");
+            loge(msg, "get parameter() rejected");
+        } catch (IllegalStateException e) {
+            msg = msg.concat("get parameter() called in wrong state");
+            loge(msg, "get parameter() called in wrong state");
+        } finally {
+            releaseEqualizer();
         }
         assertTrue(msg, result);
     }
@@ -186,7 +255,7 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
     // 2 - Effect action
     //----------------------------------
 
-    //Test case 2.0: test actual bass boost influence on sound
+    //Test case 2.0: test that the equalizer actually alters the sound
     @LargeTest
     public void test2_0SoundModification() throws Exception {
         boolean result = false;
@@ -199,7 +268,6 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
                            TEST_VOLUME,
                            0);
-
         try {
             probe = new EnergyProbe(0);
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
@@ -213,26 +281,21 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
 
             mp = new MediaPlayer();
             mp.setDataSource(MediaNames.SINE_200_1000);
-            mp.setLooping(true);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getBassBoost(mp.getAudioSessionId());
+            getEqualizer(mp.getAudioSessionId());
             mp.prepare();
             mp.start();
-            Thread.sleep(200);
+            Thread.sleep(500);
             // measure reference energy around 1kHz
-            int refEnergy200 = probe.capture(200);
-            int refEnergy1000 = probe.capture(1000);
-            mBassBoost.setStrength((short)1000);
-            mBassBoost.setEnabled(true);
-            Thread.sleep(4000);
+            int refEnergy = probe.capture(1000);
+            short band = mEqualizer.getBand(1000000);
+            short[] levelRange = mEqualizer.getBandLevelRange();
+            mEqualizer.setBandLevel(band, levelRange[0]);
+            mEqualizer.setEnabled(true);
+            Thread.sleep(500);
             // measure energy around 1kHz with band level at min
-            int energy200 = probe.capture(200);
-            int energy1000 = probe.capture(1000);
-            // verify that the energy ration between low and high frequencies is at least
-            // MIN_ENERGY_RATIO_2 times higher with bassboost on.
-            assertTrue(msg + ": bass boost has no effect",
-                    ((float)energy200/(float)energy1000) >
-                    (MIN_ENERGY_RATIO_2 * ((float)refEnergy200/(float)refEnergy1000)));
+            int energy = probe.capture(1000);
+            assertTrue(msg + ": equalizer has no effect at 1kHz", energy < refEnergy/4);
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -247,7 +310,7 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
             loge(msg, "sleep() interrupted");
         }
         finally {
-            releaseBassBoost();
+            releaseEqualizer();
             if (mp != null) {
                 mp.release();
             }
@@ -261,34 +324,34 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
         }
         assertTrue(msg, result);
     }
+
     //-----------------------------------------------------------------
     // private methods
     //----------------------------------
 
-    private void getBassBoost(int session) {
-         if (mBassBoost == null || session != mSession) {
-             if (session != mSession && mBassBoost != null) {
-                 mBassBoost.release();
-                 mBassBoost = null;
+    private void getEqualizer(int session) {
+         if (mEqualizer == null || session != mSession) {
+             if (session != mSession && mEqualizer != null) {
+                 mEqualizer.release();
+                 mEqualizer = null;
              }
              try {
-                mBassBoost = new BassBoost(0, session);
+                mEqualizer = new Equalizer(0, session);
                 mSession = session;
             } catch (IllegalArgumentException e) {
-                Log.e(TAG, "getBassBoost() BassBoost not found exception: "+e);
+                Log.e(TAG, "getEqualizer() Equalizer not found exception: "+e);
             } catch (UnsupportedOperationException e) {
-                Log.e(TAG, "getBassBoost() Effect library not loaded exception: "+e);
+                Log.e(TAG, "getEqualizer() Effect library not loaded exception: "+e);
             }
          }
-         assertNotNull("could not create mBassBoost", mBassBoost);
+         assertNotNull("could not create mEqualizer", mEqualizer);
     }
 
-    private void releaseBassBoost() {
-        if (mBassBoost != null) {
-            mBassBoost.release();
-            mBassBoost = null;
+    private void releaseEqualizer() {
+        if (mEqualizer != null) {
+            mEqualizer.release();
+            mEqualizer = null;
         }
    }
 
 }
-

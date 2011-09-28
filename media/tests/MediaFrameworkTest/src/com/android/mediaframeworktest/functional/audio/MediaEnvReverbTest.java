@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.functional.EnergyProbe;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.audiofx.AudioEffect;
@@ -528,4 +529,3 @@ public class MediaEnvReverbTest extends ActivityInstrumentationTestCase2<MediaFr
    }
 
 }
-

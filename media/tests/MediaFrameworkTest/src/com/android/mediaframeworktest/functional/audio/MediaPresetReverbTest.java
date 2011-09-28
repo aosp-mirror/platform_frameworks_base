@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.functional.EnergyProbe;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
-import android.media.audiofx.Virtualizer;
+import android.media.audiofx.PresetReverb;
 import android.media.audiofx.Visualizer;
 import android.media.MediaPlayer;
 
@@ -41,20 +42,21 @@ import java.util.UUID;
  * Junit / Instrumentation test case for the media AudioTrack api
 
  */
-public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
-    private String TAG = "MediaVirtualizerTest";
-    private final static int MIN_ENERGY_RATIO_2 = 2;
-    private final static short TEST_STRENGTH = 500;
-    private final static int TEST_VOLUME = 4;
+public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
+    private String TAG = "MediaPresetReverbTest";
     // Implementor UUID for volume controller effect defined in
     // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
     private final static UUID VOLUME_EFFECT_UUID =
         UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
+    // Implementor UUID for preset reverb effect defined in
+    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
+    private final static UUID PRESET_REVERB_EFFECT_UUID =
+        UUID.fromString("172cdf00-a3bc-11df-a72f-0002a5d5c51b");
 
-    private Virtualizer mVirtualizer = null;
+    private PresetReverb mReverb = null;
     private int mSession = -1;
 
-    public MediaVirtualizerTest() {
+    public MediaPresetReverbTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
     }
 
@@ -66,7 +68,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        releaseVirtualizer();
+        releaseReverb();
     }
 
     private static void assumeTrue(String message, boolean cond) {
@@ -82,7 +84,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     }
 
     //-----------------------------------------------------------------
-    // VIRTUALIZER TESTS:
+    // PRESET REVEB TESTS:
     //----------------------------------
 
 
@@ -95,51 +97,44 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     public void test0_0ConstructorAndRelease() throws Exception {
         boolean result = false;
         String msg = "test1_0ConstructorAndRelease()";
-        Virtualizer virtualizer = null;
+        PresetReverb reverb = null;
          try {
-            virtualizer = new Virtualizer(0, 0);
-            assertNotNull(msg + ": could not create Virtualizer", virtualizer);
+            reverb = new PresetReverb(0, 0);
+            assertNotNull(msg + ": could not create PresetReverb", reverb);
             try {
-                assertTrue(msg +": invalid effect ID", (virtualizer.getId() != 0));
+                assertTrue(msg +": invalid effect ID", (reverb.getId() != 0));
             } catch (IllegalStateException e) {
-                msg = msg.concat(": Virtualizer not initialized");
+                msg = msg.concat(": PresetReverb not initialized");
             }
             result = true;
         } catch (IllegalArgumentException e) {
-            msg = msg.concat(": Virtualizer not found");
+            msg = msg.concat(": PresetReverb not found");
         } catch (UnsupportedOperationException e) {
             msg = msg.concat(": Effect library not loaded");
         } finally {
-            if (virtualizer != null) {
-                virtualizer.release();
+            if (reverb != null) {
+                reverb.release();
             }
         }
         assertTrue(msg, result);
     }
 
-
     //-----------------------------------------------------------------
     // 1 - get/set parameters
     //----------------------------------
 
-    //Test case 1.0: test strength
+    //Test case 1.0: test preset
     @LargeTest
-    public void test1_0Strength() throws Exception {
+    public void test1_0Preset() throws Exception {
         boolean result = false;
-        String msg = "test1_0Strength()";
-        getVirtualizer(0);
+        String msg = "test1_0Preset()";
+        getReverb(0);
         try {
-            if (mVirtualizer.getStrengthSupported()) {
-                mVirtualizer.setStrength((short)TEST_STRENGTH);
-                short strength = mVirtualizer.getRoundedStrength();
-                // allow 10% difference between set strength and rounded strength
-                assertTrue(msg +": got incorrect strength",
-                        ((float)strength > (float)TEST_STRENGTH * 0.9f) &&
-                        ((float)strength < (float)TEST_STRENGTH * 1.1f));
-            } else {
-                short strength = mVirtualizer.getRoundedStrength();
-                assertTrue(msg +": got incorrect strength", strength >= 0 && strength <= 1000);
-            }
+            mReverb.setPreset((short)PresetReverb.PRESET_LARGEROOM);
+            short preset = mReverb.getPreset();
+            assertEquals(msg +": got incorrect preset",
+                         (short)PresetReverb.PRESET_LARGEROOM,
+                         preset);
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -151,7 +146,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             msg = msg.concat("get parameter() called in wrong state");
             loge(msg, "get parameter() called in wrong state");
         } finally {
-            releaseVirtualizer();
+            releaseReverb();
         }
         assertTrue(msg, result);
     }
@@ -161,12 +156,19 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     public void test1_1Properties() throws Exception {
         boolean result = false;
         String msg = "test1_1Properties()";
-        getVirtualizer(0);
+        getReverb(0);
         try {
-            Virtualizer.Settings settings = mVirtualizer.getProperties();
+            PresetReverb.Settings settings = mReverb.getProperties();
+            short newPreset = (short)PresetReverb.PRESET_LARGEROOM;
+            if (settings.preset == (short)PresetReverb.PRESET_LARGEROOM) {
+                newPreset = (short)PresetReverb.PRESET_SMALLROOM;
+            }
             String str = settings.toString();
-            settings = new Virtualizer.Settings(str);
-            mVirtualizer.setProperties(settings);
+            settings = new PresetReverb.Settings(str);
+            settings.preset = newPreset;
+            mReverb.setProperties(settings);
+            settings = mReverb.getProperties();
+            assertEquals(msg +": setProperties failed", newPreset, settings.preset);
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -178,7 +180,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             msg = msg.concat("get parameter() called in wrong state");
             loge(msg, "get parameter() called in wrong state");
         } finally {
-            releaseVirtualizer();
+            releaseReverb();
         }
         assertTrue(msg, result);
     }
@@ -187,20 +189,20 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     // 2 - Effect action
     //----------------------------------
 
-    //Test case 2.0: test actual virtualizer influence on sound
+    //Test case 2.0: test actual auxiliary reverb influence on sound
     @LargeTest
-    public void test2_0SoundModification() throws Exception {
+    public void test2_0AuxiliarySoundModification() throws Exception {
         boolean result = false;
-        String msg = "test2_0SoundModification()";
+        String msg = "test2_0AuxiliarySoundModification()";
         EnergyProbe probe = null;
         AudioEffect vc = null;
         MediaPlayer mp = null;
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
-                           TEST_VOLUME,
+                           am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
                            0);
-
+        getReverb(0);
         try {
             probe = new EnergyProbe(0);
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
@@ -214,30 +216,19 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
 
             mp = new MediaPlayer();
             mp.setDataSource(MediaNames.SINE_200_1000);
-            mp.setLooping(true);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getVirtualizer(mp.getAudioSessionId());
+            mp.attachAuxEffect(mReverb.getId());
+            mp.setAuxEffectSendLevel(1.0f);
+            mReverb.setPreset((short)PresetReverb.PRESET_PLATE);
+            mReverb.setEnabled(true);
             mp.prepare();
             mp.start();
+            Thread.sleep(1000);
+            mp.stop();
             Thread.sleep(200);
-            // measure reference energy around 1kHz
-            int refEnergy200 = probe.capture(200);
-            int refEnergy1000 = probe.capture(1000);
-            mVirtualizer.setStrength((short)1000);
-            mVirtualizer.setEnabled(true);
-            Thread.sleep(4000);
-            // measure energy around 1kHz with band level at min
-            int energy200 = probe.capture(200);
+            // measure energy around 1kHz after media player was stopped for 200 ms
             int energy1000 = probe.capture(1000);
-            // verify that the energy ration between low and high frequencies is at least
-            // MIN_ENERGY_RATIO_2 times higher with virtualizer on.
-            // NOTE: this is what is observed with current virtualizer implementation and the test
-            // audio file but is not the primary effect of the virtualizer. A better way would
-            // be to have a stereo PCM capture and check that a strongly paned input is centered
-            // when output. However, we cannot capture stereo with the visualizer.
-            assertTrue(msg + ": virtualizer has no effect",
-                    ((float)energy200/(float)energy1000) >
-                    (MIN_ENERGY_RATIO_2 * ((float)refEnergy200/(float)refEnergy1000)));
+            assertTrue(msg + ": reverb has no effect", energy1000 > 0);
             result = true;
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Bad parameter value");
@@ -252,7 +243,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             loge(msg, "sleep() interrupted");
         }
         finally {
-            releaseVirtualizer();
+            releaseReverb();
             if (mp != null) {
                 mp.release();
             }
@@ -266,34 +257,116 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
         }
         assertTrue(msg, result);
     }
+
+    //Test case 2.1: test actual insert reverb influence on sound
+    @LargeTest
+    public void test2_1InsertSoundModification() throws Exception {
+        boolean result = false;
+        String msg = "test2_1InsertSoundModification()";
+        EnergyProbe probe = null;
+        AudioEffect vc = null;
+        MediaPlayer mp = null;
+        AudioEffect rvb = null;
+        AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC,
+                           am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                           0);
+        try {
+            // creating a volume controller on output mix ensures that ro.audio.silent mutes
+            // audio after the effects and not before
+            vc = new AudioEffect(
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
+            vc.setEnabled(true);
+
+            mp = new MediaPlayer();
+            mp.setDataSource(MediaNames.SINE_200_1000);
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+            // create reverb with UUID instead of PresetReverb constructor otherwise an auxiliary
+            // reverb will be chosen by the effect framework as we are on session 0
+            rvb = new AudioEffect(
+                        AudioEffect.EFFECT_TYPE_NULL,
+                        PRESET_REVERB_EFFECT_UUID,
+                        0,
+                        0);
+
+            rvb.setParameter(PresetReverb.PARAM_PRESET, PresetReverb.PRESET_PLATE);
+            rvb.setEnabled(true);
+
+            // create probe after reverb so that it is chained behind the reverb in the
+            // effect chain
+            probe = new EnergyProbe(0);
+
+            mp.prepare();
+            mp.start();
+            Thread.sleep(1000);
+            mp.stop();
+            Thread.sleep(200);
+            // measure energy around 1kHz after media player was stopped for 200 ms
+            int energy1000 = probe.capture(1000);
+            assertTrue(msg + ": reverb has no effect", energy1000 > 0);
+            result = true;
+        } catch (IllegalArgumentException e) {
+            msg = msg.concat(": Bad parameter value");
+            loge(msg, "Bad parameter value");
+        } catch (UnsupportedOperationException e) {
+            msg = msg.concat(": get parameter() rejected");
+            loge(msg, "get parameter() rejected");
+        } catch (IllegalStateException e) {
+            msg = msg.concat("get parameter() called in wrong state");
+            loge(msg, "get parameter() called in wrong state");
+        } catch (InterruptedException e) {
+            loge(msg, "sleep() interrupted");
+        }
+        finally {
+            if (mp != null) {
+                mp.release();
+            }
+            if (vc != null) {
+                vc.release();
+            }
+            if (rvb != null) {
+                rvb.release();
+            }
+            if (probe != null) {
+                probe.release();
+            }
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+        }
+        assertTrue(msg, result);
+    }
+
     //-----------------------------------------------------------------
     // private methods
     //----------------------------------
 
-    private void getVirtualizer(int session) {
-         if (mVirtualizer == null || session != mSession) {
-             if (session != mSession && mVirtualizer != null) {
-                 mVirtualizer.release();
-                 mVirtualizer = null;
+    private void getReverb(int session) {
+         if (mReverb == null || session != mSession) {
+             if (session != mSession && mReverb != null) {
+                 mReverb.release();
+                 mReverb = null;
              }
              try {
-                mVirtualizer = new Virtualizer(0, session);
+                mReverb = new PresetReverb(0, session);
                 mSession = session;
             } catch (IllegalArgumentException e) {
-                Log.e(TAG, "getVirtualizer() Virtualizer not found exception: "+e);
+                Log.e(TAG, "getReverb() PresetReverb not found exception: "+e);
             } catch (UnsupportedOperationException e) {
-                Log.e(TAG, "getVirtualizer() Effect library not loaded exception: "+e);
+                Log.e(TAG, "getReverb() Effect library not loaded exception: "+e);
             }
          }
-         assertNotNull("could not create mVirtualizer", mVirtualizer);
+         assertNotNull("could not create mReverb", mReverb);
     }
 
-    private void releaseVirtualizer() {
-        if (mVirtualizer != null) {
-            mVirtualizer.release();
-            mVirtualizer = null;
+    private void releaseReverb() {
+        if (mReverb != null) {
+            mReverb.release();
+            mReverb = null;
         }
    }
 
 }
-

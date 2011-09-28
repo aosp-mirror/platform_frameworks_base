@@ -15,7 +15,7 @@
  */
 
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.videoeditor;
 
 import java.io.File;
 import java.io.IOException;
