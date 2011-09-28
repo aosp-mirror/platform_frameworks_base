@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.mediaplayback;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
 import com.android.mediaframeworktest.MediaProfileReader;
+import com.android.mediaframeworktest.functional.CodecTest;
 
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase;
@@ -31,16 +32,15 @@ import java.io.File;
 
 /**
  * Junit / Instrumentation test case for the media player api
- 
- */  
-public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFrameworkTest> {    
+ */
+public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFrameworkTest> {
    private boolean duratoinWithinTolerence = false;
    private String TAG = "MediaPlayerApiTest";
    private boolean isWMAEnable = false;
    private boolean isWMVEnable = false;
-   
+
    Context mContext;
-  
+
    public MediaPlayerApiTest() {
      super("com.android.mediaframeworktest", MediaFrameworkTest.class);
      isWMAEnable = MediaProfileReader.getWMAEnable();
