@@ -512,11 +512,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     @Override
     public void onScreenTurnedOn() {
         mScreenOn = true;
-        if (mMode == Mode.LockScreen) {
-            ((KeyguardScreen) mLockScreen).onResume();
-        } else {
-            ((KeyguardScreen) mUnlockScreen).onResume();
-        }
+        show();
 
         // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
         // But only if not dealing with a call
@@ -524,6 +520,15 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             bindToFaceLock();
         } else {
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+        }
+    }
+
+    @Override
+    public void show() {
+        if (mMode == Mode.LockScreen) {
+            ((KeyguardScreen) mLockScreen).onResume();
+        } else {
+            ((KeyguardScreen) mUnlockScreen).onResume();
         }
     }
 
