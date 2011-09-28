@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.mediarecorder;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;

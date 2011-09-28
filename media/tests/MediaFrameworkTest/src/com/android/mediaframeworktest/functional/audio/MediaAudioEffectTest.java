@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
@@ -1529,4 +1529,3 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
     }
 
 }
-

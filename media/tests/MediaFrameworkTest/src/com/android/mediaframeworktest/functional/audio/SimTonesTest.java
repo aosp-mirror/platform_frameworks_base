@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediaframeworktest.functional.audio;
 
 // import android.content.Resources;
 import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.functional.TonesAutoTest;
 
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase;
@@ -70,4 +71,3 @@ public class SimTonesTest extends ActivityInstrumentationTestCase<MediaFramework
      assertTrue("Stress Tones", result);  
    }
 }
-
