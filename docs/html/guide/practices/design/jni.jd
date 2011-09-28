@@ -26,9 +26,9 @@ page.title=JNI Tips
 </div>
 </div>
 
-<p>JNI is the Java Native Interface.  It defines a way for code written in the
-Java programming language to interact with native
-code: functions written in C/C++.  It's VM-neutral, has support for loading code from
+<p>JNI is the Java Native Interface.  It defines a way for managed code
+(written in the Java programming language) to interact with native
+code (written in C/C++).  It's vendor-neutral, has support for loading code from
 dynamic shared libraries, and while cumbersome at times is reasonably efficient.</p>
 
 <p>You really should read through the
@@ -46,13 +46,13 @@ There's a more detailed <a href="http://java.sun.com/docs/books/jni/html/jniTOC.
 pointers to pointers to function tables.  (In the C++ version, they're classes with a
 pointer to a function table and a member function for each JNI function that indirects through
 the table.)  The JavaVM provides the "invocation interface" functions,
-which allow you to create and destroy the VM.  In theory you can have multiple VMs per process,
-but Android's VM only allows one.</p>
+which allow you to create and destroy a JavaVM.  In theory you can have multiple JavaVMs per process,
+but Android only allows one.</p>
 
 <p>The JNIEnv provides most of the JNI functions.  Your native functions all receive a JNIEnv as
 the first argument.</p>
 
-<p>On some VMs, the JNIEnv is used for thread-local storage.  For this reason, <strong>you cannot share a JNIEnv between threads</strong>.
+<p>The JNIEnv is used for thread-local storage.  For this reason, <strong>you cannot share a JNIEnv between threads</strong>.
 If a piece of code has no other way to get its JNIEnv, you should share
 the JavaVM, and use <code>GetEnv</code> to discover the thread's JNIEnv. (Assuming it has one; see <code>AttachCurrentThread</code> below.)</p>
 
@@ -66,23 +66,22 @@ that header refers to JNIEnv.)</p>
 <a name="threads" id="threads"></a>
 <h2>Threads</h2>
 
-<p>All VM threads are Linux threads, scheduled by the kernel.  They're usually
-started using Java language features (notably <code>Thread.start</code>),
-but they can also be created elsewhere and then attached to the VM.  For
+<p>All threads are Linux threads, scheduled by the kernel.  They're usually
+started from managed code (using <code>Thread.start</code>),
+but they can also be created elsewhere and then attached to the JavaVM.  For
 example, a thread started with <code>pthread_create</code> can be attached
 with the JNI <code>AttachCurrentThread</code> or
 <code>AttachCurrentThreadAsDaemon</code> functions.  Until a thread is
-attached to the VM, it has no JNIEnv, and
-<strong>cannot make JNI calls</strong>.</p>
+attached, it has no JNIEnv, and <strong>cannot make JNI calls</strong>.</p>
 
-<p>Attaching a natively-created thread causes the VM to allocate and initialize
-a <code>Thread</code> object, add it to the "main" <code>ThreadGroup</code>,
-and add the thread to the set that is visible to the debugger.  Calling
-<code>AttachCurrentThread</code> on an already-attached thread is a no-op.</p>
+<p>Attaching a natively-created thread causes a <code>java.lang.Thread</code>
+object to be constructed and added to the "main" <code>ThreadGroup</code>,
+making it visible to the debugger.  Calling <code>AttachCurrentThread</code>
+on an already-attached thread is a no-op.</p>
 
-<p>The Dalvik VM does not suspend threads executing native code.  If
+<p>Android does not suspend threads executing native code.  If
 garbage collection is in progress, or the debugger has issued a suspend
-request, the VM will pause the thread the next time it makes a JNI call.</p>
+request, Android will pause the thread the next time it makes a JNI call.</p>
 
 <p>Threads attached through JNI <strong>must call
 <code>DetachCurrentThread</code> before they exit</strong>.
@@ -108,12 +107,12 @@ the argument.)</p>
 </ul>
 
 <p>Similarly, to call a method, you'd first get a class object reference and then a method ID.  The IDs are often just
-pointers to internal VM data structures.  Looking them up may require several string
+pointers to internal runtime data structures.  Looking them up may require several string
 comparisons, but once you have them the actual call to get the field or invoke the method
 is very quick.</p>
 
 <p>If performance is important, it's useful to look the values up once and cache the results
-in your native code.  Because there is a limit of one VM per process, it's reasonable
+in your native code.  Because there is a limit of one JavaVM per process, it's reasonable
 to store this data in a static local structure.</p>
 
 <p>The class references, field IDs, and method IDs are guaranteed valid until the class is unloaded.  Classes
@@ -145,13 +144,17 @@ then reloaded, it will be executed again.</p>
 <a name="local_and_global_references" id="local_and_global_references"></a>
 <h2>Local and Global References</h2>
 
-<p>Every object that JNI returns is a "local reference".  This means that it's valid for the
+<p>Every argument passed to a native method, and almost every object returned
+by a JNI function is a "local reference".  This means that it's valid for the
 duration of the current native method in the current thread.
-<strong>Even if the object itself continues to live on after the native method returns, the reference is not valid.</strong>
-This applies to all sub-classes of <code>jobject</code>, including
+<strong>Even if the object itself continues to live on after the native method
+returns, the reference is not valid.</strong>
+<p>This applies to all sub-classes of <code>jobject</code>, including
 <code>jclass</code>, <code>jstring</code>, and <code>jarray</code>.
-(Dalvik VM will warn you about most reference mis-uses when extended JNI
+(The runtime will warn you about most reference mis-uses when extended JNI
 checks are enabled.)</p>
+<p>The only way to get non-local references is via the functions
+<code>NewGlobalRef</code> and <code>NewWeakGlobalRef</code>.
 
 <p>If you want to hold on to a reference for a longer period, you must use
 a "global" reference.  The <code>NewGlobalRef</code> function takes the
@@ -159,7 +162,7 @@ local reference as an argument and returns a global one.
 The global reference is guaranteed to be valid until you call
 <code>DeleteGlobalRef</code>.</p>
 
-<p>This pattern is commonly used when caching copies of class objects obtained
+<p>This pattern is commonly used when caching a jclass returned
 from <code>FindClass</code>, e.g.:</p>
 <pre>jclass localClass = env-&gt;FindClass("MyClass");
 jclass globalClass = reinterpret_cast&lt;jclass&gt;(env-&gt;NewGlobalRef(localClass));</pre>
@@ -181,22 +184,25 @@ not use <code>jobject</code> values as keys.</p>
 
 <p>Programmers are required to "not excessively allocate" local references.  In practical terms this means
 that if you're creating large numbers of local references, perhaps while running through an array of
-Objects, you should free them manually with
+objects, you should free them manually with
 <code>DeleteLocalRef</code> instead of letting JNI do it for you.  The
-VM is only required to reserve slots for
+implementation is only required to reserve slots for
 16 local references, so if you need more than that you should either delete as you go or use
-<code>EnsureLocalCapacity</code> to reserve more.</p>
+<code>EnsureLocalCapacity</code>/<code>PushLocalFrame</code> to reserve more.</p>
 
-<p>Note that <code>jfieldID</code>s and <code>jmethodID</code>s are just integers, not object
-references, and should not be passed to <code>NewGlobalRef</code>.  The raw data
+<p>Note that <code>jfieldID</code>s and <code>jmethodID</code>s are opaque
+types, not object references, and should not be passed to
+<code>NewGlobalRef</code>.  The raw data
 pointers returned by functions like <code>GetStringUTFChars</code>
-and <code>GetByteArrayElements</code> are also not objects.</p>
+and <code>GetByteArrayElements</code> are also not objects. (They may be passed
+between threads, and are valid until the matching Release call.)</p>
 
 <p>One unusual case deserves separate mention.  If you attach a native
-thread to the VM with <code>AttachCurrentThread</code>, the code you are running will
-never "return" to the VM until the thread detaches from the VM.  Any local
-references you create will have to be deleted manually unless you're going
-to detach the thread soon.</p>
+thread with <code>AttachCurrentThread</code>, the code you are running will
+never automatically free local references until the thread detaches.  Any local
+references you create will have to be deleted manually. In general, any native
+code that creates local references in a loop probably needs to do some manual
+deletion.</p>
 
 <a name="UTF_8_and_UTF_16_strings" id="UTF_8_and_UTF_16_strings"></a>
 <h2>UTF-8 and UTF-16 Strings</h2>
@@ -205,14 +211,15 @@ to detach the thread soon.</p>
 modified encoding is useful for C code because it encodes \u0000 as 0xc0 0x80 instead of 0x00.
 The nice thing about this is that you can count on having C-style zero-terminated strings,
 suitable for use with standard libc string functions.  The down side is that you cannot pass
-arbitrary UTF-8 data into the VM and expect it to work correctly.</p>
+arbitrary UTF-8 data to JNI and expect it to work correctly.</p>
 
-<p>It's usually best to operate with UTF-16 strings.  With Android's current VMs, the
-<code>GetStringChars</code> method
-does not require a copy, whereas <code>GetStringUTFChars</code> requires a malloc and a UTF conversion.  Note that
+<p>If possible, it's usually faster to operate with UTF-16 strings. Android
+currently does not require a copy in <code>GetStringChars</code>, whereas
+<code>GetStringUTFChars</code> requires an allocation and a conversion to
+UTF-8.  Note that
 <strong>UTF-16 strings are not zero-terminated</strong>, and \u0000 is allowed,
 so you need to hang on to the string length as well as
-the string pointer.</p>
+the jchar pointer.</p>
 
 <p><strong>Don't forget to <code>Release</code> the strings you <code>Get</code></strong>.  The
 string functions return <code>jchar*</code> or <code>jbyte*</code>, which
@@ -237,9 +244,8 @@ While arrays of objects must be accessed one entry at a time, arrays of
 primitives can be read and written directly as if they were declared in C.</p>
 
 <p>To make the interface as efficient as possible without constraining
-the VM implementation,
-the <code>Get&lt;PrimitiveType&gt;ArrayElements</code> family of calls
-allows the VM to either return a pointer to the actual elements, or
+the VM implementation, the <code>Get&lt;PrimitiveType&gt;ArrayElements</code>
+family of calls allows the runtime to either return a pointer to the actual elements, or
 allocate some memory and make a copy.  Either way, the raw pointer returned
 is guaranteed to be valid until the corresponding <code>Release</code> call
 is issued (which implies that, if the data wasn't copied, the array object
@@ -253,7 +259,7 @@ non-NULL pointer for the <code>isCopy</code> argument.  This is rarely
 useful.</p>
 
 <p>The <code>Release</code> call takes a <code>mode</code> argument that can
-have one of three values.  The actions performed by the VM depend upon
+have one of three values.  The actions performed by the runtime depend upon
 whether it returned a pointer to the actual data or a copy of it:</p>
 
 <ul>
@@ -312,8 +318,9 @@ to do is copy data in or out.  Consider the following:</p>
     }</pre>
 
 <p>This grabs the array, copies the first <code>len</code> byte
-elements out of it, and then releases the array.  Depending upon the VM
-policies the <code>Get</code> call will either pin or copy the array contents.
+elements out of it, and then releases the array.  Depending upon the
+implementation, the <code>Get</code> call will either pin or copy the array
+contents.
 The code copies the data (for perhaps a second time), then calls <code>Release</code>; in this case
 <code>JNI_ABORT</code> ensures there's no chance of a third copy.</p>
 
@@ -335,7 +342,7 @@ to copy data into an array, and <code>GetStringRegion</code> or
 
 
 <a name="exceptions" id="exceptions"></a>
-<h2>Exception</h2>
+<h2>Exceptions</h2>
 
 <p><strong>You must not call most JNI functions while an exception is pending.</strong>
 Your code is expected to notice the exception (via the function's return value,
@@ -369,11 +376,11 @@ you call a method (using a function like <code>CallObjectMethod</code>),
 you must always check for an exception, because the return value is not
 going to be valid if an exception was thrown.</p>
 
-<p>Note that exceptions thrown by interpreted code do not "leap over" native code,
-and C++ exceptions thrown by native code are not handled by Dalvik.
+<p>Note that exceptions thrown by interpreted code do not unwind native stack
+frames, and Android does not yet support C++ exceptions.
 The JNI <code>Throw</code> and <code>ThrowNew</code> instructions just
-set an exception pointer in the current thread.  Upon returning to the VM from
-native code, the exception will be noted and handled appropriately.</p>
+set an exception pointer in the current thread.  Upon returning to managed
+from native code, the exception will be noted and handled appropriately.</p>
 
 <p>Native code can "catch" an exception by calling <code>ExceptionCheck</code> or
 <code>ExceptionOccurred</code>, and clear it with
@@ -476,23 +483,19 @@ written in C++:</p>
 shared library.  For Android apps, you may find it useful to get the full
 path to the application's private data storage area from the context object.</p>
 
-<p>This is the recommended approach, but not the only approach.  The VM does
-not require explicit registration, nor that you provide a
+<p>This is the recommended approach, but not the only approach.  Explicit
+registration is not required, nor is it necessary that you provide a
 <code>JNI_OnLoad</code> function.
 You can instead use "discovery" of native methods that are named in a
-specific way (see <a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/design.html#wp615">
-    the JNI spec</a> for details), though this is less desirable.
-It requires more space in the shared object symbol table,
-loading is slower because it requires string searches through all of the
-loaded shared libraries, and if a method signature is wrong you won't know
+specific way (see <a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/design.html#wp615">the JNI spec</a> for details), though this is less desirable because if a method signature is wrong you won't know
 about it until the first time the method is actually used.</p>
 
 <p>One other note about <code>JNI_OnLoad</code>: any <code>FindClass</code>
 calls you make from there will happen in the context of the class loader
 that was used to load the shared library.  Normally <code>FindClass</code>
 uses the loader associated with the method at the top of the interpreted
-stack, or if there isn't one (because the thread was just attached to
-the VM) it uses the "system" class loader.  This makes
+stack, or if there isn't one (because the thread was just attached) it uses
+the "system" class loader.  This makes
 <code>JNI_OnLoad</code> a convenient place to look up and cache class
 object references.</p>
 
@@ -515,10 +518,9 @@ that use 64-bit pointers, <strong>you need to stash your native pointers in a
 
 <p>All JNI 1.6 features are supported, with the following exceptions:</p>
 <ul>
-    <li><code>DefineClass</code> is not implemented.  Dalvik does not use
+    <li><code>DefineClass</code> is not implemented.  Android does not use
     Java bytecodes or class files, so passing in binary class data
-    doesn't work.  Translation facilities may be added in a future
-    version of the VM.</li>
+    doesn't work.</li>
     <li>"Weak global" references are implemented, but may only be passed
     to <code>NewLocalRef</code>, <code>NewGlobalRef</code>, and
     <code>DeleteWeakGlobalRef</code>.  (The spec strongly encourages
@@ -536,12 +538,16 @@ that use 64-bit pointers, <strong>you need to stash your native pointers in a
     around this requires using explicit registration or moving the
     native methods out of inner classes.
     <li>Until Android 2.0 (Eclair), it was not possible to use a <code>pthread_key_create</code>
-    destructor function to avoid the VM's "thread must be detached before
-    exit" check.  (The VM also uses a pthread key destructor function,
+    destructor function to avoid the "thread must be detached before
+    exit" check.  (The runtime also uses a pthread key destructor function,
     so it'd be a race to see which gets called first.)
     <li>Until Android 2.2 (Froyo), weak global references were not implemented.
-    Older VMs will vigorously reject attempts to use them.  You can use
+    Older versions will vigorously reject attempts to use them.  You can use
     the Android platform version constants to test for support.
+    <li>Until Android 4.0 (Ice Cream Sandwich), JNI local references were
+    actually direct pointers. Ice Cream Sandwich added the indirection
+    necessary to support better garbage collectors, but this means that lots
+    of JNI bugs are undetectable on older releases.
 </ul>
 
 
@@ -572,8 +578,8 @@ the details of the failure can be found in the exception's detail message.</p>
 <p>In logcat, you'll see:</p>
 <pre>W/dalvikvm(  880): No implementation found for native LFoo;.myfunc ()V</pre>
 
-<p>This means that the VM tried to find a matching method but was unsuccessful.
-Some common reasons for this are:</p>
+<p>This means that the runtime tried to find a matching method but was
+unsuccessful.  Some common reasons for this are:</p>
 <ul>
     <li>The library isn't getting loaded.  Check the logcat output for
     messages about library loading.
@@ -581,10 +587,15 @@ Some common reasons for this are:</p>
     is commonly caused by:
     <ul>
         <li>For lazy method lookup, failing to declare C++ functions
-        with <code>extern "C"</code>.  You can use <code>arm-eabi-nm</code>
+        with <code>extern "C"</code> and appropriate
+        visibility (<code>JNIEXPORT</code>). Note that prior to Ice Cream
+        Sandwich, the JNIEXPORT macro was incorrect, so using a new GCC with
+        an old <code>jni.h</code> won't work.
+        You can use <code>arm-eabi-nm</code>
         to see the symbols as they appear in the library; if they look
         mangled (something like <code>_Z15Java_Foo_myfuncP7_JNIEnvP7_jclass</code>
-        rather than <code>Java_Foo_myfunc</code>) then you need to
+        rather than <code>Java_Foo_myfunc</code>), or if the symbol type is
+        a lowercase 't' rather than an uppercase 'T', then you need to
         adjust the declaration.
         <li>For explicit registration, minor errors when entering the
         method signature.  Make sure that what you're passing to the
@@ -612,7 +623,7 @@ must also wrap the class with 'L' and ';', so a one-dimensional array of
 
 <p>If the class name looks right, you could be running into a class loader
 issue.  <code>FindClass</code> wants to start the class search in the
-class loader associated with your code.  It examines the VM call stack,
+class loader associated with your code.  It examines the call stack,
 which will look something like:
 <pre>    Foo.myfunc(Native Method)
     Foo.main(Foo.java:10)
@@ -623,14 +634,14 @@ finds the <code>ClassLoader</code> object associated with the <code>Foo</code>
 class and uses that.</p>
 
 <p>This usually does what you want.  You can get into trouble if you
-create a thread outside the VM (perhaps by calling <code>pthread_create</code>
-and then attaching it to the VM with <code>AttachCurrentThread</code>).
+create a thread yourself (perhaps by calling <code>pthread_create</code>
+and then attaching it with <code>AttachCurrentThread</code>).
 Now the stack trace looks like this:</p>
 <pre>    dalvik.system.NativeStart.run(Native Method)</pre>
 
 <p>The topmost method is <code>NativeStart.run</code>, which isn't part of
 your application.  If you call <code>FindClass</code> from this thread, the
-VM will start in the "system" class loader instead of the one associated
+JavaVM will start in the "system" class loader instead of the one associated
 with your application, so attempts to find app-specific classes will fail.</p>
 
 <p>There are a few ways to work around this:</p>
@@ -656,12 +667,12 @@ with your application, so attempts to find app-specific classes will fail.</p>
 <h2>FAQ: How do I share raw data with native code?</h2>
 
 <p>You may find yourself in a situation where you need to access a large
-buffer of raw data from code written in Java and C/C++.  Common examples
+buffer of raw data from both managed and native code.  Common examples
 include manipulation of bitmaps or sound samples.  There are two
 basic approaches.</p>
 
 <p>You can store the data in a <code>byte[]</code>.  This allows very fast
-access from code written in Java.  On the native side, however, you're
+access from managed code.  On the native side, however, you're
 not guaranteed to be able to access the data without having to copy it.  In
 some implementations, <code>GetByteArrayElements</code> and
 <code>GetPrimitiveArrayCritical</code> will return actual pointers to the
@@ -674,8 +685,8 @@ the JNI <code>NewDirectByteBuffer</code> function.  Unlike regular
 byte buffers, the storage is not allocated on the managed heap, and can
 always be accessed directly from native code (get the address
 with <code>GetDirectBufferAddress</code>).  Depending on how direct
-byte buffer access is implemented in the VM, accessing the data from code
-written in Java can be very slow.</p>
+byte buffer access is implemented, accessing the data from managed code
+can be very slow.</p>
 
 <p>The choice of which to use depends on two factors:</p>
 <ol>
@@ -688,5 +699,4 @@ written in Java can be very slow.</p>
 </ol>
 
 <p>If there's no clear winner, use a direct byte buffer.  Support for them
-is built directly into JNI, and access to them from code written in
-Java can be made faster with VM improvements.</p>
+is built directly into JNI, and performance should improve in future releases.</p>
