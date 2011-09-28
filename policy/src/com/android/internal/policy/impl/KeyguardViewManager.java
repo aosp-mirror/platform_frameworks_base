@@ -167,7 +167,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             mKeyguardHost.addView(mKeyguardView, lp);
 
             if (mScreenOn) {
-                mKeyguardView.onScreenTurnedOn();
+                mKeyguardView.show();
             }
         }
 

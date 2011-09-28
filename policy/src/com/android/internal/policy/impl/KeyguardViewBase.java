@@ -99,6 +99,11 @@ public abstract class KeyguardViewBase extends FrameLayout {
     abstract public void onScreenTurnedOn();
 
     /**
+     * Called when the view needs to be shown.
+     */
+    abstract public void show();
+
+    /**
      * Called when a key has woken the device to give us a chance to adjust our
      * state according the the key.  We are responsible for waking the device
      * (by poking the wake lock) once we are ready.
