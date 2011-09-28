@@ -34,7 +34,6 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View.AccessibilityDelegate;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
@@ -2561,7 +2560,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
+            if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE ||
+                    child.getAnimation() != null) && child.getLayerType() == LAYER_TYPE_NONE) {
                 child.mRecreateDisplayList = (child.mPrivateFlags & INVALIDATED) == INVALIDATED;
                 child.mPrivateFlags &= ~INVALIDATED;
                 child.getDisplayList();
