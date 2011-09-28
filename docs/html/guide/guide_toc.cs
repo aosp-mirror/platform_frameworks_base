@@ -693,17 +693,20 @@
         <ul>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
-                   <span class="en">Icon Design</span>
+                   <span class="en">Icon Design <span class="new">updated</span></span>
                  </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_launcher.html">
-                    <span class="en">Launcher Icons</span>
+                    <span class="en">Launcher Icons <span class="new">updated</span></span>
                   </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_menu.html">
                     <span class="en">Menu Icons</span>
                   </a></li>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_action_bar.html">
+                    <span class="en">Action Bar Icons <span class="new">new!</span></span>
+                  </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_status_bar.html">
-                    <span class="en">Status Bar Icons</span>
+                    <span class="en">Status Bar Icons <span class="new">updated</span></span>
                   </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_tab.html">
                     <span class="en">Tab Icons</span>

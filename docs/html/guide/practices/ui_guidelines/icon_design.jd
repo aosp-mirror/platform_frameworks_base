@@ -36,6 +36,8 @@ parent.link=index.html
 <h2>Downloads</h2>
 
 <ol>
+<li><a href="{@docRoot}shareables/icon_templates-v4.0.zip">Android Icon
+Templates Pack, v4.0 &raquo;</a></li>
 <li><a href="{@docRoot}shareables/icon_templates-v2.3.zip">Android Icon
 Templates Pack, v2.3 &raquo;</a></li>
 <li><a href="{@docRoot}shareables/icon_templates-v2.0.zip">Android Icon
@@ -74,6 +76,10 @@ icons used throughout Android applications:</p>
   <dt><strong><a href="icon_design_menu.html">Menu Icons</a></strong></dt>
   <dd>Menu icons are graphical elements placed in the options menu shown to
   users when they press the Menu button.</dd>
+  <dt><strong><a href="icon_design_action_bar.html">Action Bar Icons</a>
+  <span class="new">new!</span></strong></dt>
+  <dd>Action Bar icons are graphical elements representing action items in the
+  <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>.</dd>
   <dt><strong><a href="icon_design_status_bar.html">Status Bar Icons</a></strong></dt>
   <dd>Status bar icons are used to represent notifications from your
   application in the status bar.</dd>
@@ -112,8 +118,8 @@ with the layers and treatments may vary based on the program you are using.</p>
 </p>
 
 <p style="margin-left:2em"><a
-href="{@docRoot}shareables/icon_templates-v2.3.zip">Download the Icon Templates
-Pack for Android 2.3 &raquo;</a>
+href="{@docRoot}shareables/icon_templates-v4.0.zip">Download the Icon Templates
+Pack for Android 4.0 &raquo;</a>
 
 <p>For previous versions of the Icon Templates Pack, see the <em>Downloads</em>
 section in the box at the top-right corner of this page.</p>
@@ -134,7 +140,7 @@ provide icons in such a way that they will be displayed properly on any device,
 regardless of the device's screen size or resolution.</p>
 
 <p>In general, the recommended approach is to create a separate set of icons for
-each of the three generalized screen densities listed in Table 1. Then,
+each generalized screen density. Then,
 store them in density-specific resource directories in your application. When
 your application runs, the Android platform will check the characteristics of
 the device screen and load icons from the appropriate density-specific
@@ -145,145 +151,6 @@ directory qualifiers for screen size and density</a>. </p>
 
 <p>For tips on how to create and manage icon sets for multiple densities, see 
 <a href="#design-tips">Tips for Designers</a>.</p>
-
-<p class="table-caption" id="screens-table"><strong>Table 1.</strong> Summary of
-finished icon dimensions for each of the three generalized screen densities, by
-icon type.</p>
-
-  <table>
-    <tbody>
-<tr>
-<th>Icon Type</th><th colspan="3">Standard Asset Sizes (in Pixels), for
-Generalized Screen Densities</th></tr>
-    <tr>
-      <td style="background-color:#f3f3f3"></td>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        <nobr>Low density screen <em>(ldpi)</em></nobr>
-      </th>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        <nobr>Medium density screen <em>(mdpi)</em></nobr>
-      </th>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        <nobr>High density screen <em>(hdpi)</em><nobr>
-      </th>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        Launcher
-      </th>
-      <td>
-          36 x 36 px
-      </td>
-
-      <td>
-         48 x 48 px
-      </td>
-      <td>
-          72 x 72 px
-      </td>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        Menu
-      </th>
-      <td>
-          36 x 36 px
-      </td>
-
-      <td>
-         48 x 48 px
-      </td>
-      <td>
-          72 x 72 px
-      </td>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        Status Bar (Android 2.3 and later)
-      </th>
-      <td>
-        12w x 19h px<br>
-        (preferred, width may vary)
-      </td>
-
-      <td>
-        16w x 25h px<br>
-        (preferred, width may vary)
-      </td>
-      <td>
-         24w x 38h px<br>
-        (preferred, width may vary)
-      </td>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        Status Bar (Android 2.2 and below)
-      </th>
-      <td>
-          19 x 19 px
-      </td>
-
-      <td>
-         25 x 25 px
-      </td>
-      <td>
-          38 x 38 px
-      </td>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        Tab
-      </th>
-      <td>
-          24 x 24 px
-      </td>
-
-      <td>
-         32 x 32 px
-      </td>
-      <td>
-          48 x 48 px
-      </td>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        Dialog
-      </th>
-      <td>
-          24 x 24 px
-      </td>
-
-      <td>
-         32 x 32 px
-      </td>
-      <td>
-          48 x 48 px
-      </td>
-    </tr>
-
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        List View
-      </th>
-      <td>
-          24 x 24 px
-      </td>
-
-      <td>
-         32 x 32 px
-      </td>
-      <td>
-          48 x 48 px
-      </td>
-    </tr>
-    </tbody>
-  </table>
 
 
 
@@ -317,7 +184,7 @@ common prefix for each icon type. For example:</p>
 <td><code>ic_launcher_calendar.png</code></td>
 </tr>
 <tr>
-<td>Menu icons</td>
+<td>Menu icons and Action Bar icons</td>
 <td><code>ic_menu</code></td>
 <td><code>ic_menu_archive.png</code></td>
 </tr>
@@ -349,7 +216,7 @@ of the same icon. To help keep the multiple copies of files safe and easier to
 find, we recommend creating a directory structure in your working space that
 organizes asset files per resolution. For example:</p>
 
-<pre>assets/...
+<pre>art/...
     ldpi/...
         _pre_production/...
             <em>working_file</em>.psd
@@ -359,6 +226,10 @@ organizes asset files per resolution. For example:</p>
             <em>working_file</em>.psd
         <em>finished_asset</em>.png
     hdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png
+    xhdpi/...
         _pre_production/...
             <em>working_file</em>.psd
         <em>finished_asset</em>.png</pre>
@@ -380,6 +251,8 @@ application: </p>
     drawable-mdpi/...
         <em>finished_asset</em>.png
     drawable-hdpi/...
+        <em>finished_asset</em>.png
+    drawable-xhdpi/...
         <em>finished_asset</em>.png</pre>
 
 
@@ -398,24 +271,15 @@ boundaries at smaller resolutions.</li>
 
 <h3>Start with large artboards</h3>
 
-<p>Because you will need to create assets for different screen densities, as
-shown in <a href="#screens-table">Table 1</a>, it is best to start your icon
+<p>Because you will need to create assets for different screen densities,
+it is best to start your icon
 designs on large artboards with dimensions that are multiples of the target icon
 sizes. For example, <a
 href="{@docRoot}guide/practices/ui_guidelines/icon_design_launcher.html">launcher
-icons</a> are 72, 48, or 36 pixels wide, depending on screen density. If you
+icons</a> are 96, 72, 48, or 36 pixels wide, depending on screen density. If you
 initially draw launcher icons on an 864x864 artboard, it will be easier and
 cleaner to tweak the icons when you scale the artboard down to the target
 sizes for final asset creation.</p>
-
-<p>It's also beneficial to add guide lines (also known as guides) to your large
-artboard for the recommended safe margins at the highest target density.
-Continuing with the example above, per the <a
-href="{@docRoot}guide/practices/ui_guidelines/icon_design_launcher.html#size5">guidelines</a>,
-launcher icon content should be 60x60 pixels (56x56 for square icons) within the
-full 72x72 asset, or a safe margin of 6 pixels on each side. On an 864x864
-artboard, this corresponds to horizontal and vertical guide lines 72 pixels from
-each side of the artboard.</p>
 
   
 
@@ -431,22 +295,12 @@ densities. For example if a 60x60 circle was painted as a bitmap for
 
 <h3>When saving image assets, remove unnecessary metadata</h3>
 
-<p>To help keep each image asset as small as possible, make sure to remove any
-unnecessary headers from the file, such as Adobe Fireworks metadata or Adobe
-Photoshop headers. To remove the Photoshop header, follow these steps: </p>
-
-<ol>
-<li>Under the <strong>File</strong> menu, choose the <strong>Save for Web &amp;
-Devices</strong> command </li>
-<li>On the "Save for Web &amp; Devices" panel, set the Preset pop-up to
-"PNG-24," set the pop-up under Presets to "PNG-24" as well, and select the
-Transparency box (if the image uses transparency)</li>
-<li>Select <strong>Save</strong>.</li>
-</ol>
-
-<p>It is also useful to use PNG file size optimization tools such as <a
+<p>Although the Android SDK tools will automatically compress PNGs when packaging
+application resources into the application binary, a good practice is to remove
+unnecessary headers and metadata from your PNG assets. Tools such as <a
 href="http://optipng.sourceforge.net/">OptiPNG</a> or <a
-href="http://pmt.sourceforge.net/pngcrush/">Pngcrush</a>.
+href="http://pmt.sourceforge.net/pngcrush/">Pngcrush</a> can ensure that this
+metadata is removed and that your image asset file sizes are optimized.</p>
 
 
 

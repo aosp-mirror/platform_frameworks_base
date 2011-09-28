@@ -9,7 +9,8 @@ parent.link=icon_design.html
 <h2>In this document</h2>
 
 <ol>
-<li><a href="#icon9">Android 2.3 and Later</a>
+<li><a href="#icon11">Android 3.0 and Later</a>
+<li><a href="#icon9">Android 2.3</a>
   <ol>
     <li><a href="#size9">Size</a></li>
     <li><a href="#style9">Style, colors, and effects</a></li>
@@ -37,11 +38,13 @@ when they press the Menu button. They are drawn in a flat-front perspective and
 in greyscale. Elements in a menu icon must not be visualized in 3D or
 perspective.</p>
 
-<p>As described in <a href="icon_design.html#icon-sets">Providing
-Density-Specific Icon Sets</a>, you should create separate icon sets for low-,
-medium-, and high-density screens. This ensures that your icons will display
-properly across the range of devices on which your application can be installed.
-See <a href="icon_design.html#design-tips">Tips for Designers</a>
+<p>As described in <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#icon-sets">Providing Density-Specific
+Icon Sets</a> and <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>, you should create separate icons for all generalized screen densities, including low-,
+medium-, high-, and extra-high-density screens. This ensures that your icons will display properly
+across the range of devices on which your application can be installed. See <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#design-tips">Tips for Designers</a>
 for suggestions on how to work with multiple sets of icons.</p>
 
 <p><strong>Final art must be exported as a transparent PNG file. Do not include
@@ -51,6 +54,16 @@ a background color</strong>.</p>
 href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
 Templates Pack</a>.</p>
 
+
+<h2 id="icon11">Android 3.0 and Later</h2>
+
+<p>As of Android 3.0, the options menu has been superseded by the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>. Please refer to the <a
+href="icon_design_action_bar.html">Action Bar Icon Design Guidelines</a> for recommendations on
+creating icons for action items.</p>
+
+
+<h2 id="icon9">Android 2.3</h2>
 
 <p class="caution"><strong>Caution:</strong> The style and content sizing of
 menu icons have changed in Android 2.3 compared to
@@ -67,12 +80,8 @@ asset. Final asset sizes have not changed.
 
 </p>
 
-
-
-<h2 id="icon9">Android 2.3 and Later</h2>
-
 <p>The following guidelines describe how to design menu icons for Android
-2.3 (API Level 9) and later.</p>
+2.3 (API Levels 9 and 10).</p>
 
 <h3 id="size9">Size and positioning</h3>
 

@@ -1,0 +1,189 @@
+page.title=Action Bar Icons
+parent.title=Icon Design Guidelines
+parent.link=icon_design.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#icon11">Android 3.0 and Later</a>
+  <ol>
+    <li><a href="#size11">Size and format</a></li>
+    <li><a href="#style11">Style, colors, and effects</a></li>
+    <li><a href="#examples11">Example icons</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+<li><a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>Action Bar icons are graphical elements placed in the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> representing individual action
+items.</p>
+
+<p>As described in <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#icon-sets">Providing Density-Specific
+Icon Sets</a> and <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>, you should create separate icons for all generalized screen densities, including low-,
+medium-, high-, and extra-high-density screens. This ensures that your icons will display properly
+across the range of devices on which your application can be installed. See <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#design-tips">Tips for Designers</a>
+for suggestions on how to work with multiple sets of icons.</p>
+
+<p><strong>Final art must be exported as a transparent PNG file. Do not include
+a background color</strong>.</p>
+
+<p>Templates for creating icons in Adobe Photoshop are available in the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
+Templates Pack</a>.</p>
+
+
+
+<h2 id="icon11">Android 3.0 and Later</h2>
+
+<p>The following guidelines describe how to design action bar icons for Android
+3.0 (API Level 11) and later.</p>
+
+
+<h3 id="size11">Size and format</h2>
+
+<p>Action Bar icons should be 32-bit PNGs with an alpha channel for transparency. The finished
+action bar icon dimensions, corresponding to a given generalized screen density, are shown in
+the table below.</p>
+
+<p class="table-caption" id="screens_table"><strong>Table 1.</strong> Summary of
+finished Action Bar icon dimensions for each generalized screen density.</p>
+
+<table>
+  <tbody>
+  <tr>
+    <th></th>
+    <th>
+      <code>ldpi</code> (120 dpi)<br>
+      <small style="font-weight: normal">(Low density screen)</small>
+    </th>
+    <th>
+      <code>mdpi</code> (160 dpi)<br>
+      <small style="font-weight: normal">(Medium density screen)</small>
+    </th>
+    <th>
+      <code>hdpi</code> (240 dpi)<br>
+      <small style="font-weight: normal">(High density screen)</small>
+    </th>
+    <th>
+      <code>xhdpi</code> (320 dpi)<br>
+      <small style="font-weight: normal">(Extra-high density screen)</small>
+    </th>
+  </tr>
+  <tr>
+    <th style="background-color:#f3f3f3;font-weight:normal">
+      Action Bar Icon Size
+    </th>
+    <td>
+      18 x 18 px
+    </td>
+    <td>
+      24 x 24 px
+    </td>
+    <td>
+      36 x 36 px
+    </td>
+    <td>
+      48 x 48 px
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+
+<h3 id="style11">Style, colors, and effects</h3>
+
+<p>Action Bar icons are flat, pictured face on, and generally greyscale, depending on the
+application's theme. Action Bar icons should not look three-dimensional.</p>
+
+<p>In order to maintain consistency across the application's Action Bar, all Action Bar icons should
+use the same color palette and effects.</p>
+
+<p>When using the default "Holo Light" or "Holo Dark" themes, icons should use the color palette
+and effects shown in Figure 1 and Figure 2, below.</p>
+
+
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/action_bar_holo_light_style.png"
+    alt="A view of effects for Action Bar icons for the 'Holo Light' theme.">
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 1. </strong>Style and effects for "Holo Light" theme Action Bar icons.</p>
+    <div class="image-caption-nested">
+    <table>
+      <tr><td><em>1.</em></td><td nowrap>Fill color:</td><td><code>#333333</code>, 60% opacity
+        <br><br></td></tr>
+      <tr><td><em>2.</em></td><td nowrap>Inner content:</td><td>Inner content should subtract from
+        the outer shape and consist purely of transparent pixels.</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/action_bar_holo_dark_style.png"
+    alt="A view of effects for Action Bar icons for the 'Holo Dark' theme.">
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 2. </strong>Style and effects for "Holo Dark" theme Action Bar icons.</p>
+    <div class="image-caption-nested">
+    <table>
+      <tr><td><em>1.</em></td><td nowrap>Fill color:</td><td><code>#ffffff</code>, 80% opacity
+        <br><br></td></tr>
+      <tr><td><em>2.</em></td><td nowrap>Inner content:</td><td>Inner content should subtract from
+        the outer shape and consist purely of transparent pixels.</td></tr>
+    </table>
+    <p class="note"><strong>Note: </strong> icons should should have a transparent background;
+      the dark background here is for effect only.</p>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+
+
+
+<h3 id="examples11">Example icons</h3>
+
+<p>Shown below are example extra-high-density Action Bar icons that are used throughout Android
+system applications.</p>
+
+<p class="warning"><strong>Warning:</strong> Because resources can change between platform versions,
+you should not reference built-in icons using the Android platform resource IDs (i.e. menu or Action
+Bar icons under <code>android.R.drawable</code>). If you want to use any icons or other internal
+drawable resources, you should store a local copy of those icons or drawables in your application
+resources, then reference the local copy from your application code. In that way, you can maintain
+control over the appearance of your icons, even if the system's copy changes. Note that the grid
+below is not intended to be complete.</p>
+
+<img src="{@docRoot}images/icon_design/action_bar_examples.png" />
