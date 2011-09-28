@@ -423,74 +423,88 @@ again:
     MediaBuffer *frame = *mPendingFrames.begin();
     mPendingFrames.erase(mPendingFrames.begin());
 
-    size_t size = frame->range_length();
-
     if (mType != AVC) {
         *out = frame;
 
         return OK;
     }
 
-    if (size < mNALSizeLen) {
-        frame->release();
-        frame = NULL;
+    // Each input frame contains one or more NAL fragments, each fragment
+    // is prefixed by mNALSizeLen bytes giving the fragment length,
+    // followed by a corresponding number of bytes containing the fragment.
+    // We output all these fragments into a single large buffer separated
+    // by startcodes (0x00 0x00 0x00 0x01).
 
-        return ERROR_MALFORMED;
+    const uint8_t *srcPtr =
+        (const uint8_t *)frame->data() + frame->range_offset();
+
+    size_t srcSize = frame->range_length();
+
+    size_t dstSize = 0;
+    MediaBuffer *buffer = NULL;
+    uint8_t *dstPtr = NULL;
+
+    for (int32_t pass = 0; pass < 2; ++pass) {
+        size_t srcOffset = 0;
+        size_t dstOffset = 0;
+        while (srcOffset + mNALSizeLen <= srcSize) {
+            size_t NALsize;
+            switch (mNALSizeLen) {
+                case 1: NALsize = srcPtr[srcOffset]; break;
+                case 2: NALsize = U16_AT(srcPtr + srcOffset); break;
+                case 3: NALsize = U24_AT(srcPtr + srcOffset); break;
+                case 4: NALsize = U32_AT(srcPtr + srcOffset); break;
+                default:
+                    TRESPASS();
+            }
+
+            if (srcOffset + mNALSizeLen + NALsize > srcSize) {
+                break;
+            }
+
+            if (pass == 1) {
+                memcpy(&dstPtr[dstOffset], "\x00\x00\x00\x01", 4);
+
+                memcpy(&dstPtr[dstOffset + 4],
+                       &srcPtr[srcOffset + mNALSizeLen],
+                       NALsize);
+            }
+
+            dstOffset += 4;  // 0x00 00 00 01
+            dstOffset += NALsize;
+
+            srcOffset += mNALSizeLen + NALsize;
+        }
+
+        if (srcOffset < srcSize) {
+            // There were trailing bytes or not enough data to complete
+            // a fragment.
+
+            frame->release();
+            frame = NULL;
+
+            return ERROR_MALFORMED;
+        }
+
+        if (pass == 0) {
+            dstSize = dstOffset;
+
+            buffer = new MediaBuffer(dstSize);
+
+            int64_t timeUs;
+            CHECK(frame->meta_data()->findInt64(kKeyTime, &timeUs));
+            int32_t isSync;
+            CHECK(frame->meta_data()->findInt32(kKeyIsSyncFrame, &isSync));
+
+            buffer->meta_data()->setInt64(kKeyTime, timeUs);
+            buffer->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
+
+            dstPtr = (uint8_t *)buffer->data();
+        }
     }
-
-    // In the case of AVC content, each NAL unit is prefixed by
-    // mNALSizeLen bytes of length. We want to prefix the data with
-    // a four-byte 0x00000001 startcode instead of the length prefix.
-    // mNALSizeLen ranges from 1 through 4 bytes, so add an extra
-    // 3 bytes of padding to the buffer start.
-    static const size_t kPadding = 3;
-
-    MediaBuffer *buffer = new MediaBuffer(size + kPadding);
-
-    int64_t timeUs;
-    CHECK(frame->meta_data()->findInt64(kKeyTime, &timeUs));
-    int32_t isSync;
-    CHECK(frame->meta_data()->findInt32(kKeyIsSyncFrame, &isSync));
-
-    buffer->meta_data()->setInt64(kKeyTime, timeUs);
-    buffer->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
-
-    memcpy((uint8_t *)buffer->data() + kPadding,
-           (const uint8_t *)frame->data() + frame->range_offset(),
-           size);
-
-    buffer->set_range(kPadding, size);
 
     frame->release();
     frame = NULL;
-
-    uint8_t *data = (uint8_t *)buffer->data();
-
-    size_t NALsize;
-    switch (mNALSizeLen) {
-        case 1: NALsize = data[kPadding]; break;
-        case 2: NALsize = U16_AT(&data[kPadding]); break;
-        case 3: NALsize = U24_AT(&data[kPadding]); break;
-        case 4: NALsize = U32_AT(&data[kPadding]); break;
-        default:
-            TRESPASS();
-    }
-
-    if (size < NALsize + mNALSizeLen) {
-        buffer->release();
-        buffer = NULL;
-
-        return ERROR_MALFORMED;
-    }
-
-    if (size > NALsize + mNALSizeLen) {
-        LOGW("discarding %d bytes of data.", size - NALsize - mNALSizeLen);
-    }
-
-    // actual data starts at &data[kPadding + mNALSizeLen]
-
-    memcpy(&data[mNALSizeLen - 1], "\x00\x00\x00\x01", 4);
-    buffer->set_range(mNALSizeLen - 1, NALsize + 4);
 
     *out = buffer;
 
