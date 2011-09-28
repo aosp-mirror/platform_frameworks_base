@@ -46,7 +46,8 @@ struct Controller : public AHandler {
           mDecodeAudio(decodeAudio),
           mSurface(surface),
           mRenderToSurface(renderToSurface),
-          mCodec(new ACodec) {
+          mCodec(new ACodec),
+          mIsVorbis(false) {
         CHECK(!mDecodeAudio || mSurface == NULL);
     }
 
@@ -85,6 +86,12 @@ protected:
                     if (!strncasecmp(mDecodeAudio ? "audio/" : "video/",
                                      mime, 6)) {
                         mSource = extractor->getTrack(i);
+
+                        if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_VORBIS)) {
+                            mIsVorbis = true;
+                        } else {
+                            mIsVorbis = false;
+                        }
                         break;
                     }
                 }
@@ -227,6 +234,7 @@ private:
     bool mRenderToSurface;
     sp<ACodec> mCodec;
     sp<MediaSource> mSource;
+    bool mIsVorbis;
 
     Vector<sp<ABuffer> > mCSD;
     size_t mCSDIndex;
@@ -369,6 +377,20 @@ private:
 
             buffer->meta()->setInt32("csd", true);
             mCSD.push(buffer);
+        } else if (meta->findData(kKeyVorbisInfo, &type, &data, &size)) {
+            sp<ABuffer> buffer = new ABuffer(size);
+            memcpy(buffer->data(), data, size);
+
+            buffer->meta()->setInt32("csd", true);
+            mCSD.push(buffer);
+
+            CHECK(meta->findData(kKeyVorbisBooks, &type, &data, &size));
+
+            buffer = new ABuffer(size);
+            memcpy(buffer->data(), data, size);
+
+            buffer->meta()->setInt32("csd", true);
+            mCSD.push(buffer);
         }
 
         int32_t maxInputSize;
@@ -423,10 +445,17 @@ private:
                     }
                 }
 
-                if (inBuffer->range_length() > sizeLeft) {
+                size_t sizeNeeded = inBuffer->range_length();
+                if (mIsVorbis) {
+                    // Vorbis data is suffixed with the number of
+                    // valid samples on the page.
+                    sizeNeeded += sizeof(int32_t);
+                }
+
+                if (sizeNeeded > sizeLeft) {
                     if (outBuffer->size() == 0) {
                         LOGE("Unable to fit even a single input buffer of size %d.",
-                             inBuffer->range_length());
+                             sizeNeeded);
                     }
                     CHECK_GT(outBuffer->size(), 0u);
 
@@ -448,10 +477,22 @@ private:
                         + inBuffer->range_offset(),
                        inBuffer->range_length());
 
-                outBuffer->setRange(
-                        0, outBuffer->size() + inBuffer->range_length());
+                if (mIsVorbis) {
+                    int32_t numPageSamples;
+                    if (!inBuffer->meta_data()->findInt32(
+                                kKeyValidSamples, &numPageSamples)) {
+                        numPageSamples = -1;
+                    }
 
-                sizeLeft -= inBuffer->range_length();
+                    memcpy(outBuffer->data()
+                            + outBuffer->size() + inBuffer->range_length(),
+                           &numPageSamples, sizeof(numPageSamples));
+                }
+
+                outBuffer->setRange(
+                        0, outBuffer->size() + sizeNeeded);
+
+                sizeLeft -= sizeNeeded;
 
                 inBuffer->release();
                 inBuffer = NULL;

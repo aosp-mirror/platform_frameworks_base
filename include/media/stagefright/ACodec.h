@@ -151,6 +151,12 @@ private:
             OMX_VIDEO_CODINGTYPE compressionFormat);
 
     status_t setupAACDecoder(int32_t numChannels, int32_t sampleRate);
+    status_t setupAMRDecoder(bool isWAMR);
+    status_t setupG711Decoder(int32_t numChannels);
+
+    status_t setupRawAudioFormat(
+            OMX_U32 portIndex, int32_t sampleRate, int32_t numChannels);
+
     status_t setMinBufferSize(OMX_U32 portIndex, size_t size);
 
     status_t initNativeWindow();

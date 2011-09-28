@@ -687,6 +687,8 @@ void ACodec::setComponentRole(
             "audio_decoder.amrwb", "audio_encoder.amrwb" },
         { MEDIA_MIMETYPE_AUDIO_AAC,
             "audio_decoder.aac", "audio_encoder.aac" },
+        { MEDIA_MIMETYPE_AUDIO_VORBIS,
+            "audio_decoder.vorbis", "audio_encoder.vorbis" },
         { MEDIA_MIMETYPE_VIDEO_AVC,
             "video_decoder.avc", "video_encoder.avc" },
         { MEDIA_MIMETYPE_VIDEO_MPEG4,
@@ -750,9 +752,19 @@ void ACodec::configureCodec(
         CHECK(msg->findInt32("sample-rate", &sampleRate));
 
         CHECK_EQ(setupAACDecoder(numChannels, sampleRate), (status_t)OK);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
-    } else {
-        TRESPASS();
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
+        CHECK_EQ(setupAMRDecoder(false /* isWAMR */), (status_t)OK);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
+        CHECK_EQ(setupAMRDecoder(true /* isWAMR */), (status_t)OK);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_G711_ALAW)
+            || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_G711_MLAW)) {
+        // These are PCM-like formats with a fixed sample rate but
+        // a variable number of channels.
+
+        int32_t numChannels;
+        CHECK(msg->findInt32("channel-count", &numChannels));
+
+        CHECK_EQ(setupG711Decoder(numChannels), (status_t)OK);
     }
 
     int32_t maxInputSize;
@@ -822,6 +834,84 @@ status_t ACodec::setupAACDecoder(int32_t numChannels, int32_t sampleRate) {
             mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
 
     return err;
+}
+
+status_t ACodec::setupAMRDecoder(bool isWAMR) {
+    OMX_AUDIO_PARAM_AMRTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexInput;
+
+    status_t err =
+        mOMX->getParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
+
+    def.eAMRBandMode =
+        isWAMR ? OMX_AUDIO_AMRBandModeWB0 : OMX_AUDIO_AMRBandModeNB0;
+
+    return mOMX->setParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
+}
+
+status_t ACodec::setupG711Decoder(int32_t numChannels) {
+    return setupRawAudioFormat(
+            kPortIndexInput, 8000 /* sampleRate */, numChannels);
+}
+
+status_t ACodec::setupRawAudioFormat(
+        OMX_U32 portIndex, int32_t sampleRate, int32_t numChannels) {
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = portIndex;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    def.format.audio.eEncoding = OMX_AUDIO_CodingPCM;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    OMX_AUDIO_PARAM_PCMMODETYPE pcmParams;
+    InitOMXParams(&pcmParams);
+    pcmParams.nPortIndex = portIndex;
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
+
+    if (err != OK) {
+        return err;
+    }
+
+    pcmParams.nChannels = numChannels;
+    pcmParams.eNumData = OMX_NumericalDataSigned;
+    pcmParams.bInterleaved = OMX_TRUE;
+    pcmParams.nBitPerSample = 16;
+    pcmParams.nSamplingRate = sampleRate;
+    pcmParams.ePCMMode = OMX_AUDIO_PCMModeLinear;
+
+    if (numChannels == 1) {
+        pcmParams.eChannelMapping[0] = OMX_AUDIO_ChannelCF;
+    } else {
+        CHECK_EQ(numChannels, 2);
+
+        pcmParams.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
+        pcmParams.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
+    }
+
+    return mOMX->setParameter(
+            mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
 }
 
 status_t ACodec::setVideoPortFormatType(
