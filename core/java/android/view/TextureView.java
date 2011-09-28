@@ -93,6 +93,11 @@ import android.util.Log;
  * been invoked.) It is therefore highly recommended you use a listener to
  * be notified when the SurfaceTexture becomes available.</p>
  * 
+ * <p>It is important to note that only one producer can use the TextureView.
+ * For instance, if you use a TextureView to display the camera preview, you
+ * cannot use {@link #lockCanvas()} to draw onto the TextureView at the same
+ * time.</p>
+ * 
  * @see SurfaceView
  * @see SurfaceTexture
  */
@@ -522,6 +527,10 @@ public class TextureView extends View {
      * must be written. The only exception to this rule is when a dirty
      * rectangle is specified, in which case, non-dirty pixels will be
      * preserved.</p>
+     * 
+     * <p>This method can only be used if the underlying surface is not already
+     * owned by another producer. For instance, if the TextureView is being used
+     * to render the camera's preview you cannot invoke this method.</p>
      * 
      * @return A Canvas used to draw into the surface.
      * 
