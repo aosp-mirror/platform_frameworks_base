@@ -75,6 +75,7 @@ public class MediaController extends FrameLayout {
     private WindowManager       mWindowManager;
     private Window              mWindow;
     private View                mDecor;
+    private WindowManager.LayoutParams mDecorLayoutParams;
     private ProgressBar         mProgress;
     private TextView            mEndTime, mCurrentTime;
     private boolean             mShowing;
@@ -120,6 +121,7 @@ public class MediaController extends FrameLayout {
         mContext = context;
         mUseFastForward = true;
         initFloatingWindow();
+        initFloatingWindowLayout();
     }
 
     private void initFloatingWindow() {
@@ -141,6 +143,48 @@ public class MediaController extends FrameLayout {
         setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
         requestFocus();
     }
+
+    // Allocate and initialize the static parts of mDecorLayoutParams. Must
+    // also call updateFloatingWindowLayout() to fill in the dynamic parts
+    // (y and width) before mDecorLayoutParams can be used.
+    private void initFloatingWindowLayout() {
+        mDecorLayoutParams = new WindowManager.LayoutParams();
+        WindowManager.LayoutParams p = mDecorLayoutParams;
+        p.gravity = Gravity.TOP;
+        p.height = LayoutParams.WRAP_CONTENT;
+        p.x = 0;
+        p.format = PixelFormat.TRANSLUCENT;
+        p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+        p.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+        p.token = null;
+        p.windowAnimations = 0; // android.R.style.DropDownAnimationDown;
+    }
+
+    // Update the dynamic parts of mDecorLayoutParams
+    // Must be called with mAnchor != NULL.
+    private void updateFloatingWindowLayout() {
+        int [] anchorPos = new int[2];
+        mAnchor.getLocationOnScreen(anchorPos);
+
+        WindowManager.LayoutParams p = mDecorLayoutParams;
+        p.width = mAnchor.getWidth();
+        p.y = anchorPos[1] + mAnchor.getHeight();
+    }
+
+    // This is called whenever mAnchor's layout bound changes
+    private OnLayoutChangeListener mLayoutChangeListener =
+            new OnLayoutChangeListener() {
+        public void onLayoutChange(View v, int left, int top, int right,
+                int bottom, int oldLeft, int oldTop, int oldRight,
+                int oldBottom) {
+            updateFloatingWindowLayout();
+            if (mShowing) {
+                mWindowManager.updateViewLayout(mDecor, mDecorLayoutParams);
+            }
+        }
+    };
 
     private OnTouchListener mTouchListener = new OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
@@ -164,7 +208,13 @@ public class MediaController extends FrameLayout {
      * @param view The view to which to anchor the controller when it is visible.
      */
     public void setAnchorView(View view) {
+        if (mAnchor != null) {
+            mAnchor.removeOnLayoutChangeListener(mLayoutChangeListener);
+        }
         mAnchor = view;
+        if (mAnchor != null) {
+            mAnchor.addOnLayoutChangeListener(mLayoutChangeListener);
+        }
 
         FrameLayout.LayoutParams frameParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -279,31 +329,14 @@ public class MediaController extends FrameLayout {
      * the controller until hide() is called.
      */
     public void show(int timeout) {
-
         if (!mShowing && mAnchor != null) {
             setProgress();
             if (mPauseButton != null) {
                 mPauseButton.requestFocus();
             }
             disableUnsupportedButtons();
-
-            int [] anchorpos = new int[2];
-            mAnchor.getLocationOnScreen(anchorpos);
-
-            WindowManager.LayoutParams p = new WindowManager.LayoutParams();
-            p.gravity = Gravity.TOP;
-            p.width = mAnchor.getWidth();
-            p.height = LayoutParams.WRAP_CONTENT;
-            p.x = 0;
-            p.y = anchorpos[1] + mAnchor.getHeight() - p.height;
-            p.format = PixelFormat.TRANSLUCENT;
-            p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
-            p.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
-            p.token = null;
-            p.windowAnimations = 0; // android.R.style.DropDownAnimationDown;
-            mWindowManager.addView(mDecor, p);
+            updateFloatingWindowLayout();
+            mWindowManager.addView(mDecor, mDecorLayoutParams);
             mShowing = true;
         }
         updatePausePlay();
