@@ -1409,6 +1409,11 @@ public class PhoneNumberUtils
      * @hide
      */
     public static String formatNumber(String phoneNumber, String defaultCountryIso) {
+        // Do not attempt to format numbers that start with a hash or star symbol.
+        if (phoneNumber.startsWith("#") || phoneNumber.startsWith("*")) {
+            return phoneNumber;
+        }
+
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
         String result = null;
         try {
