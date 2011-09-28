@@ -33,7 +33,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.android.internal.R;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +42,7 @@ import java.util.Set;
 /**
  * @hide
  */
-public class ChooseAccountTypeActivity extends Activity implements AccountManagerCallback<Bundle> {
+public class ChooseAccountTypeActivity extends Activity {
     private static final String TAG = "AccountManager";
 
     private HashMap<String, AuthInfo> mTypeToAuthenticatorInfo = new HashMap<String, AuthInfo>();
@@ -52,7 +51,6 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.choose_account_type);
 
         // Read the validAccountTypes, if present, and add them to the setOfAllowableAccountTypes
         Set<String> setOfAllowableAccountTypes = null;
@@ -90,10 +88,11 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
         }
 
         if (mAuthenticatorInfosToDisplay.size() == 1) {
-            runAddAccountForAuthenticator(mAuthenticatorInfosToDisplay.get(0));
+            setResultAndFinish(mAuthenticatorInfosToDisplay.get(0).desc.type);
             return;
         }
 
+        setContentView(R.layout.choose_account_type);
         // Setup the list
         ListView list = (ListView) findViewById(android.R.id.list);
         // Use an existing ListAdapter that will map an array of strings to TextViews
@@ -103,9 +102,18 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
         list.setTextFilterEnabled(false);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                runAddAccountForAuthenticator(mAuthenticatorInfosToDisplay.get(position));
+                setResultAndFinish(mAuthenticatorInfosToDisplay.get(position).desc.type);
             }
         });
+    }
+
+    private void setResultAndFinish(final String type) {
+        Bundle bundle = new Bundle();
+        bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, type);
+        setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
+        Log.d(TAG, "ChooseAccountTypeActivity.setResultAndFinish: "
+                + "selected account type " + type);
+        finish();
     }
 
     private void buildTypeToAuthDescriptionMap() {
@@ -134,42 +142,6 @@ public class ChooseAccountTypeActivity extends Activity implements AccountManage
             AuthInfo authInfo = new AuthInfo(desc, name, icon);
             mTypeToAuthenticatorInfo.put(desc.type, authInfo);
         }
-    }
-
-    protected void runAddAccountForAuthenticator(AuthInfo authInfo) {
-        Log.d(TAG, "selected account type " + authInfo.name);
-        final Bundle options = getIntent().getBundleExtra(
-                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE);
-        final String[] requiredFeatures = getIntent().getStringArrayExtra(
-                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY);
-        final String authTokenType = getIntent().getStringExtra(
-                ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING);
-        AccountManager.get(this).addAccount(authInfo.desc.type, authTokenType, requiredFeatures,
-                options, this, this, null /* Handler */);
-    }
-
-    public void run(final AccountManagerFuture<Bundle> accountManagerFuture) {
-        try {
-            Bundle accountManagerResult = accountManagerFuture.getResult();
-            Bundle bundle = new Bundle();
-            bundle.putString(AccountManager.KEY_ACCOUNT_NAME,
-                    accountManagerResult.getString(AccountManager.KEY_ACCOUNT_NAME));
-            bundle.putString(AccountManager.KEY_ACCOUNT_TYPE,
-                    accountManagerResult.getString(AccountManager.KEY_ACCOUNT_TYPE));
-            setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
-            finish();
-            return;
-        } catch (OperationCanceledException e) {
-            setResult(Activity.RESULT_CANCELED);
-            finish();
-            return;
-        } catch (IOException e) {
-        } catch (AuthenticatorException e) {
-        }
-        Bundle bundle = new Bundle();
-        bundle.putString(AccountManager.KEY_ERROR_MESSAGE, "error communicating with server");
-        setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
-        finish();
     }
 
     private static class AuthInfo {
