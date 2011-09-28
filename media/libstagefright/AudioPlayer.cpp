@@ -508,6 +508,9 @@ status_t AudioPlayer::seekTo(int64_t time_us) {
     mReachedEOS = false;
     mSeekTimeUs = time_us;
 
+    // Flush resets the number of played frames
+    mNumFramesPlayed = 0;
+
     if (mAudioSink != NULL) {
         mAudioSink->flush();
     } else {
