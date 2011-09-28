@@ -504,6 +504,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         } else {
             ((KeyguardScreen) mUnlockScreen).onPause();
         }
+
+        // When screen is turned off, need to unbind from FaceLock service if using FaceLock
+        stopAndUnbindFromFaceLock();
     }
 
     @Override
@@ -513,6 +516,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             ((KeyguardScreen) mLockScreen).onResume();
         } else {
             ((KeyguardScreen) mUnlockScreen).onResume();
+        }
+
+        // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
+        // But only if not dealing with a call
+        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE) {
+            bindToFaceLock();
+        } else {
+            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
         }
     }
 
@@ -543,6 +554,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     @Override
     protected void onDetachedFromWindow() {
         removeCallbacks(mRecreateRunnable);
+
+        // When view is hidden, need to unbind from FaceLock service if we are using FaceLock
+        // e.g., when device becomes unlocked
+        stopAndUnbindFromFaceLock();
+
         super.onDetachedFromWindow();
     }
 
@@ -952,8 +968,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     // Everything below pertains to FaceLock - might want to separate this out
 
     // Only pattern and pin unlock screens actually have a view for the FaceLock area, so it's not
-    // uncommon for it to not exist.  But if it does exist, we need to make sure it's showing if
-    // FaceLock is enabled, and make sure it's not showing if FaceLock is disabled
+    // uncommon for it to not exist.  But if it does exist, we need to make sure it's shown (hiding
+    // the fallback) if FaceLock is enabled, and make sure it's hidden (showing the unlock) if
+    // FaceLock is disabled
     private void initializeFaceLockAreaView(View view) {
         mFaceLockAreaView = view.findViewById(R.id.faceLockAreaView);
         if (mFaceLockAreaView == null) {
@@ -997,9 +1014,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 if (DEBUG) Log.d(TAG, "after bind to FaceLock service");
                 mBoundToFaceLockService = true;
             } else {
-                // On startup I've seen onScreenTurnedOn() get called twice without
-                // onScreenTurnedOff() being called in between, which can cause this (bcolonna)
-                if (DEBUG) Log.w(TAG, "Attempt to bind to FaceLock when already bound");
+                Log.w(TAG, "Attempt to bind to FaceLock when already bound");
             }
         }
     }
@@ -1017,7 +1032,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             } else {
                 // This could probably happen after the session when someone activates FaceLock
                 // because it wasn't active when the phone was turned on
-                if (DEBUG) Log.w(TAG, "Attempt to unbind from FaceLock when not bound");
+                Log.w(TAG, "Attempt to unbind from FaceLock when not bound");
             }
         }
     }
@@ -1048,7 +1063,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 mFaceLockService = null;
                 mFaceLockServiceRunning = false;
             }
-            if (DEBUG) Log.w(TAG, "Unexpected disconnect from FaceLock service");
+            Log.w(TAG, "Unexpected disconnect from FaceLock service");
         }
     };
 
@@ -1099,36 +1114,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         // Stops the FaceLock UI and indicates that the phone should be unlocked
         @Override
         public void unlock() {
-            if (DEBUG) Log.d(TAG, "FaceLock unlock");
-            // Note that we don't hide the client FaceLockAreaView because we want to keep the
-            // lock screen covered while the phone is unlocked
-
+            if (DEBUG) Log.d(TAG, "FaceLock unlock()");
+            mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW); // Keep fallback covered
             stopFaceLock();
+
             mKeyguardScreenCallback.keyguardDone(true);
             mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
         }
 
         // Stops the FaceLock UI and exposes the backup method without unlocking
+        // This means either the user has cancelled out or FaceLock failed to recognize them
         @Override
         public void cancel() {
-            // In this case, either the user has cancelled out, or FaceLock failed to recognize them
-            if (DEBUG) Log.d(TAG, "FaceLock cancel");
-            // Here we hide the client FaceLockViewArea to expose the underlying backup method
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+            if (DEBUG) Log.d(TAG, "FaceLock cancel()");
+            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW); // Expose fallback
             stopFaceLock();
-        }
-
-        // Stops the FaceLock UI and puts the phone to sleep
-        @Override
-        public void sleepDevice() {
-            // In this case, it appears the phone has been turned on accidentally
-            if (DEBUG) Log.d(TAG, "FaceLock accidental turn on");
-            // Here we hide the client FaceLockViewArea to expose the underlying backup method
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
-            stopFaceLock();
-            // TODO(bcolonna): how do we put the phone back to sleep (i.e., turn off the screen)
-            // TODO(bcolonna): this should be removed once the service is no longer calling it
-            // because we are just going to let the lockscreen timeout
         }
     };
 }
