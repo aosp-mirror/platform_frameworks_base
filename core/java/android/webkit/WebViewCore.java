@@ -1349,8 +1349,14 @@ public final class WebViewCore {
                         }
 
                         case CLEAR_SSL_PREF_TABLE:
-                            Network.getInstance(mContext)
-                                    .clearUserSslPrefTable();
+                            if (JniUtil.useChromiumHttpStack()) {
+                                // FIXME: This will not work for connections currently in use, as
+                                // they cache the certificate responses. See http://b/5324235.
+                                SslCertLookupTable.getInstance().clear();
+                                nativeCloseIdleConnections();
+                            } else {
+                                Network.getInstance(mContext).clearUserSslPrefTable();
+                            }
                             break;
 
                         case TOUCH_UP:
