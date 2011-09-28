@@ -2550,9 +2550,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public synchronized ProxyProperties getProxy() {
-        if (mGlobalProxy != null) return mGlobalProxy;
-        if (mDefaultProxy != null) return mDefaultProxy;
-        return null;
+        return mDefaultProxy;
     }
 
     public void setGlobalProxy(ProxyProperties proxyProperties) {
@@ -2583,7 +2581,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (mGlobalProxy == null) {
             proxyProperties = mDefaultProxy;
         }
-        sendProxyBroadcast(proxyProperties);
+        //sendProxyBroadcast(proxyProperties);
     }
 
     private void loadGlobalProxy() {
@@ -2619,9 +2617,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         if (VDBG) log("changing default proxy to " + proxy);
-
-        // global trumps default, if set, ignore this.
-        if (mGlobalProxy != null) return;
         sendProxyBroadcast(proxy);
     }
 
