@@ -717,7 +717,7 @@
             </ul>
           </li>
           <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">
-                <span class="en">App Widget Design</span>
+                <span class="en">App Widget Design <span class="new">updated</span></span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/activity_task_design.html">
                 <span class="en">Activity and Task Design</span>
