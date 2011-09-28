@@ -2392,6 +2392,12 @@ public class WebView extends AbsoluteLayout
         return mZoomManager.getScale();
     }
 
+    // Called by JNI. Returns the scale to apply to the text selection handles
+    /* package */ float getTextHandleScale() {
+        float density = mContext.getResources().getDisplayMetrics().density;
+        return density / getScale();
+    }
+
     /**
      * Return the reading level scale of the WebView
      * @return The reading level scale.
