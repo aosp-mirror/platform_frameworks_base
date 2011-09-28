@@ -23,6 +23,7 @@
 #ifndef __RS_GRAPHICS_RSH__
 #define __RS_GRAPHICS_RSH__
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 14))
 /**
  * Set the color target used for all subsequent rendering calls
  * @param colorTarget
@@ -63,6 +64,8 @@ extern void __attribute__((overloadable))
  */
 extern uint __attribute__((overloadable))
     rsgFinish(void);
+
+#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
 /**
  * Bind a new ProgramFragment to the rendering context.
@@ -187,6 +190,8 @@ extern uint __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgAllocationSyncAll(rs_allocation alloc);
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 14))
+
 /**
  * Sync the contents of an allocation from memory space
  * specified by source.
@@ -197,6 +202,8 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgAllocationSyncAll(rs_allocation alloc,
                          rs_allocation_usage_type source);
+
+#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
 /**
  * Low performance utility function for drawing a simple rectangle.  Not

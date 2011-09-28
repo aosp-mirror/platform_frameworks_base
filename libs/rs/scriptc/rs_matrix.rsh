@@ -308,7 +308,7 @@ rsMatrixMultiply(rs_matrix2x2 *m, float2 in);
 #else
 /**
  * Multiply a vector by a matrix and return the result vector.
- * API version 10-13
+ * API version 14+
  */
 _RS_RUNTIME float4 __attribute__((overloadable))
 rsMatrixMultiply(const rs_matrix4x4 *m, float4 in);
