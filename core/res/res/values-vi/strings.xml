@@ -1161,7 +1161,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Bộ lưu trữ USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Chỉnh sửa..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Cảnh báo sử dụng dữ liệu"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Chạm để xem việc sử dụng và cài đặt"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Chạm để xem việc s.dụng và c.đặt"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Đã tắt dữ liệu 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G dữ liệu bị vô hiệu hóa"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dữ liệu di động bị vô hiệu hóa"</string>

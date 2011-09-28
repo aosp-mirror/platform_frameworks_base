@@ -29,8 +29,8 @@
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ja vēlaties pilnībā šifrēt dublējuma datus, tālāk ievadiet paroli:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ja atjaunošanas dati ir šifrēti, lūdzu, ievadiet tālāk paroli:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Tiek sākta dublēšana..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Dublēšana pabeigta"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Dublēšana ir pabeigta."</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Tiek sākta atjaunošana..."</string>
-    <string name="toast_restore_ended" msgid="1764041639199696132">"Atjaunošana beidzās"</string>
-    <string name="toast_timeout" msgid="5276598587087626877">"Iestājās darbības taimauts"</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Atjaunošana tika beigta."</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Iestājās darbības noildze."</string>
 </resources>
