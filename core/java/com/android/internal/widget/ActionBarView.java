@@ -132,6 +132,8 @@ public class ActionBarView extends AbsActionBarView {
     private ExpandedActionViewMenuPresenter mExpandedMenuPresenter;
     View mExpandedActionView;
 
+    Window.Callback mWindowCallback;
+
     private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
             new AdapterView.OnItemSelectedListener() {
         public void onItemSelected(AdapterView parent, View view, int position, long id) {
@@ -156,11 +158,7 @@ public class ActionBarView extends AbsActionBarView {
 
     private final OnClickListener mUpClickListener = new OnClickListener() {
         public void onClick(View v) {
-            Context context = getContext();
-            if (context instanceof Activity) {
-                Activity activity = (Activity) context;
-                activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
-            }
+            mWindowCallback.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
         }
     };
 
@@ -273,6 +271,14 @@ public class ActionBarView extends AbsActionBarView {
             }
             mTabScrollView.setAllowCollapse(true);
         }
+    }
+
+    /**
+     * Set the window callback used to invoke menu items; used for dispatching home button presses.
+     * @param cb Window callback to dispatch to
+     */
+    public void setWindowCallback(Window.Callback cb) {
+        mWindowCallback = cb;
     }
 
     @Override
