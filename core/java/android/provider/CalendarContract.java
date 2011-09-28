@@ -300,8 +300,25 @@ public final class CalendarContract {
         public static final String CALENDAR_COLOR = "calendar_color";
 
         /**
+         * An index for looking up a color from the {@link Colors} table. NULL
+         * or an empty string are reserved for indicating that the calendar does
+         * not use an index for looking up the color. The provider will update
+         * {@link #CALENDAR_COLOR} automatically when a valid index is written
+         * to this column. @see Colors
+         * <P>
+         * Type: TEXT
+         * </P>
+         * TODO UNHIDE
+         * 
+         * @hide
+         */
+        public static final String CALENDAR_COLOR_INDEX = "calendar_color_index";
+
+        /**
          * The display name of the calendar. Column name.
-         * <P>Type: TEXT</P>
+         * <P>
+         * Type: TEXT
+         * </P>
          */
         public static final String CALENDAR_DISPLAY_NAME = "calendar_displayName";
 
@@ -392,6 +409,34 @@ public final class CalendarContract {
          * <P>Type: TEXT</P>
          */
         public static final String ALLOWED_REMINDERS = "allowedReminders";
+
+        /**
+         * A comma separated list of availability types supported for this
+         * calendar in the format "#,#,#". Valid types are
+         * {@link Events#AVAILABILITY_BUSY}, {@link Events#AVAILABILITY_FREE},
+         * {@link Events#AVAILABILITY_TENTATIVE}. Setting this field to only
+         * {@link Events#AVAILABILITY_BUSY} should be used to indicate that
+         * changing the availability is not supported.
+         *
+         * TODO UNHIDE, Update Calendars doc
+         *
+         * @hide
+         */
+        public static final String ALLOWED_AVAILABILITY = "allowedAvailability";
+
+        /**
+         * A comma separated list of attendee types supported for this calendar
+         * in the format "#,#,#". Valid types are {@link Attendees#TYPE_NONE},
+         * {@link Attendees#TYPE_OPTIONAL}, {@link Attendees#TYPE_REQUIRED},
+         * {@link Attendees#TYPE_RESOURCE}. Setting this field to only
+         * {@link Attendees#TYPE_NONE} should be used to indicate that changing
+         * the attendee type is not supported.
+         *
+         * TODO UNHIDE, Update Calendars doc
+         *
+         * @hide
+         */
+        public static final String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
     }
 
     /**
@@ -688,13 +733,23 @@ public final class CalendarContract {
 
         /**
          * The type of attendee. Column name.
-         * <P>Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL})</P>
+         * <P>
+         * Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL},
+         * {@link #TYPE_RESOURCE})
+         * </P>
          */
         public static final String ATTENDEE_TYPE = "attendeeType";
 
         public static final int TYPE_NONE = 0;
         public static final int TYPE_REQUIRED = 1;
         public static final int TYPE_OPTIONAL = 2;
+        /**
+         * This specifies that an attendee is a resource, such as a room, and
+         * not an actual person. TODO UNHIDE
+         *
+         * @hide
+         */
+        public static final int TYPE_RESOURCE = 3;
 
         /**
          * The attendance status of the attendee. Column name.
@@ -787,11 +842,24 @@ public final class CalendarContract {
         public static final String EVENT_LOCATION = "eventLocation";
 
         /**
-         * A secondary color for the individual event. Reserved for future use.
-         * Column name.
+         * A secondary color for the individual event. This should only be
+         * updated by the sync adapter for a given account.
          * <P>Type: INTEGER</P>
          */
         public static final String EVENT_COLOR = "eventColor";
+
+        /**
+         * A secondary color index for the individual event. NULL or an empty
+         * string are reserved for indicating that the event does not use an
+         * index for looking up the color. The provider will update
+         * {@link #EVENT_COLOR} automatically when a valid index is written to
+         * this column. @see Colors
+         * <P>Type: TEXT</P>
+         * TODO UNHIDE
+         *
+         * @hide
+         */
+        public static final String EVENT_COLOR_INDEX = "eventColor_index";
 
         /**
          * The event status. Column name.
@@ -964,6 +1032,15 @@ public final class CalendarContract {
          * other events.
          */
         public static final int AVAILABILITY_FREE = 1;
+        /**
+         * Indicates that the owner's availability may change, but should be
+         * considered busy time that will conflict.
+         *
+         * TODO UNHIDE
+         *
+         * @hide
+         */
+        public static final int AVAILABILITY_TENTATIVE = 2;
 
         /**
          * Whether the event has an alarm or not. Column name.
@@ -2221,6 +2298,91 @@ public final class CalendarContract {
                 }
             }
             return found;
+        }
+    }
+
+    /**
+     * @hide
+     * TODO UNHIDE
+     */
+    protected interface ColorsColumns extends SyncStateContract.Columns {
+
+        /**
+         * The type of color, which describes how it should be used. Valid types
+         * are {@link #TYPE_CALENDAR} and {@link #TYPE_EVENT}. Column name.
+         * <P>
+         * Type: INTEGER (NOT NULL)
+         * </P>
+         */
+        public static final String COLOR_TYPE = "color_type";
+
+        /**
+         * This indicateds a color that can be used for calendars.
+         */
+        public static final int TYPE_CALENDAR = 0;
+        /**
+         * This indicates a color that can be used for events.
+         */
+        public static final int TYPE_EVENT = 1;
+
+        /**
+         * The index used to reference this color. This can be any non-empty
+         * string, but must be unique for a given {@link #ACCOUNT_TYPE} and
+         * {@link #ACCOUNT_NAME} . Column name.
+         * <P>
+         * Type: TEXT
+         * </P>
+         */
+        public static final String COLOR_INDEX = "color_index";
+
+        /**
+         * The version of this color that will work with dark text as an 8-bit
+         * ARGB integer value. Colors should specify alpha as fully opaque (eg
+         * 0xFF993322) as the alpha may be ignored or modified for display.
+         * Column name.
+         * <P>
+         * Type: INTEGER (NOT NULL)
+         * </P>
+         */
+        public static final String COLOR_LIGHT = "color_light";
+
+        /**
+         * The version of this color that will work with light text as an 8-bit
+         * ARGB integer value. Colors should specify alpha as fully opaque (eg
+         * 0xFF993322) as the alpha may be ignored or modified for display.
+         * Column name.
+         * <P>
+         * Type: INTEGER (NOT NULL)
+         * </P>
+         */
+        public static final String COLOR_DARK = "color_dark";
+
+    }
+
+    /**
+     * Fields for accessing colors available for a given account. Colors are
+     * referenced by {@link #COLOR_INDEX} which must be unique for a given
+     * account name/type. These values should only be updated by the sync
+     * adapter.
+     * TODO UNHIDE
+     *
+     * @hide
+     */
+    public static final class Colors implements ColorsColumns {
+        /**
+         * @hide
+         */
+        public static final String TABLE_NAME = "Colors";
+        /**
+         * The Uri for querying color information
+         */
+        @SuppressWarnings("hiding")
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/colors");
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Colors() {
         }
     }
 
