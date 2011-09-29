@@ -996,10 +996,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
         case MSG_SHOW_FACELOCK_AREA_VIEW:
-            mFaceLockAreaView.setVisibility(View.VISIBLE);
+            if (mFaceLockAreaView != null) {
+                mFaceLockAreaView.setVisibility(View.VISIBLE);
+            }
             break;
         case MSG_HIDE_FACELOCK_AREA_VIEW:
-            mFaceLockAreaView.setVisibility(View.GONE);
+            if (mFaceLockAreaView != null) {
+                mFaceLockAreaView.setVisibility(View.GONE);
+            }
             break;
         default:
             Log.w(TAG, "Unhandled message");
