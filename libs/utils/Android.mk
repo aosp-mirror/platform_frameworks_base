@@ -100,12 +100,8 @@ LOCAL_LDLIBS += -lpthread
 LOCAL_SHARED_LIBRARIES := \
 	libz \
 	liblog \
-	libcutils
-
-ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
-# This is needed on x86 to bring in dl_iterate_phdr for CallStack.cpp
-LOCAL_SHARED_LIBRARIES += libdl
-endif # linux-x86
+	libcutils \
+	libdl
 
 LOCAL_MODULE:= libutils
 include $(BUILD_SHARED_LIBRARY)
