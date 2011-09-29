@@ -9900,6 +9900,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionInfo.suggestionIndex = ADD_TO_DICTIONARY;
                     suggestionInfo.text.replace(0, suggestionInfo.text.length(),
                             getContext().getString(com.android.internal.R.string.addToDictionary));
+                    suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0, 0,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                     mNumberOfSuggestions++;
                 }
@@ -9911,6 +9913,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             suggestionInfo.suggestionIndex = DELETE_TEXT;
             suggestionInfo.text.replace(0, suggestionInfo.text.length(),
                     getContext().getString(com.android.internal.R.string.deleteText));
+            suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0, 0,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             mNumberOfSuggestions++;
 
             if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
@@ -9939,8 +9943,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             suggestionInfo.suggestionStart = spanStart - unionStart;
             suggestionInfo.suggestionEnd = suggestionInfo.suggestionStart 
                     + suggestionInfo.text.length();
-            
-            suggestionInfo.text.clearSpans();
+
             suggestionInfo.text.setSpan(suggestionInfo.highlightSpan, 0,
                     suggestionInfo.text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
