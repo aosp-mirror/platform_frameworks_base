@@ -207,21 +207,6 @@ public class Ringtone {
         openMediaPlayer();
     }
 
-    /** @hide */
-    public void setWakeMode(Context context, int mode) {
-        if (mAudio == null) {
-            try {
-                openMediaPlayer();
-            } catch (Exception ex) {
-                Log.e(TAG, "setWakeMode() caught ", ex);
-                mAudio = null;
-            }
-        }
-        if (mAudio != null) {
-            mAudio.setWakeMode(context, mode);
-        }
-    }
-
     /**
      * Plays the ringtone.
      */
