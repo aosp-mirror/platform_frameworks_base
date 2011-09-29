@@ -1975,8 +1975,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     Integer pid = (Integer)pids.get(j);
                     if (pid.intValue() == myPid) {
                         Collection<InetAddress> dnses = p.getDnses();
-                        String proto = determineProto(p);
-                        writePidDns(dnses, myPid, proto);
+                        writePidDns(dnses, myPid);
                         if (doBump) {
                             bumpDns();
                         }
@@ -1986,9 +1985,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
            }
         }
         // nothing found - delete
-        if (SystemProperties.get("net.dnsproto." + myPid).length() != 0) {
-            SystemProperties.set("net.dnsproto." + myPid, "");
-        }
         for (int i = 1; ; i++) {
             String prop = "net.dns" + i + "." + myPid;
             if (SystemProperties.get(prop).length() == 0) {
@@ -2002,7 +1998,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     // return true if results in a change
-    private boolean writePidDns(Collection <InetAddress> dnses, int pid, String proto) {
+    private boolean writePidDns(Collection <InetAddress> dnses, int pid) {
         int j = 1;
         boolean changed = false;
         for (InetAddress dns : dnses) {
@@ -2011,11 +2007,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 changed = true;
                 SystemProperties.set("net.dns" + j++ + "." + pid, dns.getHostAddress());
             }
-        }
-        if (dnses.size() > 0 && (changed || !proto.equals(SystemProperties.get("net.dnsproto." +
-                pid)))) {
-            changed = true;
-            SystemProperties.set("net.dnsproto." + pid, proto);
         }
         return changed;
     }
@@ -2047,7 +2038,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // Caller must grab mDnsLock.
     private boolean updateDns(String network, String iface,
-            Collection<InetAddress> dnses, String domains, String proto) {
+            Collection<InetAddress> dnses, String domains) {
         boolean changed = false;
         int last = 0;
         if (dnses.size() == 0 && mDefaultDns != null) {
@@ -2083,11 +2074,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         mNumDnsEntries = last;
 
-        if (changed || !proto.equals(SystemProperties.get("net.dnsproto"))) {
-            changed = true;
-            SystemProperties.set("net.dnsproto", proto);
-        }
-
         if (changed) {
             try {
                 mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses));
@@ -2111,14 +2097,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
             boolean changed = false;
-            String proto = determineProto(p);
-
             if (mNetConfigs[netType].isDefault()) {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
                     if (!mDnsOverridden) {
-                        changed = updateDns(network, p.getInterfaceName(), dnses, "",
-                                proto);
+                        changed = updateDns(network, p.getInterfaceName(), dnses, "");
                     }
                 }
             } else {
@@ -2132,33 +2115,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 List pids = mNetRequestersPids[netType];
                 for (int y=0; y< pids.size(); y++) {
                     Integer pid = (Integer)pids.get(y);
-                    changed = writePidDns(dnses, pid.intValue(), proto);
+                    changed = writePidDns(dnses, pid.intValue());
                 }
             }
             if (changed) bumpDns();
         }
-    }
-
-    private String determineProto(LinkProperties p) {
-        boolean v4 = false;
-        boolean v6 = false;
-        for (RouteInfo r : p.getRoutes()) {
-            if (r.getDestination().getAddress() instanceof Inet6Address) {
-                v6 = true;
-            } else {
-                v4 = true;
-            }
-        }
-        // secondary connections often don't have routes and we infer routes
-        // to the dns servers.  Look at the dns addrs too
-        for (InetAddress i : p.getDnses()) {
-            if (i instanceof Inet6Address) {
-                v6 = true;
-            } else {
-                v4 = true;
-            }
-        }
-        return (v4 ? "v4" : "") + (v6 ? "v6" : "");
     }
 
     private int getRestoreDefaultNetworkDelay(int networkType) {
@@ -2882,7 +2843,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // Apply DNS changes.
             boolean changed = false;
             synchronized (mDnsLock) {
-                changed = updateDns("VPN", "VPN", addresses, domains, "v4");
+                changed = updateDns("VPN", "VPN", addresses, domains);
                 mDnsOverridden = true;
             }
             if (changed) {
