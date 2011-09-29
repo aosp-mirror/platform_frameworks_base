@@ -530,6 +530,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         } else {
             ((KeyguardScreen) mUnlockScreen).onResume();
         }
+
+        if (mLockPatternUtils.usingBiometricWeak()) {
+            mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW);
+        } else {
+            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+        }
     }
 
     private void recreateLockScreen() {
@@ -980,12 +986,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mFaceLockAreaView = view.findViewById(R.id.faceLockAreaView);
         if (mFaceLockAreaView == null) {
             if (DEBUG) Log.d(TAG, "Layout does not have faceLockAreaView");
-        } else {
-            if (mLockPatternUtils.usingBiometricWeak()) {
-                mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW);
-            } else {
-                mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
-            }
         }
     }
 
