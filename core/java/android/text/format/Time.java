@@ -22,8 +22,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * The Time class is a faster replacement for the java.util.Calendar and
- * java.util.GregorianCalendar classes. An instance of the Time class represents
+ * An alternative to the {@link java.util.Calendar} and
+ * {@link java.util.GregorianCalendar} classes. An instance of the Time class represents
  * a moment in time, specified with second precision. It is modelled after
  * struct tm, and in fact, uses struct tm to implement most of the
  * functionality.
@@ -79,7 +79,7 @@ public class Time {
     public int month;
 
     /**
-     * Year. TBD. Is this years since 1900 like in struct tm?
+     * Year. For example, 1970.
      */
     public int year;
 
