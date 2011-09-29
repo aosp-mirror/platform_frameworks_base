@@ -113,15 +113,12 @@ public class MediaController extends FrameLayout {
         super(context);
         mContext = context;
         mUseFastForward = useFastForward;
+        initFloatingWindowLayout();
         initFloatingWindow();
     }
 
     public MediaController(Context context) {
-        super(context);
-        mContext = context;
-        mUseFastForward = true;
-        initFloatingWindow();
-        initFloatingWindowLayout();
+        this(context, true);
     }
 
     private void initFloatingWindow() {
