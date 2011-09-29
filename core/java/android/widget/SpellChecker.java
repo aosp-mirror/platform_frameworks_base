@@ -30,8 +30,6 @@ import android.view.textservice.TextServicesManager;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.Locale;
-
 
 /**
  * Helper class for TextView. Bridge between the TextView and the Dictionnary service.
@@ -167,15 +165,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     @Override
     public void onGetSuggestions(SuggestionsInfo[] results) {
-        final Editable editable = (Editable) mTextView.getText();
         for (int i = 0; i < results.length; i++) {
             SuggestionsInfo suggestionsInfo = results[i];
             if (suggestionsInfo.getCookie() != mCookie) continue;
             final int sequenceNumber = suggestionsInfo.getSequence();
 
             for (int j = 0; j < mLength; j++) {
-                final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[j];
-
                 if (sequenceNumber == mIds[j]) {
                     final int attributes = suggestionsInfo.getSuggestionsAttributes();
                     boolean isInDictionary =
@@ -184,31 +179,78 @@ public class SpellChecker implements SpellCheckerSessionListener {
                             ((attributes & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO) > 0);
 
                     if (!isInDictionary && looksLikeTypo) {
-                        String[] suggestions = getSuggestions(suggestionsInfo);
-                        SuggestionSpan suggestionSpan = new SuggestionSpan(
-                                mTextView.getContext(), suggestions,
-                                SuggestionSpan.FLAG_EASY_CORRECT |
-                                SuggestionSpan.FLAG_MISSPELLED);
-                        final int start = editable.getSpanStart(spellCheckSpan);
-                        final int end = editable.getSpanEnd(spellCheckSpan);
-                        editable.setSpan(suggestionSpan, start, end,
-                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        // TODO limit to the word rectangle region
-                        mTextView.invalidate();
+                        createMisspelledSuggestionSpan(suggestionsInfo, mSpellCheckSpans[j]);
                     }
-                    editable.removeSpan(spellCheckSpan);
+                    break;
                 }
             }
         }
     }
 
-    private static String[] getSuggestions(SuggestionsInfo suggestionsInfo) {
-        // A negative suggestion count is possible
-        final int len = Math.max(0, suggestionsInfo.getSuggestionsCount());
-        String[] suggestions = new String[len];
-        for (int j = 0; j < len; j++) {
-            suggestions[j] = suggestionsInfo.getSuggestionAt(j);
+    private void createMisspelledSuggestionSpan(SuggestionsInfo suggestionsInfo,
+            SpellCheckSpan spellCheckSpan) {
+        final Editable editable = (Editable) mTextView.getText();
+        final int start = editable.getSpanStart(spellCheckSpan);
+        final int end = editable.getSpanEnd(spellCheckSpan);
+
+        // Other suggestion spans may exist on that region, with identical suggestions, filter
+        // them out to avoid duplicates. First, filter suggestion spans on that exact region.
+        SuggestionSpan[] suggestionSpans = editable.getSpans(start, end, SuggestionSpan.class);
+        final int length = suggestionSpans.length;
+        for (int i = 0; i < length; i++) {
+            final int spanStart = editable.getSpanStart(suggestionSpans[i]);
+            final int spanEnd = editable.getSpanEnd(suggestionSpans[i]);
+            if (spanStart != start || spanEnd != end) {
+                suggestionSpans[i] = null;
+                break;
+            }
         }
-        return suggestions;
+
+        final int suggestionsCount = suggestionsInfo.getSuggestionsCount();
+        String[] suggestions;
+        if (suggestionsCount <= 0) {
+            // A negative suggestion count is possible
+            suggestions = ArrayUtils.emptyArray(String.class);
+        } else {
+            int numberOfSuggestions = 0;
+            suggestions = new String[suggestionsCount];
+
+            for (int i = 0; i < suggestionsCount; i++) {
+                final String spellSuggestion = suggestionsInfo.getSuggestionAt(i);
+                if (spellSuggestion == null) break;
+                boolean suggestionFound = false;
+
+                for (int j = 0; j < length && !suggestionFound; j++) {
+                    if (suggestionSpans[j] == null) break;
+
+                    String[] suggests = suggestionSpans[j].getSuggestions();
+                    for (int k = 0; k < suggests.length; k++) {
+                        if (spellSuggestion.equals(suggests[k])) {
+                            // The suggestion is already provided by an other SuggestionSpan
+                            suggestionFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!suggestionFound) {
+                    suggestions[numberOfSuggestions++] = spellSuggestion;
+                }
+            }
+
+            if (numberOfSuggestions != suggestionsCount) {
+                String[] newSuggestions = new String[numberOfSuggestions];
+                System.arraycopy(suggestions, 0, newSuggestions, 0, numberOfSuggestions);
+                suggestions = newSuggestions;
+            }
+        }
+
+        SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
+                SuggestionSpan.FLAG_EASY_CORRECT | SuggestionSpan.FLAG_MISSPELLED);
+        editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // TODO limit to the word rectangle region
+        mTextView.invalidate();
+        editable.removeSpan(spellCheckSpan);
     }
 }
