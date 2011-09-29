@@ -183,18 +183,16 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
                     if (!isInDictionary && looksLikeTypo) {
                         String[] suggestions = getSuggestions(suggestionsInfo);
-                        if (suggestions.length > 0) {
-                            SuggestionSpan suggestionSpan = new SuggestionSpan(
-                                    mTextView.getContext(), suggestions,
-                                    SuggestionSpan.FLAG_EASY_CORRECT |
-                                    SuggestionSpan.FLAG_MISSPELLED);
-                            final int start = editable.getSpanStart(spellCheckSpan);
-                            final int end = editable.getSpanEnd(spellCheckSpan);
-                            editable.setSpan(suggestionSpan, start, end,
-                                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            // TODO limit to the word rectangle region
-                            mTextView.invalidate();
-                        }
+                        SuggestionSpan suggestionSpan = new SuggestionSpan(
+                                mTextView.getContext(), suggestions,
+                                SuggestionSpan.FLAG_EASY_CORRECT |
+                                SuggestionSpan.FLAG_MISSPELLED);
+                        final int start = editable.getSpanStart(spellCheckSpan);
+                        final int end = editable.getSpanEnd(spellCheckSpan);
+                        editable.setSpan(suggestionSpan, start, end,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        // TODO limit to the word rectangle region
+                        mTextView.invalidate();
                     }
                     editable.removeSpan(spellCheckSpan);
                 }
