@@ -583,7 +583,7 @@ public class ScrollView extends FrameLayout {
                     final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                             (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
 
-                    if (canOverscroll && overScrollBy(0, deltaY, 0, mScrollY,
+                    if (overScrollBy(0, deltaY, 0, mScrollY,
                             0, range, 0, mOverscrollDistance, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
@@ -616,16 +616,12 @@ public class ScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                    final int bottom = getScrollRange();
-                    final int overscrollMode = getOverScrollMode();
-                    final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
-                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && bottom > 0);
-
-                    if (getChildCount() > 0 && canOverscroll) {
+                    if (getChildCount() > 0) {
                         if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
                             fling(-initialVelocity);
                         } else {
-                            if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                            if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0,
+                                    getScrollRange())) {
                                 invalidate();
                             }
                         }
