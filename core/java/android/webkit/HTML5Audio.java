@@ -23,6 +23,7 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
@@ -33,7 +34,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * <p>HTML5 support class for Audio.
+ * HTML5 support class for Audio.
+ *
+ * This class runs almost entirely on the WebCore thread. The exception is when
+ * accessing the WebView object to determine whether private browsing is
+ * enabled.
  */
 class HTML5Audio extends Handler
                  implements MediaPlayer.OnBufferingUpdateListener,
@@ -49,7 +54,7 @@ class HTML5Audio extends Handler
     // The C++ MediaPlayerPrivateAndroid object.
     private int mNativePointer;
     // The private status of the view that created this player
-    private boolean mIsPrivate;
+    private IsPrivateBrowsingEnabledGetter mIsPrivateBrowsingEnabledGetter;
 
     private static int IDLE        =  0;
     private static int INITIALIZED =  1;
@@ -81,6 +86,35 @@ class HTML5Audio extends Handler
             HTML5Audio.this.obtainMessage(TIMEUPDATE).sendToTarget();
         }
     }
+
+    // Helper class to determine whether private browsing is enabled in the
+    // given WebView. Queries the WebView on the UI thread. Calls to get()
+    // block until the data is available.
+    private class IsPrivateBrowsingEnabledGetter {
+        private boolean mIsReady;
+        private boolean mIsPrivateBrowsingEnabled;
+        IsPrivateBrowsingEnabledGetter(Looper uiThreadLooper, final WebView webView) {
+            new Handler(uiThreadLooper).post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized(IsPrivateBrowsingEnabledGetter.this) {
+                        mIsPrivateBrowsingEnabled = webView.isPrivateBrowsingEnabled();
+                        mIsReady = true;
+                        IsPrivateBrowsingEnabledGetter.this.notify();
+                    }
+                }
+            });
+        }
+        synchronized boolean get() {
+            while (!mIsReady) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            return mIsPrivateBrowsingEnabled;
+        }
+    };
 
     @Override
     public void handleMessage(Message msg) {
@@ -149,7 +183,8 @@ class HTML5Audio extends Handler
         // Save the native ptr
         mNativePointer = nativePtr;
         resetMediaPlayer();
-        mIsPrivate = webViewCore.getWebView().isPrivateBrowsingEnabled();
+        mIsPrivateBrowsingEnabledGetter = new IsPrivateBrowsingEnabledGetter(
+                webViewCore.getContext().getMainLooper(), webViewCore.getWebView());
     }
 
     private void resetMediaPlayer() {
@@ -177,13 +212,14 @@ class HTML5Audio extends Handler
             if (mState != IDLE) {
                 resetMediaPlayer();
             }
-            String cookieValue = CookieManager.getInstance().getCookie(url, mIsPrivate);
+            String cookieValue = CookieManager.getInstance().getCookie(
+                    url, mIsPrivateBrowsingEnabledGetter.get());
             Map<String, String> headers = new HashMap<String, String>();
 
             if (cookieValue != null) {
                 headers.put(COOKIE, cookieValue);
             }
-            if (mIsPrivate) {
+            if (mIsPrivateBrowsingEnabledGetter.get()) {
                 headers.put(HIDE_URL_LOGS, "true");
             }
 
