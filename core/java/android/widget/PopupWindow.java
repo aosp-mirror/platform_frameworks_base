@@ -92,6 +92,7 @@ public class PopupWindow {
     private boolean mClipToScreen;
     private boolean mAllowScrollingAnchorParent = true;
     private boolean mLayoutInsetDecor = false;
+    private boolean mNotTouchModal;
 
     private OnTouchListener mTouchInterceptor;
     
@@ -694,6 +695,15 @@ public class PopupWindow {
     }
 
     /**
+     * Set whether this window is touch modal or if outside touches will be sent to
+     * other windows behind it.
+     * @hide
+     */
+    public void setTouchModal(boolean touchModal) {
+        mNotTouchModal = !touchModal;
+    }
+
+    /**
      * <p>Change the width and height measure specs that are given to the
      * window manager by the popup.  By default these are 0, meaning that
      * the current width or height is requested as an explicit size from
@@ -1047,6 +1057,9 @@ public class PopupWindow {
         }
         if (mLayoutInsetDecor) {
             curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        }
+        if (mNotTouchModal) {
+            curFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
         return curFlags;
     }
