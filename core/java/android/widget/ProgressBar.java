@@ -937,7 +937,8 @@ public class ProgressBar extends View {
         int left = 0;
 
         if (mIndeterminateDrawable != null) {
-            if (mOnlyIndeterminate) {
+            // Aspect ratio logic does not apply to AnimationDrawables
+            if (mOnlyIndeterminate && !(mIndeterminateDrawable instanceof AnimationDrawable)) {
                 // Maintain aspect ratio. Certain kinds of animated drawables
                 // get very confused otherwise.
                 final int intrinsicWidth = mIndeterminateDrawable.getIntrinsicWidth();
