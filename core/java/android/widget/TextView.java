@@ -9613,6 +9613,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
+        private static final int ADD_TO_DICTIONARY = -1;
+        private static final int DELETE_TEXT = -2;
         private SuggestionInfo[] mSuggestionInfos;
         private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
@@ -9664,9 +9666,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             listView.setOnItemClickListener(this);
             mContentView = listView;
 
-            // Inflate the suggestion items once and for all. +1 for add to dictionary
-            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS + 1];
-            for (int i = 0; i < MAX_NUMBER_SUGGESTIONS + 1; i++) {
+            // Inflate the suggestion items once and for all. + 2 for add to dictionary and delete
+            mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS + 2];
+            for (int i = 0; i < mSuggestionInfos.length; i++) {
                 mSuggestionInfos[i] = new SuggestionInfo();
             }
         }
@@ -9717,7 +9719,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             false);
                 }
 
-                textView.setText(mSuggestionInfos[position].text);
+                final SuggestionInfo suggestionInfo = mSuggestionInfos[position];
+                textView.setText(suggestionInfo.text);
+
+                if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY) {
+                    textView.setCompoundDrawablesWithIntrinsicBounds(
+                            com.android.internal.R.drawable.ic_suggestions_add, 0, 0, 0);
+                } else if (suggestionInfo.suggestionIndex == DELETE_TEXT) {
+                    textView.setCompoundDrawablesWithIntrinsicBounds(
+                            com.android.internal.R.drawable.ic_suggestions_delete, 0, 0, 0);
+                } else {
+                    textView.setCompoundDrawables(null, null, null, null);
+                }
+
                 return textView;
             }
         }
@@ -9768,11 +9782,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void show() {
             if (!(mText instanceof Editable)) return;
 
-            if (updateSuggestions()) {
-                mCursorWasVisibleBeforeSuggestions = mCursorVisible;
-                setCursorVisible(false);
-                super.show();
-            }
+            updateSuggestions();
+            mCursorWasVisibleBeforeSuggestions = mCursorVisible;
+            setCursorVisible(false);
+            super.show();
         }
 
         @Override
@@ -9828,7 +9841,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             super.hide();
         }
 
-        private boolean updateSuggestions() {
+        private void updateSuggestions() {
             Spannable spannable = (Spannable) TextView.this.mText;
             SuggestionSpan[] suggestionSpans = getSuggestionSpans();
 
@@ -9877,13 +9890,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
             }
 
+            // Add to dictionary item is there a span with the misspelled flag
             if (misspelledSpan != null) {
                 final int misspelledStart = spannable.getSpanStart(misspelledSpan);
                 final int misspelledEnd = spannable.getSpanEnd(misspelledSpan);
                 if (misspelledStart >= 0 && misspelledEnd > misspelledStart) {
                     SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
                     suggestionInfo.suggestionSpan = misspelledSpan;
-                    suggestionInfo.suggestionIndex = -1;
+                    suggestionInfo.suggestionIndex = ADD_TO_DICTIONARY;
                     suggestionInfo.text.replace(0, suggestionInfo.text.length(),
                             getContext().getString(com.android.internal.R.string.addToDictionary));
 
@@ -9891,7 +9905,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
-            if (mNumberOfSuggestions == 0) return false;
+            // Delete item
+            SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
+            suggestionInfo.suggestionSpan = null;
+            suggestionInfo.suggestionIndex = DELETE_TEXT;
+            suggestionInfo.text.replace(0, suggestionInfo.text.length(),
+                    getContext().getString(com.android.internal.R.string.deleteText));
+            mNumberOfSuggestions++;
 
             if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
             if (underlineColor == 0) {
@@ -9907,8 +9927,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             mSuggestionsAdapter.notifyDataSetChanged();
-
-            return true;
         }
 
         private void highlightTextDifferences(SuggestionInfo suggestionInfo, int unionStart,
@@ -9933,77 +9951,94 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            hide();
+            TextView textView = (TextView) view;
+            Editable editable = (Editable) mText;
 
-            if (view instanceof TextView) {
-                TextView textView = (TextView) view;
-                Editable editable = (Editable) mText;
+            SuggestionInfo suggestionInfo = mSuggestionInfos[position];
 
-                SuggestionInfo suggestionInfo = mSuggestionInfos[position];
-                final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
-                final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
-                if (spanStart < 0 || spanEnd < 0) return; // Span has been removed
-                final String originalText = mText.subSequence(spanStart, spanEnd).toString();
-
-                if (suggestionInfo.suggestionIndex < 0) {
-                    Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
-                    intent.putExtra("word", originalText);
-                    intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getContext().startActivity(intent);
-                    suggestionInfo.removeMisspelledFlag();
-                } else {
-                    // SuggestionSpans are removed by replace: save them before
-                    SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
-                            SuggestionSpan.class);
-                    final int length = suggestionSpans.length;
-                    int[] suggestionSpansStarts = new int[length];
-                    int[] suggestionSpansEnds = new int[length];
-                    int[] suggestionSpansFlags = new int[length];
-                    for (int i = 0; i < length; i++) {
-                        final SuggestionSpan suggestionSpan = suggestionSpans[i];
-                        suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
-                        suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
-                        suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
-                    }
-
-                    final int suggestionStart = suggestionInfo.suggestionStart;
-                    final int suggestionEnd = suggestionInfo.suggestionEnd;
-                    final String suggestion = textView.getText().subSequence(
-                            suggestionStart, suggestionEnd).toString();
-                    editable.replace(spanStart, spanEnd, suggestion);
-
-                    suggestionInfo.removeMisspelledFlag();
-
-                    // Notify source IME of the suggestion pick. Do this before swaping texts.
-                    if (!TextUtils.isEmpty(
-                            suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
-                        InputMethodManager imm = InputMethodManager.peekInstance();
-                        imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
-                                suggestionInfo.suggestionIndex);
-                    }
-
-                    // Swap text content between actual text and Suggestion span
-                    String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
-                    suggestions[suggestionInfo.suggestionIndex] = originalText;
-
-                    // Restore previous SuggestionSpans
-                    final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
-                    for (int i = 0; i < length; i++) {
-                        // Only spans that include the modified region make sense after replacement
-                        // Spans partially included in the replaced region are removed, there is no
-                        // way to assign them a valid range after replacement
-                        if (suggestionSpansStarts[i] <= spanStart &&
-                                suggestionSpansEnds[i] >= spanEnd) {
-                            editable.setSpan(suggestionSpans[i], suggestionSpansStarts[i],
-                                    suggestionSpansEnds[i] + lengthDifference,
-                                    suggestionSpansFlags[i]);
-                        }
-                    }
-                    
-                    // Move cursor at the end of the replacement word
-                    Selection.setSelection(editable, spanEnd + lengthDifference);
+            if (suggestionInfo.suggestionIndex == DELETE_TEXT) {
+                final int spanUnionStart = editable.getSpanStart(mSuggestionRangeSpan);
+                int spanUnionEnd = editable.getSpanEnd(mSuggestionRangeSpan);
+                // Do not leave two adjacent spaces after deletion, or one at beginning of text
+                if (spanUnionEnd < editable.length() &&
+                        Character.isSpaceChar(editable.charAt(spanUnionEnd)) &&
+                        (spanUnionStart == 0 ||
+                        Character.isSpaceChar(editable.charAt(spanUnionStart - 1)))) {
+                        spanUnionEnd = spanUnionEnd + 1;
                 }
+                editable.replace(spanUnionStart, spanUnionEnd, "");
+                hide();
+                return;
             }
+
+            final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
+            final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
+            if (spanStart < 0 || spanEnd < 0) {
+                // Span has been removed
+                hide();
+                return;
+            }
+            final String originalText = mText.subSequence(spanStart, spanEnd).toString();
+
+            if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY) {
+                Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
+                intent.putExtra("word", originalText);
+                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+                suggestionInfo.removeMisspelledFlag();
+            } else {
+                // SuggestionSpans are removed by replace: save them before
+                SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
+                        SuggestionSpan.class);
+                final int length = suggestionSpans.length;
+                int[] suggestionSpansStarts = new int[length];
+                int[] suggestionSpansEnds = new int[length];
+                int[] suggestionSpansFlags = new int[length];
+                for (int i = 0; i < length; i++) {
+                    final SuggestionSpan suggestionSpan = suggestionSpans[i];
+                    suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
+                    suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
+                    suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
+                }
+
+                final int suggestionStart = suggestionInfo.suggestionStart;
+                final int suggestionEnd = suggestionInfo.suggestionEnd;
+                final String suggestion = textView.getText().subSequence(
+                        suggestionStart, suggestionEnd).toString();
+                editable.replace(spanStart, spanEnd, suggestion);
+
+                suggestionInfo.removeMisspelledFlag();
+
+                // Notify source IME of the suggestion pick. Do this before swaping texts.
+                if (!TextUtils.isEmpty(
+                        suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
+                    InputMethodManager imm = InputMethodManager.peekInstance();
+                    imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
+                            suggestionInfo.suggestionIndex);
+                }
+
+                // Swap text content between actual text and Suggestion span
+                String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
+                suggestions[suggestionInfo.suggestionIndex] = originalText;
+
+                // Restore previous SuggestionSpans
+                final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
+                for (int i = 0; i < length; i++) {
+                    // Only spans that include the modified region make sense after replacement
+                    // Spans partially included in the replaced region are removed, there is no
+                    // way to assign them a valid range after replacement
+                    if (suggestionSpansStarts[i] <= spanStart &&
+                            suggestionSpansEnds[i] >= spanEnd) {
+                        editable.setSpan(suggestionSpans[i], suggestionSpansStarts[i],
+                                suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
+                    }
+                }
+
+                // Move cursor at the end of the replacement word
+                Selection.setSelection(editable, spanEnd + lengthDifference);
+            }
+
+            hide();
         }
     }
 
