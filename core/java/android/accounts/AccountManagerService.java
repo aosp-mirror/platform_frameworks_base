@@ -1811,6 +1811,14 @@ public class AccountManagerService
     }
 
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            fout.println("Permission Denial: can't dump AccountsManager from from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + android.Manifest.permission.DUMP);
+            return;
+        }
+
         synchronized (mCacheLock) {
             final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 

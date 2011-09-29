@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.FileUtils;
@@ -1034,6 +1035,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
      * The data persisted to file is parsed and the stats are computed. 
      */
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump UsageStats from from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + android.Manifest.permission.DUMP);
+            return;
+        }
+
         final boolean isCheckinRequest = scanArgs(args, "--checkin");
         final boolean isCompactOutput = isCheckinRequest || scanArgs(args, "-c");
         final boolean deleteAfterPrint = isCheckinRequest || scanArgs(args, "-d");
