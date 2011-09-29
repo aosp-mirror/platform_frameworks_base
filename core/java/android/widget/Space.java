@@ -32,20 +32,24 @@ public final class Space extends View {
      */
     public Space(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        if (getVisibility() == VISIBLE) {
+            setVisibility(INVISIBLE);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public Space(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     /**
      * {@inheritDoc}
      */
     public Space(Context context) {
-        super(context);
+        //noinspection NullableProblems
+        this(context, null);
     }
 
     /**
@@ -55,22 +59,6 @@ public final class Space extends View {
      */
     @Override
     public void draw(Canvas canvas) {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ViewGroup.LayoutParams getLayoutParams() {
-        return super.getLayoutParams();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setLayoutParams(ViewGroup.LayoutParams params) {
-        super.setLayoutParams(params);
     }
 
     /**
