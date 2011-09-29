@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.Window;
+import android.widget.AbsListView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
@@ -190,9 +191,13 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
     }
 
     public void onItemClick(AdapterView parent, View view, int position, long id) {
+        // If the list has headers, subtract them from the index.
+        if (parent instanceof ListView) {
+            position -= ((ListView) parent).getHeaderViewsCount();
+        }
         Object item = getRootAdapter().getItem(position);
         if (!(item instanceof Preference)) return;
-        
+
         final Preference preference = (Preference) item; 
         preference.performClick(this);
     }
