@@ -695,7 +695,7 @@ status_t parseAndAddEntry(Bundle* bundle,
             if (isInProductList(product, String16(bundleProduct))) {
                 ;
             } else if (strcmp16(String16("default").string(), product.string()) == 0 &&
-                       !outTable->hasBagOrEntry(myPackage, curType, ident)) {
+                       !outTable->hasBagOrEntry(myPackage, curType, ident, config)) {
                 ;
             } else {
                 return NO_ERROR;
@@ -1817,6 +1817,37 @@ bool ResourceTable::hasBagOrEntry(const String16& package,
         if (t != NULL) {
             sp<ConfigList> c =  t->getConfigs().valueFor(name);
             if (c != NULL) return true;
+        }
+    }
+
+    return false;
+}
+
+bool ResourceTable::hasBagOrEntry(const String16& package,
+                                  const String16& type,
+                                  const String16& name,
+                                  const ResTable_config& config) const
+{
+    // First look for this in the included resources...
+    uint32_t rid = mAssets->getIncludedResources()
+        .identifierForName(name.string(), name.size(),
+                           type.string(), type.size(),
+                           package.string(), package.size());
+    if (rid != 0) {
+        return true;
+    }
+
+    sp<Package> p = mPackages.valueFor(package);
+    if (p != NULL) {
+        sp<Type> t = p->getTypes().valueFor(type);
+        if (t != NULL) {
+            sp<ConfigList> c =  t->getConfigs().valueFor(name);
+            if (c != NULL) {
+                sp<Entry> e = c->getEntries().valueFor(config);
+                if (e != NULL) {
+                    return true;
+                }
+            }
         }
     }
 
