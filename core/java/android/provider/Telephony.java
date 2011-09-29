@@ -1574,22 +1574,6 @@ public final class Telephony {
             public static final String SENT_TIME = "sent_time";
         }
 
-        public static final class ScrapSpace {
-            /**
-             * The content:// style URL for this table
-             */
-            public static final Uri CONTENT_URI = Uri.parse("content://mms/scrapSpace");
-
-            /**
-             * This is the scrap file we use to store the media attachment when the user
-             * chooses to capture a photo to be attached . We pass {#link@Uri} to the Camera app,
-             * which streams the captured image to the uri. Internally we write the media content
-             * to this file. It's named '.temp.jpg' so Gallery won't pick it up.
-             */
-            public static final String SCRAP_FILE_PATH =
-                Environment.getExternalStorageDirectory().getPath() + "/mms/scrapSpace/.temp.jpg";
-        }
-
         public static final class Intents {
             private Intents() {
                 // Non-instantiatable.
