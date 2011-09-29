@@ -73,10 +73,6 @@ public class WordIterator implements Selection.PositionIterator {
         }
     };
 
-    public void forceUpdate() {
-        mCurrentDirty = true;
-    }
-
     public void setCharSequence(CharSequence incoming) {
         // When incoming is different object, move listeners to new sequence
         // and mark as dirty so we reload contents.
