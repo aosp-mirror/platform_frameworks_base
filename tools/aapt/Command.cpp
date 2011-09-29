@@ -368,6 +368,7 @@ enum {
     REQUIRES_SMALLEST_WIDTH_DP_ATTR = 0x01010364,
     COMPATIBLE_WIDTH_LIMIT_DP_ATTR = 0x01010365,
     LARGEST_WIDTH_LIMIT_DP_ATTR = 0x01010366,
+    PUBLIC_KEY_ATTR = 0x010103a6,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -1021,6 +1022,15 @@ int doDump(Bundle* bundle)
                     } else if (tag == "compatible-screens") {
                         printCompatibleScreens(tree);
                         depth--;
+                    } else if (tag == "package-verifier") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (name != "" && error == "") {
+                            String8 publicKey = getAttribute(tree, PUBLIC_KEY_ATTR, &error);
+                            if (publicKey != "" && error == "") {
+                                printf("package-verifier: name='%s' publicKey='%s'\n",
+                                        name.string(), publicKey.string());
+                            }
+                        }
                     }
                 } else if (depth == 3 && withinApplication) {
                     withinActivity = false;
