@@ -124,6 +124,11 @@ public:
                        const String16& type,
                        const String16& name) const;
 
+    bool hasBagOrEntry(const String16& package,
+                       const String16& type,
+                       const String16& name,
+                       const ResTable_config& config) const;
+
     bool hasBagOrEntry(const String16& ref,
                        const String16* defType = NULL,
                        const String16* defPackage = NULL);
