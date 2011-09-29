@@ -791,7 +791,7 @@
             <span class="en">App Install Location</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
-            <span class="en">Supported Media Formats</span>
+            <span class="en">Supported Media Formats <span class="new">updated</span></span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/g-app-intents.html">
             <span class="en">Intents List: Google Apps</span>
