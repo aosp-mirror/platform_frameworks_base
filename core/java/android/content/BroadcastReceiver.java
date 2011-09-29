@@ -366,6 +366,9 @@ public abstract class BroadcastReceiver {
                 mFinished = true;
             
                 try {
+                    if (mResultExtras != null) {
+                        mResultExtras.setAllowFds(false);
+                    }
                     if (mOrderedHint) {
                         am.finishReceiver(mToken, mResultCode, mResultData, mResultExtras,
                                 mAbortBroadcast);
@@ -462,6 +465,7 @@ public abstract class BroadcastReceiver {
         IActivityManager am = ActivityManagerNative.getDefault();
         IBinder binder = null;
         try {
+            service.setAllowFds(false);
             binder = am.peekService(service, service.resolveTypeIfNeeded(
                     myContext.getContentResolver()));
         } catch (RemoteException e) {

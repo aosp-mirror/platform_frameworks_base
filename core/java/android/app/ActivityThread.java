@@ -2674,6 +2674,7 @@ public final class ActivityThread {
             // Next have the activity save its current state and managed dialogs...
             if (!r.activity.mFinished && saveState) {
                 state = new Bundle();
+                state.setAllowFds(false);
                 mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
                 r.state = state;
             }
@@ -2775,6 +2776,7 @@ public final class ActivityThread {
             if (!r.activity.mFinished && saveState) {
                 if (r.state == null) {
                     state = new Bundle();
+                    state.setAllowFds(false);
                     mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
                     r.state = state;
                 } else {
@@ -3306,6 +3308,7 @@ public final class ActivityThread {
         }
         if (r.state == null && !r.stopped && !r.isPreHoneycomb()) {
             r.state = new Bundle();
+            r.state.setAllowFds(false);
             mInstrumentation.callActivityOnSaveInstanceState(r.activity, r.state);
         }
 

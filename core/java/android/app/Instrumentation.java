@@ -1375,6 +1375,7 @@ public class Instrumentation {
             }
         }
         try {
+            intent.setAllowFds(false);
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1415,6 +1416,7 @@ public class Instrumentation {
         try {
             String[] resolvedTypes = new String[intents.length];
             for (int i=0; i<intents.length; i++) {
+                intents[i].setAllowFds(false);
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
@@ -1471,6 +1473,7 @@ public class Instrumentation {
             }
         }
         try {
+            intent.setAllowFds(false);
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),

@@ -46,7 +46,7 @@ public:
     size_t              dataAvail() const;
     size_t              dataPosition() const;
     size_t              dataCapacity() const;
-    
+
     status_t            setDataSize(size_t size);
     void                setDataPosition(size_t pos) const;
     status_t            setDataCapacity(size_t size);
@@ -55,6 +55,8 @@ public:
 
     status_t            appendFrom(const Parcel *parcel,
                                    size_t start, size_t len);
+
+    bool                setAllowFds(bool allowFds);
 
     bool                hasFileDescriptors() const;
 
@@ -212,6 +214,7 @@ private:
 
     mutable bool        mFdsKnown;
     mutable bool        mHasFds;
+    bool                mAllowFds;
     
     release_func        mOwner;
     void*               mOwnerCookie;

@@ -3568,6 +3568,13 @@ public class Intent implements Parcelable, Cloneable {
         return mExtras != null && mExtras.hasFileDescriptors();
     }
 
+    /** @hide */
+    public void setAllowFds(boolean allowFds) {
+        if (mExtras != null) {
+            mExtras.setAllowFds(allowFds);
+        }
+    }
+
     /**
      * Retrieve extended data from the intent.
      *
