@@ -31,9 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.os.LocalPowerManager;
 import android.os.Message;
@@ -253,6 +251,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private boolean mWaitingUntilKeyguardVisible = false;
     private LockPatternUtils mLockPatternUtils;
 
+    private SoundPool mLockSounds;
+    private int mLockSoundId;
+    private int mUnlockSoundId;
+    private int mLockSoundStreamId;
+
     public KeyguardViewMediator(Context context, PhoneWindowManager callback,
             LocalPowerManager powerManager) {
         mContext = context;
@@ -298,6 +301,22 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         final ContentResolver cr = mContext.getContentResolver();
         mShowLockIcon = (Settings.System.getInt(cr, "show_status_bar_lock", 0) == 1);
+
+        mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
+        String soundPath = Settings.System.getString(cr, Settings.System.LOCK_SOUND);
+        if (soundPath != null) {
+            mLockSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mLockSoundId == 0) {
+            if (DEBUG) Log.d(TAG, "failed to load sound from " + soundPath);
+        }
+        soundPath = Settings.System.getString(cr, Settings.System.UNLOCK_SOUND);
+        if (soundPath != null) {
+            mUnlockSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mUnlockSoundId == 0) {
+            if (DEBUG) Log.d(TAG, "failed to load sound from " + soundPath);
+        }
     }
 
     /**
@@ -1044,28 +1063,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         final ContentResolver cr = mContext.getContentResolver();
         if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1)
         {
-            final String whichSound = locked
-                ? Settings.System.LOCK_SOUND
-                : Settings.System.UNLOCK_SOUND;
-            final String soundPath = Settings.System.getString(cr, whichSound);
-            if (soundPath != null) {
-                final Uri soundUri = Uri.parse("file://" + soundPath);
-                if (soundUri != null) {
-                    final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                    if (sfx != null) {
-                        sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                        sfx.play();
-                    } else {
-                        if (DEBUG) Log.d(TAG, "playSounds: failed to load ringtone from uri: "
-                                + soundUri);
-                    }
-                } else {
-                    if (DEBUG) Log.d(TAG, "playSounds: could not parse Uri: " + soundPath);
-                }
-            } else {
-                if (DEBUG) Log.d(TAG, "playSounds: whichSound = " + whichSound
-                        + "; soundPath was null");
-            }
+            final int whichSound = locked
+                ? mLockSoundId
+                : mUnlockSoundId;
+            mLockSounds.stop(mLockSoundStreamId);
+            mLockSoundStreamId = mLockSounds.play(whichSound, 1.0f, 1.0f, 1, 0, 1.0f);
         }
     }
 
