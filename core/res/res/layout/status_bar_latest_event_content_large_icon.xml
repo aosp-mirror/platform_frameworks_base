@@ -4,8 +4,8 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
     >
     <TextView android:id="@+id/title"
         android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
