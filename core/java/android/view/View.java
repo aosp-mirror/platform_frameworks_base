@@ -2909,6 +2909,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         initializeScrollbars(a);
                     }
                     break;
+                //noinspection deprecation
                 case R.styleable.View_fadingEdge:
                     if (context.getApplicationInfo().targetSdkVersion >= ICE_CREAM_SANDWICH) {
                         // Ignore the attribute starting with ICS
