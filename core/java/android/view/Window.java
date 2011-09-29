@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -472,11 +473,14 @@ public abstract class Window {
     }
 
     private class LocalWindowManager extends WindowManagerImpl.CompatModeWrapper {
+        private static final String PROPERTY_HARDWARE_UI = "persist.sys.ui.hw";
+
         private final boolean mHardwareAccelerated;
 
         LocalWindowManager(WindowManager wm, boolean hardwareAccelerated) {
             super(wm, getCompatInfo(mContext));
-            mHardwareAccelerated = hardwareAccelerated;
+            mHardwareAccelerated = hardwareAccelerated ||
+                    SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, false);
         }
 
         public boolean isHardwareAccelerated() {
