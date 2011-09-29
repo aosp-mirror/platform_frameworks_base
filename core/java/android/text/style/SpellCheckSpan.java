@@ -39,8 +39,8 @@ public class SpellCheckSpan implements ParcelableSpan {
         mSpellCheckInProgress = (src.readInt() != 0);
     }
 
-    public void setSpellCheckInProgress() {
-        mSpellCheckInProgress = true;
+    public void setSpellCheckInProgress(boolean inProgress) {
+        mSpellCheckInProgress = inProgress;
     }
 
     public boolean isSpellCheckInProgress() {
