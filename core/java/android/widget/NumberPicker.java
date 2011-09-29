@@ -16,13 +16,10 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -30,8 +27,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Paint.Align;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -43,15 +40,17 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.LayoutInflater.Filter;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.LayoutInflater.Filter;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
+
+import com.android.internal.R;
 
 /**
  * A widget that enables the user to select a number form a predefined range.
@@ -91,21 +90,17 @@ public class NumberPicker extends LinearLayout {
     private static final int SELECTOR_ADJUSTMENT_DURATION_MILLIS = 800;
 
     /**
+     * The duration of scrolling to the next/previous value while changing
+     * the current value by one, i.e. increment or decrement.
+     */
+    private static final int CHANGE_CURRENT_BY_ONE_SCROLL_DURATION = 300;
+
+    /**
      * The the delay for showing the input controls after a single tap on the
      * input text.
      */
     private static final int SHOW_INPUT_CONTROLS_DELAY_MILLIS = ViewConfiguration
             .getDoubleTapTimeout();
-
-    /**
-     * The update step for incrementing the current value.
-     */
-    private static final int UPDATE_STEP_INCREMENT = 1;
-
-    /**
-     * The update step for decrementing the current value.
-     */
-    private static final int UPDATE_STEP_DECREMENT = -1;
 
     /**
      * The strength of fading in the top and bottom while drawing the selector.
@@ -115,7 +110,52 @@ public class NumberPicker extends LinearLayout {
     /**
      * The default unscaled height of the selection divider.
      */
-    private final int UNSCALED_DEFAULT_SELECTION_DIVIDER_HEIGHT = 2;
+    private static final int UNSCALED_DEFAULT_SELECTION_DIVIDER_HEIGHT = 2;
+
+    /**
+     * In this state the selector wheel is not shown.
+     */
+    private static final int SELECTOR_WHEEL_STATE_NONE = 0;
+
+    /**
+     * In this state the selector wheel is small.
+     */
+    private static final int SELECTOR_WHEEL_STATE_SMALL = 1;
+
+    /**
+     * In this state the selector wheel is large.
+     */
+    private static final int SELECTOR_WHEEL_STATE_LARGE = 2;
+
+    /**
+     * The alpha of the selector wheel when it is bright.
+     */
+    private static final int SELECTOR_WHEEL_BRIGHT_ALPHA = 255;
+
+    /**
+     * The alpha of the selector wheel when it is dimmed.
+     */
+    private static final int SELECTOR_WHEEL_DIM_ALPHA = 60;
+
+    /**
+     * The alpha for the increment/decrement button when it is transparent.
+     */
+    private static final int BUTTON_ALPHA_TRANSPARENT = 0;
+
+    /**
+     * The alpha for the increment/decrement button when it is opaque.
+     */
+    private static final int BUTTON_ALPHA_OPAQUE = 1;
+
+    /**
+     * The property for setting the selector paint.
+     */
+    private static final String PROPERTY_SELECTOR_PAINT_ALPHA = "selectorPaintAlpha";
+
+    /**
+     * The property for setting the increment/decrement button alpha.
+     */
+    private static final String PROPERTY_BUTTON_ALPHA = "alpha";
 
     /**
      * The numbers accepted by the input text's {@link Filter}
@@ -166,6 +206,11 @@ public class NumberPicker extends LinearLayout {
      * The height of the text.
      */
     private final int mTextSize;
+
+    /**
+     * The height of the gap between text elements if the selector wheel.
+     */
+    private int mSelectorTextGapHeight;
 
     /**
      * The values to be displayed instead the indices.
@@ -223,7 +268,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The {@link Paint} for drawing the selector.
      */
-    private final Paint mSelectorPaint;
+    private final Paint mSelectorWheelPaint;
 
     /**
      * The height of a selector element (text + gap).
@@ -266,15 +311,20 @@ public class NumberPicker extends LinearLayout {
     private AdjustScrollerCommand mAdjustScrollerCommand;
 
     /**
-     * Handle to the reusable command for updating the current value from long
-     * press.
+     * Handle to the reusable command for changing the current value from long
+     * press by one.
      */
-    private UpdateValueFromLongPressCommand mUpdateFromLongPressCommand;
+    private ChangeCurrentByOneFromLongPressCommand mChangeCurrentByOneFromLongPressCommand;
 
     /**
      * {@link Animator} for showing the up/down arrows.
      */
     private final AnimatorSet mShowInputControlsAnimator;
+
+    /**
+     * {@link Animator} for dimming the selector wheel.
+     */
+    private final Animator mDimSelectorWheelAnimator;
 
     /**
      * The Y position of the last down event.
@@ -297,9 +347,9 @@ public class NumberPicker extends LinearLayout {
     private boolean mAdjustScrollerOnUpEvent;
 
     /**
-     * Flag if to draw the selector wheel.
+     * The state of the selector wheel.
      */
-    private boolean mDrawSelectorWheel;
+    private int mSelectorWheelState;
 
     /**
      * Determines speed during touch scrolling.
@@ -360,6 +410,11 @@ public class NumberPicker extends LinearLayout {
      * The duration of the animation for showing the input controls.
      */
     private final long mShowInputControlsAnimimationDuration;
+
+    /**
+     * Flag whether the scoll wheel and the fading edges have been initialized.
+     */
+    private boolean mScrollWheelAndFadingEdgesInitialized;
 
     /**
      * Interface to listen for changes of the current value.
@@ -473,7 +528,7 @@ public class NumberPicker extends LinearLayout {
         // the fading edge effect implemented by View and we need our
         // draw() method to be called. Therefore, we declare we will draw.
         setWillNotDraw(false);
-        setDrawScrollWheel(false);
+        setSelectorWheelState(SELECTOR_WHEEL_STATE_NONE);
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
@@ -483,9 +538,9 @@ public class NumberPicker extends LinearLayout {
             public void onClick(View v) {
                 mInputText.clearFocus();
                 if (v.getId() == R.id.increment) {
-                    changeCurrent(mValue + 1);
+                    changeCurrentByOne(true);
                 } else {
-                    changeCurrent(mValue - 1);
+                    changeCurrentByOne(false);
                 }
             }
         };
@@ -494,9 +549,9 @@ public class NumberPicker extends LinearLayout {
             public boolean onLongClick(View v) {
                 mInputText.clearFocus();
                 if (v.getId() == R.id.increment) {
-                    postUpdateValueFromLongPress(UPDATE_STEP_INCREMENT);
+                    postChangeCurrentByOneFromLongPress(true);
                 } else {
-                    postUpdateValueFromLongPress(UPDATE_STEP_DECREMENT);
+                    postChangeCurrentByOneFromLongPress(false);
                 }
                 return true;
             }
@@ -516,10 +571,17 @@ public class NumberPicker extends LinearLayout {
         mInputText = (EditText) findViewById(R.id.numberpicker_input);
         mInputText.setOnFocusChangeListener(new OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
+                InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
                 if (hasFocus) {
                     mInputText.selectAll();
+                    if (inputMethodManager != null) {
+                        inputMethodManager.showSoftInput(mInputText, 0);
+                    }
                 } else {
                     mInputText.setSelection(0, 0);
+                    if (inputMethodManager != null) {
+                        inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+                    }
                     validateInputTextView(v);
                 }
             }
@@ -548,16 +610,17 @@ public class NumberPicker extends LinearLayout {
         ColorStateList colors = mInputText.getTextColors();
         int color = colors.getColorForState(ENABLED_STATE_SET, Color.WHITE);
         paint.setColor(color);
-        mSelectorPaint = paint;
+        mSelectorWheelPaint = paint;
 
         // create the animator for showing the input controls
-        final ValueAnimator fadeScroller = ObjectAnimator.ofInt(this, "selectorPaintAlpha", 255, 0);
+        mDimSelectorWheelAnimator = ObjectAnimator.ofInt(this, PROPERTY_SELECTOR_PAINT_ALPHA,
+                SELECTOR_WHEEL_BRIGHT_ALPHA, SELECTOR_WHEEL_DIM_ALPHA);
         final ObjectAnimator showIncrementButton = ObjectAnimator.ofFloat(mIncrementButton,
-                "alpha", 0, 1);
+                PROPERTY_BUTTON_ALPHA, BUTTON_ALPHA_TRANSPARENT, BUTTON_ALPHA_OPAQUE);
         final ObjectAnimator showDecrementButton = ObjectAnimator.ofFloat(mDecrementButton,
-                "alpha", 0, 1);
+                PROPERTY_BUTTON_ALPHA, BUTTON_ALPHA_TRANSPARENT, BUTTON_ALPHA_OPAQUE);
         mShowInputControlsAnimator = new AnimatorSet();
-        mShowInputControlsAnimator.playTogether(fadeScroller, showIncrementButton,
+        mShowInputControlsAnimator.playTogether(mDimSelectorWheelAnimator, showIncrementButton,
                 showDecrementButton);
         mShowInputControlsAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mCanceled = false;
@@ -566,11 +629,9 @@ public class NumberPicker extends LinearLayout {
             public void onAnimationEnd(Animator animation) {
                 if (!mCanceled) {
                     // if canceled => we still want the wheel drawn
-                    setDrawScrollWheel(false);
+                    setSelectorWheelState(SELECTOR_WHEEL_STATE_SMALL);
                 }
                 mCanceled = false;
-                mSelectorPaint.setAlpha(255);
-                invalidate();
             }
 
             @Override
@@ -588,20 +649,28 @@ public class NumberPicker extends LinearLayout {
         updateInputTextView();
         updateIncrementAndDecrementButtonsVisibilityState();
 
-        if (mFlingable && !isInEditMode()) {
-            // Start with shown selector wheel and hidden controls. When made
-            // visible hide the selector and fade-in the controls to suggest
-            // fling interaction.
-            setDrawScrollWheel(true);
-            hideInputControls();
+        if (mFlingable) {
+           if (isInEditMode()) {
+               setSelectorWheelState(SELECTOR_WHEEL_STATE_SMALL);
+           } else {
+                // Start with shown selector wheel and hidden controls. When made
+                // visible hide the selector and fade-in the controls to suggest
+                // fling interaction.
+                setSelectorWheelState(SELECTOR_WHEEL_STATE_LARGE);
+                hideInputControls();
+           }
         }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        // need to do this when we know our size
-        initializeScrollWheel();
+        if (!mScrollWheelAndFadingEdgesInitialized) {
+            mScrollWheelAndFadingEdgesInitialized = true;
+            // need to do all this when we know our size
+            initializeSelectorWheel();
+            initializeFadingEdges();
+        }
     }
 
     @Override
@@ -614,9 +683,10 @@ public class NumberPicker extends LinearLayout {
                 mLastMotionEventY = mLastDownEventY = event.getY();
                 removeAllCallbacks();
                 mShowInputControlsAnimator.cancel();
+                mDimSelectorWheelAnimator.cancel();
                 mBeginEditOnUpEvent = false;
                 mAdjustScrollerOnUpEvent = true;
-                if (mDrawSelectorWheel) {
+                if (mSelectorWheelState == SELECTOR_WHEEL_STATE_LARGE) {
                     boolean scrollersFinished = mFlingScroller.isFinished()
                             && mAdjustScroller.isFinished();
                     if (!scrollersFinished) {
@@ -635,7 +705,7 @@ public class NumberPicker extends LinearLayout {
                         || (!mDecrementButton.isShown()
                                 && isEventInViewHitRect(event, mDecrementButton))) {
                     mAdjustScrollerOnUpEvent = false;
-                    setDrawScrollWheel(true);
+                    setSelectorWheelState(SELECTOR_WHEEL_STATE_LARGE);
                     hideInputControls();
                     return true;
                 }
@@ -646,7 +716,7 @@ public class NumberPicker extends LinearLayout {
                 if (deltaDownY > mTouchSlop) {
                     mBeginEditOnUpEvent = false;
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
-                    setDrawScrollWheel(true);
+                    setSelectorWheelState(SELECTOR_WHEEL_STATE_LARGE);
                     hideInputControls();
                     return true;
                 }
@@ -683,12 +753,9 @@ public class NumberPicker extends LinearLayout {
                 break;
             case MotionEvent.ACTION_UP:
                 if (mBeginEditOnUpEvent) {
-                    setDrawScrollWheel(false);
+                    setSelectorWheelState(SELECTOR_WHEEL_STATE_SMALL);
                     showInputControls(mShowInputControlsAnimimationDuration);
                     mInputText.requestFocus();
-                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(mInputText, 0);
                     return true;
                 }
                 VelocityTracker velocityTracker = mVelocityTracker;
@@ -715,10 +782,18 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        int action = event.getActionMasked();
-        if ((action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
-                && !isEventInViewHitRect(event, mInputText)) {
-            removeAllCallbacks();
+        final int action = event.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_MOVE:
+                if (mSelectorWheelState == SELECTOR_WHEEL_STATE_LARGE) {
+                    removeAllCallbacks();
+                    forceCompleteChangeCurrentByOneViaScroll();
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                removeAllCallbacks();
+                break;
         }
         return super.dispatchTouchEvent(event);
     }
@@ -743,7 +818,7 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     public void computeScroll() {
-        if (!mDrawSelectorWheel) {
+        if (mSelectorWheelState == SELECTOR_WHEEL_STATE_NONE) {
             return;
         }
         Scroller scroller = mFlingScroller;
@@ -777,7 +852,10 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     public void scrollBy(int x, int y) {
-        int[] selectorIndices = getSelectorIndices();
+        if (mSelectorWheelState == SELECTOR_WHEEL_STATE_NONE) {
+            return;
+        }
+        int[] selectorIndices = mSelectorIndices;
         if (!mWrapSelectorWheel && y > 0
                 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
             mCurrentScrollOffset = mInitialScrollOffset;
@@ -789,19 +867,19 @@ public class NumberPicker extends LinearLayout {
             return;
         }
         mCurrentScrollOffset += y;
-        while (mCurrentScrollOffset - mInitialScrollOffset >= mSelectorElementHeight) {
+        while (mCurrentScrollOffset - mInitialScrollOffset > mSelectorTextGapHeight) {
             mCurrentScrollOffset -= mSelectorElementHeight;
             decrementSelectorIndices(selectorIndices);
             changeCurrent(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX]);
-            if (selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
+            if (!mWrapSelectorWheel && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
                 mCurrentScrollOffset = mInitialScrollOffset;
             }
         }
-        while (mCurrentScrollOffset - mInitialScrollOffset <= -mSelectorElementHeight) {
+        while (mCurrentScrollOffset - mInitialScrollOffset < -mSelectorTextGapHeight) {
             mCurrentScrollOffset += mSelectorElementHeight;
-            incrementScrollSelectorIndices(selectorIndices);
+            incrementSelectorIndices(selectorIndices);
             changeCurrent(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX]);
-            if (selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mMaxValue) {
+            if (!mWrapSelectorWheel && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mMaxValue) {
                 mCurrentScrollOffset = mInitialScrollOffset;
             }
         }
@@ -847,7 +925,7 @@ public class NumberPicker extends LinearLayout {
             return;
         }
         mFormatter = formatter;
-        resetSelectorWheelIndices();
+        initializeSelectorWheelIndices();
         updateInputTextView();
     }
 
@@ -890,8 +968,10 @@ public class NumberPicker extends LinearLayout {
             value = mWrapSelectorWheel ? mMinValue : mMaxValue;
         }
         mValue = value;
+        initializeSelectorWheelIndices();
         updateInputTextView();
         updateIncrementAndDecrementButtonsVisibilityState();
+        invalidate();
     }
 
     /**
@@ -981,7 +1061,7 @@ public class NumberPicker extends LinearLayout {
         }
         boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
         setWrapSelectorWheel(wrapSelectorWheel);
-        resetSelectorWheelIndices();
+        initializeSelectorWheelIndices();
         updateInputTextView();
     }
 
@@ -1012,7 +1092,7 @@ public class NumberPicker extends LinearLayout {
         }
         boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
         setWrapSelectorWheel(wrapSelectorWheel);
-        resetSelectorWheelIndices();
+        initializeSelectorWheelIndices();
         updateInputTextView();
     }
 
@@ -1043,7 +1123,7 @@ public class NumberPicker extends LinearLayout {
             mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         }
         updateInputTextView();
-        resetSelectorWheelIndices();
+        initializeSelectorWheelIndices();
     }
 
     @Override
@@ -1080,18 +1160,19 @@ public class NumberPicker extends LinearLayout {
     @Override
     public void draw(Canvas canvas) {
         // Dispatch draw to our children only if we are not currently running
-        // the animation for simultaneously fading out the scroll wheel and
+        // the animation for simultaneously dimming the scroll wheel and
         // showing in the buttons. This class takes advantage of the View
         // implementation of fading edges effect to draw the selector wheel.
         // However, in View.draw(), the fading is applied after all the children
         // have been drawn and we do not want this fading to be applied to the
-        // buttons which are currently showing in. Therefore, we draw our
-        // children after we have completed drawing ourselves.
+        // buttons. Therefore, we draw our children after we have completed
+        // drawing ourselves.
         super.draw(canvas);
 
         // Draw our children if we are not showing the selector wheel of fading
         // it out
-        if (mShowInputControlsAnimator.isRunning() || !mDrawSelectorWheel) {
+        if (mShowInputControlsAnimator.isRunning()
+                || mSelectorWheelState != SELECTOR_WHEEL_STATE_LARGE) {
             long drawTime = getDrawingTime();
             for (int i = 0, count = getChildCount(); i < count; i++) {
                 View child = getChildAt(i);
@@ -1105,25 +1186,32 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // we only draw the selector wheel
-        if (!mDrawSelectorWheel) {
+        if (mSelectorWheelState == SELECTOR_WHEEL_STATE_NONE) {
             return;
         }
+
         float x = (mRight - mLeft) / 2;
         float y = mCurrentScrollOffset;
 
+        final int restoreCount = canvas.save();
+
+        if (mSelectorWheelState == SELECTOR_WHEEL_STATE_SMALL) {
+            Rect clipBounds = canvas.getClipBounds();
+            clipBounds.inset(0, mSelectorElementHeight);
+            canvas.clipRect(clipBounds);
+        }
+
         // draw the selector wheel
-        int[] selectorIndices = getSelectorIndices();
+        int[] selectorIndices = mSelectorIndices;
         for (int i = 0; i < selectorIndices.length; i++) {
             int selectorIndex = selectorIndices[i];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
-            canvas.drawText(scrollSelectorValue, x, y, mSelectorPaint);
+            canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
             y += mSelectorElementHeight;
         }
 
         // draw the selection dividers (only if scrolling and drawable specified)
         if (mSelectionDivider != null) {
-            mSelectionDivider.setAlpha(mSelectorPaint.getAlpha());
             // draw the top divider
             int topOfTopDivider =
                 (getHeight() - mSelectorElementHeight - mSelectionDividerHeight) / 2;
@@ -1137,6 +1225,8 @@ public class NumberPicker extends LinearLayout {
             mSelectionDivider.setBounds(0, topOfBottomDivider, mRight, bottomOfBottomDivider);
             mSelectionDivider.draw(canvas);
         }
+
+        canvas.restoreToCount(restoreCount);
     }
 
     @Override
@@ -1149,11 +1239,17 @@ public class NumberPicker extends LinearLayout {
      * Resets the selector indices and clear the cached
      * string representation of these indices.
      */
-    private void resetSelectorWheelIndices() {
+    private void initializeSelectorWheelIndices() {
         mSelectorIndexToStringCache.clear();
-        int[] selectorIdices = getSelectorIndices();
-        for (int i = 0; i < selectorIdices.length; i++) {
-            selectorIdices[i] = Integer.MIN_VALUE; 
+        int[] selectorIdices = mSelectorIndices;
+        int current = getValue();
+        for (int i = 0; i < mSelectorIndices.length; i++) {
+            int selectorIndex = current + (i - SELECTOR_MIDDLE_ITEM_INDEX);
+            if (mWrapSelectorWheel) {
+                selectorIndex = getWrappedSelectorIndex(selectorIndex);
+            }
+            mSelectorIndices[i] = selectorIndex;
+            ensureCachedScrollSelectorValue(mSelectorIndices[i]);
         }
     }
 
@@ -1179,16 +1275,59 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
+     * Changes the current value by one which is increment or
+     * decrement based on the passes argument.
+     *
+     * @param increment True to increment, false to decrement.
+     */
+    private void changeCurrentByOne(boolean increment) {
+        if (mFlingable) {
+            mDimSelectorWheelAnimator.cancel();
+            mInputText.setVisibility(View.INVISIBLE);
+            mSelectorWheelPaint.setAlpha(SELECTOR_WHEEL_BRIGHT_ALPHA);
+            mPreviousScrollerY = 0;
+            forceCompleteChangeCurrentByOneViaScroll();
+            if (increment) {
+                mFlingScroller.startScroll(0, 0, 0, -mSelectorElementHeight,
+                        CHANGE_CURRENT_BY_ONE_SCROLL_DURATION);
+            } else {
+                mFlingScroller.startScroll(0, 0, 0, mSelectorElementHeight,
+                        CHANGE_CURRENT_BY_ONE_SCROLL_DURATION);
+            }
+            invalidate();
+        } else {
+            if (increment) {
+                changeCurrent(mValue + 1);
+            } else {
+                changeCurrent(mValue - 1);
+            }
+        }
+    }
+
+    /**
+     * Ensures that if we are in the process of changing the current value
+     * by one via scrolling the scroller gets to its final state and the
+     * value is updated.
+     */
+    private void forceCompleteChangeCurrentByOneViaScroll() {
+        Scroller scroller = mFlingScroller;
+        if (!scroller.isFinished()) {
+            final int yBeforeAbort = scroller.getCurrY();
+            scroller.abortAnimation();
+            final int yDelta = scroller.getCurrY() - yBeforeAbort;
+            scrollBy(0, yDelta);
+        }
+    }
+
+    /**
      * Sets the <code>alpha</code> of the {@link Paint} for drawing the selector
      * wheel.
      */
     @SuppressWarnings("unused")
-    // Called by ShowInputControlsAnimator via reflection
+    // Called via reflection
     private void setSelectorPaintAlpha(int alpha) {
-        mSelectorPaint.setAlpha(alpha);
-        if (mDrawSelectorWheel) {
-            invalidate();
-        }
+        mSelectorWheelPaint.setAlpha(alpha);
+        invalidate();
     }
 
     /**
@@ -1200,14 +1339,15 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
-     * Sets if to <code>drawSelectionWheel</code>.
+     * Sets the <code>selectorWheelState</code>.
      */
-    private void setDrawScrollWheel(boolean drawSelectorWheel) {
-        mDrawSelectorWheel = drawSelectorWheel;
-        // do not fade if the selector wheel not shown
-        setVerticalFadingEdgeEnabled(drawSelectorWheel);
+    private void setSelectorWheelState(int selectorWheelState) {
+        mSelectorWheelState = selectorWheelState;
+        if (selectorWheelState == SELECTOR_WHEEL_STATE_LARGE) {
+            mSelectorWheelPaint.setAlpha(SELECTOR_WHEEL_BRIGHT_ALPHA);
+        }
 
-        if (mFlingable && mDrawSelectorWheel
+        if (mFlingable && selectorWheelState == SELECTOR_WHEEL_STATE_LARGE
                 && AccessibilityManager.getInstance(mContext).isEnabled()) {
             AccessibilityManager.getInstance(mContext).interrupt();
             String text = mContext.getString(R.string.number_picker_increment_scroll_action);
@@ -1217,16 +1357,14 @@ public class NumberPicker extends LinearLayout {
         }
     }
 
-    private void initializeScrollWheel() {
-        if (mInitialScrollOffset != Integer.MIN_VALUE) {
-            return;
-        }
-        int[] selectorIndices = getSelectorIndices();
+    private void initializeSelectorWheel() {
+        initializeSelectorWheelIndices();
+        int[] selectorIndices = mSelectorIndices;
         int totalTextHeight = selectorIndices.length * mTextSize;
         float totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
         float textGapCount = selectorIndices.length - 1;
-        int selectorTextGapHeight = (int) (totalTextGapHeight / textGapCount + 0.5f);
-        mSelectorElementHeight = mTextSize + selectorTextGapHeight;
+        mSelectorTextGapHeight = (int) (totalTextGapHeight / textGapCount + 0.5f);
+        mSelectorElementHeight = mTextSize + mSelectorTextGapHeight;
         // Ensure that the middle item is positioned the same as the text in mInputText
         int editTextTextPosition = mInputText.getBaseline() + mInputText.getTop();
         mInitialScrollOffset = editTextTextPosition -
@@ -1235,13 +1373,23 @@ public class NumberPicker extends LinearLayout {
         updateInputTextView();
     }
 
+    private void initializeFadingEdges() {
+        setVerticalFadingEdgeEnabled(true);
+        setFadingEdgeLength((mBottom - mTop - mTextSize) / 2);
+    }
+
     /**
      * Callback invoked upon completion of a given <code>scroller</code>.
      */
     private void onScrollerFinished(Scroller scroller) {
         if (scroller == mFlingScroller) {
-            postAdjustScrollerCommand(0);
-            onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+            if (mSelectorWheelState == SELECTOR_WHEEL_STATE_LARGE) {
+                postAdjustScrollerCommand(0);
+                onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+            } else {
+                updateInputTextView();
+                fadeSelectorWheel(mShowInputControlsAnimimationDuration);
+            }
         } else {
             updateInputTextView();
             showInputControls(mShowInputControlsAnimimationDuration);
@@ -1312,6 +1460,17 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
+     * Fade the selector wheel via an animation.
+     *
+     * @param animationDuration The duration of the animation.
+     */
+    private void fadeSelectorWheel(long animationDuration) {
+        mInputText.setVisibility(VISIBLE);
+        mDimSelectorWheelAnimator.setDuration(animationDuration);
+        mDimSelectorWheelAnimator.start();
+    }
+
+    /**
      * Updates the visibility state of the increment and decrement buttons.
      */
     private void updateIncrementAndDecrementButtonsVisibilityState() {
@@ -1325,25 +1484,6 @@ public class NumberPicker extends LinearLayout {
         } else {
             mDecrementButton.setVisibility(INVISIBLE);
         }
-    }
-
-    /**
-     * @return The selector indices array with proper values with the current as
-     *         the middle one.
-     */
-    private int[] getSelectorIndices() {
-        int current = getValue();
-        if (mSelectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] != current) {
-            for (int i = 0; i < mSelectorIndices.length; i++) {
-                int selectorIndex = current + (i - SELECTOR_MIDDLE_ITEM_INDEX);
-                if (mWrapSelectorWheel) {
-                    selectorIndex = getWrappedSelectorIndex(selectorIndex);
-                }
-                mSelectorIndices[i] = selectorIndex;
-                ensureCachedScrollSelectorValue(mSelectorIndices[i]);
-            }
-        }
-        return mSelectorIndices;
     }
 
     /**
@@ -1362,7 +1502,7 @@ public class NumberPicker extends LinearLayout {
      * Increments the <code>selectorIndices</code> whose string representations
      * will be displayed in the selector.
      */
-    private void incrementScrollSelectorIndices(int[] selectorIndices) {
+    private void incrementSelectorIndices(int[] selectorIndices) {
         for (int i = 0; i < selectorIndices.length - 1; i++) {
             selectorIndices[i] = selectorIndices[i + 1];
         }
@@ -1467,25 +1607,26 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
-     * Posts a command for updating the current value every <code>updateMillis
-     * </code>.
+     * Posts a command for changing the current value by one.
+     *
+     * @param increment Whether to increment or decrement the value.
      */
-    private void postUpdateValueFromLongPress(int updateMillis) {
+    private void postChangeCurrentByOneFromLongPress(boolean increment) {
         mInputText.clearFocus();
         removeAllCallbacks();
-        if (mUpdateFromLongPressCommand == null) {
-            mUpdateFromLongPressCommand = new UpdateValueFromLongPressCommand();
+        if (mChangeCurrentByOneFromLongPressCommand == null) {
+            mChangeCurrentByOneFromLongPressCommand = new ChangeCurrentByOneFromLongPressCommand();
         }
-        mUpdateFromLongPressCommand.setUpdateStep(updateMillis);
-        post(mUpdateFromLongPressCommand);
+        mChangeCurrentByOneFromLongPressCommand.setIncrement(increment);
+        post(mChangeCurrentByOneFromLongPressCommand);
     }
 
     /**
      * Removes all pending callback from the message queue.
      */
     private void removeAllCallbacks() {
-        if (mUpdateFromLongPressCommand != null) {
-            removeCallbacks(mUpdateFromLongPressCommand);
+        if (mChangeCurrentByOneFromLongPressCommand != null) {
+            removeCallbacks(mChangeCurrentByOneFromLongPressCommand);
         }
         if (mAdjustScrollerCommand != null) {
             removeCallbacks(mAdjustScrollerCommand);
@@ -1658,17 +1799,17 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
-     * Command for updating the current value from a long press.
+     * Command for changing the current value from a long press by one.
      */
-    class UpdateValueFromLongPressCommand implements Runnable {
-        private int mUpdateStep = 0;
+    class ChangeCurrentByOneFromLongPressCommand implements Runnable {
+        private boolean mIncrement;
 
-        private void setUpdateStep(int updateStep) {
-            mUpdateStep = updateStep;
+        private void setIncrement(boolean increment) {
+            mIncrement = increment;
         }
 
         public void run() {
-            changeCurrent(mValue + mUpdateStep);
+            changeCurrentByOne(mIncrement);
             postDelayed(this, mLongPressUpdateInterval);
         }
     }
