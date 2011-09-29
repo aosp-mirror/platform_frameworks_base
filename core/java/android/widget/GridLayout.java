@@ -850,32 +850,65 @@ public class GridLayout extends ViewGroup {
         return c.getVisibility() == View.GONE;
     }
 
-    private void measureChildWithMargins(View child, int widthMeasureSpec, int heightMeasureSpec) {
-        LayoutParams lp = getLayoutParams(child);
-        int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                mPaddingLeft + mPaddingRight + getTotalMargin(child, true), lp.width);
-        int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
-                mPaddingTop + mPaddingBottom + getTotalMargin(child, false), lp.height);
-        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    private void measureChildWithMargins2(View child, int parentWidthSpec, int parentHeightSpec,
+                                          int childWidth, int childHeight) {
+        int childWidthSpec = getChildMeasureSpec(parentWidthSpec,
+                mPaddingLeft + mPaddingRight + getTotalMargin(child, true), childWidth);
+        int childHeightSpec = getChildMeasureSpec(parentHeightSpec,
+                mPaddingTop + mPaddingBottom + getTotalMargin(child, false), childHeight);
+        child.measure(childWidthSpec, childHeightSpec);
     }
 
-    private void measureChildrenWithMargins(int widthMeasureSpec, int heightMeasureSpec) {
+    private void measureChildrenWithMargins(int widthSpec, int heightSpec, boolean firstPass) {
         for (int i = 0, N = getChildCount(); i < N; i++) {
             View c = getChildAt(i);
             if (isGone(c)) continue;
-            measureChildWithMargins(c, widthMeasureSpec, heightMeasureSpec);
+            LayoutParams lp = getLayoutParams(c);
+            if (firstPass) {
+                measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, lp.height);
+            } else {
+                Spec spec = (orientation == HORIZONTAL) ? lp.columnSpec : lp.rowSpec;
+                if (spec.alignment == FILL) {
+                    Interval span = spec.span;
+                    Axis axis = (orientation == HORIZONTAL) ? horizontalAxis : verticalAxis;
+                    int[] locations = axis.getLocations();
+                    int size = locations[span.max] - locations[span.min];
+                    if (orientation == HORIZONTAL) {
+                        measureChildWithMargins2(c, widthSpec, heightSpec, size, lp.height);
+                    } else {
+                        measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, size);
+                    }
+                }
+            }
         }
     }
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
-        measureChildrenWithMargins(widthSpec, heightSpec);
+        /** If we have been called by {@link View#measure(int, int)}, one of width or height
+         *  is  likely to have changed. We must invalidate if so. */
+        invalidateValues();
 
-        int width = getPaddingLeft() + horizontalAxis.getMeasure(widthSpec) + getPaddingRight();
-        int height = getPaddingTop() + verticalAxis.getMeasure(heightSpec) + getPaddingBottom();
+        measureChildrenWithMargins(widthSpec, heightSpec, true);
 
-        int measuredWidth = Math.max(width, getSuggestedMinimumWidth());
-        int measuredHeight = Math.max(height, getSuggestedMinimumHeight());
+        int width, height;
+
+        // Use the orientation property to decide which axis should be laid out first.
+        if (orientation == HORIZONTAL) {
+            width = horizontalAxis.getMeasure(widthSpec);
+            measureChildrenWithMargins(widthSpec, heightSpec, false);
+            height = verticalAxis.getMeasure(heightSpec);
+        } else {
+            height = verticalAxis.getMeasure(heightSpec);
+            measureChildrenWithMargins(widthSpec, heightSpec, false);
+            width = horizontalAxis.getMeasure(widthSpec);
+        }
+
+        int hPadding = getPaddingLeft() + getPaddingRight();
+        int vPadding = getPaddingTop() + getPaddingBottom();
+
+        int measuredWidth = Math.max(hPadding + width, getSuggestedMinimumWidth());
+        int measuredHeight = Math.max(vPadding + height, getSuggestedMinimumHeight());
 
         setMeasuredDimension(
                 resolveSizeAndState(measuredWidth, widthSpec, 0),
@@ -1015,8 +1048,6 @@ public class GridLayout extends ViewGroup {
      for the vertical one.
      */
     final class Axis {
-        private static final int MIN_VALUE = -1000000;
-
         private static final int NEW = 0;
         private static final int PENDING = 1;
         private static final int COMPLETE = 2;
@@ -1024,7 +1055,7 @@ public class GridLayout extends ViewGroup {
         public final boolean horizontal;
 
         public int definedCount = UNDEFINED;
-        private int inferredCount = UNDEFINED;
+        private int maxIndex = UNDEFINED;
 
         PackedMap<Spec, Bounds> groupBounds;
         public boolean groupBoundsValid = false;
@@ -1056,28 +1087,29 @@ public class GridLayout extends ViewGroup {
             this.horizontal = horizontal;
         }
 
-        private int maxIndex() {
-            // note the number Integer.MIN_VALUE + 1 comes up in undefined cells
-            int count = -1;
+        private int calculateMaxIndex() {
+            // the number Integer.MIN_VALUE + 1 comes up in undefined cells
+            int result = -1;
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
                 LayoutParams params = getLayoutParams(c);
                 Spec spec = horizontal ? params.columnSpec : params.rowSpec;
-                count = max(count, spec.span.min);
-                count = max(count, spec.span.max);
+                Interval span = spec.span;
+                result = max(result, span.min);
+                result = max(result, span.max);
             }
-            return count == -1 ? UNDEFINED : count;
+            return result == -1 ? UNDEFINED : result;
         }
 
-        private int getInferredCount() {
-            if (inferredCount == UNDEFINED) {
-                inferredCount = max(0, maxIndex()); // if there are no cells, actual count is zero
+        private int getMaxIndex() {
+            if (maxIndex == UNDEFINED) {
+                maxIndex = max(0, calculateMaxIndex()); // use zero when there are no children
             }
-            return inferredCount;
+            return maxIndex;
         }
 
         public int getCount() {
-            return max(definedCount, getInferredCount());
+            return max(definedCount, getMaxIndex());
         }
 
         public void setCount(int count) {
@@ -1179,7 +1211,7 @@ public class GridLayout extends ViewGroup {
         }
 
         private void include(List<Arc> arcs, Interval key, MutableInt size,
-                boolean ignoreIfAlreadyPresent) {
+                             boolean ignoreIfAlreadyPresent) {
             /*
             Remove self referential links.
             These appear:
@@ -1341,19 +1373,18 @@ public class GridLayout extends ViewGroup {
         }
 
         private void init(int[] locations) {
-            Arrays.fill(locations, MIN_VALUE);
-            locations[0] = 0;
+            Arrays.fill(locations, 0);
         }
 
         private String arcsToString(List<Arc> arcs) {
-            String var = horizontal ? "c" : "r";
+            String var = horizontal ? "x" : "y";
             StringBuilder result = new StringBuilder();
-            boolean first = false;
-            for(Arc arc : arcs) {
-                if (!first) {
-                    first = true;
+            boolean first = true;
+            for (Arc arc : arcs) {
+                if (first) {
+                    first = false;
                 } else {
-                    result =result.append(", ");
+                    result = result.append(", ");
                 }
                 int src = arc.span.min;
                 int dst = arc.span.max;
@@ -1434,10 +1465,6 @@ public class GridLayout extends ViewGroup {
                         if (originalCulprits != null) {
                             logError(axisName, arcs, originalCulprits);
                         }
-                        if (DEBUG) {
-                            Log.v(TAG, axisName + " iteration completed in " +
-                                    (1 + i) + " steps of " + N);
-                        }
                         return;
                     }
                 }
@@ -1506,6 +1533,18 @@ public class GridLayout extends ViewGroup {
 
         private void computeLocations(int[] a) {
             solve(getArcs(), a);
+            if (!orderPreserved) {
+                // Solve returns the smallest solution to the constraint system for which all
+                // values are positive. One value is therefore zero - though if the row/col
+                // order is not preserved this may not be the first vertex. For consistency,
+                // translate all the values so that they measure the distance from a[0]; the
+                // leading edge of the parent. After this transformation some values may be
+                // negative.
+                int a0 = a[0];
+                for (int i = 0, N = a.length; i < N; i++) {
+                    a[i] = a[i] - a0;
+                }
+            }
         }
 
         public int[] getLocations() {
@@ -1521,7 +1560,10 @@ public class GridLayout extends ViewGroup {
         }
 
         private int size(int[] locations) {
-            return max2(locations, 0) - locations[0];
+            // The parental edges are attached to vertices 0 and N - even when order is not
+            // being preserved and other vertices fall outside this range. Measure the distance
+            // between vertices 0 and N, assuming that locations[0] = 0.
+            return locations[getCount()];
         }
 
         private void setParentConstraints(int min, int max) {
@@ -1561,7 +1603,7 @@ public class GridLayout extends ViewGroup {
         }
 
         public void invalidateStructure() {
-            inferredCount = UNDEFINED;
+            maxIndex = UNDEFINED;
 
             groupBounds = null;
             forwardLinks = null;
@@ -2139,8 +2181,8 @@ public class GridLayout extends ViewGroup {
 
     /**
      * A Spec defines the horizontal or vertical characteristics of a group of
-     * cells. Each spec. defines the <em>grid indices</em>, <em>alignment</em> and
-     * <em>flexibility</em> along the appropriate axis.
+     * cells. Each spec. defines the <em>grid indices</em> and <em>alignment</em>
+     * along the appropriate axis.
      * <p>
      * The <em>grid indices</em> are the leading and trailing edges of this cell group.
      * See {@link GridLayout} for a description of the conventions used by GridLayout
@@ -2149,6 +2191,15 @@ public class GridLayout extends ViewGroup {
      * The <em>alignment</em> property specifies how cells should be aligned in this group.
      * For row groups, this specifies the vertical alignment.
      * For column groups, this specifies the horizontal alignment.
+     * <p>
+     * Use the following static methods to create specs:
+     * <ul>
+     *   <li>{@link #spec(int)}</li>
+     *   <li>{@link #spec(int, int)}</li>
+     *   <li>{@link #spec(int, Alignment)}</li>
+     *   <li>{@link #spec(int, int, Alignment)}</li>
+     * </ul>
+     *
      */
     public static class Spec {
         static final Spec UNDEFINED = spec(GridLayout.UNDEFINED);
