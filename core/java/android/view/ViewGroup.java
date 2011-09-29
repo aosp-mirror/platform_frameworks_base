@@ -614,9 +614,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Called when a child has requested sending an {@link AccessibilityEvent} and
      * gives an opportunity to its parent to augment the event.
      * <p>
-     * If an {@link AccessibilityDelegate} has been specified via calling
-     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
-     * {@link AccessibilityDelegate#onRequestSendAccessibilityEvent(ViewGroup, View, AccessibilityEvent)}
+     * If an {@link android.view.View.AccessibilityDelegate} has been specified via calling
+     * {@link android.view.View#setAccessibilityDelegate(android.view.View.AccessibilityDelegate)} its
+     * {@link android.view.View.AccessibilityDelegate#onRequestSendAccessibilityEvent(ViewGroup, View, AccessibilityEvent)}
      * is responsible for handling this call.
      * </p>
      *
