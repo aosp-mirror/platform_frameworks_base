@@ -302,8 +302,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
 
-        mAdapter.setMaxActivityCount(maxActivityCount);
-
         final boolean defaultActivityButtonShown =
             mDefaultActivityButton.getVisibility() == VISIBLE;
 
@@ -312,8 +310,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         if (maxActivityCount != ActivityChooserViewAdapter.MAX_ACTIVITY_COUNT_UNLIMITED
                 && activityCount > maxActivityCount + maxActivityCountOffset) {
             mAdapter.setShowFooterView(true);
+            mAdapter.setMaxActivityCount(maxActivityCount - 1);
         } else {
             mAdapter.setShowFooterView(false);
+            mAdapter.setMaxActivityCount(maxActivityCount);
         }
 
         ListPopupWindow popupWindow = getListPopupWindow();
