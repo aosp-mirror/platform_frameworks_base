@@ -1161,7 +1161,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Mémoire de stockage USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Modifier..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertissement utilisation données"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Appuyez pour utilisation/param."</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Appuyez pour voir utilis./param."</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Données 2G-3G désactivées"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Données 4G désactivées"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Données mobiles désactivées"</string>
