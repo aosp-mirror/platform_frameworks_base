@@ -2154,6 +2154,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionModePopup.setLayoutInScreenEnabled(true);
                         mActionModePopup.setLayoutInsetDecor(true);
                         mActionModePopup.setFocusable(true);
+                        mActionModePopup.setOutsideTouchable(false);
+                        mActionModePopup.setTouchModal(false);
                         mActionModePopup.setWindowLayoutType(
                                 WindowManager.LayoutParams.TYPE_APPLICATION);
                         mActionModePopup.setContentView(mActionModeView);
