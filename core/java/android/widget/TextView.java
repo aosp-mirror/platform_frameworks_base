@@ -9192,17 +9192,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_CUT:
-                setPrimaryClip(ClipData.newPlainText(null, mTransformed.subSequence(min, max)));
+                setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
                 ((Editable) mText).delete(min, max);
                 stopSelectionActionMode();
                 return true;
 
             case ID_COPY:
-                setPrimaryClip(ClipData.newPlainText(null, mTransformed.subSequence(min, max)));
+                setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
                 stopSelectionActionMode();
                 return true;
         }
         return false;
+    }
+
+    private CharSequence getTransformedText(int start, int end) {
+        return removeSuggestionSpans(mTransformed.subSequence(start, end));
     }
 
     /**
@@ -9321,7 +9325,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Start a drag
                 final int start = getSelectionStart();
                 final int end = getSelectionEnd();
-                CharSequence selectedText = mTransformed.subSequence(start, end);
+                CharSequence selectedText = getTransformedText(start, end);
                 ClipData data = ClipData.newPlainText(null, selectedText);
                 DragLocalState localState = new DragLocalState(this, start, end);
                 startDrag(data, getTextThumbnailBuilder(selectedText), localState, 0);
