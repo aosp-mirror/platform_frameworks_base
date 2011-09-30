@@ -1362,13 +1362,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mInputShown = true;
             res = true;
         } else if (mHaveConnection && SystemClock.uptimeMillis()
-                < (mLastBindTime+TIME_TO_RECONNECT)) {
+                >= (mLastBindTime+TIME_TO_RECONNECT)) {
             // The client has asked to have the input method shown, but
             // we have been sitting here too long with a connection to the
             // service and no interface received, so let's disconnect/connect
             // to try to prod things along.
             EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, mCurMethodId,
                     SystemClock.uptimeMillis()-mLastBindTime,1);
+            Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
             mContext.unbindService(this);
             mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE);
         }
