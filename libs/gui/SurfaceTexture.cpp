@@ -94,7 +94,8 @@ static int32_t createProcessUniqueId() {
     return android_atomic_inc(&globalCounter);
 }
 
-SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
+SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
+        GLenum texTarget) :
     mDefaultWidth(1),
     mDefaultHeight(1),
     mPixelFormat(PIXEL_FORMAT_RGBA_8888),
@@ -110,7 +111,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mSynchronousMode(false),
     mAllowSynchronousMode(allowSynchronousMode),
     mConnectedApi(NO_CONNECTED_API),
-    mAbandoned(false) {
+    mAbandoned(false),
+    mTexTarget(texTarget) {
     // Choose a name using the PID and a process-unique ID.
     mName = String8::format("unnamed-%d-%d", getpid(), createProcessUniqueId());
 
@@ -698,9 +700,8 @@ status_t SurfaceTexture::updateTexImage() {
             ST_LOGW("updateTexImage: clearing GL error: %#04x", error);
         }
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTexName);
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES,
-                (GLeglImageOES)image);
+        glBindTexture(mTexTarget, mTexName);
+        glEGLImageTargetTexture2DOES(mTexTarget, (GLeglImageOES)image);
 
         bool failed = false;
         while ((error = glGetError()) != GL_NO_ERROR) {
@@ -735,7 +736,7 @@ status_t SurfaceTexture::updateTexImage() {
         mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTexName);
+        glBindTexture(mTexTarget, mTexName);
     }
 
     return OK;
@@ -761,7 +762,7 @@ bool SurfaceTexture::isExternalFormat(uint32_t format)
 }
 
 GLenum SurfaceTexture::getCurrentTextureTarget() const {
-    return GL_TEXTURE_EXTERNAL_OES;
+    return mTexTarget;
 }
 
 void SurfaceTexture::getTransformMatrix(float mtx[16]) {
