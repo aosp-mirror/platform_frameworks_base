@@ -2351,22 +2351,6 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
                     formatHasNotablyChanged(oldOutputFormat, mOutputFormat)) {
                     mOutputPortSettingsHaveChanged = true;
 
-                    if (mNativeWindow != NULL) {
-                        int32_t left, top, right, bottom;
-                        CHECK(mOutputFormat->findRect(
-                                    kKeyCropRect,
-                                    &left, &top, &right, &bottom));
-
-                        android_native_rect_t crop;
-                        crop.left = left;
-                        crop.top = top;
-                        crop.right = right + 1;
-                        crop.bottom = bottom + 1;
-
-                        // We'll ignore any errors here, if the surface is
-                        // already invalid, we'll know soon enough.
-                        native_window_set_crop(mNativeWindow.get(), &crop);
-                    }
                 } else if (data2 == OMX_IndexConfigCommonScale) {
                     OMX_CONFIG_SCALEFACTORTYPE scale;
                     InitOMXParams(&scale);
@@ -4183,6 +4167,24 @@ status_t OMXCodec::initNativeWindow() {
     return OK;
 }
 
+void OMXCodec::initNativeWindowCrop() {
+    int32_t left, top, right, bottom;
+
+    CHECK(mOutputFormat->findRect(
+                        kKeyCropRect,
+                        &left, &top, &right, &bottom));
+
+    android_native_rect_t crop;
+    crop.left = left;
+    crop.top = top;
+    crop.right = right + 1;
+    crop.bottom = bottom + 1;
+
+    // We'll ignore any errors here, if the surface is
+    // already invalid, we'll know soon enough.
+    native_window_set_crop(mNativeWindow.get(), &crop);
+}
+
 void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
     mOutputFormat = new MetaData;
     mOutputFormat->setCString(kKeyDecoderComponent, mComponentName);
@@ -4365,6 +4367,10 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                             0, 0,
                             video_def->nFrameWidth - 1,
                             video_def->nFrameHeight - 1);
+                }
+
+                if (mNativeWindow != NULL) {
+                     initNativeWindowCrop();
                 }
             }
             break;
