@@ -2560,8 +2560,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
-            if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE ||
-                    child.getAnimation() != null) && child.getLayerType() == LAYER_TYPE_NONE) {
+            if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) &&
+                    child.hasStaticLayer()) {
                 child.mRecreateDisplayList = (child.mPrivateFlags & INVALIDATED) == INVALIDATED;
                 child.mPrivateFlags &= ~INVALIDATED;
                 child.getDisplayList();
