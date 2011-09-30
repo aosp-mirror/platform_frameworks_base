@@ -139,7 +139,7 @@ public class StaticLayout extends Layout {
 
         generate(source, bufstart, bufend, paint, outerwidth, align, textDir,
                  spacingmult, spacingadd, includepad, includepad,
-                 ellipsizedWidth, ellipsize);
+                 ellipsizedWidth, ellipsize, mMaximumVisibleLineCount);
 
         mMeasured = MeasuredText.recycle(mMeasured);
         mFontMetricsInt = null;
@@ -160,7 +160,7 @@ public class StaticLayout extends Layout {
                         Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
                         boolean includepad, boolean trackpad,
-                        float ellipsizedWidth, TextUtils.TruncateAt ellipsize) {
+                        float ellipsizedWidth, TextUtils.TruncateAt ellipsize, int maxLines) {
         mLineCount = 0;
 
         int v = 0;
@@ -477,13 +477,13 @@ public class StaticLayout extends Layout {
                             width = restWidth;
                         }
                     }
-                    if (mLineCount >= mMaximumVisibleLineCount) {
+                    if (mLineCount >= maxLines) {
                         break;
                     }
                 }
             }
 
-            if (paraEnd != here && mLineCount < mMaximumVisibleLineCount) {
+            if (paraEnd != here && mLineCount < maxLines) {
                 if ((fitTop | fitBottom | fitDescent | fitAscent) == 0) {
                     paint.getFontMetricsInt(fm);
 
@@ -514,7 +514,7 @@ public class StaticLayout extends Layout {
         }
 
         if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE) &&
-                mLineCount < mMaximumVisibleLineCount) {
+                mLineCount < maxLines) {
             // Log.e("text", "output last " + bufEnd);
 
             paint.getFontMetricsInt(fm);
