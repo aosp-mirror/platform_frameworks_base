@@ -61,7 +61,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final TextServicesManager textServicesManager = (TextServicesManager) textView.getContext().
                 getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
         mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
-                null /* not currently used by the textServicesManager */, Locale.getDefault(),
+                null /* not currently used by the textServicesManager */,
+                null /* null locale means use the languages defined in Settings
+                        if referToSpellCheckerLanguageSettings is true */,
                 this, true /* means use the languages defined in Settings */);
         mCookie = hashCode();
 

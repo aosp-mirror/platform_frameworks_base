@@ -238,7 +238,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     }
                 } else if (scs.hashCode() == hashCode) {
                     if (DBG) {
-                        Slog.w(TAG, "Return subtype " + scs.hashCode());
+                        Slog.w(TAG, "Return subtype " + scs.hashCode() + ", input= " + locale
+                                + ", " + scs.getLocale());
                     }
                     return scs;
                 }
