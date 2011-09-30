@@ -18,6 +18,8 @@ package android.net;
 
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.SET_ALL;
+import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 
@@ -176,8 +178,63 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(64L, uidTag.getTotalBytes());
     }
 
+    public void testGroupedByIfaceEmpty() throws Exception {
+        final NetworkStats uidStats = new NetworkStats(TEST_START, 3);
+        final NetworkStats grouped = uidStats.groupedByIface();
+
+        assertEquals(0, uidStats.size());
+        assertEquals(0, grouped.size());
+    }
+
+    public void testGroupedByIfaceAll() throws Exception {
+        final NetworkStats uidStats = new NetworkStats(TEST_START, 3)
+                .addValues(IFACE_ALL, 100, SET_ALL, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
+                .addValues(IFACE_ALL, 101, SET_FOREGROUND, TAG_NONE, 128L, 8L, 0L, 2L, 20L);
+        final NetworkStats grouped = uidStats.groupedByIface();
+
+        assertEquals(2, uidStats.size());
+        assertEquals(1, grouped.size());
+
+        assertValues(grouped, 0, IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE, 256L, 16L, 0L, 4L, 0L);
+    }
+
+    public void testGroupedByIface() throws Exception {
+        final NetworkStats uidStats = new NetworkStats(TEST_START, 3)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 64L, 4L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 128L, 8L, 0L, 0L, 0L);
+
+        final NetworkStats grouped = uidStats.groupedByIface();
+
+        assertEquals(6, uidStats.size());
+
+        assertEquals(2, grouped.size());
+        assertValues(grouped, 0, TEST_IFACE, UID_ALL, SET_ALL, TAG_NONE, 256L, 16L, 0L, 2L, 0L);
+        assertValues(grouped, 1, TEST_IFACE2, UID_ALL, SET_ALL, TAG_NONE, 1024L, 64L, 0L, 0L, 0L);
+    }
+
+    public void testAddAllValues() {
+        final NetworkStats first = new NetworkStats(TEST_START, 5)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, 32L, 0L, 0L, 0L, 0L);
+
+        final NetworkStats second = new NetworkStats(TEST_START, 2)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L);
+
+        first.combineAllValues(second);
+
+        assertEquals(3, first.size());
+        assertValues(first, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 64L, 0L, 0L, 0L, 0L);
+        assertValues(first, 1, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, 32L, 0L, 0L, 0L, 0L);
+        assertValues(first, 2, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L);
+    }
+
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,
-            int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, int operations) {
+            int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
         final NetworkStats.Entry entry = stats.getValues(index, null);
         assertEquals(iface, entry.iface);
         assertEquals(uid, entry.uid);
