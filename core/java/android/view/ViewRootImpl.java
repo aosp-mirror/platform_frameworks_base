@@ -4820,18 +4820,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         public void run() {
             if (mView != null) {
-                // Check again for accessibility state since this is executed delayed.
-                AccessibilityManager accessibilityManager =
-                    AccessibilityManager.getInstance(mView.mContext);
-                if (accessibilityManager.isEnabled()) {
-                    // Send the event directly since we do not want to append the
-                    // source text because this is the text for the entire window
-                    // and we just want to notify that the content has changed.
-                    AccessibilityEvent event = AccessibilityEvent.obtain(
-                            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                    mView.onInitializeAccessibilityEvent(event);
-                    accessibilityManager.sendAccessibilityEvent(event);
-                }
+                mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
                 mIsPending = false;
             }
         }

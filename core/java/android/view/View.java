@@ -1487,6 +1487,18 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Accessibility event types that are dispatched for text population.
+     */
+    private static final int POPULATING_ACCESSIBILITY_EVENT_TYPES =
+            AccessibilityEvent.TYPE_VIEW_CLICKED
+            | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED
+            | AccessibilityEvent.TYPE_VIEW_SELECTED
+            | AccessibilityEvent.TYPE_VIEW_FOCUSED
+            | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT;
+
+    /**
      * Temporary Rect currently for use in setBackground().  This will probably
      * be extended in the future to hold our own class with more than just
      * a Rect. :)
@@ -3855,7 +3867,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             return;
         }
         onInitializeAccessibilityEvent(event);
-        dispatchPopulateAccessibilityEvent(event);
+        // Only a subset of accessibility events populates text content.
+        if ((event.getEventType() & POPULATING_ACCESSIBILITY_EVENT_TYPES) != 0) {
+            dispatchPopulateAccessibilityEvent(event);
+        }
         // In the beginning we called #isShown(), so we know that getParent() is not null.
         getParent().requestSendAccessibilityEvent(this, event);
     }
@@ -3876,6 +3891,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link AccessibilityDelegate#dispatchPopulateAccessibilityEvent(View, AccessibilityEvent)}
      * is responsible for handling this call.
      * </p>
+     * <p>
+     * <em>Note:</em> Accessibility events of certain types are not dispatched for
+     * populating the event text via this method. For details refer to {@link AccessibilityEvent}.
+     * </p>
      *
      * @param event The event.
      *
@@ -3895,12 +3914,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
     boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-        // Do not populate text to scroll events. They describe position change
-        // and usually come from container with a lot of text which is not very
-        // informative for accessibility purposes. Also they are fired frequently.
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            return true;
-        }
         onPopulateAccessibilityEvent(event);
         return false;
     }
