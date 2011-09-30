@@ -29,6 +29,7 @@
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;bez nazwy&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Brak numeru telefonu)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Nieznany)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Poczta głosowa"</string>
@@ -859,12 +860,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Kopiuj adres URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Zaznacz tekst"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Zaznaczanie tekstu"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"dodaj do słownika"</string>
+    <string name="deleteText" msgid="7070985395199629156">"usuń"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Sposób wprowadzania tekstu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Działania na tekście"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Mało miejsca"</string>
@@ -1113,12 +1110,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Cofnij usunięcie."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Nie wykonuj teraz żadnych czynności."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Wybierz konto"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Dodaj konto"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Którego konta chcesz użyć?"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Zmniejsz"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
@@ -1168,10 +1162,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Nośnik USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Edytuj..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Ostrzeżenie o transmisji danych"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Zobacz wykorzystanie i ustawienia"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Wyłączono transmisję danych 2G/3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Wyłączono transmisję danych 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Wyłączono komórkową transm. danych"</string>
