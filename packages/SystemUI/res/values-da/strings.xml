@@ -25,8 +25,7 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Vis meddelelser"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
-    <!-- no translation found for status_bar_no_recent_apps (6576392951053994640) -->
-    <skip />
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Der er ingen seneste apps"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen meddelelser"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"I gang"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelelser"</string>
