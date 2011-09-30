@@ -139,9 +139,10 @@ public class NetworkController extends BroadcastReceiver {
     IBatteryStats mBatteryStats;
 
     public interface SignalCluster {
-        void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon);
+        void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon, 
+                String contentDescription);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
-                int typeIcon);
+                int typeIcon, String contentDescription, String typeContentDescription);
         void setIsAirplaneMode(boolean is);
     }
 
@@ -235,12 +236,16 @@ public class NetworkController extends BroadcastReceiver {
         cluster.setWifiIndicators(
                 mWifiConnected, // only show wifi in the cluster if connected
                 mWifiIconId,
-                mWifiActivityIconId);
+                mWifiActivityIconId,
+                mContentDescriptionWifi);
         cluster.setMobileDataIndicators(
                 mHasMobileDataFeature,
                 mPhoneSignalIconId,
                 mMobileActivityIconId,
-                mDataTypeIconId);
+                mDataTypeIconId,
+                mContentDescriptionPhoneSignal,
+                mContentDescriptionDataType);
+
     }
 
     public void setStackedMode(boolean stacked) {
@@ -806,8 +811,8 @@ public class NetworkController extends BroadcastReceiver {
                 (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly()))) {
             // Only display the flight-mode icon if not in "emergency calls only" mode.
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-            mContentDescriptionCombinedSignal = mContext.getString(
-                    R.string.accessibility_airplane_mode);
+            mContentDescriptionCombinedSignal = mContentDescriptionPhoneSignal
+                = mContext.getString(R.string.accessibility_airplane_mode);
             
             // look again; your radios are now airplanes
             mPhoneSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
@@ -862,12 +867,15 @@ public class NetworkController extends BroadcastReceiver {
                 cluster.setWifiIndicators(
                         mWifiConnected, // only show wifi in the cluster if connected
                         mWifiIconId,
-                        mWifiActivityIconId);
+                        mWifiActivityIconId,
+                        mContentDescriptionWifi);
                 cluster.setMobileDataIndicators(
                         mHasMobileDataFeature,
                         mPhoneSignalIconId,
                         mMobileActivityIconId,
-                        mDataTypeIconId);
+                        mDataTypeIconId,
+                        mContentDescriptionPhoneSignal,
+                        mContentDescriptionDataType);
                 cluster.setIsAirplaneMode(mAirplaneMode);
             }
         }

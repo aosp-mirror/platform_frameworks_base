@@ -65,6 +65,7 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:src="@drawable/ic_notify_quicksettings"
+            android:contentDescription="@string/accessibility_settings_button"
             />
 
         <ImageView android:id="@+id/clear_all_button"
@@ -74,6 +75,7 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:src="@drawable/ic_notify_clear"
+            android:contentDescription="@string/accessibility_clear_all"
             />            
     </RelativeLayout>
 
