@@ -29,6 +29,7 @@
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;без названия&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="ellipsis_two_dots" msgid="1228078994866030736">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нет номера телефона)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Неизвестно)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосовая почта"</string>
@@ -671,10 +672,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Количество неудачных попыток ввода PIN-кода: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После нескольких неудачных попыток (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будет предложено разблокировать планшетный ПК с помощью учетных данных Google."\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.  "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Количество неудачных попыток разблокировать планшетный ПК: <xliff:g id="NUMBER_0">%d</xliff:g>. Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого настройки будут сброшены до заводских, а данные пользователя потеряны."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Количество неудачных попыток разблокировать телефон: <xliff:g id="NUMBER_0">%d</xliff:g>. Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого настройки будут сброшены до заводских, а данные пользователя потеряны."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Количество неудачных попыток разблокировать планшетный ПК: <xliff:g id="NUMBER">%d</xliff:g>. Настройки будут сброшены до заводских."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Количество неудачных попыток разблокировать телефон: <xliff:g id="NUMBER">%d</xliff:g>. Настройки будут сброшены до заводских."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Не удалось разблокировать телефон (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER">%d</xliff:g>). Будут установлены настройки по умолчанию."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Не удалось разблокировать телефон (число попыток: <xliff:g id="NUMBER">%d</xliff:g>). Будут установлены настройки по умолчанию."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забыли графический ключ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Снятие блокировки аккаунта"</string>
@@ -859,12 +860,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Выбрать текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Выбор текста"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"добавить в словарь"</string>
+    <string name="deleteText" msgid="7070985395199629156">"удалить"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Способ ввода"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Операции с текстом"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Недостаточно места"</string>
@@ -885,8 +882,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Выбор приложения для USB-устройства"</string>
     <string name="noApplications" msgid="1691104391758345586">"Это действие не может выполнять ни одно приложение."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> остановилось."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Процесс \"<xliff:g id="PROCESS">%1$s</xliff:g>\" остановился."</string>
+    <string name="aerr_application" msgid="932628488013092776">"В приложении \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" произошла ошибка."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"В приложении \"<xliff:g id="PROCESS">%1$s</xliff:g>\" произошла ошибка."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"Приложение \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" не отвечает."\n\n"Закрыть его?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Приложение \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\" не отвечает."\n\n"Закрыть его?"</string>
@@ -990,7 +987,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Включение USB-накопителя"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"При включении USB-накопителя некоторые используемые приложения могут прекратить работу и оставаться недоступными до отключения USB-накопителя."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"Сбой подключения USB"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"Ошибка при подключении USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Подключен как устройство хранения данных"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Подключен как камера"</string>
@@ -1113,12 +1110,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Отменить удаления."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ничего не делать сейчас."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Выберите аккаунт"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Добавить аккаунт"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Выберите аккаунт"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Добавить аккаунт"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Увеличить"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Уменьшить"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Нажмите и удерживайте <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1143,7 +1137,7 @@
     <string name="switch_off" msgid="7249798614327155088">"Выкл."</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"нажато"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"не нажато"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Клавиша Alt"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Клавиша ALT"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Отмена"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Клавиша удаления"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Готово"</string>
@@ -1168,10 +1162,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Изменить..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Осталось мало трафика"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Проверить трафик и настройки"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Передача данных 2G/3G отключена"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Передача данных 4G отключена"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобильный Интернет отключен"</string>
@@ -1200,7 +1191,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Отпечаток SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Просмотреть все"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Выбор действия"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Поделиться с..."</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Настройка доступа"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройство заблокировано."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

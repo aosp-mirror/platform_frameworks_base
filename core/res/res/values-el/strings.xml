@@ -29,6 +29,7 @@
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;χωρίς τίτλο&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Δεν υπάρχει τηλεφωνικός αριθμός)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Άγνωστο)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτόματος τηλεφωνητής"</string>
@@ -151,7 +152,7 @@
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ο ήχος είναι ενεργοποιημένος"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Λειτουργία πτήσης"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Η λειτουργία πτήσης είναι ενεργοποιημένη."</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Η λειτουργία πτήσης είναι απενεργοποιημένη"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Λειτ. πτήσης είναι ανενεργή"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
@@ -859,12 +860,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Αντιγραφή διεύθυνσης URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Επιλογή κειμένου..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Επιλογή κειμένου"</string>
-    <!-- unknown placeholder WORD in addToDictionary -->
-    <skip />
-    <!-- no translation found for addToDictionary (9090375111134433012) -->
-    <skip />
-    <!-- no translation found for deleteText (7070985395199629156) -->
-    <skip />
+    <string name="addToDictionary" msgid="9090375111134433012">"προσθήκη στο λεξικό"</string>
+    <string name="deleteText" msgid="7070985395199629156">"διαγραφή"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Μέθοδος εισόδου"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Ενέργειες κειμένου"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Απομένει λίγος ελεύθερος χώρος"</string>
@@ -1113,12 +1110,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Αναίρεση των διαγραφών."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Να μην γίνει καμία ενέργεια τώρα."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Επιλογή λογαριασμού"</string>
-    <!-- no translation found for add_account_label (2935267344849993553) -->
-    <skip />
-    <!-- no translation found for choose_account_text (6891230675141555481) -->
-    <skip />
-    <!-- no translation found for add_account_button_label (3611982894853435874) -->
-    <skip />
+    <string name="add_account_label" msgid="2935267344849993553">"Προσθήκη λογαριασμού"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Ποιον λογαριασμό θέλετε να χρησιμοποιήσετε;"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Προσθήκη λογαριασμού"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Αύξηση"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Μείωση"</string>
     <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"Πατήστε και κρατήστε πατημένο το <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1168,10 +1162,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Χώρος αποθήκευσης USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Επεξεργασία..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Προειδοποίηση χρήσης δεδομένων"</string>
-    <!-- unknown placeholder SIZE in data_usage_warning_body -->
-    <skip />
-    <!-- no translation found for data_usage_warning_body (7217480745540055170) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Αγγ.για προβ.της χρ.και των ρυθ."</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Τα δεδ. 2G-3G απενεργοποιήθηκαν"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Τα δεδομένα 4G απενεργοποιήθηκαν"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Τα δεδομ. κιν. τηλεφ. απενεργοπ."</string>
