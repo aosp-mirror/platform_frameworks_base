@@ -508,6 +508,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    public void enableIpv6(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        try {
+            mConnector.doCommand(String.format("interface ipv6 %s enable", iface));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for enabling ipv6");
+        }
+    }
+
+    public void disableIpv6(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        try {
+            mConnector.doCommand(String.format("interface ipv6 %s disable", iface));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for disabling ipv6");
+        }
+    }
+
     public void addRoute(String interfaceName, RouteInfo route) {
         modifyRoute(interfaceName, ADD, route);
     }
