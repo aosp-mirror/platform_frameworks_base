@@ -126,8 +126,6 @@ public class LockPatternUtils {
 
     private static FileObserver sPasswordObserver;
 
-    private static boolean mLastAttemptWasBiometric = false;
-
     private static class PasswordFileObserver extends FileObserver {
         public PasswordFileObserver(String path, int mask) {
             super(path, mask);
@@ -394,13 +392,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Sets whether the last lockscreen setup attempt was biometric
-     */
-    public static void setLastAttemptWasBiometric(boolean val) {
-        mLastAttemptWasBiometric = val;
-    }
-
-    /**
      * Determine if LockScreen can be disabled. This is used, for example, to tell if we should
      * show LockScreen or go straight to the home screen.
      *
@@ -430,15 +421,13 @@ public class LockPatternUtils {
     }
 
     /**
-     * Calls back SetupFaceLock to delete the temporary gallery file if this is the backup lock.
+     * Calls back SetupFaceLock to delete the temporary gallery file
      */
     public void deleteTempGallery() {
-        //if(mLastAttemptWasBiometric) {
-            Intent intent = new Intent().setClassName("com.android.facelock",
-                    "com.android.facelock.SetupFaceLock");
-            intent.putExtra("deleteTempGallery", true);
-            mContext.startActivity(intent);
-            //}
+        Intent intent = new Intent().setClassName("com.android.facelock",
+                "com.android.facelock.SetupFaceLock");
+        intent.putExtra("deleteTempGallery", true);
+        mContext.startActivity(intent);
     }
 
     /**
