@@ -7609,9 +7609,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
 
-        // The WordIterator text change listener may be called after this one.
-        // Make sure this changed text is rescanned before the iterator is used on it.
-        getWordIterator().forceUpdate();
         updateSpellCheckSpans(start, start + after);
 
         // Hide the controllers if the amount of content changed
@@ -7745,21 +7742,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void updateSpellCheckSpans(int start, int end) {
         if (!isTextEditable() || !isSuggestionsEnabled() || !getSpellChecker().isSessionActive())
             return;
-
         Editable text = (Editable) mText;
-        WordIterator wordIterator = getWordIterator();
-        wordIterator.setCharSequence(text);
+
+        final int shift = prepareWordIterator(start, end);
+        final int shiftedStart = start - shift;
+        final int shiftedEnd = end - shift;
 
         // Move back to the beginning of the current word, if any
-        int wordStart = wordIterator.preceding(start);
+        int wordStart = mWordIterator.preceding(shiftedStart);
         int wordEnd;
         if (wordStart == BreakIterator.DONE) {
-            wordEnd = wordIterator.following(start);
+            wordEnd = mWordIterator.following(shiftedStart);
             if (wordEnd != BreakIterator.DONE) {
-                wordStart = wordIterator.getBeginning(wordEnd);
+                wordStart = mWordIterator.getBeginning(wordEnd);
             }
         } else {
-            wordEnd = wordIterator.getEnd(wordStart);
+            wordEnd = mWordIterator.getEnd(wordStart);
         }
         if (wordEnd == BreakIterator.DONE) {
             return;
@@ -7772,22 +7770,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int numberOfSpellCheckSpans = spellCheckSpans.length;
 
         // Iterate over the newly added text and schedule new SpellCheckSpans
-        while (wordStart <= end) {
-            if (wordEnd >= start) {
+        while (wordStart <= shiftedEnd) {
+            if (wordEnd >= shiftedStart) {
                 // A new word has been created across the interval boundaries. Remove previous spans
-                if (wordStart < start && wordEnd > start) {
+                if (wordStart < shiftedStart && wordEnd > shiftedStart) {
                     removeSpansAt(start, spellCheckSpans, text);
                     removeSpansAt(start, suggestionSpans, text);
                 }
 
-                if (wordStart < end && wordEnd > end) {
+                if (wordStart < shiftedEnd && wordEnd > shiftedEnd) {
                     removeSpansAt(end, spellCheckSpans, text);
                     removeSpansAt(end, suggestionSpans, text);
                 }
 
                 // Do not create new boundary spans if they already exist
                 boolean createSpellCheckSpan = true;
-                if (wordEnd == start) {
+                if (wordEnd == shiftedStart) {
                     for (int i = 0; i < numberOfSpellCheckSpans; i++) {
                         final int spanEnd = text.getSpanEnd(spellCheckSpans[i]);
                         if (spanEnd == start) {
@@ -7797,9 +7795,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
 
-                if (wordStart == end) {
+                if (wordStart == shiftedEnd) {
                     for (int i = 0; i < numberOfSpellCheckSpans; i++) {
-                        final int spanStart = text.getSpanEnd(spellCheckSpans[i]);
+                        final int spanStart = text.getSpanStart(spellCheckSpans[i]);
                         if (spanStart == end) {
                             createSpellCheckSpan = false;
                             break;
@@ -7808,16 +7806,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (createSpellCheckSpan) {
-                    mSpellChecker.addSpellCheckSpan(wordStart, wordEnd);
+                    mSpellChecker.addSpellCheckSpan(wordStart + shift, wordEnd + shift);
                 }
             }
 
             // iterate word by word
-            wordEnd = wordIterator.following(wordEnd);
+            wordEnd = mWordIterator.following(wordEnd);
             if (wordEnd == BreakIterator.DONE) break;
-            wordStart = wordIterator.getBeginning(wordEnd);
+            wordStart = mWordIterator.getBeginning(wordEnd);
             if (wordStart == BreakIterator.DONE) {
-                Log.e(LOG_TAG, "Unable to find word beginning from " + wordEnd + "in " + mText);
+                Log.e(LOG_TAG, "No word beginning from " + (wordEnd + shift) + "in " + mText);
                 break;
             }
         }
@@ -8941,26 +8939,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectionStart = ((Spanned) mText).getSpanStart(url);
             selectionEnd = ((Spanned) mText).getSpanEnd(url);
         } else {
-            WordIterator wordIterator = getWordIterator();
-            // WordIterator handles text changes, this is a no-op if text in unchanged.
-            wordIterator.setCharSequence(mText);
+            final int shift = prepareWordIterator(minOffset, maxOffset);
 
-            selectionStart = wordIterator.getBeginning(minOffset);
+            selectionStart = mWordIterator.getBeginning(minOffset - shift);
             if (selectionStart == BreakIterator.DONE) return false;
+            selectionStart += shift;
 
-            selectionEnd = wordIterator.getEnd(maxOffset);
+            selectionEnd = mWordIterator.getEnd(maxOffset - shift);
             if (selectionEnd == BreakIterator.DONE) return false;
+            selectionEnd += shift;
         }
 
         Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
         return true;
     }
 
-    WordIterator getWordIterator() {
+    int prepareWordIterator(int start, int end) {
         if (mWordIterator == null) {
             mWordIterator = new WordIterator();
         }
-        return mWordIterator;
+
+        final int TEXT_WINDOW_WIDTH = 50; // Should be larger than the longest word's length
+        final int windowStart = Math.max(0, start - TEXT_WINDOW_WIDTH);
+        final int windowEnd = Math.min(mText.length(), end + TEXT_WINDOW_WIDTH);
+        mWordIterator.setCharSequence(mText.subSequence(windowStart, windowEnd));
+
+        return windowStart;
     }
 
     private SpellChecker getSpellChecker() {
