@@ -42,8 +42,18 @@
     <string name="status_bar_recent_inspect_item_title">App info</string>
 
     <!-- Message shown in the middle of the screen after clicking on the recent apps button
-         when there are no recent apps to show [CHAR LIMIT=45]-->
+         when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
     <string name="status_bar_no_recent_apps">No recent apps</string>
+
+    <!-- Content description for the button to dismiss Recent Apps (only present on large
+         devices) -->
+    <string name="status_bar_accessibility_dismiss_recents">Dismiss recent apps</string>
+
+    <!-- Message that is read when you enter recent apps in TalkBack -->
+    <plurals name="status_bar_accessibility_recent_apps">
+        <item quantity="one">1 recent app</item>
+        <item quantity="other">%d recent apps</item>
+    </plurals>
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing.  [CHAR LIMIT=40]-->
@@ -108,14 +118,6 @@
 
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false">"\n"</string>
-
-    <!-- Recent Tasks dialog: title [CHAR LIMIT=30] -->
-    <string name="recent_tasks_title">Recent</string>
-    <!-- Recent Tasks dialog: message when there are no recent applications [CHAR LIMIT=NONE]-->
-    <string name="recent_tasks_empty">No recent applications.</string>
-
-    <!-- Recent apps label. Shown as title on recent apps panel -->
-    <string name="recent_tasks_app_label">Apps</string>
 
     <!-- Network connection string for Bluetooth Reverse Tethering -->
     <string name="bluetooth_tethered">Bluetooth tethered</string>
@@ -187,7 +189,7 @@
     <!-- Content description of the menu button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_menu">Menu</string>
     <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_recent">Recent applications</string>
+    <string name="accessibility_recent">Recent apps</string>
 
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ime_switch_button">Switch input method button.</string>

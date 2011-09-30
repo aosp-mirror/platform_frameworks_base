@@ -75,13 +75,4 @@
         android:layout_height="match_parent"
         android:visibility="invisible" />
 
-    <View android:id="@+id/recents_dismiss_button"
-        android:layout_width="80px"
-        android:layout_height="@*android:dimen/status_bar_height"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:background="@drawable/ic_sysbar_back_ime"
-        android:visibility="gone"
-    />
-
 </com.android.systemui.recent.RecentsPanelView>
