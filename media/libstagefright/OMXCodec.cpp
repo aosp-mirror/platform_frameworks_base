@@ -625,7 +625,11 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
 
-        setAACFormat(numChannels, sampleRate, bitRate);
+        status_t err = setAACFormat(numChannels, sampleRate, bitRate);
+        if (err != OK) {
+            CODEC_LOGE("setAACFormat() failed (err = %d)", err);
+            return err;
+        }
     } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_G711_ALAW, mMIME)
             || !strcasecmp(MEDIA_MIMETYPE_AUDIO_G711_MLAW, mMIME)) {
         // These are PCM-like formats with a fixed sample rate but
@@ -3358,8 +3362,10 @@ void OMXCodec::setAMRFormat(bool isWAMR, int32_t bitRate) {
     }
 }
 
-void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate) {
-    CHECK(numChannels == 1 || numChannels == 2);
+status_t OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate) {
+    if (numChannels > 2)
+        LOGW("Number of channels: (%d) \n", numChannels);
+
     if (mIsEncoder) {
         //////////////// input port ////////////////////
         setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
@@ -3410,9 +3416,13 @@ void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bit
         profile.nAACERtools = OMX_AUDIO_AACERNone;
         profile.eAACProfile = OMX_AUDIO_AACObjectLC;
         profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4FF;
-        CHECK_EQ(mOMX->setParameter(mNode, OMX_IndexParamAudioAac,
-                &profile, sizeof(profile)), (status_t)OK);
+        err = mOMX->setParameter(mNode, OMX_IndexParamAudioAac,
+                &profile, sizeof(profile));
 
+        if (err != OK) {
+            CODEC_LOGE("setParameter('OMX_IndexParamAudioAac') failed (err = %d)", err);
+            return err;
+        }
     } else {
         OMX_AUDIO_PARAM_AACPROFILETYPE profile;
         InitOMXParams(&profile);
@@ -3428,8 +3438,14 @@ void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bit
 
         err = mOMX->setParameter(
                 mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
-        CHECK_EQ(err, (status_t)OK);
+
+        if (err != OK) {
+            CODEC_LOGE("setParameter('OMX_IndexParamAudioAac') failed (err = %d)", err);
+            return err;
+        }
     }
+
+    return OK;
 }
 
 void OMXCodec::setG711Format(int32_t numChannels) {
