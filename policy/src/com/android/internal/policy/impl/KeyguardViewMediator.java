@@ -147,8 +147,16 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     private static final boolean ENABLE_INSECURE_STATUS_BAR_EXPAND = true;
 
+    /** The stream type that the lock sounds are tied to. */
+    private static final int MASTER_STREAM_TYPE = AudioManager.STREAM_RING;
+    /** Minimum volume for lock sounds, as a ratio of max MASTER_STREAM_TYPE */
+    final float MIN_LOCK_VOLUME = 0.05f;
+    /** Maximum volume for lock sounds, as a ratio of max MASTER_STREAM_TYPE */
+    final float MAX_LOCK_VOLUME = 0.4f;
+
     private Context mContext;
     private AlarmManager mAlarmManager;
+    private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
     private boolean mShowLockIcon;
     private boolean mShowingLockIcon;
@@ -255,6 +263,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
+    private int mMasterStreamMaxVolume;
 
     public KeyguardViewMediator(Context context, PhoneWindowManager callback,
             LocalPowerManager powerManager) {
@@ -1061,13 +1070,33 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
 
         final ContentResolver cr = mContext.getContentResolver();
-        if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1)
-        {
+        if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1) {
             final int whichSound = locked
                 ? mLockSoundId
                 : mUnlockSoundId;
             mLockSounds.stop(mLockSoundStreamId);
-            mLockSoundStreamId = mLockSounds.play(whichSound, 1.0f, 1.0f, 1, 0, 1.0f);
+            // Init mAudioManager
+            if (mAudioManager == null) {
+                mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+                if (mAudioManager == null) return;
+                mMasterStreamMaxVolume = mAudioManager.getStreamMaxVolume(MASTER_STREAM_TYPE);
+            }
+            // If the stream is muted, don't play the sound
+            if (mAudioManager.isStreamMute(MASTER_STREAM_TYPE)) return;
+
+            // Adjust the lock sound volume from a minimum of MIN_LOCK_VOLUME to a maximum
+            // of MAX_LOCK_VOLUME, relative to the maximum level of the MASTER_STREAM_TYPE volume.
+            float lockSoundVolume;
+            int masterStreamVolume = mAudioManager.getStreamVolume(MASTER_STREAM_TYPE);
+            if (masterStreamVolume == 0) {
+                return;
+            } else {
+                lockSoundVolume = MIN_LOCK_VOLUME + (MAX_LOCK_VOLUME - MIN_LOCK_VOLUME)
+                        * ((float) masterStreamVolume / mMasterStreamMaxVolume);
+            }
+
+            mLockSoundStreamId = mLockSounds.play(whichSound, lockSoundVolume, lockSoundVolume, 1,
+                    0, 1.0f);
         }
     }
 
