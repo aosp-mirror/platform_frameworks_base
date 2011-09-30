@@ -39,16 +39,7 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/system_fonts.xml:system/etc/system_fonts.xml \
     frameworks/base/data/fonts/fallback_fonts.xml:system/etc/fallback_fonts.xml
 
-# Next, include additional fonts, depending on how much space we have
-ifeq ($(SMALLER_FONT_FOOTPRINT),true)
-# Smaller fonts alternatives
-PRODUCT_COPY_FILES += \
-    frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf
-else
-# Full font set alternatives
-PRODUCT_COPY_FILES += \
-    frameworks/base/data/fonts/DroidSansFallbackFull.ttf:system/fonts/DroidSansFallback.ttf \
-    frameworks/base/data/fonts/DroidSans.ttf:system/fonts/DroidSans.ttf \
-    frameworks/base/data/fonts/DroidSans-Bold.ttf:system/fonts/DroidSans-Bold.ttf \
-    frameworks/base/data/fonts/DroidSansEthiopic-Regular.ttf:system/fonts/DroidSansEthiopic-Regular.ttf
-endif
+# Next, include additional fonts, depending on how much space we have.
+# Details see module definitions in Android.mk.
+PRODUCT_PACKAGES := \
+    DroidSansFallback.ttf
