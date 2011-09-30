@@ -23,6 +23,7 @@ import com.google.android.collect.Lists;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.FileObserver;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -124,6 +125,8 @@ public class LockPatternUtils {
     private static final AtomicBoolean sHaveNonZeroPasswordFile = new AtomicBoolean(false);
 
     private static FileObserver sPasswordObserver;
+
+    private static boolean mLastAttemptWasBiometric = false;
 
     private static class PasswordFileObserver extends FileObserver {
         public PasswordFileObserver(String path, int mask) {
@@ -371,7 +374,8 @@ public class LockPatternUtils {
     /**
      * Clear any lock pattern or password.
      */
-    public void clearLock() {
+    public void clearLock(boolean isFallback) {
+        if(!isFallback) deleteGallery();
         saveLockPassword(null, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
         setLockPatternEnabled(false);
         saveLockPattern(null);
@@ -390,6 +394,13 @@ public class LockPatternUtils {
     }
 
     /**
+     * Sets whether the last lockscreen setup attempt was biometric
+     */
+    public static void setLastAttemptWasBiometric(boolean val) {
+        mLastAttemptWasBiometric = val;
+    }
+
+    /**
      * Determine if LockScreen can be disabled. This is used, for example, to tell if we should
      * show LockScreen or go straight to the home screen.
      *
@@ -405,6 +416,41 @@ public class LockPatternUtils {
      */
     public void saveLockPattern(List<LockPatternView.Cell> pattern) {
         this.saveLockPattern(pattern, false);
+    }
+
+    /**
+     * Calls back SetupFaceLock to save the temporary gallery file if this is the backup lock.
+     * This doesn't have to verify that biometric is enabled because it's only called in that case
+    */
+    void moveTempGallery() {
+        Intent intent = new Intent().setClassName("com.android.facelock",
+                "com.android.facelock.SetupFaceLock");
+        intent.putExtra("moveTempGallery", true);
+        mContext.startActivity(intent);
+    }
+
+    /**
+     * Calls back SetupFaceLock to delete the temporary gallery file if this is the backup lock.
+     */
+    public void deleteTempGallery() {
+        //if(mLastAttemptWasBiometric) {
+            Intent intent = new Intent().setClassName("com.android.facelock",
+                    "com.android.facelock.SetupFaceLock");
+            intent.putExtra("deleteTempGallery", true);
+            mContext.startActivity(intent);
+            //}
+    }
+
+    /**
+     * Calls back SetupFaceLock to delete the gallery file when the lock type is changed
+    */
+    void deleteGallery() {
+        if(isBiometricEnabled()) {
+            Intent intent = new Intent().setClassName("com.android.facelock",
+                    "com.android.facelock.SetupFaceLock");
+            intent.putExtra("deleteGallery", true);
+            mContext.startActivity(intent);
+        }
     }
 
     /**
@@ -431,11 +477,13 @@ public class LockPatternUtils {
                 keyStore.password(patternToString(pattern));
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 if (!isFallback) {
+                    deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY,
                             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                    moveTempGallery();
                 }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
                         .size(), 0, 0, 0, 0, 0, 0);
@@ -547,10 +595,12 @@ public class LockPatternUtils {
 
                 int computedQuality = computePasswordQuality(password);
                 if (!isFallback) {
+                    deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality));
+                    moveTempGallery();
                 }
                 if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                     int letters = 0;
