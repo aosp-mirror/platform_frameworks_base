@@ -667,6 +667,13 @@ public class PduPersister {
         String contentType = null;
         if (part.getContentType() != null) {
             contentType = toIsoString(part.getContentType());
+
+            // There is no "image/jpg" in Android (and it's an invalid mimetype).
+            // Change it to "image/jpeg"
+            if (ContentType.IMAGE_JPG.equals(contentType)) {
+                contentType = ContentType.IMAGE_JPEG;
+            }
+
             values.put(Part.CONTENT_TYPE, contentType);
             // To ensure the SMIL part is always the first part.
             if (ContentType.APP_SMIL.equals(contentType)) {
