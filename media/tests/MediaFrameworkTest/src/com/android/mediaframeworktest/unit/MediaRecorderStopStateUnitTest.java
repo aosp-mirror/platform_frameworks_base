@@ -20,6 +20,7 @@ import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.Suppress;
+import android.util.Log;
 
 /**
  * Unit test class to test the set of valid and invalid states that
@@ -27,6 +28,8 @@ import android.test.suitebuilder.annotation.Suppress;
  */          
 public class MediaRecorderStopStateUnitTest extends AndroidTestCase implements MediaRecorderMethodUnderTest {
     private MediaRecorderStateUnitTestTemplate mTestTemplate = new MediaRecorderStateUnitTestTemplate();
+    private static final String TAG = "MediaRecorderStopStateUnitTest";
+    private static final int SLEEP_TIME_BEFORE_STOP = 1000;
 
     /**
      * 1. It is valid to call stop() in the following states:
@@ -51,6 +54,15 @@ public class MediaRecorderStopStateUnitTest extends AndroidTestCase implements M
     }
 
     public void invokeMethodUnderTest(MediaRecorder recorder) {
+        // Wait for some time before stopping the media recorder.
+        // This will fix the assertion caused by stopping it immediatedly
+        // after it is started
+        try {
+            Thread.sleep(SLEEP_TIME_BEFORE_STOP);
+        } catch(Exception e) {
+            Log.v(TAG, "sleep was interrupted and terminated prematurely");
+        }
+
         recorder.stop();
     }
 
