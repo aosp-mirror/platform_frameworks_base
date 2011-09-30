@@ -17,6 +17,7 @@
 #ifndef ANDROID_GUI_SURFACETEXTURE_H
 #define ANDROID_GUI_SURFACETEXTURE_H
 
+#include <GLES2/gl2ext.h>
 #include <ui/GraphicBuffer.h>
 
 namespace android {
@@ -24,7 +25,8 @@ namespace android {
 struct SurfaceTexture {
     struct FrameAvailableListener : public virtual RefBase {};
 
-    SurfaceTexture(GLuint, bool allowSynchronousMode = true) {}
+    SurfaceTexture(GLuint, bool allowSynchronousMode = true,
+                   GLenum texTarget = GL_TEXTURE_EXTERNAL_OES) {}
     void updateTexImage() {}
     void decStrong(android::sp<android::SurfaceTexture>* const) {}
     void incStrong(android::sp<android::SurfaceTexture>* const) {}
