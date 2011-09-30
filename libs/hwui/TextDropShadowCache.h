@@ -81,7 +81,7 @@ struct ShadowText {
                         LTE_INT(flags) {
                             LTE_INT(italicStyle) {
                                 LTE_INT(scaleX) {
-                                    return strncmp16(text, rhs.text, len >> 1) < 0;
+                                    return memcmp(text, rhs.text, len) < 0;
                                 }
                             }
                         }

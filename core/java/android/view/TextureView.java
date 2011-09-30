@@ -250,6 +250,11 @@ public class TextureView extends View {
         return LAYER_TYPE_HARDWARE;
     }
 
+    @Override
+    boolean hasStaticLayer() {
+        return true;
+    }
+
     /**
      * Calling this method has no effect.
      */
