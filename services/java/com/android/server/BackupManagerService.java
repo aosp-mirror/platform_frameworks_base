@@ -5596,6 +5596,16 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private void dumpInternal(PrintWriter pw) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump Backup Manager service from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " without permission "
+                    + android.Manifest.permission.DUMP);
+            return;
+        }
+
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
