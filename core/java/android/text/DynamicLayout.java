@@ -76,7 +76,7 @@ extends Layout
                          boolean includepad,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth);
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE);
     }
 
     /**
@@ -93,7 +93,7 @@ extends Layout
                          int width, Alignment align, TextDirectionHeuristic textDir,
                          float spacingmult, float spacingadd,
                          boolean includepad,
-                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines) {
         super((ellipsize == null)
                 ? display
                 : (display instanceof Spanned)
@@ -134,6 +134,8 @@ extends Layout
             e.mMethod = ellipsize;
             mEllipsize = true;
         }
+
+        mMaxLines = maxLines;
 
         // Initial state is a single line with 0 characters (0 to 0),
         // with top at 0 and bottom at whatever is natural, and
@@ -283,7 +285,7 @@ extends Layout
         reflowed.generate(text, where, where + after,
                 getPaint(), getWidth(), getAlignment(), getTextDirectionHeuristic(),
                 getSpacingMultiplier(), getSpacingAdd(),
-                false, true, mEllipsizedWidth, mEllipsizeAt);
+                false, true, mEllipsizedWidth, mEllipsizeAt, mMaxLines);
         int n = reflowed.getLineCount();
 
         // If the new layout has a blank line at the end, but it is not
@@ -487,6 +489,8 @@ extends Layout
     private PackedObjectVector<Directions> mObjects;
 
     private int mTopPadding, mBottomPadding;
+
+    private int mMaxLines;
 
     private static StaticLayout sStaticLayout = new StaticLayout(null);
 
