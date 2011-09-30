@@ -176,9 +176,9 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE,
                 mList->numHwLayers, mList->flags);
         result.append(buffer);
         result.append(
-                "    type   |   hints  |   flags  | tr | blend |  format  |     source rectangle      |      crop rectangle       name \n"
-                "-----------+----------+----------+----+-------+----------+---------------------------+--------------------------------\n");
-        //      "  ________ | ________ | ________ | __ | _____ | ________ | [_____,_____,_____,_____] | [_____,_____,_____,_____]
+                "   type   |  handle  |   hints  |   flags  | tr | blend |  format  |       source crop         |           frame           name \n"
+                "----------+----------+----------+----------+----+-------+----------+---------------------------+--------------------------------\n");
+        //      " ________ | ________ | ________ | ________ | __ | _____ | ________ | [_____,_____,_____,_____] | [_____,_____,_____,_____]
         for (size_t i=0 ; i<mList->numHwLayers ; i++) {
             const hwc_layer_t& l(mList->hwLayers[i]);
             const sp<LayerBase> layer(visibleLayersSortedByZ[i]);
@@ -190,9 +190,9 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE,
                 }
             }
             snprintf(buffer, SIZE,
-                    "  %8s | %08x | %08x | %02x | %05x | %08x | [%5d,%5d,%5d,%5d] | [%5d,%5d,%5d,%5d] %s\n",
+                    " %8s | %08x | %08x | %08x | %02x | %05x | %08x | [%5d,%5d,%5d,%5d] | [%5d,%5d,%5d,%5d] %s\n",
                     l.compositionType ? "OVERLAY" : "FB",
-                    l.hints, l.flags, l.transform, l.blending, format,
+                    intptr_t(l.handle), l.hints, l.flags, l.transform, l.blending, format,
                     l.sourceCrop.left, l.sourceCrop.top, l.sourceCrop.right, l.sourceCrop.bottom,
                     l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
                     layer->getName().string());
