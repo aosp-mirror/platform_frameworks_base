@@ -785,6 +785,7 @@ public class NetworkController extends BroadcastReceiver {
                         mWifiActivityIconId = R.drawable.stat_sys_wifi_inout;
                         break;
                     case WifiManager.DATA_ACTIVITY_NONE:
+                        mWifiActivityIconId = 0;
                         break;
                 }
             }
