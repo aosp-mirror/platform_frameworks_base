@@ -26,12 +26,21 @@
     android:paddingRight="0px"
     >
 
-    <View
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:layout_weight="1"
-         android:background="@drawable/notification_tracking_bg"
-         />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@drawable/notification_tracking_bg"
+        >
+        <com.android.systemui.statusbar.phone.CarrierLabel
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:paddingBottom="20dp"
+            />
+    </FrameLayout>
 
     <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
         android:layout_width="match_parent"
