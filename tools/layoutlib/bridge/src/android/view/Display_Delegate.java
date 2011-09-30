@@ -47,14 +47,14 @@ public class Display_Delegate {
 
     @LayoutlibDelegate
     /** @hide special for when we are faking the screen size. */
-    /*package*/ static int getRawWidth(Display theDisplay) {
+    /*package*/ static int getRawWidthNative(Display theDisplay) {
         // same as real since we're not faking compatibility mode.
         return RenderAction.getCurrentContext().getIWindowManager().getMetrics().widthPixels;
     }
 
     @LayoutlibDelegate
     /** @hide special for when we are faking the screen size. */
-    /*package*/ static int getRawHeight(Display theDisplay) {
+    /*package*/ static int getRawHeightNative(Display theDisplay) {
         // same as real since we're not faking compatibility mode.
         return RenderAction.getCurrentContext().getIWindowManager().getMetrics().heightPixels;
     }
