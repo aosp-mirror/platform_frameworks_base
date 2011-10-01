@@ -73,7 +73,7 @@
                     android:layout_width="80dip"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_recent"
-                    android:contentDescription="@string/accessibility_menu"
+                    android:contentDescription="@string/accessibility_recent"
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"

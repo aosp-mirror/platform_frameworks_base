@@ -79,6 +79,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:background="@drawable/ic_sysbar_back_ime"
+        android:contentDescription="@string/status_bar_accessibility_dismiss_recents"
     />
 
 </com.android.systemui.recent.RecentsPanelView>

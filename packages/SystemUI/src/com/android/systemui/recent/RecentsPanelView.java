@@ -32,12 +32,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -56,7 +53,6 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -202,6 +198,7 @@ public class RecentsPanelView extends RelativeLayout
             holder.descriptionView.setText(activityDescription.recentTaskInfo.description);
             holder.thumbnailView.setTag(activityDescription);
             holder.thumbnailView.setOnLongClickListener(new OnLongClickDelegate(convertView));
+            holder.thumbnailView.setContentDescription(activityDescription.getLabel());
             holder.activityDescription = activityDescription;
 
             return convertView;
@@ -228,6 +225,23 @@ public class RecentsPanelView extends RelativeLayout
     }
 
     public void show(boolean show, boolean animate) {
+        if (show) {
+            // Need to update list of recent apps before we set visibility so this view's
+            // content description is updated before it gets focus for TalkBack mode
+            refreshApplicationList();
+
+            // if there are no apps, either bring up a "No recent apps" message, or just
+            // quit early
+            boolean noApps = (mActivityDescriptions.size() == 0);
+            if (mRecentsNoApps != null) { // doesn't exist on large devices
+                mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
+            } else {
+                if (noApps) {
+                    if (DEBUG) Log.v(TAG, "Nothing to show");
+                    return;
+                }
+            }
+        }
         if (animate) {
             if (mShowing != show) {
                 mShowing = show;
@@ -378,11 +392,13 @@ public class RecentsPanelView extends RelativeLayout
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, mRecentsNoApps, this);
         mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
-        mRecentsDismissButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                hide(true);
-            }
-        });
+        if (mRecentsDismissButton != null) {
+            mRecentsDismissButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    hide(true);
+                }
+            });
+        }
 
         // In order to save space, we make the background texture repeat in the Y direction
         if (mRecentsScrim != null && mRecentsScrim.getBackground() instanceof BitmapDrawable) {
@@ -400,9 +416,6 @@ public class RecentsPanelView extends RelativeLayout
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + changedView + ", " + visibility + ")");
-        if (visibility == View.VISIBLE && changedView == this) {
-            refreshApplicationList();
-        }
 
         if (mRecentsContainer instanceof RecentsHorizontalScrollView) {
             ((RecentsHorizontalScrollView) mRecentsContainer).onRecentsVisibilityChanged();
@@ -553,6 +566,7 @@ public class RecentsPanelView extends RelativeLayout
                             }
                             h.iconView.setVisibility(View.VISIBLE);
                             h.labelView.setText(ad.getLabel());
+                            h.thumbnailView.setContentDescription(ad.getLabel());
                             if (anim) {
                                 h.labelView.setAnimation(AnimationUtils.loadAnimation(
                                         mContext, R.anim.recent_appear));
@@ -582,10 +596,18 @@ public class RecentsPanelView extends RelativeLayout
             mThumbnailLoader.cancel(false);
             mThumbnailLoader = null;
         }
-        if (mRecentsNoApps != null) { // doesn't exist on large devices
-            mRecentsNoApps.setVisibility(View.INVISIBLE);
-        }
+
         mActivityDescriptions = getRecentTasks();
+        int numRecentApps = mActivityDescriptions.size();
+        String recentAppsAccessibilityDescription;
+        if (numRecentApps == 0) {
+            recentAppsAccessibilityDescription =
+                getResources().getString(R.string.status_bar_no_recent_apps);
+        } else {
+            recentAppsAccessibilityDescription = getResources().getQuantityString(
+                R.plurals.status_bar_accessibility_recent_apps, numRecentApps, numRecentApps);
+        }
+        setContentDescription(recentAppsAccessibilityDescription);
         for (ActivityDescription ad : mActivityDescriptions) {
             ad.setThumbnail(mDefaultThumbnailBackground);
         }
@@ -648,14 +670,6 @@ public class RecentsPanelView extends RelativeLayout
                     }
                 };
                 mThumbnailLoader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        } else {
-            // Immediately hide this panel
-            if (DEBUG) Log.v(TAG, "Nothing to show");
-            if (mRecentsNoApps != null) { // doesn't exist on large devices
-                mRecentsNoApps.setVisibility(View.VISIBLE);
-            } else {
-                hide(false);
             }
         }
     }

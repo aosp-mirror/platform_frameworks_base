@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.View.OnTouchListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -65,6 +66,13 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                 mPerformanceHelper.addViewCallback(view);
             }
 
+            OnTouchListener noOpListener = new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            };
+
             view.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     mCallback.dismiss();
@@ -78,22 +86,25 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                     mCallback.handleOnClick(view);
                 }
             };
+
+            final View thumbnailView = view.findViewById(R.id.app_thumbnail);
             OnLongClickListener longClickListener = new OnLongClickListener() {
                 public boolean onLongClick(View v) {
                     final View anchorView = view.findViewById(R.id.app_description);
-                    final View thumbnailView = view.findViewById(R.id.app_thumbnail);
                     mCallback.handleLongPress(view, anchorView, thumbnailView);
                     return true;
                 }
             };
-            final View thumbnail = view.findViewById(R.id.app_thumbnail);
-            thumbnail.setClickable(true);
-            thumbnail.setOnClickListener(launchAppListener);
-            thumbnail.setOnLongClickListener(longClickListener);
+            thumbnailView.setClickable(true);
+            thumbnailView.setOnClickListener(launchAppListener);
+            thumbnailView.setOnLongClickListener(longClickListener);
+
+            // We don't want to dismiss recents if a user clicks on the app title
+            // (we also don't want to launch the app either, though, because the
+            // app title is a small target and doesn't have great click feedback)
             final View appTitle = view.findViewById(R.id.app_label);
-            appTitle.setClickable(true);
-            appTitle.setOnClickListener(launchAppListener);
-            appTitle.setOnLongClickListener(longClickListener);
+            appTitle.setContentDescription(" ");
+            appTitle.setOnTouchListener(noOpListener);
             mLinearLayout.addView(view);
         }
         // Scroll to end after layout.

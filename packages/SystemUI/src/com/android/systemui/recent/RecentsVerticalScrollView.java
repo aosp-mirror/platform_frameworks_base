@@ -74,6 +74,13 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
             }
 
             if (old == null) {
+                OnTouchListener noOpListener = new OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return true;
+                    }
+                };
+
                 view.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         mCallback.dismiss();
@@ -87,26 +94,27 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
                         mCallback.handleOnClick(view);
                     }
                 };
+
+                final View thumbnailView = view.findViewById(R.id.app_thumbnail);
                 OnLongClickListener longClickListener = new OnLongClickListener() {
                     public boolean onLongClick(View v) {
                         final View anchorView = view.findViewById(R.id.app_description);
-                        final View thumbnailView = view.findViewById(R.id.app_thumbnail);
                         mCallback.handleLongPress(view, anchorView, thumbnailView);
                         return true;
                     }
                 };
-                final View thumbnail = view.findViewById(R.id.app_thumbnail);
-                thumbnail.setClickable(true);
-                thumbnail.setOnClickListener(launchAppListener);
-                thumbnail.setOnLongClickListener(longClickListener);
+                thumbnailView.setClickable(true);
+                thumbnailView.setOnClickListener(launchAppListener);
+                thumbnailView.setOnLongClickListener(longClickListener);
+
+                // We don't want to dismiss recents if a user clicks on the app title
+                // (we also don't want to launch the app either, though, because the
+                // app title is a small target and doesn't have great click feedback)
                 final View appTitle = view.findViewById(R.id.app_label);
-                appTitle.setClickable(true);
-                appTitle.setOnClickListener(launchAppListener);
-                appTitle.setOnLongClickListener(longClickListener);
+                appTitle.setContentDescription(" ");
+                appTitle.setOnTouchListener(noOpListener);
                 final View calloutLine = view.findViewById(R.id.recents_callout_line);
-                calloutLine.setClickable(true);
-                calloutLine.setOnClickListener(launchAppListener);
-                calloutLine.setOnLongClickListener(longClickListener);
+                calloutLine.setOnTouchListener(noOpListener);
                 mLinearLayout.addView(view);
             }
         }
