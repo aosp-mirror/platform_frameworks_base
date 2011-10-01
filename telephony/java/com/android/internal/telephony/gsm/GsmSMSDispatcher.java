@@ -25,8 +25,9 @@ import android.os.Message;
 import android.os.SystemProperties;
 import android.provider.Telephony.Sms;
 import android.provider.Telephony.Sms.Intents;
-import android.telephony.ServiceState;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsCbMessage;
+import android.telephony.SmsManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 
@@ -41,7 +42,6 @@ import com.android.internal.telephony.SmsStorageMonitor;
 import com.android.internal.telephony.SmsUsageMonitor;
 import com.android.internal.telephony.TelephonyProperties;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -56,9 +56,16 @@ public final class GsmSMSDispatcher extends SMSDispatcher {
     /** New broadcast SMS */
     private static final int EVENT_NEW_BROADCAST_SMS = 101;
 
+    /** Result of writing SM to UICC (when SMS-PP service is not available). */
+    private static final int EVENT_WRITE_SMS_COMPLETE = 102;
+
+    /** Handler for SMS-PP data download messages to UICC. */
+    private final UsimDataDownloadHandler mDataDownloadHandler;
+
     public GsmSMSDispatcher(PhoneBase phone, SmsStorageMonitor storageMonitor,
             SmsUsageMonitor usageMonitor) {
         super(phone, storageMonitor, usageMonitor);
+        mDataDownloadHandler = new UsimDataDownloadHandler(mCm);
         mCm.setOnNewGsmSms(this, EVENT_NEW_SMS, null);
         mCm.setOnSmsStatus(this, EVENT_NEW_SMS_STATUS_REPORT, null);
         mCm.setOnNewGsmBroadcastSms(this, EVENT_NEW_BROADCAST_SMS, null);
@@ -91,6 +98,18 @@ public final class GsmSMSDispatcher extends SMSDispatcher {
 
         case EVENT_NEW_BROADCAST_SMS:
             handleBroadcastSms((AsyncResult)msg.obj);
+            break;
+
+        case EVENT_WRITE_SMS_COMPLETE:
+            AsyncResult ar = (AsyncResult) msg.obj;
+            if (ar.exception == null) {
+                Log.d(TAG, "Successfully wrote SMS-PP message to UICC");
+                mCm.acknowledgeLastIncomingGsmSms(true, 0, null);
+            } else {
+                Log.d(TAG, "Failed to write SMS-PP message to UICC", ar.exception);
+                mCm.acknowledgeLastIncomingGsmSms(false,
+                        CommandsInterface.GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR, null);
+            }
             break;
 
         default:
@@ -152,6 +171,29 @@ public final class GsmSMSDispatcher extends SMSDispatcher {
             // Displayed/Stored/Notified. They should only be acknowledged.
             Log.d(TAG, "Received short message type 0, Don't display or store it. Send Ack");
             return Intents.RESULT_SMS_HANDLED;
+        }
+
+        // Send SMS-PP data download messages to UICC. See 3GPP TS 31.111 section 7.1.1.
+        if (sms.isUsimDataDownload()) {
+            UsimServiceTable ust = mPhone.getUsimServiceTable();
+            // If we receive an SMS-PP message before the UsimServiceTable has been loaded,
+            // assume that the data download service is not present. This is very unlikely to
+            // happen because the IMS connection will not be established until after the ISIM
+            // records have been loaded, after the USIM service table has been loaded.
+            if (ust != null && ust.isAvailable(
+                    UsimServiceTable.UsimService.DATA_DL_VIA_SMS_PP)) {
+                Log.d(TAG, "Received SMS-PP data download, sending to UICC.");
+                return mDataDownloadHandler.startDataDownload(sms);
+            } else {
+                Log.d(TAG, "DATA_DL_VIA_SMS_PP service not available, storing message to UICC.");
+                String smsc = IccUtils.bytesToHexString(
+                        PhoneNumberUtils.networkPortionToCalledPartyBCDWithLength(
+                                sms.getServiceCenterAddress()));
+                mCm.writeSmsToSim(SmsManager.STATUS_ON_ICC_UNREAD, smsc,
+                        IccUtils.bytesToHexString(sms.getPdu()),
+                        obtainMessage(EVENT_WRITE_SMS_COMPLETE));
+                return Activity.RESULT_OK;  // acknowledge after response from write to USIM
+            }
         }
 
         if (mSmsReceiveDisabled) {

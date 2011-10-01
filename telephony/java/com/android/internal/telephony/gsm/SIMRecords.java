@@ -248,6 +248,7 @@ public class SIMRecords extends IccRecords {
         return msisdn;
     }
 
+    @Override
     public UsimServiceTable getUsimServiceTable() {
         return mUsimServiceTable;
     }

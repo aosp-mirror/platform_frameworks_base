@@ -769,6 +769,14 @@ public class SmsMessage extends SmsMessageBase {
         return protocolIdentifier;
     }
 
+    /**
+     * Returns the TP-Data-Coding-Scheme byte, for acknowledgement of SMS-PP download messages.
+     * @return the TP-DCS field of the SMS header
+     */
+    int getDataCodingScheme() {
+        return dataCodingScheme;
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isReplace() {
@@ -1129,4 +1137,14 @@ public class SmsMessage extends SmsMessageBase {
         return messageClass;
     }
 
+    /**
+     * Returns true if this is a (U)SIM data download type SM.
+     * See 3GPP TS 31.111 section 9.1 and TS 23.040 section 9.2.3.9.
+     *
+     * @return true if this is a USIM data download message; false otherwise
+     */
+    boolean isUsimDataDownload() {
+        return messageClass == MessageClass.CLASS_2 &&
+                (protocolIdentifier == 0x7f || protocolIdentifier == 0x7c);
+    }
 }

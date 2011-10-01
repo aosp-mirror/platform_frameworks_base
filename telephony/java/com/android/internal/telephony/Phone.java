@@ -28,6 +28,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.gsm.UsimServiceTable;
 import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
@@ -1765,4 +1766,10 @@ public interface Phone {
      *                      messages are waiting
      */
     void setVoiceMessageWaiting(int line, int countWaiting);
+
+    /**
+     * Gets the USIM service table from the UICC, if present and available.
+     * @return an interface to the UsimServiceTable record, or null if not available
+     */
+    UsimServiceTable getUsimServiceTable();
 }
