@@ -16,6 +16,9 @@
 
 package android.view.inputmethod;
 
+/**
+ * Class allowing access to package-protected methods/fields.
+ */
 public class InputMethodManager_Accessor {
 
     public static void resetInstance() {

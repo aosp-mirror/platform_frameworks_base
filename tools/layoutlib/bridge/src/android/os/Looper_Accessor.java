@@ -15,6 +15,9 @@
  */
 package android.os;
 
+/**
+ * Class allowing access to package-protected methods/fields.
+ */
 public class Looper_Accessor {
 
     public static void cleanupThread() {

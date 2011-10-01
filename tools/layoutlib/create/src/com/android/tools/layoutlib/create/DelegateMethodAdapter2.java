@@ -188,20 +188,24 @@ class DelegateMethodAdapter2 implements MethodVisitor {
         boolean pushedArg0 = false;
         int maxStack = 0;
 
+        // Check if the last segment of the class name has inner an class.
+        // Right now we only support one level of inner classes.
+        Type outerType = null;
+        int slash = mClassName.lastIndexOf('/');
+        int dol = mClassName.lastIndexOf('$');
+        if (dol != -1 && dol > slash && dol == mClassName.indexOf('$')) {
+            String outerClass = mClassName.substring(0, dol);
+            outerType = Type.getObjectType(outerClass);
+
+            // Change a delegate class name to "com/foo/Outer_Inner_Delegate"
+            delegateClassName = delegateClassName.replace('$', '_');
+        }
+
         // For an instance method (e.g. non-static), push the 'this' preceded
         // by the 'this' of any outer class, if any.
         if (!mIsStatic) {
-            // Check if the last segment of the class name has inner an class.
-            // Right now we only support one level of inner classes.
-            int slash = mClassName.lastIndexOf('/');
-            int dol = mClassName.lastIndexOf('$');
-            if (dol != -1 && dol > slash && dol == mClassName.indexOf('$')) {
-                String outerClass = mClassName.substring(0, dol);
-                Type outerType = Type.getObjectType(outerClass);
 
-                // Change a delegate class name to "com/foo/Outer_Inner_Delegate"
-                delegateClassName = delegateClassName.replace('$', '_');
-
+            if (outerType != null) {
                 // The first-level inner class has a package-protected member called 'this$0'
                 // that points to the outer class.
 
@@ -213,6 +217,7 @@ class DelegateMethodAdapter2 implements MethodVisitor {
                         outerType.getDescriptor()); // type of the field
                 maxStack++;
                 paramTypes.add(outerType);
+
             }
 
             // Push "this" for the instance method, which is always ALOAD 0
