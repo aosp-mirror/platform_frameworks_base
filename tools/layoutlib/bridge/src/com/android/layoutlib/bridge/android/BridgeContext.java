@@ -67,6 +67,7 @@ import android.view.BridgeInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.textservice.TextServicesManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -412,6 +413,11 @@ public final class BridgeContext extends Context {
     public Object getSystemService(String service) {
         if (LAYOUT_INFLATER_SERVICE.equals(service)) {
             return mBridgeInflater;
+        }
+
+        if (TEXT_SERVICES_MANAGER_SERVICE.equals(service)) {
+            // we need to return a valid service to avoid NPE
+            return TextServicesManager.getInstance();
         }
 
         // AutoCompleteTextView and MultiAutoCompleteTextView want a window
