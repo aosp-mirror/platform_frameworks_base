@@ -16,13 +16,17 @@
 
 package android.appwidget;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -107,6 +111,54 @@ public class AppWidgetHostView extends FrameLayout {
     public void setAppWidget(int appWidgetId, AppWidgetProviderInfo info) {
         mAppWidgetId = appWidgetId;
         mInfo = info;
+
+        // Sometimes the AppWidgetManager returns a null AppWidgetProviderInfo object for
+        // a widget, eg. for some widgets in safe mode.
+        if (info != null) {
+            // We add padding to the AppWidgetHostView if necessary
+            Padding padding = getPaddingForWidget(info.provider);
+            setPadding(padding.left, padding.top, padding.right, padding.bottom);
+        }
+    }
+
+    private static class Padding {
+        int left = 0;
+        int right = 0;
+        int top = 0;
+        int bottom = 0;
+    }
+
+    /**
+     * As of ICE_CREAM_SANDWICH we are automatically adding padding to widgets targeting
+     * ICE_CREAM_SANDWICH and higher. The new widget design guidelines strongly recommend
+     * that widget developers do not add extra padding to their widgets. This will help
+     * achieve consistency among widgets.
+     */
+    private Padding getPaddingForWidget(ComponentName component) {
+        PackageManager packageManager = mContext.getPackageManager();
+        Padding p = new Padding();
+        ApplicationInfo appInfo;
+
+        try {
+            appInfo = packageManager.getApplicationInfo(component.getPackageName(), 0);
+        } catch (Exception e) {
+            // if we can't find the package, return 0 padding
+            return p;
+        }
+
+        if (appInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            Resources r = getResources();
+            p.left = r.getDimensionPixelSize(com.android.internal.
+                    R.dimen.default_app_widget_padding_left);
+            p.right = r.getDimensionPixelSize(com.android.internal.
+                    R.dimen.default_app_widget_padding_right);
+            p.top = r.getDimensionPixelSize(com.android.internal.
+                    R.dimen.default_app_widget_padding_top);
+            p.bottom = r.getDimensionPixelSize(com.android.internal.
+                    R.dimen.default_app_widget_padding_bottom);
+        }
+
+        return p;
     }
 
     public int getAppWidgetId() {
