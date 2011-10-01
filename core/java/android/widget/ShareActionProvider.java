@@ -171,6 +171,12 @@ public class ShareActionProvider extends ActionProvider {
         activityChooserView.setExpandActivityOverflowButtonDrawable(drawable);
         activityChooserView.setProvider(this);
 
+        // Set content description.
+        activityChooserView.setDefaultActionButtonContentDescription(
+                R.string.shareactionprovider_share_with_application);
+        activityChooserView.setExpandActivityOverflowButtonContentDescription(
+                R.string.shareactionprovider_share_with);
+
         return activityChooserView;
     }
 
