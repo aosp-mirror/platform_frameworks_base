@@ -183,4 +183,10 @@
 
     <!-- Volume panel y offset -->
     <dimen name="volume_panel_top">80dp</dimen>
+
+    <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
+    <dimen name="default_app_widget_padding_left">8dp</dimen>
+    <dimen name="default_app_widget_padding_top">8dp</dimen>
+    <dimen name="default_app_widget_padding_right">8dp</dimen>
+    <dimen name="default_app_widget_padding_bottom">8dp</dimen>
 </resources>
