@@ -37,19 +37,16 @@
             android:layout_height="@dimen/status_bar_recents_thumbnail_height"
             android:visibility="invisible"
         />
+        <ImageView android:id="@+id/app_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/status_bar_recents_app_icon_left_margin"
+            android:layout_marginTop="@dimen/status_bar_recents_app_icon_top_margin"
+            android:maxWidth="@dimen/status_bar_recents_app_icon_max_width"
+            android:maxHeight="@dimen/status_bar_recents_app_icon_max_height"
+            android:adjustViewBounds="true"
+        />
     </FrameLayout>
-
-    <ImageView android:id="@+id/app_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/app_thumbnail"
-        android:layout_alignTop="@id/app_thumbnail"
-        android:layout_marginLeft="@dimen/status_bar_recents_app_icon_left_margin"
-        android:layout_marginTop="@dimen/status_bar_recents_app_icon_top_margin"
-        android:maxWidth="@dimen/status_bar_recents_app_icon_max_width"
-        android:maxHeight="@dimen/status_bar_recents_app_icon_max_height"
-        android:adjustViewBounds="true"
-    />
 
     <TextView android:id="@+id/app_label"
         android:layout_width="@dimen/status_bar_recents_app_label_width"

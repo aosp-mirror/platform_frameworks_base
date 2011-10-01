@@ -192,7 +192,7 @@ public class PhoneStatusBar extends StatusBar {
     private View mTickerView;
     private boolean mTicking;
 
-    // Recent applications
+    // Recent apps
     private RecentsPanelView mRecentsPanel;
 
     // Tracking finger for opening/closing.
@@ -417,9 +417,6 @@ public class PhoneStatusBar extends StatusBar {
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
         if (visible) {
-            // need to set visibility to View.GONE earlier since that
-            // triggers refreshing application list
-            mRecentsPanel.setVisibility(View.VISIBLE);
             mRecentsPanel.show(true, false);
         }
 
@@ -1126,7 +1123,6 @@ public class PhoneStatusBar extends StatusBar {
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
                     if (mRecentsPanel != null) {
-                        mRecentsPanel.setVisibility(View.VISIBLE);
                         mRecentsPanel.show(true, true);
                     }
                     break;
