@@ -149,6 +149,8 @@ public class WifiService extends IWifiManager.Stub {
     private static final int WIFI_ENABLED                   = 1;
     /* Wifi enabled while in airplane mode */
     private static final int WIFI_ENABLED_AIRPLANE_OVERRIDE = 2;
+    /* Wifi disabled due to airplane mode on */
+    private static final int WIFI_DISABLED_AIRPLANE_ON      = 3;
 
     private AtomicInteger mWifiState = new AtomicInteger(WIFI_DISABLED);
     private AtomicBoolean mAirplaneModeOn = new AtomicBoolean(false);
@@ -478,14 +480,19 @@ public class WifiService extends IWifiManager.Stub {
 
     private void persistWifiEnabled(boolean enabled) {
         final ContentResolver cr = mContext.getContentResolver();
+        boolean airplane = mAirplaneModeOn.get() && isAirplaneToggleable();
         if (enabled) {
-            if (isAirplaneModeOn() && isAirplaneToggleable()) {
+            if (airplane) {
                 mWifiState.set(WIFI_ENABLED_AIRPLANE_OVERRIDE);
             } else {
                 mWifiState.set(WIFI_ENABLED);
             }
         } else {
-            mWifiState.set(WIFI_DISABLED);
+            if (airplane) {
+                mWifiState.set(WIFI_DISABLED_AIRPLANE_ON);
+            } else {
+                mWifiState.set(WIFI_DISABLED);
+            }
         }
         Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, mWifiState.get());
     }
