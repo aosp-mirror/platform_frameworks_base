@@ -77,6 +77,12 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     static final int PER_PROCESS_TURN_ON = 3;
     static final int PER_PROCESS_TURN_OFF = 4;
 
+    // Turn on Bluetooth Module, Load firmware, and do all the preparation
+    // needed to get the Bluetooth Module ready but keep it not discoverable
+    // and not connectable. This way the Bluetooth Module can be quickly
+    // switched on if needed
+    static final int TURN_HOT = 5;
+
     // Message(what) to report a event that the state machine need to respond to
     //
     // Event indicates sevice records have been loaded
@@ -94,23 +100,18 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
     // private internal messages
     //
-    // Turn on Bluetooth Module, Load firmware, and do all the preparation
-    // needed to get the Bluetooth Module ready but keep it not discoverable
-    // and not connectable. This way the Bluetooth Module can be quickly
-    // switched on if needed
-    private static final int TURN_HOT = 101;
     // USER_TURN_ON is changed to TURN_ON_CONTINUE after we broadcast the
     // state change intent so that we will not broadcast the intent again in
     // other state
-    private static final int TURN_ON_CONTINUE = 102;
+    private static final int TURN_ON_CONTINUE = 101;
     // Unload firmware, turning off Bluetooth module power
-    private static final int TURN_COLD = 103;
+    private static final int TURN_COLD = 102;
     // Device disconnecting timeout happens
-    private static final int DEVICES_DISCONNECT_TIMEOUT = 104;
+    private static final int DEVICES_DISCONNECT_TIMEOUT = 103;
     // Prepare Bluetooth timeout happens
-    private static final int PREPARE_BLUETOOTH_TIMEOUT = 105;
+    private static final int PREPARE_BLUETOOTH_TIMEOUT = 104;
     // Bluetooth Powerdown timeout happens
-    private static final int POWER_DOWN_TIMEOUT = 106;
+    private static final int POWER_DOWN_TIMEOUT = 105;
 
     private Context mContext;
     private BluetoothService mBluetoothService;
@@ -156,11 +157,6 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
         setInitialState(mPowerOff);
         mPublicState = BluetoothAdapter.STATE_OFF;
-
-        if (mContext.getResources().getBoolean
-            (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
-            sendMessage(TURN_HOT);
-        }
     }
 
     /**
