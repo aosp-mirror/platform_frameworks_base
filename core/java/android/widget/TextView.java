@@ -10248,7 +10248,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
+            TypedArray styledAttributes = mContext.obtainStyledAttributes(
+                    com.android.internal.R.styleable.SelectionModeDrawables);
 
             boolean allowText = getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
@@ -10261,7 +10262,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!allowText) {
                 // Provide an icon, text will not be displayed on smaller screens.
                 selectAllIconId = styledAttributes.getResourceId(
-                        R.styleable.Theme_actionModeSelectAllDrawable, 0);
+                        R.styleable.SelectionModeDrawables_actionModeSelectAllDrawable, 0);
             }
 
             menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
@@ -10273,7 +10274,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
                     setIcon(styledAttributes.getResourceId(
-                            R.styleable.Theme_actionModeCutDrawable, 0)).
+                            R.styleable.SelectionModeDrawables_actionModeCutDrawable, 0)).
                     setAlphabeticShortcut('x').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -10282,7 +10283,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
                     setIcon(styledAttributes.getResourceId(
-                            R.styleable.Theme_actionModeCopyDrawable, 0)).
+                            R.styleable.SelectionModeDrawables_actionModeCopyDrawable, 0)).
                     setAlphabeticShortcut('c').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -10291,7 +10292,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
                         setIcon(styledAttributes.getResourceId(
-                                R.styleable.Theme_actionModePasteDrawable, 0)).
+                                R.styleable.SelectionModeDrawables_actionModePasteDrawable, 0)).
                         setAlphabeticShortcut('v').
                         setShowAsAction(
                                 MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
