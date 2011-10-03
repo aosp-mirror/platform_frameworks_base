@@ -4760,12 +4760,12 @@ public class WebView extends AbsoluteLayout
         }
         String text = nativeFocusCandidateText();
         int nodePointer = nativeFocusCandidatePointer();
-        mWebTextView.setGravity(nativeFocusCandidateIsRtlText() ?
-                Gravity.RIGHT : Gravity.NO_GRAVITY);
         // This needs to be called before setType, which may call
         // requestFormData, and it needs to have the correct nodePointer.
         mWebTextView.setNodePointer(nodePointer);
         mWebTextView.setType(nativeFocusCandidateType());
+        // Gravity needs to be set after setType
+        mWebTextView.setGravityForRtl(nativeFocusCandidateIsRtlText());
         updateWebTextViewPadding();
         if (null == text) {
             if (DebugFlags.WEB_VIEW) {
