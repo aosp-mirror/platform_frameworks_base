@@ -12093,6 +12093,39 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Finds a view by its unuque and stable accessibility id.
+     *
+     * @param accessibilityId The searched accessibility id.
+     * @return The found view.
+     */
+    final View findViewByAccessibilityId(int accessibilityId) {
+        if (accessibilityId < 0) {
+            return null;
+        }
+        return findViewByAccessibilityIdTraversal(accessibilityId);
+    }
+
+    /**
+     * Performs the traversal to find a view by its unuque and stable accessibility id.
+     *
+     * <strong>Note:</strong>This method does not stop at the root namespace
+     * boundary since the user can touch the screen at an arbitrary location
+     * potentially crossing the root namespace bounday which will send an
+     * accessibility event to accessibility services and they should be able
+     * to obtain the event source. Also accessibility ids are guaranteed to be
+     * unique in the window.
+     *
+     * @param accessibilityId The accessibility id.
+     * @return The found view.
+     */
+    View findViewByAccessibilityIdTraversal(int accessibilityId) {
+        if (getAccessibilityViewId() == accessibilityId) {
+            return this;
+        }
+        return null;
+    }
+
+    /**
      * Look for a child view with the given tag.  If this view has the given
      * tag, return this view.
      *

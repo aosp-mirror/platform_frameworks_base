@@ -74,7 +74,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
 import com.android.internal.policy.PolicyManager;
-import com.android.internal.util.Predicate;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
@@ -4462,9 +4461,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     final class AccessibilityInteractionController {
         private static final int POOL_SIZE = 5;
 
-        private FindByAccessibilitytIdPredicate mFindByAccessibilityIdPredicate =
-            new FindByAccessibilitytIdPredicate();
-
         private ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
             new ArrayList<AccessibilityNodeInfo>();
 
@@ -4551,11 +4547,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
             AccessibilityNodeInfo info = null;
             try {
-                FindByAccessibilitytIdPredicate predicate = mFindByAccessibilityIdPredicate;
-                predicate.init(accessibilityId);
-                View root = ViewRootImpl.this.mView;
-                View target = root.findViewByPredicate(predicate);
-                if (target != null && target.getVisibility() == View.VISIBLE) {
+                View target = findViewByAccessibilityId(accessibilityId);
+                if (target != null) {
                     info = target.createAccessibilityNodeInfo();
                 }
             } finally {
@@ -4794,24 +4787,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (root == null) {
                 return null;
             }
-            mFindByAccessibilityIdPredicate.init(accessibilityId);
-            View foundView = root.findViewByPredicate(mFindByAccessibilityIdPredicate);
-            if (foundView == null || foundView.getVisibility() != View.VISIBLE) {
+            View foundView = root.findViewByAccessibilityId(accessibilityId);
+            if (foundView != null && foundView.getVisibility() != View.VISIBLE) {
                 return null;
             }
             return foundView;
-        }
-
-        private final class FindByAccessibilitytIdPredicate implements Predicate<View> {
-            public int mSearchedId;
-
-            public void init(int searchedId) {
-                mSearchedId = searchedId;
-            }
-
-            public boolean apply(View view) {
-                return (view.getAccessibilityViewId() == mSearchedId);
-            }
         }
     }
 
