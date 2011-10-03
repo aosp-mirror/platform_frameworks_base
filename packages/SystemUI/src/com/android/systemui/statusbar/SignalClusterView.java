@@ -44,6 +44,7 @@ public class SignalClusterView
     private boolean mMobileVisible = false;
     private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
+    private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
 
     ViewGroup mWifiGroup, mMobileGroup;
     ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType;
@@ -95,20 +96,24 @@ public class SignalClusterView
         super.onDetachedFromWindow();
     }
 
-    public void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon) {
+    public void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon,
+            String contentDescription) {
         mWifiVisible = visible;
         mWifiStrengthId = strengthIcon;
         mWifiActivityId = activityIcon;
+        mWifiDescription = contentDescription;
 
         apply();
     }
 
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
-            int typeIcon) {
+            int typeIcon, String contentDescription, String typeContentDescription) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileActivityId = activityIcon;
         mMobileTypeId = typeIcon;
+        mMobileDescription = contentDescription;
+        mMobileTypeDescription = typeContentDescription;
 
         apply();
     }
@@ -125,6 +130,7 @@ public class SignalClusterView
             mWifiGroup.setVisibility(View.VISIBLE);
             mWifi.setImageResource(mWifiStrengthId);
             mWifiActivity.setImageResource(mWifiActivityId);
+            mWifiGroup.setContentDescription(mWifiDescription);
         } else {
             mWifiGroup.setVisibility(View.GONE);
         }
@@ -139,6 +145,7 @@ public class SignalClusterView
             mMobile.setImageResource(mMobileStrengthId);
             mMobileActivity.setImageResource(mMobileActivityId);
             mMobileType.setImageResource(mMobileTypeId);
+            mMobileGroup.setContentDescription(mMobileTypeDescription + " " + mMobileDescription);
         } else {
             mMobileGroup.setVisibility(View.GONE);
         }
