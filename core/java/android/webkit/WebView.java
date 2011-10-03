@@ -4078,8 +4078,8 @@ public class WebView extends AbsoluteLayout
         boolean pressed = (mTouchMode == TOUCH_SHORTPRESS_START_MODE
                 || mTouchMode == TOUCH_INIT_MODE
                 || mTouchMode == TOUCH_SHORTPRESS_MODE);
-        nativeRecordButtons(hasFocus() && hasWindowFocus(),
-                (pressed && !USE_WEBKIT_RINGS)
+        recordButtons(canvas,
+                hasFocus() && hasWindowFocus(), (pressed && !USE_WEBKIT_RINGS)
                 || mTrackballDown || mGotCenterDown, false);
         drawCoreAndCursorRing(canvas, mBackgroundColor,
                 mDrawCursorRing && drawRings);
@@ -5133,7 +5133,7 @@ public class WebView extends AbsoluteLayout
                         .obtainMessage(LONG_PRESS_CENTER), LONG_PRESS_TIMEOUT);
                 // Already checked mNativeClass, so we do not need to check it
                 // again.
-                nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
+                recordButtons(null, hasFocus() && hasWindowFocus(), true, true);
                 if (!wantsKeyEvents) return true;
             }
             // Bubble up the key event as WebView doesn't handle it
@@ -5561,7 +5561,7 @@ public class WebView extends AbsoluteLayout
                 mDrawCursorRing = true;
                 setFocusControllerActive(true);
                 if (mNativeClass != 0) {
-                    nativeRecordButtons(true, false, true);
+                    recordButtons(null, true, false, true);
                 }
             } else {
                 if (!inEditingMode()) {
@@ -5570,7 +5570,7 @@ public class WebView extends AbsoluteLayout
                     mDrawCursorRing = false;
                     setFocusControllerActive(false);
                 }
-                // We do not call nativeRecordButtons here because we assume
+                // We do not call recordButtons here because we assume
                 // that when we lost focus, or window focus, it got called with
                 // false for the first parameter
             }
@@ -5589,7 +5589,7 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
             mTouchMode = TOUCH_DONE_MODE;
             if (mNativeClass != 0) {
-                nativeRecordButtons(false, false, true);
+                recordButtons(null, false, false, true);
             }
             setFocusControllerActive(false);
         }
@@ -5647,13 +5647,13 @@ public class WebView extends AbsoluteLayout
             if (hasWindowFocus()) {
                 mDrawCursorRing = true;
                 if (mNativeClass != 0) {
-                    nativeRecordButtons(true, false, true);
+                    recordButtons(null, true, false, true);
                 }
                 setFocusControllerActive(true);
             //} else {
                 // The WebView has gained focus while we do not have
                 // windowfocus.  When our window lost focus, we should have
-                // called nativeRecordButtons(false...)
+                // called recordButtons(false...)
             }
         } else {
             // When we lost focus, unless focus went to the TextView (which is
@@ -5661,7 +5661,7 @@ public class WebView extends AbsoluteLayout
             if (!inEditingMode()) {
                 mDrawCursorRing = false;
                 if (mNativeClass != 0) {
-                    nativeRecordButtons(false, false, true);
+                    recordButtons(null, false, false, true);
                 }
                 setFocusControllerActive(false);
             }
@@ -6762,7 +6762,7 @@ public class WebView extends AbsoluteLayout
             if (mNativeClass == 0) {
                 return false;
             }
-            nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
+            recordButtons(null, hasFocus() && hasWindowFocus(), true, true);
             if (time - mLastCursorTime <= TRACKBALL_TIMEOUT
                     && !mLastCursorBounds.equals(nativeGetCursorRingBounds())) {
                 nativeSelectBestAt(mLastCursorBounds);
@@ -9347,6 +9347,24 @@ public class WebView extends AbsoluteLayout
     /** @hide only used by profiling tests */
     public float tileProfilingGetFloat(int frame, int tile, String key) {
         return nativeTileProfilingGetFloat(frame, tile, key);
+    }
+
+    /**
+     * Helper method to deal with differences between hardware and software rendering
+     */
+    private void recordButtons(Canvas canvas, boolean focus, boolean pressed,
+            boolean inval) {
+        boolean isHardwareAccel = canvas != null
+                ? canvas.isHardwareAccelerated()
+                : isHardwareAccelerated();
+        if (isHardwareAccel) {
+            // We never want to change button state if we are hardware accelerated,
+            // but we DO want to invalidate as necessary so that the GL ring
+            // can be drawn
+            nativeRecordButtons(false, false, inval);
+        } else {
+            nativeRecordButtons(focus, pressed, inval);
+        }
     }
 
     private native int nativeCacheHitFramePointer();
