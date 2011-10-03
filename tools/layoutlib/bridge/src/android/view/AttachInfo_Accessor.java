@@ -22,6 +22,9 @@ import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import android.os.Handler;
 import android.view.View.AttachInfo;
 
+/**
+ * Class allowing access to package-protected methods/fields.
+ */
 public class AttachInfo_Accessor {
 
     public static void setAttachInfo(View view) {
