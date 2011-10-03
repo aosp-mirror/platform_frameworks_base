@@ -9930,7 +9930,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Fallback on the default highlight color when the first span does not provide one
                 mSuggestionRangeSpan.setBackgroundColor(mHighlightColor);
             } else {
-                final float BACKGROUND_TRANSPARENCY = 0.3f;
+                final float BACKGROUND_TRANSPARENCY = 0.4f;
                 final int newAlpha = (int) (Color.alpha(underlineColor) * BACKGROUND_TRANSPARENCY);
                 mSuggestionRangeSpan.setBackgroundColor(
                         (underlineColor & 0x00FFFFFF) + (newAlpha << 24));
