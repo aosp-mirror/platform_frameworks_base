@@ -1301,7 +1301,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
                 elapsedTime = authoritySyncStats.elapsedTime;
                 times = authoritySyncStats.times;
-                timeStr = String.format("%d/%d%%",
+                timeStr = String.format("%ds/%d%%",
                         elapsedTime / 1000,
                         elapsedTime * 100 / totalElapsedTime);
                 timesStr = String.format("%d/%d%%",
@@ -1309,32 +1309,30 @@ public class SyncManager implements OnAccountsUpdateListener {
                         times * 100 / totalTimes);
                 pw.printf(authorityFormat, name, timesStr, timeStr);
 
-                if (authoritySyncStats.accountMap.size() > 1) {
-                    final List<AccountSyncStats> sortedAccounts =
-                            new ArrayList<AccountSyncStats>(
-                                    authoritySyncStats.accountMap.values());
-                    Collections.sort(sortedAccounts, new Comparator<AccountSyncStats>() {
-                        @Override
-                        public int compare(AccountSyncStats lhs, AccountSyncStats rhs) {
-                            // reverse order
-                            int compare = Integer.compare(rhs.times, lhs.times);
-                            if (compare == 0) {
-                                compare = Long.compare(rhs.elapsedTime, lhs.elapsedTime);
-                            }
-                            return compare;
+                final List<AccountSyncStats> sortedAccounts =
+                        new ArrayList<AccountSyncStats>(
+                                authoritySyncStats.accountMap.values());
+                Collections.sort(sortedAccounts, new Comparator<AccountSyncStats>() {
+                    @Override
+                    public int compare(AccountSyncStats lhs, AccountSyncStats rhs) {
+                        // reverse order
+                        int compare = Integer.compare(rhs.times, lhs.times);
+                        if (compare == 0) {
+                            compare = Long.compare(rhs.elapsedTime, lhs.elapsedTime);
                         }
-                    });
-                    for (AccountSyncStats stats: sortedAccounts) {
-                        elapsedTime = stats.elapsedTime;
-                        times = stats.times;
-                        timeStr = String.format("%d/%d%%",
-                                elapsedTime / 1000,
-                                elapsedTime * 100 / totalElapsedTime);
-                        timesStr = String.format("%d/%d%%",
-                                times,
-                                times * 100 / totalTimes);
-                        pw.printf(accountFormat, stats.name, timesStr, timeStr);
+                        return compare;
                     }
+                });
+                for (AccountSyncStats stats: sortedAccounts) {
+                    elapsedTime = stats.elapsedTime;
+                    times = stats.times;
+                    timeStr = String.format("%ds/%d%%",
+                            elapsedTime / 1000,
+                            elapsedTime * 100 / totalElapsedTime);
+                    timesStr = String.format("%d/%d%%",
+                            times,
+                            times * 100 / totalTimes);
+                    pw.printf(accountFormat, stats.name, timesStr, timeStr);
                 }
                 pw.println(separator);
             }
@@ -1342,9 +1340,8 @@ public class SyncManager implements OnAccountsUpdateListener {
             pw.println();
             pw.println("Recent Sync History");
             final String format = "  %-" + maxAccount + "s  %s\n";
-            String lastAuthorityName = null;
-            String lastAccountKey = null;
-            long lastEventTime = 0;
+            final Map<String, Long> lastTimeMap = Maps.newHashMap();
+
             for (int i = 0; i < N; i++) {
                 SyncStorageEngine.SyncHistoryItem item = items.get(i);
                 SyncStorageEngine.AuthorityInfo authority
@@ -1363,21 +1360,32 @@ public class SyncManager implements OnAccountsUpdateListener {
                 final long eventTime = item.eventTime;
                 time.set(eventTime);
 
-                pw.printf("  #%-3d: %s %8s  %5.1fs",
+                final String key = authorityName + "/" + accountKey;
+                final Long lastEventTime = lastTimeMap.get(key);
+                final String diffString;
+                if (lastEventTime == null) {
+                    diffString = "";
+                } else {
+                    final long diff = (lastEventTime - eventTime) / 1000;
+                    if (diff < 60) {
+                        diffString = String.valueOf(diff);
+                    } else if (diff < 3600) {
+                        diffString = String.format("%02d:%02d", diff / 60, diff % 60);
+                    } else {
+                        final long sec = diff % 3600;
+                        diffString = String.format("%02d:%02d:%02d",
+                                diff / 3600, sec / 60, sec % 60);
+                    }
+                }
+                lastTimeMap.put(key, eventTime);
+
+                pw.printf("  #%-3d: %s %8s  %5.1fs  %8s",
                         i + 1,
                         formatTime(eventTime),
                         SyncStorageEngine.SOURCES[item.source],
-                        ((float) elapsedTime) / 1000);
-                if (authorityName.equals(lastAuthorityName) && accountKey.equals(lastAccountKey)) {
-                    final long span = (lastEventTime - eventTime) / 1000;
-                    pw.printf("  %02d:%02d\n", span / 60, span % 60);
-                } else {
-                    pw.printf(format, accountKey, authorityName);
-                }
-
-                lastAuthorityName = authorityName;
-                lastAccountKey = accountKey;
-                lastEventTime = eventTime;
+                        ((float) elapsedTime) / 1000,
+                        diffString);
+                pw.printf(format, accountKey, authorityName);
 
                 if (item.event != SyncStorageEngine.EVENT_STOP
                         || item.upstreamActivity != 0
