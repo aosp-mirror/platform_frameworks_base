@@ -753,7 +753,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     if (state != null) {
                         final InstallArgs args = state.getInstallArgs();
-                        Slog.i(TAG, "Validation timed out for " + args.packageURI.toString());
+                        Slog.i(TAG, "Verification timed out for " + args.packageURI.toString());
                         mPendingVerification.remove(verificationId);
 
                         int ret = PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT;
@@ -769,7 +769,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     final PackageVerificationState state = mPendingVerification.get(verificationId);
                     if (state == null) {
-                        Slog.w(TAG, "Invalid validation token " + verificationId + " received");
+                        Slog.w(TAG, "Invalid verification token " + verificationId + " received");
                         break;
                     }
 
@@ -5464,8 +5464,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
                         : getPackageUid(mRequiredVerifierPackage);
                 if (requiredUid != -1 && isVerificationEnabled()) {
-                    final Intent verification = new Intent(
-                            Intent.ACTION_PACKAGE_NEEDS_VERIFICATION, packageURI);
+                    final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+                    verification.setDataAndType(packageURI, PACKAGE_MIME_TYPE);
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     final List<ResolveInfo> receivers = queryIntentReceivers(verification, null,
