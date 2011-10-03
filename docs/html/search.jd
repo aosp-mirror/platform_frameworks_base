@@ -64,11 +64,14 @@ page.title=Search Results
 
         // upon ajax search, refresh the url and search title
         searchControl.setSearchStartingCallback(this, function(control, searcher, query) {
+            $("#searchTitle").html("search results for <em>" + escapeHTML(query) + "</em>");
+
             // save the tab index from the hash
             tabIndex = location.hash.split("&t=")[1];
-
-            $("#searchTitle").html("search results for <em>" + escapeHTML(query) + "</em>");
             $.history.add('q=' + query + '&t=' + tabIndex);
+        });
+
+        searchControl.setSearchCompleteCallback(this, function(control, searcher) {
             openTab();
         });
 
