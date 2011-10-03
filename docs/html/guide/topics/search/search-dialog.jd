@@ -748,8 +748,8 @@ with some callback methods and event listeners. For more information, see the re
 documentation for {@link android.widget.SearchView} and its nested interfaces for the
 appropriate event listeners.</p>
 
-<p>For more information about action views in the Action Bar, read <a
-href="{@docRoot}guide/topics/ui/actionbar.html#ActionView">Using the Action Bar</a> (which
+<p>For more information about action views in the Action Bar, read the <a
+href="{@docRoot}guide/topics/ui/actionbar.html#ActionView">Action Bar</a> developer guide (which
 includes sample code for adding a search widget as an action view).</p>
 
 
@@ -803,8 +803,8 @@ handle the "Search" menu item and open the search dialog by calling {@link
 android.app.Activity#onSearchRequested onSearchRequested()}.</p>
 
 <p>For more information about how items in the Action Bar work and how to handle this situation, see
-the documentation for <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action
-Bar</a>.</p>
+the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+Bar</a> developer guide.</p>
 
 <p>Also see the <a
 href="{@docRoot}resources/samples/SearchableDictionary/src/com/example/android/searchabledict/

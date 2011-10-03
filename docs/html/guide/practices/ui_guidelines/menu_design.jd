@@ -260,8 +260,8 @@ or device to another.
 <img src={@docRoot}images/menu_design/TaskFlowDiagram.png>
 
 <p>
-  For more technical information on menus, see
-  <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>.
+  For more technical information on menus, see the
+  <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guide.
 </p>
 
 <h3 id="commands_fixed">Commands Fixed in an Activity Screen</h4>

@@ -7,7 +7,7 @@ parent.link=available-resources.html
   <div id="qv">
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/menus.html">Menus</a></li>
     </ol>
   </div>
 </div>
@@ -15,8 +15,8 @@ parent.link=available-resources.html
 <p>A menu resource defines an application menu (Options Menu, Context Menu, or submenu) that
 can be inflated with {@link android.view.MenuInflater}.</p>
 
-<p>For a guide to using menus, see the <a href="{@docRoot}guide/topics/ui/menus.html">Creating
-Menus</a> document.</p>
+<p>For a guide to using menus, see the <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a>
+developer guide.</p>
 
 <dl class="xml">
 
@@ -132,22 +132,22 @@ Avoid using this unless it's critical that the item always appear in the action
 bar. Setting multiple items to always appear as action items can result in them overlapping
 with other UI in the action bar.</td></tr>
           </table>
-          <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
-more information.</p>
+          <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
+guide for more information.</p>
           <p>Introduced in API Level 11.</p>
         </dd>
 
         <dt><code>android:actionViewLayout</code></dt>
           <dd><em>Layout resource</em>. A layout to use as the action view.
-          <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
-more information.</p>
+          <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
+guide for more information.</p>
           <p>Introduced in API Level 11.</p></dd>
 
         <dt><code>android:actionViewClassName</code></dt>
           <dd><em>Class name</em>. A fully-qualified class name for the {@link android.view.View}
 to use as the action view.
-          <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
-more information.</p>
+          <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
+guide for more information.</p>
           <p class="warning"><strong>Warning:</strong> If you obfuscate your code using <a
 href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
 be sure to exclude the class you specify in this attribute from renaming, because it can break the

@@ -171,7 +171,7 @@ interface they've come to expect. When designing your UIs, you should try and
 avoid rolling your own as much as possible. Instead, use a Theme. You
 can override or extend those parts of the theme that you need to, but at least
 you're starting from the same UI base as all the other applications. For all
-the details, read <a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
+the details, read <a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
 
 <h2 id="flexui">Design Your UI to Work with Multiple Screen Resolutions</h2>
 

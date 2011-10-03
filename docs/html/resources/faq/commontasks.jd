@@ -268,7 +268,8 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
     {@link android.app.Activity#finishActivity(int) Activity.finishActivity()}
     on any screens that it opens to close them. </p>
 <a name="listening" id="listening"></a><h2>Listening for Button Clicks</h2>
-<p>Button click and other UI event capturing are covered in <a href="{@docRoot}guide/topics/ui/ui-events.html">Handling UI Events</a> on the UI Design page.</p>
+<p>Button click and other UI event capturing are covered in <a
+href="{@docRoot}guide/topics/ui/ui-events.html">Input Events</a>.</p>
 <a name="configurewindowproperties" id="configurewindowproperties"></a><h2>Configuring General Window Properties</h2>
 <p>You can set a number of general window properties, such as whether to display
     a title, whether the window is floating, and whether it displays an icon, by
@@ -543,7 +544,7 @@ focus to the notification before they can interact with it.</p>
     which enables a  dialog box with an embedded progress bar to send a &quot;I'm working
     on it&quot; notification to the user. </p>
 <a name="addmenuitems" id="addmenuitems"></a><h2>Adding Items to the Screen Menu</h2>
-<p>See <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>.</p>
+<p>See <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a>.</p>
 
 <a name="webpage" id="webpage"></a><h2>Display a Web Page</h2>
 <p>Use the {@link android.webkit.WebView webkit.WebView} object. </p>

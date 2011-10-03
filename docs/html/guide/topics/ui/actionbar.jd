@@ -1,4 +1,4 @@
-page.title=Using the Action Bar
+page.title=Action Bar
 parent.title=User Interface
 parent.link=index.html
 @jd:body
@@ -49,7 +49,7 @@ href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery
   
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/menus.html">Menus</a></li>
   </ol>
 </div>
 </div>
@@ -157,7 +157,7 @@ action items and the overflow menu.</p>
 
 <p>When the activity first starts, the system populates the Action Bar and overflow menu by calling
 {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} for your activity. As
-discussed in the guide to <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>, it's in
+discussed in the <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guid, it's in
 this callback method that you define the Options Menu for the activity.</p>
 
 <p>You can specify a menu item to appear as an action item&mdash;if there is room
@@ -211,7 +211,7 @@ doing so, because it can create a cluttered UI if there are too many action item
 collide with other elements in the Action Bar.</p>
 
 <p>For more information about menus, see the <a
-href="{@docRoot}guide/topics/ui/menus.html#options-menu">Creating Menus</a> developer guide.</p>
+href="{@docRoot}guide/topics/ui/menus.html#options-menu">Menus</a> developer guide.</p>
 
 
 <h3 id="Home">Using the app icon as an action item</h3>
@@ -845,7 +845,7 @@ Bar completely, use the following style attributes:</p>
 </dl>
   
 <p>For more information about using themes in your application, read <a
-href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
+href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
 
 
 
