@@ -25,7 +25,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 
 /**
- * Delegate used to provide new implementation of a select few methods of {@link Theme}
+ * Delegate used to provide new implementation of a select few methods of {@link Resources$Theme}
  *
  * Through the layoutlib_create tool, the original  methods of Theme have been replaced
  * by calls to methods of the same name in this delegate class.

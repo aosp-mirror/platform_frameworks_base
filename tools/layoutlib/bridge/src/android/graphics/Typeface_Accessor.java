@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+/**
+ * Class allowing access to package-protected methods/fields.
+ */
 public class Typeface_Accessor {
 
     public static void resetDefaults() {

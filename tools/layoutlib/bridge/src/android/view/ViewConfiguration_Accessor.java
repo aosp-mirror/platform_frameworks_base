@@ -16,6 +16,9 @@
 
 package android.view;
 
+/**
+ * Class allowing access to package-protected methods/fields.
+ */
 public class ViewConfiguration_Accessor {
 
     public static void clearConfigurations() {
