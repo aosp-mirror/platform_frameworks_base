@@ -153,6 +153,18 @@ public abstract class ActionMode {
     public abstract MenuInflater getMenuInflater();
 
     /**
+     * Returns whether the UI presenting this action mode can take focus or not.
+     * This is used by internal components within the framework that would otherwise
+     * present an action mode UI that requires focus, such as an EditText as a custom view.
+     *
+     * @return true if the UI used to show this action mode can take focus
+     * @hide Internal use only
+     */
+    public boolean isUiFocusable() {
+        return true;
+    }
+
+    /**
      * Callback interface for action modes. Supplied to
      * {@link View#startActionMode(Callback)}, a Callback
      * configures and handles events raised by a user's interaction with an action mode.

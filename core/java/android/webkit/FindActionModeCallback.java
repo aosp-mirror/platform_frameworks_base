@@ -180,6 +180,14 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        if (!mode.isUiFocusable()) {
+            // If the action mode we're running in is not focusable the user
+            // will not be able to type into the find on page field. This
+            // should only come up when we're running in a dialog which is
+            // already less than ideal; disable the option for now.
+            return false;
+        }
+
         mode.setCustomView(mCustomView);
         mode.getMenuInflater().inflate(com.android.internal.R.menu.webview_find,
                 menu);

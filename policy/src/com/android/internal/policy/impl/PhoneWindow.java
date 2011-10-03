@@ -2147,15 +2147,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mActionMode = mode;
             } else {
                 if (mActionModeView == null) {
-                    if (hasFeature(FEATURE_ACTION_MODE_OVERLAY)) {
+                    if (isFloating()) {
                         mActionModeView = new ActionBarContextView(mContext);
                         mActionModePopup = new PopupWindow(mContext, null,
                                 com.android.internal.R.attr.actionModePopupWindowStyle);
                         mActionModePopup.setLayoutInScreenEnabled(true);
                         mActionModePopup.setLayoutInsetDecor(true);
-                        mActionModePopup.setFocusable(true);
-                        mActionModePopup.setOutsideTouchable(false);
-                        mActionModePopup.setTouchModal(false);
                         mActionModePopup.setWindowLayoutType(
                                 WindowManager.LayoutParams.TYPE_APPLICATION);
                         mActionModePopup.setContentView(mActionModeView);
@@ -2186,7 +2183,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                 if (mActionModeView != null) {
                     mActionModeView.killMode();
-                    mode = new StandaloneActionMode(getContext(), mActionModeView, wrappedCallback);
+                    mode = new StandaloneActionMode(getContext(), mActionModeView, wrappedCallback,
+                            mActionModePopup == null);
                     if (callback.onCreateActionMode(mode, mode.getMenu())) {
                         mode.invalidate();
                         mActionModeView.initForMode(mode);
@@ -2664,6 +2662,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }
             // System.out.println("Title!");
+        } else if ((features & (1 << FEATURE_ACTION_MODE_OVERLAY)) != 0) {
+            layoutResource = com.android.internal.R.layout.screen_simple_overlay_action_mode;
         } else {
             // Embedded, so no decoration is needed.
             layoutResource = com.android.internal.R.layout.screen_simple;
