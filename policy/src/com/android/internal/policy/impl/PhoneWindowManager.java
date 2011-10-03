@@ -277,6 +277,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
+    int mHdmiRotation;
 
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
@@ -782,6 +783,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ? mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_width)
                 : 0;
+
+        if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
+            mHdmiRotation = mPortraitRotation;
+        } else {
+            mHdmiRotation = mLandscapeRotation;
+        }
     }
 
     public void updateSettings() {
@@ -2941,7 +2948,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             int preferredRotation = -1;
             if (mHdmiPlugged) {
                 // Ignore sensor when plugged into HDMI.
-                preferredRotation = mLandscapeRotation;
+                preferredRotation = mHdmiRotation;
             } else if (mLidOpen == LID_OPEN && mLidOpenRotation >= 0) {
                 // Ignore sensor when lid switch is open and rotation is forced.
                 preferredRotation = mLidOpenRotation;
