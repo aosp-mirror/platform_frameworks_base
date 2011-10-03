@@ -36,17 +36,19 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
     private ActionMode.Callback mCallback;
     private WeakReference<View> mCustomView;
     private boolean mFinished;
+    private boolean mFocusable;
 
     private MenuBuilder mMenu;
 
     public StandaloneActionMode(Context context, ActionBarContextView view,
-            ActionMode.Callback callback) {
+            ActionMode.Callback callback, boolean isFocusable) {
         mContext = context;
         mContextView = view;
         mCallback = callback;
 
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         mMenu.setCallback(this);
+        mFocusable = isFocusable;
     }
 
     @Override
@@ -138,5 +140,9 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
     public void onMenuModeChange(MenuBuilder menu) {
         invalidate();
         mContextView.showOverflowMenu();
+    }
+
+    public boolean isUiFocusable() {
+        return mFocusable;
     }
 }

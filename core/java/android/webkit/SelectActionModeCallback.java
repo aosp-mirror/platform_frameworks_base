@@ -17,13 +17,12 @@
 package android.webkit;
 
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.provider.Browser;
-import android.webkit.WebView;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 class SelectActionModeCallback implements ActionMode.Callback {
     private WebView mWebView;
@@ -45,9 +44,25 @@ class SelectActionModeCallback implements ActionMode.Callback {
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        mode.getMenuInflater().inflate(com.android.internal.R.menu.webview_copy,
-                menu);
-        mode.setTitle(com.android.internal.R.string.textSelectionCABTitle);
+        mode.getMenuInflater().inflate(com.android.internal.R.menu.webview_copy, menu);
+
+        final Context context = mWebView.getContext();
+        boolean allowText = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
+        mode.setTitle(allowText ?
+                context.getString(com.android.internal.R.string.textSelectionCABTitle) : null);
+
+        if (!mode.isUiFocusable()) {
+            // If the action mode UI we're running in isn't capable of taking window focus
+            // the user won't be able to type into the find on page UI. Disable this functionality.
+            // (Note that this should only happen in floating dialog windows.)
+            // This can be removed once we can handle multiple focusable windows at a time
+            // in a better way.
+            final MenuItem findOnPageItem = menu.findItem(com.android.internal.R.id.find);
+            if (findOnPageItem != null) {
+                findOnPageItem.setVisible(false);
+            }
+        }
         mActionMode = mode;
         return true;
     }
