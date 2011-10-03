@@ -43,15 +43,18 @@ import android.widget.SpinnerAdapter;
  * modify various characteristics of the action bar or remove it completely.</p>
  * <p>From your activity, you can retrieve an instance of {@link ActionBar} by calling {@link
  * android.app.Activity#getActionBar getActionBar()}.</p>
- * <p>For information about how to use the action bar, including how to add action items, navigation
- * modes and more, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
- * Bar</a> developer guide.</p>
  * <p>In some cases, the action bar may be overlayed by another bar that enables contextual actions,
  * using an {@link android.view.ActionMode}. For example, when the user selects one or more items in
  * your activity, you can enable an action mode that offers actions specific to the selected
  * items, with a UI that temporarily replaces the action bar. Although the UI may occupy the
  * same space, the {@link android.view.ActionMode} APIs are distinct and independent from those for
  * {@link ActionBar}.
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about how to use the action bar, including how to add action items, navigation
+ * modes and more, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+ * Bar</a> developer guide.</p>
+ * </div>
  */
 public abstract class ActionBar {
     /**

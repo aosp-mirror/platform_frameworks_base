@@ -55,13 +55,21 @@ import java.util.Set;
  * {@link android.content.Context#bindService} to communicate with a
  * background {@link android.app.Service}.
  *
- * <p>An Intent provides a facility for performing late runtime binding between
- * the code in different applications.  Its most significant use is in the
- * launching of activities, where it can be thought of as the glue between
- * activities. It is
- * basically a passive data structure holding an abstract description of an
- * action to be performed. The primary pieces of information in an intent
- * are:</p>
+ * <p>An Intent provides a facility for performing late runtime binding between the code in
+ * different applications. Its most significant use is in the launching of activities, where it
+ * can be thought of as the glue between activities. It is basically a passive data structure 
+ * holding an abstract description of an action to be performed.</p> 
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about how to create and resolve intents, read the
+ * <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+ * developer guide.</p>
+ * </div>
+ *
+ * <a name="IntentStructure"></a>
+ * <h3>Intent Structure</h3>
+ * <p>The primary pieces of information in an intent are:</p>
  *
  * <ul>
  *   <li> <p><b>action</b> -- The general action to be performed, such as

@@ -111,18 +111,6 @@ import java.util.HashMap;
  * {@link android.R.styleable#AndroidManifestActivity &lt;activity&gt;}
  * declaration in their package's <code>AndroidManifest.xml</code>.</p>
  * 
- * <p>The Activity class is an important part of an application's overall lifecycle,
- * and the way activities are launched and put together is a fundamental
- * part of the platform's application model. For a detailed perspective on the structure of an
- * Android application and how activities behave, please read the
- * <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> and
- * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
- * documents.</p>
- *
- * <p>You can also find a detailed discussion about how to create activities in the
- * <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
- * document.</p>
- * 
  * <p>Topics covered here:
  * <ol>
  * <li><a href="#Fragments">Fragments</a>
@@ -133,7 +121,22 @@ import java.util.HashMap;
  * <li><a href="#Permissions">Permissions</a>
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
  * </ol>
- * 
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>The Activity class is an important part of an application's overall lifecycle,
+ * and the way activities are launched and put together is a fundamental
+ * part of the platform's application model. For a detailed perspective on the structure of an
+ * Android application and how activities behave, please read the
+ * <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> and
+ * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+ * developer guides.</p>
+ *
+ * <p>You can also find a detailed discussion about how to create activities in the
+ * <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
+ * developer guide.</p>
+ * </div>
+ *
  * <a name="Fragments"></a>
  * <h3>Fragments</h3>
  *
