@@ -3181,6 +3181,12 @@
         <!-- Base text color, typeface, size, and style. -->
         <attr name="textAppearance" />
     </declare-styleable>
+    <declare-styleable name="SelectionModeDrawables">
+        <attr name="actionModeSelectAllDrawable" />
+        <attr name="actionModeCutDrawable" />
+        <attr name="actionModeCopyDrawable" />
+        <attr name="actionModePasteDrawable" />
+    </declare-styleable>
     <declare-styleable name="SuggestionSpan">
         <attr name="textUnderlineColor" />
         <attr name="textUnderlineThickness" />
