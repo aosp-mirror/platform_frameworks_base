@@ -299,7 +299,8 @@ case ACTIVITY_EDIT:
     in real Android applications.</p>
     <p>Creating a
     good UI is part art and part science, and the rest is work. Mastery of <a
-    href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a> is an essential part of creating
+    href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> is an essential part of
+creating
     a good looking Android application.</p>
     <p>Take a look at the
     <a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a>

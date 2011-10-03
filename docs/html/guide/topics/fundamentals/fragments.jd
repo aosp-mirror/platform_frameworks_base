@@ -631,8 +631,9 @@ selects a menu item. If the activity's implementation of the on-item-selected ca
 handle the selected item, then the event is passed to the fragment's callback. This is true for
 the Options Menu and context menus.</p>
 
-<p>For more information about menus, see <a href="{@docRoot}guide/topics/ui/menus.html">Creating
-Menus</a> and <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a>.</p>
+<p>For more information about menus, see the <a
+href="{@docRoot}guide/topics/ui/menus.html">Menus</a> and <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guides.</p>
 
 
 

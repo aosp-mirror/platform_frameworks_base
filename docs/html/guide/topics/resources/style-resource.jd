@@ -7,7 +7,7 @@ parent.link=available-resources.html
   <div id="qv">
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a></li>
     </ol>
   </div>
 </div>
@@ -18,7 +18,7 @@ A style can be applied to an individual {@link android.view.View} (from within a
 an entire {@link android.app.Activity} or application (from within the manifest file).</p>
 
 <p>For more information about creating and applying styles, please read
-<a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
+<a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
 
 <p class="note"><strong>Note:</strong> A style is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As

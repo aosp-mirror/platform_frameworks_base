@@ -7,7 +7,7 @@ parent.link=available-resources.html
   <div id="qv">
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
     </ol>
   </div>
 </div>
@@ -127,8 +127,9 @@ or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> bel
       </dl>
       <p>More attributes are supported by the {@link android.view.View}
       base class, and many more are supported by each implementation of
-      {@link android.view.View}. Read <a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring
-      Layout</a> for more information. For a reference of all available attributes,
+      {@link android.view.View}. Read <a
+href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> for more information. For
+a reference of all available attributes,
       see the corresponding reference documentation (for example, the <a
       href="{@docRoot}reference/android/widget/TextView.html#lattrs">TextView XML attributes</a>).</p>
     </dd>
@@ -235,7 +236,8 @@ deprecate <code>fill_parent</code>.</td>
 <p>You can create your own custom {@link android.view.View} and {@link android.view.ViewGroup}
 elements and apply them to your layout the same as a standard layout
 element. You can also specify the attributes supported in the XML element. To learn more,
-read <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>.
+see the <a href="{@docRoot}guide/topics/ui/custom-components.html">Custom Components</a> developer
+guide.
 </p>
 
 </dd> <!-- end  elements and attributes -->
@@ -273,7 +275,7 @@ public void onCreate(Bundle savedInstanceState) {
 <dt>see also:</dt>
 <dd>
 <ul>
-  <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
+  <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
   <li>{@link android.view.View}</li>
   <li>{@link android.view.ViewGroup}</li>
 </ul>

@@ -1,4 +1,4 @@
-page.title=Handling UI Events
+page.title=Input Events
 parent.title=User Interface
 parent.link=index.html
 @jd:body
@@ -72,7 +72,8 @@ been registered is triggered by user interaction with the item in the UI.</p>
   <dt><code>onCreateContextMenu()</code></dt>
     <dd>From {@link android.view.View.OnCreateContextMenuListener}. 
     This is called when a Context Menu is being built (as the result of a sustained "long click"). See the discussion
-    on context menus in <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Creating Menus</a> for more information.</dd>
+    on context menus in the <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Menus</a>
+    developer guide.</dd>
 </dl>
 
 <p>These methods are the sole inhabitants of their respective interface. To define one of these methods
@@ -159,8 +160,9 @@ default event handler in the View. So be certain that you want to terminate the 
 
 <p>If you're building a custom component from  View, then you'll be able to define several callback methods
 used as default event handlers.
-In the document on <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>,
-you'll learn see some of the common callbacks used for event handling, including:</p>
+In the document about <a href="{@docRoot}guide/topics/ui/custom-components.html">Custom
+Components</a>, you'll learn see some of the common callbacks used for event handling,
+including:</p>
 <ul>
   <li><code>{@link  android.view.View#onKeyDown}</code> - Called when a new key event occurs.</li>
   <li><code>{@link  android.view.View#onKeyUp}</code> - Called when a key up event occurs.</li>

@@ -52,7 +52,7 @@ defaults.</li>
   <li><a
 href="{@docRoot}resources/tutorials/localization/index.html">Hello, L10N Tutorial</a></li>
     <li><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></li>
-    <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
     <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">Activity Lifecycle</a></li>
 </ol>
 </div>
