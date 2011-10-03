@@ -1092,4 +1092,11 @@ import junit.framework.Assert;
 
         return url != null ? url.getProtocol() + "://" + url.getHost() + url.getPath() : null;
     }
+
+    public void setGravityForRtl(boolean rtl) {
+        int gravity = rtl ? Gravity.RIGHT : Gravity.LEFT;
+        gravity |= mSingle ? Gravity.CENTER_VERTICAL : Gravity.TOP;
+        setGravity(gravity);
+    }
+
 }
