@@ -2426,7 +2426,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final List<InputMethodSubtype> subtypes = getSubtypes(imi);
         final String systemLocale = res.getConfiguration().locale.toString();
         if (TextUtils.isEmpty(systemLocale)) return new ArrayList<InputMethodSubtype>();
-        HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap =
+        final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap =
                 new HashMap<String, InputMethodSubtype>();
         final int N = subtypes.size();
         boolean containsKeyboardSubtype = false;
@@ -2444,7 +2444,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return new ArrayList<InputMethodSubtype>(applicableModeAndSubtypesMap.values());
         }
         for (int i = 0; i < N; ++i) {
-            InputMethodSubtype subtype = subtypes.get(i);
+            final InputMethodSubtype subtype = subtypes.get(i);
             final String locale = subtype.getLocale();
             final String mode = subtype.getMode();
             // When system locale starts with subtype's locale, that subtype will be applicable
@@ -2456,10 +2456,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // need to find applicable subtypes aggressively unlike
             // findLastResortApplicableSubtypeLocked.
             if (systemLocale.startsWith(locale)) {
-                InputMethodSubtype applicableSubtype = applicableModeAndSubtypesMap.get(mode);
+                final InputMethodSubtype applicableSubtype = applicableModeAndSubtypesMap.get(mode);
                 // If more applicable subtypes are contained, skip.
-                if (applicableSubtype != null
-                        && systemLocale.equals(applicableSubtype.getLocale())) continue;
+                if (applicableSubtype != null) {
+                    if (systemLocale.equals(applicableSubtype.getLocale())) continue;
+                    if (!systemLocale.equals(locale)) continue;
+                }
                 applicableModeAndSubtypesMap.put(mode, subtype);
                 if (!containsKeyboardSubtype
                         && SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())) {
