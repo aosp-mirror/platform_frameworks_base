@@ -626,7 +626,9 @@ void TextLayoutCacheValue::getGlyphsIndexAndCount(size_t start, size_t count, si
         return;
     }
     *outStartIndex = mLogClusters[start];
-    *outGlyphsCount = mLogClusters[start + count - 1] - mLogClusters[start] + 1;
+    size_t endIndex = (start + count >= mAdvances.size()) ?
+            mGlyphs.size() : mLogClusters[start + count];
+    *outGlyphsCount = endIndex - *outStartIndex;
 #if DEBUG_GLYPHS
     LOGD("getGlyphsIndexes - start=%d count=%d - startIndex=%d count=%d", start, count,
             *outStartIndex, *outGlyphsCount);
