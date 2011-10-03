@@ -60,19 +60,18 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
 
-    private boolean mIsAlpha;
+    private final boolean mIsAlpha;
 
-    private EditText mPasswordEntry;
-    private LockPatternUtils mLockPatternUtils;
-    private PasswordEntryKeyboardView mKeyboardView;
-    private PasswordEntryKeyboardHelper mKeyboardHelper;
+    private final EditText mPasswordEntry;
+    private final LockPatternUtils mLockPatternUtils;
+    private final PasswordEntryKeyboardView mKeyboardView;
+    private final PasswordEntryKeyboardHelper mKeyboardHelper;
 
-    private int mCreationOrientation;
-    private int mCreationHardKeyboardHidden;
-    private CountDownTimer mCountdownTimer;
+    private final int mCreationOrientation;
+    private final int mCreationHardKeyboardHidden;
 
-    private KeyguardStatusViewManager mStatusViewManager;
-    private boolean mUseSystemIME = true; // TODO: Make configurable
+    private final KeyguardStatusViewManager mStatusViewManager;
+    private final boolean mUseSystemIME = true; // TODO: Make configurable
     private boolean mResuming; // used to prevent poking the wakelock during onResume()
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
@@ -119,6 +118,19 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
             mKeyboardView.setVisibility(mCreationHardKeyboardHidden
                     == Configuration.HARDKEYBOARDHIDDEN_NO ? View.INVISIBLE : View.VISIBLE);
+
+            // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
+            // not a separate view
+            View pinDelete = findViewById(R.id.pinDel);
+            if (pinDelete != null) {
+                pinDelete.setVisibility(View.VISIBLE);
+                pinDelete.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mKeyboardHelper.handleBackspace();
+                    }
+                });
+            }
         }
 
         mPasswordEntry.requestFocus();
@@ -293,7 +305,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mPasswordEntry.setEnabled(false);
         mKeyboardView.setEnabled(false);
         long elapsedRealtime = SystemClock.elapsedRealtime();
-        mCountdownTimer = new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
+        new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
@@ -309,7 +321,6 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 mPasswordEntry.setEnabled(true);
                 mKeyboardView.setEnabled(true);
                 mStatusViewManager.resetStatusInfo();
-                mCountdownTimer = null;
             }
         }.start();
     }

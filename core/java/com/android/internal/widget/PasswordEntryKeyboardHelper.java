@@ -48,11 +48,11 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     private PasswordEntryKeyboard mSymbolsKeyboard;
     private PasswordEntryKeyboard mSymbolsKeyboardShifted;
     private PasswordEntryKeyboard mNumericKeyboard;
-    private Context mContext;
-    private View mTargetView;
-    private KeyboardView mKeyboardView;
+    private final Context mContext;
+    private final View mTargetView;
+    private final KeyboardView mKeyboardView;
     private long[] mVibratePattern;
-    private Vibrator mVibrator;
+    private final Vibrator mVibrator;
 
     public PasswordEntryKeyboardHelper(Context context, KeyboardView keyboardView, View targetView) {
         this(context, keyboardView, targetView, true);
@@ -228,7 +228,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
         }
     }
 
-    private void handleBackspace() {
+    public void handleBackspace() {
         sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
     }
 
