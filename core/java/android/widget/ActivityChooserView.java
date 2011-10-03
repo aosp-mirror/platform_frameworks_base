@@ -33,6 +33,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
 
 /**
@@ -169,6 +171,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     private boolean mIsAttachedToWindow;
 
     /**
+     * String resource for formatting content description of the default target.
+     */
+    private int mDefaultActionButtonContentDescription;
+
+    /**
      * Create a new instance.
      *
      * @param context The application environment.
@@ -259,13 +266,28 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      *
      * <strong>Note:</strong> Clients would like to set this drawable
      * as a clue about the action the chosen activity will perform. For
-     * example, if share activity is to be chosen the drawable should
+     * example, if a share activity is to be chosen the drawable should
      * give a clue that sharing is to be performed.
      *
      * @param drawable The drawable.
      */
     public void setExpandActivityOverflowButtonDrawable(Drawable drawable) {
         mExpandActivityOverflowButtonImage.setImageDrawable(drawable);
+    }
+
+    /**
+     * Sets the content description for the button that expands the activity
+     * overflow list.
+     *
+     * description as a clue about the action performed by the button.
+     * For example, if a share activity is to be chosen the content
+     * description should be something like "Share with".
+     *
+     * @param resourceId The content description resource id.
+     */
+    public void setExpandActivityOverflowButtonContentDescription(int resourceId) {
+        CharSequence contentDescription = mContext.getString(resourceId);
+        mExpandActivityOverflowButtonImage.setContentDescription(contentDescription);
     }
 
     /**
@@ -329,6 +351,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             if (mProvider != null) {
                 mProvider.subUiVisibilityChanged(true);
             }
+            popupWindow.getListView().setContentDescription(mContext.getString(
+                    R.string.activitychooserview_choose_application));
         }
     }
 
@@ -431,6 +455,20 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     }
 
     /**
+     * Sets a content description of the default action button. This
+     * resource should be a string taking one formatting argument and
+     * will be used for formatting the content description of the button
+     * dynamically as the default target changes. For example, a resource
+     * pointing to the string "share with %1$s" will result in a content
+     * description "share with Bluetooth" for the Bluetooth activity.
+     *
+     * @param resourceId The resource id.
+     */
+    public void setDefaultActionButtonContentDescription(int resourceId) {
+        mDefaultActionButtonContentDescription = resourceId;
+    }
+
+    /**
      * Gets the list popup window which is lazily initialized.
      *
      * @return The popup.
@@ -465,6 +503,12 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             ResolveInfo activity = mAdapter.getDefaultActivity();
             PackageManager packageManager = mContext.getPackageManager();
             mDefaultActivityButtonImage.setImageDrawable(activity.loadIcon(packageManager));
+            if (mDefaultActionButtonContentDescription != 0) {
+                CharSequence label = activity.loadLabel(packageManager);
+                String contentDescription = mContext.getString(
+                        mDefaultActionButtonContentDescription, label);
+                mDefaultActivityButton.setContentDescription(contentDescription);
+            }
         } else {
             mDefaultActivityButton.setVisibility(View.GONE);
         }
