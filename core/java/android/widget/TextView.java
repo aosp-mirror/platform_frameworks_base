@@ -353,6 +353,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     private boolean mCreatedWithASelection = false;
 
+    // Size of the window for the word iterator, should be greater than the longest word's length
+    private static final int WORD_ITERATOR_WINDOW_WIDTH = 50;
     private WordIterator mWordIterator;
 
     private SpellChecker mSpellChecker;
@@ -2937,9 +2939,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 Spannable sp = new SpannableString(mText);
 
-                for (ChangeWatcher cw :
-                     sp.getSpans(0, sp.length(), ChangeWatcher.class)) {
+                for (ChangeWatcher cw : sp.getSpans(0, sp.length(), ChangeWatcher.class)) {
                     sp.removeSpan(cw);
+                }
+
+                SuggestionSpan[] suggestionSpans = sp.getSpans(0, sp.length(), SuggestionSpan.class);
+                for (int i = 0; i < suggestionSpans.length; i++) {
+                    int flags = suggestionSpans[i].getFlags();
+                    if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
+                            && (flags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                        sp.removeSpan(suggestionSpans[i]);
+                    }
                 }
 
                 sp.removeSpan(mSuggestionRangeSpan);
@@ -4449,7 +4459,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mSpellChecker != null) {
             mSpellChecker.closeSession();
-            removeMisspelledSpans();
             // Forces the creation of a new SpellChecker next time this window is created.
             // Will handle the cases where the settings has been changed in the meantime.
             mSpellChecker = null;
@@ -8461,24 +8470,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    /**
-     * Removes the suggestion spans for misspelled words.
-     */
-    private void removeMisspelledSpans() {
-        if (mText instanceof Spannable) {
-            Spannable spannable = (Spannable) mText;
-            SuggestionSpan[] suggestionSpans = spannable.getSpans(0,
-                    spannable.length(), SuggestionSpan.class);
-            for (int i = 0; i < suggestionSpans.length; i++) {
-                int flags = suggestionSpans[i].getFlags();
-                if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
-                        && (flags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
-                    spannable.removeSpan(suggestionSpans[i]);
-                }
-            }
-        }
-    }
-
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
         if (mMovement != null && mText instanceof Spannable && mLayout != null) {
@@ -8959,9 +8950,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mWordIterator = new WordIterator();
         }
 
-        final int TEXT_WINDOW_WIDTH = 50; // Should be larger than the longest word's length
-        final int windowStart = Math.max(0, start - TEXT_WINDOW_WIDTH);
-        final int windowEnd = Math.min(mText.length(), end + TEXT_WINDOW_WIDTH);
+        final int windowStart = Math.max(0, start - WORD_ITERATOR_WINDOW_WIDTH);
+        final int windowEnd = Math.min(mText.length(), end + WORD_ITERATOR_WINDOW_WIDTH);
         mWordIterator.setCharSequence(mText.subSequence(windowStart, windowEnd));
 
         return windowStart;
