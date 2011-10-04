@@ -16598,10 +16598,6 @@ package android.provider {
     field public static final java.lang.String PHOTO_FILE_ID = "data14";
   }
 
-  public static final class ContactsContract.Contacts.StreamItems implements android.provider.ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String CONTENT_DIRECTORY = "stream_items";
-  }
-
   protected static abstract interface ContactsContract.ContactsColumns {
     field public static final java.lang.String DISPLAY_NAME = "display_name";
     field public static final java.lang.String HAS_PHONE_NUMBER = "has_phone_number";
@@ -16859,10 +16855,6 @@ package android.provider {
     field public static final java.lang.String DATA_ID = "data_id";
   }
 
-  public static final class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String CONTENT_DIRECTORY = "stream_items";
-  }
-
   protected static abstract interface ContactsContract.RawContactsColumns {
     field public static final java.lang.String AGGREGATION_MODE = "aggregation_mode";
     field public static final java.lang.String CONTACT_ID = "contact_id";
@@ -16924,56 +16916,6 @@ package android.provider {
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/status-update";
     field public static final android.net.Uri CONTENT_URI;
     field public static final android.net.Uri PROFILE_CONTENT_URI;
-  }
-
-  public static final class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String PHOTO = "photo";
-  }
-
-  protected static abstract interface ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String PHOTO_FILE_ID = "photo_file_id";
-    field public static final java.lang.String PHOTO_URI = "photo_uri";
-    field public static final java.lang.String SORT_INDEX = "sort_index";
-    field public static final java.lang.String STREAM_ITEM_ID = "stream_item_id";
-    field public static final java.lang.String SYNC1 = "stream_item_photo_sync1";
-    field public static final java.lang.String SYNC2 = "stream_item_photo_sync2";
-    field public static final java.lang.String SYNC3 = "stream_item_photo_sync3";
-    field public static final java.lang.String SYNC4 = "stream_item_photo_sync4";
-  }
-
-  public static final class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
-    field public static final android.net.Uri CONTENT_LIMIT_URI;
-    field public static final android.net.Uri CONTENT_PHOTO_URI;
-    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
-    field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String MAX_ITEMS = "max_items";
-  }
-
-  public static final class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String CONTENT_DIRECTORY = "photo";
-    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
-    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
-  }
-
-  protected static abstract interface ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String ACCOUNT_NAME = "account_name";
-    field public static final java.lang.String ACCOUNT_TYPE = "account_type";
-    field public static final java.lang.String COMMENTS = "comments";
-    field public static final java.lang.String CONTACT_ID = "contact_id";
-    field public static final java.lang.String CONTACT_LOOKUP_KEY = "contact_lookup";
-    field public static final java.lang.String DATA_SET = "data_set";
-    field public static final java.lang.String RAW_CONTACT_ID = "raw_contact_id";
-    field public static final java.lang.String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
-    field public static final java.lang.String RES_ICON = "icon";
-    field public static final java.lang.String RES_LABEL = "label";
-    field public static final java.lang.String RES_PACKAGE = "res_package";
-    field public static final java.lang.String SYNC1 = "stream_item_sync1";
-    field public static final java.lang.String SYNC2 = "stream_item_sync2";
-    field public static final java.lang.String SYNC3 = "stream_item_sync3";
-    field public static final java.lang.String SYNC4 = "stream_item_sync4";
-    field public static final java.lang.String TEXT = "text";
-    field public static final java.lang.String TIMESTAMP = "timestamp";
   }
 
   protected static abstract interface ContactsContract.SyncColumns implements android.provider.ContactsContract.BaseSyncColumns {
