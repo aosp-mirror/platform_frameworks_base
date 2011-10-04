@@ -165,6 +165,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     @Override
     public void onGetSuggestions(SuggestionsInfo[] results) {
+        final Editable editable = (Editable) mTextView.getText();
         for (int i = 0; i < results.length; i++) {
             SuggestionsInfo suggestionsInfo = results[i];
             if (suggestionsInfo.getCookie() != mCookie) continue;
@@ -178,18 +179,19 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     boolean looksLikeTypo =
                             ((attributes & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO) > 0);
 
+                    SpellCheckSpan spellCheckSpan = mSpellCheckSpans[j];
                     if (!isInDictionary && looksLikeTypo) {
-                        createMisspelledSuggestionSpan(suggestionsInfo, mSpellCheckSpans[j]);
+                        createMisspelledSuggestionSpan(editable, suggestionsInfo, spellCheckSpan);
                     }
+                    editable.removeSpan(spellCheckSpan);
                     break;
                 }
             }
         }
     }
 
-    private void createMisspelledSuggestionSpan(SuggestionsInfo suggestionsInfo,
+    private void createMisspelledSuggestionSpan(Editable editable, SuggestionsInfo suggestionsInfo,
             SpellCheckSpan spellCheckSpan) {
-        final Editable editable = (Editable) mTextView.getText();
         final int start = editable.getSpanStart(spellCheckSpan);
         final int end = editable.getSpanEnd(spellCheckSpan);
 
@@ -251,6 +253,5 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         // TODO limit to the word rectangle region
         mTextView.invalidate();
-        editable.removeSpan(spellCheckSpan);
     }
 }
