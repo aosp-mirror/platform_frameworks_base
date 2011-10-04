@@ -1303,14 +1303,22 @@ static void android_os_Parcel_setDataCapacity(JNIEnv* env, jobject clazz, jint s
     }
 }
 
-static jboolean android_os_Parcel_setAllowFds(JNIEnv* env, jobject clazz, jboolean allowFds)
+static jboolean android_os_Parcel_pushAllowFds(JNIEnv* env, jobject clazz, jboolean allowFds)
 {
     Parcel* parcel = parcelForJavaObject(env, clazz);
     jboolean ret = JNI_TRUE;
     if (parcel != NULL) {
-        ret = (jboolean)parcel->setAllowFds((bool)allowFds);
+        ret = (jboolean)parcel->pushAllowFds(allowFds);
     }
     return ret;
+}
+
+static void android_os_Parcel_restoreAllowFds(JNIEnv* env, jobject clazz, jboolean lastValue)
+{
+    Parcel* parcel = parcelForJavaObject(env, clazz);
+    if (parcel != NULL) {
+        parcel->restoreAllowFds((bool)lastValue);
+    }
 }
 
 static void android_os_Parcel_writeNative(JNIEnv* env, jobject clazz,
@@ -1810,7 +1818,8 @@ static const JNINativeMethod gParcelMethods[] = {
     {"setDataSize",         "(I)V", (void*)android_os_Parcel_setDataSize},
     {"setDataPosition",     "(I)V", (void*)android_os_Parcel_setDataPosition},
     {"setDataCapacity",     "(I)V", (void*)android_os_Parcel_setDataCapacity},
-    {"setAllowFds",         "(Z)Z", (void*)android_os_Parcel_setAllowFds},
+    {"pushAllowFds",        "(Z)Z", (void*)android_os_Parcel_pushAllowFds},
+    {"restoreAllowFds",     "(Z)V", (void*)android_os_Parcel_restoreAllowFds},
     {"writeNative",         "([BII)V", (void*)android_os_Parcel_writeNative},
     {"writeInt",            "(I)V", (void*)android_os_Parcel_writeInt},
     {"writeLong",           "(J)V", (void*)android_os_Parcel_writeLong},
