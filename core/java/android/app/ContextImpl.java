@@ -882,6 +882,7 @@ class ContextImpl extends Context {
         try {
             String resolvedType = null;
             if (fillInIntent != null) {
+                fillInIntent.setAllowFds(false);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
@@ -900,6 +901,7 @@ class ContextImpl extends Context {
     public void sendBroadcast(Intent intent) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, false, false);
@@ -911,6 +913,7 @@ class ContextImpl extends Context {
     public void sendBroadcast(Intent intent, String receiverPermission) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, receiverPermission, false, false);
@@ -923,6 +926,7 @@ class ContextImpl extends Context {
             String receiverPermission) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, receiverPermission, true, false);
@@ -954,6 +958,7 @@ class ContextImpl extends Context {
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermission,
@@ -966,6 +971,7 @@ class ContextImpl extends Context {
     public void sendStickyBroadcast(Intent intent) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, false, true);
@@ -997,6 +1003,7 @@ class ContextImpl extends Context {
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
@@ -1013,6 +1020,7 @@ class ContextImpl extends Context {
             intent.setDataAndType(intent.getData(), resolvedType);
         }
         try {
+            intent.setAllowFds(false);
             ActivityManagerNative.getDefault().unbroadcastIntent(
                 mMainThread.getApplicationThread(), intent);
         } catch (RemoteException e) {
@@ -1077,6 +1085,7 @@ class ContextImpl extends Context {
     @Override
     public ComponentName startService(Intent service) {
         try {
+            service.setAllowFds(false);
             ComponentName cn = ActivityManagerNative.getDefault().startService(
                 mMainThread.getApplicationThread(), service,
                 service.resolveTypeIfNeeded(getContentResolver()));
@@ -1094,6 +1103,7 @@ class ContextImpl extends Context {
     @Override
     public boolean stopService(Intent service) {
         try {
+            service.setAllowFds(false);
             int res = ActivityManagerNative.getDefault().stopService(
                 mMainThread.getApplicationThread(), service,
                 service.resolveTypeIfNeeded(getContentResolver()));
@@ -1124,6 +1134,7 @@ class ContextImpl extends Context {
                     < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 flags |= BIND_WAIVE_PRIORITY;
             }
+            service.setAllowFds(false);
             int res = ActivityManagerNative.getDefault().bindService(
                 mMainThread.getApplicationThread(), getActivityToken(),
                 service, service.resolveTypeIfNeeded(getContentResolver()),
@@ -1156,6 +1167,9 @@ class ContextImpl extends Context {
     public boolean startInstrumentation(ComponentName className,
             String profileFile, Bundle arguments) {
         try {
+            if (arguments != null) {
+                arguments.setAllowFds(false);
+            }
             return ActivityManagerNative.getDefault().startInstrumentation(
                     className, profileFile, 0, arguments, null);
         } catch (RemoteException e) {

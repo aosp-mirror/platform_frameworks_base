@@ -697,6 +697,10 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err)
             LOGE("!!! FAILED BINDER TRANSACTION !!!");
             //jniThrowException(env, "java/lang/OutOfMemoryError", "Binder transaction too large");
             break;
+        case FDS_NOT_ALLOWED:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Not allowed to write file descriptors here");
+            break;
         default:
             LOGE("Unknown binder error code. 0x%x", err);
     }
@@ -1275,7 +1279,7 @@ static void android_os_Parcel_setDataSize(JNIEnv* env, jobject clazz, jint size)
     if (parcel != NULL) {
         const status_t err = parcel->setDataSize(size);
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1294,9 +1298,19 @@ static void android_os_Parcel_setDataCapacity(JNIEnv* env, jobject clazz, jint s
     if (parcel != NULL) {
         const status_t err = parcel->setDataCapacity(size);
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
+}
+
+static jboolean android_os_Parcel_setAllowFds(JNIEnv* env, jobject clazz, jboolean allowFds)
+{
+    Parcel* parcel = parcelForJavaObject(env, clazz);
+    jboolean ret = JNI_TRUE;
+    if (parcel != NULL) {
+        ret = (jboolean)parcel->setAllowFds((bool)allowFds);
+    }
+    return ret;
 }
 
 static void android_os_Parcel_writeNative(JNIEnv* env, jobject clazz,
@@ -1310,12 +1324,13 @@ static void android_os_Parcel_writeNative(JNIEnv* env, jobject clazz,
 
     const status_t err = parcel->writeInt32(length);
     if (err != NO_ERROR) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        signalExceptionForError(env, clazz, err);
+        return;
     }
 
     void* dest = parcel->writeInplace(length);
     if (dest == NULL) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        signalExceptionForError(env, clazz, NO_MEMORY);
         return;
     }
 
@@ -1333,7 +1348,7 @@ static void android_os_Parcel_writeInt(JNIEnv* env, jobject clazz, jint val)
     if (parcel != NULL) {
         const status_t err = parcel->writeInt32(val);
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1344,7 +1359,7 @@ static void android_os_Parcel_writeLong(JNIEnv* env, jobject clazz, jlong val)
     if (parcel != NULL) {
         const status_t err = parcel->writeInt64(val);
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1355,7 +1370,7 @@ static void android_os_Parcel_writeFloat(JNIEnv* env, jobject clazz, jfloat val)
     if (parcel != NULL) {
         const status_t err = parcel->writeFloat(val);
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1366,7 +1381,7 @@ static void android_os_Parcel_writeDouble(JNIEnv* env, jobject clazz, jdouble va
     if (parcel != NULL) {
         const status_t err = parcel->writeDouble(val);
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1386,7 +1401,7 @@ static void android_os_Parcel_writeString(JNIEnv* env, jobject clazz, jstring va
             err = parcel->writeString16(NULL, 0);
         }
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1397,7 +1412,7 @@ static void android_os_Parcel_writeStrongBinder(JNIEnv* env, jobject clazz, jobj
     if (parcel != NULL) {
         const status_t err = parcel->writeStrongBinder(ibinderForJavaObject(env, object));
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1409,7 +1424,7 @@ static void android_os_Parcel_writeFileDescriptor(JNIEnv* env, jobject clazz, jo
         const status_t err =
                 parcel->writeDupFileDescriptor(jniGetFDFromFileDescriptor(env, object));
         if (err != NO_ERROR) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            signalExceptionForError(env, clazz, err);
         }
     }
 }
@@ -1717,7 +1732,10 @@ static void android_os_Parcel_appendFrom(JNIEnv* env, jobject clazz, jobject par
        return;
     }
 
-    (void) thisParcel->appendFrom(otherParcel, offset, length);
+    status_t err = thisParcel->appendFrom(otherParcel, offset, length);
+    if (err != NO_ERROR) {
+        signalExceptionForError(env, clazz, err);
+    }
 }
 
 static jboolean android_os_Parcel_hasFileDescriptors(JNIEnv* env, jobject clazz)
@@ -1792,6 +1810,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"setDataSize",         "(I)V", (void*)android_os_Parcel_setDataSize},
     {"setDataPosition",     "(I)V", (void*)android_os_Parcel_setDataPosition},
     {"setDataCapacity",     "(I)V", (void*)android_os_Parcel_setDataCapacity},
+    {"setAllowFds",         "(Z)Z", (void*)android_os_Parcel_setAllowFds},
     {"writeNative",         "([BII)V", (void*)android_os_Parcel_writeNative},
     {"writeInt",            "(I)V", (void*)android_os_Parcel_writeInt},
     {"writeLong",           "(J)V", (void*)android_os_Parcel_writeLong},

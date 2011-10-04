@@ -661,6 +661,9 @@ public final class LoadedApk {
                             "Finishing broadcast to unregistered receiver");
                     IActivityManager mgr = ActivityManagerNative.getDefault();
                     try {
+                        if (extras != null) {
+                            extras.setAllowFds(false);
+                        }
                         mgr.finishReceiver(this, resultCode, data, extras, false);
                     } catch (RemoteException e) {
                         Slog.w(ActivityThread.TAG, "Couldn't finish broadcast to unregistered receiver");
