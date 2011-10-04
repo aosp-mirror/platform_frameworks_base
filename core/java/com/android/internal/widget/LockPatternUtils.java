@@ -346,10 +346,19 @@ public class LockPatternUtils {
      */
     public int getActivePasswordQuality() {
         int activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-        switch (getKeyguardStoredPasswordQuality()) {
+        // Note we don't want to use getKeyguardStoredPasswordQuality() because we want this to
+        // return biometric_weak if that is being used instead of the backup
+        int quality =
+                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        switch (quality) {
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                 if (isLockPatternEnabled()) {
                     activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+                }
+                break;
+            case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
+                if (isBiometricWeakInstalled()) {
+                    activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
                 }
                 break;
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
@@ -373,6 +382,7 @@ public class LockPatternUtils {
                 }
                 break;
         }
+
         return activePasswordQuality;
     }
 
