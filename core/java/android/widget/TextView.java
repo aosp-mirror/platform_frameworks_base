@@ -7780,7 +7780,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Iterate over the newly added text and schedule new SpellCheckSpans
         while (wordStart <= shiftedEnd) {
-            if (wordEnd >= shiftedStart) {
+            if (wordEnd >= shiftedStart && wordEnd > wordStart) {
                 // A new word has been created across the interval boundaries. Remove previous spans
                 if (wordStart < shiftedStart && wordEnd > shiftedStart) {
                     removeSpansAt(start, spellCheckSpans, text);
@@ -9946,8 +9946,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionInfo.text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             // Add the text before and after the span.
-            suggestionInfo.text.insert(0, mText.subSequence(unionStart, spanStart).toString());
-            suggestionInfo.text.append(mText.subSequence(spanEnd, unionEnd).toString());
+            suggestionInfo.text.insert(0, mText.toString().substring(unionStart, spanStart));
+            suggestionInfo.text.append(mText.toString().substring(spanEnd, unionEnd));
         }
 
         @Override
@@ -9979,7 +9979,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hide();
                 return;
             }
-            final String originalText = mText.subSequence(spanStart, spanEnd).toString();
+            final String originalText = mText.toString().substring(spanStart, spanEnd);
 
             if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY) {
                 Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
@@ -10016,8 +10016,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (!TextUtils.isEmpty(
                         suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
                     InputMethodManager imm = InputMethodManager.peekInstance();
-                    imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
-                            suggestionInfo.suggestionIndex);
+                    if (imm != null) {
+                        imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
+                                suggestionInfo.suggestionIndex);
+                    }
                 }
 
                 // Swap text content between actual text and Suggestion span
@@ -10037,7 +10039,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
 
-                // Move cursor at the end of the replacement word
+                // Move cursor at the end of the replaced word
                 Selection.setSelection(editable, spanEnd + lengthDifference);
             }
 
@@ -10166,8 +10168,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (!hasSelection()) {
             // There may already be a selection on device rotation
-            boolean currentWordSelected = selectCurrentWord();
-            if (!currentWordSelected) {
+            if (!selectCurrentWord()) {
                 // No word found under cursor or text selection not permitted.
                 return false;
             }
