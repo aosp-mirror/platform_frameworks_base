@@ -17,8 +17,6 @@
 package com.android.internal.widget;
 
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -39,6 +37,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+
+import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -401,6 +403,34 @@ public class LockPatternView extends View {
         invalidate();
     }
 
+    private void notifyCellAdded() {
+        if (mOnPatternListener != null) {
+            mOnPatternListener.onPatternCellAdded(mPattern);
+        }
+        sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
+    }
+
+    private void notifyPatternStarted() {
+        if (mOnPatternListener != null) {
+            mOnPatternListener.onPatternStart();
+        }
+        sendAccessEvent(R.string.lockscreen_access_pattern_start);
+    }
+
+    private void notifyPatternDetected() {
+        if (mOnPatternListener != null) {
+            mOnPatternListener.onPatternDetected(mPattern);
+        }
+        sendAccessEvent(R.string.lockscreen_access_pattern_detected);
+    }
+
+    private void notifyPatternCleared() {
+        if (mOnPatternListener != null) {
+            mOnPatternListener.onPatternCleared();
+        }
+        sendAccessEvent(R.string.lockscreen_access_pattern_cleared);
+    }
+
     /**
      * Clear the pattern.
      */
@@ -554,9 +584,7 @@ public class LockPatternView extends View {
     private void addCellToPattern(Cell newCell) {
         mPatternDrawLookup[newCell.getRow()][newCell.getColumn()] = true;
         mPattern.add(newCell);
-        if (mOnPatternListener != null) {
-            mOnPatternListener.onPatternCellAdded(mPattern);
-        }
+        notifyCellAdded();
     }
 
     // helper method to find which cell a point maps to
@@ -619,6 +647,27 @@ public class LockPatternView extends View {
     }
 
     @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (AccessibilityManager.getInstance(mContext).isTouchExplorationEnabled()) {
+            final int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    event.setAction(MotionEvent.ACTION_DOWN);
+                    break;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    event.setAction(MotionEvent.ACTION_MOVE);
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    event.setAction(MotionEvent.ACTION_UP);
+                    break;
+            }
+            onTouchEvent(event);
+            event.setAction(action);
+        }
+        return super.onHoverEvent(event);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!mInputEnabled || !isEnabled()) {
             return false;
@@ -636,10 +685,8 @@ public class LockPatternView extends View {
                 return true;
             case MotionEvent.ACTION_CANCEL:
                 resetPattern();
-                if (mOnPatternListener != null) {
-                    mPatternInProgress = false;
-                    mOnPatternListener.onPatternCleared();
-                }
+                mPatternInProgress = false;
+                notifyPatternCleared();
                 if (PROFILE_DRAWING) {
                     if (mDrawingProfilingStarted) {
                         Debug.stopMethodTracing();
@@ -661,9 +708,9 @@ public class LockPatternView extends View {
             final int patternSizePreHitDetect = mPattern.size();
             Cell hitCell = detectAndAddHit(x, y);
             final int patternSize = mPattern.size();
-            if (hitCell != null && (mOnPatternListener != null) && (patternSize == 1)) {
+            if (hitCell != null && patternSize == 1) {
                 mPatternInProgress = true;
-                mOnPatternListener.onPatternStart();
+                notifyPatternStarted();
             }
             // note current x and y for rubber banding of in progress patterns
             final float dx = Math.abs(x - mInProgressX);
@@ -778,11 +825,17 @@ public class LockPatternView extends View {
         }
     }
 
+    private void sendAccessEvent(int resId) {
+        setContentDescription(mContext.getString(resId));
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        setContentDescription(null);
+    }
+
     private void handleActionUp(MotionEvent event) {
         // report pattern detected
-        if (!mPattern.isEmpty() && mOnPatternListener != null) {
+        if (!mPattern.isEmpty()) {
             mPatternInProgress = false;
-            mOnPatternListener.onPatternDetected(mPattern);
+            notifyPatternDetected();
             invalidate();
         }
         if (PROFILE_DRAWING) {
@@ -798,13 +851,13 @@ public class LockPatternView extends View {
         final float x = event.getX();
         final float y = event.getY();
         final Cell hitCell = detectAndAddHit(x, y);
-        if (hitCell != null && mOnPatternListener != null) {
+        if (hitCell != null) {
             mPatternInProgress = true;
             mPatternDisplayMode = DisplayMode.Correct;
-            mOnPatternListener.onPatternStart();
-        } else if (mOnPatternListener != null) {
+            notifyPatternStarted();
+        } else {
             mPatternInProgress = false;
-            mOnPatternListener.onPatternCleared();
+            notifyPatternCleared();
         }
         if (hitCell != null) {
             final float startX = getCenterXForColumn(hitCell.column);
