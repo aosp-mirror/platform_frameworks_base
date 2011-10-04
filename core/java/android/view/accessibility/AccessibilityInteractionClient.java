@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.LongSparseArray;
 
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,8 @@ public final class AccessibilityInteractionClient
 
     private static final Object sStaticLock = new Object();
 
-    private static AccessibilityInteractionClient sInstance;
+    private static final LongSparseArray<AccessibilityInteractionClient> sClients =
+        new LongSparseArray<AccessibilityInteractionClient>();
 
     private final AtomicInteger mInteractionIdCounter = new AtomicInteger();
 
@@ -84,15 +86,34 @@ public final class AccessibilityInteractionClient
     private final Rect mTempBounds = new Rect();
 
     /**
-     * @return The singleton of this class.
+     * @return The client for the current thread.
      */
     public static AccessibilityInteractionClient getInstance() {
+        final long threadId = Thread.currentThread().getId();
+        return getInstanceForThread(threadId);
+    }
+
+    /**
+     * <strong>Note:</strong> We keep one instance per interrogating thread since
+     * the instance contains state which can lead to undesired thread interleavings.
+     * We do not have a thread local variable since other threads should be able to
+     * look up the correct client knowing a thread id. See ViewRootImpl for details.
+     *
+     * @return The client for a given <code>threadId</code>.
+     */
+    public static AccessibilityInteractionClient getInstanceForThread(long threadId) {
         synchronized (sStaticLock) {
-            if (sInstance == null) {
-                sInstance = new AccessibilityInteractionClient();
+            AccessibilityInteractionClient client = sClients.get(threadId);
+            if (client == null) {
+                client = new AccessibilityInteractionClient();
+                sClients.put(threadId, client);
             }
-            return sInstance;
+            return client;
         }
+    }
+
+    private AccessibilityInteractionClient() {
+        /* reducing constructor visibility */
     }
 
     /**
@@ -113,16 +134,17 @@ public final class AccessibilityInteractionClient
      *
      * @param connection A connection for interacting with the system.
      * @param accessibilityWindowId A unique window id.
-     * @param accessibilityViewId A unique View accessibility id.
+     * @param accessibilityNodeId A unique node accessibility id
+     *     (accessibility view and virtual descendant id).
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(
             IAccessibilityServiceConnection connection, int accessibilityWindowId,
-            int accessibilityViewId) {
+            long accessibilityNodeId) {
         try {
             final int interactionId = mInteractionIdCounter.getAndIncrement();
             final float windowScale = connection.findAccessibilityNodeInfoByAccessibilityId(
-                    accessibilityWindowId, accessibilityViewId, interactionId, this,
+                    accessibilityWindowId, accessibilityNodeId, interactionId, this,
                     Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
@@ -173,16 +195,19 @@ public final class AccessibilityInteractionClient
      * @param text The searched text.
      * @return A list of found {@link AccessibilityNodeInfo}s.
      */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewTextInActiveWindow(
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByTextInActiveWindow(
             IAccessibilityServiceConnection connection, String text) {
         try {
             final int interactionId = mInteractionIdCounter.getAndIncrement();
-            final float windowScale = connection.findAccessibilityNodeInfosByViewTextInActiveWindow(
+            final float windowScale = connection.findAccessibilityNodeInfosByTextInActiveWindow(
                     text, interactionId, this, Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
                 List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                         interactionId);
+                if (infos == null) {
+                    return Collections.emptyList();
+                }
                 finalizeAccessibilityNodeInfos(infos, connection, windowScale);
                 return infos;
             }
@@ -201,17 +226,17 @@ public final class AccessibilityInteractionClient
      * @param connection A connection for interacting with the system.
      * @param text The searched text.
      * @param accessibilityWindowId A unique window id.
-     * @param accessibilityViewId A unique View accessibility id from where to start the search.
-     *        Use {@link android.view.View#NO_ID} to start from the root.
+     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id) from
+     *        where to start the search. Use {@link android.view.View#NO_ID} to start from the root.
      * @return A list of found {@link AccessibilityNodeInfo}s.
      */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(
             IAccessibilityServiceConnection connection, String text, int accessibilityWindowId,
-            int accessibilityViewId) {
+            long accessibilityNodeId) {
         try {
             final int interactionId = mInteractionIdCounter.getAndIncrement();
-            final float windowScale = connection.findAccessibilityNodeInfosByViewText(text,
-                    accessibilityWindowId, accessibilityViewId, interactionId, this,
+            final float windowScale = connection.findAccessibilityNodeInfosByText(text,
+                    accessibilityWindowId, accessibilityNodeId, interactionId, this,
                     Thread.currentThread().getId());
             // If the scale is zero the call has failed.
             if (windowScale > 0) {
@@ -231,16 +256,16 @@ public final class AccessibilityInteractionClient
      *
      * @param connection A connection for interacting with the system.
      * @param accessibilityWindowId The id of the window.
-     * @param accessibilityViewId A unique View accessibility id.
+     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param action The action to perform.
      * @return Whether the action was performed.
      */
     public boolean performAccessibilityAction(IAccessibilityServiceConnection connection,
-            int accessibilityWindowId, int accessibilityViewId, int action) {
+            int accessibilityWindowId, long accessibilityNodeId, int action) {
         try {
             final int interactionId = mInteractionIdCounter.getAndIncrement();
             final boolean success = connection.performAccessibilityAction(
-                    accessibilityWindowId, accessibilityViewId, action, interactionId, this,
+                    accessibilityWindowId, accessibilityNodeId, action, interactionId, this,
                     Thread.currentThread().getId());
             if (success) {
                 return getPerformAccessibilityActionResult(interactionId);

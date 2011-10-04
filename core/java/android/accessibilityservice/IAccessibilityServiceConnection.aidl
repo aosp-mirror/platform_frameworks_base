@@ -33,14 +33,14 @@ interface IAccessibilityServiceConnection {
      * Finds an {@link AccessibilityNodeInfo} by accessibility id.
      *
      * @param accessibilityWindowId A unique window id.
-     * @param accessibilityViewId A unique View accessibility id.
+     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
      * @return The current window scale, where zero means a failure.
      */
     float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
-        int accessibilityViewId, int interactionId,
+        long accessibilityNodeId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
 
     /**
@@ -51,15 +51,15 @@ interface IAccessibilityServiceConnection {
      *
      * @param text The searched text.
      * @param accessibilityWindowId A unique window id.
-     * @param accessibilityViewId A unique View accessibility id from where to start the search.
-     *        Use {@link android.view.View#NO_ID} to start from the root.
+     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id) from
+     *        where to start the search. Use {@link android.view.View#NO_ID} to start from the root.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
      * @return The current window scale, where zero means a failure.
      */
-    float findAccessibilityNodeInfosByViewText(String text, int accessibilityWindowId,
-        int accessibilityViewId, int interractionId,
+    float findAccessibilityNodeInfosByText(String text, int accessibilityWindowId,
+        long accessibilityNodeId, int interractionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
 
     /**
@@ -75,7 +75,7 @@ interface IAccessibilityServiceConnection {
      * @param threadId The id of the calling thread.
      * @return The current window scale, where zero means a failure.
      */
-    float findAccessibilityNodeInfosByViewTextInActiveWindow(String text,
+    float findAccessibilityNodeInfosByTextInActiveWindow(String text,
         int interactionId, IAccessibilityInteractionConnectionCallback callback,
         long threadId);
 
@@ -96,14 +96,14 @@ interface IAccessibilityServiceConnection {
      * Performs an accessibility action on an {@link AccessibilityNodeInfo}.
      *
      * @param accessibilityWindowId The id of the window.
-     * @param accessibilityViewId A unique View accessibility id.
+     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param action The action to perform.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
      * @return Whether the action was performed.
      */
-    boolean performAccessibilityAction(int accessibilityWindowId, int accessibilityViewId,
+    boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
         int action, int interactionId, IAccessibilityInteractionConnectionCallback callback,
         long threadId);
 }
