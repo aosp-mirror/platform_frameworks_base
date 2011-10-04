@@ -42,6 +42,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * and 4 steps, called <code>onPreExecute</code>, <code>doInBackground</code>,
  * <code>onProgressUpdate</code> and <code>onPostExecute</code>.</p>
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using tasks and threads, read the
+ * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes and
+ * Threads</a> developer guide.</p>
+ * </div>
+ *
  * <h2>Usage</h2>
  * <p>AsyncTask must be subclassed to be used. The subclass will override at least
  * one method ({@link #doInBackground}), and most often will override a

@@ -50,10 +50,6 @@ import java.io.PrintWriter;
  * Threads</a>.  The {@link IntentService} class is available
  * as a standard implementation of Service that has its own thread where it
  * schedules its work to be done.</p>
- *
- * <p>You can find a detailed discussion about how to create services in the 
- * <a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a>
- * document.</p>
  * 
  * <p>Topics covered here:
  * <ol>
@@ -64,7 +60,13 @@ import java.io.PrintWriter;
  * <li><a href="#LocalServiceSample">Local Service Sample</a>
  * <li><a href="#RemoteMessengerServiceSample">Remote Messenger Service Sample</a>
  * </ol>
- * 
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For a detailed discussion about how to create services, read the
+ * <a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> developer guide.</p>
+ * </div>
+ *
  * <a name="WhatIsAService"></a>
  * <h3>What is a Service?</h3>
  * 

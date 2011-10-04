@@ -71,6 +71,14 @@ import java.util.Set;
  * To specify a path, you also must specify both one or more authorities and
  * one or more schemes it is associated with.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about how to create and resolve intents, read the
+ * <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+ * developer guide.</p>
+ * </div>
+ *
+ * <h3>Filter Rules</h3>
  * <p>A match is based on the following rules.  Note that
  * for an IntentFilter to match an Intent, three conditions must hold:
  * the <strong>action</strong> and <strong>category</strong> must match, and

@@ -90,7 +90,14 @@ import android.util.Slog;
  * <li><a href="#Permissions">Permissions</a>
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
  * </ol>
- * 
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about how to use this class to receive and resolve intents, read the
+ * <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+ * developer guide.</p>
+ * </div>
+ *
  * <a name="ReceiverLifecycle"></a>
  * <h3>Receiver Lifecycle</h3>
  * 

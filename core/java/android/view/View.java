@@ -94,20 +94,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * their layout properties.
  * </p>
  *
- * <div class="special">
- * <p>For an introduction to using this class to develop your
- * application's user interface, read the Developer Guide documentation on
- * <strong><a href="{@docRoot}guide/topics/ui/index.html">User Interface</a></strong>. Special topics
- * include:
- * <br/><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a>
- * <br/><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>
- * <br/><a href="{@docRoot}guide/topics/ui/layout-objects.html">Common Layout Objects</a>
- * <br/><a href="{@docRoot}guide/topics/ui/binding.html">Binding to Data with AdapterView</a>
- * <br/><a href="{@docRoot}guide/topics/ui/ui-events.html">Handling UI Events</a>
- * <br/><a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>
- * <br/><a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>
- * <br/><a href="{@docRoot}guide/topics/ui/how-android-draws.html">How Android Draws Views</a>.
- * </p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about using this class to develop your application's user interface,
+ * read the <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a> developer guide.
  * </div>
  *
  * <a name="Using"></a>

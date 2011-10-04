@@ -2,6 +2,12 @@ package android.app;
 
 /**
  * API for performing a set of Fragment operations.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using fragments, read the
+ * <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+ * </div>
  */
 public abstract class FragmentTransaction {
     /**

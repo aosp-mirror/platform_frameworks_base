@@ -47,6 +47,12 @@ import java.lang.reflect.Modifier;
  *
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.java
  *      fragment_cursor}
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using loaders, read the
+ * <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</p>
+ * </div>
  */
 public abstract class LoaderManager {
     /**
