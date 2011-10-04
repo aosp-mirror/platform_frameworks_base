@@ -24,11 +24,15 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.os.FileObserver;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.security.KeyStore;
@@ -434,7 +438,7 @@ public class LockPatternUtils {
      * Calls back SetupFaceLock to delete the gallery file when the lock type is changed
     */
     void deleteGallery() {
-        if(isBiometricEnabled()) {
+        if(usingBiometricWeak()) {
             Intent intent = new Intent().setClassName("com.android.facelock",
                     "com.android.facelock.SetupFaceLock");
             intent.putExtra("deleteGallery", true);
@@ -677,6 +681,9 @@ public class LockPatternUtils {
         return quality;
     }
 
+    /**
+     * @return true if the lockscreen method is set to biometric weak
+     */
     public boolean usingBiometricWeak() {
         int quality =
                 (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
@@ -810,7 +817,7 @@ public class LockPatternUtils {
                 || backupMode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 
         return savedPasswordExists() && (passwordEnabled ||
-                (isBiometricEnabled() && backupEnabled));
+                (usingBiometricWeak() && backupEnabled));
     }
 
     /**
@@ -824,16 +831,36 @@ public class LockPatternUtils {
         return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED)
                 && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
                         == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING ||
-                        (isBiometricEnabled() && backupEnabled));
+                        (usingBiometricWeak() && backupEnabled));
     }
 
     /**
-     * @return Whether biometric weak lock is enabled.
+     * @return Whether biometric weak lock is installed and that the front facing camera exists
      */
-    public boolean isBiometricEnabled() {
-        // TODO: check if it's installed
-        return getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
-                == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
+    public boolean isBiometricWeakInstalled() {
+        // Check that the system flag was set
+        if (!SystemProperties.getBoolean("ro.lockscreen.facelock_enabled", false)) {
+            return false;
+        }
+
+        // Check that it's installed
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo("com.android.facelock", PackageManager.GET_ACTIVITIES);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        // Check that the camera is enabled
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)) {
+            return false;
+        }
+        if (getDevicePolicyManager().getCameraDisabled(null)) {
+            return false;
+        }
+
+
+        return true;
     }
 
     /**
