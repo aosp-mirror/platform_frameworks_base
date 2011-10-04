@@ -8925,10 +8925,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // If a URLSpan (web address, email, phone...) is found at that position, select it.
         URLSpan[] urlSpans = ((Spanned) mText).getSpans(minOffset, maxOffset, URLSpan.class);
-        if (urlSpans.length == 1) {
-            URLSpan url = urlSpans[0];
-            selectionStart = ((Spanned) mText).getSpanStart(url);
-            selectionEnd = ((Spanned) mText).getSpanEnd(url);
+        if (urlSpans.length >= 1) {
+            URLSpan urlSpan = urlSpans[0];
+            selectionStart = ((Spanned) mText).getSpanStart(urlSpan);
+            selectionEnd = ((Spanned) mText).getSpanEnd(urlSpan);
         } else {
             final int shift = prepareWordIterator(minOffset, maxOffset);
 
@@ -8939,10 +8939,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectionEnd = mWordIterator.getEnd(maxOffset - shift);
             if (selectionEnd == BreakIterator.DONE) return false;
             selectionEnd += shift;
+
+            if (selectionStart == selectionEnd) {
+                // Possible when the word iterator does not properly handle the text's language
+                long range = getCharRange(selectionStart);
+                selectionStart = extractRangeStartFromLong(range);
+                selectionEnd = extractRangeEndFromLong(range);
+            }
         }
 
         Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
-        return true;
+        return selectionEnd > selectionStart;
+    }
+
+    private long getCharRange(int offset) {
+        final int textLength = mText.length();
+        if (offset + 1 < textLength) {
+            final char currentChar = mText.charAt(offset);
+            final char nextChar = mText.charAt(offset + 1);
+            if (Character.isSurrogatePair(currentChar, nextChar)) {
+                return packRangeInLong(offset,  offset + 2);
+            }
+        }
+        if (offset < textLength) {
+            return packRangeInLong(offset,  offset + 1);
+        }
+        if (offset - 2 >= 0) {
+            final char previousChar = mText.charAt(offset - 1);
+            final char previousPreviousChar = mText.charAt(offset - 2);
+            if (Character.isSurrogatePair(previousPreviousChar, previousChar)) {
+                return packRangeInLong(offset - 2,  offset);
+            }
+        }
+        if (offset - 1 >= 0) {
+            return packRangeInLong(offset - 1,  offset);
+        }
+        return packRangeInLong(offset,  offset);
     }
 
     int prepareWordIterator(int start, int end) {
@@ -9330,7 +9362,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Start a new selection
         if (!handled) {
-            handled = startSelectionActionMode();
+            vibrate = handled = startSelectionActionMode();
         }
 
         if (vibrate) {
@@ -10166,8 +10198,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (!hasSelection()) {
             // There may already be a selection on device rotation
-            boolean currentWordSelected = selectCurrentWord();
-            if (!currentWordSelected) {
+            if (!selectCurrentWord()) {
                 // No word found under cursor or text selection not permitted.
                 return false;
             }
