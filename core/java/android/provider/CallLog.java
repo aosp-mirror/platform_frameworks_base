@@ -238,6 +238,14 @@ public class CallLog {
         public static final String CACHED_PHOTO_ID = "photo_id";
 
         /**
+         * The cached formatted phone number.
+         * This value is not guaranteed to be present.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String CACHED_FORMATTED_NUMBER = "formatted_number";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
