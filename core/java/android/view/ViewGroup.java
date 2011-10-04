@@ -821,6 +821,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @Override
+    View findViewByAccessibilityIdTraversal(int accessibilityId) {
+        View foundView = super.findViewByAccessibilityIdTraversal(accessibilityId);
+        if (foundView != null) {
+            return foundView;
+        }
+        final int childrenCount = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < childrenCount; i++) {
+            View child = children[i];
+            foundView = child.findViewByAccessibilityIdTraversal(accessibilityId);
+            if (foundView != null) {
+                return foundView;
+            }
+        }
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      */
