@@ -531,7 +531,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             ((KeyguardScreen) mUnlockScreen).onResume();
         }
 
-        if (mLockPatternUtils.usingBiometricWeak()) {
+        if (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled()) {
             mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW);
         } else {
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
@@ -1014,7 +1015,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     // Binds to FaceLock service, but does not tell it to start
     public void bindToFaceLock() {
-        if (mLockPatternUtils.usingBiometricWeak()) {
+        if (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled()) {
             if (!mBoundToFaceLockService) {
                 if (DEBUG) Log.d(TAG, "before bind to FaceLock service");
                 mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
@@ -1030,7 +1032,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     // Tells FaceLock to stop and then unbinds from the FaceLock service
     public void stopAndUnbindFromFaceLock() {
-        if (mLockPatternUtils.usingBiometricWeak()) {
+        if (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled()) {
             stopFaceLock();
 
             if (mBoundToFaceLockService) {
@@ -1079,7 +1082,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     // Tells the FaceLock service to start displaying its UI and perform recognition
     public void startFaceLock(IBinder windowToken, int x, int y, int h, int w)
     {
-        if (mLockPatternUtils.usingBiometricWeak()) {
+        if (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled()) {
             synchronized (mFaceLockServiceRunningLock) {
                 if (!mFaceLockServiceRunning) {
                     if (DEBUG) Log.d(TAG, "Starting FaceLock");
@@ -1099,7 +1103,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     // Tells the FaceLock service to stop displaying its UI and stop recognition
     public void stopFaceLock()
     {
-        if (mLockPatternUtils.usingBiometricWeak()) {
+        if (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled()) {
             // Note that attempting to stop FaceLock when it's not running is not an issue.
             // FaceLock can return, which stops it and then we try to stop it when the
             // screen is turned off.  That's why we check.
