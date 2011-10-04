@@ -22,7 +22,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.util.Protocol;
 
@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @hide
  */
 public final class DnsPinger extends Handler {
-    private static final boolean V = true;
+    private static final boolean DBG = false;
 
     private static final int RECEIVE_POLL_INTERVAL_MS = 200;
     private static final int DNS_PORT = 53;
@@ -154,7 +154,7 @@ public final class DnsPinger extends Handler {
                         newActivePing.socket.setNetworkInterface(NetworkInterface.getByName(
                                 getCurrentLinkProperties().getInterfaceName()));
                     } catch (Exception e) {
-                        Slog.w(TAG,"sendDnsPing::Error binding to socket", e);
+                        loge("sendDnsPing::Error binding to socket " + e);
                     }
 
                     newActivePing.packetId = (short) sRandom.nextInt();
@@ -165,8 +165,8 @@ public final class DnsPinger extends Handler {
                     // Send the DNS query
                     DatagramPacket packet = new DatagramPacket(buf,
                             buf.length, dnsAddress, DNS_PORT);
-                    if (V) {
-                        Slog.v(TAG, "Sending a ping " + newActivePing.internalId +
+                    if (DBG) {
+                        log("Sending a ping " + newActivePing.internalId +
                                 " to " + dnsAddress.getHostAddress()
                                 + " with packetId " + newActivePing.packetId + ".");
                     }
@@ -196,15 +196,15 @@ public final class DnsPinger extends Handler {
                             curPing.result =
                                     (int) (SystemClock.elapsedRealtime() - curPing.start);
                         } else {
-                            if (V) {
-                                Slog.v(TAG, "response ID didn't match, ignoring packet");
+                            if (DBG) {
+                                log("response ID didn't match, ignoring packet");
                             }
                         }
                     } catch (SocketTimeoutException e) {
                         // A timeout here doesn't mean anything - squelsh this exception
                     } catch (Exception e) {
-                        if (V) {
-                            Slog.v(TAG, "DnsPinger.pingDns got socket exception: ", e);
+                        if (DBG) {
+                            log("DnsPinger.pingDns got socket exception: " + e);
                         }
                         curPing.result = SOCKET_EXCEPTION;
                     }
@@ -244,13 +244,13 @@ public final class DnsPinger extends Handler {
     public List<InetAddress> getDnsList() {
         LinkProperties curLinkProps = getCurrentLinkProperties();
         if (curLinkProps == null) {
-            Slog.e(TAG, "getCurLinkProperties:: LP for type" + mConnectionType + " is null!");
+            loge("getCurLinkProperties:: LP for type" + mConnectionType + " is null!");
             return mDefaultDns;
         }
 
         Collection<InetAddress> dnses = curLinkProps.getDnses();
         if (dnses == null || dnses.size() == 0) {
-            Slog.v(TAG, "getDns::LinkProps has null dns - returning default");
+            loge("getDns::LinkProps has null dns - returning default");
             return mDefaultDns;
         }
 
@@ -277,8 +277,8 @@ public final class DnsPinger extends Handler {
     }
 
     private void sendResponse(int internalId, int externalId, int responseVal) {
-        if(V) {
-            Slog.d(TAG, "Responding to packet " + internalId +
+        if(DBG) {
+            log("Responding to packet " + internalId +
                     " externalId " + externalId +
                     " and val " + responseVal);
         }
@@ -304,7 +304,7 @@ public final class DnsPinger extends Handler {
         try {
             return NetworkUtils.numericToInetAddress(dns);
         } catch (IllegalArgumentException e) {
-            Slog.w(TAG, "getDefaultDns::malformed default dns address");
+            loge("getDefaultDns::malformed default dns address");
             return null;
         }
     }
@@ -323,4 +323,12 @@ public final class DnsPinger extends Handler {
         0, 1, // QTYPE, set to 1 = A (host address)
         0, 1  // QCLASS, set to 1 = IN (internet)
     };
+
+    private void log(String s) {
+        Log.d(TAG, s);
+    }
+
+    private void loge(String s) {
+        Log.e(TAG, s);
+    }
 }

@@ -100,6 +100,7 @@ class WifiConfigStore {
 
     private static Context sContext;
     private static final String TAG = "WifiConfigStore";
+    private static final boolean DBG = false;
 
     /* configured networks with network id as the key */
     private static HashMap<Integer, WifiConfiguration> sConfiguredNetworks =
@@ -140,7 +141,7 @@ class WifiConfigStore {
      * and enable all stored networks in supplicant.
      */
     static void initialize(Context context) {
-        Log.d(TAG, "Loading config and enabling all networks");
+        if (DBG) log("Loading config and enabling all networks");
         sContext = context;
         loadConfiguredNetworks();
         enableAllNetworks();
@@ -173,7 +174,7 @@ class WifiConfigStore {
                         networkEnabledStateChanged = true;
                         config.status = Status.ENABLED;
                     } else {
-                        Log.e(TAG, "Enable network failed on " + config.networkId);
+                        loge("Enable network failed on " + config.networkId);
                     }
                 }
             }
@@ -204,7 +205,7 @@ class WifiConfigStore {
             if (netId != INVALID_NETWORK_ID) {
                 selectNetwork(netId);
             } else {
-                Log.e(TAG, "Failed to update network " + config);
+                loge("Failed to update network " + config);
             }
             return netId;
         }
@@ -290,7 +291,7 @@ class WifiConfigStore {
             writeIpAndProxyConfigurations();
             sendConfiguredNetworksChangedBroadcast();
         } else {
-            Log.e(TAG, "Failed to remove network " + netId);
+            loge("Failed to remove network " + netId);
         }
     }
 
@@ -404,7 +405,7 @@ class WifiConfigStore {
             markAllNetworksDisabled();
             result.status = WpsResult.Status.SUCCESS;
         } else {
-            Log.e(TAG, "Failed to start WPS pin method configuration");
+            loge("Failed to start WPS pin method configuration");
             result.status = WpsResult.Status.FAILURE;
         }
         return result;
@@ -423,7 +424,7 @@ class WifiConfigStore {
             markAllNetworksDisabled();
             result.status = WpsResult.Status.SUCCESS;
         } else {
-            Log.e(TAG, "Failed to start WPS pin method configuration");
+            loge("Failed to start WPS pin method configuration");
             result.status = WpsResult.Status.FAILURE;
         }
         return result;
@@ -439,7 +440,7 @@ class WifiConfigStore {
             markAllNetworksDisabled();
             result.status = WpsResult.Status.SUCCESS;
         } else {
-            Log.e(TAG, "Failed to start WPS push button configuration");
+            loge("Failed to start WPS push button configuration");
             result.status = WpsResult.Status.FAILURE;
         }
         return result;
@@ -680,7 +681,7 @@ class WifiConfigStore {
                                 /* Ignore */
                                 break;
                             default:
-                                Log.e(TAG, "Ignore invalid ip assignment while writing");
+                                loge("Ignore invalid ip assignment while writing");
                                 break;
                         }
 
@@ -707,7 +708,7 @@ class WifiConfigStore {
                                 /* Ignore */
                                 break;
                             default:
-                                Log.e(TAG, "Ignore invalid proxy settings while writing");
+                                loge("Ignore invalid proxy settings while writing");
                                 break;
                         }
                         if (writeToFile) {
@@ -715,14 +716,14 @@ class WifiConfigStore {
                             out.writeInt(configKey(config));
                         }
                     } catch (NullPointerException e) {
-                        Log.e(TAG, "Failure in writing " + config.linkProperties + e);
+                        loge("Failure in writing " + config.linkProperties + e);
                     }
                     out.writeUTF(EOS);
                 }
             }
 
         } catch (IOException e) {
-            Log.e(TAG, "Error writing data file");
+            loge("Error writing data file");
         } finally {
             if (out != null) {
                 try {
@@ -741,7 +742,7 @@ class WifiConfigStore {
 
             int version = in.readInt();
             if (version != 2 && version != 1) {
-                Log.e(TAG, "Bad version on IP configuration file, ignore read");
+                loge("Bad version on IP configuration file, ignore read");
                 return;
             }
 
@@ -797,10 +798,10 @@ class WifiConfigStore {
                         } else if (key.equals(EOS)) {
                             break;
                         } else {
-                            Log.e(TAG, "Ignore unknown key " + key + "while reading");
+                            loge("Ignore unknown key " + key + "while reading");
                         }
                     } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "Ignore invalid address while reading" + e);
+                        loge("Ignore invalid address while reading" + e);
                     }
                 } while (true);
 
@@ -810,7 +811,7 @@ class WifiConfigStore {
                                 sNetworkIds.get(id));
 
                         if (config == null) {
-                            Log.e(TAG, "configuration found for missing network, ignored");
+                            loge("configuration found for missing network, ignored");
                         } else {
                             config.linkProperties = linkProperties;
                             switch (ipAssignment) {
@@ -822,7 +823,7 @@ class WifiConfigStore {
                                     //Ignore
                                     break;
                                 default:
-                                    Log.e(TAG, "Ignore invalid ip assignment while reading");
+                                    loge("Ignore invalid ip assignment while reading");
                                     break;
                             }
 
@@ -840,18 +841,18 @@ class WifiConfigStore {
                                     //Ignore
                                     break;
                                 default:
-                                    Log.e(TAG, "Ignore invalid proxy settings while reading");
+                                    loge("Ignore invalid proxy settings while reading");
                                     break;
                             }
                         }
                     }
                 } else {
-                    Log.e(TAG, "Missing id while parsing configuration");
+                    loge("Missing id while parsing configuration");
                 }
             }
         } catch (EOFException ignore) {
         } catch (IOException e) {
-            Log.e(TAG, "Error parsing configuration" + e);
+            loge("Error parsing configuration" + e);
         } finally {
             if (in != null) {
                 try {
@@ -878,7 +879,7 @@ class WifiConfigStore {
                 newNetwork = true;
                 netId = WifiNative.addNetworkCommand();
                 if (netId < 0) {
-                    Log.e(TAG, "Failed to add a network!");
+                    loge("Failed to add a network!");
                     return new NetworkUpdateResult(INVALID_NETWORK_ID);
                 }
             }
@@ -893,7 +894,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.ssidVarName,
                         config.SSID)) {
-                Log.d(TAG, "failed to set SSID: "+config.SSID);
+                loge("failed to set SSID: "+config.SSID);
                 break setVariables;
             }
 
@@ -902,7 +903,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.bssidVarName,
                         config.BSSID)) {
-                Log.d(TAG, "failed to set BSSID: "+config.BSSID);
+                loge("failed to set BSSID: "+config.BSSID);
                 break setVariables;
             }
 
@@ -913,7 +914,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.KeyMgmt.varName,
                         allowedKeyManagementString)) {
-                Log.d(TAG, "failed to set key_mgmt: "+
+                loge("failed to set key_mgmt: "+
                         allowedKeyManagementString);
                 break setVariables;
             }
@@ -925,7 +926,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.Protocol.varName,
                         allowedProtocolsString)) {
-                Log.d(TAG, "failed to set proto: "+
+                loge("failed to set proto: "+
                         allowedProtocolsString);
                 break setVariables;
             }
@@ -937,7 +938,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.AuthAlgorithm.varName,
                         allowedAuthAlgorithmsString)) {
-                Log.d(TAG, "failed to set auth_alg: "+
+                loge("failed to set auth_alg: "+
                         allowedAuthAlgorithmsString);
                 break setVariables;
             }
@@ -950,7 +951,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.PairwiseCipher.varName,
                         allowedPairwiseCiphersString)) {
-                Log.d(TAG, "failed to set pairwise: "+
+                loge("failed to set pairwise: "+
                         allowedPairwiseCiphersString);
                 break setVariables;
             }
@@ -962,7 +963,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.GroupCipher.varName,
                         allowedGroupCiphersString)) {
-                Log.d(TAG, "failed to set group: "+
+                loge("failed to set group: "+
                         allowedGroupCiphersString);
                 break setVariables;
             }
@@ -974,7 +975,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.pskVarName,
                         config.preSharedKey)) {
-                Log.d(TAG, "failed to set psk");
+                loge("failed to set psk");
                 break setVariables;
             }
 
@@ -988,9 +989,7 @@ class WifiConfigStore {
                                     netId,
                                     WifiConfiguration.wepKeyVarNames[i],
                                     config.wepKeys[i])) {
-                            Log.d(TAG,
-                                    "failed to set wep_key"+i+": " +
-                                    config.wepKeys[i]);
+                            loge("failed to set wep_key" + i + ": " + config.wepKeys[i]);
                             break setVariables;
                         }
                         hasSetKey = true;
@@ -1003,9 +1002,7 @@ class WifiConfigStore {
                             netId,
                             WifiConfiguration.wepTxKeyIdxVarName,
                             Integer.toString(config.wepTxKeyIndex))) {
-                    Log.d(TAG,
-                            "failed to set wep_tx_keyidx: "+
-                            config.wepTxKeyIndex);
+                    loge("failed to set wep_tx_keyidx: " + config.wepTxKeyIndex);
                     break setVariables;
                 }
             }
@@ -1014,7 +1011,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.priorityVarName,
                         Integer.toString(config.priority))) {
-                Log.d(TAG, config.SSID + ": failed to set priority: "
+                loge(config.SSID + ": failed to set priority: "
                         +config.priority);
                 break setVariables;
             }
@@ -1023,7 +1020,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.hiddenSSIDVarName,
                         Integer.toString(config.hiddenSSID ? 1 : 0))) {
-                Log.d(TAG, config.SSID + ": failed to set hiddenSSID: "+
+                loge(config.SSID + ": failed to set hiddenSSID: "+
                         config.hiddenSSID);
                 break setVariables;
             }
@@ -1040,7 +1037,7 @@ class WifiConfigStore {
                                 netId,
                                 varName,
                                 value)) {
-                        Log.d(TAG, config.SSID + ": failed to set " + varName +
+                        loge(config.SSID + ": failed to set " + varName +
                                 ": " + value);
                         break setVariables;
                     }
@@ -1052,9 +1049,7 @@ class WifiConfigStore {
         if (updateFailed) {
             if (newNetwork) {
                 WifiNative.removeNetworkCommand(netId);
-                Log.d(TAG,
-                        "Failed to set a network variable, removed network: "
-                        + netId);
+                loge("Failed to set a network variable, removed network: " + netId);
             }
             return new NetworkUpdateResult(INVALID_NETWORK_ID);
         }
@@ -1130,7 +1125,7 @@ class WifiConfigStore {
                 /* Ignore */
                 break;
             default:
-                Log.e(TAG, "Ignore invalid ip assignment during write");
+                loge("Ignore invalid ip assignment during write");
                 break;
         }
 
@@ -1154,7 +1149,7 @@ class WifiConfigStore {
                 /* Ignore */
                 break;
             default:
-                Log.e(TAG, "Ignore invalid proxy configuration during write");
+                loge("Ignore invalid proxy configuration during write");
                 break;
         }
 
@@ -1163,7 +1158,7 @@ class WifiConfigStore {
         } else {
             currentConfig.ipAssignment = newConfig.ipAssignment;
             addIpSettingsFromConfig(linkProperties, newConfig);
-            Log.d(TAG, "IP config changed SSID = " + currentConfig.SSID + " linkProperties: " +
+            log("IP config changed SSID = " + currentConfig.SSID + " linkProperties: " +
                     linkProperties.toString());
         }
 
@@ -1173,9 +1168,9 @@ class WifiConfigStore {
         } else {
             currentConfig.proxySettings = newConfig.proxySettings;
             linkProperties.setHttpProxy(newConfig.linkProperties.getHttpProxy());
-            Log.d(TAG, "proxy changed SSID = " + currentConfig.SSID);
+            log("proxy changed SSID = " + currentConfig.SSID);
             if (linkProperties.getHttpProxy() != null) {
-                Log.d(TAG, " proxyProperties: " + linkProperties.getHttpProxy().toString());
+                log(" proxyProperties: " + linkProperties.getHttpProxy().toString());
             }
         }
 
@@ -1394,7 +1389,7 @@ class WifiConfigStore {
         // if we ever get here, we should probably add the
         // value to WifiConfiguration to reflect that it's
         // supported by the WPA supplicant
-        Log.w(TAG, "Failed to look-up a string: " + string);
+        loge("Failed to look-up a string: " + string);
 
         return -1;
     }
@@ -1430,5 +1425,13 @@ class WifiConfigStore {
 
     public static String getConfigFile() {
         return ipConfigFile;
+    }
+
+    private static void loge(String s) {
+        Log.e(TAG, s);
+    }
+
+    private static void log(String s) {
+        Log.d(TAG, s);
     }
 }

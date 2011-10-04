@@ -75,7 +75,6 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
-import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
@@ -1104,12 +1103,12 @@ public class WifiStateMachine extends StateMachine {
                             mNwService.setInterfaceConfig(intf, ifcg);
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, "Error configuring interface " + intf + ", :" + e);
+                        loge("Error configuring interface " + intf + ", :" + e);
                         return false;
                     }
 
                     if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                        Log.e(TAG, "Error tethering on " + intf);
+                        loge("Error tethering on " + intf);
                         return false;
                     }
                     return true;
@@ -1135,11 +1134,11 @@ public class WifiStateMachine extends StateMachine {
                 mNwService.setInterfaceConfig(mInterfaceName, ifcg);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error resetting interface " + mInterfaceName + ", :" + e);
+            loge("Error resetting interface " + mInterfaceName + ", :" + e);
         }
 
         if (mCm.untether(mInterfaceName) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-            Log.e(TAG, "Untether initiate failed!");
+            loge("Untether initiate failed!");
         }
     }
 
@@ -1175,12 +1174,12 @@ public class WifiStateMachine extends StateMachine {
                 mBatteryStats.noteWifiOff();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to note battery stats in wifi");
+            loge("Failed to note battery stats in wifi");
         }
 
         mWifiState.set(wifiState);
 
-        if (DBG) Log.d(TAG, "setWifiState: " + syncGetWifiStateByName());
+        if (DBG) log("setWifiState: " + syncGetWifiStateByName());
 
         final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -1199,13 +1198,13 @@ public class WifiStateMachine extends StateMachine {
                 mBatteryStats.noteWifiOff();
             }
         } catch (RemoteException e) {
-            Log.d(TAG, "Failed to note battery stats in wifi");
+            loge("Failed to note battery stats in wifi");
         }
 
         // Update state
         mWifiApState.set(wifiApState);
 
-        if (DBG) Log.d(TAG, "setWifiApState: " + syncGetWifiApStateByName());
+        if (DBG) log("setWifiApState: " + syncGetWifiApStateByName());
 
         final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -1291,7 +1290,7 @@ public class WifiStateMachine extends StateMachine {
                         }
                     }
                 } else {
-                    Log.w(TAG, "Misformatted scan result text with " +
+                    loge("Misformatted scan result text with " +
                           result.length + " fields: " + line);
                 }
             }
@@ -1419,15 +1418,15 @@ public class WifiStateMachine extends StateMachine {
 
     private void setHighPerfModeEnabledNative(boolean enable) {
         if(!WifiNative.setSuspendOptimizationsCommand(!enable)) {
-            Log.e(TAG, "set suspend optimizations failed!");
+            loge("set suspend optimizations failed!");
         }
         if (enable) {
             if (!WifiNative.setPowerModeCommand(POWER_MODE_ACTIVE)) {
-                Log.e(TAG, "set power mode active failed!");
+                loge("set power mode active failed!");
             }
         } else {
             if (!WifiNative.setPowerModeCommand(POWER_MODE_AUTO)) {
-                Log.e(TAG, "set power mode auto failed!");
+                loge("set power mode auto failed!");
             }
         }
     }
@@ -1442,7 +1441,10 @@ public class WifiStateMachine extends StateMachine {
             mLinkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
         }
         mLinkProperties.setInterfaceName(mInterfaceName);
-        Log.d(TAG, "netId=" + mLastNetworkId  + " Link configured: " + mLinkProperties.toString());
+        if (DBG) {
+            log("netId=" + mLastNetworkId  + " Link configured: " +
+                    mLinkProperties.toString());
+        }
     }
 
     private int getMaxDhcpRetries() {
@@ -1503,8 +1505,11 @@ public class WifiStateMachine extends StateMachine {
      * @param state the new @{code DetailedState}
      */
     private void setNetworkDetailedState(NetworkInfo.DetailedState state) {
-        Log.d(TAG, "setDetailed state, old ="
-                + mNetworkInfo.getDetailedState() + " and new state=" + state);
+        if (DBG) {
+            log("setDetailed state, old ="
+                    + mNetworkInfo.getDetailedState() + " and new state=" + state);
+        }
+
         if (state != mNetworkInfo.getDetailedState()) {
             mNetworkInfo.setDetailedState(state, null, null);
         }
@@ -1547,7 +1552,7 @@ public class WifiStateMachine extends StateMachine {
      * using the interface, stopping DHCP & disabling interface
      */
     private void handleNetworkDisconnect() {
-        Log.d(TAG, "Stopping DHCP and clearing IP");
+        if (DBG) log("Stopping DHCP and clearing IP");
 
         /*
          * stop DHCP
@@ -1562,7 +1567,7 @@ public class WifiStateMachine extends StateMachine {
             mNwService.clearInterfaceAddresses(mInterfaceName);
             mNwService.disableIpv6(mInterfaceName);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to clear addresses or disable ipv6" + e);
+            loge("Failed to clear addresses or disable ipv6" + e);
         }
 
         /* Reset data structures */
@@ -1647,8 +1652,10 @@ public class WifiStateMachine extends StateMachine {
             linkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
             linkProperties.setInterfaceName(mInterfaceName);
             if (!linkProperties.equals(mLinkProperties)) {
-                Log.d(TAG, "Link configuration changed for netId: " + mLastNetworkId
-                    + " old: " + mLinkProperties + "new: " + linkProperties);
+                if (DBG) {
+                    log("Link configuration changed for netId: " + mLastNetworkId
+                            + " old: " + mLinkProperties + "new: " + linkProperties);
+                }
                 mLinkProperties = linkProperties;
                 sendLinkConfigurationChangedBroadcast();
             }
@@ -1660,7 +1667,7 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void handleFailedIpConfiguration() {
-        Log.e(TAG, "IP configuration failed");
+        loge("IP configuration failed");
 
         mWifiInfo.setInetAddress(null);
         /**
@@ -1668,7 +1675,7 @@ public class WifiStateMachine extends StateMachine {
          * to a given network, disable the network
          */
         if (++mReconnectCount > getMaxDhcpRetries()) {
-            Log.e(TAG, "Failed " +
+            loge("Failed " +
                     mReconnectCount + " times, Disabling " + mLastNetworkId);
             WifiConfigStore.disableNetwork(mLastNetworkId,
                     WifiConfiguration.DISABLED_DHCP_FAILURE);
@@ -1697,12 +1704,12 @@ public class WifiStateMachine extends StateMachine {
         try {
             mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
         } catch (Exception e) {
-            Log.e(TAG, "Exception in softap start " + e);
+            loge("Exception in softap start " + e);
             try {
                 mNwService.stopAccessPoint(mInterfaceName);
                 mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
             } catch (Exception e1) {
-                Log.e(TAG, "Exception in softap re-start " + e1);
+                loge("Exception in softap re-start " + e1);
                 return false;
             }
         }
@@ -1716,17 +1723,17 @@ public class WifiStateMachine extends StateMachine {
     class DefaultState extends State {
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     if (message.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
                         mWifiP2pChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
                     } else {
-                        Log.e(TAG, "WifiP2pService connection failure, error=" + message.arg1);
+                        loge("WifiP2pService connection failure, error=" + message.arg1);
                     }
                     break;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-                    Log.e(TAG, "WifiP2pService channel lost, message.arg1 =" + message.arg1);
+                    loge("WifiP2pService channel lost, message.arg1 =" + message.arg1);
                     //TODO: Re-establish connection to state machine after a delay
                     //mWifiP2pChannel.connect(mContext, getHandler(), mWifiP2pManager.getMessenger());
                     break;
@@ -1812,7 +1819,7 @@ public class WifiStateMachine extends StateMachine {
                     deferMessage(message);
                     break;
                 default:
-                    Log.e(TAG, "Error! unhandled message" + message);
+                    loge("Error! unhandled message" + message);
                     break;
             }
             return HANDLED;
@@ -1823,7 +1830,7 @@ public class WifiStateMachine extends StateMachine {
         @Override
         //TODO: could move logging into a common class
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             // [31-8] Reserved for future use
             // [7 - 0] HSM state change
             // 50021 wifi_state_changed (custom|1|5)
@@ -1853,9 +1860,9 @@ public class WifiStateMachine extends StateMachine {
             try {
                 mNwService.disableIpv6(mInterfaceName);
             } catch (RemoteException re) {
-                Log.e(TAG, "Failed to disable IPv6: " + re);
+                loge("Failed to disable IPv6: " + re);
             } catch (IllegalStateException e) {
-                Log.e(TAG, "Failed to disable IPv6: " + e);
+                loge("Failed to disable IPv6: " + e);
             }
         }
     }
@@ -1863,7 +1870,7 @@ public class WifiStateMachine extends StateMachine {
     class DriverLoadingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             final Message message = new Message();
@@ -1885,10 +1892,10 @@ public class WifiStateMachine extends StateMachine {
                     }
 
                     if(WifiNative.loadDriver()) {
-                        Log.d(TAG, "Driver load successful");
+                        if (DBG) log("Driver load successful");
                         sendMessage(CMD_LOAD_DRIVER_SUCCESS);
                     } else {
-                        Log.e(TAG, "Failed to load driver!");
+                        loge("Failed to load driver!");
                         switch(message.arg1) {
                             case WIFI_STATE_ENABLING:
                                 setWifiState(WIFI_STATE_UNKNOWN);
@@ -1906,7 +1913,7 @@ public class WifiStateMachine extends StateMachine {
 
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_LOAD_DRIVER_SUCCESS:
                     transitionTo(mDriverLoadedState);
@@ -1942,12 +1949,12 @@ public class WifiStateMachine extends StateMachine {
     class DriverLoadedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case CMD_UNLOAD_DRIVER:
                     transitionTo(mDriverUnloadingState);
@@ -1956,7 +1963,7 @@ public class WifiStateMachine extends StateMachine {
                     try {
                         mNwService.wifiFirmwareReload(mInterfaceName, "STA");
                     } catch (Exception e) {
-                        Log.e(TAG, "Failed to reload STA firmware " + e);
+                        loge("Failed to reload STA firmware " + e);
                         // continue
                     }
                    try {
@@ -1967,17 +1974,17 @@ public class WifiStateMachine extends StateMachine {
                         //Set privacy extensions
                         mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
                     } catch (RemoteException re) {
-                        if (DBG) Log.w(TAG, "Unable to change interface settings: " + re);
+                        loge("Unable to change interface settings: " + re);
                     } catch (IllegalStateException ie) {
-                        if (DBG) Log.w(TAG, "Unable to change interface settings: " + ie);
+                        loge("Unable to change interface settings: " + ie);
                     }
 
                     if(WifiNative.startSupplicant()) {
-                        Log.d(TAG, "Supplicant start successful");
+                        if (DBG) log("Supplicant start successful");
                         mWifiMonitor.startMonitoring();
                         transitionTo(mSupplicantStartingState);
                     } else {
-                        Log.e(TAG, "Failed to start supplicant!");
+                        loge("Failed to start supplicant!");
                         sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
                     }
                     break;
@@ -1995,17 +2002,17 @@ public class WifiStateMachine extends StateMachine {
     class DriverUnloadingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             final Message message = new Message();
             message.copyFrom(getCurrentMessage());
             new Thread(new Runnable() {
                 public void run() {
-                    if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+                    if (DBG) log(getName() + message.toString() + "\n");
                     mWakeLock.acquire();
                     if(WifiNative.unloadDriver()) {
-                        Log.d(TAG, "Driver unload successful");
+                        if (DBG) log("Driver unload successful");
                         sendMessage(CMD_UNLOAD_DRIVER_SUCCESS);
 
                         switch(message.arg1) {
@@ -2019,7 +2026,7 @@ public class WifiStateMachine extends StateMachine {
                                 break;
                         }
                     } else {
-                        Log.e(TAG, "Failed to unload driver!");
+                        loge("Failed to unload driver!");
                         sendMessage(CMD_UNLOAD_DRIVER_FAILURE);
 
                         switch(message.arg1) {
@@ -2040,7 +2047,7 @@ public class WifiStateMachine extends StateMachine {
 
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_UNLOAD_DRIVER_SUCCESS:
                     transitionTo(mDriverUnloadedState);
@@ -2076,12 +2083,12 @@ public class WifiStateMachine extends StateMachine {
     class DriverUnloadedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_LOAD_DRIVER:
                     mWifiP2pChannel.sendMessage(WIFI_ENABLE_PENDING);
@@ -2101,12 +2108,12 @@ public class WifiStateMachine extends StateMachine {
     class DriverFailedState extends State {
         @Override
         public void enter() {
-            Log.e(TAG, getName() + "\n");
+            loge(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             return NOT_HANDLED;
         }
     }
@@ -2115,15 +2122,15 @@ public class WifiStateMachine extends StateMachine {
     class SupplicantStartingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case WifiMonitor.SUP_CONNECTION_EVENT:
-                    Log.d(TAG, "Supplicant connection established");
+                    if (DBG) log("Supplicant connection established");
                     setWifiState(WIFI_STATE_ENABLED);
                     mSupplicantRestartCount = 0;
                     /* Reset the supplicant state to indicate the supplicant
@@ -2144,12 +2151,12 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     if (++mSupplicantRestartCount <= SUPPLICANT_RESTART_TRIES) {
-                        Log.e(TAG, "Failed to setup control channel, restart supplicant");
+                        loge("Failed to setup control channel, restart supplicant");
                         WifiNative.killSupplicant();
                         transitionTo(mDriverLoadedState);
                         sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     } else {
-                        Log.e(TAG, "Failed " + mSupplicantRestartCount +
+                        loge("Failed " + mSupplicantRestartCount +
                                 " times to start supplicant, unload driver");
                         mSupplicantRestartCount = 0;
                         transitionTo(mDriverLoadedState);
@@ -2184,7 +2191,7 @@ public class WifiStateMachine extends StateMachine {
     class SupplicantStartedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             /* Initialize for connect mode operation at start */
             mIsScanMode = false;
@@ -2198,7 +2205,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             WifiConfiguration config;
             boolean eventLoggingEnabled = true;
             switch(message.what) {
@@ -2206,7 +2213,7 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mSupplicantStoppingState);
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
-                    Log.e(TAG, "Connection lost, restart supplicant");
+                    loge("Connection lost, restart supplicant");
                     WifiNative.killSupplicant();
                     WifiNative.closeSupplicantConnection();
                     mNetworkInfo.setIsAvailable(false);
@@ -2270,7 +2277,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                     /* Cannot start soft AP while in client mode */
                 case CMD_START_AP:
-                    Log.d(TAG, "Failed to start soft AP with a running supplicant");
+                    loge("Failed to start soft AP with a running supplicant");
                     setWifiApState(WIFI_AP_STATE_FAILED);
                     break;
                 case CMD_SET_SCAN_MODE:
@@ -2301,11 +2308,11 @@ public class WifiStateMachine extends StateMachine {
     class SupplicantStoppingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-            Log.d(TAG, "stopping supplicant");
+            if (DBG) log("stopping supplicant");
             if (!WifiNative.stopSupplicant()) {
-                Log.e(TAG, "Failed to stop supplicant");
+                loge("Failed to stop supplicant");
             }
 
             /* Send ourselves a delayed message to indicate failure after a wait time */
@@ -2321,13 +2328,13 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case WifiMonitor.SUP_CONNECTION_EVENT:
-                    Log.e(TAG, "Supplicant connection received while stopping");
+                    loge("Supplicant connection received while stopping");
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
-                    Log.d(TAG, "Supplicant connection lost");
+                    if (DBG) log("Supplicant connection lost");
                     /* Socket connection can be lost when we do a graceful shutdown
                      * or when the driver is hung. Ensure supplicant is stopped here.
                      */
@@ -2337,7 +2344,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_STOP_SUPPLICANT_FAILED:
                     if (message.arg1 == mSupplicantStopFailureToken) {
-                        Log.e(TAG, "Timed out on a supplicant stop, kill and proceed");
+                        loge("Timed out on a supplicant stop, kill and proceed");
                         WifiNative.killSupplicant();
                         WifiNative.closeSupplicantConnection();
                         transitionTo(mDriverLoadedState);
@@ -2371,12 +2378,12 @@ public class WifiStateMachine extends StateMachine {
     class DriverStartingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
@@ -2418,7 +2425,7 @@ public class WifiStateMachine extends StateMachine {
     class DriverStartedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             mIsRunning = true;
@@ -2459,7 +2466,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             boolean eventLoggingEnabled = true;
             switch(message.what) {
                 case CMD_SET_SCAN_TYPE:
@@ -2479,20 +2486,20 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
-                    Log.d(TAG, "set country code " + country);
+                    if (DBG) log("set country code " + country);
                     if (!WifiNative.setCountryCodeCommand(country.toUpperCase())) {
-                        Log.e(TAG, "Failed to set country code " + country);
+                        loge("Failed to set country code " + country);
                     }
                     break;
                 case CMD_SET_FREQUENCY_BAND:
                     int band =  message.arg1;
-                    Log.d(TAG, "set frequency band " + band);
+                    if (DBG) log("set frequency band " + band);
                     if (WifiNative.setBandCommand(band)) {
                         mFrequencyBand.set(band);
                         //Fetch the latest scan results when frequency band is set
                         startScan(true);
                     } else {
-                        Log.e(TAG, "Failed to set frequency band " + band);
+                        loge("Failed to set frequency band " + band);
                     }
                     break;
                 case CMD_BLUETOOTH_ADAPTER_STATE_CHANGE:
@@ -2512,7 +2519,7 @@ public class WifiStateMachine extends StateMachine {
                     } else if (message.arg1 == MULTICAST_V4) {
                         WifiNative.startFilteringMulticastV4Packets();
                     } else {
-                        Log.e(TAG, "Illegal arugments to CMD_START_PACKET_FILTERING");
+                        loge("Illegal arugments to CMD_START_PACKET_FILTERING");
                     }
                     break;
                 case CMD_STOP_PACKET_FILTERING:
@@ -2521,7 +2528,7 @@ public class WifiStateMachine extends StateMachine {
                     } else if (message.arg1 == MULTICAST_V4) {
                         WifiNative.stopFilteringMulticastV4Packets();
                     } else {
-                        Log.e(TAG, "Illegal arugments to CMD_STOP_PACKET_FILTERING");
+                        loge("Illegal arugments to CMD_STOP_PACKET_FILTERING");
                     }
                     break;
                 default:
@@ -2534,7 +2541,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public void exit() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             mIsRunning = false;
             updateBatteryWorkSource(null);
             mScanResults = null;
@@ -2544,12 +2551,12 @@ public class WifiStateMachine extends StateMachine {
     class DriverStoppingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
@@ -2583,12 +2590,12 @@ public class WifiStateMachine extends StateMachine {
     class DriverStoppedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_START_DRIVER:
                     mWakeLock.acquire();
@@ -2607,12 +2614,12 @@ public class WifiStateMachine extends StateMachine {
     class ScanModeState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
@@ -2644,12 +2651,12 @@ public class WifiStateMachine extends StateMachine {
     class ConnectModeState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             StateChangeResult stateChangeResult;
             switch(message.what) {
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
@@ -2696,7 +2703,7 @@ public class WifiStateMachine extends StateMachine {
                     mLastExplicitNetworkId = netId;
                     mLastNetworkChoiceTime  = SystemClock.elapsedRealtime();
                     mNextWifiActionExplicit = true;
-                    Slog.d(TAG, "Setting wifi connect explicit for netid " + netId);
+                    if (DBG) log("Setting wifi connect explicit for netid " + netId);
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
@@ -2710,7 +2717,7 @@ public class WifiStateMachine extends StateMachine {
                     /* Handle scan results */
                     return NOT_HANDLED;
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
-                    Log.d(TAG,"Network connection established");
+                    if (DBG) log("Network connection established");
                     mLastNetworkId = message.arg1;
                     mLastBssid = (String) message.obj;
 
@@ -2731,7 +2738,7 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mConnectingState);
                     break;
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
-                    Log.d(TAG,"Network connection lost");
+                    if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
                     transitionTo(mDisconnectedState);
                     break;
@@ -2747,15 +2754,15 @@ public class WifiStateMachine extends StateMachine {
 
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             try {
                 mNwService.enableIpv6(mInterfaceName);
             } catch (RemoteException re) {
-                Log.e(TAG, "Failed to enable IPv6: " + re);
+                loge("Failed to enable IPv6: " + re);
             } catch (IllegalStateException e) {
-                Log.e(TAG, "Failed to enable IPv6: " + e);
+                loge("Failed to enable IPv6: " + e);
             }
 
             if (!WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
@@ -2772,20 +2779,20 @@ public class WifiStateMachine extends StateMachine {
                 ifcg.interfaceFlags = "[up]";
                 try {
                     mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-                    Log.v(TAG, "Static IP configuration succeeded");
+                    if (DBG) log("Static IP configuration succeeded");
                     sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
                 } catch (RemoteException re) {
-                    Log.v(TAG, "Static IP configuration failed: " + re);
+                    loge("Static IP configuration failed: " + re);
                     sendMessage(CMD_STATIC_IP_FAILURE);
                 } catch (IllegalStateException e) {
-                    Log.v(TAG, "Static IP configuration failed: " + e);
+                    loge("Static IP configuration failed: " + e);
                     sendMessage(CMD_STATIC_IP_FAILURE);
                 }
             }
         }
       @Override
       public boolean processMessage(Message message) {
-          if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+          if (DBG) log(getName() + message.toString() + "\n");
 
           switch(message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
@@ -2856,7 +2863,7 @@ public class WifiStateMachine extends StateMachine {
     class ConnectedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             mRssiPollToken++;
             if (mEnableRssiPolling) {
@@ -2865,7 +2872,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             boolean eventLoggingEnabled = true;
             switch (message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
@@ -2921,11 +2928,11 @@ public class WifiStateMachine extends StateMachine {
                     NetworkUpdateResult result = WifiConfigStore.saveNetwork(config);
                     if (mWifiInfo.getNetworkId() == result.getNetworkId()) {
                         if (result.hasIpChanged()) {
-                            Log.d(TAG,"Reconfiguring IP on connection");
+                            log("Reconfiguring IP on connection");
                             transitionTo(mConnectingState);
                         }
                         if (result.hasProxyChanged()) {
-                            Log.d(TAG,"Reconfiguring proxy on connection");
+                            log("Reconfiguring proxy on connection");
                             configureLinkProperties();
                             sendLinkConfigurationChangedBroadcast();
                         }
@@ -2977,12 +2984,12 @@ public class WifiStateMachine extends StateMachine {
     class DisconnectingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_STOP_DRIVER: /* Stop driver only after disconnect handled */
                     deferMessage(message);
@@ -3029,7 +3036,7 @@ public class WifiStateMachine extends StateMachine {
 
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             mFrameworkScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
@@ -3056,7 +3063,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
@@ -3119,12 +3126,12 @@ public class WifiStateMachine extends StateMachine {
     class WaitForWpsCompletionState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 /* Defer all commands that can cause connections to a different network
                  * or put the state machine out of connect mode
@@ -3139,7 +3146,7 @@ public class WifiStateMachine extends StateMachine {
                     deferMessage(message);
                     break;
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
-                    Log.d(TAG,"Network connection lost");
+                    if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
                     break;
                 case WPS_COMPLETED_EVENT:
@@ -3158,7 +3165,7 @@ public class WifiStateMachine extends StateMachine {
     class SoftApStartingState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             final Message message = Message.obtain(getCurrentMessage());
@@ -3168,10 +3175,10 @@ public class WifiStateMachine extends StateMachine {
             new Thread(new Runnable() {
                 public void run() {
                     if (startSoftApWithConfig(config)) {
-                        Log.d(TAG, "Soft AP start successful");
+                        if (DBG) log("Soft AP start successful");
                         sendMessage(CMD_START_AP_SUCCESS);
                     } else {
-                        Log.d(TAG, "Soft AP start failed");
+                        loge("Soft AP start failed");
                         sendMessage(CMD_START_AP_FAILURE);
                     }
                 }
@@ -3179,7 +3186,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
@@ -3219,21 +3226,21 @@ public class WifiStateMachine extends StateMachine {
     class SoftApStartedState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case CMD_STOP_AP:
-                    Log.d(TAG,"Stopping Soft AP");
+                    if (DBG) log("Stopping Soft AP");
                     setWifiApState(WIFI_AP_STATE_DISABLING);
                     stopTethering();
                     try {
                         mNwService.stopAccessPoint(mInterfaceName);
                     } catch(Exception e) {
-                        Log.e(TAG, "Exception in stopAccessPoint()");
+                        loge("Exception in stopAccessPoint()");
                     }
                     transitionTo(mDriverLoadedState);
                     break;
@@ -3242,7 +3249,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                     /* Fail client mode operation when soft AP is enabled */
                 case CMD_START_SUPPLICANT:
-                    Log.e(TAG,"Cannot start supplicant with a running soft AP");
+                   loge("Cannot start supplicant with a running soft AP");
                     setWifiState(WIFI_STATE_UNKNOWN);
                     break;
                 case CMD_TETHER_INTERFACE:
@@ -3268,7 +3275,7 @@ public class WifiStateMachine extends StateMachine {
         private int mSavedArg;
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             //Preserve the argument arg1 that has information used in DriverLoadingState
@@ -3276,7 +3283,7 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                 case WifiP2pService.WIFI_ENABLE_PROCEED:
                     //restore argument from original message (CMD_LOAD_DRIVER)
@@ -3311,12 +3318,12 @@ public class WifiStateMachine extends StateMachine {
     class TetheredState extends State {
         @Override
         public void enter() {
-            if (DBG) Log.d(TAG, getName() + "\n");
+            if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
                case CMD_TETHER_INTERFACE:
                     // Ignore any duplicate interface available notifications
@@ -3326,5 +3333,13 @@ public class WifiStateMachine extends StateMachine {
                     return NOT_HANDLED;
             }
         }
+    }
+
+    private void log(String s) {
+        Log.d(TAG, s);
+    }
+
+    private void loge(String s) {
+        Log.e(TAG, s);
     }
 }
