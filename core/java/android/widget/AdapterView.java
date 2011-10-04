@@ -881,20 +881,14 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        final int eventType = event.getEventType();
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-                // Do not populate the text of scroll events.
-                return true;
-            case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-                // This is an exceptional case which occurs when a window gets the
-                // focus and sends a focus event via its focused child to announce
-                // current focus/selection. AdapterView fires selection but not focus
-                // events so we change the event type here.
-                if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
-                    event.setEventType(AccessibilityEvent.TYPE_VIEW_SELECTED);
-                }
-                break;
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+            // This is an exceptional case which occurs when a window gets the
+            // focus and sends a focus event via its focused child to announce
+            // current focus/selection. AdapterView fires selection but not focus
+            // events so we change the event type here.
+            if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+                event.setEventType(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            }
         }
 
         View selectedView = getSelectedView();

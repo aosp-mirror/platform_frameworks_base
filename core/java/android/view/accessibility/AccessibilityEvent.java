@@ -69,14 +69,16 @@ import java.util.List;
  * <em>Type:</em>{@link #TYPE_VIEW_CLICKED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
  * <p>
@@ -85,14 +87,16 @@ import java.util.List;
  * <em>Type:</em>{@link #TYPE_VIEW_LONG_CLICKED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
  * <p>
@@ -101,16 +105,18 @@ import java.util.List;
  * <em>Type:</em> {@link #TYPE_VIEW_SELECTED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
  *   <li>{@link #getItemCount()} - The number of selectable items of the source.</li>
  *   <li>{@link #getCurrentItemIndex()} - The currently selected item index.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
  * <p>
@@ -119,16 +125,18 @@ import java.util.List;
  * <em>Type:</em> {@link #TYPE_VIEW_FOCUSED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
  *   <li>{@link #getItemCount()} - The number of focusable items on the screen.</li>
  *   <li>{@link #getCurrentItemIndex()} - The currently focused item index.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
  * <p>
@@ -137,6 +145,7 @@ import java.util.List;
  * <em>Type:</em> {@link #TYPE_VIEW_TEXT_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
@@ -149,7 +158,17 @@ import java.util.List;
  *   <li>{@link #getAddedCount()} - The number of added characters.</li>
  *   <li>{@link #getRemovedCount()} - The number of removed characters.</li>
  *   <li>{@link #getBeforeText()} - The text of the source before the change.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
  * </p>
  * <p>
  * <b>View text selection changed</b> - represents the event of changing the text
@@ -157,35 +176,47 @@ import java.util.List;
  * <em>Type:</em> {@link #TYPE_VIEW_TEXT_SELECTION_CHANGED} </br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getText()} - The text of the source.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #getFromIndex()} - The selection start index.</li>
  *   <li>{@link #getToIndex()} - The selection end index.</li>
  *   <li>{@link #getItemCount()} - The length of the source text.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
  * </p>
  * <p>
  * <b>View scrolled</b> - represents the event of scrolling a view. If
  * the source is a descendant of {@link android.widget.AdapterView} the
  * scroll is reported in terms of visible items - the first visible item,
  * the last visible item, and the total items - because the the source
- * is unaware if its pixel size since its adapter is responsible for
+ * is unaware of its pixel size since its adapter is responsible for
  * creating views. In all other cases the scroll is reported as the current
  * scroll on the X and Y axis respectively plus the height of the source in
  * pixels.</br>
  * <em>Type:</em> {@link #TYPE_VIEW_SCROLLED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #getScrollX()} - The horizontal offset of the source
  *                                (without descendants of AdapterView)).</li>
@@ -197,56 +228,165 @@ import java.util.List;
  *                               (for descendants of AdapterView).</li>
  *   <li>{@link #getItemCount()} - The total items of the source (for descendants of AdapterView)
  *                                 or the height of the source in pixels (all other cases).</li>
+ *   <li>{@link #getText()} - Text for providing more context.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
  * </p>
  * <p>
  * <b>TRANSITION TYPES</b></br>
  * </p>
+ * <p>
  * <b>Window state changed</b> - represents the event of opening a
  * {@link android.widget.PopupWindow}, {@link android.view.Menu},
  * {@link android.app.Dialog}, etc.</br>
  * <em>Type:</em> {@link #TYPE_WINDOW_STATE_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  * </ul>
  * </p>
  * <p>
  * <b>Window content changed</b> - represents the event of change in the
  * content of a window. This change can be adding/removing view, changing
  * a view size, etc.</br>
+ * </p>
  * <p>
  * <strong>Note:</strong> This event is fired only for the window source of the
- * last accessibility event different from {@link #TYPE_NOTIFICATION_STATE_CHANGED})
+ * last accessibility event different from {@link #TYPE_NOTIFICATION_STATE_CHANGED}
  * and its purpose is to notify clients that the content of the user interaction
- * window has changed.
- * </p>
+ * window has changed.</br>
  * <em>Type:</em> {@link #TYPE_WINDOW_CONTENT_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
  * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
+ * </p>
  * <p>
  * <b>NOTIFICATION TYPES</b></br>
+ * </p>
  * <p>
  * <b>Notification state changed</b> - represents the event showing
- * {@link android.app.Notification}.
+ * {@link android.app.Notification}.</br>
  * <em>Type:</em> {@link #TYPE_NOTIFICATION_STATE_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #getParcelableData()} - The posted {@link android.app.Notification}.</li>
+ *   <li>{@link #getText()} - Text for providing more context.</li>
  * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
+ * </p>
+ * <p>
+ * <b>EXPLORATION TYPES</b></br>
+ * </p>
+ * <p>
+ * <b>View hover enter</b> - represents the event of beginning to hover
+ * over a {@link android.view.View}. The hover may be generated via
+ * exploring the screen by touch or via a pointing device.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_HOVER_ENTER}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ * </ul>
+ * </p>
+ * <b>View hover exit</b> - represents the event of stopping to hover
+ * over a {@link android.view.View}. The hover may be generated via
+ * exploring the screen by touch or via a pointing device.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_HOVER_EXIT}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ * </ul>
+ * </p>
+ * <p>
+ * <b>Touch exploration gesture start</b> - represents the event of starting a touch
+ * exploring gesture.</br>
+ * <em>Type:</em> {@link #TYPE_TOUCH_EXPLORATION_GESTURE_START}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
+ * </p>
+ * <p>
+ * <b>Touch exploration gesture end</b> - represents the event of ending a touch
+ * exploring gesture.</br>
+ * <em>Type:</em> {@link #TYPE_TOUCH_EXPLORATION_GESTURE_END}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ * </ul>
+ * <em>Note:</em> This event type is not dispatched to descendants though
+ * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
+ * source {@link android.view.View} and the sub-tree rooted at it will not receive
+ * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
+ * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
+ * text content to such events is by setting the
+ * {@link android.R.styleable#View_contentDescription contentDescription} of the source
+ * view.</br>
  * </p>
  * <p>
  * <b>Security note</b>
@@ -254,6 +394,7 @@ import java.util.List;
  * Since an event contains the text of its source privacy can be compromised by leaking
  * sensitive information such as passwords. To address this issue any event fired in response
  * to manipulation of a PASSWORD field does NOT CONTAIN the text of the password.
+ * </p>
  *
  * @see android.view.accessibility.AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService

@@ -371,16 +371,6 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         }
     }
 
-    @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        // Do not append text content to scroll events they are fired frequently
-        // and the client has already received another event type with the text.
-        if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            super.dispatchPopulateAccessibilityEvent(event);
-        }
-        return false;
-    }
-
     /**
      * Tracks a motion scroll. In reality, this is used to do just about any
      * movement to items (touch scroll, arrow-key scroll, set an item as selected).
