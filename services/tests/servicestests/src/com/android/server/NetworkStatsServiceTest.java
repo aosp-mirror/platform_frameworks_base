@@ -32,6 +32,7 @@ import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -179,6 +180,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -232,6 +234,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -327,6 +330,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -378,6 +382,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -459,6 +464,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -518,6 +524,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -585,6 +592,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -648,6 +656,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
@@ -703,6 +712,42 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, 0xFAAD, 1L, 1L, 1L, 1L, 1);
 
         verifyAndReset();
+    }
+
+    public void testTethering() throws Exception {
+        // pretend first mobile network comes online
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkState(buildMobile3gState(IMSI_1));
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
+        verifyAndReset();
+
+        // create some tethering traffic
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 2048L, 16L, 512L, 4L));
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 0L));
+        final String[] tetherIfacePairs = new String[] { TEST_IFACE, "wlan0" };
+        expectNetworkStatsPoll(tetherIfacePairs, new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1920L, 14L, 384L, 2L, 0L));
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+
+        // verify service recorded history
+        assertNetworkTotal(sTemplateImsi1, 2048L, 16L, 512L, 4L, 0);
+        assertUidTotal(sTemplateImsi1, UID_RED, 128L, 2L, 128L, 2L, 0);
+        assertUidTotal(sTemplateImsi1, UID_TETHERING, 1920L, 14L, 384L, 2L, 0);
+        verifyAndReset();
+
     }
 
     private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long rxPackets,
@@ -774,9 +819,16 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectNetworkStatsPoll() throws Exception {
+        expectNetworkStatsPoll(new String[0], new NetworkStats(getElapsedRealtime(), 0));
+    }
+
+    private void expectNetworkStatsPoll(String[] tetherIfacePairs, NetworkStats tetherStats)
+            throws Exception {
         mNetManager.setGlobalAlert(anyLong());
         expectLastCall().anyTimes();
-        expect(mConnManager.getTetheredIfacePairs()).andReturn(null).anyTimes();
+        expect(mConnManager.getTetheredIfacePairs()).andReturn(tetherIfacePairs).anyTimes();
+        expect(mNetManager.getNetworkStatsTethering(eq(tetherIfacePairs)))
+                .andReturn(tetherStats).anyTimes();
     }
 
     private void assertStatsFilesExist(boolean exist) {

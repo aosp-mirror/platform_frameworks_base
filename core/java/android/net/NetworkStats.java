@@ -272,6 +272,17 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Combine all values from another {@link NetworkStats} into this object.
+     */
+    public void combineAllValues(NetworkStats another) {
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < another.size; i++) {
+            entry = another.getValues(i, entry);
+            combineValues(entry);
+        }
+    }
+
+    /**
      * Find first stats index that matches the requested parameters.
      */
     public int findIndex(String iface, int uid, int set, int tag) {
@@ -454,6 +465,34 @@ public class NetworkStats implements Parcelable {
         }
 
         return result;
+    }
+
+    /**
+     * Return total statistics grouped by {@link #iface}; doesn't mutate the
+     * original structure.
+     */
+    public NetworkStats groupedByIface() {
+        final NetworkStats stats = new NetworkStats(elapsedRealtime, 10);
+
+        final Entry entry = new Entry();
+        entry.uid = UID_ALL;
+        entry.set = SET_ALL;
+        entry.tag = TAG_NONE;
+        entry.operations = 0L;
+
+        for (int i = 0; i < size; i++) {
+            // skip specific tags, since already counted in TAG_NONE
+            if (tag[i] != TAG_NONE) continue;
+
+            entry.iface = iface[i];
+            entry.rxBytes = rxBytes[i];
+            entry.rxPackets = rxPackets[i];
+            entry.txBytes = txBytes[i];
+            entry.txPackets = txPackets[i];
+            stats.combineValues(entry);
+        }
+
+        return stats;
     }
 
     public void dump(String prefix, PrintWriter pw) {
