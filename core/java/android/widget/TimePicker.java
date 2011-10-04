@@ -237,9 +237,7 @@ public class TimePicker extends FrameLayout {
         }
 
         // set the content descriptions
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            setContentDescriptions();
-        }
+        setContentDescriptions();
     }
 
     @Override

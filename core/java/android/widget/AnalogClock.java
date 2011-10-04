@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.View;
@@ -228,6 +229,8 @@ public class AnalogClock extends View {
         mMinutes = minute + second / 60.0f;
         mHour = hour + mMinutes / 60.0f;
         mChanged = true;
+
+        updateContentDescription(mCalendar);
     }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -243,4 +246,11 @@ public class AnalogClock extends View {
             invalidate();
         }
     };
+
+    private void updateContentDescription(Time time) {
+        final int flags = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR;
+        String contentDescription = DateUtils.formatDateTime(mContext,
+                time.toMillis(false), flags);
+        setContentDescription(contentDescription);
+    }
 }
