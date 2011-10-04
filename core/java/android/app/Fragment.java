@@ -162,9 +162,6 @@ final class FragmentState implements Parcelable {
  * constructor to instantiate it.  If the empty constructor is not available,
  * a runtime exception will occur in some cases during state restore.
  *
- * <p>For more documentation, also see the <a
- * href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
- *
  * <p>Topics covered here:
  * <ol>
  * <li><a href="#OlderPlatforms">Older Platforms</a>
@@ -172,6 +169,12 @@ final class FragmentState implements Parcelable {
  * <li><a href="#Layout">Layout</a>
  * <li><a href="#BackStack">Back Stack</a>
  * </ol>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using fragments, read the
+ * <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+ * </div>
  *
  * <a name="OlderPlatforms"></a>
  * <h3>Older Platforms</h3>
