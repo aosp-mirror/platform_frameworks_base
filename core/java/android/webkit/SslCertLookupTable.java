@@ -25,7 +25,8 @@ import java.net.URL;
 /**
  * Stores the user's decision of whether to allow or deny an invalid certificate.
  *
- * This class is not threadsafe. It is used only on the WebCore thread.
+ * This class is not threadsafe. It is used only on the WebCore thread. Also, it
+ * is used only by the Chromium HTTP stack.
  */
 final class SslCertLookupTable {
     private static SslCertLookupTable sTable;
@@ -42,11 +43,11 @@ final class SslCertLookupTable {
         table = new Bundle();
     }
 
-    public void setIsAllowed(SslError sslError, boolean allow) {
+    public void setIsAllowed(SslError sslError) {
         // TODO: We should key on just the host. See http://b/5409251.
         String errorString = sslErrorToString(sslError);
         if (errorString != null) {
-            table.putBoolean(errorString, allow);
+            table.putBoolean(errorString, true);
         }
     }
 
