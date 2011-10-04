@@ -35,7 +35,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
-import android.util.Slog;
 import android.util.Log;
 
 import com.android.internal.util.Protocol;
@@ -67,10 +66,8 @@ import java.util.List;
  */
 public class WifiWatchdogStateMachine extends StateMachine {
 
-
-    private static final boolean VDBG = false;
-    private static final boolean DBG = true;
-    private static final String WWSM_TAG = "WifiWatchdogStateMachine";
+    private static final boolean DBG = false;
+    private static final String TAG = "WifiWatchdogStateMachine";
     private static final String WATCHDOG_NOTIFICATION_ID = "Android.System.WifiWatchdog";
 
     private static final int WIFI_SIGNAL_LEVELS = 4;
@@ -192,7 +189,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      *               (all other states)
      */
     private WifiWatchdogStateMachine(Context context) {
-        super(WWSM_TAG);
+        super(TAG);
         mContext = context;
         mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -351,7 +348,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             return urlConnection.getResponseCode() != 204;
         } catch (IOException e) {
             if (DBG) {
-                Slog.d(WWSM_TAG, "Walled garden check - probably not a portal: exception ", e);
+                log("Walled garden check - probably not a portal: exception " + e);
             }
             return false;
         } finally {
@@ -443,7 +440,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         if (results == null) {
             if (DBG) {
-                Slog.d(WWSM_TAG, "updateBssids: Got null scan results!");
+                log("updateBssids: Got null scan results!");
             }
             return;
         }
@@ -451,7 +448,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         for (ScanResult result : results) {
             if (result == null || result.SSID == null) {
                 if (DBG) {
-                    Slog.d(WWSM_TAG, "Received invalid scan result: " + result);
+                    log("Received invalid scan result: " + result);
                 }
                 continue;
             }
@@ -461,8 +458,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     private void resetWatchdogState() {
-        if (VDBG) {
-            Slog.v(WWSM_TAG, "Resetting watchdog state...");
+        if (DBG) {
+            log("Resetting watchdog state...");
         }
         mConnectionInfo = null;
         mDisableAPNextFailure = false;
@@ -522,13 +519,13 @@ public class WifiWatchdogStateMachine extends StateMachine {
             switch (msg.what) {
                 case EVENT_WATCHDOG_SETTINGS_CHANGE:
                     updateSettings();
-                    if (VDBG) {
-                        Slog.d(WWSM_TAG, "Updating wifi-watchdog secure settings");
+                    if (DBG) {
+                        log("Updating wifi-watchdog secure settings");
                     }
                     return HANDLED;
             }
-            if (VDBG) {
-                Slog.v(WWSM_TAG, "Caught message " + msg.what + " in state " +
+            if (DBG) {
+                log("Caught message " + msg.what + " in state " +
                         getCurrentState().getName());
             }
             return HANDLED;
@@ -553,7 +550,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         public void enter() {
             resetWatchdogState();
             mContext.registerReceiver(mBroadcastReceiver, mIntentFilter);
-            Slog.i(WWSM_TAG, "WifiWatchdogService enabled");
+            if (DBG) log("WifiWatchdogService enabled");
         }
 
         @Override
@@ -574,12 +571,12 @@ public class WifiWatchdogStateMachine extends StateMachine {
                             WifiInfo wifiInfo = (WifiInfo)
                                 stateChangeIntent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                             if (wifiInfo == null) {
-                                Slog.e(WWSM_TAG, "Connected --> WifiInfo object null!");
+                                loge("Connected --> WifiInfo object null!");
                                 return HANDLED;
                             }
 
                             if (wifiInfo.getSSID() == null || wifiInfo.getBSSID() == null) {
-                                Slog.e(WWSM_TAG, "Received wifiInfo object with null elts: "
+                                loge("Received wifiInfo object with null elts: "
                                         + wifiInfoToStr(wifiInfo));
                                 return HANDLED;
                             }
@@ -598,7 +595,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     return HANDLED;
                 case EVENT_WIFI_RADIO_STATE_CHANGE:
                     if ((Integer) msg.obj == WifiManager.WIFI_STATE_DISABLING) {
-                        Slog.i(WWSM_TAG, "WifiStateDisabling -- Resetting WatchdogState");
+                        if (DBG) log("WifiStateDisabling -- Resetting WatchdogState");
                         resetWatchdogState();
                         mNetEventCounter++;
                         transitionTo(mNotConnectedState);
@@ -613,8 +610,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
          * @param wifiInfo Info object with non-null ssid and bssid
          */
         private void initConnection(WifiInfo wifiInfo) {
-            if (VDBG) {
-                Slog.v(WWSM_TAG, "Connected:: old " + wifiInfoToStr(mConnectionInfo) +
+            if (DBG) {
+                log("Connected:: old " + wifiInfoToStr(mConnectionInfo) +
                         " ==> new " + wifiInfoToStr(wifiInfo));
             }
 
@@ -628,7 +625,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         @Override
         public void exit() {
             mContext.unregisterReceiver(mBroadcastReceiver);
-            Slog.i(WWSM_TAG, "WifiWatchdogService disabled");
+            if (DBG) log("WifiWatchdogService disabled");
         }
     }
 
@@ -671,7 +668,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             if (DBG) {
                 dnsCheckLogStr = String.format("Pinging %s on ssid [%s]: ",
                         mDnsList, mConnectionInfo.getSSID());
-                Slog.d(WWSM_TAG, dnsCheckLogStr);
+                log(dnsCheckLogStr);
             }
 
             idDnsMap.clear();
@@ -694,7 +691,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
             Integer dnsServerId = idDnsMap.get(pingID);
             if (dnsServerId == null) {
-                Slog.w(WWSM_TAG, "Received a Dns response with unknown ID!");
+                loge("Received a Dns response with unknown ID!");
                 return HANDLED;
             }
 
@@ -722,7 +719,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             if (dnsCheckSuccesses[dnsServerId] >= mMinDnsResponses) {
                 // DNS CHECKS OK, NOW WALLED GARDEN
                 if (DBG) {
-                    Slog.d(WWSM_TAG, makeLogString() + "  SUCCESS");
+                    log(makeLogString() + "  SUCCESS");
                 }
 
                 if (!shouldCheckWalledGarden()) {
@@ -732,13 +729,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
                 mLastWalledGardenCheckTime = SystemClock.elapsedRealtime();
                 if (isWalledGardenConnection()) {
-                    if (DBG)
-                        Slog.d(WWSM_TAG,
-                                "Walled garden test complete - walled garden detected");
+                    if (DBG) log("Walled garden test complete - walled garden detected");
                     transitionTo(mWalledGardenState);
                 } else {
-                    if (DBG)
-                        Slog.d(WWSM_TAG, "Walled garden test complete - online");
+                    if (DBG) log("Walled garden test complete - online");
                     transitionTo(mOnlineWatchState);
                 }
                 return HANDLED;
@@ -746,7 +740,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
             if (idDnsMap.isEmpty()) {
                 if (DBG) {
-                    Slog.d(WWSM_TAG, makeLogString() + "  FAILURE");
+                    log(makeLogString() + "  FAILURE");
                 }
                 transitionTo(mDnsCheckFailureState);
                 return HANDLED;
@@ -769,15 +763,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         private boolean shouldCheckWalledGarden() {
             if (!mWalledGardenTestEnabled) {
-                if (VDBG)
-                    Slog.v(WWSM_TAG, "Skipping walled garden check - disabled");
+                if (DBG)
+                    log("Skipping walled garden check - disabled");
                 return false;
             }
             long waitTime = waitTime(mWalledGardenIntervalMs,
                     mLastWalledGardenCheckTime);
             if (waitTime > 0) {
                 if (DBG) {
-                    Slog.d(WWSM_TAG, "Skipping walled garden check - wait " +
+                    log("Skipping walled garden check - wait " +
                             waitTime + " ms.");
                 }
                 return false;
@@ -825,28 +819,28 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 case EVENT_RSSI_CHANGE:
                     if (msg.arg1 != mNetEventCounter) {
                         if (DBG) {
-                            Slog.d(WWSM_TAG, "Rssi change message out of sync, ignoring");
+                            log("Rssi change message out of sync, ignoring");
                         }
                         return HANDLED;
                     }
                     int newRssi = msg.arg2;
                     signalUnstable = !rssiStrengthAboveCutoff(newRssi);
-                    if (VDBG) {
-                        Slog.v(WWSM_TAG, "OnlineWatchState:: new rssi " + newRssi + " --> level " +
+                    if (DBG) {
+                        log("OnlineWatchState:: new rssi " + newRssi + " --> level " +
                                 WifiManager.calculateSignalLevel(newRssi, WIFI_SIGNAL_LEVELS));
                     }
 
                     if (signalUnstable && !unstableSignalChecks) {
-                        if (VDBG) {
-                            Slog.v(WWSM_TAG, "Sending triggered check msg");
+                        if (DBG) {
+                            log("Sending triggered check msg");
                         }
                         triggerSingleDnsCheck();
                     }
                     return HANDLED;
                 case MESSAGE_SINGLE_DNS_CHECK:
                     if (msg.arg1 != checkGuard) {
-                        if (VDBG) {
-                            Slog.v(WWSM_TAG, "Single check msg out of sync, ignoring.");
+                        if (DBG) {
+                            log("Single check msg out of sync, ignoring.");
                         }
                         return HANDLED;
                     }
@@ -865,8 +859,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     pingInfoMap.remove(msg.arg1);
                     int responseTime = msg.arg2;
                     if (responseTime >= 0) {
-                        if (VDBG) {
-                            Slog.v(WWSM_TAG, "Single DNS ping OK. Response time: "
+                        if (DBG) {
+                            log("Single DNS ping OK. Response time: "
                                     + responseTime + " from DNS " + curDnsServer);
                         }
                         pingInfoMap.clear();
@@ -877,7 +871,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     } else {
                         if (pingInfoMap.isEmpty()) {
                             if (DBG) {
-                                Slog.d(WWSM_TAG, "Single dns ping failure. All dns servers failed, "
+                                log("Single dns ping failure. All dns servers failed, "
                                         + "starting full checks.");
                             }
                             transitionTo(mDnsCheckingState);
@@ -924,8 +918,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
 
             if (msg.arg1 != mNetEventCounter) {
-                if (VDBG) {
-                    Slog.v(WWSM_TAG, "Msg out of sync, ignoring...");
+                if (DBG) {
+                    log("Msg out of sync, ignoring...");
                 }
                 return HANDLED;
             }
@@ -933,7 +927,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             if (mDisableAPNextFailure || mNumCheckFailures >= mBssids.size()
                     || mNumCheckFailures >= mMaxSsidBlacklists) {
                 if (sWifiOnly) {
-                    Slog.w(WWSM_TAG, "Would disable bad network, but device has no mobile data!" +
+                    log("Would disable bad network, but device has no mobile data!" +
                             "  Going idle...");
                     // This state should be called idle -- will be changing flow.
                     transitionTo(mNotConnectedState);
@@ -941,7 +935,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 }
 
                 // TODO : Unban networks if they had low signal ?
-                Slog.i(WWSM_TAG, "Disabling current SSID " + wifiInfoToStr(mConnectionInfo)
+                log("Disabling current SSID " + wifiInfoToStr(mConnectionInfo)
                         + ".  " + "numCheckFailures " + mNumCheckFailures
                         + ", numAPs " + mBssids.size());
                 int networkId = mConnectionInfo.getNetworkId();
@@ -955,7 +949,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 }
                 transitionTo(mNotConnectedState);
             } else {
-                Slog.i(WWSM_TAG, "Blacklisting current BSSID.  " + wifiInfoToStr(mConnectionInfo)
+                log("Blacklisting current BSSID.  " + wifiInfoToStr(mConnectionInfo)
                        + "numCheckFailures " + mNumCheckFailures + ", numAPs " + mBssids.size());
 
                 mWifiManager.addToBlacklist(mConnectionInfo.getBSSID());
@@ -979,8 +973,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
 
             if (msg.arg1 != mNetEventCounter) {
-                if (VDBG) {
-                    Slog.v(WWSM_TAG, "WalledGardenState::Msg out of sync, ignoring...");
+                if (DBG) {
+                    log("WalledGardenState::Msg out of sync, ignoring...");
                 }
                 return HANDLED;
             }
@@ -1005,8 +999,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
 
             if (msg.arg1 != mNetEventCounter) {
-                if (VDBG) {
-                    Slog.v(WWSM_TAG, "BlacklistedApState::Msg out of sync, ignoring...");
+                if (DBG) {
+                    log("BlacklistedApState::Msg out of sync, ignoring...");
                 }
                 return HANDLED;
             }
@@ -1067,5 +1061,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
         return Settings.Secure.putInt(cr, name, value ? 1 : 0);
     }
 
+    private void log(String s) {
+        Log.d(TAG, s);
+    }
 
+    private void loge(String s) {
+        Log.e(TAG, s);
+    }
 }
