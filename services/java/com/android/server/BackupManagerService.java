@@ -325,14 +325,16 @@ class BackupManagerService extends IBackupManager.Stub {
         public boolean includeApks;
         public boolean includeShared;
         public boolean allApps;
+        public boolean includeSystem;
         public String[] packages;
 
         FullBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveShared,
-                boolean doAllApps, String[] pkgList) {
+                boolean doAllApps, boolean doSystem, String[] pkgList) {
             fd = output;
             includeApks = saveApks;
             includeShared = saveShared;
             allApps = doAllApps;
+            includeSystem = doSystem;
             packages = pkgList;
         }
     }
@@ -504,7 +506,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 PerformFullBackupTask task = new PerformFullBackupTask(params.fd,
                         params.observer, params.includeApks,
                         params.includeShared, params.curPassword, params.encryptPassword,
-                        params.allApps, params.packages, params.latch);
+                        params.allApps, params.includeSystem, params.packages, params.latch);
                 (new Thread(task)).start();
                 break;
             }
@@ -2161,6 +2163,7 @@ class BackupManagerService extends IBackupManager.Stub {
         boolean mIncludeApks;
         boolean mIncludeShared;
         boolean mAllApps;
+        final boolean mIncludeSystem;
         String[] mPackages;
         String mCurrentPassword;
         String mEncryptPassword;
@@ -2219,13 +2222,14 @@ class BackupManagerService extends IBackupManager.Stub {
 
         PerformFullBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
                 boolean includeApks, boolean includeShared, String curPassword,
-                String encryptPassword, boolean doAllApps, String[] packages,
+                String encryptPassword, boolean doAllApps, boolean doSystem, String[] packages,
                 AtomicBoolean latch) {
             mOutputFile = fd;
             mObserver = observer;
             mIncludeApks = includeApks;
             mIncludeShared = includeShared;
             mAllApps = doAllApps;
+            mIncludeSystem = doSystem;
             mPackages = packages;
             mCurrentPassword = curPassword;
             // when backing up, if there is a current backup password, we require that
@@ -2245,7 +2249,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
-            final List<PackageInfo> packagesToBackup;
+            List<PackageInfo> packagesToBackup = new ArrayList<PackageInfo>();
 
             Slog.i(TAG, "--- Performing full-dataset backup ---");
             sendStartBackup();
@@ -2254,8 +2258,23 @@ class BackupManagerService extends IBackupManager.Stub {
             if (mAllApps) {
                 packagesToBackup = mPackageManager.getInstalledPackages(
                         PackageManager.GET_SIGNATURES);
-            } else {
-                packagesToBackup = new ArrayList<PackageInfo>();
+                // Exclude system apps if we've been asked to do so
+                if (mIncludeSystem == false) {
+                    for (int i = 0; i < packagesToBackup.size(); ) {
+                        PackageInfo pkg = packagesToBackup.get(i);
+                        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            packagesToBackup.remove(i);
+                        } else {
+                            i++;
+                        }
+                    }
+                }
+            }
+
+            // Now process the command line argument packages, if any. Note that explicitly-
+            // named system-partition packages will be included even if includeSystem was
+            // set to false.
+            if (mPackages != null) {
                 for (String pkgName : mPackages) {
                     try {
                         packagesToBackup.add(mPackageManager.getPackageInfo(pkgName,
@@ -2268,8 +2287,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
             // Cull any packages that have indicated that backups are not permitted.
             for (int i = 0; i < packagesToBackup.size(); ) {
-                PackageInfo info = packagesToBackup.get(i);
-                if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                PackageInfo pkg = packagesToBackup.get(i);
+                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
                     packagesToBackup.remove(i);
                 } else {
                     i++;
@@ -4781,7 +4800,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // to the supplied file descriptor.  This method is synchronous and does not return
     // to the caller until the backup has been completed.
     public void fullBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeShared,
-            boolean doAllApps, String[] pkgList) {
+            boolean doAllApps, boolean includeSystem, String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
 
         // Validate
@@ -4811,7 +4830,7 @@ class BackupManagerService extends IBackupManager.Stub {
             Slog.i(TAG, "Beginning full backup...");
 
             FullBackupParams params = new FullBackupParams(fd, includeApks, includeShared,
-                    doAllApps, pkgList);
+                    doAllApps, includeSystem, pkgList);
             final int token = generateToken();
             synchronized (mFullConfirmations) {
                 mFullConfirmations.put(token, params);

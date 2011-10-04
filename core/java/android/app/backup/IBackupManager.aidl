@@ -157,11 +157,15 @@ interface IBackupManager {
      * @param allApps If <code>true</code>, the resulting tar stream will include all
      *     installed applications' data, not just those named in the <code>packageNames</code>
      *     parameter.
+     * @param allIncludesSystem If {@code true}, then {@code allApps} will be interpreted
+     *     as including packages pre-installed as part of the system. If {@code false},
+     *     then setting {@code allApps} to {@code true} will mean only that all 3rd-party
+     *     applications will be included in the dataset.
      * @param packageNames The package names of the apps whose data (and optionally .apk files)
      *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
      */
     void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeShared,
-            boolean allApps, in String[] packageNames);
+            boolean allApps, boolean allIncludesSystem, in String[] packageNames);
 
     /**
      * Restore device content from the data stream passed through the given socket.  The
