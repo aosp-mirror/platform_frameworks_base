@@ -447,11 +447,18 @@ status_t Parcel::appendFrom(const Parcel *parcel, size_t offset, size_t len)
     return err;
 }
 
-bool Parcel::setAllowFds(bool allowFds)
+bool Parcel::pushAllowFds(bool allowFds)
 {
     const bool origValue = mAllowFds;
-    mAllowFds = allowFds;
+    if (!allowFds) {
+        mAllowFds = false;
+    }
     return origValue;
+}
+
+void Parcel::restoreAllowFds(bool lastValue)
+{
+    mAllowFds = lastValue;
 }
 
 bool Parcel::hasFileDescriptors() const

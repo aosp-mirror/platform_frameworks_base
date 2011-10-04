@@ -1597,7 +1597,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * @param parcel The parcel to copy this bundle to.
      */
     public void writeToParcel(Parcel parcel, int flags) {
-        final boolean oldAllowFds = parcel.setAllowFds(mAllowFds);
+        final boolean oldAllowFds = parcel.pushAllowFds(mAllowFds);
         try {
             if (mParcelledData != null) {
                 int length = mParcelledData.dataSize();
@@ -1619,7 +1619,7 @@ public final class Bundle implements Parcelable, Cloneable {
                 parcel.setDataPosition(newPos);
             }
         } finally {
-            parcel.setAllowFds(oldAllowFds);
+            parcel.restoreAllowFds(oldAllowFds);
         }
     }
 

@@ -59,7 +59,8 @@ public:
     status_t            appendFrom(const Parcel *parcel,
                                    size_t start, size_t len);
 
-    bool                setAllowFds(bool allowFds);
+    bool                pushAllowFds(bool allowFds);
+    void                restoreAllowFds(bool lastValue);
 
     bool                hasFileDescriptors() const;
 
