@@ -59,6 +59,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class LockPatternUtils {
 
+    private static final String OPTION_ENABLE_FACELOCK = "enable_facelock";
+
     private static final String TAG = "LockPatternUtils";
 
     private static final String SYSTEM_DIRECTORY = "/system/";
@@ -114,6 +116,7 @@ public class LockPatternUtils {
     public static final String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
     private final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
     private final static String DISABLE_LOCKSCREEN_KEY = "lockscreen.disabled";
+    private final static String LOCKSCREEN_OPTIONS = "lockscreen.options";
     public final static String LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK
             = "lockscreen.biometric_weak_fallback";
 
@@ -839,7 +842,7 @@ public class LockPatternUtils {
      */
     public boolean isBiometricWeakInstalled() {
         // Check that the system flag was set
-        if (!SystemProperties.getBoolean("ro.lockscreen.facelock_enabled", false)) {
+        if (!OPTION_ENABLE_FACELOCK.equals(getString(LOCKSCREEN_OPTIONS))) {
             return false;
         }
 
