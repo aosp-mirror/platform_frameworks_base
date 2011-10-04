@@ -1611,9 +1611,16 @@ public final class ContactsContract {
         }
 
         /**
+         * <p>
          * A sub-directory of a single contact that contains all of the constituent raw contact
          * {@link ContactsContract.StreamItems} rows.  This directory can be used either
          * with a {@link #CONTENT_URI} or {@link #CONTENT_LOOKUP_URI}.
+         * </p>
+         * <p>
+         * Querying for social stream data requires android.permission.READ_SOCIAL_STREAM
+         * permission.
+         * </p>
+         * @hide
          */
         public static final class StreamItems implements StreamItemsColumns {
             /**
@@ -2669,6 +2676,14 @@ public final class ContactsContract {
          * {@link ContactsContract.StreamItems} for a stand-alone table containing the
          * same data.
          * </p>
+         * <p>
+         * Access to the social stream through this sub-directory requires additional permissions
+         * beyond the read/write contact permissions required by the provider.  Querying for
+         * social stream data requires android.permission.READ_SOCIAL_STREAM permission, and
+         * inserting or updating social stream items requires android.permission.WRITE_SOCIAL_STREAM
+         * permission.
+         * </p>
+         * @hide
          */
         public static final class StreamItems implements BaseColumns, StreamItemsColumns {
             /**
@@ -2963,6 +2978,12 @@ public final class ContactsContract {
      * transaction correspondingly.  Insertion of more items beyond the limit will
      * automatically lead to deletion of the oldest items, by {@link StreamItems#TIMESTAMP}.
      * </p>
+     * <p>
+     * Access to the social stream through these URIs requires additional permissions beyond the
+     * read/write contact permissions required by the provider.  Querying for social stream data
+     * requires android.permission.READ_SOCIAL_STREAM permission, and inserting or updating social
+     * stream items requires android.permission.WRITE_SOCIAL_STREAM permission.
+     * </p>
      * <h3>Operations</h3>
      * <dl>
      * <dt><b>Insert</b></dt>
@@ -3073,6 +3094,7 @@ public final class ContactsContract {
      * </pre>
      * </dd>
      * </dl>
+     * @hide
      */
     public static final class StreamItems implements BaseColumns, StreamItemsColumns {
         /**
@@ -3133,6 +3155,12 @@ public final class ContactsContract {
          * directory append {@link StreamItems.StreamItemPhotos#CONTENT_DIRECTORY} to
          * an individual stream item URI.
          * </p>
+         * <p>
+         * Access to social stream photos requires additional permissions beyond the read/write
+         * contact permissions required by the provider.  Querying for social stream photos
+         * requires android.permission.READ_SOCIAL_STREAM permission, and inserting or updating
+         * social stream photos requires android.permission.WRITE_SOCIAL_STREAM permission.
+         * </p>
          */
         public static final class StreamItemPhotos
                 implements BaseColumns, StreamItemPhotosColumns {
@@ -3164,6 +3192,7 @@ public final class ContactsContract {
      * Columns in the StreamItems table.
      *
      * @see ContactsContract.StreamItems
+     * @hide
      */
     protected interface StreamItemsColumns {
         /**
@@ -3310,6 +3339,12 @@ public final class ContactsContract {
      * Constants for the stream_item_photos table, which contains photos associated with
      * social stream updates.
      * </p>
+     * <p>
+     * Access to social stream photos requires additional permissions beyond the read/write
+     * contact permissions required by the provider.  Querying for social stream photos
+     * requires android.permission.READ_SOCIAL_STREAM permission, and inserting or updating
+     * social stream photos requires android.permission.WRITE_SOCIAL_STREAM permission.
+     * </p>
      * <h3>Operations</h3>
      * <dl>
      * <dt><b>Insert</b></dt>
@@ -3448,6 +3483,7 @@ public final class ContactsContract {
      * <pre>
      * </dd>
      * </dl>
+     * @hide
      */
     public static final class StreamItemPhotos implements BaseColumns, StreamItemPhotosColumns {
         /**
@@ -3475,6 +3511,7 @@ public final class ContactsContract {
      * Columns in the StreamItemPhotos table.
      *
      * @see ContactsContract.StreamItemPhotos
+     * @hide
      */
     protected interface StreamItemPhotosColumns {
         /**

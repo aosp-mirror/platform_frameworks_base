@@ -937,6 +937,18 @@
         information.  This means other applications can identify you and send your profile
         information to others.</string>
 
+    <!-- Title of the read social stream permission, listed so the user can decide whether to allow the application to read information from the user's social stream. [CHAR LIMIT=30] -->
+    <string name="permlab_readSocialStream" product="default">read your social stream</string>
+    <string name="permdesc_readSocialStream" product="default">Allows the application to access
+        and sync social updates from you and your friends. Malicious apps can use this to read
+        private communications between you and your friends on social networks.</string>
+
+    <!-- Title of the write social stream permission, listed so the user can decide whether to allow the application to write information to the user's social stream. [CHAR LIMIT=30] -->
+    <string name="permlab_writeSocialStream" product="default">write to your social stream</string>
+    <string name="permdesc_writeSocialStream" product="default">Allows the application to display
+        social updates from your friends. Malicious apps can use this to pretend to be a friend
+        and trick you into revealing passwords or other confidential information.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events plus confidential information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
