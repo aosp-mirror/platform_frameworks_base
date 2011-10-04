@@ -302,7 +302,10 @@ void rsdScriptInvokeForEach(const Context *rsc,
     DrvScript *drv = (DrvScript *)s->mHal.drv;
     // We only support slot 0 (root) at this point in time.
     rsAssert(slot == 0);
-    mtls.sig = drv->mExportForEachSignatureList[slot];
+    mtls.sig = 0x1f;  // temp fix for old apps, full table in slang_rs_export_foreach.cpp
+    if (drv->mExportForEachSignatureList) {
+        mtls.sig = drv->mExportForEachSignatureList[slot];
+    }
     if (ain) {
         mtls.dimX = ain->getType()->getDimX();
         mtls.dimY = ain->getType()->getDimY();
