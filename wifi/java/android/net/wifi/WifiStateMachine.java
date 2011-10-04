@@ -2597,6 +2597,15 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                    StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+                    SupplicantState state = stateChangeResult.state;
+                    // A WEXT bug means that we can be back to driver started state
+                    // unexpectedly
+                    if (SupplicantState.isDriverActive(state)) {
+                        transitionTo(mDriverStartedState);
+                    }
+                    break;
                 case CMD_START_DRIVER:
                     mWakeLock.acquire();
                     WifiNative.startDriverCommand();
@@ -2667,8 +2676,18 @@ public class WifiStateMachine extends StateMachine {
                     sendErrorBroadcast(WifiManager.WPS_OVERLAP_ERROR);
                     break;
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
-                    handleSupplicantStateChange(message);
-                   break;
+                    SupplicantState state = handleSupplicantStateChange(message);
+                    // Due to a WEXT bug, during the time of driver start/stop
+                    // we can go into a driver stopped state in an unexpected way.
+                    // The sequence eventually puts interface
+                    // up and we should be back to a connected state
+                    if (!SupplicantState.isDriverActive(state)) {
+                        if (mNetworkInfo.getState() != NetworkInfo.State.DISCONNECTED) {
+                            handleNetworkDisconnect();
+                        }
+                        transitionTo(mDriverStoppedState);
+                    }
+                    break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
                     WifiNative.disconnectCommand();
