@@ -336,17 +336,17 @@ public class DhcpStateMachine extends StateMachine {
         DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
 
         if (dhcpAction == DhcpAction.START) {
-            Log.d(TAG, "DHCP request on " + mInterfaceName);
+            if (DBG) Log.d(TAG, "DHCP request on " + mInterfaceName);
             success = NetworkUtils.runDhcp(mInterfaceName, dhcpInfoInternal);
             mDhcpInfo = dhcpInfoInternal;
         } else if (dhcpAction == DhcpAction.RENEW) {
-            Log.d(TAG, "DHCP renewal on " + mInterfaceName);
+            if (DBG) Log.d(TAG, "DHCP renewal on " + mInterfaceName);
             success = NetworkUtils.runDhcpRenew(mInterfaceName, dhcpInfoInternal);
             dhcpInfoInternal.updateFromDhcpRequest(mDhcpInfo);
         }
 
         if (success) {
-            Log.d(TAG, "DHCP succeeded on " + mInterfaceName);
+            if (DBG) Log.d(TAG, "DHCP succeeded on " + mInterfaceName);
            long leaseDuration = dhcpInfoInternal.leaseDuration; //int to long conversion
 
            //Sanity check for renewal
@@ -366,7 +366,7 @@ public class DhcpStateMachine extends StateMachine {
             mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_SUCCESS, 0, dhcpInfoInternal)
                 .sendToTarget();
         } else {
-            Log.d(TAG, "DHCP failed on " + mInterfaceName + ": " +
+            Log.e(TAG, "DHCP failed on " + mInterfaceName + ": " +
                     NetworkUtils.getDhcpError());
             NetworkUtils.stopDhcp(mInterfaceName);
             mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_FAILURE, 0)
