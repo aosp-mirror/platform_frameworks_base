@@ -159,6 +159,16 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         assertStatsEntry(stats, "rmnet0", 1000, SET_FOREGROUND, 0, 26033L, 30L, 1401L, 26L);
     }
 
+    public void testNetworkStatsSingle() throws Exception {
+        stageFile(R.raw.xt_qtaguid_iface_typical, new File(mTestProc, "net/xt_qtaguid/iface_stat_all"));
+
+        final NetworkStats stats = mService.getNetworkStatsSummary();
+        assertEquals(6, stats.size());
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 2112L, 24L, 700L, 10L);
+        assertStatsEntry(stats, "test1", UID_ALL, SET_DEFAULT, TAG_NONE, 6L, 8L, 10L, 12L);
+        assertStatsEntry(stats, "test2", UID_ALL, SET_DEFAULT, TAG_NONE, 1L, 2L, 3L, 4L);
+    }
+
     /**
      * Copy a {@link Resources#openRawResource(int)} into {@link File} for
      * testing purposes.
