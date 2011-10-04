@@ -323,6 +323,9 @@ public final class Parcel {
      */
     public final native void setDataCapacity(int size);
 
+    /** @hide */
+    public final native boolean setAllowFds(boolean allowFds);
+
     /**
      * Returns the raw bytes of the parcel.
      *

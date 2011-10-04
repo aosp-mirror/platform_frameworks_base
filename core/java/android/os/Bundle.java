@@ -54,6 +54,7 @@ public final class Bundle implements Parcelable, Cloneable {
 
     private boolean mHasFds = false;
     private boolean mFdsKnown = true;
+    private boolean mAllowFds = true;
 
     /**
      * The ClassLoader used when unparcelling data from mParcelledData.
@@ -186,7 +187,14 @@ public final class Bundle implements Parcelable, Cloneable {
     public ClassLoader getClassLoader() {
         return mClassLoader;
     }
-    
+
+    /** @hide */
+    public boolean setAllowFds(boolean allowFds) {
+        boolean orig = mAllowFds;
+        mAllowFds = allowFds;
+        return orig;
+    }
+
     /**
      * Clones the current Bundle. The internal map is cloned, but the keys and
      * values to which it refers are copied by reference.
@@ -1589,24 +1597,29 @@ public final class Bundle implements Parcelable, Cloneable {
      * @param parcel The parcel to copy this bundle to.
      */
     public void writeToParcel(Parcel parcel, int flags) {
-        if (mParcelledData != null) {
-            int length = mParcelledData.dataSize();
-            parcel.writeInt(length);
-            parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
-            parcel.appendFrom(mParcelledData, 0, length);
-        } else {
-            parcel.writeInt(-1); // dummy, will hold length
-            parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
-
-            int oldPos = parcel.dataPosition();
-            parcel.writeMapInternal(mMap);
-            int newPos = parcel.dataPosition();
-
-            // Backpatch length
-            parcel.setDataPosition(oldPos - 8);
-            int length = newPos - oldPos;
-            parcel.writeInt(length);
-            parcel.setDataPosition(newPos);
+        final boolean oldAllowFds = parcel.setAllowFds(mAllowFds);
+        try {
+            if (mParcelledData != null) {
+                int length = mParcelledData.dataSize();
+                parcel.writeInt(length);
+                parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
+                parcel.appendFrom(mParcelledData, 0, length);
+            } else {
+                parcel.writeInt(-1); // dummy, will hold length
+                parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
+    
+                int oldPos = parcel.dataPosition();
+                parcel.writeMapInternal(mMap);
+                int newPos = parcel.dataPosition();
+    
+                // Backpatch length
+                parcel.setDataPosition(oldPos - 8);
+                int length = newPos - oldPos;
+                parcel.writeInt(length);
+                parcel.setDataPosition(newPos);
+            }
+        } finally {
+            parcel.setAllowFds(oldAllowFds);
         }
     }
 
