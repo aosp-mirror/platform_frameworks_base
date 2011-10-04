@@ -21,8 +21,8 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
-import static android.net.TrafficStats.UID_TETHERING;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
@@ -86,11 +86,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Deprecated
     private final File mStatsUid;
     /** Path to {@code /proc/net/dev}. */
+    @Deprecated
     private final File mStatsIface;
+    /** Path to {@code /proc/net/xt_qtaguid/iface_stat}. */
+    @Deprecated
+    private final File mStatsXtIface;
+    /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
+    private final File mStatsXtIfaceAll;
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
-    /** Path to {@code /proc/net/xt_qtaguid/iface_stat}. */
-    private final File mStatsXtIface;
 
     /**
      * Name representing {@link #setGlobalAlert(long)} limit when delivered to
@@ -98,12 +102,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     public static final String LIMIT_GLOBAL_ALERT = "globalAlert";
 
-    /** {@link #mStatsXtUid} headers. */
+    /** {@link #mStatsXtUid} and {@link #mStatsXtIfaceAll} headers. */
     private static final String KEY_IDX = "idx";
     private static final String KEY_IFACE = "iface";
+    private static final String KEY_ACTIVE = "active";
     private static final String KEY_UID = "uid_tag_int";
     private static final String KEY_COUNTER_SET = "cnt_set";
     private static final String KEY_TAG_HEX = "acct_tag_hex";
+    private static final String KEY_SNAP_RX_BYTES = "snap_rx_bytes";
+    private static final String KEY_SNAP_RX_PACKETS = "snap_rx_packets";
+    private static final String KEY_SNAP_TX_BYTES = "snap_tx_bytes";
+    private static final String KEY_SNAP_TX_PACKETS = "snap_tx_packets";
     private static final String KEY_RX_BYTES = "rx_bytes";
     private static final String KEY_RX_PACKETS = "rx_packets";
     private static final String KEY_TX_BYTES = "tx_bytes";
@@ -170,6 +179,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mStatsIface = new File(procRoot, "net/dev");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
         mStatsXtIface = new File(procRoot, "net/xt_qtaguid/iface_stat");
+        mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
             return;
@@ -1072,6 +1082,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
+        if (mBandwidthControlEnabled && mStatsXtIfaceAll.exists()) {
+            return getNetworkStatsSummarySingleFile();
+        } else {
+            return getNetworkStatsSummaryMultipleFiles();
+        }
+    }
+
+    @Deprecated
+    private NetworkStats getNetworkStatsSummaryMultipleFiles() {
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
@@ -1142,6 +1161,61 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
                 }
+            }
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
+        } catch (IOException e) {
+            throw new IllegalStateException("problem parsing stats: " + e);
+        } finally {
+            IoUtils.closeQuietly(reader);
+        }
+
+        return stats;
+    }
+
+    private NetworkStats getNetworkStatsSummarySingleFile() {
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+
+        // TODO: read directly from proc once headers are added
+        final ArrayList<String> keys = Lists.newArrayList(KEY_IFACE, KEY_ACTIVE, KEY_SNAP_RX_BYTES,
+                KEY_SNAP_RX_PACKETS, KEY_SNAP_TX_BYTES, KEY_SNAP_TX_PACKETS, KEY_RX_BYTES,
+                KEY_RX_PACKETS, KEY_TX_BYTES, KEY_TX_PACKETS);
+        final ArrayList<String> values = Lists.newArrayList();
+        final HashMap<String, String> parsed = Maps.newHashMap();
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(mStatsXtIfaceAll));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                splitLine(line, values);
+                parseLine(keys, values, parsed);
+
+                entry.iface = parsed.get(KEY_IFACE);
+                entry.uid = UID_ALL;
+                entry.set = SET_DEFAULT;
+                entry.tag = TAG_NONE;
+
+                // always include snapshot values
+                entry.rxBytes = getParsedLong(parsed, KEY_SNAP_RX_BYTES);
+                entry.rxPackets = getParsedLong(parsed, KEY_SNAP_RX_PACKETS);
+                entry.txBytes = getParsedLong(parsed, KEY_SNAP_TX_BYTES);
+                entry.txPackets = getParsedLong(parsed, KEY_SNAP_TX_PACKETS);
+
+                // fold in active numbers, but only when active
+                final boolean active = getParsedInt(parsed, KEY_ACTIVE) != 0;
+                if (active) {
+                    entry.rxBytes += getParsedLong(parsed, KEY_RX_BYTES);
+                    entry.rxPackets += getParsedLong(parsed, KEY_RX_PACKETS);
+                    entry.txBytes += getParsedLong(parsed, KEY_TX_BYTES);
+                    entry.txPackets += getParsedLong(parsed, KEY_TX_PACKETS);
+                }
+
+                stats.addValues(entry);
             }
         } catch (NullPointerException e) {
             throw new IllegalStateException("problem parsing stats: " + e);
