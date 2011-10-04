@@ -60,6 +60,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView.ScaleType;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBar;
@@ -556,7 +557,7 @@ public class RecentsPanelView extends RelativeLayout
                     if (v.getTag() instanceof ViewHolder) {
                         ViewHolder h = (ViewHolder)v.getTag();
                         if (h.activityDescription == ad) {
-                            if (DEBUG) Log.v(TAG, "Updatating thumbnail #" + index + " in "
+                            if (DEBUG) Log.v(TAG, "Updating thumbnail #" + index + " in "
                                     + h.activityDescription
                                     + ": " + ad.getThumbnail());
                             h.iconView.setImageDrawable(ad.getIcon());
@@ -578,6 +579,15 @@ public class RecentsPanelView extends RelativeLayout
                                 // that this now covers, to improve scrolling speed.
                                 // That can't be done until the anim is complete though.
                                 h.thumbnailViewImage.setImageBitmap(thumbnail);
+
+                                // scale to fill up the full width
+                                Matrix scaleMatrix = new Matrix();
+                                float thumbnailViewWidth = h.thumbnailViewImage.getWidth();
+                                float scale = thumbnailViewWidth / thumbnail.getWidth();
+                                scaleMatrix.setScale(scale, scale);
+                                h.thumbnailViewImage.setScaleType(ScaleType.MATRIX);
+                                h.thumbnailViewImage.setImageMatrix(scaleMatrix);
+
                                 if (anim) {
                                     h.thumbnailViewImage.setAnimation(AnimationUtils.loadAnimation(
                                             mContext, R.anim.recent_appear));
