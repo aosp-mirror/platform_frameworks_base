@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.net.NetworkStats.UID_ALL;
 import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
@@ -1522,7 +1523,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             final NetworkStats.Entry entry = new NetworkStats.Entry();
             entry.iface = ifaceIn;
-            entry.uid = UID_ALL;
+            entry.uid = UID_TETHERING;
             entry.set = SET_DEFAULT;
             entry.tag = TAG_NONE;
             entry.rxBytes = Long.parseLong(tok[3]);
