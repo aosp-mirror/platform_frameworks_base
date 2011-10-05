@@ -76,7 +76,8 @@ import java.io.IOException;
  * {@link com.android.internal.policy.impl.KeyguardViewManager}
  * via its {@link com.android.internal.policy.impl.KeyguardViewCallback}, as appropriate.
  */
-public class LockPatternKeyguardView extends KeyguardViewBase implements Handler.Callback {
+public class LockPatternKeyguardView extends KeyguardViewBase implements Handler.Callback,
+        KeyguardUpdateMonitor.InfoCallback {
 
     private static final int TRANSPORT_USERACTIVITY_TIMEOUT = 10000;
 
@@ -265,6 +266,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
+
+        mUpdateMonitor.registerInfoCallback(this);
 
         mKeyguardScreenCallback = new KeyguardScreenCallback() {
 
@@ -586,6 +589,25 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
         removeCallbacks(mRecreateRunnable);
         post(mRecreateRunnable);
+    }
+
+    //Ignore these events; they are implemented only because they come from the same interface
+    @Override
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel)
+    {}
+    @Override
+    public void onTimeChanged() {}
+    @Override
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {}
+    @Override
+    public void onRingerModeChanged(int state) {}
+    @Override
+    public void onClockVisibilityChanged() {}
+
+    //We need to stop faceunlock when a phonecall comes in
+    @Override
+    public void onPhoneStateChanged(int phoneState) {
+        if(phoneState == TelephonyManager.CALL_STATE_RINGING) stopAndUnbindFromFaceLock();
     }
 
     @Override
