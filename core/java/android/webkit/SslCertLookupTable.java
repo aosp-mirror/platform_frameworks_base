@@ -19,6 +19,9 @@ package android.webkit;
 import android.os.Bundle;
 import android.net.http.SslError;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Stores the user's decision of whether to allow or deny an invalid certificate.
  *
@@ -40,14 +43,32 @@ final class SslCertLookupTable {
     }
 
     public void setIsAllowed(SslError sslError, boolean allow) {
-        table.putBoolean(sslError.toString(), allow);
+        // TODO: We should key on just the host. See http://b/5409251.
+        String errorString = sslErrorToString(sslError);
+        if (errorString != null) {
+            table.putBoolean(errorString, allow);
+        }
     }
 
     public boolean isAllowed(SslError sslError) {
-        return table.getBoolean(sslError.toString());
+        // TODO: We should key on just the host. See http://b/5409251.
+        String errorString = sslErrorToString(sslError);
+        return errorString == null ? false : table.getBoolean(errorString);
     }
 
     public void clear() {
         table.clear();
+    }
+
+    private static String sslErrorToString(SslError error) {
+        String host;
+        try {
+            host = new URL(error.getUrl()).getHost();
+        } catch(MalformedURLException e) {
+            return null;
+        }
+        return "primary error: " + error.getPrimaryError() +
+                " certificate: " + error.getCertificate() +
+                " on host: " + host;
     }
 }
