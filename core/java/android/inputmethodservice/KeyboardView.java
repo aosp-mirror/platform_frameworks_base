@@ -248,6 +248,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     private AccessibilityManager mAccessibilityManager;
     /** The audio manager for accessibility support */
     private AudioManager mAudioManager;
+    /** Whether the requirement of a headset to hear passwords if accessibility is enabled is announced. */
+    private boolean mHeadsetRequiredToHearPasswordsAnnounced;
 
     Handler mHandler = new Handler() {
         @Override
@@ -852,13 +854,15 @@ public class KeyboardView extends View implements View.OnClickListener {
                 Key oldKey = keys[oldKeyIndex];
                 oldKey.onReleased(mCurrentKeyIndex == NOT_A_KEY);
                 invalidateKey(oldKeyIndex);
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT, oldKey.codes[0]);
+                sendAccessibilityEventForUnicodeCharacter(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT,
+                        oldKey.codes[0]);
             }
             if (mCurrentKeyIndex != NOT_A_KEY && keys.length > mCurrentKeyIndex) {
                 Key newKey = keys[mCurrentKeyIndex];
                 newKey.onPressed();
                 invalidateKey(mCurrentKeyIndex);
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER, newKey.codes[0]);
+                sendAccessibilityEventForUnicodeCharacter(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER,
+                        newKey.codes[0]);
             }
         }
         // If key changed and preview is on ...
@@ -958,13 +962,13 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPreviewText.setVisibility(VISIBLE);
     }
 
-    private void sendAccessibilityEvent(int eventType, int code) {
+    private void sendAccessibilityEventForUnicodeCharacter(int eventType, int code) {
         if (mAccessibilityManager.isEnabled()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
             onInitializeAccessibilityEvent(event);
+            String text = null;
             // Add text only if headset is used to avoid leaking passwords.
             if (mAudioManager.isBluetoothA2dpOn() || mAudioManager.isWiredHeadsetOn()) {
-                String text = null;
                 switch (code) {
                     case Keyboard.KEYCODE_ALT:
                         text = mContext.getString(R.string.keyboardview_keycode_alt);
@@ -990,11 +994,17 @@ public class KeyboardView extends View implements View.OnClickListener {
                     default:
                         text = String.valueOf((char) code);
                 }
-                event.getText().add(text);
+            } else if (!mHeadsetRequiredToHearPasswordsAnnounced) {
+                // We want the waring for required head set to be send with both the
+                // hover enter and hover exit event, so set the flag after the exit.
+                if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+                    mHeadsetRequiredToHearPasswordsAnnounced = true;
+                }
+                text = mContext.getString(R.string.keyboard_headset_required_to_hear_password);
             } else {
-                event.getText().add(mContext.getString(
-                R.string.keyboard_headset_required_to_hear_password));
+                text = mContext.getString(R.string.keyboard_password_character_no_headset);
             }
+            event.getText().add(text);
             mAccessibilityManager.sendAccessibilityEvent(event);
         }
     }
@@ -1134,15 +1144,13 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     @Override
-    protected boolean dispatchHoverEvent(MotionEvent event) {
+    public boolean onHoverEvent(MotionEvent event) {
         // If touch exploring is enabled we ignore touch events and transform
         // the stream of hover events as touch events. This allows one consistent
         // event stream to drive the keyboard since during touch exploring the
         // first touch generates only hover events and tapping on the same
         // location generates hover and touch events.
-        if (mAccessibilityManager.isEnabled()
-                && mAccessibilityManager.isTouchExplorationEnabled()
-                && event.getPointerCount() == 1) {
+        if (mAccessibilityManager.isTouchExplorationEnabled() && event.getPointerCount() == 1) {
             final int action = event.getAction();
             switch (action) {
                 case MotionEvent.ACTION_HOVER_ENTER:
@@ -1156,9 +1164,9 @@ public class KeyboardView extends View implements View.OnClickListener {
                     break;
             }
             onTouchEventInternal(event);
-            return true;
+            event.setAction(action);
         }
-        return super.dispatchHoverEvent(event);
+        return super.onHoverEvent(event);
     }
 
     @Override
@@ -1168,8 +1176,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         // event stream to drive the keyboard since during touch exploring the
         // first touch generates only hover events and tapping on the same
         // location generates hover and touch events.
-        if (mAccessibilityManager.isEnabled()
-                && mAccessibilityManager.isTouchExplorationEnabled()) {
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
             return true;
         }
         return onTouchEventInternal(event);
