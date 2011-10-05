@@ -19,7 +19,8 @@ package android.net.http;
 import java.security.cert.X509Certificate;
 
 /**
- * One or more individual SSL errors and the associated SSL certificate
+ * This class represents a set of one or more SSL errors and the associated SSL
+ * certificate.
  */
 public class SslError {
 
@@ -48,16 +49,17 @@ public class SslError {
      */
     public static final int SSL_DATE_INVALID = 4;
     /**
-     * The certificate is invalid
+     * A generic error occurred
      */
     public static final int SSL_INVALID = 5;
 
 
     /**
-     * The number of different SSL errors (update if you add a new SSL error!!!)
+     * The number of different SSL errors.
      * @deprecated This constant is not necessary for using the SslError API and
      *             can change from release to release.
      */
+    // Update if you add a new SSL error!!!
     @Deprecated
     public static final int SSL_MAX_ERROR = 6;
 
@@ -78,53 +80,53 @@ public class SslError {
     final String mUrl;
 
     /**
-     * Creates a new SSL error set object
+     * Creates a new SslError object using the supplied error and certificate.
+     * The URL will be set to the empty string.
      * @param error The SSL error
      * @param certificate The associated SSL certificate
      * @deprecated Use {@link #SslError(int, SslCertificate, String)}
      */
     @Deprecated
     public SslError(int error, SslCertificate certificate) {
-        addError(error);
-        if (certificate == null) {
-            throw new NullPointerException("certificate is null.");
-        }
-        mCertificate = certificate;
-        mUrl = "";
+        this(error, certificate, "");
     }
 
     /**
-     * Creates a new SSL error set object
+     * Creates a new SslError object using the supplied error and certificate.
+     * The URL will be set to the empty string.
      * @param error The SSL error
      * @param certificate The associated SSL certificate
      * @deprecated Use {@link #SslError(int, X509Certificate, String)}
      */
     @Deprecated
     public SslError(int error, X509Certificate certificate) {
-        addError(error);
-        if (certificate == null) {
-            throw new NullPointerException("certificate is null.");
-        }
-        mCertificate = new SslCertificate(certificate);
-        mUrl = "";
+        this(error, certificate, "");
     }
 
     /**
-     * Creates a new SSL error set object
+     * Creates a new SslError object using the supplied error, certificate and
+     * URL.
      * @param error The SSL error
      * @param certificate The associated SSL certificate
-     * @param url The associated URL.
+     * @param url The associated URL
      */
     public SslError(int error, SslCertificate certificate, String url) {
+        assert certificate != null;
+        assert url != null;
         addError(error);
-        if (certificate == null) {
-            throw new NullPointerException("certificate is null.");
-        }
         mCertificate = certificate;
-        if (url == null) {
-            throw new NullPointerException("url is null.");
-        }
         mUrl = url;
+    }
+
+    /**
+     * Creates a new SslError object using the supplied error, certificate and
+     * URL.
+     * @param error The SSL error
+     * @param certificate The associated SSL certificate
+     * @param url The associated URL
+     */
+    public SslError(int error, X509Certificate certificate, String url) {
+        this(error, new SslCertificate(certificate), url);
     }
 
     /**
@@ -138,56 +140,42 @@ public class SslError {
             int error, SslCertificate cert, String url) {
         // The chromium error codes are in:
         // external/chromium/net/base/net_error_list.h
-        if (error > -200 || error < -299) {
-            throw new NullPointerException("Not a valid chromium SSL error code.");
-        }
+        assert (error >= -299 && error <= -200);
         if (error == -200)
             return new SslError(SSL_IDMISMATCH, cert, url);
         if (error == -201)
             return new SslError(SSL_DATE_INVALID, cert, url);
         if (error == -202)
             return new SslError(SSL_UNTRUSTED, cert, url);
-        // Map all other errors to SSL_INVALID
+        // Map all other codes to SSL_INVALID.
         return new SslError(SSL_INVALID, cert, url);
     }
 
     /**
-     * Creates a new SSL error set object
-     * @param error The SSL error
-     * @param certificate The associated SSL certificate
-     * @param url The associated URL.
-     */
-    public SslError(int error, X509Certificate certificate, String url) {
-        addError(error);
-        if (certificate == null) {
-            throw new NullPointerException("certificate is null.");
-        }
-        mCertificate = new SslCertificate(certificate);
-        if (url == null) {
-            throw new NullPointerException("url is null.");
-        }
-        mUrl = url;
-    }
-
-    /**
-     * @return The SSL certificate associated with the error set, non-null.
+     * Gets the SSL certificate associated with this object.
+     * @return The SSL certificate, non-null.
      */
     public SslCertificate getCertificate() {
         return mCertificate;
     }
 
     /**
-     * @return The URL associated with the error set, non-null.
-     * "" if one of the deprecated constructors is used.
+     * Gets the URL associated with this object.
+     * @return The URL, non-null.
      */
+    // TODO: When the WebView constructs an instance of this object, we
+    // actually provide only the hostname, not the full URL. We should consider
+    // deprecating this method, adding a new getHost() method and updating the
+    // constructor arguments. See http://b/5410252.
     public String getUrl() {
         return mUrl;
     }
 
     /**
-     * Adds the SSL error to the error set
+     * Adds the supplied SSL error to the set.
      * @param error The SSL error to add
-     * @return True iff the error being added is a known SSL error
+     * @return True if the error being added is a known SSL error, otherwise
+     *         false.
      */
     public boolean addError(int error) {
         boolean rval = (0 <= error && error < SslError.SSL_MAX_ERROR);
@@ -199,8 +187,9 @@ public class SslError {
     }
 
     /**
-     * @param error The SSL error to check
-     * @return True iff the set includes the error
+     * Determines whether this object includes the supplied error.
+     * @param error The SSL error to check for
+     * @return True if this object includes the error, otherwise false.
      */
     public boolean hasError(int error) {
         boolean rval = (0 <= error && error < SslError.SSL_MAX_ERROR);
@@ -212,7 +201,8 @@ public class SslError {
     }
 
     /**
-     * @return The primary, most severe, SSL error in the set
+     * Gets the most severe SSL error in this object's set of errors.
+     * @return The most severe SSL error.
      */
     public int getPrimaryError() {
         if (mErrors != 0) {
@@ -228,12 +218,12 @@ public class SslError {
     }
 
     /**
-     * @return A String representation of this SSL error object
-     * (used mostly for debugging).
+     * Returns a string representation of this object.
+     * @return A String representation of this object.
      */
     public String toString() {
         return "primary error: " + getPrimaryError() +
-            " certificate: " + getCertificate() +
-            "  on URL: " + getUrl();
+                " certificate: " + getCertificate() +
+                " on URL: " + getUrl();
     }
 }
