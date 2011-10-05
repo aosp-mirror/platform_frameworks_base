@@ -256,12 +256,11 @@ private:
 public:     // hack to work around gcc 4.0.3 bug
     const GraphicPlane&     graphicPlane(int dpy) const;
           GraphicPlane&     graphicPlane(int dpy);
-private:
+          void              signalEvent();
+          void              repaintEverything();
 
-            void        waitForEvent();
-public:     // hack to work around gcc 4.0.3 bug
-            void        signalEvent();
 private:
+            void        waitForEvent();
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
             void        handleTransactionLocked(uint32_t transactionFlags);
@@ -279,7 +278,6 @@ private:
             void        postFramebuffer();
             void        setupHardwareComposer(Region& dirtyInOut);
             void        composeSurfaces(const Region& dirty);
-            void        repaintEverything();
 
 
             ssize_t     addClientLayer(const sp<Client>& client,
