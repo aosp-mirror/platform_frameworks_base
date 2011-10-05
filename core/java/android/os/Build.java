@@ -282,6 +282,10 @@ public class Build {
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
+         * <li> For devices without a dedicated menu key, the software compatibility
+         * menu key will not be shown even on phones.  By targeting Ice Cream Sandwich
+         * or later, your UI must always have its own menu UI affordance if needed,
+         * on both tablets and phones.  The ActionBar will take care of this for you.
          * <li> 2d drawing hardware acceleration is now turned on by default.
          * You can use
          * {@link android.R.attr#hardwareAccelerated android:hardwareAccelerated}
@@ -296,6 +300,12 @@ public class Build {
          *      will not change character within the same platform version. Applications
          *      that wish to blend in with the device should use a theme from the
          *      {@link android.R.style#Theme_DeviceDefault} family.
+         * <li> Managed cursors can now throw an exception if you directly close
+         * the cursor yourself without stopping the management of it; previously failures
+         * would be silently ignored.
+         * <li> The fadingEdge attribute on views will be ignored (fading edges is no
+         * longer a standard part of the UI).  A new requiresFadingEdge attribute allows
+         * applications to still force fading edges on for special cases.
          * </ul>
          */
         public static final int ICE_CREAM_SANDWICH = 14;
