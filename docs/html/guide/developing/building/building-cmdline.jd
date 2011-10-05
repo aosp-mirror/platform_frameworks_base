@@ -18,6 +18,7 @@ parent.link=index.html
         <li><a href="#RunningOnEmulator">Running on the Emulator</a></li>
         <li><a href="#RunningOnDevice">Running on a Device</a></li>
         <li><a href="#Signing">Application Signing</a></li>
+        <li><a href="#AntReference">Ant Command Reference</a></li>
       </ol>
   <h2>See also</h2>
   <ol>
@@ -58,11 +59,11 @@ Emulator</a></li>
 
   <p class="note"><strong>Note:</strong> When installing JDK on Windows, the default is to install
   in the "Program Files" directory. This location will cause <code>ant</code> to fail, because of
-  the space. To fix the problem, you can specify the JAVA_HOME variable like this: 
+  the space. To fix the problem, you can specify the JAVA_HOME variable like this:
   <pre>set JAVA_HOME=c:\Progra~1\Java\&lt;jdkdir&gt;</pre>
-  
+
   <p>The easiest solution, however, is to install JDK in a non-space directory, for example:</p>
-  
+
   <pre>c:\java\jdk1.6.0_02</pre>
 
   <h2 id="DebugMode">Building in Debug Mode</h2>
@@ -141,7 +142,7 @@ ant release
 
   <p>If you would like, you can configure the Android build script to automatically sign and align
   your application package. To do so, you must provide the path to your keystore and the name of
-  your key alias in your project's {@code build.properties} file. With this information provided,
+  your key alias in your project's {@code ant.properties} file. With this information provided,
   the build script will prompt you for your keystore and alias password when you build in release
   mode and produce your final application package, which will be ready for distribution.</p>
 
@@ -152,7 +153,7 @@ ant release
   procedure manually, <a href="#ManualReleaseMode">build unsigned</a> and then continue with
   <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
 
-  <p>To specify your keystore and alias, open the project {@code build.properties} file (found in
+  <p>To specify your keystore and alias, open the project {@code ant.properties} file (found in
   the root of the project directory) and add entries for {@code key.store} and {@code key.alias}.
   For example:</p>
   <pre>
@@ -180,16 +181,16 @@ ant release
 
   <p>This creates your Android application .apk file inside the project <code>bin/</code>
   directory, named <code><em>&lt;your_project_name&gt;</em>-release.apk</code>. This .apk file has
-  been signed with the private key specified in {@code build.properties} and aligned with {@code
+  been signed with the private key specified in {@code ant.properties} and aligned with {@code
   zipalign}. It's ready for installation and distribution.</p>
 
   <h3 id="OnceBuilt">Once built and signed in release mode</h3>
 
   <p>Once you have signed your application with a private key, you can install and run it on an
-  <a href="#RunningOnEmulator">emulator</a> or <a href="#RunningOnDevice">device</a>. You can 
-  also try installing it onto a device from a web server. Simply upload the signed .apk to a web 
-  site, then load the .apk URL in your Android web browser to download the application and begin 
-  installation. (On your device, be sure you have enabled 
+  <a href="#RunningOnEmulator">emulator</a> or <a href="#RunningOnDevice">device</a>. You can
+  also try installing it onto a device from a web server. Simply upload the signed .apk to a web
+  site, then load the .apk URL in your Android web browser to download the application and begin
+  installation. (On your device, be sure you have enabled
   <em>Settings &gt; Applications &gt; Unknown sources</em>.)</p>
 
   <h2 id="RunningOnEmulator">Running on the Emulator</h2>
@@ -260,10 +261,6 @@ adb -s emulator-5554 install <em>path/to/your/app</em>.apk
   device:</p>
 
   <ul>
-    <li>Ensure that your application is debuggable by setting the
-    <code>android:debuggable</code> attribute of the <code>&lt;application&gt;</code>
-    element to <code>true</code>. As of ADT 8.0, this is done by default when you build in debug mode.</li>
-
     <li>Enable USB Debugging on your device. You can find the setting on most Android devices by
     going to <strong>Settings > Applications > Development > USB debugging</strong>.</li>
 
@@ -276,7 +273,7 @@ adb -s emulator-5554 install <em>path/to/your/app</em>.apk
   <p>Once your device is set up and connected via USB, navigate to your SDK's <code>platform-tools/</code>
   directory and install the <code>.apk</code> on the device:</p>
   <pre>
-adb -d install <em>path/to/your/app</em>.apk 
+adb -d install <em>path/to/your/app</em>.apk
 </pre>
 
   <p>The {@code -d} flag specifies that you want to use the attached device (in case you also have
@@ -316,3 +313,59 @@ adb -d install <em>path/to/your/app</em>.apk
   Applications</a>, which provides a thorough guide to application signing on Android and what it
   means to you as an Android application developer. The document also includes a guide to exporting
   and signing your application with the ADT's Export Wizard.</p>
+
+  <h2 id="AntReference">Ant Command Reference</h2>
+  <dt><code>ant clean</code></dt>
+  <dd>Cleans the project. If you include the <code>all</code> target before <code>clean</code>
+(<code>ant all clean</code>), other projects are also cleaned. For instance if you clean a
+test project, the tested project is also cleaned.</dd>
+
+  <dt><code>ant debug</code></dt>
+  <dd>Builds a debug package. Works on application, library, and test projects and compiles
+  dependencies as  needed.</dd>
+
+  <dt id="emma"><code>ant emma debug</code></dt>
+  <dd>Builds a test project while building the tested project with instrumentation turned on.
+  This is used to run tests with code coverage enabled.</dd>
+
+  <dt><code>ant release</code></dt>
+  <dd>Builds a release package.</dd>
+
+  <dt><code>ant instrument</code>
+  </dt>
+  <dd>Builds an instrumented debug package. This is generally called automatically when building a
+  test project with code coverage enabled (with the <code>emma</code>
+  target)</dd>
+
+  <dt><code>ant &lt;build_target&gt; install</code></dt>
+  <dd>Builds and installs a package. Using <code>install</code> by itself fails.</dd>
+
+  <dt><code>ant installd</code></dt>
+  <dd>Installs an already compiled debug package. This fails if the <code>.apk</code> is not
+  already built.</dd>
+
+  <dt><code>ant installr</code></dt>
+  <dd>Installs an already compiled release package. This fails if the <code>.apk</code> is not
+  already built.</dd>
+
+  <dt><code>ant installt</code></dt>
+  <dd>Installs an already compiled test package. Also installs the <code>.apk</code> of the
+  tested application. This fails if the <code>.apk</code> is not already built.</dd>
+
+  <dt><code>ant installi</code></dt>
+  <dd>Installs an already compiled instrumented package. This is generally not used manually as
+  it's called when installing a test package. This fails if the <code>.apk</code> is not already
+  built.</dd>
+
+   <dt><code>ant test</code></dt>
+   <dd>Runs the tests (for test projects). The tested and test <code>.apk</code> files must be
+   previously installed.</dd>
+
+  <dt><code>ant debug installt test</code></dt>
+  <dd>Builds a test project and the tested project, installs both <code>.apk</code> files, and
+  runs the tests.</dd>
+
+  <dt><code>ant emma debug installt test</code></dt>
+  <dd>Builds a test project and the tested project, installs both <code>.apk</code> files, and
+  runs the tests with code coverage enabled.</dd>
+

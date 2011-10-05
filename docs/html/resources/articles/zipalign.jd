@@ -67,7 +67,7 @@ when building in debug mode.</li>
 information to sign the packages, since aligning has to happen after signing. In
 order to be able to sign packages, and therefore to align them, <em>Ant</em>
 needs to know the location of the keystore and the name of the key in
-<code>build.properties</code>. The name of the properties are
+<code>ant.properties</code>. The name of the properties are
 <code>key.store</code> and <code>key.alias</code> respectively. If those
 properties are present, the signing tool will prompt to enter the store/key
 passwords during the build, and the script will sign and then align the apk

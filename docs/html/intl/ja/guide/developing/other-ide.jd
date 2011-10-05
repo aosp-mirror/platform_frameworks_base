@@ -98,8 +98,8 @@ android create project \
 <ul>
   <li><code>AndroidManifest.xml</code> - アプリケーションのマニフェスト ファイル。指定したプロジェクトの Activity クラスと同期されます。</li>
   <li><code>build.xml</code> - Ant 用のビルド ファイルです。</li>
-  <li><code>default.properties</code> - ビルド システム用のプロパティです。このファイルを変更しないでください。<em></em></li>
-  <li><code>build.properties</code> - ビルド システム用のカスタマイズ可能なプロパティです。このファイルを編集して、Ant が使用するデフォルトのビルド設定をオーバーライドできます。</li>
+  <li><code>project.properties</code> - ビルド システム用のプロパティです。このファイルを変更しないでください。<em></em></li>
+  <li><code>ant.properties</code> - ビルド システム用のカスタマイズ可能なプロパティです。このファイルを編集して、Ant が使用するデフォルトのビルド設定をオーバーライドできます。</li>
   <li><code>src<em>/your/package/namespace/ActivityName</em>.java</code> - プロジェクトの作成時に指定した Activity クラスです。</li>
   <li><code>bin/</code> - ビルド スクリプト用の出力ディレクトリです。</li>
   <li><code>gen/</code> - <code>Ant</code> が生成するファイル（<code>R.java</code> など）が含まれます。 </li>
