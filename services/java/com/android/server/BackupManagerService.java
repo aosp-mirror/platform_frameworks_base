@@ -228,6 +228,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // completed.
     final Object mAgentConnectLock = new Object();
     IBackupAgent mConnectedAgent;
+    volatile boolean mBackupRunning;
     volatile boolean mConnecting;
     volatile long mLastBackupPass;
     volatile long mNextBackupPass;
@@ -434,6 +435,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Slog.v(TAG, "Backup requested but no transport available");
+                    synchronized (mQueueLock) {
+                        mBackupRunning = false;
+                    }
                     mWakelock.release();
                     break;
                 }
@@ -470,6 +474,9 @@ class BackupManagerService extends IBackupManager.Stub {
                     sendMessage(pbtMessage);
                 } else {
                     Slog.v(TAG, "Backup requested but nothing pending");
+                    synchronized (mQueueLock) {
+                        mBackupRunning = false;
+                    }
                     mWakelock.release();
                 }
                 break;
@@ -804,14 +811,19 @@ class BackupManagerService extends IBackupManager.Stub {
                         // Don't run backups now if we're disabled or not yet
                         // fully set up.
                         if (mEnabled && mProvisioned) {
-                            if (DEBUG) Slog.v(TAG, "Running a backup pass");
+                            if (!mBackupRunning) {
+                                if (DEBUG) Slog.v(TAG, "Running a backup pass");
 
-                            // Acquire the wakelock and pass it to the backup thread.  it will
-                            // be released once backup concludes.
-                            mWakelock.acquire();
+                                // Acquire the wakelock and pass it to the backup thread.  it will
+                                // be released once backup concludes.
+                                mBackupRunning = true;
+                                mWakelock.acquire();
 
-                            Message msg = mBackupHandler.obtainMessage(MSG_RUN_BACKUP);
-                            mBackupHandler.sendMessage(msg);
+                                Message msg = mBackupHandler.obtainMessage(MSG_RUN_BACKUP);
+                                mBackupHandler.sendMessage(msg);
+                            } else {
+                                Slog.i(TAG, "Backup time but one already running");
+                            }
                         } else {
                             Slog.w(TAG, "Backup pass but e=" + mEnabled + " p=" + mProvisioned);
                         }
@@ -1948,9 +1960,14 @@ class BackupManagerService extends IBackupManager.Stub {
                 writeRestoreTokens();
             }
 
-            // Set up the next backup pass
-            if (mStatus == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
-                backupNow();
+            // Set up the next backup pass - at this point we can set mBackupRunning
+            // to false to allow another pass to fire, because we're done with the
+            // state machine sequence and the wakelock is refcounted.
+            synchronized (mQueueLock) {
+                mBackupRunning = false;
+                if (mStatus == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                    backupNow();
+                }
             }
 
             // Only once we're entirely finished do we release the wakelock
@@ -2400,8 +2417,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     mLatchObject.notifyAll();
                 }
                 sendEndBackup();
-                mWakelock.release();
                 if (DEBUG) Slog.d(TAG, "Full backup pass complete.");
+                mWakelock.release();
             }
         }
 
@@ -2908,8 +2925,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     mLatchObject.notifyAll();
                 }
                 sendEndRestore();
-                mWakelock.release();
                 Slog.d(TAG, "Full restore pass complete.");
+                mWakelock.release();
             }
         }
 
@@ -5630,7 +5647,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
-            pw.println("Last backup pass: " + mLastBackupPass
+            if (mBackupRunning) pw.println("Backup currently running");
+            pw.println("Last backup pass started: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + mNextBackupPass);
 
