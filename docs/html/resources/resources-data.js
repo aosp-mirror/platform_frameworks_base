@@ -588,6 +588,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'input', 'new'],
+    path: 'samples/SampleSpellCheckerService/index.html',
+    title: {
+      en: 'Spell Checker'
+    },
+    description: {
+      en: 'An example spell checker service, using the <a href="'+toRoot+'reference/android/service/textservice/SpellCheckerService.html"><code>SpellCheckerservice</code></a>.'
+    }
+  },
+  {
     tags: ['sample', 'accountsync'],
     path: 'samples/SampleSyncAdapter/index.html',
     title: {
@@ -701,7 +711,7 @@ var ANDROID_RESOURCES = [
     tags: ['sample', 'data', 'new'],
     path: 'samples/VoicemailProviderDemo/index.html',
     title: {
-      en: 'Voicemail Provider Demo'
+      en: 'Voicemail Provider'
     },
     description: {
       en: 'A sample application to demonstrate how to use voicemail content provider APIs in Android 4.0.'
