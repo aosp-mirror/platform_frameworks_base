@@ -71,6 +71,8 @@ extern uint32_t __attribute__((overloadable))
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimFaces(rs_allocation);
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 14))
+
 /**
  * Copy part of an allocation from another allocation.
  *
@@ -123,6 +125,7 @@ extern void __attribute__((overloadable))
                             uint32_t srcMip,
                             rs_allocation_cubemap_face srcFace);
 
+#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
 /**
  * Extract a single element from an allocation.

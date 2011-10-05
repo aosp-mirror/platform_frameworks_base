@@ -23,6 +23,7 @@
 #ifndef __RS_ATOMIC_RSH__
 #define __RS_ATOMIC_RSH__
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 14))
 
 /**
  * Atomic add one to the value at addr.
@@ -243,6 +244,7 @@ extern int32_t __attribute__((overloadable))
 extern uint32_t __attribute__((overloadable))
     rsAtomicCas(volatile uint32_t* addr, int32_t compareValue, int32_t newValue);
 
+#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
 #endif
 
