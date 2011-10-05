@@ -30,7 +30,7 @@ import android.util.Slog;
  */
 public class Display {
     static final String TAG = "Display";
-    static final boolean DEBUG_DISPLAY_SIZE = true;
+    static final boolean DEBUG_DISPLAY_SIZE = false;
 
     /**
      * The default Display id.
