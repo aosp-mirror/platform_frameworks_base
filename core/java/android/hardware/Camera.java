@@ -201,7 +201,7 @@ public class Camera {
         public static final int CAMERA_FACING_FRONT = 1;
 
         /**
-         * The direction that the camera faces to. It should be
+         * The direction that the camera faces. It should be
          * CAMERA_FACING_BACK or CAMERA_FACING_FRONT.
          */
         public int facing;
@@ -1055,9 +1055,9 @@ public class Camera {
         /**
          * Notify the listener of the detected faces in the preview frame.
          *
-         * @param faces the detected faces. The list is sorted by the score.
-         *              The highest score is the first element.
-         * @param camera  the Camera service object
+         * @param faces The detected faces in a list sorted by the confidence score.
+         *              The highest scored face is the first element.
+         * @param camera  The {@link Camera} service object
          */
         void onFaceDetection(Face[] faces, Camera camera);
     }
@@ -1105,7 +1105,7 @@ public class Camera {
     /**
      * Stops the face detection.
      *
-     * @see #startFaceDetection(int)
+     * @see #startFaceDetection()
      */
     public final void stopFaceDetection() {
         _stopFaceDetection();
@@ -1116,8 +1116,12 @@ public class Camera {
     private native final void _stopFaceDetection();
 
     /**
-     * The information of a face from camera face detection.
+     * Information about a face identified through camera face detection.
+     * 
+     * <p>When face detection is used with a camera, the {@link FaceDetectionListener} returns a
+     * list of face objects for use in focusing and metering.</p>
      *
+     * @see FaceDetectionListener
      */
     public static class Face {
         /**
@@ -1138,15 +1142,15 @@ public class Camera {
          * the sensor sees. The direction is not affected by the rotation or
          * mirroring of {@link #setDisplayOrientation(int)}.</p>
          *
-         * @see #startFaceDetection(int)
+         * @see #startFaceDetection()
          */
         public Rect rect;
 
         /**
-         * The confidence level of the face. The range is 1 to 100. 100 is the
+         * The confidence level for the detection of the face. The range is 1 to 100. 100 is the
          * highest confidence.
          *
-         * @see #startFaceDetection(int)
+         * @see #startFaceDetection()
          */
         public int score;
 
@@ -3144,7 +3148,7 @@ public class Camera {
          * supported.
          *
          * @return the maximum number of detected face supported by the camera.
-         * @see #startFaceDetection(int)
+         * @see #startFaceDetection()
          */
         public int getMaxNumDetectedFaces() {
             return getInt(KEY_MAX_NUM_DETECTED_FACES_HW, 0);
