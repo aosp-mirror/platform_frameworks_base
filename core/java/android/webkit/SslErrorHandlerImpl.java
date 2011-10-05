@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import junit.framework.Assert;
-
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,7 +52,7 @@ class SslErrorHandlerImpl extends SslErrorHandler {
     private final SslErrorHandler mOriginHandler;
     private final LoadListener mLoadListener;
 
-    // Message id for handling the response
+    // Message id for handling the response from the client.
     private static final int HANDLE_RESPONSE = 100;
 
     @Override
@@ -130,7 +128,9 @@ class SslErrorHandlerImpl extends SslErrorHandler {
     }
 
     /**
-     * Handles SSL error(s) on the way up to the user.
+     * Handles requests from the network stack about whether to proceed with a
+     * load given an SSL error(s). We may ask the client what to do, or use a
+     * cached response.
      */
     /* package */ synchronized void handleSslErrorRequest(LoadListener loader) {
         if (DebugFlags.SSL_ERROR_HANDLER) {
@@ -147,8 +147,10 @@ class SslErrorHandlerImpl extends SslErrorHandler {
     }
 
     /**
-     * Check the preference table for a ssl error that has already been shown
-     * to the user.
+     * Check the preference table to see if we already have a 'proceed' decision
+     * from the client for this host and for an error of equal or greater
+     * severity than the supplied error. If so, instruct the loader to proceed
+     * and return true. Otherwise return false.
      */
     /* package */ synchronized boolean checkSslPrefTable(LoadListener loader,
             SslError error) {
@@ -156,21 +158,22 @@ class SslErrorHandlerImpl extends SslErrorHandler {
         final int primary = error.getPrimaryError();
 
         if (DebugFlags.SSL_ERROR_HANDLER) {
-            Assert.assertTrue(host != null && primary != 0);
+            assert host != null;
+            assert primary != 0;
         }
 
-        if (mSslPrefTable.containsKey(host)) {
-            if (primary <= mSslPrefTable.getInt(host)) {
-                handleSslErrorResponse(loader, error, true);
-                return true;
+        if (mSslPrefTable.containsKey(host) && primary <= mSslPrefTable.getInt(host)) {
+            if (!loader.cancelled()) {
+                loader.handleSslErrorResponse(true);
             }
+            return true;
         }
         return false;
     }
 
     /**
      * Processes queued SSL-error confirmation requests in
-     * a tight loop while there is no need to ask the user.
+     * a tight loop while there is no need to ask the client.
      */
     /* package */void fastProcessQueuedSslErrors() {
         while (processNextLoader());
@@ -195,19 +198,18 @@ class SslErrorHandlerImpl extends SslErrorHandler {
             SslError error = loader.sslError();
 
             if (DebugFlags.SSL_ERROR_HANDLER) {
-                Assert.assertNotNull(error);
+                assert error != null;
             }
 
-            // checkSslPrefTable will handle the ssl error response if the
-            // answer is available. It does not remove the loader from the
-            // queue.
+            // checkSslPrefTable() will instruct the loader to proceed if we
+            // have a cached 'proceed' decision. It does not remove the loader
+            // from the queue.
             if (checkSslPrefTable(loader, error)) {
                 mLoaderQueue.remove(loader);
                 return true;
             }
 
-            // if we do not have information on record, ask
-            // the user (display a dialog)
+            // If we can not proceed based on a cached decision, ask the client.
             CallbackProxy proxy = loader.getFrame().getCallbackProxy();
             proxy.onReceivedSslError(new SslErrorHandlerImpl(this, loader), error);
         }
@@ -217,32 +219,31 @@ class SslErrorHandlerImpl extends SslErrorHandler {
     }
 
     /**
-     * Proceed with the SSL certificate.
+     * Proceed with this load.
      */
     public void proceed() {
-        mOriginHandler.sendMessage(
-                mOriginHandler.obtainMessage(
-                        HANDLE_RESPONSE, 1, 0, mLoadListener));
+        mOriginHandler.sendMessage(mOriginHandler.obtainMessage(
+                HANDLE_RESPONSE, 1, 0, mLoadListener));
     }
 
     /**
-     * Cancel this request and all pending requests for the WebView that had
-     * the error.
+     * Cancel this load and all pending loads for the WebView that had the
+     * error.
      */
     public void cancel() {
-        mOriginHandler.sendMessage(
-                mOriginHandler.obtainMessage(
-                        HANDLE_RESPONSE, 0, 0, mLoadListener));
+        mOriginHandler.sendMessage(mOriginHandler.obtainMessage(
+                HANDLE_RESPONSE, 0, 0, mLoadListener));
     }
 
     /**
-     * Handles SSL error(s) on the way down from the user.
+     * Handles the response from the client about whether to proceed with this
+     * load. We save the response to be re-used in the future.
      */
     /* package */ synchronized void handleSslErrorResponse(LoadListener loader,
             SslError error, boolean proceed) {
         if (DebugFlags.SSL_ERROR_HANDLER) {
-            Assert.assertNotNull(loader);
-            Assert.assertNotNull(error);
+            assert loader != null;
+            assert error != null;
         }
 
         if (DebugFlags.SSL_ERROR_HANDLER) {
@@ -253,16 +254,16 @@ class SslErrorHandlerImpl extends SslErrorHandler {
 
         if (!loader.cancelled()) {
             if (proceed) {
-                // update the user's SSL error preference table
+                // Update the SSL error preference table
                 int primary = error.getPrimaryError();
                 String host = loader.host();
 
                 if (DebugFlags.SSL_ERROR_HANDLER) {
-                    Assert.assertTrue(host != null && primary != 0);
+                    assert host != null;
+                    assert primary != 0;
                 }
                 boolean hasKey = mSslPrefTable.containsKey(host);
-                if (!hasKey ||
-                    primary > mSslPrefTable.getInt(host)) {
+                if (!hasKey || primary > mSslPrefTable.getInt(host)) {
                     mSslPrefTable.putInt(host, primary);
                 }
             }

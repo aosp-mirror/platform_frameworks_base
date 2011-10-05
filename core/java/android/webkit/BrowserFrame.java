@@ -471,8 +471,6 @@ class BrowserFrame extends Handler {
 
     /**
      * We have received an SSL certificate for the main top-level page.
-     *
-     * !!!Called from the network thread!!!
      */
     void certificate(SslCertificate certificate) {
         if (mIsMainFrame) {
@@ -1186,12 +1184,11 @@ class BrowserFrame extends Handler {
         SslErrorHandler handler = new SslErrorHandler() {
             @Override
             public void proceed() {
-                SslCertLookupTable.getInstance().setIsAllowed(sslError, true);
+                SslCertLookupTable.getInstance().setIsAllowed(sslError);
                 nativeSslCertErrorProceed(handle);
             }
             @Override
             public void cancel() {
-                SslCertLookupTable.getInstance().setIsAllowed(sslError, false);
                 nativeSslCertErrorCancel(handle, certError);
             }
         };
