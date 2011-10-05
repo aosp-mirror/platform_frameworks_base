@@ -366,6 +366,7 @@ typedef float4 rs_quaternion;
 #define RS_PACKED __attribute__((packed, aligned(4)))
 #define NULL ((const void *)0)
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 14))
 
 /**
  * \brief Enum for selecting cube map faces
@@ -392,5 +393,7 @@ typedef enum {
     RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS = 0x0008,
     RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET = 0x0010
 } rs_allocation_usage_type;
+
+#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
 #endif
