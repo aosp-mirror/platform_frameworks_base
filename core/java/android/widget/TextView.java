@@ -11605,7 +11605,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final RectF      sTempRect = new RectF();
 
     // XXX should be much larger
-    private static final int        VERY_WIDE = 16384;
+    private static final int        VERY_WIDE = 1024*1024;
 
     private static final int        BLINK = 500;
 
