@@ -518,7 +518,7 @@ public final class WebViewCore {
     /**
      * Update the layers' content
      */
-    private native int nativeUpdateLayers(Region invalRegion);
+    private native boolean nativeUpdateLayers(int baseLayer);
 
     private native boolean nativeFocusBoundsChanged();
 
@@ -2004,18 +2004,25 @@ public final class WebViewCore {
         boolean mFocusSizeChanged;
     }
 
+    DrawData mLastDrawData = null;
+
     // Only update the layers' content, not the base surface
     // PictureSet.
     private void webkitDrawLayers() {
         mDrawLayersIsScheduled = false;
-        if (mDrawIsScheduled) {
+        if (mDrawIsScheduled || mLastDrawData == null) {
             removeMessages(EventHub.WEBKIT_DRAW);
             webkitDraw();
             return;
         }
-        DrawData draw = new DrawData();
-        draw.mBaseLayer = nativeUpdateLayers(draw.mInvalRegion);
-        webkitDraw(draw);
+        // Directly update the layers we last passed to the UI side
+        if (nativeUpdateLayers(mLastDrawData.mBaseLayer)) {
+            // If anything more complex than position has been touched, let's do a full draw
+            webkitDraw();
+        } else {
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebView.INVAL_RECT_MSG_ID).sendToTarget();
+        }
     }
 
     private void webkitDraw() {
@@ -2032,6 +2039,7 @@ public final class WebViewCore {
             }
             return;
         }
+        mLastDrawData = draw;
         webkitDraw(draw);
     }
 
