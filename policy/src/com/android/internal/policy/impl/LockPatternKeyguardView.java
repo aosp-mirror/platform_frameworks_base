@@ -1170,5 +1170,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW); // Expose fallback
             stopFaceLock();
         }
+
+        // Allows the Face Unlock service to poke the wake lock to keep the lockscreen alive
+        @Override
+        public void pokeWakelock() {
+            if (DEBUG) Log.d(TAG, "FaceLock pokeWakelock()");
+            mKeyguardScreenCallback.pokeWakelock();
+        }
     };
 }
