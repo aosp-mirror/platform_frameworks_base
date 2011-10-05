@@ -1581,6 +1581,11 @@ public class WebView extends AbsoluteLayout
             mListBoxDialog.dismiss();
             mListBoxDialog = null;
         }
+        // remove so that it doesn't cause events
+        if (mWebTextView != null) {
+            mWebTextView.remove();
+            mWebTextView = null;
+        }
         if (mNativeClass != 0) nativeStopGL();
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
@@ -7636,6 +7641,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
+        // check if mWebViewCore has been destroyed
+        if (mWebViewCore == null) {
+            return;
+        }
         WebViewCore.JSKeyData arg = new WebViewCore.JSKeyData();
         arg.mEvent = event;
         arg.mCurrentText = currentText;
