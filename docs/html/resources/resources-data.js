@@ -408,6 +408,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new'],
+    path: 'samples/AndroidBeam/index.html',
+    title: {
+      en: 'Android Beam'
+    },
+    description: {
+      en: 'An example of how to use the Android Beam feature to send messages between two Android-powered devices (API level 14 or later) that support NFC.'
+    }
+  },
+  {
     tags: ['sample', 'layout', 'ui'],
     path: 'samples/ApiDemos/index.html',
     title: {
