@@ -5704,6 +5704,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     Configuration computeNewConfigurationLocked() {
         Configuration config = new Configuration();
+        config.fontScale = 0;
         if (!computeNewConfigurationLocked(config)) {
             return null;
         }
