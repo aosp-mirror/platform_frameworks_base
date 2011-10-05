@@ -43,7 +43,6 @@ import junit.framework.Assert;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charsets;
 import java.security.PrivateKey;
@@ -1171,12 +1170,7 @@ class BrowserFrame extends Handler {
         try {
             X509Certificate cert = new X509CertImpl(certDER);
             SslCertificate sslCert = new SslCertificate(cert);
-            if (JniUtil.useChromiumHttpStack()) {
-                sslError = SslError.SslErrorFromChromiumErrorCode(certError, sslCert,
-                        new URL(url).getHost());
-            } else {
-                sslError = new SslError(certError, cert, url);
-            }
+            sslError = SslError.SslErrorFromChromiumErrorCode(certError, sslCert, url);
         } catch (IOException e) {
             // Can't get the certificate, not much to do.
             Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");

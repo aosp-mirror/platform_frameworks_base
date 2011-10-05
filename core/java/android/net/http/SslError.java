@@ -163,10 +163,6 @@ public class SslError {
      * Gets the URL associated with this object.
      * @return The URL, non-null.
      */
-    // TODO: When the WebView constructs an instance of this object, we
-    // actually provide only the hostname, not the full URL. We should consider
-    // deprecating this method, adding a new getHost() method and updating the
-    // constructor arguments. See http://b/5410252.
     public String getUrl() {
         return mUrl;
     }
