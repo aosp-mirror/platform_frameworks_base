@@ -231,6 +231,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         }
     };
 
+    private TransportControlView mTransportControlView;
+
     /**
      * @return Whether we are stuck on the lock screen because the sim is
      *   missing.
@@ -516,7 +518,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
         // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
         // But only if not dealing with a call
-        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE) {
+        final boolean transportInvisible = mTransportControlView == null ? true :
+                mTransportControlView.getVisibility() != View.VISIBLE;
+        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
+                && transportInvisible) {
             bindToFaceLock();
         } else {
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
@@ -805,14 +810,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     }
 
     private void initializeTransportControlView(View view) {
-        com.android.internal.widget.TransportControlView tcv =
-                (TransportControlView) view.findViewById(R.id.transport);
-        if (tcv == null) {
+        mTransportControlView = (TransportControlView) view.findViewById(R.id.transport);
+        if (mTransportControlView == null) {
             if (DEBUG) Log.w(TAG, "Couldn't find transport control widget");
         } else {
             mUpdateMonitor.reportClockVisible(true);
-            tcv.setVisibility(View.GONE); // hide tcv until we get the callback below to show it.
-            tcv.setCallback(mWidgetCallback);
+            mTransportControlView.setVisibility(View.GONE); // hide until it requests being shown.
+            mTransportControlView.setCallback(mWidgetCallback);
         }
     }
 
