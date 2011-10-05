@@ -1478,7 +1478,7 @@ public final class ActivityThread {
         }
 
         //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
-        DisplayMetrics metrics = getDisplayMetricsLocked(compInfo, false);
+        DisplayMetrics metrics = getDisplayMetricsLocked(null, false);
         r = new Resources(assets, metrics, getConfiguration(), compInfo);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
@@ -3476,7 +3476,7 @@ public final class ActivityThread {
             return false;
         }
         int changes = mResConfiguration.updateFrom(config);
-        DisplayMetrics dm = getDisplayMetricsLocked(compat, true);
+        DisplayMetrics dm = getDisplayMetricsLocked(null, true);
 
         if (compat != null && (mResCompatibilityInfo == null ||
                 !mResCompatibilityInfo.equals(compat))) {
@@ -3517,7 +3517,20 @@ public final class ActivityThread {
         
         return changes != 0;
     }
-    
+
+    final Configuration applyCompatConfiguration() {
+        Configuration config = mConfiguration;
+        if (mCompatConfiguration == null) {
+            mCompatConfiguration = new Configuration();
+        }
+        mCompatConfiguration.setTo(mConfiguration);
+        if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
+            mResCompatibilityInfo.applyToConfiguration(mCompatConfiguration);
+            config = mCompatConfiguration;
+        }
+        return config;
+    }
+
     final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
         ArrayList<ComponentCallbacks2> callbacks = null;
@@ -3546,14 +3559,7 @@ public final class ActivityThread {
                 return;
             }
             mConfiguration.updateFrom(config);
-            if (mCompatConfiguration == null) {
-                mCompatConfiguration = new Configuration();
-            }
-            mCompatConfiguration.setTo(mConfiguration);
-            if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
-                mResCompatibilityInfo.applyToConfiguration(mCompatConfiguration);
-                config = mCompatConfiguration;
-            }
+            config = applyCompatConfiguration();
             callbacks = collectComponentCallbacksLocked(false, config);
         }
         
@@ -3752,6 +3758,7 @@ public final class ActivityThread {
          * in AppBindData can be safely assumed to be up to date
          */
         applyConfigurationToResourcesLocked(data.config, data.compatInfo);
+        applyCompatConfiguration();
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
