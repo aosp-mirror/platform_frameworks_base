@@ -30,6 +30,7 @@ import java.net.URL;
  */
 final class SslCertLookupTable {
     private static SslCertLookupTable sTable;
+    // We store the most severe error we're willing to allow for each host.
     private final Bundle table;
 
     public static SslCertLookupTable getInstance() {
@@ -44,32 +45,28 @@ final class SslCertLookupTable {
     }
 
     public void setIsAllowed(SslError sslError) {
-        // TODO: We should key on just the host. See http://b/5409251.
-        String errorString = sslErrorToString(sslError);
-        if (errorString != null) {
-            table.putBoolean(errorString, true);
+        String host;
+        try {
+            host = new URL(sslError.getUrl()).getHost();
+        } catch(MalformedURLException e) {
+            return;
         }
+        table.putInt(host, sslError.getPrimaryError());
     }
 
+    // We allow the decision to be re-used if it's for the same host and is for
+    // an error of equal or greater severity than this error.
     public boolean isAllowed(SslError sslError) {
-        // TODO: We should key on just the host. See http://b/5409251.
-        String errorString = sslErrorToString(sslError);
-        return errorString == null ? false : table.getBoolean(errorString);
+        String host;
+        try {
+            host = new URL(sslError.getUrl()).getHost();
+        } catch(MalformedURLException e) {
+            return false;
+        }
+        return table.containsKey(host) && sslError.getPrimaryError() <= table.getInt(host);
     }
 
     public void clear() {
         table.clear();
-    }
-
-    private static String sslErrorToString(SslError error) {
-        String host;
-        try {
-            host = new URL(error.getUrl()).getHost();
-        } catch(MalformedURLException e) {
-            return null;
-        }
-        return "primary error: " + error.getPrimaryError() +
-                " certificate: " + error.getCertificate() +
-                " on host: " + host;
     }
 }
