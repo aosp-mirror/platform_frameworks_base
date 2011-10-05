@@ -381,6 +381,14 @@ public class WifiStateMachine extends StateMachine {
      */
     private final int mDefaultSupplicantScanIntervalMs;
 
+    /**
+     * Minimum time interval between enabling all networks.
+     * A device can end up repeatedly connecting to a bad network on screen on/off toggle
+     * due to enabling every time. We add a threshold to avoid this.
+     */
+    private static final int MIN_INTERVAL_ENABLE_ALL_NETWORKS_MS = 10 * 60 * 1000; /* 10 minutes */
+    private long mLastEnableAllNetworksTime;
+
 
     private static final int MIN_RSSI = -200;
     private static final int MAX_RSSI = 256;
@@ -2248,7 +2256,11 @@ public class WifiStateMachine extends StateMachine {
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_ALL_NETWORKS:
-                    WifiConfigStore.enableAllNetworks();
+                    long time =  android.os.SystemClock.elapsedRealtime();
+                    if (time - mLastEnableAllNetworksTime > MIN_INTERVAL_ENABLE_ALL_NETWORKS_MS) {
+                        WifiConfigStore.enableAllNetworks();
+                        mLastEnableAllNetworksTime = time;
+                    }
                     break;
                 case CMD_DISABLE_NETWORK:
                     ok = WifiConfigStore.disableNetwork(message.arg1, message.arg2);
