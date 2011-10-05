@@ -440,6 +440,9 @@ public class TextToSpeech {
     private final Context mContext;
     private Connection mServiceConnection;
     private OnInitListener mInitListener;
+    // Written from an unspecified application thread, read from
+    // a binder thread.
+    private volatile OnUtteranceCompletedListener mUtteranceCompletedListener;
     private final Object mStartLock = new Object();
 
     private String mRequestedEngine;
@@ -1071,20 +1074,8 @@ public class TextToSpeech {
      * @return {@link #ERROR} or {@link #SUCCESS}.
      */
     public int setOnUtteranceCompletedListener(final OnUtteranceCompletedListener listener) {
-        return runAction(new Action<Integer>() {
-            @Override
-            public Integer run(ITextToSpeechService service) throws RemoteException {
-                ITextToSpeechCallback.Stub callback = new ITextToSpeechCallback.Stub() {
-                    public void utteranceCompleted(String utteranceId) {
-                        if (listener != null) {
-                            listener.onUtteranceCompleted(utteranceId);
-                        }
-                    }
-                };
-                service.setCallback(getPackageName(), callback);
-                return SUCCESS;
-            }
-        }, ERROR, "setOnUtteranceCompletedListener");
+        mUtteranceCompletedListener = listener;
+        return TextToSpeech.SUCCESS;
     }
 
     /**
@@ -1137,6 +1128,15 @@ public class TextToSpeech {
 
     private class Connection implements ServiceConnection {
         private ITextToSpeechService mService;
+        private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
+            @Override
+            public void utteranceCompleted(String utteranceId) {
+                OnUtteranceCompletedListener listener = mUtteranceCompletedListener;
+                if (listener != null) {
+                    listener.onUtteranceCompleted(utteranceId);
+                }
+            }
+        };
 
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.i(TAG, "Connected to " + name);
@@ -1147,7 +1147,13 @@ public class TextToSpeech {
                 }
                 mServiceConnection = this;
                 mService = ITextToSpeechService.Stub.asInterface(service);
-                dispatchOnInit(SUCCESS);
+                try {
+                    mService.setCallback(getPackageName(), mCallback);
+                    dispatchOnInit(SUCCESS);
+                } catch (RemoteException re) {
+                    Log.e(TAG, "Error connecting to service, setCallback() failed");
+                    dispatchOnInit(ERROR);
+                }
             }
         }
 
