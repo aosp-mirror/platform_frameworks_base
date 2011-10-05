@@ -70,13 +70,6 @@ public:
             clipRect = s->clipRect;
         }
 
-        if ((s->flags & Snapshot::kFlagClipSet) &&
-                !(s->flags & Snapshot::kFlagDirtyLocalClip)) {
-            mLocalClip.set(s->mLocalClip);
-        } else {
-            flags |= Snapshot::kFlagDirtyLocalClip;
-        }
-
         if (s->flags & Snapshot::kFlagFboTarget) {
             flags |= Snapshot::kFlagFboTarget;
             region = s->region;
@@ -106,18 +99,14 @@ public:
          */
         kFlagIsFboLayer = 0x4,
         /**
-         * Indicates that the local clip should be recomputed.
-         */
-        kFlagDirtyLocalClip = 0x8,
-        /**
          * Indicates that this snapshot has changed the ortho matrix.
          */
-        kFlagDirtyOrtho = 0x10,
+        kFlagDirtyOrtho = 0x8,
         /**
          * Indicates that this snapshot or an ancestor snapshot is
          * an FBO layer.
          */
-        kFlagFboTarget = 0x20
+        kFlagFboTarget = 0x10
     };
 
     /**
@@ -169,7 +158,7 @@ public:
         }
 
         if (clipped) {
-            flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
+            flags |= Snapshot::kFlagClipSet;
         }
 
         return clipped;
@@ -180,19 +169,16 @@ public:
      */
     void setClip(float left, float top, float right, float bottom) {
         clipRect->set(left, top, right, bottom);
-        flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
+        flags |= Snapshot::kFlagClipSet;
     }
 
     const Rect& getLocalClip() {
-        if (flags & Snapshot::kFlagDirtyLocalClip) {
-            mat4 inverse;
-            inverse.loadInverse(*transform);
+        mat4 inverse;
+        inverse.loadInverse(*transform);
 
-            mLocalClip.set(*clipRect);
-            inverse.mapRect(mLocalClip);
+        mLocalClip.set(*clipRect);
+        inverse.mapRect(mLocalClip);
 
-            flags &= ~Snapshot::kFlagDirtyLocalClip;
-        }
         return mLocalClip;
     }
 
@@ -204,7 +190,7 @@ public:
     void resetClip(float left, float top, float right, float bottom) {
         clipRect = &mClipRectRoot;
         clipRect->set(left, top, right, bottom);
-        flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
+        flags |= Snapshot::kFlagClipSet;
     }
 
     bool isIgnored() const {
