@@ -2947,10 +2947,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // enable 180 degree rotation while docked.
                 preferredRotation = mDeskDockEnablesAccelerometer
                         ? sensorRotation : mDeskDockRotation;
-            } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
-                // Ignore sensor when user locked rotation.
-                preferredRotation = mUserRotation;
-            } else if ((mAccelerometerDefault != 0
+            } else if ((mAccelerometerDefault != 0 /* implies not rotation locked */
                             && (orientation == ActivityInfo.SCREEN_ORIENTATION_USER
                                     || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED))
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
@@ -2973,6 +2970,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     preferredRotation = lastRotation;
                 }
+            } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
+                // Apply rotation lock.
+                preferredRotation = mUserRotation;
             }
 
             // TODO: Sometimes, we might want to override the application-requested
@@ -3018,8 +3018,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return mPortraitRotation;
 
                 default:
-                    // For USER, UNSPECIFIED and NOSENSOR, just return the preferred
-                    // orientation we already calculated.
+                    // For USER, UNSPECIFIED, NOSENSOR, SENSOR and FULL_SENSOR,
+                    // just return the preferred orientation we already calculated.
                     if (preferredRotation >= 0) {
                         return preferredRotation;
                     }

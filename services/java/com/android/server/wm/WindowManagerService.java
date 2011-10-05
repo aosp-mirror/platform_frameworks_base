@@ -5050,16 +5050,23 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Freeze rotation changes.  (Enable "rotation lock".)
      * Persists across reboots.
+     * @param rotation The desired rotation to freeze to, or -1 to use the
+     * current rotation.
      */
-    public void freezeRotation() {
+    public void freezeRotation(int rotation) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "freezeRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
         }
+        if (rotation < -1 || rotation > Surface.ROTATION_270) {
+            throw new IllegalArgumentException("Rotation argument must be -1 or a valid "
+                    + "rotation constant.");
+        }
 
         if (DEBUG_ORIENTATION) Slog.v(TAG, "freezeRotation: mRotation=" + mRotation);
 
-        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED, mRotation);
+        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED,
+                rotation == -1 ? mRotation : rotation);
         updateRotationUnchecked(false);
     }
 
