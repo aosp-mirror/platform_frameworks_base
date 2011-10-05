@@ -768,9 +768,13 @@ import junit.framework.Assert;
             imm.hideSoftInputFromWindow(getWindowToken(), 0);
         }
         mInsideRemove = true;
+        boolean isFocused = hasFocus();
         mWebView.removeView(this);
-        mWebView.requestFocus();
+        if (isFocused) {
+            mWebView.requestFocus();
+        }
         mInsideRemove = false;
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
