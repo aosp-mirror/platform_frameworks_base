@@ -198,7 +198,8 @@ public class SslError {
 
     /**
      * Gets the most severe SSL error in this object's set of errors.
-     * @return The most severe SSL error.
+     * Returns -1 if the set is empty.
+     * @return The most severe SSL error, or -1 if the set is empty.
      */
     public int getPrimaryError() {
         if (mErrors != 0) {
@@ -208,9 +209,11 @@ public class SslError {
                     return error;
                 }
             }
+            // mErrors should never be set to an invalid value.
+            assert false;
         }
 
-        return 0;
+        return -1;
     }
 
     /**
