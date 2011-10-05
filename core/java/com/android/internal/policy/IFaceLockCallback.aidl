@@ -21,4 +21,5 @@ import android.os.IBinder;
 oneway interface IFaceLockCallback {
     void unlock();
     void cancel();
+    void pokeWakelock();
 }
