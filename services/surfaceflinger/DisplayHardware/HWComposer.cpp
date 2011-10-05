@@ -75,7 +75,7 @@ void HWComposer::hook_invalidate(struct hwc_procs* procs) {
 }
 
 void HWComposer::invalidate() {
-    mFlinger->signalEvent();
+    mFlinger->repaintEverything();
 }
 
 void HWComposer::setFrameBuffer(EGLDisplay dpy, EGLSurface sur) {
