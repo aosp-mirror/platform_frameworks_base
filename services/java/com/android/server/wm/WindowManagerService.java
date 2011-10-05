@@ -9009,8 +9009,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mScreenRotationAnimation = null;
             }
             updateRotation = true;
-            Surface.unfreezeDisplay(0);
         }
+        Surface.unfreezeDisplay(0);
 
         mInputMonitor.thawInputDispatchingLw();
 
