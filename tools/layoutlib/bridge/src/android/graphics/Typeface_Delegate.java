@@ -26,7 +26,6 @@ import android.content.res.AssetManager;
 
 import java.awt.Font;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,7 +49,6 @@ public final class Typeface_Delegate {
 
     // ---- delegate helper data ----
     private static final String DEFAULT_FAMILY = "sans-serif";
-    private static final int[] STYLE_BUFFER = new int[1];
 
     private static FontLoader sFontLoader;
     private static final List<Typeface_Delegate> sPostInitDelegate =
@@ -178,14 +176,6 @@ public final class Typeface_Delegate {
     }
 
     private void init() {
-        STYLE_BUFFER[0] = mStyle;
-        Font font = sFontLoader.getFont(mFamily, STYLE_BUFFER);
-        if (font != null) {
-            List<Font> list = new ArrayList<Font>();
-            list.add(font);
-            list.addAll(sFontLoader.getFallBackFonts());
-            mFonts = Collections.unmodifiableList(list);
-            mStyle = STYLE_BUFFER[0];
-        }
+        mFonts = sFontLoader.getFont(mFamily, mStyle);
     }
 }
