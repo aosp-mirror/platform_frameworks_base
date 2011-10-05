@@ -319,6 +319,8 @@ private:
     void initOutputFormat(const sp<MetaData> &inputFormat);
     status_t initNativeWindow();
 
+    void initNativeWindowCrop();
+
     void dumpPortStatus(OMX_U32 portIndex);
 
     status_t configureCodec(const sp<MetaData> &meta);
