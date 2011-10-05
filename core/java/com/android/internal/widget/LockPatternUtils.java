@@ -119,6 +119,8 @@ public class LockPatternUtils {
     private final static String LOCKSCREEN_OPTIONS = "lockscreen.options";
     public final static String LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK
             = "lockscreen.biometric_weak_fallback";
+    public final static String BIOMETRIC_WEAK_EVER_CHOSEN_KEY
+            = "lockscreen.biometricweakeverchosen";
 
     private final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
@@ -341,6 +343,16 @@ public class LockPatternUtils {
     }
 
     /**
+     * Return true if the user has ever chosen biometric weak.  This is true even if biometric
+     * weak is not current set.
+     *
+     * @return True if the user has ever chosen biometric weak.
+     */
+    public boolean isBiometricWeakEverChosen() {
+        return getBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY);
+    }
+
+    /**
      * Used by device policy manager to validate the current password
      * information it has.
      */
@@ -489,6 +501,7 @@ public class LockPatternUtils {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY,
                             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                    setBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, true);
                     moveTempGallery();
                 }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
@@ -606,6 +619,7 @@ public class LockPatternUtils {
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality));
+                    setBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, true);
                     moveTempGallery();
                 }
                 if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
