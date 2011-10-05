@@ -405,6 +405,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/AccessibilityService "Accessibility Service" \
 		-samplecode $(sample_dir)/AccelerometerPlay \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
+                -samplecode $(sample_dir)/AndroidBeam \
+		            resources/samples/AndroidBeam "Android Beam" \
 		-samplecode $(sample_dir)/ApiDemos \
 		            resources/samples/ApiDemos "API Demos" \
 		-samplecode $(sample_dir)/Support4Demos \
