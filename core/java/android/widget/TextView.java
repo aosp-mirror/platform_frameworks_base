@@ -6262,7 +6262,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             result = new DynamicLayout(mText, mTransformed, mTextPaint, w,
                     alignment, mTextDir, mSpacingMult,
                     mSpacingAdd, mIncludePad, mInput == null ? effectiveEllipsize : null,
-                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                            ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
                 boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
