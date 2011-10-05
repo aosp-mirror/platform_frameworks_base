@@ -44,10 +44,10 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
     private static final boolean DEBUG = false;
     private static final boolean SLOW_ANIMATIONS = DEBUG;
 
-    private static final boolean ANIMATE_LAYOUT = true;
-
     private static final int APPEAR_ANIM_LEN = SLOW_ANIMATIONS ? 5000 : 250;
     private static final int DISAPPEAR_ANIM_LEN = APPEAR_ANIM_LEN;
+
+    boolean mAnimateBounds = true;
 
     Rect mTmpRect = new Rect();
     int mNumRows = 0;
@@ -91,6 +91,10 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+    }
+
+    public void setAnimateBounds(boolean anim) {
+        mAnimateBounds = anim;
     }
 
     @Override
@@ -165,7 +169,7 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
 
         final View childF = child;
 
-        if (ANIMATE_LAYOUT) {
+        if (mAnimateBounds) {
             child.setPivotY(0);
             final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f, 1f);
             alphaFade.setDuration(APPEAR_ANIM_LEN);
@@ -185,10 +189,18 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
         }
     }
 
+    public void dismissRowAnimated(View child) {
+        dismissRowAnimated(child, 0);
+    }
+
+    public void dismissRowAnimated(View child, int vel) {
+        mSwipeHelper.dismissChild(child, vel);
+    }
+
     @Override
     public void removeView(View child) {
         final View childF = child;
-        if (ANIMATE_LAYOUT) {
+        if (mAnimateBounds) {
             if (mAppearingViews.containsKey(child)) {
                 mAppearingViews.remove(child);
             }
@@ -264,7 +276,7 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
 
             mNumRows = numRows;
 
-            if (ANIMATE_LAYOUT && isShown()) {
+            if (mAnimateBounds && isShown()) {
                 ObjectAnimator.ofInt(this, "forcedHeight", computedHeight)
                     .setDuration(APPEAR_ANIM_LEN)
                     .start();
