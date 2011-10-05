@@ -75,6 +75,8 @@ public final class FontLoader {
     private static final List<FontInfo> mMainFonts = new ArrayList<FontInfo>();
     private static final List<FontInfo> mFallbackFonts = new ArrayList<FontInfo>();
 
+    private final String mOsFontsLocation;
+
     public static FontLoader create(String fontOsLocation) {
         try {
             SAXParserFactory parserFactory = SAXParserFactory.newInstance();
@@ -89,7 +91,7 @@ public final class FontLoader {
             handler = parseFontFile(parserFactory, fontOsLocation, FONTS_FALLBACK);
             List<FontInfo> fallbackFonts = handler.getFontList();
 
-            return new FontLoader(systemFonts, fallbackFonts);
+            return new FontLoader(fontOsLocation, systemFonts, fallbackFonts);
         } catch (ParserConfigurationException e) {
             // return null below
         } catch (SAXException e) {
@@ -116,9 +118,16 @@ public final class FontLoader {
         return definitionParser;
     }
 
-    private FontLoader(List<FontInfo> fontList, List<FontInfo> fallBackList) {
+    private FontLoader(String fontOsLocation,
+            List<FontInfo> fontList, List<FontInfo> fallBackList) {
+        mOsFontsLocation = fontOsLocation;
         mMainFonts.addAll(fontList);
         mFallbackFonts.addAll(fallBackList);
+    }
+
+
+    public String getOsFontsLocation() {
+        return mOsFontsLocation;
     }
 
     /**
@@ -146,13 +155,24 @@ public final class FontLoader {
             }
         }
 
-        // add all the fallback fonts
+        // add all the fallback fonts for the given style
         for (FontInfo info : mFallbackFonts) {
             result.add(info.font[style]);
         }
 
         return result;
     }
+
+
+    public synchronized List<Font> getFallbackFonts(int style) {
+        List<Font> result = new ArrayList<Font>();
+        // add all the fallback fonts
+        for (FontInfo info : mFallbackFonts) {
+            result.add(info.font[style]);
+        }
+        return result;
+    }
+
 
     private final static class FontInfo {
         final Font[] font = new Font[4]; // Matches the 4 type-face styles.
