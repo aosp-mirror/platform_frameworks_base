@@ -537,6 +537,7 @@ extern Type* CONTEXT_TYPE;
 
 extern Type* RPC_DATA_TYPE;
 extern Type* RPC_ERROR_TYPE;
+extern Type* RPC_CONTEXT_TYPE;
 extern Type* EVENT_FAKE_TYPE;
 
 extern Expression* NULL_VALUE;
