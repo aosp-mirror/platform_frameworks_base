@@ -846,6 +846,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
             if (operatorNumeric == null) {
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
+                mGotCountryCode = false;
             } else {
                 String iso = "";
                 try{
