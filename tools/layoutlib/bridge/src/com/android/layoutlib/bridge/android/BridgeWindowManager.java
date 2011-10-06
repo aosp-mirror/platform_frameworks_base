@@ -124,7 +124,7 @@ public class BridgeWindowManager implements IWindowManager {
 
     }
 
-    public void freezeRotation() throws RemoteException {
+    public void freezeRotation(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
