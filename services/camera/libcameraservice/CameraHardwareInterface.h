@@ -80,24 +80,33 @@ typedef void (*data_callback_timestamp)(nsecs_t timestamp,
 
 class CameraHardwareInterface : public virtual RefBase {
 public:
-    CameraHardwareInterface(hw_module_t *module, const char *name)
+    CameraHardwareInterface(const char *name)
     {
         mDevice = 0;
         mName = name;
-        LOGI("Opening camera %s, this %p", name, this);
-        int rc = module->methods->open(module, name,
-                                       (hw_device_t **)&mDevice);
-        if (rc != OK)
-            LOGE("Could not open camera %s: %d", name, rc);
-        initHalPreviewWindow();
     }
 
     ~CameraHardwareInterface()
     {
         LOGI("Destroying camera %s", mName.string());
-        int rc = mDevice->common.close(&mDevice->common);
-        if (rc != OK)
-            LOGE("Could not close camera %s: %d", mName.string(), rc);
+        if(mDevice) {
+            int rc = mDevice->common.close(&mDevice->common);
+            if (rc != OK)
+                LOGE("Could not close camera %s: %d", mName.string(), rc);
+        }
+    }
+
+    status_t initialize(hw_module_t *module)
+    {
+        LOGI("Opening camera %s", mName.string());
+        int rc = module->methods->open(module, mName.string(),
+                                       (hw_device_t **)&mDevice);
+        if (rc != OK) {
+            LOGE("Could not open camera %s: %d", mName.string(), rc);
+            return rc;
+        }
+        initHalPreviewWindow();
+        return rc;
     }
 
     /** Set the ANativeWindow to which preview frames are sent */
