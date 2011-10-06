@@ -548,6 +548,8 @@ public class ConnectivityManager {
      * Return quota status for the current active network, or {@code null} if no
      * network is active. Quota status can change rapidly, so these values
      * shouldn't be cached.
+     *
+     * @hide
      */
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
         try {
