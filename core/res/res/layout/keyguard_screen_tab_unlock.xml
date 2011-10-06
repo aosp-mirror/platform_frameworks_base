@@ -121,7 +121,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="292dip">
+        android:layout_height="302dip">
 
         <com.android.internal.widget.multiwaveview.MultiWaveView
             android:id="@+id/unlock_widget"
