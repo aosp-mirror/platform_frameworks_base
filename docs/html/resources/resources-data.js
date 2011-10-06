@@ -578,13 +578,13 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'media' ],
+    tags: ['sample', 'media', 'updated'],
     path: 'samples/RandomMusicPlayer/index.html',
     title: {
       en: 'Random Music Player'
     },
     description: {
-      en: 'Demonstrates how to write a multimedia application that plays music from the device and from URLs. It manages media playback from a service and can play music in the background, respecting audio focus changes.'
+      en: 'Demonstrates how to write a multimedia application that plays music from the device and from URLs. It manages media playback from a service and can play music in the background, respecting audio focus changes. Also shows how to use the new Remote Control APIs in API level 14.'
     }
   },
   {
