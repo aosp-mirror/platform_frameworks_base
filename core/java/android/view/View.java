@@ -4001,23 +4001,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         event.setEnabled(isEnabled());
         event.setContentDescription(mContentDescription);
 
-        final int eventType = event.getEventType();
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
-                if (mAttachInfo != null) {
-                    ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
-                    getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD,
-                            FOCUSABLES_ALL);
-                    event.setItemCount(focusablesTempList.size());
-                    event.setCurrentItemIndex(focusablesTempList.indexOf(this));
-                    focusablesTempList.clear();
-                }
-            } break;
-            case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
-                event.setScrollX(mScrollX);
-                event.setScrollY(mScrollY);
-                event.setItemCount(getHeight());
-            } break;
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
+            ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
+            getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD,
+                    FOCUSABLES_ALL);
+            event.setItemCount(focusablesTempList.size());
+            event.setCurrentItemIndex(focusablesTempList.indexOf(this));
+            focusablesTempList.clear();
         }
     }
 

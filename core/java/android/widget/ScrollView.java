@@ -721,13 +721,18 @@ public class ScrollView extends FrameLayout {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.setScrollable(true);
+        info.setScrollable(getScrollRange() > 0);
     }
 
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-        event.setScrollable(true);
+        final boolean scrollable = getScrollRange() > 0;
+        event.setScrollable(scrollable);
+        event.setScrollX(mScrollX);
+        event.setScrollY(mScrollY);
+        event.setMaxScrollX(mScrollX);
+        event.setMaxScrollY(getScrollRange());
     }
 
     private int getScrollRange() {

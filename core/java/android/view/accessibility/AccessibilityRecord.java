@@ -73,6 +73,8 @@ public class AccessibilityRecord {
     int mToIndex = UNDEFINED;
     int mScrollX = UNDEFINED;
     int mScrollY = UNDEFINED;
+    int mMaxScrollX = UNDEFINED;
+    int mMaxScrollY = UNDEFINED;
 
     int mAddedCount= UNDEFINED;
     int mRemovedCount = UNDEFINED;
@@ -348,18 +350,18 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Gets the scroll position of the source along the X axis.
+     * Gets the scroll offset of the source left edge in pixels.
      *
-     * @return The scroll along the X axis.
+     * @return The scroll.
      */
     public int getScrollX() {
         return mScrollX;
     }
 
     /**
-     * Sets the scroll position of the source along the X axis.
+     * Sets the scroll offset of the source left edge in pixels.
      *
-     * @param scrollX The scroll along the X axis.
+     * @param scrollX The scroll.
      */
     public void setScrollX(int scrollX) {
         enforceNotSealed();
@@ -367,22 +369,67 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Gets the scroll position of the source along the Y axis.
+     * Gets the scroll offset of the source top edge in pixels.
      *
-     * @return The scroll along the Y axis.
+     * @return The scroll.
      */
     public int getScrollY() {
         return mScrollY;
     }
 
     /**
-     * Sets the scroll position of the source along the Y axis.
+     * Sets the scroll offset of the source top edge in pixels.
      *
-     * @param scrollY The scroll along the Y axis.
+     * @param scrollY The scroll.
      */
     public void setScrollY(int scrollY) {
         enforceNotSealed();
         mScrollY = scrollY;
+    }
+
+    /**
+     * Gets the max scroll offset of the source left edge in pixels.
+     *
+     * @return The max scroll.
+     *
+     * @hide
+     */
+    public int getMaxScrollX() {
+        return mMaxScrollX;
+    }
+    /**
+     * Sets the max scroll offset of the source left edge in pixels.
+     *
+     * @param maxScrollX The max scroll.
+     *
+     * @hide
+     */
+    public void setMaxScrollX(int maxScrollX) {
+        enforceNotSealed();
+        mMaxScrollX = maxScrollX;
+    }
+
+    /**
+     * Gets the max scroll offset of the source top edge in pixels.
+     *
+     * @return The max scroll.
+     *
+     * @hide
+     */
+    public int getMaxScrollY() {
+        return mMaxScrollY;
+    }
+
+    /**
+     * Sets the max scroll offset of the source top edge in pixels.
+     *
+     * @param maxScrollY The max scroll.
+     *
+     * @hide
+     */
+    public void setMaxScrollY(int maxScrollY) {
+        enforceNotSealed();
+        mMaxScrollY = maxScrollY;
     }
 
     /**
@@ -658,6 +705,8 @@ public class AccessibilityRecord {
         mToIndex = record.mToIndex;
         mScrollX = record.mScrollX;
         mScrollY = record.mScrollY;
+        mMaxScrollX = record.mMaxScrollX;
+        mMaxScrollY = record.mMaxScrollY;
         mAddedCount = record.mAddedCount;
         mRemovedCount = record.mRemovedCount;
         mClassName = record.mClassName;
@@ -682,6 +731,8 @@ public class AccessibilityRecord {
         mToIndex = UNDEFINED;
         mScrollX = UNDEFINED;
         mScrollY = UNDEFINED;
+        mMaxScrollX = UNDEFINED;
+        mMaxScrollY = UNDEFINED;
         mAddedCount = UNDEFINED;
         mRemovedCount = UNDEFINED;
         mClassName = null;
@@ -711,6 +762,8 @@ public class AccessibilityRecord {
         builder.append("; ToIndex: " + mToIndex);
         builder.append("; ScrollX: " + mScrollX);
         builder.append("; ScrollY: " + mScrollY);
+        builder.append("; MaxScrollX: " + mMaxScrollX);
+        builder.append("; MaxScrollY: " + mMaxScrollY);
         builder.append("; AddedCount: " + mAddedCount);
         builder.append("; RemovedCount: " + mRemovedCount);
         builder.append("; ParcelableData: " + mParcelableData);
