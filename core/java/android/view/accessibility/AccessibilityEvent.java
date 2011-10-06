@@ -79,6 +79,16 @@ import java.util.List;
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -97,6 +107,16 @@ import java.util.List;
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -117,6 +137,16 @@ import java.util.List;
  *   <li>{@link #getItemCount()} - The number of selectable items of the source.</li>
  *   <li>{@link #getCurrentItemIndex()} - The currently selected item index.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -137,6 +167,16 @@ import java.util.List;
  *   <li>{@link #getItemCount()} - The number of focusable items on the screen.</li>
  *   <li>{@link #getCurrentItemIndex()} - The currently focused item index.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -218,18 +258,17 @@ import java.util.List;
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getScrollX()} - The horizontal offset of the source
- *                                (without descendants of AdapterView)).</li>
- *   <li>{@link #getScrollY()} - The vertical offset of the source
- *                                (without descendants of AdapterView)).</li>
- *   <li>{@link #getFromIndex()} - The index of the first visible item of the source
- *                                 (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The index of the last visible item of the source
- *                               (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source (for descendants of AdapterView)
- *                                 or the height of the source in pixels (all other cases).</li>
- *   <li>{@link #getText()} - Text for providing more context.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * <em>Note:</em> This event type is not dispatched to descendants though
  * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
@@ -334,6 +373,16 @@ import java.util.List;
  *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <b>View hover exit</b> - represents the event of stopping to hover
@@ -350,6 +399,16 @@ import java.util.List;
  *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
+ *       (without descendants of AdapterView).</li>
+ *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
+ *       inclusive (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source
+ *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -816,6 +875,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mToIndex = parcel.readInt();
         record.mScrollX = parcel.readInt();
         record.mScrollY =  parcel.readInt();
+        record.mMaxScrollX = parcel.readInt();
+        record.mMaxScrollY =  parcel.readInt();
         record.mAddedCount = parcel.readInt();
         record.mRemovedCount = parcel.readInt();
         record.mClassName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
@@ -868,6 +929,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(record.mToIndex);
         parcel.writeInt(record.mScrollX);
         parcel.writeInt(record.mScrollY);
+        parcel.writeInt(record.mMaxScrollX);
+        parcel.writeInt(record.mMaxScrollY);
         parcel.writeInt(record.mAddedCount);
         parcel.writeInt(record.mRemovedCount);
         TextUtils.writeToParcel(record.mClassName, parcel, flags);

@@ -32,8 +32,6 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Transformation;
 
 import com.android.internal.R;
@@ -352,23 +350,6 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     @Override
     int getChildHeight(View child) {
         return child.getMeasuredHeight();
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setScrollable(true);
-    }
-
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setScrollable(true);
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            event.setFromIndex(mFirstPosition);
-            event.setToIndex(mFirstPosition +  getChildCount());
-            event.setItemCount(mItemCount);
-        }
     }
 
     /**

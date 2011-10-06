@@ -77,7 +77,9 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -1300,6 +1302,31 @@ public class WebView extends AbsoluteLayout
             mTextToSpeech.shutdown();
             mTextToSpeech = null;
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setScrollable(isScrollableForAccessibility());
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setScrollable(isScrollableForAccessibility());
+        event.setScrollX(mScrollX);
+        event.setScrollY(mScrollY);
+        final int convertedContentWidth = contentToViewX(getContentWidth());
+        final int adjustedViewWidth = getWidth() - mPaddingLeft - mPaddingRight;
+        event.setMaxScrollX(Math.max(convertedContentWidth - adjustedViewWidth, 0));
+        final int convertedContentHeight = contentToViewY(getContentHeight());
+        final int adjustedViewHeight = getHeight() - mPaddingTop - mPaddingBottom;
+        event.setMaxScrollY(Math.max(convertedContentHeight - adjustedViewHeight, 0));
+    }
+
+    private boolean isScrollableForAccessibility() {
+        return (contentToViewX(getContentWidth()) > getWidth() - mPaddingLeft - mPaddingRight
+                || contentToViewY(getContentHeight()) > getHeight() - mPaddingTop - mPaddingBottom);
     }
 
     @Override

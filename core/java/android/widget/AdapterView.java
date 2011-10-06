@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 /**
@@ -881,19 +882,10 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
-            // This is an exceptional case which occurs when a window gets the
-            // focus and sends a focus event via its focused child to announce
-            // current focus/selection. AdapterView fires selection but not focus
-            // events so we change the event type here.
-            if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
-                event.setEventType(AccessibilityEvent.TYPE_VIEW_SELECTED);
-            }
-        }
-
         View selectedView = getSelectedView();
-        if (selectedView != null && selectedView.getVisibility() == VISIBLE) {
-            getSelectedView().dispatchPopulateAccessibilityEvent(event);
+        if (selectedView != null && selectedView.getVisibility() == VISIBLE
+                && selectedView.dispatchPopulateAccessibilityEvent(event)) {
+            return true;
         }
         return false;
     }
@@ -913,19 +905,32 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setScrollable(isScrollableForAccessibility());
+        View selectedView = getSelectedView();
+        if (selectedView != null) {
+            info.setEnabled(selectedView.isEnabled());
+        }
+    }
+
+    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-
+        event.setScrollable(isScrollableForAccessibility());
         View selectedView = getSelectedView();
         if (selectedView != null) {
             event.setEnabled(selectedView.isEnabled());
         }
-        event.setItemCount(getCount());
-        event.setCurrentItemIndex(getSelectedItemPosition());
-        if (getChildCount() > 0) {
-            event.setFromIndex(getFirstVisiblePosition());
-            event.setToIndex(getLastVisiblePosition());
-        }
+        event.setFromIndex(getFirstVisiblePosition());
+        event.setToIndex(getLastVisiblePosition());
+        event.setItemCount(getAdapter().getCount());
+    }
+
+    private boolean isScrollableForAccessibility() {
+        final int itemCount = getAdapter().getCount();
+        return itemCount > 0
+            && (getFirstVisiblePosition() > 0 || getLastVisiblePosition() < itemCount - 1);
     }
 
     @Override
