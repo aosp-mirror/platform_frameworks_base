@@ -1270,38 +1270,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setScrollable(true);
-    }
-
-    @Override
     public void sendAccessibilityEvent(int eventType) {
         // Since this class calls onScrollChanged even if the mFirstPosition and the
         // child count have not changed we will avoid sending duplicate accessibility
         // events.
         if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            final int lastPosition = mFirstPosition + getChildCount();
-            if (mLastAccessibilityScrollEventFromIndex == mFirstPosition
-                    && mLastAccessibilityScrollEventToIndex == lastPosition) {
+            final int firstVisiblePosition = getFirstVisiblePosition();
+            final int lastVisiblePosition = getLastVisiblePosition();
+            if (mLastAccessibilityScrollEventFromIndex == firstVisiblePosition
+                    && mLastAccessibilityScrollEventToIndex == lastVisiblePosition) {
                 return;   
             } else {
-                mLastAccessibilityScrollEventFromIndex = mFirstPosition;
-                mLastAccessibilityScrollEventToIndex = lastPosition;       
+                mLastAccessibilityScrollEventFromIndex = firstVisiblePosition;
+                mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
             }
         }
         super.sendAccessibilityEvent(eventType);
-    }
-
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setScrollable(true);
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            event.setFromIndex(mFirstPosition);
-            event.setToIndex(mFirstPosition +  getChildCount());
-            event.setItemCount(mItemCount);
-        }
     }
 
     /**

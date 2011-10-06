@@ -1997,31 +1997,6 @@ public class ListView extends AbsListView {
         }
     }
 
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-
-        // If the item count is less than 15 then subtract disabled items from the count and
-        // position. Otherwise ignore disabled items.
-        int itemCount = 0;
-        int currentItemIndex = getSelectedItemPosition();
-
-        ListAdapter adapter = getAdapter();
-        if (adapter != null) {
-            final int count = adapter.getCount();
-            for (int i = 0; i < count; i++) {
-                if (adapter.isEnabled(i)) {
-                    itemCount++;
-                } else if (i <= currentItemIndex) {
-                    currentItemIndex--;
-                }
-            }
-        }
-
-        event.setItemCount(itemCount);
-        event.setCurrentItemIndex(currentItemIndex);
-    }
-
     /**
      * setSelectionAfterHeaderView set the selection to be the first list item
      * after the header views.
