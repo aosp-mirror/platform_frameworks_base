@@ -554,7 +554,7 @@ status_t StagefrightRecorder::setParamTimeBetweenTimeLapseFrameCapture(int64_t t
 }
 
 status_t StagefrightRecorder::setParamGeoDataLongitude(
-    int32_t longitudex10000) {
+    int64_t longitudex10000) {
 
     if (longitudex10000 > 1800000 || longitudex10000 < -1800000) {
         return BAD_VALUE;
@@ -564,7 +564,7 @@ status_t StagefrightRecorder::setParamGeoDataLongitude(
 }
 
 status_t StagefrightRecorder::setParamGeoDataLatitude(
-    int32_t latitudex10000) {
+    int64_t latitudex10000) {
 
     if (latitudex10000 > 900000 || latitudex10000 < -900000) {
         return BAD_VALUE;
@@ -602,13 +602,13 @@ status_t StagefrightRecorder::setParameter(
             return setParam64BitFileOffset(use64BitOffset != 0);
         }
     } else if (key == "param-geotag-longitude") {
-        int32_t longitudex10000;
-        if (safe_strtoi32(value.string(), &longitudex10000)) {
+        int64_t longitudex10000;
+        if (safe_strtoi64(value.string(), &longitudex10000)) {
             return setParamGeoDataLongitude(longitudex10000);
         }
     } else if (key == "param-geotag-latitude") {
-        int32_t latitudex10000;
-        if (safe_strtoi32(value.string(), &latitudex10000)) {
+        int64_t latitudex10000;
+        if (safe_strtoi64(value.string(), &latitudex10000)) {
             return setParamGeoDataLatitude(latitudex10000);
         }
     } else if (key == "param-track-time-status") {
