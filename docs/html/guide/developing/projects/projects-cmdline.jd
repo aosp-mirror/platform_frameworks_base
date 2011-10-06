@@ -37,8 +37,8 @@ file</a></li>
 
   <p>The <code>android</code> tool provides you with commands to create all three types of
   projects. An Android project contains all of the files and resources that are needed to build a
-  project into an .apk file for installation. 
-  
+  project into an .apk file for installation.
+
   <ul>
     <li>An Android project contains all of the files and resources that are needed to build a project into
   an .apk file for installation. You need to create an Android project for any application that you
@@ -107,13 +107,14 @@ android create project \
   "{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb) &mdash; located in the
   SDK <code>platform-tools/</code> directory &mdash; to send your application to the emulator (discussed
   later). So you need access between your project solution and the <code>platform-tools/</code> folder.</p>
- 
+
   <p class="note"><strong>Tip:</strong> Add the <code>platform-tools/</code> as well as the <code>tools/</code> directory
   to your <code>PATH</code> environment variable.</p>
-  
+
   <p class="caution"><strong>Caution:</strong> You should refrain from moving the location of the
-  SDK directory, because this will break the build scripts. (They will need to be manually updated
-  to reflect the new SDK location before they will work again.)</p>
+  SDK directory, because this will break the SDK location property located in <code>local.properties</code>.
+  If you need to update the SDK location, use the <code>android update project</code> command.
+  See <a href="UpdatingAProject">Updating a Project</a> for more information.</p>
 
   <h2 id="UpdatingAProject">Updating a Project</h2>
 
@@ -166,7 +167,7 @@ android create lib-project --name &lt;your_project_name&gt; \
 
   <p>The <code>create lib-project</code> command creates a standard project structure that includes
   preset property that indicates to the build system that the project is a library. It does this by
-  adding this line to the project's <code>default.properties</code> file:</p>
+  adding this line to the project's <code>project.properties</code> file:</p>
   <pre class="no-pretty-print">
 android.library=true
 </pre>
@@ -176,7 +177,7 @@ android.library=true
 
   <p>If you want to convert an existing application project to a library project, so that other
   applications can use it, you can do so by adding a the <code>android.library=true</code> property
-  to the application's <code>default.properties</code> file.</p>
+  to the application's <code>project.properties</code> file.</p>
 
   <h3 id="CreatingManifestFile">Creating the manifest file</h3>
 
@@ -225,13 +226,13 @@ android update lib-project \
 
   <p>This command updates the application project's build properties to include a reference to the
   library project. Specifically, it adds an <code>android.library.reference.<em>n</em></code>
-  property to the project's <code>default.properties</code> file. For example:</p>
+  property to the project's <code>project.properties</code> file. For example:</p>
   <pre class="no-pretty-print">
 android.library.reference.1=path/to/library_projectA
 </pre>
 
   <p>If you are adding references to multiple libraries, note that you can set their relative
-  priority (and merge order) by manually editing the <code>default.properties</code> file and
+  priority (and merge order) by manually editing the <code>project.properties</code> file and
   adjusting the each reference's <code>.<em>n</em></code> index as appropriate. For example, assume
   these references:</p>
   <pre class="no-pretty-print">

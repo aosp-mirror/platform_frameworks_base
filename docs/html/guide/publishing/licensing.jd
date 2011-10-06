@@ -662,7 +662,7 @@ name, package, and set other fields as needed. </li>
 </ol>
 
 <p> When created, the project is
-predefined as a library project in its <code>default.properties</code> file, so
+predefined as a library project in its <code>project.properties</code> file, so
 no further configuration is needed. </p>
 
 <p>For more information about how to create an application project or work with
@@ -712,7 +712,7 @@ application from the application's project properties.</div>
 
 <p>If you are developing using the SDK command-line tools, navigate to the
 directory containing your application project and open the
-<code>default.properties</code> file. Add a line to the file that specifies the
+<code>project.properties</code> file. Add a line to the file that specifies the
 <code>android.library.reference.&lt;n&gt;</code> key and the path to the
 library. For example: </p>
 

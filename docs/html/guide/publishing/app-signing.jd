@@ -434,13 +434,13 @@ key and then align it using {@code zipalign}.</p>
 
 <p>However, the Ant build script can also perform the signing
 and aligning for you, if you have provided the path to your keystore and the name of
-your key alias in the project's {@code build.properties} file. With this information provided,
+your key alias in the project's {@code ant.properties} file. With this information provided,
 the build script will prompt you for your keystore and alias password when you perform
 <code>ant release</code>, it will sign the package and then align it. The final output
 file in {@code bin/} will instead be 
 <code><em>&lt;your_project_name></em>-release.apk</code>. With these steps
 automated for you, you're able to skip the manual procedures below (steps 3 and 4).
-To learn how to specify your keystore and alias in the {@code build.properties} file,
+To learn how to specify your keystore and alias in the {@code ant.properties} file,
 see <a href="{@docRoot}guide/developing/building/building-cmdline.html#ReleaseMode">
 Building and Running Apps on the Command Line</a>.</p>
 
