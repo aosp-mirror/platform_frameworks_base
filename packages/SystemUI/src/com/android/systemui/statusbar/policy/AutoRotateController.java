@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
@@ -63,13 +64,13 @@ public class AutoRotateController implements CompoundButton.OnCheckedChangeListe
                     try {
                         IWindowManager wm = IWindowManager.Stub.asInterface(
                                 ServiceManager.getService(Context.WINDOW_SERVICE));
-                        ContentResolver cr = mContext.getContentResolver();
                         if (autorotate) {
                             wm.thawRotation();
                         } else {
-                            wm.freezeRotation();
+                            wm.freezeRotation(-1);
                         }
                     } catch (RemoteException exc) {
+                        Log.w(TAG, "Unable to save auto-rotate setting");
                     }
                 }
             });
