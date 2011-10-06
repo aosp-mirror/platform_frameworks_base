@@ -172,6 +172,10 @@ class AppWidgetService extends IAppWidgetService.Stub
     boolean mSafeMode;
     boolean mStateLoaded;
 
+    // These are for debugging only -- widgets are going missing in some rare instances
+    ArrayList<Provider> mDeletedProviders = new ArrayList<Provider>();
+    ArrayList<Host> mDeletedHosts = new ArrayList<Host>();
+
     AppWidgetService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
@@ -219,6 +223,55 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
+    private void dumpProvider(Provider p, int index, PrintWriter pw) {
+        AppWidgetProviderInfo info = p.info;
+        pw.print("  ["); pw.print(index); pw.print("] provider ");
+                pw.print(info.provider.flattenToShortString());
+                pw.println(':');
+        pw.print("    min=("); pw.print(info.minWidth);
+                pw.print("x"); pw.print(info.minHeight);
+        pw.print(")   minResize=("); pw.print(info.minResizeWidth);
+                pw.print("x"); pw.print(info.minResizeHeight);
+                pw.print(") updatePeriodMillis=");
+                pw.print(info.updatePeriodMillis);
+                pw.print(" resizeMode=");
+                pw.print(info.resizeMode);
+                pw.print(" autoAdvanceViewId=");
+                pw.print(info.autoAdvanceViewId);
+                pw.print(" initialLayout=#");
+                pw.print(Integer.toHexString(info.initialLayout));
+                pw.print(" zombie="); pw.println(p.zombie);
+    }
+
+    private void dumpHost(Host host, int index, PrintWriter pw) {
+        pw.print("  ["); pw.print(index); pw.print("] hostId=");
+                pw.print(host.hostId); pw.print(' ');
+                pw.print(host.packageName); pw.print('/');
+        pw.print(host.uid); pw.println(':');
+        pw.print("    callbacks="); pw.println(host.callbacks);
+        pw.print("    instances.size="); pw.print(host.instances.size());
+                pw.print(" zombie="); pw.println(host.zombie);
+    }
+
+    private void dumpAppWidgetId(AppWidgetId id, int index, PrintWriter pw) {
+        pw.print("  ["); pw.print(index); pw.print("] id=");
+                pw.println(id.appWidgetId);
+        pw.print("    hostId=");
+                pw.print(id.host.hostId); pw.print(' ');
+                pw.print(id.host.packageName); pw.print('/');
+                pw.println(id.host.uid);
+        if (id.provider != null) {
+            pw.print("    provider=");
+                    pw.println(id.provider.info.provider.flattenToShortString());
+        }
+        if (id.host != null) {
+            pw.print("    host.callbacks="); pw.println(id.host.callbacks);
+        }
+        if (id.views != null) {
+            pw.print("    views="); pw.println(id.views);
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -233,61 +286,35 @@ class AppWidgetService extends IAppWidgetService.Stub
             int N = mInstalledProviders.size();
             pw.println("Providers:");
             for (int i=0; i<N; i++) {
-                Provider p = mInstalledProviders.get(i);
-                AppWidgetProviderInfo info = p.info;
-                pw.print("  ["); pw.print(i); pw.print("] provider ");
-                        pw.print(info.provider.flattenToShortString());
-                        pw.println(':');
-                pw.print("    min=("); pw.print(info.minWidth);
-                        pw.print("x"); pw.print(info.minHeight);
-                pw.print(")   minResize=("); pw.print(info.minResizeWidth);
-                        pw.print("x"); pw.print(info.minResizeHeight);
-                        pw.print(") updatePeriodMillis=");
-                        pw.print(info.updatePeriodMillis);
-                        pw.print(" resizeMode=");
-                        pw.print(info.resizeMode);
-                        pw.print(" autoAdvanceViewId=");
-                        pw.print(info.autoAdvanceViewId);
-                        pw.print(" initialLayout=#");
-                        pw.print(Integer.toHexString(info.initialLayout));
-                        pw.print(" zombie="); pw.println(p.zombie);
+                dumpProvider(mInstalledProviders.get(i), i, pw);
             }
 
             N = mAppWidgetIds.size();
             pw.println(" ");
             pw.println("AppWidgetIds:");
             for (int i=0; i<N; i++) {
-                AppWidgetId id = mAppWidgetIds.get(i);
-                pw.print("  ["); pw.print(i); pw.print("] id=");
-                        pw.println(id.appWidgetId);
-                pw.print("    hostId=");
-                        pw.print(id.host.hostId); pw.print(' ');
-                        pw.print(id.host.packageName); pw.print('/');
-                        pw.println(id.host.uid);
-                if (id.provider != null) {
-                    pw.print("    provider=");
-                            pw.println(id.provider.info.provider.flattenToShortString());
-                }
-                if (id.host != null) {
-                    pw.print("    host.callbacks="); pw.println(id.host.callbacks);
-                }
-                if (id.views != null) {
-                    pw.print("    views="); pw.println(id.views);
-                }
+                dumpAppWidgetId(mAppWidgetIds.get(i), i, pw);
             }
 
             N = mHosts.size();
             pw.println(" ");
             pw.println("Hosts:");
             for (int i=0; i<N; i++) {
-                Host host = mHosts.get(i);
-                pw.print("  ["); pw.print(i); pw.print("] hostId=");
-                        pw.print(host.hostId); pw.print(' ');
-                        pw.print(host.packageName); pw.print('/');
-                        pw.print(host.uid); pw.println(':');
-                pw.print("    callbacks="); pw.println(host.callbacks);
-                pw.print("    instances.size="); pw.print(host.instances.size());
-                        pw.print(" zombie="); pw.println(host.zombie);
+                dumpHost(mHosts.get(i), i, pw);
+            }
+
+            N = mDeletedProviders.size();
+            pw.println(" ");
+            pw.println("Deleted Providers:");
+            for (int i=0; i<N; i++) {
+                dumpProvider(mDeletedProviders.get(i), i, pw);
+            }
+
+            N = mDeletedHosts.size();
+            pw.println(" ");
+            pw.println("Deleted Hosts:");
+            for (int i=0; i<N; i++) {
+                dumpHost(mDeletedHosts.get(i), i, pw);
             }
         }
     }
@@ -363,6 +390,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
         host.instances.clear();
         mHosts.remove(host);
+        mDeletedHosts.add(host);
         // it's gone or going away, abruptly drop the callback connection
         host.callbacks = null;
     }
@@ -934,6 +962,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
         p.instances.clear();
         mInstalledProviders.remove(index);
+        mDeletedProviders.add(p);
         // no need to send the DISABLE broadcast, since the receiver is gone anyway
         cancelBroadcasts(p);
     }
