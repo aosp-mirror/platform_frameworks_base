@@ -21,6 +21,8 @@ import android.os.Parcelable;
 
 /**
  * Information about quota status on a specific network.
+ *
+ * @hide
  */
 public class NetworkQuotaInfo implements Parcelable {
     private final long mEstimatedBytes;
