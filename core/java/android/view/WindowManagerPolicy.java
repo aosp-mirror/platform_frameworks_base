@@ -237,6 +237,12 @@ public interface WindowManagerPolicy {
         public WindowManager.LayoutParams getAttrs();
 
         /**
+         * Retrieve the current system UI visibility flags associated with
+         * this window.
+         */
+        public int getSystemUiVisibility();
+
+        /**
          * Get the layer at which this window's surface will be Z-ordered.
          */
         public int getSurfaceLayer();

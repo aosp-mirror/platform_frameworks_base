@@ -76,8 +76,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final boolean mIsImWindow;
     final boolean mIsWallpaper;
     final boolean mIsFloatingLayer;
+    int mSeq;
     boolean mEnforceSizeCompat;
     int mViewVisibility;
+    int mSystemUiVisibility;
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppFreezing;
@@ -282,7 +284,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mWasPaused;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
-           WindowState attachedWindow, WindowManager.LayoutParams a,
+           WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility) {
         mService = service;
         mSession = s;
@@ -292,6 +294,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mViewVisibility = viewVisibility;
         DeathRecipient deathRecipient = new DeathRecipient();
         mAlpha = a.alpha;
+        mSeq = seq;
         mEnforceSizeCompat = (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
             WindowManagerService.TAG, "Window " + this + " client=" + c.asBinder()
@@ -549,6 +552,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     public WindowManager.LayoutParams getAttrs() {
         return mAttrs;
+    }
+
+    public int getSystemUiVisibility() {
+        return mSystemUiVisibility;
     }
 
     public int getSurfaceLayer() {
@@ -1597,6 +1604,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(" mLastHidden="); pw.print(mLastHidden);
             pw.print(" mHaveFrame="); pw.print(mHaveFrame);
             pw.print(" mObscured="); pw.println(mObscured);
+            pw.print(prefix); pw.print("mSeq="); pw.print(mSeq);
+            pw.print(" mSystemUiVisibility=0x");
+            pw.println(Integer.toHexString(mSystemUiVisibility));
         }
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || mAttachedHidden) {
             pw.print(prefix); pw.print("mPolicyVisibility=");

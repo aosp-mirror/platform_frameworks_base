@@ -37,14 +37,14 @@ import android.view.WindowManager.LayoutParams;
  */
 public final class BridgeWindowSession implements IWindowSession {
 
-    public int add(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3,
+    public int add(IWindow arg0, int seq, LayoutParams arg1, int arg2, Rect arg3,
             InputChannel outInputchannel)
             throws RemoteException {
         // pass for now.
         return 0;
     }
 
-    public int addWithoutInputChannel(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3)
+    public int addWithoutInputChannel(IWindow arg0, int seq, LayoutParams arg1, int arg2, Rect arg3)
             throws RemoteException {
         // pass for now.
         return 0;
@@ -78,7 +78,7 @@ public final class BridgeWindowSession implements IWindowSession {
         return null;
     }
 
-    public int relayout(IWindow arg0, LayoutParams arg1, int arg2, int arg3, int arg4,
+    public int relayout(IWindow arg0, int seq, LayoutParams arg1, int arg2, int arg3, int arg4,
             boolean arg4_5, Rect arg5, Rect arg6, Rect arg7, Configuration arg7b, Surface arg8)
             throws RemoteException {
         // pass for now.
