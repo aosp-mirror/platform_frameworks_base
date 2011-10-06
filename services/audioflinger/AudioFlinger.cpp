@@ -5550,7 +5550,7 @@ status_t AudioFlinger::moveEffectChain_l(int sessionId,
 
     // remove chain first. This is useful only if reconfiguring effect chain on same output thread,
     // so that a new chain is created with correct parameters when first effect is added. This is
-    // otherwise unecessary as removeEffect_l() will remove the chain when last effect is
+    // otherwise unnecessary as removeEffect_l() will remove the chain when last effect is
     // removed.
     srcThread->removeEffectChain_l(chain);
 
@@ -5563,6 +5563,11 @@ status_t AudioFlinger::moveEffectChain_l(int sessionId,
     while (effect != 0) {
         srcThread->removeEffect_l(effect);
         dstThread->addEffect_l(effect);
+        // removeEffect_l() has stopped the effect if it was active so it must be restarted
+        if (effect->state() == EffectModule::ACTIVE ||
+                effect->state() == EffectModule::STOPPING) {
+            effect->start();
+        }
         // if the move request is not received from audio policy manager, the effect must be
         // re-registered with the new strategy and output
         if (dstChain == 0) {
@@ -6348,6 +6353,12 @@ status_t AudioFlinger::EffectModule::init()
         status = cmdStatus;
     }
     return status;
+}
+
+status_t AudioFlinger::EffectModule::start()
+{
+    Mutex::Autolock _l(mLock);
+    return start_l();
 }
 
 status_t AudioFlinger::EffectModule::start_l()
@@ -7214,7 +7225,10 @@ size_t AudioFlinger::EffectChain::removeEffect_l(const sp<EffectModule>& effect)
             // calling stop here will remove pre-processing effect from the audio HAL.
             // This is safe as we hold the EffectChain mutex which guarantees that we are not in
             // the middle of a read from audio HAL
-            mEffects[i]->stop();
+            if (mEffects[i]->state() == EffectModule::ACTIVE ||
+                    mEffects[i]->state() == EffectModule::STOPPING) {
+                mEffects[i]->stop();
+            }
             if (type == EFFECT_FLAG_TYPE_AUXILIARY) {
                 delete[] effect->inBuffer();
             } else {
