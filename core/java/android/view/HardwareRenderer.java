@@ -184,6 +184,22 @@ public abstract class HardwareRenderer {
     abstract void setup(int width, int height);
 
     /**
+     * Gets the current width of the surface. This is the width that the surface
+     * was last set to in a call to {@link #setup(int, int)}.
+     *
+     * @return the current width of the surface
+     */
+    abstract int getWidth();
+
+    /**
+     * Gets the current height of the surface. This is the height that the surface
+     * was last set to in a call to {@link #setup(int, int)}.
+     *
+     * @return the current width of the surface
+     */
+    abstract int getHeight();
+
+    /**
      * Interface used to receive callbacks whenever a view is drawn by
      * a hardware renderer instance.
      */
@@ -362,6 +378,7 @@ public abstract class HardwareRenderer {
         static EGLDisplay sEglDisplay;
         static EGLConfig sEglConfig;
         static final Object[] sEglLock = new Object[0];
+        int mWidth = -1, mHeight = -1;
 
         static final ThreadLocal<EGLContext> sEglContextStorage = new ThreadLocal<EGLContext>();
 
@@ -714,7 +731,19 @@ public abstract class HardwareRenderer {
         void setup(int width, int height) {
             if (validate()) {
                 mCanvas.setViewport(width, height);
+                mWidth = width;
+                mHeight = height;
             }
+        }
+
+        @Override
+        int getWidth() {
+            return mWidth;
+        }
+
+        @Override
+        int getHeight() {
+            return mHeight;
         }
 
         boolean canDraw() {
