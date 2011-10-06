@@ -143,8 +143,6 @@ public:
                          */
     uint32_t            alloc(size_t size, bool aligned = false);
 
-    uint32_t            read_field_slot(int row, int column, field_slot_t * slot);
-
                         /**
                          * Copy data into the window at the given offset.
                          */
@@ -180,6 +178,32 @@ public:
                                 int fieldDirOffset = getRowSlot(row)->offset;
                                 return ((field_slot_t *)offsetToPtr(fieldDirOffset)) + column;
                             }
+
+    int64_t getFieldSlotValueLong(field_slot_t* fieldSlot) {
+#if WINDOW_STORAGE_INLINE_NUMERICS
+        return fieldSlot->data.l;
+#else
+        return copyOutLong(fieldSlot->data.buffer.offset);
+#endif
+    }
+
+    double getFieldSlotValueDouble(field_slot_t* fieldSlot) {
+#if WINDOW_STORAGE_INLINE_NUMERICS
+        return fieldSlot->data.d;
+#else
+        return copyOutDouble(fieldSlot->data.buffer.offset);
+#endif
+    }
+
+#if WINDOW_STORAGE_UTF8
+    char* getFieldSlotValueString(field_slot_t* fieldSlot) {
+        return reinterpret_cast<char*>(offsetToPtr(fieldSlot->data.buffer.offset));
+    }
+#else
+    char16_t* getFieldSlotValueString(field_slot_t* fieldSlot) {
+        return reinterpret_cast<char16_t*>(offsetToPtr(fieldSlot->data.buffer.offset));
+    }
+#endif
 
 private:
     uint8_t * mData;

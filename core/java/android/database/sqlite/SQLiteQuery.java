@@ -79,7 +79,7 @@ public class SQLiteQuery extends SQLiteProgram {
                 // if the start pos is not equal to 0, then most likely window is
                 // too small for the data set, loading by another thread
                 // is not safe in this situation. the native code will ignore maxRead
-                int numRows = native_fill_window(window, window.getStartPosition(),
+                int numRows = native_fill_window(window.mWindowPtr, window.getStartPosition(),
                         mOffsetIndex, maxRead, lastPos);
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
@@ -154,7 +154,7 @@ public class SQLiteQuery extends SQLiteProgram {
         compileAndbindAllArgs();
     }
 
-    private final native int native_fill_window(CursorWindow window,
+    private final native int native_fill_window(int windowPtr,
             int startPos, int offsetParam, int maxRead, int lastPos);
 
     private final native int native_column_count();
