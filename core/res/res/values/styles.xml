@@ -1513,8 +1513,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.StackView">
-        <item name="android:resOutColor">#ff6699ff</item>
-        <item name="android:clickColor">#886699ff</item>
+        <item name="android:resOutColor">@android:color/holo_blue_light</item>
+        <item name="android:clickColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="Widget.Holo.Button.Borderless">
