@@ -728,6 +728,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample','newfeature', 'new'],
+    path: 'samples/WiFiDirectDemo/index.html',
+    title: {
+      en: 'Wi-Fi Direct Demo'
+    },
+    description: {
+      en: 'A demo application to demonstrate how to use Wi-Fi Direct APIs.'
+    }
+  },
+  {
     tags: ['sample', 'ui', 'widgets'],
     path: 'samples/Wiktionary/index.html',
     title: {
