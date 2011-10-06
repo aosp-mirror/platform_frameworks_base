@@ -3335,7 +3335,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (mOnLayoutChangeListeners == null) {
             mOnLayoutChangeListeners = new ArrayList<OnLayoutChangeListener>();
         }
-        mOnLayoutChangeListeners.add(listener);
+        if (!mOnLayoutChangeListeners.contains(listener)) {
+            mOnLayoutChangeListeners.add(listener);
+        }
     }
 
     /**
