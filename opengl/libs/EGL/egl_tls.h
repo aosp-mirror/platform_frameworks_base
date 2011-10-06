@@ -41,7 +41,8 @@ class egl_tls_t {
 
     egl_tls_t();
     static void validateTLSKey();
-    static void setErrorEtcImpl(const char* caller, int line, EGLint error);
+    static void setErrorEtcImpl(
+            const char* caller, int line, EGLint error, bool quiet);
 
 public:
     static egl_tls_t* getTLS();
@@ -55,13 +56,17 @@ public:
 
     template<typename T>
     static T setErrorEtc(const char* caller,
-            int line, EGLint error, T returnValue) {
-        setErrorEtcImpl(caller, line, error);
+            int line, EGLint error, T returnValue, bool quiet = false) {
+        setErrorEtcImpl(caller, line, error, quiet);
         return returnValue;
     }
 };
 
-#define setError(_e, _r) egl_tls_t::setErrorEtc(__FUNCTION__, __LINE__, _e, _r)
+#define setError(_e, _r)        \
+    egl_tls_t::setErrorEtc(__FUNCTION__, __LINE__, _e, _r)
+
+#define setErrorQuiet(_e, _r)   \
+    egl_tls_t::setErrorEtc(__FUNCTION__, __LINE__, _e, _r, true)
 
 // ----------------------------------------------------------------------------
 
