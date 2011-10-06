@@ -483,18 +483,15 @@ public:
         }
 
         jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
-        HB_ShaperItem shaperItem;
-        HB_FontRec font;
-        FontData fontData;
-        TextLayoutCacheValue::shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, text,
-                start, count, contextCount, flags);
 
-        int glyphCount = shaperItem.num_glyphs;
-        for (int i = 0; i < glyphCount; i++) {
-            glyphsArray[i] = (jchar) shaperItem.glyphs[i];
-        }
+        TextLayoutCacheValue value;
+        value.computeValues(paint, text, start, count, contextCount, flags);
+        const jchar* shapedGlyphs = value.getGlyphs();
+        size_t glyphsCount = value.getGlyphsCount();
+        memcpy(glyphsArray, shapedGlyphs, sizeof(jchar) * glyphsCount);
+
         env->ReleaseCharArrayElements(glyphs, glyphsArray, JNI_ABORT);
-        return glyphCount;
+        return glyphsCount;
     }
 
     static int getTextGlyphs__StringIIIII_C(JNIEnv* env, jobject clazz, SkPaint* paint,
