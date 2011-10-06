@@ -1,21 +1,21 @@
 page.title=Android SDK
 sdk.redirect=0
 
-sdk.win_installer=installer_r13-windows.exe
-sdk.win_installer_bytes=36533357
-sdk.win_installer_checksum=cd3a76fe2b8ed62b2d03cf1851692e2d
+sdk.win_installer=installer_r14-windows.exe
+sdk.win_installer_bytes=33860145
+sdk.win_installer_checksum=7a563491bf4671d09b9da0dcde85f212
 
-sdk.win_download=android-sdk_r13-windows.zip
-sdk.win_bytes=36487911
-sdk.win_checksum=de8a039891e5e65b7742f188f07b992d
+sdk.win_download=android-sdk_r14-windows.zip
+sdk.win_bytes=33852972
+sdk.win_checksum=d1381a0cc8e6f9358174aa6d051ba379
 
-sdk.mac_download=android-sdk_r13-mac_x86.zip
-sdk.mac_bytes=30233944
-sdk.mac_checksum=f4002a0344b48856c09dec796acecd4d
+sdk.mac_download=android-sdk_r14-macosx.zip
+sdk.mac_bytes=30426052
+sdk.mac_checksum=df0a5c5b5327ffcaf256ce735998e12a
 
-sdk.linux_download=android-sdk_r13-linux_x86.tgz
-sdk.linux_bytes=30034328
-sdk.linux_checksum=d80d7530a46c665644ae76084a9a0dc4
+sdk.linux_download=android-sdk_r14-linux.tgz
+sdk.linux_bytes=26083315
+sdk.linux_checksum=2049d5c1a164fcae47a5e93c52200752
 
 @jd:body
 
@@ -39,7 +39,7 @@ then read the guide to <a href="installing.html">Installing the SDK</a>.</p>
 <style type="text/css">
   .offline-message { display:none; }
 </style>
-      
+
 <p class="offline-message">For more information about how to set up your
 development environment, read the guide to <a href="installing.html">Installing the SDK</a>.</p>
 
