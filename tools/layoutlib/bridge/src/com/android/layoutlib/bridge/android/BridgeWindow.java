@@ -85,7 +85,8 @@ public final class BridgeWindow implements IWindow {
         // pass for now.
     }
 
-    public void dispatchSystemUiVisibilityChanged(int visibility) {
+    public void dispatchSystemUiVisibilityChanged(int seq, int globalUi,
+            int localValue, int localChanges) {
         // pass for now.
     }
 

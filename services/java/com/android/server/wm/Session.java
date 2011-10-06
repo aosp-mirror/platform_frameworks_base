@@ -134,28 +134,28 @@ final class Session extends IWindowSession.Stub
         }
     }
 
-    public int add(IWindow window, WindowManager.LayoutParams attrs,
+    public int add(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, Rect outContentInsets, InputChannel outInputChannel) {
-        return mService.addWindow(this, window, attrs, viewVisibility, outContentInsets,
+        return mService.addWindow(this, window, seq, attrs, viewVisibility, outContentInsets,
                 outInputChannel);
     }
     
-    public int addWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
+    public int addWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, Rect outContentInsets) {
-        return mService.addWindow(this, window, attrs, viewVisibility, outContentInsets, null);
+        return mService.addWindow(this, window, seq, attrs, viewVisibility, outContentInsets, null);
     }
 
     public void remove(IWindow window) {
         mService.removeWindow(this, window);
     }
 
-    public int relayout(IWindow window, WindowManager.LayoutParams attrs,
+    public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags,
             boolean insetsPending, Rect outFrame, Rect outContentInsets,
             Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
         if (false) Slog.d(WindowManagerService.TAG, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
-        int res = mService.relayoutWindow(this, window, attrs,
+        int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, insetsPending,
                 outFrame, outContentInsets, outVisibleInsets, outConfig, outSurface);
         if (false) Slog.d(WindowManagerService.TAG, "<<<<<< EXITING relayout to "
