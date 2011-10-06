@@ -892,7 +892,10 @@ import junit.framework.Assert;
      *          WebTextView represents.
      */
     /* package */ void setNodePointer(int ptr) {
-        mNodePointer = ptr;
+        if (ptr != mNodePointer) {
+            mNodePointer = ptr;
+            setAdapterCustom(null);
+        }
     }
 
     /**
@@ -1047,11 +1050,12 @@ import junit.framework.Assert;
         }
         setHint(null);
         setThreshold(1);
+        boolean autoComplete = false;
         if (single) {
             mWebView.requestLabel(mWebView.nativeFocusCandidateFramePointer(),
                     mNodePointer);
             maxLength = mWebView.nativeFocusCandidateMaxLength();
-            boolean autoComplete = mWebView.nativeFocusCandidateIsAutoComplete();
+            autoComplete = mWebView.nativeFocusCandidateIsAutoComplete();
             if (type != PASSWORD && (mAutoFillable || autoComplete)) {
                 String name = mWebView.nativeFocusCandidateName();
                 if (name != null && name.length() > 0) {
@@ -1066,8 +1070,9 @@ import junit.framework.Assert;
         setInputType(inputType);
         setImeOptions(imeOptions);
         setVisibility(VISIBLE);
-        AutoCompleteAdapter adapter = null;
-        setAdapterCustom(adapter);
+        if (!autoComplete) {
+            setAdapterCustom(null);
+        }
     }
 
     /**

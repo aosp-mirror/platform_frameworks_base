@@ -3241,8 +3241,7 @@ public class WebView extends AbsoluteLayout
     public void clearFormData() {
         checkThread();
         if (inEditingMode()) {
-            AutoCompleteAdapter adapter = null;
-            mWebTextView.setAdapterCustom(adapter);
+            mWebTextView.setAdapterCustom(null);
         }
     }
 
