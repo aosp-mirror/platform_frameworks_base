@@ -964,6 +964,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
             if (operatorNumeric == null) {
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
+                mGotCountryCode = false;
             } else {
                 String isoCountryCode = "";
                 try{
