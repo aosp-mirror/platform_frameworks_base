@@ -24,6 +24,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -615,10 +616,13 @@ public class LayoutTransition {
         observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
                 parent.getViewTreeObserver().removeOnPreDrawListener(this);
-                int numChildren = parent.getChildCount();
-                for (int i = 0; i < numChildren; ++i) {
-                    final View child = parent.getChildAt(i);
-                    child.removeOnLayoutChangeListener(layoutChangeListenerMap.get(child));
+                int count = layoutChangeListenerMap.size();
+                if (count > 0) {
+                    Collection<View> views = layoutChangeListenerMap.keySet();
+                    for (View view : views) {
+                        View.OnLayoutChangeListener listener = layoutChangeListenerMap.get(view);
+                        view.removeOnLayoutChangeListener(listener);
+                    }
                 }
                 layoutChangeListenerMap.clear();
                 return true;
