@@ -61,7 +61,7 @@
     <color name="suggestion_highlight_text">#177bbd</color>
 
     <drawable name="stat_notify_sync_noanim">@drawable/stat_notify_sync_anim0</drawable>
-    <drawable name="stat_sys_download_done">@drawable/stat_sys_download_anim0</drawable>
+    <drawable name="stat_sys_download_done">@drawable/stat_sys_download_done_static</drawable>
     <drawable name="stat_sys_upload_done">@drawable/stat_sys_upload_anim0</drawable>
     <drawable name="dialog_frame">@drawable/panel_background</drawable>
     <drawable name="alert_dark_frame">@drawable/popup_full_dark</drawable>
