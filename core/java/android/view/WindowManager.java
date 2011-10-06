@@ -1260,8 +1260,6 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int PRIVATE_FLAGS_CHANGED = 1<<16;
         /** {@hide} */
-        public static final int BUFFER_CHANGED = 1<<17;
-        /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
         // internal buffer to backup/restore parameters under compatibility mode.
@@ -1272,11 +1270,11 @@ public interface WindowManager extends ViewManager {
     
             if (width != o.width) {
                 width = o.width;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (height != o.height) {
                 height = o.height;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (x != o.x) {
                 x = o.x;
@@ -1288,19 +1286,19 @@ public interface WindowManager extends ViewManager {
             }
             if (horizontalWeight != o.horizontalWeight) {
                 horizontalWeight = o.horizontalWeight;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (verticalWeight != o.verticalWeight) {
                 verticalWeight = o.verticalWeight;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (horizontalMargin != o.horizontalMargin) {
                 horizontalMargin = o.horizontalMargin;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (verticalMargin != o.verticalMargin) {
                 verticalMargin = o.verticalMargin;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (type != o.type) {
                 type = o.type;
@@ -1308,7 +1306,7 @@ public interface WindowManager extends ViewManager {
             }
             if (flags != o.flags) {
                 flags = o.flags;
-                changes |= FLAGS_CHANGED | BUFFER_CHANGED;
+                changes |= FLAGS_CHANGED;
             }
             if (privateFlags != o.privateFlags) {
                 privateFlags = o.privateFlags;
@@ -1320,11 +1318,11 @@ public interface WindowManager extends ViewManager {
             }
             if (gravity != o.gravity) {
                 gravity = o.gravity;
-                changes |= LAYOUT_CHANGED | BUFFER_CHANGED;
+                changes |= LAYOUT_CHANGED;
             }
             if (format != o.format) {
                 format = o.format;
-                changes |= FORMAT_CHANGED | BUFFER_CHANGED;
+                changes |= FORMAT_CHANGED;
             }
             if (windowAnimations != o.windowAnimations) {
                 windowAnimations = o.windowAnimations;
@@ -1363,7 +1361,7 @@ public interface WindowManager extends ViewManager {
     
             if (screenOrientation != o.screenOrientation) {
                 screenOrientation = o.screenOrientation;
-                changes |= SCREEN_ORIENTATION_CHANGED | BUFFER_CHANGED;
+                changes |= SCREEN_ORIENTATION_CHANGED;
             }
 
             if (systemUiVisibility != o.systemUiVisibility
