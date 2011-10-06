@@ -159,7 +159,7 @@ class SslErrorHandlerImpl extends SslErrorHandler {
 
         if (DebugFlags.SSL_ERROR_HANDLER) {
             assert host != null;
-            assert primary != 0;
+            assert primary != -1;
         }
 
         if (mSslPrefTable.containsKey(host) && primary <= mSslPrefTable.getInt(host)) {
@@ -260,7 +260,7 @@ class SslErrorHandlerImpl extends SslErrorHandler {
 
                 if (DebugFlags.SSL_ERROR_HANDLER) {
                     assert host != null;
-                    assert primary != 0;
+                    assert primary != -1;
                 }
                 boolean hasKey = mSslPrefTable.containsKey(host);
                 if (!hasKey || primary > mSslPrefTable.getInt(host)) {
