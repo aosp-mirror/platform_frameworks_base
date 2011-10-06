@@ -34,10 +34,10 @@ import android.view.Surface;
  * {@hide}
  */
 interface IWindowSession {
-    int add(IWindow window, in WindowManager.LayoutParams attrs,
+    int add(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets,
             out InputChannel outInputChannel);
-    int addWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
+    int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets);
     void remove(IWindow window);
     
@@ -49,6 +49,7 @@ interface IWindowSession {
      * to draw the window's contents.
      * 
      * @param window The window being modified.
+     * @param seq Ordering sequence number.
      * @param attrs If non-null, new attributes to apply to the window.
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
@@ -77,7 +78,7 @@ interface IWindowSession {
      * @return int Result flags: {@link WindowManagerImpl#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerImpl#RELAYOUT_FIRST_TIME}.
      */
-    int relayout(IWindow window, in WindowManager.LayoutParams attrs,
+    int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
             boolean insetsPending, out Rect outFrame, out Rect outContentInsets,
             out Rect outVisibleInsets, out Configuration outConfig,

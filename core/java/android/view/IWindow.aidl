@@ -74,5 +74,6 @@ oneway interface IWindow {
     /**
      * System chrome visibility changes
      */
-     void dispatchSystemUiVisibilityChanged(int visibility);
+     void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
+            int localValue, int localChanges);
 }

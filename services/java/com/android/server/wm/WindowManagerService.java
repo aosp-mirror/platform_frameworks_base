@@ -1948,7 +1948,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
     
-    public int addWindow(Session session, IWindow client,
+    public int addWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int viewVisibility,
             Rect outContentInsets, InputChannel outInputChannel) {
         int res = mPolicy.checkAddPermission(attrs);
@@ -2040,7 +2040,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             win = new WindowState(this, session, client, token,
-                    attachedWindow, attrs, viewVisibility);
+                    attachedWindow, seq, attrs, viewVisibility);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -2467,7 +2467,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
-    public int relayoutWindow(Session session, IWindow client,
+    public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, boolean insetsPending,
             Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
@@ -2477,13 +2477,13 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean configChanged;
 
         // if they don't have this permission, mask out the status bar bits
+        int systemUiVisibility = 0;
         if (attrs != null) {
-            if (((attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility)
-                    & StatusBarManager.DISABLE_MASK) != 0) {
+            systemUiVisibility = (attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility);
+            if ((systemUiVisibility & StatusBarManager.DISABLE_MASK) != 0) {
                 if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                         != PackageManager.PERMISSION_GRANTED) {
-                    attrs.systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
-                    attrs.subtreeSystemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+                    systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
                 }
             }
         }
@@ -2496,6 +2496,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.mRequestedWidth = requestedWidth;
             win.mRequestedHeight = requestedHeight;
+            if (attrs != null && seq == win.mSeq) {
+                win.mSystemUiVisibility = systemUiVisibility;
+            }
 
             if (attrs != null) {
                 mPolicy.adjustWindowParamsLw(attrs);
@@ -9088,13 +9091,27 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void statusBarVisibilityChanged(int visibility) {
         mInputManager.setSystemUiVisibility(visibility);
+
         synchronized (mWindowMap) {
             final int N = mWindows.size();
             for (int i = 0; i < N; i++) {
                 WindowState ws = mWindows.get(i);
                 try {
-                    if (ws.getAttrs().hasSystemUiListeners) {
-                        ws.mClient.dispatchSystemUiVisibilityChanged(visibility);
+                    int curValue = ws.mSystemUiVisibility;
+                    int diff = curValue ^ visibility;
+                    // We are only interested in differences of one of the
+                    // clearable flags...
+                    diff &= View.SYSTEM_UI_CLEARABLE_FLAGS;
+                    // ...if it has actually been cleared.
+                    diff &= ~visibility;
+                    int newValue = (curValue&~diff) | (visibility&diff);
+                    if (newValue != curValue) {
+                        ws.mSeq++;
+                        ws.mSystemUiVisibility = newValue;
+                    }
+                    if (newValue != curValue || ws.mAttrs.hasSystemUiListeners) {
+                        ws.mClient.dispatchSystemUiVisibilityChanged(ws.mSeq,
+                                visibility, newValue, diff);
                     }
                 } catch (RemoteException e) {
                     // so sorry

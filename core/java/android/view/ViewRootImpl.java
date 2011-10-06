@@ -165,6 +165,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     final int mTargetSdkVersion;
 
+    int mSeq;
+
     View mView;
     View mFocusedView;
     View mRealFocusedView;  // this is not set to null in touch mode
@@ -307,6 +309,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
             return sWindowSession;
         }
+    }
+
+    static final class SystemUiVisibilityInfo {
+        int seq;
+        int globalVisibility;
+        int localValue;
+        int localChanges;
     }
     
     public ViewRootImpl(Context context) {
@@ -465,7 +474,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
                 try {
                     mOrigWindowType = mWindowAttributes.type;
-                    res = sWindowSession.add(mWindow, mWindowAttributes,
+                    res = sWindowSession.add(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mAttachInfo.mContentInsets,
                             mInputChannel);
                 } catch (RemoteException e) {
@@ -1045,15 +1054,20 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             attachInfo.mRecomputeGlobalAttributes = false;
             boolean oldScreenOn = attachInfo.mKeepScreenOn;
             int oldVis = attachInfo.mSystemUiVisibility;
+            boolean oldHasSystemUiListeners = attachInfo.mHasSystemUiListeners;
             attachInfo.mKeepScreenOn = false;
             attachInfo.mSystemUiVisibility = 0;
             attachInfo.mHasSystemUiListeners = false;
             host.dispatchCollectViewAttributes(0);
             if (attachInfo.mKeepScreenOn != oldScreenOn
                     || attachInfo.mSystemUiVisibility != oldVis
-                    || attachInfo.mHasSystemUiListeners) {
+                    || attachInfo.mHasSystemUiListeners != oldHasSystemUiListeners) {
                 params = lp;
             }
+        }
+        if (attachInfo.mForceReportNewAttributes) {
+            attachInfo.mForceReportNewAttributes = false;
+            params = lp;
         }
 
         if (mFirst || attachInfo.mViewVisibilityChanged) {
@@ -1136,9 +1150,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
                     }
                     params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
-                    params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners
-                            || params.subtreeSystemUiVisibility != 0
-                            || params.systemUiVisibility != 0;
+                    params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
                 }
                 if (DEBUG_LAYOUT) {
                     Log.i(TAG, "host=w:" + host.getMeasuredWidth() + ", h:" +
@@ -2545,7 +2557,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             handleDragEvent(event);
         } break;
         case DISPATCH_SYSTEM_UI_VISIBILITY: {
-            handleDispatchSystemUiVisibilityChanged(msg.arg1);
+            handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo)msg.obj);
         } break;
         case UPDATE_CONFIGURATION: {
             Configuration config = (Configuration)msg.obj;
@@ -3429,12 +3441,27 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         event.recycle();
     }
 
-    public void handleDispatchSystemUiVisibilityChanged(int visibility) {
-        if (mView == null) return;
-        if (mAttachInfo != null) {
-            mAttachInfo.mSystemUiVisibility = visibility;
+    public void handleDispatchSystemUiVisibilityChanged(SystemUiVisibilityInfo args) {
+        if (mSeq != args.seq) {
+            // The sequence has changed, so we need to update our value and make
+            // sure to do a traversal afterward so the window manager is given our
+            // most recent data.
+            mSeq = args.seq;
+            mAttachInfo.mForceReportNewAttributes = true;
+            scheduleTraversals();            
         }
-        mView.dispatchSystemUiVisibilityChanged(visibility);
+        if (mView == null) return;
+        if (args.localChanges != 0) {
+            if (mAttachInfo != null) {
+                mAttachInfo.mSystemUiVisibility =
+                        (mAttachInfo.mSystemUiVisibility&~args.localChanges)
+                        | (args.localValue&args.localChanges);
+            }
+            mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
+            mAttachInfo.mRecomputeGlobalAttributes = true;
+            scheduleTraversals();            
+        }
+        mView.dispatchSystemUiVisibilityChanged(args.globalVisibility);
     }
 
     public void getLastTouchPoint(Point outLocation) {
@@ -3493,7 +3520,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
         }
         int relayoutResult = sWindowSession.relayout(
-                mWindow, params,
+                mWindow, mSeq, params,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending, mWinFrame,
@@ -3796,8 +3823,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         sendMessage(msg);
     }
 
-    public void dispatchSystemUiVisibilityChanged(int visibility) {
-        sendMessage(obtainMessage(DISPATCH_SYSTEM_UI_VISIBILITY, visibility, 0));
+    public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
+            int localValue, int localChanges) {
+        SystemUiVisibilityInfo args = new SystemUiVisibilityInfo();
+        args.seq = seq;
+        args.globalVisibility = globalVisibility;
+        args.localValue = localValue;
+        args.localChanges = localChanges;
+        sendMessage(obtainMessage(DISPATCH_SYSTEM_UI_VISIBILITY, args));
     }
 
     /**
@@ -4052,10 +4085,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
         }
 
-        public void dispatchSystemUiVisibilityChanged(int visibility) {
+        public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
+                int localValue, int localChanges) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchSystemUiVisibilityChanged(visibility);
+                viewAncestor.dispatchSystemUiVisibilityChanged(seq, globalVisibility,
+                        localValue, localChanges);
             }
         }
     }

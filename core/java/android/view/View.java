@@ -1925,6 +1925,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x0000FFFF;
 
     /**
+     * These are the system UI flags that can be cleared by events outside
+     * of an application.  Currently this is just the ability to tap on the
+     * screen while hiding the navigation bar to have it return.
+     * @hide
+     */
+    public static final int SYSTEM_UI_CLEARABLE_FLAGS =
+            SYSTEM_UI_FLAG_LOW_PROFILE | SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+
+    /**
      * Find views that render the specified text.
      *
      * @see #findViewsWithText(ArrayList, CharSequence, int)
@@ -13027,11 +13036,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Dispatch callbacks to {@link #setOnSystemUiVisibilityChangeListener} down
+     * the view hierarchy.
      */
     public void dispatchSystemUiVisibilityChanged(int visibility) {
         if (mOnSystemUiVisibilityChangeListener != null) {
             mOnSystemUiVisibilityChangeListener.onSystemUiVisibilityChange(
                     visibility & PUBLIC_STATUS_BAR_VISIBILITY_MASK);
+        }
+    }
+
+    void updateLocalSystemUiVisibility(int localValue, int localChanges) {
+        int val = (mSystemUiVisibility&~localChanges) | (localValue&localChanges);
+        if (val != mSystemUiVisibility) {
+            setSystemUiVisibility(val);
         }
     }
 
@@ -14108,7 +14126,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Interface definition for a callback to be invoked when the status bar changes
-     * visibility.
+     * visibility.  This reports <strong>global</strong> changes to the system UI
+     * state, not just what the application is requesting.
      *
      * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener) 
      */
@@ -14118,7 +14137,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * {@link View#setSystemUiVisibility(int)}.
          *
          * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
-         * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
+         * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.  This tells you the
+         * <strong>global</strong> state of the UI visibility flags, not what your
+         * app is currently applying.
          */
         public void onSystemUiVisibilityChange(int visibility);
     }
@@ -14374,6 +14395,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * the next time it performs a traversal
          */
         boolean mRecomputeGlobalAttributes;
+
+        /**
+         * Always report new attributes at next traversal.
+         */
+        boolean mForceReportNewAttributes;
 
         /**
          * Set during a traveral if any views want to keep the screen on.
