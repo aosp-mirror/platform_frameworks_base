@@ -329,6 +329,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Sallii sovelluksen lukea yksityisiä profiilitietoja, kuten nimen ja yhteystiedot. Haittaohjelmat voivat käyttää tätä käyttäjien tunnistamiseen ja profiilitietojen levittämiseen muille."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"kirjoittaa profiilin tietoihin"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Sallii sovelluksen muuttaa tai lisätä laitteellesi tallennettuja yksityisiä profiilitietoja. Haittaohjelmat voivat käyttää tätä tunnistamiseesi ja profiilitietojesi lähettämiseen muille."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lue sosiaalista streamia"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Antaa sovelluksen käyttää ja synkronoida sinun ja kavereidesi päivityksiä sosiaalisista palveluista. Haitalliset sovellukset voivat käyttää tätä sosiaalisissa verkostoissa kavereidesi kanssa käytyjen yksityisten keskustelujen lukemiseen."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"kirjoita sosiaaliseen streamiin"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Antaa sovelluksen näyttää kavereidesi päivityksiä sosiaalisista palveluista. Haitalliset sovellukset voivat tämän asetuksen avulla tekeytyä kaveriksesi ja huijata sinua paljastamaan salasanoja tai muita luottamuksellisia tietoja."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lue kalenteritapahtumia ja luottamuksellisia tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Antaa sovelluksen lukea kaikkia tablet-laitteelle tallennettuja kalenteritapahtumia (myös kavereiden ja työkavereiden lisäämiä). Haitalliset sovellukset voivat noutaa henkilötietoja kalentereista ilman omistajien lupaa."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Antaa sovelluksen lukea kaikkia puhelimeen tallennettuja kalenteritapahtumia (myös kavereiden ja työkavereiden lisäämiä). Haitalliset sovellukset voivat noutaa henkilötietoja kalentereista ilman omistajien lupaa."</string>
@@ -1161,7 +1165,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-tallennustila"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Muokkaa..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Tiedonsiirtovaroitus"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Näytä käyttö ja asetukset"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Näytä käyttö ja asetukset koskettamalla"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiilitiedonsiirto pois käytöstä"</string>

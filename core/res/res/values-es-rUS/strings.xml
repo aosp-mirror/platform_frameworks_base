@@ -329,6 +329,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permite que la aplicación lea información personal del perfil almacenada en tu dispositivo, como tu nombre e información de contacto. Esto significa que la aplicación puede identificarte y enviar tu información de perfil a otras personas."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"Escrib. en datos de tu perfil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permite que la aplicación cambie o agregue información personal del perfil almacenada en tu dispositivo, como tu nombre e información de contacto. Esto significa que otras aplicaciones pueden identificarte y enviar tu información de perfil a otras personas."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Lectura de tu muro social"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Permite que la aplicación acceda a tus actualizaciones sociales y a las de tus amigos y las sincronice. Las aplicaciones maliciosas pueden usar este permiso para acceder a las comunicaciones privadas que mantienes con tus amigos en las redes sociales."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Escritura en tu muro social"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Permite que la aplicación muestre las actualizaciones sociales de tus amigos. Las aplicaciones maliciosas pueden usar este permiso para hacerse pasar por un amigo y engañarte para que reveles contraseñas u otros datos confidenciales."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"Leer eventos de calendario e información confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permite que una aplicación lea todos los eventos de calendario almacenados en la tableta, incluidos los de tus amigos o compañeros de trabajo. Una aplicación maliciosa con este permiso puede extraer información personal de estos calendarios sin que los propietarios lo sepan."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permite que una aplicación lea todos los eventos del calendario almacenados en tu teléfono, incluidos los de tus amigos o compañeros de trabajo. Una aplicación maliciosa con este permiso puede extraer información personal de estos calendarios sin que los propietarios lo sepan."</string>
@@ -860,7 +864,7 @@
     <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selección de texto"</string>
     <string name="addToDictionary" msgid="9090375111134433012">"Agregar al diccionario"</string>
-    <string name="deleteText" msgid="7070985395199629156">"Eliminar"</string>
+    <string name="deleteText" msgid="7070985395199629156">"eliminar"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Poco espacio de almacenamiento"</string>

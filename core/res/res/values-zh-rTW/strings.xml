@@ -329,6 +329,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"允許應用程式讀取儲存在裝置上的個人資料資訊，例如您的姓名和聯絡資訊。這表示該應用程式可以識別您的身分，並將您的個人資料資訊傳送給他人。"</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"寫入您的個人資料"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"允許應用程式新增或變更儲存在裝置上的個人資料資訊，例如您的姓名和聯絡資訊。這表示其他應用程式可以識別您的身分，並將您的個人資料資訊傳送給他人。"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"閱讀您的社交串流"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"允許應用程式存取並同步處理來自好友的動態更新。惡意應用程式可能會藉此讀取您和好友在社交網路上的私人訊息。"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"寫入您的社交串流"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"允許應用程式顯示好友的動態更新。惡意應用程式可能會藉此假裝成您的好友，欺騙您透露密碼或其他機密資訊。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"讀取日曆活動與機密資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"允許應用程式讀取所有儲存在您平板電腦上的日曆活動，包含好友或同事的日曆活動。惡意應用程式可能藉此在未經擁有者同意的情況下，從這些日曆擷取個人資訊。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"允許應用程式讀取所有儲存在您手機上的日曆活動，包含好友或同事的日曆活動。惡意應用程式可能藉此在未經擁有者同意的情況下，從這些日曆擷取個人資訊。"</string>

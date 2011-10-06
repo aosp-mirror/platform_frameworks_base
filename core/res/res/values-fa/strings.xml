@@ -329,6 +329,14 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"به برنامه کاربردی اجازه می‌دهد اطلاعات مربوط به نمایه شخصی ذخیره شده بر روی دستگاه شما مانند نام و اطلاعات تماس شما را بخواند. این بدان معناست که برنامه می‌تواند شما را شناسایی کند و اطلاعات نمایه‌ شما را به دیگران ارسال نماید."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"نوشتن در داده‌های نمایه شما"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"به برنامه کاربردی اجازه می‌دهد به تغییر و یا اضافه کردن اطلاعات نمایه شخصی ذخیره شده بر روی دستگاه شما مانند نام و اطلاعات تماس شما، بپردازد. این بدان معناست که برنامه‌های دیگر می‌توانند شما را شناسایی کنند و اطلاعات نمایه شما را به دیگران ارسال نمایند."</string>
+    <!-- no translation found for permlab_readSocialStream (1268920956152419170) -->
+    <skip />
+    <!-- no translation found for permdesc_readSocialStream (6619997662735851111) -->
+    <skip />
+    <!-- no translation found for permlab_writeSocialStream (3504179222493235645) -->
+    <skip />
+    <!-- no translation found for permdesc_writeSocialStream (2689083745826002521) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="5972727560257612398">"خواندن رویدادهای تقویم به همراه اطلاعات محرمانه"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"به برنامه اجازه خواندن تمام رویدادهای تقویم موجود در رایانه لوحی شما را می‌دهد که این شامل تقویم دوستان و همکاران نیز می‌شود. یک برنامه مخرب با این اجازه می‌تواند بدون اطلاع مالک، اطلاعات شخصی را از این تقویم‌ها استخراج کند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"به یک برنامه کاربردی اجازه خواندن تمام رویدادهای تقویم موجود در گوشی شما را می‌دهد که این شامل تقویم دوستان و همکاران نیز می‌شود. یک برنامه مخرب با این اجازه می‌تواند بدون اطلاع مالک، اطلاعات شخصی را از این تقویم‌ها استخراج کند."</string>
@@ -1161,7 +1169,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"حافظه USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"ویرایش..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"هشدار میزان استفاده از داده"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"لمس برای مشاهده استفاده و تنظیمات"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"لمس برای مشاهده مصرف و تنظیمات"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"داده های 2G-3G غیرفعال شد"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"داده 4G غیر فعال شده است"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"داده های تلفن همراه غیرفعال شد"</string>

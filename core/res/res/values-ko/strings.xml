@@ -329,6 +329,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"애플리케이션이 기기에 저장된 개인 프로필 정보(예: 사용자 이름, 연락처 정보 등)를 읽을 수 있도록 합니다. 이것은 애플리케이션이 사용자를 확인하고 다른 사용자들에게 해당 프로필 정보를 전송할 수 있다는 것을 의미합니다."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"프로필 데이터에 쓰기"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"애플리케이션이 기기에 저장된 개인 프로필 정보(예: 사용자 이름, 연락처 정보 등)를 변경하거나 추가할 수 있도록 합니다. 이것은 다른 애플리케이션이 사용자를 확인하고 다른 사용자들에게 해당 프로필 정보를 전송할 수 있다는 것을 의미합니다."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"소셜 스트림 읽기"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"애플리케이션이 나와 친구의 최신 소셜 소식에 액세스하고 동기화할 수 있도록 허용합니다. 이 경우 악성 앱이 소셜 네트워크에서 나와 친구가 주고받은 사적인 내용을 읽을 수 있습니다."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"소셜 스트림에 쓰기"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"애플리케이션이 친구의 최신 소셜 소식을 표시할 수 있도록 허용합니다. 이 경우 악성 앱이 친구로 가장하고 나를 속여 비밀번호나 기타 기밀 정보를 알아낼 수 있습니다."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 및 기밀정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"애플리케이션이 친구나 동료의 일정을 포함하여 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 권한이 있는 악성 애플리케이션은 소유자 몰래 이러한 캘린더에서 개인정보를 추출할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"애플리케이션이 친구나 동료의 일정을 포함하여 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 권한이 있는 악성 애플리케이션은 소유자 몰래 이러한 캘린더에서 개인정보를 추출할 수 있습니다."</string>

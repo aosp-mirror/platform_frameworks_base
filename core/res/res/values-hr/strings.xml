@@ -329,6 +329,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Aplikaciji omogućuje čitanje osobnih informacija profila koje su pohranjene na vašem uređaju, poput vašeg imena i kontaktnih podataka. To znači da vas aplikacija može identificirati i slati informacije vašeg profila drugima."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje u podatke profila"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Aplikaciji omogućuje promjenu ili dodavanje informacija u osobne informacije profila koje su spremljene na vašem uređaju, poput vašeg imena i kontaktnih podataka. To znači da vas druge aplikacije mogu identificirati i slati informacije vašeg profila drugima."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čitanje društvenog streama"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Aplikaciji omogućuje pristup i sinkronizaciju društvenih ažuriranja vaših prijatelja. Zlonamjerne aplikacije to mogu upotrijebiti za pristup privatnim porukama između vas i vaših prijatelja na društvenim mrežama."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje društvenog streama"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Aplikaciji omogućuje prikazivanje društvenih ažuriranja vaših prijatelja. Zlonamjerne aplikacije to mogu upotrijebiti kako bi se predstavile kao prijatelj i zavarale vas da otkrijete zaporke ili druge povjerljive informacije."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čitajte kalendarske događaje i povjerljive informacije"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Aplikaciji omogućuje čitanje svih kalendarskih događaja pohranjenih na tabletnom računalu, uključujući događaje prijatelja ili suradnika. Zlonamjerna aplikacija s tim dopuštenjem može izdvajati osobne podatke iz tih kalendara bez znanja vlasnika."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Aplikaciji omogućuje čitanje svih kalendarskih događaja na vašem telefonu, uključujući događaje prijatelja ili suradnika. Zlonamjerne aplikacije s tim dopuštenjem mogu izdvajati osobne podatke iz tih kalendara bez znanja vlasnika."</string>
@@ -1161,7 +1165,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB pohrana"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Uređivanje..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Upozorenje o upotrebi podataka"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Dodirnite za pregled upotrebe i postavki"</string>
+    <string name="data_usage_warning_body" msgid="7217480745540055170">"Pogledajte upotrebu i postavke"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G podaci su onemogućeni"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G podaci su onemogućeni"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilni podaci su onemogućeni"</string>
