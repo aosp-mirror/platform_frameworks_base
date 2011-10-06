@@ -171,6 +171,17 @@ public class KeyguardViewManager implements KeyguardWindowController {
             }
         }
 
+        // Disable aspects of the system/status/navigation bars that are not appropriate or
+        // useful for the lockscreen but can be re-shown by dialogs or SHOW_WHEN_LOCKED activities.
+        // Other disabled bits are handled by the KeyguardViewMediator talking directly to the
+        // status bar service.
+        int visFlags =
+                ( View.STATUS_BAR_DISABLE_BACK
+                | View.STATUS_BAR_DISABLE_HOME
+                | View.STATUS_BAR_DISABLE_CLOCK
+                );
+        mKeyguardHost.setSystemUiVisibility(visFlags);
+
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
         mKeyguardHost.setVisibility(View.VISIBLE);
         mKeyguardView.requestFocus();

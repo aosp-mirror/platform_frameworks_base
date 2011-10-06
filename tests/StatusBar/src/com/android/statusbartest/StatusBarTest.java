@@ -114,9 +114,9 @@ public class StatusBarTest extends TestActivity
 //                v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 //            }
 //        },
-        new Test("systemUiVisibility: STATUS_BAR_DISABLE_NAVIGATION") {
+        new Test("systemUiVisibility: STATUS_BAR_DISABLE_HOME") {
             public void run() {
-                mListView.setSystemUiVisibility(View.STATUS_BAR_DISABLE_NAVIGATION);
+                mListView.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME);
             }
         },
         new Test("Double Remove") {
@@ -227,14 +227,19 @@ public class StatusBarTest extends TestActivity
                     }, 3000);
             }
         },
-        new Test("Disable Navigation") {
+        new Test("Disable Home (StatusBarManager)") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_NAVIGATION);
+                mStatusBarManager.disable(StatusBarManager.DISABLE_HOME);
             }
         },
-        new Test("Disable Back") {
+        new Test("Disable Back (StatusBarManager)") {
             public void run() {
                 mStatusBarManager.disable(StatusBarManager.DISABLE_BACK);
+            }
+        },
+        new Test("Disable Recent (StatusBarManager)") {
+            public void run() {
+                mStatusBarManager.disable(StatusBarManager.DISABLE_RECENT);
             }
         },
         new Test("Disable Clock") {
