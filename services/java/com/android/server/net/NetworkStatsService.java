@@ -32,6 +32,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.NetworkStatsHistory.randomLong;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
@@ -48,6 +49,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
@@ -62,6 +64,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
@@ -113,7 +117,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Random;
 
 import libcore.io.IoUtils;
 
@@ -1347,7 +1351,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         synchronized (mStatsLock) {
             // TODO: remove this testing code, since it corrupts stats
             if (argSet.contains("generate")) {
-                generateRandomLocked();
+                generateRandomLocked(args);
                 pw.println("Generated stub stats");
                 return;
             }
@@ -1406,42 +1410,78 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * @deprecated only for temporary testing
      */
     @Deprecated
-    private void generateRandomLocked() {
-        final long NET_END = System.currentTimeMillis();
-        final long NET_START = NET_END - mSettings.getNetworkMaxHistory();
-        final long NET_RX_BYTES = 3 * GB_IN_BYTES;
-        final long NET_RX_PACKETS = NET_RX_BYTES / 1024;
-        final long NET_TX_BYTES = 2 * GB_IN_BYTES;
-        final long NET_TX_PACKETS = NET_TX_BYTES / 1024;
+    private void generateRandomLocked(String[] args) {
+        final long totalBytes = Long.parseLong(args[1]);
+        final long totalTime = Long.parseLong(args[2]);
+        
+        final PackageManager pm = mContext.getPackageManager();
+        final ArrayList<Integer> specialUidList = Lists.newArrayList();
+        for (int i = 3; i < args.length; i++) {
+            try {
+                specialUidList.add(pm.getApplicationInfo(args[i], 0).uid);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-        final long UID_END = System.currentTimeMillis();
-        final long UID_START = UID_END - mSettings.getUidMaxHistory();
-        final long UID_RX_BYTES = 500 * MB_IN_BYTES;
-        final long UID_RX_PACKETS = UID_RX_BYTES / 1024;
-        final long UID_TX_BYTES = 100 * MB_IN_BYTES;
-        final long UID_TX_PACKETS = UID_TX_BYTES / 1024;
-        final long UID_OPERATIONS = UID_RX_BYTES / 2048;
+        final HashSet<Integer> otherUidSet = Sets.newHashSet();
+        for (ApplicationInfo info : pm.getInstalledApplications(0)) {
+            if (pm.checkPermission(android.Manifest.permission.INTERNET, info.packageName)
+                    == PackageManager.PERMISSION_GRANTED && !specialUidList.contains(info.uid)) {
+                otherUidSet.add(info.uid);
+            }
+        }
 
-        final List<ApplicationInfo> installedApps = mContext
-                .getPackageManager().getInstalledApplications(0);
+        final ArrayList<Integer> otherUidList = new ArrayList<Integer>(otherUidSet);
+
+        final long end = System.currentTimeMillis();
+        final long start = end - totalTime;
 
         mNetworkDevStats.clear();
         mNetworkXtStats.clear();
         mUidStats.clear();
-        for (NetworkIdentitySet ident : mActiveIfaces.values()) {
-            findOrCreateNetworkDevStatsLocked(ident).generateRandom(NET_START, NET_END,
-                    NET_RX_BYTES, NET_RX_PACKETS, NET_TX_BYTES, NET_TX_PACKETS, 0L);
-            findOrCreateNetworkXtStatsLocked(ident).generateRandom(NET_START, NET_END, NET_RX_BYTES,
-                    NET_RX_PACKETS, NET_TX_BYTES, NET_TX_PACKETS, 0L);
 
-            for (ApplicationInfo info : installedApps) {
-                final int uid = info.uid;
-                findOrCreateUidStatsLocked(ident, uid, SET_DEFAULT, TAG_NONE).generateRandom(
-                        UID_START, UID_END, UID_RX_BYTES, UID_RX_PACKETS, UID_TX_BYTES,
-                        UID_TX_PACKETS, UID_OPERATIONS);
-                findOrCreateUidStatsLocked(ident, uid, SET_FOREGROUND, TAG_NONE).generateRandom(
-                        UID_START, UID_END, UID_RX_BYTES, UID_RX_PACKETS, UID_TX_BYTES,
-                        UID_TX_PACKETS, UID_OPERATIONS);
+        final Random r = new Random();
+        for (NetworkIdentitySet ident : mActiveIfaces.values()) {
+            final NetworkStatsHistory devHistory = findOrCreateNetworkDevStatsLocked(ident);
+            final NetworkStatsHistory xtHistory = findOrCreateNetworkXtStatsLocked(ident);
+
+            final ArrayList<Integer> uidList = new ArrayList<Integer>();
+            uidList.addAll(specialUidList);
+
+            if (uidList.size() == 0) {
+                Collections.shuffle(otherUidList);
+                uidList.addAll(otherUidList);
+            }
+
+            boolean first = true;
+            long remainingBytes = totalBytes;
+            for (int uid : uidList) {
+                final NetworkStatsHistory defaultHistory = findOrCreateUidStatsLocked(
+                        ident, uid, SET_DEFAULT, TAG_NONE);
+                final NetworkStatsHistory foregroundHistory = findOrCreateUidStatsLocked(
+                        ident, uid, SET_FOREGROUND, TAG_NONE);
+
+                final long uidBytes = totalBytes / uidList.size();
+
+                final float fractionDefault = r.nextFloat();
+                final long defaultBytes = (long) (uidBytes * fractionDefault);
+                final long foregroundBytes = (long) (uidBytes * (1 - fractionDefault));
+
+                defaultHistory.generateRandom(start, end, defaultBytes);
+                foregroundHistory.generateRandom(start, end, foregroundBytes);
+
+                if (first) {
+                    final long bumpTime = (start + end) / 2;
+                    defaultHistory.recordData(
+                            bumpTime, bumpTime + DAY_IN_MILLIS, 200 * MB_IN_BYTES, 0);
+                    first = false;
+                }
+
+                devHistory.recordEntireHistory(defaultHistory);
+                devHistory.recordEntireHistory(foregroundHistory);
+                xtHistory.recordEntireHistory(defaultHistory);
+                xtHistory.recordEntireHistory(foregroundHistory);
             }
         }
     }

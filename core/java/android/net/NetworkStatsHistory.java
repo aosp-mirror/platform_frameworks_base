@@ -478,17 +478,34 @@ public class NetworkStatsHistory implements Parcelable {
      * @deprecated only for temporary testing
      */
     @Deprecated
+    public void generateRandom(long start, long end, long bytes) {
+        final Random r = new Random();
+
+        final float fractionRx = r.nextFloat();
+        final long rxBytes = (long) (bytes * fractionRx);
+        final long txBytes = (long) (bytes * (1 - fractionRx));
+
+        final long rxPackets = rxBytes / 1024;
+        final long txPackets = txBytes / 1024;
+        final long operations = rxBytes / 2048;
+
+        generateRandom(start, end, rxBytes, rxPackets, txBytes, txPackets, operations, r);
+    }
+
+    /**
+     * @deprecated only for temporary testing
+     */
+    @Deprecated
     public void generateRandom(long start, long end, long rxBytes, long rxPackets, long txBytes,
-            long txPackets, long operations) {
+            long txPackets, long operations, Random r) {
         ensureBuckets(start, end);
 
         final NetworkStats.Entry entry = new NetworkStats.Entry(
                 IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
-        final Random r = new Random();
         while (rxBytes > 1024 || rxPackets > 128 || txBytes > 1024 || txPackets > 128
                 || operations > 32) {
             final long curStart = randomLong(r, start, end);
-            final long curEnd = randomLong(r, curStart, end);
+            final long curEnd = curStart + randomLong(r, 0, (end - curStart) / 2);
 
             entry.rxBytes = randomLong(r, 0, rxBytes);
             entry.rxPackets = randomLong(r, 0, rxPackets);
@@ -506,7 +523,7 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
-    private static long randomLong(Random r, long start, long end) {
+    public static long randomLong(Random r, long start, long end) {
         return (long) (start + (r.nextFloat() * (end - start)));
     }
 
