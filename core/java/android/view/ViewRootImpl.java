@@ -860,7 +860,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
             params = lp;
-            windowAttributesChanges |= WindowManager.LayoutParams.BUFFER_CHANGED;
             fullRedrawNeeded = true;
             mLayoutRequested = true;
             if (mLastInCompatMode) {
@@ -1078,7 +1077,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                             ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) |
                             resizeMode;
                     params = lp;
-                    windowAttributesChanges |= WindowManager.LayoutParams.BUFFER_CHANGED;
                 }
             }
         }
@@ -1375,13 +1373,15 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
             }
 
-            if (hwInitialized || ((windowShouldResize || (params != null &&
-                    (windowAttributesChanges & WindowManager.LayoutParams.BUFFER_CHANGED) != 0)) &&
-                    mAttachInfo.mHardwareRenderer != null &&
-                    mAttachInfo.mHardwareRenderer.isEnabled())) {
-                mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
-                if (!hwInitialized && mAttachInfo.mHardwareRenderer.isEnabled()) {
-                    mAttachInfo.mHardwareRenderer.invalidate(mHolder);
+            if (mAttachInfo.mHardwareRenderer != null &&
+                    mAttachInfo.mHardwareRenderer.isEnabled()) {
+                if (hwInitialized || windowShouldResize ||
+                        mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
+                        mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
+                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
+                    if (!hwInitialized) {
+                        mAttachInfo.mHardwareRenderer.invalidate(mHolder);
+                    }
                 }
             }
 
