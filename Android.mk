@@ -405,6 +405,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/AccessibilityService "Accessibility Service" \
 		-samplecode $(sample_dir)/AccelerometerPlay \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
+		-samplecode $(sample_dir)/ActionBarCompat \
+		            resources/samples/ActionBarCompat "Action Bar Compatibility" \
                 -samplecode $(sample_dir)/AndroidBeam \
 		            resources/samples/AndroidBeam "Android Beam" \
 		-samplecode $(sample_dir)/ApiDemos \
@@ -421,12 +423,12 @@ web_docs_sample_code_flags := \
 		            resources/samples/BusinessCard "Business Card" \
 		-samplecode $(sample_dir)/ContactManager \
 		            resources/samples/ContactManager "Contact Manager" \
-    -samplecode $(sample_dir)/CubeLiveWallpaper \
-                resources/samples/CubeLiveWallpaper "Cube Live Wallpaper" \
+		-samplecode $(sample_dir)/CubeLiveWallpaper \
+		            resources/samples/CubeLiveWallpaper "Cube Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
-                -samplecode $(sample_dir)/HoneycombGallery \
-                            resources/samples/HoneycombGallery "Honeycomb Gallery" \
+		-samplecode $(sample_dir)/HoneycombGallery \
+		            resources/samples/HoneycombGallery "Honeycomb Gallery" \
 		-samplecode $(sample_dir)/JetBoy \
 		            resources/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \

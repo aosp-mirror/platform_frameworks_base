@@ -408,6 +408,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new', 'ui', 'compatibility', 'newfeature'],
+    path: 'samples/ActionBarCompat/index.html',
+    title: {
+      en: 'Action Bar Compatibility'
+    },
+    description: {
+      en: 'Shows how to use the action bar on both pre-API 11 and API 11+ devices, maximizing code re-use.'
+    }
+  },
+  {
     tags: ['sample', 'new'],
     path: 'samples/AndroidBeam/index.html',
     title: {
