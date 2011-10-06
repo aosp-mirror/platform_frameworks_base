@@ -832,7 +832,7 @@ import junit.framework.Assert;
             TextView tv =
                     (TextView) super.getView(position, convertView, parent);
             if (tv != null && mTextView != null) {
-                tv.setTextSize(mTextView.getTextSize());
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextView.getTextSize());
             }
             return tv;
         }
