@@ -192,11 +192,12 @@ interface IWindowManager
     int getPreferredOptionsPanelGravity();
 
 	/**
-	 * Lock the device orientation to the current rotation. Sensor input will
-	 * be ignored until thawRotation() is called.
+	 * Lock the device orientation to the specified rotation, or to the
+	 * current rotation if -1.  Sensor input will be ignored until
+	 * thawRotation() is called.
 	 * @hide
 	 */
-	void freezeRotation();
+	void freezeRotation(int rotation);
 
 	/**
 	 * Release the orientation lock imposed by freezeRotation().
