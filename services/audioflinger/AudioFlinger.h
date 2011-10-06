@@ -1215,6 +1215,7 @@ private:
         status_t         setDevice(uint32_t device);
         status_t         setVolume(uint32_t *left, uint32_t *right, bool controller);
         status_t         setMode(uint32_t mode);
+        status_t         start();
         status_t         stop();
         void             setSuspended(bool suspended);
         bool             suspended();
