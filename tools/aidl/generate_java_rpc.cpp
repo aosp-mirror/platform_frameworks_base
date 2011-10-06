@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-Type* SERVICE_CONTAINER_TYPE = new Type("com.android.athome.service",
-        "AndroidAtHomeServiceContainer", Type::BUILT_IN, false, false, false);
+Type* SERVICE_CONTEXT_TYPE = new Type("android.content",
+        "Context", Type::BUILT_IN, false, false, false);
 Type* PRESENTER_BASE_TYPE = new Type("com.android.athome.service",
         "AndroidAtHomePresenter", Type::BUILT_IN, false, false, false);
 Type* PRESENTER_LISTENER_BASE_TYPE = new Type("com.android.athome.service",
@@ -21,6 +21,8 @@ Type* RPC_RESULT_HANDLER_TYPE = new ParcelableType("com.android.athome.rpc", "Rp
         true, __FILE__, __LINE__);
 Type* RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
         Type::BUILT_IN, false, false, false);
+Type* RPC_CONTEXT_TYPE = new ParcelableType("com.android.athome.rpc", "RpcContext", true,
+        __FILE__, __LINE__);
 
 static void generate_create_from_data(Type* t, StatementBlock* addTo, const string& key,
         Variable* v, Variable* data, Variable** cl);
@@ -87,6 +89,7 @@ public:
     Method* processMethod;
     Variable* actionParam;
     Variable* requestParam;
+    Variable* rpcContextParam;
     Variable* errorParam;
     Variable* requestData;
     Variable* resultData;
@@ -112,7 +115,7 @@ DispatcherClass::~DispatcherClass()
 void
 DispatcherClass::generate_process()
 {
-    // byte[] process(String action, byte[] params, RpcError status)
+    // byte[] process(String action, byte[] params, RpcContext context, RpcError status)
     this->processMethod = new Method;
         this->processMethod->modifiers = PUBLIC;
         this->processMethod->returnType = BYTE_TYPE;
@@ -125,6 +128,9 @@ DispatcherClass::generate_process()
 
     this->requestParam = new Variable(BYTE_TYPE, "requestParam", 1);
     this->processMethod->parameters.push_back(this->requestParam);
+
+    this->rpcContextParam = new Variable(RPC_CONTEXT_TYPE, "context", 0);
+    this->processMethod->parameters.push_back(this->rpcContextParam);    
 
     this->errorParam = new Variable(RPC_ERROR_TYPE, "errorParam", 0);
     this->processMethod->parameters.push_back(this->errorParam);
@@ -192,6 +198,9 @@ DispatcherClass::AddMethod(const method_type* method)
         arg = arg->next;
     }
 
+    // Add a final parameter: RpcContext. Contains data about
+    // incoming request (e.g., certificate)
+    realCall->arguments.push_back(new Variable(RPC_CONTEXT_TYPE, "context", 0));
 
     Type* returnType = NAMES.Search(method->type.type.data);
     if (returnType == EVENT_FAKE_TYPE) {
@@ -254,8 +263,10 @@ DispatcherClass::DoneWithMethods()
     IfStatement* fallthrough = new IfStatement();
         fallthrough->statements = new StatementBlock;
         fallthrough->statements->Add(new ReturnStatement(
-                    new MethodCall(SUPER_VALUE, "process", 3, this->actionParam, this->requestParam,
-                        this->errorParam)));
+                    new MethodCall(SUPER_VALUE, "process", 4, 
+                    this->actionParam, this->requestParam, 
+                    this->rpcContextParam,
+                    this->errorParam)));
     this->dispatchIfStatement->elseif = fallthrough;
     IfStatement* s = new IfStatement;
         s->statements = new StatementBlock;
@@ -446,7 +457,7 @@ ServiceBaseClass::~ServiceBaseClass()
 void
 ServiceBaseClass::generate_ctor()
 {
-    Variable* container = new Variable(SERVICE_CONTAINER_TYPE, "container");
+    Variable* context = new Variable(SERVICE_CONTEXT_TYPE, "context");
     Variable* name = new Variable(STRING_TYPE, "name");
     Variable* type = new Variable(STRING_TYPE, "type");
     Variable* version = new Variable(INT_TYPE, "version");
@@ -454,13 +465,13 @@ ServiceBaseClass::generate_ctor()
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
-        ctor->parameters.push_back(container);
+        ctor->parameters.push_back(context);
         ctor->parameters.push_back(name);
         ctor->parameters.push_back(type);
         ctor->parameters.push_back(version);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new MethodCall("super", 4, container, name, type, version));
+    ctor->statements->Add(new MethodCall("super", 4, context, name, type, version));
 }
 
 // =================================================
@@ -794,6 +805,10 @@ generate_regular_method(const method_type* method, RpcProxyClass* proxyClass,
                             arg->type.dimension));
         arg = arg->next;
     }
+
+    // Add the default RpcContext param to all methods
+    decl->parameters.push_back(new Variable(RPC_CONTEXT_TYPE, "context", 0));
+	
     serviceBaseClass->elements.push_back(decl);
     
 
@@ -858,6 +873,10 @@ generate_event_method(const method_type* method, RpcProxyClass* proxyClass,
                             arg->type.dimension));
         arg = arg->next;
     }
+
+    // Add a final parameter: RpcContext. Contains data about
+    // incoming request (e.g., certificate)
+    event->parameters.push_back(new Variable(RPC_CONTEXT_TYPE, "context", 0));
 }
 
 static void
