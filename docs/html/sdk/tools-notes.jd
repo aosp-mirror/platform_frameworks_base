@@ -2,7 +2,7 @@ page.title=SDK Tools
 @jd:body
 
 <p>SDK Tools is a downloadable component for the Android SDK. It includes the
-complete set of development and debugging tools for the Android SDK. </p>
+complete set of development and debugging tools for the Android SDK.</p>
 
 <p>If you are new to the Android SDK, the <a
 href="{@docRoot}sdk/index.html">SDK starter package</a> installs the
@@ -13,7 +13,7 @@ of the SDK Tools, use the <em>Android SDK and AVD Manager</em> to get the
 update, rather than downloading a new SDK starter package. For more information
 about how to update, see <a
 href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Updating SDK
-Components</a>. </p>
+Components</a>.</p>
 
 
 <h2 id="notes">Revisions</h2>
@@ -62,10 +62,56 @@ padding: .25em 1em;
 }
 </style>
 
-
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+    width="9px" />SDK Tools, Revision 14</a> <em>(October 2011)</em>
+  <div class="toggleme">
+  <dl>
+<dt>Dependencies:</dt>
+<dd>
+  <ul><li>Android SDK Platform-tools revision 8 or later.</li>
+  <li>If you are developing in Eclipse with ADT, note that the SDK Tools r14 is designed for use
+  with ADT 14.0.0 and later. If you haven't already, we highly recommend updating your <a
+  href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 14.0.0.</li>
+  <li>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
+  Ant</a> 1.8 or later.</li>
+</ul>
+
+<dt>General notes:</dt>
+<dd>
+  <ul>
+     <li>Changed <code>default.properties</code> to <code>project.properties</code> and
+    <code>build.properties</code> to <code>ant.properties</code>. Any existing
+    projects that you build with Ant must be updated with the <code>android update project</code>
+    command.</li>
+    <li>Changed Ant <code>build.xml</code> file to support improvements to the
+    build system and added and modified Ant commands to support these changes. For a list of Ant
+commands, see the
+<a href="{@docRoot}guide/developing/building/building-cmdline.html#AntReference">Ant Command
+Reference</a>.</li>
+
+    <li>Changed how library projects are built.</a></li>
+    <li>Improved incremental builds, so that resource compilation runs less frequently. Builds no
+    longer run when you edit strings or layouts (unless you add a new <code>id</code>) and no longer
+    run once for each library project.</li>
+    <li>Introduced a "PNG crunch cache" that only runs on modified PNG files, instead of
+    crunching all existing PNG files, all the time.</li>
+    <li>Revamped the SDK Manager UI (<a href="http://tools.android.com/recent/newsdkmanager">more
+info</a>).</li>
+  </ul>
+  <p>For a complete overview of the build system changes and what you need to do to support them,
+see the <a href="http://tools.android.com/recent/buildchangesinrevision14">Android Tools Project
+site</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+        width="9px" />
 SDK Tools, Revision 13</a> <em>(September 2011)</em>
   <div class="toggleme">
   <dl>
