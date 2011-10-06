@@ -1662,21 +1662,12 @@ public final class WebViewCore {
                 mDrawIsScheduled = false;
             }
             if (mMessages != null) {
-                Log.w(LOGTAG, "Not supported in this case.");
+                Throwable throwable = new Throwable(
+                        "EventHub.removeMessages(int what = " + what + ") is not supported " +
+                        "before the WebViewCore is set up.");
+                Log.w(LOGTAG, Log.getStackTraceString(throwable));
             } else {
                 mHandler.removeMessages(what);
-            }
-        }
-
-        private synchronized boolean hasMessages(int what) {
-            if (mBlockMessages) {
-                return false;
-            }
-            if (mMessages != null) {
-                Log.w(LOGTAG, "hasMessages() is not supported in this case.");
-                return false;
-            } else {
-                return mHandler.hasMessages(what);
             }
         }
 
