@@ -31,8 +31,6 @@
 
 namespace android {
 
-class CursorWindow;
-
 class AndroidRuntime
 {
 public:
@@ -132,8 +130,6 @@ private:
                                 android_thread_id_t* threadId);
     static int javaThreadShell(void* args);
 };
-
-extern CursorWindow * get_window_from_object(JNIEnv * env, jobject javaWindow);
 
 }
 
