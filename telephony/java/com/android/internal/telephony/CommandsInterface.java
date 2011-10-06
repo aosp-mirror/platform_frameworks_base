@@ -20,8 +20,6 @@ import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
 
 import android.os.Message;
 import android.os.Handler;
-import android.os.SystemProperties;
-
 
 /**
  * {@hide}
@@ -267,14 +265,32 @@ public interface CommandsInterface {
     void unregisterForRUIMReady(Handler h);
 
     /**
-     * unlike the register* methods, there's only one new SMS handler
+     * unlike the register* methods, there's only one new 3GPP format SMS handler.
      * if you need to unregister, you should also tell the radio to stop
      * sending SMS's to you (via AT+CNMI)
      *
      * AsyncResult.result is a String containing the SMS PDU
      */
-    void setOnNewSMS(Handler h, int what, Object obj);
-    void unSetOnNewSMS(Handler h);
+    void setOnNewGsmSms(Handler h, int what, Object obj);
+    void unSetOnNewGsmSms(Handler h);
+
+    /**
+     * unlike the register* methods, there's only one new 3GPP2 format SMS handler.
+     * if you need to unregister, you should also tell the radio to stop
+     * sending SMS's to you (via AT+CNMI)
+     *
+     * AsyncResult.result is a String containing the SMS PDU
+     */
+    void setOnNewCdmaSms(Handler h, int what, Object obj);
+    void unSetOnNewCdmaSms(Handler h);
+
+    /**
+     * Set the handler for SMS Cell Broadcast messages.
+     *
+     * AsyncResult.result is a byte array containing the SMS-CB PDU
+     */
+    void setOnNewGsmBroadcastSms(Handler h, int what, Object obj);
+    void unSetOnNewGsmBroadcastSms(Handler h);
 
    /**
      * Register for NEW_SMS_ON_SIM unsolicited message

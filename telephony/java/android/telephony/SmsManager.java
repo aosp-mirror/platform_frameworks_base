@@ -325,7 +325,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
-    public ArrayList<SmsMessage> getAllMessagesFromIcc() {
+    public static ArrayList<SmsMessage> getAllMessagesFromIcc() {
         List<SmsRawData> records = null;
 
         try {
@@ -470,7 +470,7 @@ public final class SmsManager {
      *   <code>getAllMessagesFromIcc</code>
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects.
      */
-    private ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
+    private static ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
         ArrayList<SmsMessage> messages = new ArrayList<SmsMessage>();
         if (records != null) {
             int count = records.size();

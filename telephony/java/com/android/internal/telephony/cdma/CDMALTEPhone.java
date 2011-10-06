@@ -27,6 +27,9 @@ import android.util.Log;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneNotifier;
+import com.android.internal.telephony.PhoneProxy;
+import com.android.internal.telephony.SMSDispatcher;
+import com.android.internal.telephony.gsm.GsmSMSDispatcher;
 import com.android.internal.telephony.gsm.SimCard;
 import com.android.internal.telephony.ims.IsimRecords;
 
@@ -35,14 +38,13 @@ public class CDMALTEPhone extends CDMAPhone {
 
     private static final boolean DBG = true;
 
+    /** Secondary SMSDispatcher for 3GPP format messages. */
+    SMSDispatcher m3gppSMS;
+
     // Constructors
     public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
-        this(context, ci, notifier, false);
-    }
-
-    public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
-            boolean unitTestMode) {
         super(context, ci, notifier, false);
+        m3gppSMS = new GsmSMSDispatcher(this, mSmsStorageMonitor, mSmsUsageMonitor);
     }
 
     @Override
@@ -51,6 +53,20 @@ public class CDMALTEPhone extends CDMAPhone {
         mIccRecords = new CdmaLteUiccRecords(this);
         mIccCard = new SimCard(this, LOG_TAG, DBG);
         mIccFileHandler = new CdmaLteUiccFileHandler(this);
+    }
+
+    @Override
+    public void dispose() {
+        synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+            super.dispose();
+            m3gppSMS.dispose();
+        }
+    }
+
+    @Override
+    public void removeReferences() {
+        super.removeReferences();
+        m3gppSMS = null;
     }
 
     @Override
@@ -92,13 +108,15 @@ public class CDMALTEPhone extends CDMAPhone {
         return ret;
     }
 
+    @Override
     public boolean updateCurrentCarrierInProvider() {
         if (mIccRecords != null) {
             try {
                 Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
                 ContentValues map = new ContentValues();
-                map.put(Telephony.Carriers.NUMERIC, mIccRecords.getOperatorNumeric());
-                log("updateCurrentCarrierInProvider insert uri=" + uri);
+                String operatorNumeric = mIccRecords.getOperatorNumeric();
+                map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
+                log("updateCurrentCarrierInProvider from UICC: numeric=" + operatorNumeric);
                 mContext.getContentResolver().insert(uri, map);
                 return true;
             } catch (SQLException e) {

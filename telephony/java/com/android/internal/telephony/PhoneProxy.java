@@ -72,7 +72,7 @@ public class PhoneProxy extends Handler implements Phone {
         switch(msg.what) {
         case EVENT_RADIO_TECHNOLOGY_CHANGED:
             //switch Phone from CDMA to GSM or vice versa
-            mOutgoingPhone = ((PhoneBase)mActivePhone).getPhoneName();
+            mOutgoingPhone = mActivePhone.getPhoneName();
             logd("Switching phone from " + mOutgoingPhone + "Phone to " +
                     (mOutgoingPhone.equals("GSM") ? "CDMAPhone" : "GSMPhone") );
             boolean oldPowerState = false; // old power state to off
@@ -144,22 +144,9 @@ public class PhoneProxy extends Handler implements Phone {
         super.handleMessage(msg);
     }
 
-    private void logv(String msg) {
-        Log.v(LOG_TAG, "[PhoneProxy] " + msg);
-    }
-
-    private void logd(String msg) {
+    private static void logd(String msg) {
         Log.d(LOG_TAG, "[PhoneProxy] " + msg);
     }
-
-    private void logw(String msg) {
-        Log.w(LOG_TAG, "[PhoneProxy] " + msg);
-    }
-
-    private void loge(String msg) {
-        Log.e(LOG_TAG, "[PhoneProxy] " + msg);
-    }
-
 
     public ServiceState getServiceState() {
         return mActivePhone.getServiceState();
@@ -739,19 +726,19 @@ public class PhoneProxy extends Handler implements Phone {
     }
 
     public int getCdmaEriIconIndex() {
-         return mActivePhone.getCdmaEriIconIndex();
+        return mActivePhone.getCdmaEriIconIndex();
     }
 
-     public String getCdmaEriText() {
-         return mActivePhone.getCdmaEriText();
-     }
+    public String getCdmaEriText() {
+        return mActivePhone.getCdmaEriText();
+    }
 
     public int getCdmaEriIconMode() {
-         return mActivePhone.getCdmaEriIconMode();
+        return mActivePhone.getCdmaEriIconMode();
     }
 
     public Phone getActivePhone() {
-         return mActivePhone;
+        return mActivePhone;
     }
 
     public void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete){
@@ -860,5 +847,10 @@ public class PhoneProxy extends Handler implements Phone {
     @Override
     public int getLteOnCdmaMode() {
         return mActivePhone.getLteOnCdmaMode();
+    }
+
+    @Override
+    public void setVoiceMessageWaiting(int line, int countWaiting) {
+        mActivePhone.setVoiceMessageWaiting(line, countWaiting);
     }
 }

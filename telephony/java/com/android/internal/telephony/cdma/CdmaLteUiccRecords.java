@@ -26,6 +26,7 @@ import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.PhoneBase;
+import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.gsm.SIMRecords;
 import com.android.internal.telephony.ims.IsimRecords;
@@ -437,5 +438,14 @@ public final class CdmaLteUiccRecords extends SIMRecords {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Dispatch 3GPP format message. For CDMA/LTE phones,
+     * send the message to the secondary 3GPP format SMS dispatcher.
+     */
+    @Override
+    protected int dispatchGsmMessage(SmsMessageBase message) {
+        return ((CDMALTEPhone) phone).m3gppSMS.dispatchMessage(message);
     }
 }

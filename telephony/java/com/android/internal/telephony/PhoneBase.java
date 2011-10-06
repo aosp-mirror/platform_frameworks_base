@@ -112,15 +112,17 @@ public abstract class PhoneBase extends Handler implements Phone {
     /* Instance Variables */
     public CommandsInterface mCM;
     protected IccFileHandler mIccFileHandler;
-    boolean mDnsCheckDisabled = false;
+    boolean mDnsCheckDisabled;
     public DataConnectionTracker mDataConnectionTracker;
     boolean mDoesRilSendMultipleCallRing;
-    int mCallRingContinueToken = 0;
+    int mCallRingContinueToken;
     int mCallRingDelay;
     public boolean mIsTheCurrentActivePhone = true;
     boolean mIsVoiceCapable = true;
     public IccRecords mIccRecords;
     public IccCard mIccCard;
+    public SmsStorageMonitor mSmsStorageMonitor;
+    public SmsUsageMonitor mSmsUsageMonitor;
     public SMSDispatcher mSMS;
 
     /**
@@ -164,7 +166,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     protected Looper mLooper; /* to insure registrants are in correct thread*/
 
-    protected Context mContext;
+    protected final Context mContext;
 
     /**
      * PhoneNotifier is an abstraction for all system-wide
@@ -238,6 +240,10 @@ public abstract class PhoneBase extends Handler implements Phone {
         mCallRingDelay = SystemProperties.getInt(
                 TelephonyProperties.PROPERTY_CALL_RING_DELAY, 3000);
         Log.d(LOG_TAG, "mCallRingDelay=" + mCallRingDelay);
+
+        // Initialize device storage and outgoing SMS usage monitors for SMSDispatchers.
+        mSmsStorageMonitor = new SmsStorageMonitor(this);
+        mSmsUsageMonitor = new SmsUsageMonitor(context.getContentResolver());
     }
 
     public void dispose() {
@@ -246,7 +252,15 @@ public abstract class PhoneBase extends Handler implements Phone {
             // Must cleanup all connectionS and needs to use sendMessage!
             mDataConnectionTracker.cleanUpAllConnections(null);
             mIsTheCurrentActivePhone = false;
+            // Dispose the SMS usage and storage monitors
+            mSmsStorageMonitor.dispose();
+            mSmsUsageMonitor.dispose();
         }
+    }
+
+    public void removeReferences() {
+        mSmsStorageMonitor = null;
+        mSmsUsageMonitor = null;
     }
 
     /**
@@ -1037,37 +1051,6 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     /**
-     * simulateDataConnection
-     *
-     * simulates various data connection states. This messes with
-     * DataConnectionTracker's internal states, but doesn't actually change
-     * the underlying radio connection states.
-     *
-     * @param state Phone.DataState enum.
-     */
-    public void simulateDataConnection(Phone.DataState state) {
-        DataConnectionTracker.State dcState;
-
-        switch (state) {
-            case CONNECTED:
-                dcState = DataConnectionTracker.State.CONNECTED;
-                break;
-            case SUSPENDED:
-                dcState = DataConnectionTracker.State.CONNECTED;
-                break;
-            case DISCONNECTED:
-                dcState = DataConnectionTracker.State.FAILED;
-                break;
-            default:
-                dcState = DataConnectionTracker.State.CONNECTING;
-                break;
-        }
-
-        mDataConnectionTracker.setState(dcState);
-        notifyDataConnection(null, Phone.APN_TYPE_DEFAULT);
-    }
-
-    /**
      * Notify registrants of a new ringing Connection.
      * Subclasses of Phone probably want to replace this with a
      * version scoped to their packages
@@ -1132,7 +1115,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     /**
      * Common error logger method for unexpected calls to CDMA-only methods.
      */
-    private void logUnexpectedCdmaMethodCall(String name)
+    private static void logUnexpectedCdmaMethodCall(String name)
     {
         Log.e(LOG_TAG, "Error! " + name + "() in PhoneBase should not be " +
                 "called, CDMAPhone inactive.");
@@ -1145,7 +1128,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     /**
      * Common error logger method for unexpected calls to GSM/WCDMA-only methods.
      */
-    private void logUnexpectedGsmMethodCall(String name) {
+    private static void logUnexpectedGsmMethodCall(String name) {
         Log.e(LOG_TAG, "Error! " + name + "() in PhoneBase should not be " +
                 "called, GSMPhone inactive.");
     }
@@ -1166,5 +1149,17 @@ public abstract class PhoneBase extends Handler implements Phone {
     @Override
     public int getLteOnCdmaMode() {
         return mCM.getLteOnCdmaMode();
+    }
+
+    /**
+     * Sets the SIM voice message waiting indicator records.
+     * @param line GSM Subscriber Profile Number, one-based. Only '1' is supported
+     * @param countWaiting The number of messages waiting, if known. Use
+     *                     -1 to indicate that an unknown number of
+     *                      messages are waiting
+     */
+    @Override
+    public void setVoiceMessageWaiting(int line, int countWaiting) {
+        mIccRecords.setVoiceMessageWaiting(line, countWaiting);
     }
 }

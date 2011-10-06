@@ -44,10 +44,12 @@ import android.telephony.ServiceState;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -60,68 +62,66 @@ import static android.telephony.SmsManager.RESULT_ERROR_RADIO_OFF;
 import static android.telephony.SmsManager.RESULT_ERROR_LIMIT_EXCEEDED;
 import static android.telephony.SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE;
 
-
 public abstract class SMSDispatcher extends Handler {
-    private static final String TAG = "SMS";
+    static final String TAG = "SMS";    // accessed from inner class
     private static final String SEND_NEXT_MSG_EXTRA = "SendNextMsg";
-
-    /** Default checking period for SMS sent without user permit */
-    private static final int DEFAULT_SMS_CHECK_PERIOD = 3600000;
-
-    /** Default number of SMS sent in checking period without user permit */
-    private static final int DEFAULT_SMS_MAX_COUNT = 100;
 
     /** Default timeout for SMS sent query */
     private static final int DEFAULT_SMS_TIMEOUT = 6000;
 
-    protected static final String[] RAW_PROJECTION = new String[] {
-        "pdu",
-        "sequence",
-        "destination_port",
+    /** Permission required to receive SMS and SMS-CB messages. */
+    public static final String RECEIVE_SMS_PERMISSION = "android.permission.RECEIVE_SMS";
+
+    /** Permission required to receive ETWS and CMAS emergency broadcasts. */
+    public static final String RECEIVE_EMERGENCY_BROADCAST_PERMISSION =
+            "android.permission.RECEIVE_EMERGENCY_BROADCAST";
+
+    /** Query projection for checking for duplicate message segments. */
+    private static final String[] PDU_PROJECTION = new String[] {
+            "pdu"
     };
 
-    static final protected int EVENT_NEW_SMS = 1;
+    /** Query projection for combining concatenated message segments. */
+    private static final String[] PDU_SEQUENCE_PORT_PROJECTION = new String[] {
+            "pdu",
+            "sequence",
+            "destination_port"
+    };
 
-    static final protected int EVENT_SEND_SMS_COMPLETE = 2;
+    private static final int PDU_COLUMN = 0;
+    private static final int SEQUENCE_COLUMN = 1;
+    private static final int DESTINATION_PORT_COLUMN = 2;
+
+    /** New SMS received. */
+    protected static final int EVENT_NEW_SMS = 1;
+
+    /** SMS send complete. */
+    protected static final int EVENT_SEND_SMS_COMPLETE = 2;
 
     /** Retry sending a previously failed SMS message */
-    static final protected int EVENT_SEND_RETRY = 3;
-
-    /** Status report received */
-    static final protected int EVENT_NEW_SMS_STATUS_REPORT = 5;
-
-    /** SIM/RUIM storage is full */
-    static final protected int EVENT_ICC_FULL = 6;
+    private static final int EVENT_SEND_RETRY = 3;
 
     /** SMS confirm required */
-    static final protected int EVENT_POST_ALERT = 7;
+    private static final int EVENT_POST_ALERT = 4;
 
     /** Send the user confirmed SMS */
-    static final protected int EVENT_SEND_CONFIRMED_SMS = 8;
+    static final int EVENT_SEND_CONFIRMED_SMS = 5;  // accessed from inner class
 
     /** Alert is timeout */
-    static final protected int EVENT_ALERT_TIMEOUT = 9;
+    private static final int EVENT_ALERT_TIMEOUT = 6;
 
     /** Stop the sending */
-    static final protected int EVENT_STOP_SENDING = 10;
+    static final int EVENT_STOP_SENDING = 7;        // accessed from inner class
 
-    /** Memory status reporting is acknowledged by RIL */
-    static final protected int EVENT_REPORT_MEMORY_STATUS_DONE = 11;
-
-    /** Radio is ON */
-    static final protected int EVENT_RADIO_ON = 12;
-
-    /** New broadcast SMS */
-    static final protected int EVENT_NEW_BROADCAST_SMS = 13;
-
-    protected Phone mPhone;
-    protected Context mContext;
-    protected ContentResolver mResolver;
-    protected CommandsInterface mCm;
+    protected final Phone mPhone;
+    protected final Context mContext;
+    protected final ContentResolver mResolver;
+    protected final CommandsInterface mCm;
+    protected final SmsStorageMonitor mStorageMonitor;
 
     protected final WapPushOverSms mWapPush;
 
-    protected final Uri mRawUri = Uri.withAppendedPath(Telephony.Sms.CONTENT_URI, "raw");
+    protected static final Uri mRawUri = Uri.withAppendedPath(Telephony.Sms.CONTENT_URI, "raw");
 
     /** Maximum number of times to retry sending a failed SMS. */
     private static final int MAX_SEND_RETRIES = 3;
@@ -136,12 +136,14 @@ public abstract class SMSDispatcher extends Handler {
      * Message reference for a CONCATENATED_8_BIT_REFERENCE or
      * CONCATENATED_16_BIT_REFERENCE message set.  Should be
      * incremented for each set of concatenated messages.
+     * Static field shared by all dispatcher objects.
      */
-    private static int sConcatenatedRef;
+    private static int sConcatenatedRef = new Random().nextInt(256);
 
-    private SmsCounter mCounter;
+    /** Outgoing message counter. Shared by all dispatchers. */
+    private final SmsUsageMonitor mUsageMonitor;
 
-    private ArrayList<SmsTracker> mSTrackers = new ArrayList<SmsTracker>(MO_MSG_QUEUE_LIMIT);
+    private final ArrayList<SmsTracker> mSTrackers = new ArrayList<SmsTracker>(MO_MSG_QUEUE_LIMIT);
 
     /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
     private PowerManager.WakeLock mWakeLock;
@@ -150,17 +152,14 @@ public abstract class SMSDispatcher extends Handler {
      * Hold the wake lock for 5 seconds, which should be enough time for
      * any receiver(s) to grab its own wake lock.
      */
-    private final int WAKE_LOCK_TIMEOUT = 5000;
-
-    protected boolean mStorageAvailable = true;
-    protected boolean mReportMemoryStatusPending = false;
+    private static final int WAKE_LOCK_TIMEOUT = 5000;
 
     /* Flags indicating whether the current device allows sms service */
     protected boolean mSmsCapable = true;
     protected boolean mSmsReceiveDisabled;
     protected boolean mSmsSendDisabled;
 
-    protected static int mRemainingMessages = -1;
+    protected int mRemainingMessages = -1;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -168,93 +167,22 @@ public abstract class SMSDispatcher extends Handler {
     }
 
     /**
-     *  Implement the per-application based SMS control, which only allows
-     *  a limit on the number of SMS/MMS messages an app can send in checking
-     *  period.
+     * Create a new SMS dispatcher.
+     * @param phone the Phone to use
+     * @param storageMonitor the SmsStorageMonitor to use
+     * @param usageMonitor the SmsUsageMonitor to use
      */
-    private class SmsCounter {
-        private int mCheckPeriod;
-        private int mMaxAllowed;
-        private HashMap<String, ArrayList<Long>> mSmsStamp;
-
-        /**
-         * Create SmsCounter
-         * @param mMax is the number of SMS allowed without user permit
-         * @param mPeriod is the checking period
-         */
-        SmsCounter(int mMax, int mPeriod) {
-            mMaxAllowed = mMax;
-            mCheckPeriod = mPeriod;
-            mSmsStamp = new HashMap<String, ArrayList<Long>> ();
-        }
-
-        /**
-         * Check to see if an application allow to send new SMS messages
-         *
-         * @param appName is the application sending sms
-         * @param smsWaiting is the number of new sms wants to be sent
-         * @return true if application is allowed to send the requested number
-         *         of new sms messages
-         */
-        boolean check(String appName, int smsWaiting) {
-            if (!mSmsStamp.containsKey(appName)) {
-                mSmsStamp.put(appName, new ArrayList<Long>());
-            }
-
-            return isUnderLimit(mSmsStamp.get(appName), smsWaiting);
-        }
-
-        private boolean isUnderLimit(ArrayList<Long> sent, int smsWaiting) {
-            Long ct =  System.currentTimeMillis();
-
-            Log.d(TAG, "SMS send size=" + sent.size() + "time=" + ct);
-
-            while (sent.size() > 0 && (ct - sent.get(0)) > mCheckPeriod ) {
-                    sent.remove(0);
-            }
-
-
-            if ( (sent.size() + smsWaiting) <= mMaxAllowed) {
-                for (int i = 0; i < smsWaiting; i++ ) {
-                    sent.add(ct);
-                }
-                return true;
-            }
-            return false;
-        }
-    }
-
-    protected SMSDispatcher(PhoneBase phone) {
+    protected SMSDispatcher(PhoneBase phone, SmsStorageMonitor storageMonitor,
+            SmsUsageMonitor usageMonitor) {
         mPhone = phone;
         mWapPush = new WapPushOverSms(phone, this);
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
+        mStorageMonitor = storageMonitor;
+        mUsageMonitor = usageMonitor;
 
         createWakelock();
-
-        int check_period = Settings.Secure.getInt(mResolver,
-                Settings.Secure.SMS_OUTGOING_CHECK_INTERVAL_MS,
-                DEFAULT_SMS_CHECK_PERIOD);
-        int max_count = Settings.Secure.getInt(mResolver,
-                Settings.Secure.SMS_OUTGOING_CHECK_MAX_COUNT,
-                DEFAULT_SMS_MAX_COUNT);
-        mCounter = new SmsCounter(max_count, check_period);
-
-        mCm.setOnNewSMS(this, EVENT_NEW_SMS, null);
-        mCm.setOnSmsStatus(this, EVENT_NEW_SMS_STATUS_REPORT, null);
-        mCm.setOnIccSmsFull(this, EVENT_ICC_FULL, null);
-        mCm.registerForOn(this, EVENT_RADIO_ON, null);
-
-        // Don't always start message ref at 0.
-        sConcatenatedRef = new Random().nextInt(256);
-
-        // Register for device storage intents.  Use these to notify the RIL
-        // that storage for SMS is or is not available.
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_FULL);
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
-        mContext.registerReceiver(mResultReceiver, filter);
 
         mSmsCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sms_capable);
@@ -262,17 +190,29 @@ public abstract class SMSDispatcher extends Handler {
                                 TelephonyProperties.PROPERTY_SMS_RECEIVE, mSmsCapable);
         mSmsSendDisabled = !SystemProperties.getBoolean(
                                 TelephonyProperties.PROPERTY_SMS_SEND, mSmsCapable);
-        Log.d(TAG, "SMSDispatcher: ctor mSmsCapable=" + mSmsCapable
+        Log.d(TAG, "SMSDispatcher: ctor mSmsCapable=" + mSmsCapable + " format=" + getFormat()
                 + " mSmsReceiveDisabled=" + mSmsReceiveDisabled
                 + " mSmsSendDisabled=" + mSmsSendDisabled);
     }
 
-    public void dispose() {
-        mCm.unSetOnNewSMS(this);
-        mCm.unSetOnSmsStatus(this);
-        mCm.unSetOnIccSmsFull(this);
-        mCm.unregisterForOn(this);
-    }
+    /** Unregister for incoming SMS events. */
+    public abstract void dispose();
+
+    /**
+     * The format of the message PDU in the associated broadcast intent.
+     * This will be either "3gpp" for GSM/UMTS/LTE messages in 3GPP format
+     * or "3gpp2" for CDMA/LTE messages in 3GPP2 format.
+     *
+     * Note: All applications which handle incoming SMS messages by processing the
+     * SMS_RECEIVED_ACTION broadcast intent MUST pass the "format" extra from the intent
+     * into the new methods in {@link android.telephony.SmsMessage} which take an
+     * extra format parameter. This is required in order to correctly decode the PDU on
+     * devices which require support for both 3GPP and 3GPP2 formats at the same time,
+     * such as CDMA/LTE devices and GSM/CDMA world phones.
+     *
+     * @return the format of the message PDU
+     */
+    protected abstract String getFormat();
 
     @Override
     protected void finalize() {
@@ -338,14 +278,6 @@ public abstract class SMSDispatcher extends Handler {
             sendSms((SmsTracker) msg.obj);
             break;
 
-        case EVENT_NEW_SMS_STATUS_REPORT:
-            handleStatusReport((AsyncResult)msg.obj);
-            break;
-
-        case EVENT_ICC_FULL:
-            handleIccFull();
-            break;
-
         case EVENT_POST_ALERT:
             handleReachSentLimit((SmsTracker)(msg.obj));
             break;
@@ -369,7 +301,7 @@ public abstract class SMSDispatcher extends Handler {
         case EVENT_SEND_CONFIRMED_SMS:
             if (mSTrackers.isEmpty() == false) {
                 SmsTracker sTracker = mSTrackers.remove(mSTrackers.size() - 1);
-                if (isMultipartTracker(sTracker)) {
+                if (sTracker.isMultipart()) {
                     sendMultipartSms(sTracker);
                 } else {
                     sendSms(sTracker);
@@ -389,30 +321,6 @@ public abstract class SMSDispatcher extends Handler {
                 }
                 removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
             }
-            break;
-
-        case EVENT_REPORT_MEMORY_STATUS_DONE:
-            ar = (AsyncResult)msg.obj;
-            if (ar.exception != null) {
-                mReportMemoryStatusPending = true;
-                Log.v(TAG, "Memory status report to modem pending : mStorageAvailable = "
-                        + mStorageAvailable);
-            } else {
-                mReportMemoryStatusPending = false;
-            }
-            break;
-
-        case EVENT_RADIO_ON:
-            if (mReportMemoryStatusPending) {
-                Log.v(TAG, "Sending pending memory status report : mStorageAvailable = "
-                        + mStorageAvailable);
-                mCm.reportSmsMemoryStatus(mStorageAvailable,
-                        obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-            }
-            break;
-
-        case EVENT_NEW_BROADCAST_SMS:
-            handleBroadcastSms((AsyncResult)msg.obj);
             break;
         }
     }
@@ -438,26 +346,6 @@ public abstract class SMSDispatcher extends Handler {
         mContext.sendOrderedBroadcast(intent, permission, mResultReceiver,
                 this, Activity.RESULT_OK, null, null);
     }
-
-    /**
-     * Called when SIM_FULL message is received from the RIL.  Notifies interested
-     * parties that SIM storage for SMS messages is full.
-     */
-    private void handleIccFull(){
-        // broadcast SIM_FULL intent
-        Intent intent = new Intent(Intents.SIM_FULL_ACTION);
-        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
-        mContext.sendBroadcast(intent, "android.permission.RECEIVE_SMS");
-    }
-
-    /**
-     * Called when a status report is received.  This should correspond to
-     * a previously successful SEND.
-     *
-     * @param ar AsyncResult passed into the message handler.  ar.result should
-     *           be a String representing the status report PDU, as ASCII hex.
-     */
-    protected abstract void handleStatusReport(AsyncResult ar);
 
     /**
      * Called when SMS send completes. Broadcasts a sentIntent on success.
@@ -559,7 +447,7 @@ public abstract class SMSDispatcher extends Handler {
      *                  POWER_OFF
      * @param tracker   An SmsTracker for the current message.
      */
-    protected void handleNotInService(int ss, SmsTracker tracker) {
+    protected static void handleNotInService(int ss, SmsTracker tracker) {
         if (tracker.mSentIntent != null) {
             try {
                 if (ss == ServiceState.STATE_POWER_OFF) {
@@ -581,86 +469,171 @@ public abstract class SMSDispatcher extends Handler {
      */
     public abstract int dispatchMessage(SmsMessageBase sms);
 
+    /**
+     * Dispatch a normal incoming SMS. This is called from the format-specific
+     * {@link #dispatchMessage(SmsMessageBase)} if no format-specific handling is required.
+     *
+     * @param sms
+     * @return
+     */
+    protected int dispatchNormalMessage(SmsMessageBase sms) {
+        SmsHeader smsHeader = sms.getUserDataHeader();
+
+        // See if message is partial or port addressed.
+        if ((smsHeader == null) || (smsHeader.concatRef == null)) {
+            // Message is not partial (not part of concatenated sequence).
+            byte[][] pdus = new byte[1][];
+            pdus[0] = sms.getPdu();
+
+            if (smsHeader != null && smsHeader.portAddrs != null) {
+                if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
+                    // GSM-style WAP indication
+                    return mWapPush.dispatchWapPdu(sms.getUserData());
+                } else {
+                    // The message was sent to a port, so concoct a URI for it.
+                    dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
+                }
+            } else {
+                // Normal short and non-port-addressed message, dispatch it.
+                dispatchPdus(pdus);
+            }
+            return Activity.RESULT_OK;
+        } else {
+            // Process the message part.
+            SmsHeader.ConcatRef concatRef = smsHeader.concatRef;
+            SmsHeader.PortAddrs portAddrs = smsHeader.portAddrs;
+            return processMessagePart(sms.getPdu(), sms.getOriginatingAddress(),
+                    concatRef.refNumber, concatRef.seqNumber, concatRef.msgCount,
+                    sms.getTimestampMillis(), (portAddrs != null ? portAddrs.destPort : -1), false);
+        }
+    }
 
     /**
      * If this is the last part send the parts out to the application, otherwise
-     * the part is stored for later processing.
+     * the part is stored for later processing. Handles both 3GPP concatenated messages
+     * as well as 3GPP2 format WAP push messages processed by
+     * {@link com.android.internal.telephony.cdma.CdmaSMSDispatcher#processCdmaWapPdu}.
      *
-     * NOTE: concatRef (naturally) needs to be non-null, but portAddrs can be null.
+     * @param pdu the message PDU, or the datagram portion of a CDMA WDP datagram segment
+     * @param address the originating address
+     * @param referenceNumber distinguishes concatenated messages from the same sender
+     * @param sequenceNumber the order of this segment in the message
+     * @param messageCount the number of segments in the message
+     * @param timestamp the service center timestamp in millis
+     * @param destPort the destination port for the message, or -1 for no destination port
+     * @param isCdmaWapPush true if pdu is a CDMA WDP datagram segment and not an SM PDU
+     *
      * @return a result code from {@link Telephony.Sms.Intents}, or
      *         {@link Activity#RESULT_OK} if the message has been broadcast
      *         to applications
      */
-    protected int processMessagePart(SmsMessageBase sms,
-            SmsHeader.ConcatRef concatRef, SmsHeader.PortAddrs portAddrs) {
-
-        // Lookup all other related parts
-        StringBuilder where = new StringBuilder("reference_number =");
-        where.append(concatRef.refNumber);
-        where.append(" AND address = ?");
-        String[] whereArgs = new String[] {sms.getOriginatingAddress()};
-
+    protected int processMessagePart(byte[] pdu, String address, int referenceNumber,
+            int sequenceNumber, int messageCount, long timestamp, int destPort,
+            boolean isCdmaWapPush) {
         byte[][] pdus = null;
         Cursor cursor = null;
         try {
-            cursor = mResolver.query(mRawUri, RAW_PROJECTION, where.toString(), whereArgs, null);
+            // used by several query selection arguments
+            String refNumber = Integer.toString(referenceNumber);
+            String seqNumber = Integer.toString(sequenceNumber);
+
+            // Check for duplicate message segment
+            cursor = mResolver.query(mRawUri, PDU_PROJECTION,
+                    "address=? AND reference_number=? AND sequence=?",
+                    new String[] {address, refNumber, seqNumber}, null);
+
+            // moveToNext() returns false if no duplicates were found
+            if (cursor.moveToNext()) {
+                Log.w(TAG, "Discarding duplicate message segment from address=" + address
+                        + " refNumber=" + refNumber + " seqNumber=" + seqNumber);
+                String oldPduString = cursor.getString(PDU_COLUMN);
+                byte[] oldPdu = HexDump.hexStringToByteArray(oldPduString);
+                if (!Arrays.equals(oldPdu, pdu)) {
+                    Log.e(TAG, "Warning: dup message segment PDU of length " + pdu.length
+                            + " is different from existing PDU of length " + oldPdu.length);
+                }
+                return Intents.RESULT_SMS_HANDLED;
+            }
+            cursor.close();
+
+            // not a dup, query for all other segments of this concatenated message
+            String where = "address=? AND reference_number=?";
+            String[] whereArgs = new String[] {address, refNumber};
+            cursor = mResolver.query(mRawUri, PDU_SEQUENCE_PORT_PROJECTION, where, whereArgs, null);
+
             int cursorCount = cursor.getCount();
-            if (cursorCount != concatRef.msgCount - 1) {
+            if (cursorCount != messageCount - 1) {
                 // We don't have all the parts yet, store this one away
                 ContentValues values = new ContentValues();
-                values.put("date", new Long(sms.getTimestampMillis()));
-                values.put("pdu", HexDump.toHexString(sms.getPdu()));
-                values.put("address", sms.getOriginatingAddress());
-                values.put("reference_number", concatRef.refNumber);
-                values.put("count", concatRef.msgCount);
-                values.put("sequence", concatRef.seqNumber);
-                if (portAddrs != null) {
-                    values.put("destination_port", portAddrs.destPort);
+                values.put("date", timestamp);
+                values.put("pdu", HexDump.toHexString(pdu));
+                values.put("address", address);
+                values.put("reference_number", referenceNumber);
+                values.put("count", messageCount);
+                values.put("sequence", sequenceNumber);
+                if (destPort != -1) {
+                    values.put("destination_port", destPort);
                 }
                 mResolver.insert(mRawUri, values);
                 return Intents.RESULT_SMS_HANDLED;
             }
 
             // All the parts are in place, deal with them
-            int pduColumn = cursor.getColumnIndex("pdu");
-            int sequenceColumn = cursor.getColumnIndex("sequence");
-
-            pdus = new byte[concatRef.msgCount][];
+            pdus = new byte[messageCount][];
             for (int i = 0; i < cursorCount; i++) {
                 cursor.moveToNext();
-                int cursorSequence = (int)cursor.getLong(sequenceColumn);
+                int cursorSequence = cursor.getInt(SEQUENCE_COLUMN);
                 pdus[cursorSequence - 1] = HexDump.hexStringToByteArray(
-                        cursor.getString(pduColumn));
+                        cursor.getString(PDU_COLUMN));
+
+                // Read the destination port from the first segment (needed for CDMA WAP PDU).
+                // It's not a bad idea to prefer the port from the first segment for 3GPP as well.
+                if (cursorSequence == 0 && !cursor.isNull(DESTINATION_PORT_COLUMN)) {
+                    destPort = cursor.getInt(DESTINATION_PORT_COLUMN);
+                }
             }
             // This one isn't in the DB, so add it
-            pdus[concatRef.seqNumber - 1] = sms.getPdu();
+            pdus[sequenceNumber - 1] = pdu;
 
             // Remove the parts from the database
-            mResolver.delete(mRawUri, where.toString(), whereArgs);
+            mResolver.delete(mRawUri, where, whereArgs);
         } catch (SQLException e) {
             Log.e(TAG, "Can't access multipart SMS database", e);
-            // TODO:  Would OUT_OF_MEMORY be more appropriate?
             return Intents.RESULT_SMS_GENERIC_ERROR;
         } finally {
             if (cursor != null) cursor.close();
         }
 
-        /**
-         * TODO(cleanup): The following code has duplicated logic with
-         * the radio-specific dispatchMessage code, which is fragile,
-         * in addition to being redundant.  Instead, if this method
-         * maybe returned the reassembled message (or just contents),
-         * the following code (which is not really related to
-         * reconstruction) could be better consolidated.
-         */
+        // Special handling for CDMA WDP datagrams
+        if (isCdmaWapPush) {
+            // Build up the data stream
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            for (int i = 0; i < messageCount; i++) {
+                // reassemble the (WSP-)pdu
+                output.write(pdus[i], 0, pdus[i].length);
+            }
+            byte[] datagram = output.toByteArray();
+
+            // Dispatch the PDU to applications
+            if (destPort == SmsHeader.PORT_WAP_PUSH) {
+                // Handle the PUSH
+                return mWapPush.dispatchWapPdu(datagram);
+            } else {
+                pdus = new byte[1][];
+                pdus[0] = datagram;
+                // The messages were sent to any other WAP port
+                dispatchPortAddressedPdus(pdus, destPort);
+                return Activity.RESULT_OK;
+            }
+        }
 
         // Dispatch the PDUs to applications
-        if (portAddrs != null) {
-            if (portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
+        if (destPort != -1) {
+            if (destPort == SmsHeader.PORT_WAP_PUSH) {
                 // Build up the data stream
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
-                for (int i = 0; i < concatRef.msgCount; i++) {
-                    SmsMessage msg = SmsMessage.createFromPdu(pdus[i]);
+                for (int i = 0; i < messageCount; i++) {
+                    SmsMessage msg = SmsMessage.createFromPdu(pdus[i], getFormat());
                     byte[] data = msg.getUserData();
                     output.write(data, 0, data.length);
                 }
@@ -668,7 +641,7 @@ public abstract class SMSDispatcher extends Handler {
                 return mWapPush.dispatchWapPdu(output.toByteArray());
             } else {
                 // The messages were sent to a port, so concoct a URI for it
-                dispatchPortAddressedPdus(pdus, portAddrs.destPort);
+                dispatchPortAddressedPdus(pdus, destPort);
             }
         } else {
             // The messages were not sent to a port
@@ -685,7 +658,8 @@ public abstract class SMSDispatcher extends Handler {
     protected void dispatchPdus(byte[][] pdus) {
         Intent intent = new Intent(Intents.SMS_RECEIVED_ACTION);
         intent.putExtra("pdus", pdus);
-        dispatch(intent, "android.permission.RECEIVE_SMS");
+        intent.putExtra("format", getFormat());
+        dispatch(intent, RECEIVE_SMS_PERMISSION);
     }
 
     /**
@@ -698,7 +672,8 @@ public abstract class SMSDispatcher extends Handler {
         Uri uri = Uri.parse("sms://localhost:" + port);
         Intent intent = new Intent(Intents.DATA_SMS_RECEIVED_ACTION, uri);
         intent.putExtra("pdus", pdus);
-        dispatch(intent, "android.permission.RECEIVE_SMS");
+        intent.putExtra("format", getFormat());
+        dispatch(intent, RECEIVE_SMS_PERMISSION);
     }
 
     /**
@@ -759,6 +734,16 @@ public abstract class SMSDispatcher extends Handler {
             String text, PendingIntent sentIntent, PendingIntent deliveryIntent);
 
     /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param messageBody the message to encode
+     * @param use7bitOnly ignore (but still count) illegal characters if true
+     * @return TextEncodingDetails
+     */
+    protected abstract TextEncodingDetails calculateLength(CharSequence messageBody,
+            boolean use7bitOnly);
+
+    /**
      * Send a multi-part text based SMS.
      *
      * @param destAddr the address to send the message to
@@ -784,9 +769,70 @@ public abstract class SMSDispatcher extends Handler {
      *   to the recipient.  The raw pdu of the status report is in the
      *   extended data ("pdu").
      */
-    protected abstract void sendMultipartText(String destAddr, String scAddr,
+    protected void sendMultipartText(String destAddr, String scAddr,
             ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
-            ArrayList<PendingIntent> deliveryIntents);
+            ArrayList<PendingIntent> deliveryIntents) {
+
+        int refNumber = getNextConcatenatedRef() & 0x00FF;
+        int msgCount = parts.size();
+        int encoding = android.telephony.SmsMessage.ENCODING_UNKNOWN;
+
+        mRemainingMessages = msgCount;
+
+        TextEncodingDetails[] encodingForParts = new TextEncodingDetails[msgCount];
+        for (int i = 0; i < msgCount; i++) {
+            TextEncodingDetails details = calculateLength(parts.get(i), false);
+            if (encoding != details.codeUnitSize
+                    && (encoding == android.telephony.SmsMessage.ENCODING_UNKNOWN
+                            || encoding == android.telephony.SmsMessage.ENCODING_7BIT)) {
+                encoding = details.codeUnitSize;
+            }
+            encodingForParts[i] = details;
+        }
+
+        for (int i = 0; i < msgCount; i++) {
+            SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+            concatRef.refNumber = refNumber;
+            concatRef.seqNumber = i + 1;  // 1-based sequence
+            concatRef.msgCount = msgCount;
+            // TODO: We currently set this to true since our messaging app will never
+            // send more than 255 parts (it converts the message to MMS well before that).
+            // However, we should support 3rd party messaging apps that might need 16-bit
+            // references
+            // Note:  It's not sufficient to just flip this bit to true; it will have
+            // ripple effects (several calculations assume 8-bit ref).
+            concatRef.isEightBits = true;
+            SmsHeader smsHeader = new SmsHeader();
+            smsHeader.concatRef = concatRef;
+
+            // Set the national language tables for 3GPP 7-bit encoding, if enabled.
+            if (encoding == android.telephony.SmsMessage.ENCODING_7BIT) {
+                smsHeader.languageTable = encodingForParts[i].languageTable;
+                smsHeader.languageShiftTable = encodingForParts[i].languageShiftTable;
+            }
+
+            PendingIntent sentIntent = null;
+            if (sentIntents != null && sentIntents.size() > i) {
+                sentIntent = sentIntents.get(i);
+            }
+
+            PendingIntent deliveryIntent = null;
+            if (deliveryIntents != null && deliveryIntents.size() > i) {
+                deliveryIntent = deliveryIntents.get(i);
+            }
+
+            sendNewSubmitPdu(destAddr, scAddr, parts.get(i), smsHeader, encoding,
+                    sentIntent, deliveryIntent, (i == (msgCount - 1)));
+        }
+
+    }
+
+    /**
+     * Create a new SubmitPdu and send it.
+     */
+    protected abstract void sendNewSubmitPdu(String destinationAddress, String scAddress,
+            String message, SmsHeader smsHeader, int encoding,
+            PendingIntent sentIntent, PendingIntent deliveryIntent, boolean lastPart);
 
     /**
      * Send a SMS
@@ -842,7 +888,7 @@ public abstract class SMSDispatcher extends Handler {
             handleNotInService(ss, tracker);
         } else {
             String appName = getAppNameByIntent(sentIntent);
-            if (mCounter.check(appName, SINGLE_PART_SMS)) {
+            if (mUsageMonitor.check(appName, SINGLE_PART_SMS)) {
                 sendSms(tracker);
             } else {
                 sendMessage(obtainMessage(EVENT_POST_ALERT, tracker));
@@ -885,7 +931,7 @@ public abstract class SMSDispatcher extends Handler {
                 DEFAULT_SMS_TIMEOUT);
     }
 
-    protected String getAppNameByIntent(PendingIntent intent) {
+    protected static String getAppNameByIntent(PendingIntent intent) {
         Resources r = Resources.getSystem();
         return (intent != null) ? intent.getTargetPackage()
             : r.getString(R.string.sms_control_default_app_name);
@@ -903,7 +949,35 @@ public abstract class SMSDispatcher extends Handler {
      *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
-    protected abstract void sendMultipartSms (SmsTracker tracker);
+    private void sendMultipartSms(SmsTracker tracker) {
+        ArrayList<String> parts;
+        ArrayList<PendingIntent> sentIntents;
+        ArrayList<PendingIntent> deliveryIntents;
+
+        HashMap<String, Object> map = tracker.mData;
+
+        String destinationAddress = (String) map.get("destination");
+        String scAddress = (String) map.get("scaddress");
+
+        parts = (ArrayList<String>) map.get("parts");
+        sentIntents = (ArrayList<PendingIntent>) map.get("sentIntents");
+        deliveryIntents = (ArrayList<PendingIntent>) map.get("deliveryIntents");
+
+        // check if in service
+        int ss = mPhone.getServiceState().getState();
+        if (ss != ServiceState.STATE_IN_SERVICE) {
+            for (int i = 0, count = parts.size(); i < count; i++) {
+                PendingIntent sentIntent = null;
+                if (sentIntents != null && sentIntents.size() > i) {
+                    sentIntent = sentIntents.get(i);
+                }
+                handleNotInService(ss, new SmsTracker(null, sentIntent, null));
+            }
+            return;
+        }
+
+        sendMultipartText(destinationAddress, scAddress, parts, sentIntents, deliveryIntents);
+    }
 
     /**
      * Send an acknowledge message.
@@ -934,66 +1008,38 @@ public abstract class SMSDispatcher extends Handler {
     }
 
     /**
-     * Check if a SmsTracker holds multi-part Sms
-     *
-     * @param tracker a SmsTracker could hold a multi-part Sms
-     * @return true for tracker holds Multi-parts Sms
-     */
-    private boolean isMultipartTracker (SmsTracker tracker) {
-        HashMap map = tracker.mData;
-        return ( map.get("parts") != null);
-    }
-
-    /**
      * Keeps track of an SMS that has been sent to the RIL, until it has
      * successfully been sent, or we're done trying.
      *
      */
-    static protected class SmsTracker {
+    protected static final class SmsTracker {
         // fields need to be public for derived SmsDispatchers
-        public HashMap<String, Object> mData;
+        public final HashMap<String, Object> mData;
         public int mRetryCount;
         public int mMessageRef;
 
-        public PendingIntent mSentIntent;
-        public PendingIntent mDeliveryIntent;
+        public final PendingIntent mSentIntent;
+        public final PendingIntent mDeliveryIntent;
 
-        SmsTracker(HashMap<String, Object> data, PendingIntent sentIntent,
+        public SmsTracker(HashMap<String, Object> data, PendingIntent sentIntent,
                 PendingIntent deliveryIntent) {
             mData = data;
             mSentIntent = sentIntent;
             mDeliveryIntent = deliveryIntent;
             mRetryCount = 0;
         }
+
+        /**
+         * Returns whether this tracker holds a multi-part SMS.
+         * @return true if the tracker holds a multi-part SMS; false otherwise
+         */
+        protected boolean isMultipart() {
+            HashMap map = mData;
+            return map.containsKey("parts");
+        }
     }
 
-    protected SmsTracker SmsTrackerFactory(HashMap<String, Object> data, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-        return new SmsTracker(data, sentIntent, deliveryIntent);
-    }
-
-    public void initSipStack(boolean isObg) {
-        // This function should be overridden by the classes that support
-        // switching modes such as the CdmaSMSDispatcher.
-        // Not implemented in GsmSMSDispatcher.
-        Log.e(TAG, "Error! This function should never be executed.");
-    }
-
-    public void switchToCdma() {
-        // This function should be overridden by the classes that support
-        // switching modes such as the CdmaSMSDispatcher.
-        // Not implemented in GsmSMSDispatcher.
-        Log.e(TAG, "Error! This function should never be executed.");
-    }
-
-    public void switchToGsm() {
-        // This function should be overridden by the classes that support
-        // switching modes such as the CdmaSMSDispatcher.
-        // Not implemented in GsmSMSDispatcher.
-        Log.e(TAG, "Error! This function should never be executed.");
-    }
-
-    private DialogInterface.OnClickListener mListener =
+    private final DialogInterface.OnClickListener mListener =
         new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
@@ -1007,42 +1053,32 @@ public abstract class SMSDispatcher extends Handler {
             }
         };
 
-    private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_FULL)) {
-                mStorageAvailable = false;
-                mCm.reportSmsMemoryStatus(false, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-            } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_NOT_FULL)) {
-                mStorageAvailable = true;
-                mCm.reportSmsMemoryStatus(true, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-            } else {
-                // Assume the intent is one of the SMS receive intents that
-                // was sent as an ordered broadcast.  Check result and ACK.
-                int rc = getResultCode();
-                boolean success = (rc == Activity.RESULT_OK)
-                        || (rc == Intents.RESULT_SMS_HANDLED);
+            // Assume the intent is one of the SMS receive intents that
+            // was sent as an ordered broadcast.  Check result and ACK.
+            int rc = getResultCode();
+            boolean success = (rc == Activity.RESULT_OK)
+                    || (rc == Intents.RESULT_SMS_HANDLED);
 
-                // For a multi-part message, this only ACKs the last part.
-                // Previous parts were ACK'd as they were received.
-                acknowledgeLastIncomingSms(success, rc, null);
-            }
+            // For a multi-part message, this only ACKs the last part.
+            // Previous parts were ACK'd as they were received.
+            acknowledgeLastIncomingSms(success, rc, null);
         }
     };
-
-    protected abstract void handleBroadcastSms(AsyncResult ar);
 
     protected void dispatchBroadcastPdus(byte[][] pdus, boolean isEmergencyMessage) {
         if (isEmergencyMessage) {
             Intent intent = new Intent(Intents.SMS_EMERGENCY_CB_RECEIVED_ACTION);
             intent.putExtra("pdus", pdus);
             Log.d(TAG, "Dispatching " + pdus.length + " emergency SMS CB pdus");
-            dispatch(intent, "android.permission.RECEIVE_EMERGENCY_BROADCAST");
+            dispatch(intent, RECEIVE_EMERGENCY_BROADCAST_PERMISSION);
         } else {
             Intent intent = new Intent(Intents.SMS_CB_RECEIVED_ACTION);
             intent.putExtra("pdus", pdus);
             Log.d(TAG, "Dispatching " + pdus.length + " SMS CB pdus");
-            dispatch(intent, "android.permission.RECEIVE_SMS");
+            dispatch(intent, RECEIVE_SMS_PERMISSION);
         }
     }
 }

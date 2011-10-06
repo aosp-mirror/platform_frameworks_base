@@ -114,30 +114,6 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Note: This function is a GSM specific functionality which is not supported in CDMA mode.
-     */
-    public static SmsMessage newFromCMT(String[] lines) {
-        Log.w(LOG_TAG, "newFromCMT: is not supported in CDMA mode.");
-        return null;
-    }
-
-    /**
-     * Note: This function is a GSM specific functionality which is not supported in CDMA mode.
-     */
-    public static SmsMessage newFromCMTI(String line) {
-        Log.w(LOG_TAG, "newFromCMTI: is not supported in CDMA mode.");
-        return null;
-    }
-
-    /**
-     * Note: This function is a GSM specific functionality which is not supported in CDMA mode.
-     */
-    public static SmsMessage newFromCDS(String line) {
-        Log.w(LOG_TAG, "newFromCDS: is not supported in CDMA mode.");
-        return null;
-    }
-
-    /**
      *  Create a "raw" CDMA SmsMessage from a Parcel that was forged in ril.cpp.
      *  Note: Only primitive fields are set.
      */
