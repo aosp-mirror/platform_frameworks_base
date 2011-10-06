@@ -1972,6 +1972,12 @@ status_t MPEG4Source::read(
                     sampleIndex, &syncSampleIndex, findFlags);
         }
 
+        uint32_t sampleTime;
+        if (err == OK) {
+            err = mSampleTable->getMetaDataForSample(
+                    sampleIndex, NULL, NULL, &sampleTime);
+        }
+
         if (err != OK) {
             if (err == ERROR_OUT_OF_RANGE) {
                 // An attempt to seek past the end of the stream would
@@ -1983,10 +1989,6 @@ status_t MPEG4Source::read(
             }
             return err;
         }
-
-        uint32_t sampleTime;
-        CHECK_EQ((status_t)OK, mSampleTable->getMetaDataForSample(
-                    sampleIndex, NULL, NULL, &sampleTime));
 
         if (mode == ReadOptions::SEEK_CLOSEST) {
             targetSampleTimeUs = (sampleTime * 1000000ll) / mTimescale;
