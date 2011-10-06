@@ -284,6 +284,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // track the current default http proxy - tell the world if we get a new one (real change)
     private ProxyProperties mDefaultProxy = null;
+    private Object mDefaultProxyLock = new Object();
+    private boolean mDefaultProxyDisabled = false;
+
     // track the global proxy.
     private ProxyProperties mGlobalProxy = null;
     private final Object mGlobalProxyLock = new Object();
@@ -1770,7 +1773,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
             if (mNetConfigs[netType].isDefault()) {
-                handleApplyDefaultProxy(netType);
+                handleApplyDefaultProxy(newLp.getHttpProxy());
             }
         } else {
             if (VDBG) {
@@ -2549,8 +2552,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return;
     }
 
-    public synchronized ProxyProperties getProxy() {
-        return mDefaultProxy;
+    public ProxyProperties getProxy() {
+        synchronized (mDefaultProxyLock) {
+            return mDefaultProxyDisabled ? null : mDefaultProxy;
+        }
     }
 
     public void setGlobalProxy(ProxyProperties proxyProperties) {
@@ -2604,20 +2609,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void handleApplyDefaultProxy(int type) {
-        // check if new default - push it out to all VM if so
-        ProxyProperties proxy = mNetTrackers[type].getLinkProperties().getHttpProxy();
-        synchronized (this) {
+    private void handleApplyDefaultProxy(ProxyProperties proxy) {
+        if (proxy != null && TextUtils.isEmpty(proxy.getHost())) {
+            proxy = null;
+        }
+        synchronized (mDefaultProxyLock) {
             if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
             if (mDefaultProxy == proxy) return;
-            if (proxy != null && !TextUtils.isEmpty(proxy.getHost())) {
-                mDefaultProxy = proxy;
-            } else {
-                mDefaultProxy = null;
+            mDefaultProxy = proxy;
+
+            if (!mDefaultProxyDisabled) {
+                sendProxyBroadcast(proxy);
             }
         }
-        if (VDBG) log("changing default proxy to " + proxy);
-        sendProxyBroadcast(proxy);
     }
 
     private void handleDeprecatedGlobalHttpProxy() {
@@ -2845,17 +2849,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 bumpDns();
             }
 
-            // TODO: temporarily remove http proxy?
+            // Temporarily disable the default proxy.
+            synchronized (mDefaultProxyLock) {
+                mDefaultProxyDisabled = true;
+                if (mDefaultProxy != null) {
+                    sendProxyBroadcast(null);
+                }
+            }
+
+            // TODO: support proxy per network.
         }
 
         public void restore() {
             synchronized (mDnsLock) {
-                if (!mDnsOverridden) {
-                    return;
+                if (mDnsOverridden) {
+                    mDnsOverridden = false;
+                    mHandler.sendEmptyMessage(EVENT_RESTORE_DNS);
                 }
-                mDnsOverridden = false;
             }
-            mHandler.sendEmptyMessage(EVENT_RESTORE_DNS);
+            synchronized (mDefaultProxyLock) {
+                mDefaultProxyDisabled = false;
+                if (mDefaultProxy != null) {
+                    sendProxyBroadcast(mDefaultProxy);
+                }
+            }
         }
     }
 }
