@@ -641,6 +641,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:drawable="@[package:]drawable/<em>drawable_resource</em>"
         android:state_pressed=["true" | "false"]
         android:state_focused=["true" | "false"]
+        android:state_hovered=["true" | "false"]
         android:state_selected=["true" | "false"]
         android:state_checkable=["true" | "false"]
         android:state_checked=["true" | "false"]
@@ -692,6 +693,11 @@ is touched/clicked); "false" if this item should be used in the default, non-pre
           <dd><em>Boolean</em>. "true" if this item should be used when the object is focused (such as when a button
 is highlighted using the trackball/d-pad); "false" if this item should be used in the default,
 non-focused state.</dd>
+        <dt><code>android:state_hovered</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is being hovered
+by a cursor; "false" if this item should be used in the default, non-hovered state. Often, this
+drawable may be the same drawable used for the "focused" state.
+          <p>Introduced in API level 14.</p></dd>
         <dt><code>android:state_selected</code></dt>
           <dd><em>Boolean</em>. "true" if this item should be used when the object is selected (such as when a
 tab is opened); "false" if this item should be used when the object is not selected.</dd>
@@ -729,6 +735,8 @@ default value should always be last (as demonstrated in the following example).<
           android:drawable="@drawable/button_pressed" /> &lt;!-- pressed --&gt;
     &lt;item android:state_focused="true"
           android:drawable="@drawable/button_focused" /> &lt;!-- focused --&gt;
+    &lt;item android:state_hovered="true"
+          android:drawable="@drawable/button_focused" /> &lt;!-- hovered --&gt;
     &lt;item android:drawable="@drawable/button_normal" /> &lt;!-- default --&gt;
 &lt;/selector>
 </pre>
