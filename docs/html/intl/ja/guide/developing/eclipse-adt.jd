@@ -77,7 +77,7 @@ page.title=Eclipse 内で ADT を使用
   <dd>アプリケーションのリソース用（描画ファイル、レイアウト ファイル、文字列値など）のフォルダです。<a href="{@docRoot}guide/topics/resources/index.html">Resources and Assets</a>をご覧ください。</dd>
     <dt><code>AndroidManifest.xml</code></dt>
   <dd>このプロジェクトの Android マニフェストです。<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>をご覧ください。</dd>
-    <dt><code>default.properties</code></dt>
+    <dt><code>project.properties</code></dt>
   <dd>このファイルには、ビルド ターゲットのようなプロジェクトの設定が含まれます。このファイルはプロジェクトに不可欠なので、ソース リビジョン管理システムで管理する必要があります。このファイルを手動で編集しないでください。プロジェクトのプロパティを編集するには、プロジェクト フォルダを右クリックして、[プロパティ（Properties）] を選択します。</dd>
   </dl>
 
