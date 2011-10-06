@@ -423,7 +423,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.freezeRotation();
+            mWm.freezeRotation(-1);
             mWm.getSwitchState(0);
             fail("IWindowManager.freezeRotation did not throw SecurityException as"
                     + " expected");
