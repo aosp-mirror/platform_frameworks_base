@@ -92,6 +92,11 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SearchView";
 
+    /**
+     * Private constant for removing the microphone in the keyboard.
+     */
+    private static final String IME_OPTION_NO_MICROPHONE = "nm";
+
     private OnQueryTextListener mOnQueryChangeListener;
     private OnCloseListener mOnCloseListener;
     private OnFocusChangeListener mOnQueryTextFocusChangeListener;
@@ -256,7 +261,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mQueryTextView.setOnItemClickListener(mOnItemClickListener);
         mQueryTextView.setOnItemSelectedListener(mOnItemSelectedListener);
         mQueryTextView.setOnKeyListener(mTextKeyListener);
-        // Inform any listener of focus changes 
+        // Inform any listener of focus changes
         mQueryTextView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
@@ -335,6 +340,12 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         }
         // Cache the voice search capability
         mVoiceButtonEnabled = hasVoiceSearch();
+
+        if (mVoiceButtonEnabled) {
+            // Disable the microphone on the keyboard, as a mic is displayed near the text box
+            // TODO: use imeOptions to disable voice input when the new API will be available
+            mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
+        }
         updateViewsVisibility(isIconified());
     }
 
