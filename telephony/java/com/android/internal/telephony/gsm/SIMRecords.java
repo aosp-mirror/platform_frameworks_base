@@ -38,6 +38,7 @@ import com.android.internal.telephony.IccVmNotSupportedException;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
+import com.android.internal.telephony.SmsMessageBase;
 
 import java.util.ArrayList;
 
@@ -1160,6 +1161,15 @@ public class SIMRecords extends IccRecords {
         }
     }
 
+    /**
+     * Dispatch 3GPP format message. Overridden for CDMA/LTE phones by
+     * {@link com.android.internal.telephony.cdma.CdmaLteUiccRecords}
+     * to send messages to the secondary 3GPP format SMS dispatcher.
+     */
+    protected int dispatchGsmMessage(SmsMessageBase message) {
+        return phone.mSMS.dispatchMessage(message);
+    }
+
     private void handleSms(byte[] ba) {
         if (ba[0] != 0)
             Log.d("ENF", "status : " + ba[0]);
@@ -1175,7 +1185,7 @@ public class SIMRecords extends IccRecords {
             System.arraycopy(ba, 1, pdu, 0, n - 1);
             SmsMessage message = SmsMessage.createFromPdu(pdu);
 
-            phone.mSMS.dispatchMessage(message);
+            dispatchGsmMessage(message);
         }
     }
 
@@ -1201,7 +1211,7 @@ public class SIMRecords extends IccRecords {
                 System.arraycopy(ba, 1, pdu, 0, n - 1);
                 SmsMessage message = SmsMessage.createFromPdu(pdu);
 
-                phone.mSMS.dispatchMessage(message);
+                dispatchGsmMessage(message);
 
                 // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
                 // 1 == "received by MS from network; message read"

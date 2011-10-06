@@ -79,7 +79,8 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mRilConnectedRegistrants = new RegistrantList();
     protected RegistrantList mIccRefreshRegistrants = new RegistrantList();
 
-    protected Registrant mSMSRegistrant;
+    protected Registrant mGsmSmsRegistrant;
+    protected Registrant mCdmaSmsRegistrant;
     protected Registrant mNITZTimeRegistrant;
     protected Registrant mSignalStrengthRegistrant;
     protected Registrant mUSSDRegistrant;
@@ -358,12 +359,20 @@ public abstract class BaseCommands implements CommandsInterface {
         mIccStatusChangedRegistrants.remove(h);
     }
 
-    public void setOnNewSMS(Handler h, int what, Object obj) {
-        mSMSRegistrant = new Registrant (h, what, obj);
+    public void setOnNewGsmSms(Handler h, int what, Object obj) {
+        mGsmSmsRegistrant = new Registrant (h, what, obj);
     }
 
-    public void unSetOnNewSMS(Handler h) {
-        mSMSRegistrant.clear();
+    public void unSetOnNewGsmSms(Handler h) {
+        mGsmSmsRegistrant.clear();
+    }
+
+    public void setOnNewCdmaSms(Handler h, int what, Object obj) {
+        mCdmaSmsRegistrant = new Registrant (h, what, obj);
+    }
+
+    public void unSetOnNewCdmaSms(Handler h) {
+        mCdmaSmsRegistrant.clear();
     }
 
     public void setOnNewGsmBroadcastSms(Handler h, int what, Object obj) {

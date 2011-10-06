@@ -1394,7 +1394,7 @@ public interface Phone {
     String getDeviceSvn();
 
     /**
-     * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
+     * Retrieves the unique subscriber ID, e.g., IMSI for GSM phones.
      */
     String getSubscriberId();
 
@@ -1756,4 +1756,13 @@ public interface Phone {
      * @param response a callback message with the String response in the obj field
      */
     void requestIsimAuthentication(String nonce, Message response);
+
+    /**
+     * Sets the SIM voice message waiting indicator records.
+     * @param line GSM Subscriber Profile Number, one-based. Only '1' is supported
+     * @param countWaiting The number of messages waiting, if known. Use
+     *                     -1 to indicate that an unknown number of
+     *                      messages are waiting
+     */
+    void setVoiceMessageWaiting(int line, int countWaiting);
 }
