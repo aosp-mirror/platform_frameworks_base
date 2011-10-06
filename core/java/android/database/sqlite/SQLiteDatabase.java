@@ -66,6 +66,7 @@ import java.util.regex.Pattern;
  */
 public class SQLiteDatabase extends SQLiteClosable {
     private static final String TAG = "SQLiteDatabase";
+    private static final boolean ENABLE_DB_SAMPLE = false; // true to enable stats in event log
     private static final int EVENT_DB_OPERATION = 52000;
     private static final int EVENT_DB_CORRUPT = 75004;
 
@@ -440,7 +441,9 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
         }
         if (sql != null) {
-            logTimeStat(sql, timeStart, GET_LOCK_LOG_PREFIX);
+            if (ENABLE_DB_SAMPLE)  {
+                logTimeStat(sql, timeStart, GET_LOCK_LOG_PREFIX);
+            }
         }
     }
     private static class DatabaseReentrantLock extends ReentrantLock {
@@ -726,7 +729,9 @@ public class SQLiteDatabase extends SQLiteClosable {
                     }
                 }
                 // log the transaction time to the Eventlog.
-                logTimeStat(getLastSqlStatement(), mTransStartTime, COMMIT_SQL);
+                if (ENABLE_DB_SAMPLE) {
+                    logTimeStat(getLastSqlStatement(), mTransStartTime, COMMIT_SQL);
+                }
             } else {
                 try {
                     execSQL("ROLLBACK;");
@@ -2036,7 +2041,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /* package */ void logTimeStat(String sql, long beginMillis) {
-        logTimeStat(sql, beginMillis, null);
+        if (ENABLE_DB_SAMPLE) {
+            logTimeStat(sql, beginMillis, null);
+        }
     }
 
     private void logTimeStat(String sql, long beginMillis, String prefix) {
