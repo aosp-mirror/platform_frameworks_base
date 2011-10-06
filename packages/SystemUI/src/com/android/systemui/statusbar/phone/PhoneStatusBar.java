@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 public class PhoneStatusBar extends StatusBar {
     static final String TAG = "PhoneStatusBar";
@@ -103,8 +104,10 @@ public class PhoneStatusBar extends StatusBar {
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
 
-    private static final int MSG_ANIMATE = 1000;
-    private static final int MSG_ANIMATE_REVEAL = 1001;
+    private static final int MSG_ANIMATE = 100;
+    private static final int MSG_ANIMATE_REVEAL = 101;
+    private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
+    private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
     private static final int MSG_SHOW_INTRUDER = 1002;
     private static final int MSG_HIDE_INTRUDER = 1003;
     private static final int MSG_OPEN_RECENTS_PANEL = 1020;
@@ -165,7 +168,7 @@ public class PhoneStatusBar extends StatusBar {
     
     // all notifications
     NotificationData mNotificationData = new NotificationData();
-    ViewGroup mPile;
+    NotificationRowLayout mPile;
 
     // position
     int[] mPositionTmp = new int[2];
@@ -324,7 +327,7 @@ public class PhoneStatusBar extends StatusBar {
 
         mExpandedDialog = new ExpandedDialog(context);
         mExpandedView = expanded;
-        mPile = (ViewGroup)expanded.findViewById(R.id.latestItems);
+        mPile = (NotificationRowLayout)expanded.findViewById(R.id.latestItems);
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
         mNoNotificationsTitle.setVisibility(View.GONE); // disabling for now
@@ -332,6 +335,7 @@ public class PhoneStatusBar extends StatusBar {
         mClearButton = expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mClearButton.setAlpha(0f);
+        mClearButton.setEnabled(false);
         mDateView = (DateView)expanded.findViewById(R.id.date);
         mSettingsButton = expanded.findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(mSettingsButtonListener);
@@ -1005,6 +1009,7 @@ public class PhoneStatusBar extends StatusBar {
         } else {
             mClearButton.setAlpha(clearable ? 1.0f : 0.0f);
         }
+        mClearButton.setEnabled(clearable);
 
         /*
         if (mNoNotificationsTitle.isShown()) {
@@ -1114,6 +1119,12 @@ public class PhoneStatusBar extends StatusBar {
                 case MSG_ANIMATE_REVEAL:
                     doRevealAnimation();
                     break;
+                case MSG_OPEN_NOTIFICATION_PANEL:
+                    animateExpand();
+                    break;
+                case MSG_CLOSE_NOTIFICATION_PANEL:
+                    animateCollapse();
+                    break;
                 case MSG_SHOW_INTRUDER:
                     setIntruderAlertVisibility(true);
                     break;
@@ -1181,6 +1192,10 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     public void animateCollapse(boolean excludeRecents) {
+        animateCollapse(excludeRecents, 1.0f);
+    }
+    
+    public void animateCollapse(boolean excludeRecents, float velocityMultiplier) {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
                     + " mExpandedVisible=" + mExpandedVisible
@@ -1209,7 +1224,7 @@ public class PhoneStatusBar extends StatusBar {
         // and doesn't try to re-open the windowshade.
         mExpanded = true;
         prepareTracking(y, false);
-        performFling(y, -mSelfCollapseVelocityPx, true);
+        performFling(y, -mSelfCollapseVelocityPx*velocityMultiplier, true);
     }
 
     void performExpand() {
@@ -2086,13 +2101,57 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
+        final int mini(int a, int b) {
+            return (b>a?a:b);
+        }
         public void onClick(View v) {
-            try {
-                mBarService.onClearAllNotifications();
-            } catch (RemoteException ex) {
-                // system process is dead if we're here.
+            synchronized (mNotificationData) {
+                // let's also queue up 400ms worth of animated dismissals
+                final int N = mini(5, mPile.getChildCount());
+
+                final ArrayList<View> snapshot = new ArrayList<View>(N);
+                for (int i=0; i<N; i++) {
+                    final View child = mPile.getChildAt(i);
+                    if (mPile.canChildBeDismissed(child)) snapshot.add(child);
+                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final int ROW_DELAY = 100;
+
+                        mHandler.postDelayed(new Runnable() {
+                            public void run() {
+                                animateCollapse(false, 0f);
+                            }
+                        }, (N-1) * ROW_DELAY);
+
+                        mHandler.postDelayed(new Runnable() {
+                            public void run() {
+                                try {
+                                    mBarService.onClearAllNotifications();
+                                } catch (RemoteException ex) { }
+                            }
+                        }, N * ROW_DELAY + 500);
+
+                        mPile.setAnimateBounds(false); // temporarily disable some re-layouts
+
+                        for (View v : snapshot) {
+                            final View _v = v;
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mPile.dismissRowAnimated(_v, (int)(ROW_DELAY*0.25f));
+                                }
+                            });
+                            try {
+                                Thread.sleep(ROW_DELAY);
+                            } catch (InterruptedException ex) { }
+                        }
+                        
+                        mPile.setAnimateBounds(true); // reenable layout animation
+                    }
+                }).start();
             }
-            animateCollapse();
         }
     };
 
