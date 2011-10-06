@@ -574,7 +574,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             if (defIm == null && mMethodList.size() > 0) {
-                defIm = mMethodList.get(0);
+                defIm = getMostApplicableDefaultIMELocked();
                 Slog.i(TAG, "No default found, using " + defIm.getId());
             }
             if (defIm != null) {
@@ -1925,19 +1925,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return subtypes;
     }
 
-    private boolean chooseNewDefaultIMELocked() {
+    private InputMethodInfo getMostApplicableDefaultIMELocked() {
         List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
             // We'd prefer to fall back on a system IME, since that is safer.
             int i=enabled.size();
             while (i > 0) {
                 i--;
-                if ((enabled.get(i).getServiceInfo().applicationInfo.flags
-                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                final InputMethodInfo imi = enabled.get(i);
+                if (isSystemIme(imi) && !imi.isAuxiliaryIme()) {
                     break;
                 }
             }
-            InputMethodInfo imi = enabled.get(i);
+            return enabled.get(i);
+        }
+        return null;
+    }
+
+    private boolean chooseNewDefaultIMELocked() {
+        final InputMethodInfo imi = getMostApplicableDefaultIMELocked();
+        if (imi != null) {
             if (DEBUG) {
                 Slog.d(TAG, "New default IME was selected: " + imi.getId());
             }
