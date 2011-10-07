@@ -6081,11 +6081,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int physicalWidth = width;
 
         if (mHorizontallyScrolling) {
-            width = VERY_WIDE;
+            width = getTextWidth();
         }
 
         makeNewLayout(width, physicalWidth, UNKNOWN_BORING, UNKNOWN_BORING,
                       physicalWidth, false);
+    }
+
+    private int getTextWidth() {
+        final int length = mText.length();
+        return (length == 0) ? 0 : (int) (getPaint().measureText(mText, 0, length) + 0.5f);
     }
 
     @Override
@@ -6533,7 +6538,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int want = width - getCompoundPaddingLeft() - getCompoundPaddingRight();
         int unpaddedWidth = want;
 
-        if (mHorizontallyScrolling) want = VERY_WIDE;
+        if (mHorizontallyScrolling) want = getTextWidth();
 
         int hintWant = want;
         int hintWidth = (mHintLayout == null) ? hintWant : mHintLayout.getWidth();
@@ -11590,9 +11595,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Path                    mHighlightPath;
     private boolean                 mHighlightPathBogus = true;
     private static final RectF      sTempRect = new RectF();
-
-    // XXX should be much larger
-    private static final int        VERY_WIDE = 1024*1024;
 
     private static final int        BLINK = 500;
 
