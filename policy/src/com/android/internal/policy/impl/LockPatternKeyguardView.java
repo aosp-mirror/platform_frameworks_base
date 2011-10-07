@@ -526,7 +526,19 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
                 && transportInvisible) {
             bindToFaceLock();
+            //Eliminate the black background so that the lockpattern will be visible
+            //If FaceUnlock is cancelled
+            mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACELOCK_AREA_VIEW, 4000);
         } else {
+            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+        }
+    }
+
+    /** Unbind from facelock if something covers this window (such as an alarm) */
+    @Override
+    public void onWindowFocusChanged (boolean hasWindowFocus) {
+        if(!hasWindowFocus) {
+            stopAndUnbindFromFaceLock();
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
         }
     }
@@ -607,7 +619,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     //We need to stop faceunlock when a phonecall comes in
     @Override
     public void onPhoneStateChanged(int phoneState) {
-        if(phoneState == TelephonyManager.CALL_STATE_RINGING) stopAndUnbindFromFaceLock();
+        if(phoneState == TelephonyManager.CALL_STATE_RINGING) {
+            stopAndUnbindFromFaceLock();
+            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+        }
     }
 
     @Override
