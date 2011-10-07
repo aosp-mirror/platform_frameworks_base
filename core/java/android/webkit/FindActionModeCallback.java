@@ -22,16 +22,14 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextWatcher;
-import android.webkit.WebView;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.TextView;
 
 class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         View.OnLongClickListener, View.OnClickListener {
@@ -203,6 +201,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
         mWebView.notifyFindDialogDismissed();
         mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
     }
@@ -253,6 +252,15 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     @Override
     public void afterTextChanged(Editable s) {
         // Does nothing.  Needed to implement TextWatcher.
+    }
+
+    public int getActionModeHeight() {
+        if (mActionMode == null) {
+            return 0;
+        }
+        View parent = (View) mCustomView.getParent();
+        return parent != null ? parent.getMeasuredHeight()
+                : mCustomView.getMeasuredHeight();
     }
 
 }

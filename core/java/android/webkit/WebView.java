@@ -1456,7 +1456,8 @@ public class WebView extends AbsoluteLayout
 
     private int getVisibleTitleHeightImpl() {
         // need to restrict mScrollY due to over scroll
-        return Math.max(getTitleHeight() - Math.max(0, mScrollY), 0);
+        return Math.max(getTitleHeight() - Math.max(0, mScrollY),
+                mFindCallback != null ? mFindCallback.getActionModeHeight() : 0);
     }
 
     /*
