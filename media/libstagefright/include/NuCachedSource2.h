@@ -63,13 +63,13 @@ private:
     friend struct AHandlerReflector<NuCachedSource2>;
 
     enum {
-        kPageSize            = 65536,
-        kHighWaterThreshold  = 20 * 1024 * 1024,
-        kLowWaterThreshold   = 4 * 1024 * 1024,
+        kPageSize                       = 65536,
+        kDefaultHighWaterThreshold      = 20 * 1024 * 1024,
+        kDefaultLowWaterThreshold       = 4 * 1024 * 1024,
 
         // Read data after a 15 sec timeout whether we're actively
         // fetching or not.
-        kKeepAliveIntervalUs = 15000000,
+        kDefaultKeepAliveIntervalUs     = 15000000,
     };
 
     enum {
@@ -99,6 +99,12 @@ private:
 
     int32_t mNumRetriesLeft;
 
+    size_t mHighwaterThresholdBytes;
+    size_t mLowwaterThresholdBytes;
+
+    // If the keep-alive interval is 0, keep-alives are disabled.
+    int64_t mKeepAliveIntervalUs;
+
     void onMessageReceived(const sp<AMessage> &msg);
     void onFetch();
     void onRead(const sp<AMessage> &msg);
@@ -111,6 +117,9 @@ private:
 
     void restartPrefetcherIfNecessary_l(
             bool ignoreLowWaterThreshold = false, bool force = false);
+
+    void updateCacheParamsFromSystemProperty();
+    void updateCacheParamsFromString(const char *s);
 
     DISALLOW_EVIL_CONSTRUCTORS(NuCachedSource2);
 };
