@@ -35,20 +35,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="Activity2" android:label="Activity2">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
-        <activity android:name="Activity3" android:label="Activity3">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
         <activity android:name="Activity4" android:label="Activity4">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
