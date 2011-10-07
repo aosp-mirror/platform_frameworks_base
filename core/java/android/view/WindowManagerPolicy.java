@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
+import android.os.Looper;
 import android.view.animation.Animation;
 
 import java.io.FileDescriptor;
@@ -315,6 +316,36 @@ public interface WindowManagerPolicy {
     }
 
     /**
+     * Representation of a "fake window" that the policy has added to the
+     * window manager to consume events.
+     */
+    public interface FakeWindow {
+        /**
+         * Remove the fake window from the window manager.
+         */
+        void dismiss();
+    }
+
+    /**
+     * Interface for calling back in to the window manager that is private
+     * between it and the policy.
+     */
+    public interface WindowManagerFuncs {
+        /**
+         * Ask the window manager to re-evaluate the system UI flags.
+         */
+        public void reevaluateStatusBarVisibility();
+
+        /**
+         * Add a fake window to the window manager.  This window sits
+         * at the top of the other windows and consumes events.
+         */
+        public FakeWindow addFakeWindow(Looper looper, InputHandler inputHandler,
+                String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
+                boolean hasFocus, boolean touchFullscreen);
+    }
+
+    /**
      * Bit mask that is set for all enter transition.
      */
     public final int TRANSIT_ENTER_MASK = 0x1000;
@@ -395,6 +426,7 @@ public interface WindowManagerPolicy {
      * @param powerManager 
      */
     public void init(Context context, IWindowManager windowManager,
+            WindowManagerFuncs windowManagerFuncs,
             LocalPowerManager powerManager);
 
     /**
@@ -762,7 +794,7 @@ public interface WindowManagerPolicy {
     /**
      * A new window has been focused.
      */
-    public void focusChanged(WindowState lastFocus, WindowState newFocus);
+    public int focusChangedLw(WindowState lastFocus, WindowState newFocus);
     
     /**
      * Called after the screen turns off.
@@ -966,6 +998,14 @@ public interface WindowManagerPolicy {
      *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}. 
      */
     public void setUserRotationMode(int mode, int rotation);
+
+    /**
+     * Called when a new system UI visibility is being reported, allowing
+     * the policy to adjust what is actually reported.
+     * @param visibility The raw visiblity reported by the status bar.
+     * @return The new desired visibility.
+     */
+    public int adjustSystemUiVisibilityLw(int visibility);
 
     /**
      * Print the WindowManagerPolicy's state into the given stream.

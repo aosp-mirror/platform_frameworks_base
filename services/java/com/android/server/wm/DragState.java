@@ -32,7 +32,6 @@ import android.view.InputQueue;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 
 import java.util.ArrayList;
 

@@ -17,9 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.ServiceManager;
@@ -27,14 +25,12 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.animation.AccelerateInterpolator;
 import android.view.Display;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.content.res.Configuration;
 
 import com.android.internal.statusbar.IStatusBarService;
 
@@ -54,7 +50,6 @@ public class NavigationBarView extends LinearLayout {
     final Display mDisplay;
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
-    AnimatorSet mLastAnimator = null;
 
     int mBarSize;
     boolean mVertical;
@@ -204,43 +199,6 @@ public class NavigationBarView extends LinearLayout {
 
         // bring up the lights no matter what
         setLowProfile(false);
-
-        if (!ANIMATE_HIDE_TRANSITION) {
-            setVisibility(hide ? View.GONE : View.VISIBLE);
-            return;
-        }
-
-        float oldAlpha = mCurrentView.getAlpha();
-        if (DEBUG) {
-            Slog.d(TAG, "animating alpha: " + oldAlpha + " -> "
-                + (!hide ? 1f : 0f));
-        }
-
-        if (mLastAnimator != null && mLastAnimator.isRunning()) mLastAnimator.cancel();
-
-        if (!hide) {
-            setVisibility(View.VISIBLE);
-        }
-
-        // play us off, animatorset
-        mLastAnimator = new AnimatorSet();
-        mLastAnimator.playTogether(
-                ObjectAnimator.ofFloat(mCurrentView, "alpha", hide ? 0f : 1f),
-                ObjectAnimator.ofFloat(mCurrentView,
-                                       mVertical ? "translationX" : "translationY",
-                                       hide ? mBarSize : 0)
-        );
-        mLastAnimator.setDuration(!hide ? 250 : 1000);
-        mLastAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator _a) {
-                mLastAnimator = null;
-                if (hide) {
-                    setVisibility(View.GONE);
-                }
-            }
-        });
-        mLastAnimator.start();
     }
 
     public void onFinishInflate() {

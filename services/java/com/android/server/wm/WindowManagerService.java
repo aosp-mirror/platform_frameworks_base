@@ -118,6 +118,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerPolicy.FakeWindow;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -142,7 +143,7 @@ import java.util.List;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
-        implements Watchdog.Monitor {
+        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -352,6 +353,12 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mWindows = new ArrayList<WindowState>();
 
     /**
+     * Fake windows added to the window manager.  Note: ordered from top to
+     * bottom, opposite of mWindows.
+     */
+    final ArrayList<FakeWindowImpl> mFakeWindows = new ArrayList<FakeWindowImpl>();
+
+    /**
      * Windows that are being resized.  Used so we can tell the client about
      * the resize after closing the transaction in which we resized the
      * underlying surface.
@@ -442,7 +449,9 @@ public class WindowManagerService extends IWindowManager.Stub
     int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
     int mLayoutSeq = 0;
-    
+
+    int mLastStatusBarVisibility = 0;
+
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
     
@@ -702,7 +711,7 @@ public class WindowManagerService extends IWindowManager.Stub
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_FOREGROUND);
             android.os.Process.setCanSelfBackground(false);
-            mPolicy.init(mContext, mService, mPM);
+            mPolicy.init(mContext, mService, mService, mPM);
 
             synchronized (this) {
                 mRunning = true;
@@ -6368,8 +6377,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                 // Ignore if process has died.
                             }
                         }
-
-                        mPolicy.focusChanged(lastFocus, newFocus);
                     }
                 } break;
 
@@ -7183,6 +7190,11 @@ public class WindowManagerService extends IWindowManager.Stub
         
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
+
+        final int NFW = mFakeWindows.size();
+        for (int i=0; i<NFW; i++) {
+            mFakeWindows.get(i).layout(dw, dh);
+        }
 
         final int N = mWindows.size();
         int i;
@@ -8835,6 +8847,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
+            int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
             final WindowState imWindow = mInputMethodWindow;
             if (newFocus != imWindow && oldFocus != imWindow) {
@@ -8845,13 +8858,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner(true /*initial*/, updateInputWindows);
+                    focusChanged &= ~WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
                 } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                     // Client will do the layout, but we need to assign layers
                     // for handleNewWindowLocked() below.
                     assignLayersLocked();
                 }
             }
-            
+
+            if ((focusChanged&WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
+                // The change in focus caused us to need to do a layout.  Okay.
+                mLayoutNeeded = true;
+                if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
+                    performLayoutLockedInner(true /*initial*/, updateInputWindows);
+                }
+            }
+
             if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
                 // If we defer assigning layers, then the caller is responsible for
                 // doing this part.
@@ -9097,33 +9119,82 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void statusBarVisibilityChanged(int visibility) {
-        mInputManager.setSystemUiVisibility(visibility);
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller does not hold permission "
+                    + android.Manifest.permission.STATUS_BAR);
+        }
 
         synchronized (mWindowMap) {
-            final int N = mWindows.size();
-            for (int i = 0; i < N; i++) {
-                WindowState ws = mWindows.get(i);
-                try {
-                    int curValue = ws.mSystemUiVisibility;
-                    int diff = curValue ^ visibility;
-                    // We are only interested in differences of one of the
-                    // clearable flags...
-                    diff &= View.SYSTEM_UI_CLEARABLE_FLAGS;
-                    // ...if it has actually been cleared.
-                    diff &= ~visibility;
-                    int newValue = (curValue&~diff) | (visibility&diff);
-                    if (newValue != curValue) {
-                        ws.mSeq++;
-                        ws.mSystemUiVisibility = newValue;
-                    }
-                    if (newValue != curValue || ws.mAttrs.hasSystemUiListeners) {
-                        ws.mClient.dispatchSystemUiVisibilityChanged(ws.mSeq,
-                                visibility, newValue, diff);
-                    }
-                } catch (RemoteException e) {
-                    // so sorry
+            mLastStatusBarVisibility = visibility;
+            visibility = mPolicy.adjustSystemUiVisibilityLw(visibility);
+            updateStatusBarVisibilityLocked(visibility);
+        }
+    }
+
+    void updateStatusBarVisibilityLocked(int visibility) {
+        mInputManager.setSystemUiVisibility(visibility);
+        final int N = mWindows.size();
+        for (int i = 0; i < N; i++) {
+            WindowState ws = mWindows.get(i);
+            try {
+                int curValue = ws.mSystemUiVisibility;
+                int diff = curValue ^ visibility;
+                // We are only interested in differences of one of the
+                // clearable flags...
+                diff &= View.SYSTEM_UI_CLEARABLE_FLAGS;
+                // ...if it has actually been cleared.
+                diff &= ~visibility;
+                int newValue = (curValue&~diff) | (visibility&diff);
+                if (newValue != curValue) {
+                    ws.mSeq++;
+                    ws.mSystemUiVisibility = newValue;
+                }
+                if (newValue != curValue || ws.mAttrs.hasSystemUiListeners) {
+                    ws.mClient.dispatchSystemUiVisibilityChanged(ws.mSeq,
+                            visibility, newValue, diff);
+                }
+            } catch (RemoteException e) {
+                // so sorry
+            }
+        }
+    }
+ 
+    @Override
+    public void reevaluateStatusBarVisibility() {
+        synchronized (mWindowMap) {
+            int visibility = mPolicy.adjustSystemUiVisibilityLw(mLastStatusBarVisibility);
+            updateStatusBarVisibilityLocked(visibility);
+            performLayoutAndPlaceSurfacesLocked();
+        }
+    }
+
+    @Override
+    public FakeWindow addFakeWindow(Looper looper, InputHandler inputHandler,
+            String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
+            boolean hasFocus, boolean touchFullscreen) {
+        synchronized (mWindowMap) {
+            FakeWindowImpl fw = new FakeWindowImpl(this, looper, inputHandler, name, windowType,
+                    layoutParamsFlags, canReceiveKeys, hasFocus, touchFullscreen);
+            int i=0;
+            while (i<mFakeWindows.size()) {
+                if (mFakeWindows.get(i).mWindowLayer <= fw.mWindowLayer) {
+                    break;
                 }
             }
+            mFakeWindows.add(i, fw);
+            mInputMonitor.updateInputWindowsLw(true);
+            return fw;
+        }
+    }
+
+    boolean removeFakeWindowLocked(FakeWindow window) {
+        synchronized (mWindowMap) {
+            if (mFakeWindows.remove(window)) {
+                mInputMonitor.updateInputWindowsLw(true);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -9387,6 +9458,10 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mInTouchMode="); pw.print(mInTouchMode);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
         if (dumpAll) {
+            if (mLastStatusBarVisibility != 0) {
+                pw.print("  mLastStatusBarVisibility=0x");
+                        pw.println(Integer.toHexString(mLastStatusBarVisibility));
+            }
             if (mInputMethodWindow != null) {
                 pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
             }

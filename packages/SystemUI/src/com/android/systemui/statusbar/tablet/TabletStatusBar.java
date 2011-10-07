@@ -1822,9 +1822,6 @@ public class TabletStatusBar extends StatusBar implements
         visibilityChanged(false);
     }
 
-    public void userActivity() {
-    }
-
     public void toggleRecentApps() {
         int msg = (mRecentsPanel.getVisibility() == View.GONE)
                 ? MSG_OPEN_RECENTS_PANEL : MSG_CLOSE_RECENTS_PANEL;
