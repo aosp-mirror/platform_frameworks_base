@@ -173,8 +173,8 @@ private:
     status_t setParamMaxFileDurationUs(int64_t timeUs);
     status_t setParamMaxFileSizeBytes(int64_t bytes);
     status_t setParamMovieTimeScale(int32_t timeScale);
-    status_t setParamGeoDataLongitude(int32_t longitudex10000);
-    status_t setParamGeoDataLatitude(int32_t latitudex10000);
+    status_t setParamGeoDataLongitude(int64_t longitudex10000);
+    status_t setParamGeoDataLatitude(int64_t latitudex10000);
     void clipVideoBitRate();
     void clipVideoFrameRate();
     void clipVideoFrameWidth();
