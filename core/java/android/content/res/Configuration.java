@@ -54,10 +54,17 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * IMSI MNC (Mobile Network Code), corresponding to
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#MccQualifier">mnc</a>
-     * resource qualifier.  0 if undefined.
+     * resource qualifier.  0 if undefined. Note that the actual MNC may be 0; in order to check
+     * for this use the {@link #MNC_ZERO} symbol.
      */
     public int mnc;
-    
+
+    /**
+     * Constant used to to represent MNC (Mobile Network Code) zero.
+     * 0 cannot be used, since it is used to represent an undefined MNC.
+     */
+    public static final int MNC_ZERO = 0xffff;
+
     /**
      * Current user preference for the locale, corresponding to
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#LocaleQualifier">locale</a>
