@@ -416,6 +416,13 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_BOOT_PROGRESS = FIRST_SYSTEM_WINDOW+21;
 
         /**
+         * Window type: Fake window to consume touch events when the navigation
+         * bar is hidden.
+         * @hide
+         */
+        public static final int TYPE_HIDDEN_NAV_CONSUMER = FIRST_SYSTEM_WINDOW+22;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;

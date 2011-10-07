@@ -31,12 +31,8 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.net.Uri;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Handler;
@@ -471,6 +467,7 @@ public class PhoneStatusBar extends StatusBar {
                     0
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.OPAQUE);
@@ -2024,19 +2021,6 @@ public class PhoneStatusBar extends StatusBar {
             if (DEBUG) {
                 Slog.d(TAG, "updateExpandedSize: height=" + mExpandedParams.height + " " + 
                     (mExpandedVisible ? "VISIBLE":"INVISIBLE"));
-            }
-        }
-    }
-
-    // The user is not allowed to get stuck without navigation UI. Upon the slightest user
-    // interaction we bring the navigation back.
-    public void userActivity() {
-        if (0 != (mSystemUiVisibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)) {
-            try {
-                mBarService.setSystemUiVisibility(
-                    mSystemUiVisibility & ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-            } catch (RemoteException ex) {
-                // weep softly
             }
         }
     }
