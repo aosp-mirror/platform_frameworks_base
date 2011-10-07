@@ -45,8 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 final class BluetoothHealthProfileHandler {
     private static final String TAG = "BluetoothHealthProfileHandler";
-    /*STOPSHIP*/
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private static BluetoothHealthProfileHandler sInstance;
     private BluetoothService mBluetoothService;
