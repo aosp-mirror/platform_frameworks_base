@@ -865,13 +865,7 @@ public class RenderScript {
     }
 
     static int getTargetSdkVersion(Context ctx) {
-        try {
-            PackageManager pm = ctx.getPackageManager();
-            ApplicationInfo app = pm.getApplicationInfo(ctx.getPackageName(), 0);
-            return app.targetSdkVersion;
-        } catch (Exception e) {
-            throw new RSDriverException("Error calculating target SDK version for RS.");
-        }
+        return ctx.getApplicationInfo().targetSdkVersion;
     }
 
     /**
