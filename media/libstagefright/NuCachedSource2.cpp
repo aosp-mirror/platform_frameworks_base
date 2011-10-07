@@ -598,11 +598,10 @@ void NuCachedSource2::updateCacheParamsFromSystemProperty() {
 
 void NuCachedSource2::updateCacheParamsFromString(const char *s) {
     ssize_t lowwaterMarkKb, highwaterMarkKb;
-    unsigned keepAliveSecs;
+    int keepAliveSecs;
 
-    if (sscanf(s, "%ld/%ld/%u",
-               &lowwaterMarkKb, &highwaterMarkKb, &keepAliveSecs) != 3
-        || lowwaterMarkKb >= highwaterMarkKb) {
+    if (sscanf(s, "%ld/%ld/%d",
+               &lowwaterMarkKb, &highwaterMarkKb, &keepAliveSecs) != 3) {
         LOGE("Failed to parse cache parameters from '%s'.", s);
         return;
     }
@@ -619,7 +618,18 @@ void NuCachedSource2::updateCacheParamsFromString(const char *s) {
         mHighwaterThresholdBytes = kDefaultHighWaterThreshold;
     }
 
-    mKeepAliveIntervalUs = keepAliveSecs * 1000000ll;
+    if (mLowwaterThresholdBytes >= mHighwaterThresholdBytes) {
+        LOGE("Illegal low/highwater marks specified, reverting to defaults.");
+
+        mLowwaterThresholdBytes = kDefaultLowWaterThreshold;
+        mHighwaterThresholdBytes = kDefaultHighWaterThreshold;
+    }
+
+    if (keepAliveSecs >= 0) {
+        mKeepAliveIntervalUs = keepAliveSecs * 1000000ll;
+    } else {
+        mKeepAliveIntervalUs = kDefaultKeepAliveIntervalUs;
+    }
 
     LOGV("lowwater = %d bytes, highwater = %d bytes, keepalive = %lld us",
          mLowwaterThresholdBytes,
