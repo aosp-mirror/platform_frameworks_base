@@ -2010,10 +2010,10 @@ public final class WebViewCore {
         if (nativeUpdateLayers(mLastDrawData.mBaseLayer)) {
             // If anything more complex than position has been touched, let's do a full draw
             webkitDraw();
-        } else {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.INVAL_RECT_MSG_ID).sendToTarget();
         }
+        mWebView.mPrivateHandler.removeMessages(WebView.INVAL_RECT_MSG_ID);
+        mWebView.mPrivateHandler.sendMessageAtFrontOfQueue(mWebView.mPrivateHandler
+                .obtainMessage(WebView.INVAL_RECT_MSG_ID));
     }
 
     private void webkitDraw() {
