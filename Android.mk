@@ -464,6 +464,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/USB "USB" \
 		-samplecode $(sample_dir)/WeatherListWidget \
 		            resources/samples/WeatherListWidget "Weather List Widget" \
+		-samplecode $(sample_dir)/WiFiDirectDemo \
+                            resources/samples/WiFiDirectDemo "Wi-Fi Direct Demo" \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \
