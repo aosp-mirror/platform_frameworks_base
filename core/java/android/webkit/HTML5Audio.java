@@ -16,12 +16,9 @@
 
 package android.webkit;
 
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnBufferingUpdateListener;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnErrorListener;
-import android.media.MediaPlayer.OnPreparedListener;
-import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -45,7 +42,8 @@ class HTML5Audio extends Handler
                             MediaPlayer.OnCompletionListener,
                             MediaPlayer.OnErrorListener,
                             MediaPlayer.OnPreparedListener,
-                            MediaPlayer.OnSeekCompleteListener {
+                            MediaPlayer.OnSeekCompleteListener,
+                            AudioManager.OnAudioFocusChangeListener {
     // Logging tag.
     private static final String LOGTAG = "HTML5Audio";
 
@@ -69,6 +67,7 @@ class HTML5Audio extends Handler
 
     private String mUrl;
     private boolean mAskToPlay = false;
+    private Context mContext;
 
     // Timer thread -> UI thread
     private static final int TIMEUPDATE = 100;
@@ -183,6 +182,7 @@ class HTML5Audio extends Handler
         // Save the native ptr
         mNativePointer = nativePtr;
         resetMediaPlayer();
+        mContext = webViewCore.getContext();
         mIsPrivateBrowsingEnabledGetter = new IsPrivateBrowsingEnabledGetter(
                 webViewCore.getContext().getMainLooper(), webViewCore.getWebView());
     }
@@ -233,6 +233,34 @@ class HTML5Audio extends Handler
         }
     }
 
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        switch (focusChange) {
+        case AudioManager.AUDIOFOCUS_GAIN:
+            // resume playback
+            if (mMediaPlayer == null) resetMediaPlayer();
+            else if (!mMediaPlayer.isPlaying()) mMediaPlayer.start();
+            mState = STARTED;
+            break;
+
+        case AudioManager.AUDIOFOCUS_LOSS:
+            // Lost focus for an unbounded amount of time: stop playback and release media player
+            if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+            break;
+
+        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+            // Lost focus for a short time, but we have to stop
+            // playback. We don't release the media player because playback
+            // is likely to resume
+            if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
+            break;
+        }
+    }
+
+
     private void play() {
         if ((mState >= ERROR && mState < PREPARED) && mUrl != null) {
             resetMediaPlayer();
@@ -241,8 +269,17 @@ class HTML5Audio extends Handler
         }
 
         if (mState >= PREPARED) {
-            mMediaPlayer.start();
-            mState = STARTED;
+            AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+            int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+
+            if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                // could not get audio focus.
+                teardown();
+            } else {
+                mMediaPlayer.start();
+                mState = STARTED;
+            }
         }
     }
 
@@ -276,4 +313,5 @@ class HTML5Audio extends Handler
     private native void nativeOnEnded(int nativePointer);
     private native void nativeOnPrepared(int duration, int width, int height, int nativePointer);
     private native void nativeOnTimeupdate(int position, int nativePointer);
+
 }
