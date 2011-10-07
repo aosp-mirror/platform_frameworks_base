@@ -1593,32 +1593,6 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Runs the provided SQL and returns a cursor over the result set.
-     * The cursor will read an initial set of rows and the return to the caller.
-     * It will continue to read in batches and send data changed notifications
-     * when the later batches are ready.
-     * @param sql the SQL query. The SQL string must not be ; terminated
-     * @param selectionArgs You may include ?s in where clause in the query,
-     *     which will be replaced by the values from selectionArgs. The
-     *     values will be bound as Strings.
-     * @param initialRead set the initial count of items to read from the cursor
-     * @param maxRead set the count of items to read on each iteration after the first
-     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
-     * {@link Cursor}s are not synchronized, see the documentation for more details.
-     *
-     * This work is incomplete and not fully tested or reviewed, so currently
-     * hidden.
-     * @hide
-     */
-    public Cursor rawQuery(String sql, String[] selectionArgs,
-            int initialRead, int maxRead) {
-        SQLiteCursor c = (SQLiteCursor)rawQueryWithFactory(
-                null, sql, selectionArgs, null);
-        c.setLoadStyle(initialRead, maxRead);
-        return c;
-    }
-
-    /**
      * Convenience method for inserting a row into the database.
      *
      * @param table the table to insert the row into
