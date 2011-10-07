@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permet que l\'aplicació pugui llegir la informació del perfil personal emmagatzemada al dispositiu, com ara el teu nom i la teva informació de contacte. Això significa que l\'aplicació et pot identificar i enviar la informació del teu perfil a altres persones."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"escriptura a les teves dades del perfil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permet que l\'aplicació pugui canviar o afegir a la informació del perfil personal emmagatzemada al dispositiu, com ara el teu nom i la teva informació de contacte. Això significa que altres aplicacions et poden identificar i enviar la informació del teu perfil a altres persones."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"llegeix el teu tauler d\'activitat social"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Permet que l\'aplicació accedeixi a les teves actualitzacions socials i a les dels teus amics i que les sincronitzi. Les aplicacions malicioses poden fer servir aquesta funció per llegir comunicacions privades entre tu i els teus amics a les xarxes socials."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"escriu al tauler d\'activitat social"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Permet que l\'aplicació mostri actualitzacions socials dels teus amics. Les aplicacions malicioses poden fer servir aquesta funció per fer-se passar per amics teus i per enganyar-te per tal que els revelis contrasenyes o altra informació confidencial."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"llegeix els esdeveniments del calendari més informació confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permet que una aplicació llegeixi tots els esdeveniments de calendari emmagatzemats a la tauleta, inclosos els dels seus amics o els seus companys de feina. Una aplicació maliciosa amb aquest permís pot extreure informació personal d\'aquests calendaris sense el coneixement dels propietaris."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permet que una aplicació llegeixi tots els esdeveniments de calendari emmagatzemats al telèfon, inclosos els dels seus amics o els teus companys de feina. Una aplicació maliciosa amb aquest permís pot extreure informació personal d\'aquests calendaris sense que ho sàpiguen els propietaris."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Canvi de mode"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retorn"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Selecciona una aplicació"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Comparteix amb"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Comparteix amb <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Llisca el dit. Mantén premut."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Cap avall per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Càmera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silenci"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Activa el so"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tecles. Es necessiten auriculars per escoltar les tecles en escriure una contrasenya."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tecles. Es necessiten auriculars per escoltar les tecles en escriure una contrasenya."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Torna a la pàgina d\'inici"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Mou cap a dalt"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Més opcions"</string>

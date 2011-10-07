@@ -32,6 +32,10 @@
     <skip />
     <!-- no translation found for status_bar_no_recent_apps (6576392951053994640) -->
     <skip />
+    <!-- no translation found for status_bar_accessibility_dismiss_recents (4576076075226540105) -->
+    <skip />
+    <!-- no translation found for status_bar_accessibility_recent_apps:one (5854176083865845541) -->
+    <!-- no translation found for status_bar_accessibility_recent_apps:other (1040784359794890744) -->
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nagins avis"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actual"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Avis"</string>
@@ -55,11 +59,6 @@
     <!-- no translation found for status_bar_settings_auto_brightness_label (511453614962324674) -->
     <skip />
     <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
-    <skip />
-    <string name="recent_tasks_title" msgid="3691764623638127888">"Utilisà sco ultim"</string>
-    <!-- no translation found for recent_tasks_empty (1905484479067697884) -->
-    <skip />
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
     <skip />
     <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
     <skip />
@@ -111,7 +110,7 @@
     <skip />
     <!-- no translation found for accessibility_menu (316839303324695949) -->
     <skip />
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
+    <!-- no translation found for accessibility_recent (8571350598987952883) -->
     <skip />
     <!-- no translation found for accessibility_ime_switch_button (5032926134740456424) -->
     <skip />
@@ -185,11 +184,11 @@
     <skip />
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
-    <!-- no translation found for accessibility_settings_button (7913780116850379698) -->
+    <!-- no translation found for accessibility_settings_button (799583911231893380) -->
     <skip />
-    <!-- no translation found for accessibility_notifications_button (2933903195211483438) -->
+    <!-- no translation found for accessibility_notifications_button (4498000369779421892) -->
     <skip />
-    <!-- no translation found for accessibility_remove_notification (4883990503785778699) -->
+    <!-- no translation found for accessibility_remove_notification (3603099514902182350) -->
     <skip />
     <!-- no translation found for accessibility_gps_enabled (3511469499240123019) -->
     <skip />
@@ -220,5 +219,7 @@
     <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
     <skip />
     <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
+    <skip />
+    <!-- no translation found for accessibility_clear_all (5235938559247164925) -->
     <skip />
 </resources>

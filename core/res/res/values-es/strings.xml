@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permite que la aplicación acceda a información del perfil personal almacenada en el dispositivo (como tu nombre o la información de contacto), lo que significa que la aplicación puede identificarte y enviar la información de tu perfil a otros usuarios."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"escribir en datos de tu perfil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permite que la aplicación modifique la información del perfil personal almacenada en el dispositivo (como tu nombre o la información de contacto) o que añada contenido a esta información, lo que significa que otras aplicaciones pueden identificarte y enviar la información de tu perfil a otros usuarios."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"consulta tu actividad social"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Permite que la aplicación acceda a las actualizaciones sociales de tus amigos y las sincronice. Las aplicaciones malintencionadas pueden usar este permiso para leer conversaciones privadas con tus amigos en las redes sociales."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"escribir en tu actividad social"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Permite que la aplicación muestre actualizaciones sociales de tus amigos. Las aplicaciones malintencionadas pueden usar este permiso para suplantar la identidad de un amigo y hacer que reveles tus contraseñas u otra información confidencial."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"leer eventos de calendario e información confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permite que una aplicación lea todos los eventos de calendario almacenados en el tablet, incluidos los de tus amigos o tus compañeros de trabajo. Las aplicaciones malintencionadas con este permiso pueden extraer información personal de estos calendarios sin el consentimiento de los propietarios."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permite que una aplicación lea todos los eventos de calendario almacenados en el teléfono, incluidos los de tus amigos o tus compañeros de trabajo. Las aplicaciones malintencionadas con este permiso pueden extraer información personal de estos calendarios sin el consentimiento de los propietarios."</string>
@@ -890,7 +894,7 @@
     <string name="anr_application_process" msgid="7208175830253210526">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> no responde. ¿Quieres cerrarla?"</string>
     <string name="anr_process" msgid="306819947562555821">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> no responde."\n\n"¿Quieres cerrarlo?"</string>
     <string name="force_close" msgid="8346072094521265605">"ACEPTAR"</string>
-    <string name="report" msgid="4060218260984795706">"Informe"</string>
+    <string name="report" msgid="4060218260984795706">"Informar"</string>
     <string name="wait" msgid="7147118217226317732">"Esperar"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplicación redireccionada"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando."</string>
@@ -989,7 +993,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activas el almacenamiento USB, se detendrán algunas aplicaciones que estás utilizando y estas no estarán disponibles hasta que lo desactives."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Error de funcionamiento de USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como un dispositivo de medios"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como un dispositivo multimedia"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como una cámara"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Cambio de modo"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Mayús"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Intro"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Seleccionar una aplicación"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Compartir con"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Compartir con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Tirador deslizante (mantener pulsado)"</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Hacia arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Hacia abajo para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Cámara"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencio"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Sonido activado"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Se necesitan auriculares para escuchar las teclas mientras se escribe una contraseña."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Se necesitan auriculares para escuchar las teclas mientras se escribe una contraseña."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ir al escritorio"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>

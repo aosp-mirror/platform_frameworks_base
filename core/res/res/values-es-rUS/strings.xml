@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permite que la aplicación lea información personal del perfil almacenada en tu dispositivo, como tu nombre e información de contacto. Esto significa que la aplicación puede identificarte y enviar tu información de perfil a otras personas."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"Escrib. en datos de tu perfil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permite que la aplicación cambie o agregue información personal del perfil almacenada en tu dispositivo, como tu nombre e información de contacto. Esto significa que otras aplicaciones pueden identificarte y enviar tu información de perfil a otras personas."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Lectura de tu muro social"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Permite que la aplicación acceda a tus actualizaciones sociales y a las de tus amigos y las sincronice. Las aplicaciones maliciosas pueden usar este permiso para acceder a las comunicaciones privadas que mantienes con tus amigos en las redes sociales."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Escritura en tu muro social"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Permite que la aplicación muestre las actualizaciones sociales de tus amigos. Las aplicaciones maliciosas pueden usar este permiso para hacerse pasar por un amigo y engañarte para que reveles contraseñas u otros datos confidenciales."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"Leer eventos de calendario e información confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permite que una aplicación lea todos los eventos de calendario almacenados en la tableta, incluidos los de tus amigos o compañeros de trabajo. Una aplicación maliciosa con este permiso puede extraer información personal de estos calendarios sin que los propietarios lo sepan."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permite que una aplicación lea todos los eventos del calendario almacenados en tu teléfono, incluidos los de tus amigos o compañeros de trabajo. Una aplicación maliciosa con este permiso puede extraer información personal de estos calendarios sin que los propietarios lo sepan."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Cambio de modo"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Mayúscula"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Ingresar"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Elegir una aplicación"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Compartir con"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Compartir con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Asidero deslizante (tocar y mantener la presión)"</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Hacia arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Hacia abajo para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Cámara"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencioso"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Sonido activado"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tecla. Se requieren auriculares para escuchar el sonido de las teclas al ingresar una contraseña."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tecla. Se requieren auriculares para escuchar el sonido de las teclas al ingresar una contraseña."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Desplazarse hasta la página principal"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>

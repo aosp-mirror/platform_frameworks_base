@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Ļauj lietojumprogrammai lasīt ierīcē glabāto personiskā profila informāciju, piemēram, jūsu vārdu un kontaktinformāciju. Tas nozīmē, ka lietojumprogramma var jūs identificēt un sūtīt jūsu profila informāciju citām personām."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"rakstīšana jūsu profila datos"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Ļauj lietojumprogrammai mainīt vai pievienot ierīcē glabāto personiskā profila informāciju, piemēram, jūsu vārdu un kontaktinformāciju. Tas nozīmē, ka citas lietojumprogrammas var jūs identificēt un sūtīt jūsu profila informāciju citām personām."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lasīt jūsu soc. tīklu straumi"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Ļauj lietojumprogrammai piekļūt jūsu un jūsu draugu atjauninājumiem sociālajos tīklos un sinhronizēt tos. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai piekļūtu jūsu un jūsu draugu savstarpējām privātām sarunām sociālajos tīklos."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"rakstīt sociālo tīklu straumē"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Ļauj lietojumprogrammai rādīt jūsu draugu atjauninājumus sociālajos tīklos. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai uzdotos par jūsu draugu un mudinātu jūs atklāt paroles vai citu konfidenciālu informāciju."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lasīt kalendāra pasākumus un konfidenciālu informāciju"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Ļauj lietojumprogrammai lasīt visus planšetdatorā saglabātos kalendāra pasākumus, tostarp jūsu draugu un darbabiedru pasākumus. Ļaunprātīga lietojumprogramma, izmantojot šo atļauju, bez īpašnieka ziņas no šiem kalendāriem var iegūt personisku informāciju."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Ļauj lietojumprogrammai lasīt visus tālrunī saglabātos kalendāra pasākumus, tostarp jūsu draugu un darbabiedru pasākumus. Ļaunprātīga lietojumprogramma, izmantojot šo atļauju, bez īpašnieka ziņas no šiem kalendāriem var iegūt personisku informāciju."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Režīma maiņa"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Pārslēgšanas taustiņš"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Ievadīšanas taustiņš"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Lietojumprogrammas izvēle"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Kopīgot ar:"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Kopīgot ar lietojumprogrammu <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Bīdāms rokturis. Pieskarieties tam un turiet to nospiestu."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Bīdiet uz augšu, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Bīdiet uz leju, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Klusums"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Skaņa ieslēgta"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Taustiņš. Lai, rakstot paroli, dzirdētu taustiņu signālus, nepieciešamas austiņas."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Taustiņš. Lai, rakstot paroli, dzirdētu taustiņu signālus, nepieciešamas austiņas."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Pārvietoties uz sākuma ekrānu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Pārvietoties augšup"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Vairāk opciju"</string>

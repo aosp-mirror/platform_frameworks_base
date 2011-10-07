@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Hiermee kan de app persoonlijke profielgegevens lezen die op uw apparaat staan, zoals uw naam en contactgegevens. Dit houdt in dat de app u kan identificeren en uw profielgegevens kan doorsturen naar anderen."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"schrijven naar profielgegevens"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Hiermee kan de app persoonlijke profielgegevens die op uw apparaat staan, zoals uw naam en contactgegevens, wijzigen of toevoegen. Dit houdt in dat andere apps u kunnen identificeren en uw profielgegevens kunnen doorsturen naar anderen."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"uw sociale stream lezen"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Hiermee kan de app toegang krijgen tot sociale updates van u en uw vrienden en deze synchroniseren. Schadelijke apps kunnen hiermee toegang krijgen tot privécommunicatie tussen u en uw vrienden in sociale netwerken."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"schrijven naar sociale streams"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Hiermee kan de app sociale updates van uw vrienden weergeven. Schadelijke apps kunnen deze mogelijkheid gebruiken om zich voor te doen als vriend en u wachtwoorden of andere vertrouwelijke gegevens te laten vrijgeven."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"agenda-afspraken en vertrouwelijke informatie lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Hiermee kan een app alle agenda-afspraken lezen die op uw tablet zijn opgeslagen, inclusief de afspraken van vrienden of collega\'s. Een schadelijke app die over deze rechten beschikt, kan persoonlijke gegevens extraheren uit deze agenda\'s zonder medeweten van de eigenaren van de agenda\'s."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Hiermee kan een app alle agenda-afspraken lezen die op uw telefoon zijn opgeslagen, inclusief de afspraken van vrienden of collega\'s. Een schadelijke app die over deze rechten beschikt, kan persoonlijke gegevens extraheren uit deze agenda\'s zonder medeweten van de eigenaren van de agenda\'s."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modus wijzigen"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Een applicatie kiezen"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Delen met"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Delen met <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Schuifgreep. Tikken en blijven aanraken."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Omlaag voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Stil"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Geluid aan"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Toetsaanslag. Headset vereist om toetsaanslagen te kunnen horen bij het typen van een wachtwoord."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Toetsaanslag. Headset vereist om toetsaanslagen te kunnen horen bij het typen van een wachtwoord."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigeren naar startpositie"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Omhoog navigeren"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Meer opties"</string>

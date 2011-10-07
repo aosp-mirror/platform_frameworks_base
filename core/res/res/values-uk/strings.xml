@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Дозволяє програмі читати особисту інформацію профілю, збережену на вашому пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що така програма може ідентифікувати вашу особу та надсилати інформацію вашого профілю іншим."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"записувати в дані профілю"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Дозволяє програмі змінювати чи додавати особисту інформацію профілю, збережену на вашому пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що інші програми можуть ідентифікувати вашу особу та надсилати інформацію вашого профілю іншим."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читати ваш соціальний потік"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Дозволяє програмі отримувати доступ до оновлень із соціальних мереж від вас і ваших друзів та синхронізувати їх. Шкідливі програми можуть використовувати це для доступу до приватного спілкування між вами та вашими друзями в соціальних мережах."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"писати у ваш соціальний потік"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Дозволяє програмі відображати оновлення із соціальних мереж від ваших друзів. Шкідливі програми можуть використовувати це, щоб видавати себе за вашого друга й оманливим шляхом отримувати ваші паролі чи іншу конфіденційну інформацію."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"читати події календаря, а також конфіденційну інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Дозволяє програмі читати всі події календаря, збережені в планшетному ПК, включно з подіями друзів або співробітників. Шкідлива програма з таким дозволом може отримувати особисту інформацію з цих календарів без відома власників."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Дозволяє програмі читати всі події календаря, збережені в телефоні, включно з подіями друзів або співробітників. Шкідлива програма з таким дозволом може отримувати особисту інформацію з цих календарів без відома власників."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Зміна режиму"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Виберіть програму"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Надіслати через"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Надіслати через <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Ручка-повзунок. Торкніться й утримуйте її."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Угору, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Униз, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Без звуку"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Увімкнути звук"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Клавіша. Гарнітура має чути звук клавіш під час введення пароля."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Клавіша. Гарнітура має чути звук клавіш під час введення пароля."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на головну"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вгору"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Інші варіанти"</string>

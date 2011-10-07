@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Gir applikasjonen tillatelse til å lese personlig profilinformasjon lagret på enheten, for eksempel navn og kontaktinformasjon. Dette betyr at applikasjonen kan identifisere deg og sende din profilinformasjon til andre."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"skriv til profildataene dine"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Gir applikasjonen tillatelse til å endre eller legge til personlig profilinformasjon lagret på enheten, for eksempel navn og kontaktinformasjon. Dette betyr at andre applikasjoner kan identifisere deg og sende din profilinformasjon til andre."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lese din sosiale strøm"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Gir tillatelse til at appen får tilgang til og kan synkronisere oppdateringer fra deg og vennene dine. Apper med skadelig programvare kan utnytte denne tillatelsen til å lese privat kommunikasjon som du har med vennene dine i sosiale nettverk."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrive i din sosiale strøm"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Gir tillatelse til at appen kan vise sosiale oppdateringer fra vennene dine. Apper med skadelig programvare kan utnytte denne tillatelsen gjennom å opptre som en venn og således lure deg til å oppgi passord eller annen konfidensiell informasjon."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"les kalenderhendelser og konfidensiell informasjon"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Lar en applikasjon lese alle kalenderhendelser lagret på nettbrettet, herunder de som tilhører venner eller kollegaer. En skadelig applikasjon med denne tillatelsen kan trekke ut personlige opplysninger fra disse kalenderne uten eiernes viten."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Lar applikasjoner lese alle kalenderhendelser lagret på telefonen, herunder de som tilhører venner eller kollegaer. Skadelige applikasjon med denne tillatelsen kan trekke ut personlige opplysninger fra disse kalenderne uten eiernes viten."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusendring"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Velg en app"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Del med"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Del med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Glidebryter. Trykk og hold inne."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Opp for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Ned for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Stille"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Lyd på"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tast. Hodetelefoner kreves for å høre tastene mens du skriver inn et passord."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tast. Hodetelefoner kreves for å høre tastene mens du skriver inn et passord."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Gå til startsiden"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Gå opp"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Flere alternativer"</string>
