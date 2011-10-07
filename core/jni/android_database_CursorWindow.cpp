@@ -205,8 +205,14 @@ static jstring nativeGetString(JNIEnv* env, jclass clazz, jint windowPtr,
     if (type == FIELD_TYPE_STRING) {
         uint32_t size = fieldSlot->data.buffer.size;
 #if WINDOW_STORAGE_UTF8
-        return size > 1 ? env->NewStringUTF(window->getFieldSlotValueString(fieldSlot))
-                : gEmptyString;
+        if (size <= 1) {
+            return gEmptyString;
+        }
+        // Convert to UTF-16 here instead of calling NewStringUTF.  NewStringUTF
+        // doesn't like UTF-8 strings with high codepoints.  It actually expects
+        // Modified UTF-8 with encoded surrogate pairs.
+        String16 utf16(window->getFieldSlotValueString(fieldSlot), size - 1);
+        return env->NewString(reinterpret_cast<const jchar*>(utf16.string()), utf16.size());
 #else
         size_t chars = size / sizeof(char16_t);
         return chars ? env->NewString(reinterpret_cast<jchar*>(
@@ -267,7 +273,7 @@ static void fillCharArrayBufferUTF(JNIEnv* env, jobject bufferObj,
     if (dataObj) {
         if (size) {
             jchar* data = static_cast<jchar*>(env->GetPrimitiveArrayCritical(dataObj, NULL));
-            utf8_to_utf16(reinterpret_cast<const uint8_t*>(str), len,
+            utf8_to_utf16_no_null_terminator(reinterpret_cast<const uint8_t*>(str), len,
                     reinterpret_cast<char16_t*>(data));
             env->ReleasePrimitiveArrayCritical(dataObj, data, 0);
         }

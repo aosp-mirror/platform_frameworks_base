@@ -150,6 +150,13 @@ void utf8_to_utf32(const char* src, size_t src_len, char32_t* dst);
 ssize_t utf8_to_utf16_length(const uint8_t* src, size_t srcLen);
 
 /**
+ * Convert UTF-8 to UTF-16 including surrogate pairs.
+ * Returns a pointer to the end of the string (where a null terminator might go
+ * if you wanted to add one).
+ */
+char16_t* utf8_to_utf16_no_null_terminator(const uint8_t* src, size_t srcLen, char16_t* dst);
+
+/**
  * Convert UTF-8 to UTF-16 including surrogate pairs. The destination buffer
  * must be large enough to hold the result as measured by utf8_to_utf16_length
  * plus an added NULL terminator.
