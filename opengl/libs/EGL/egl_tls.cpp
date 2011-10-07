@@ -67,19 +67,23 @@ void egl_tls_t::validateTLSKey()
     }
 }
 
-void egl_tls_t::setErrorEtcImpl(const char* caller, int line, EGLint error) {
+void egl_tls_t::setErrorEtcImpl(
+        const char* caller, int line, EGLint error, bool quiet) {
     validateTLSKey();
     egl_tls_t* tls = getTLS();
     if (tls->error != error) {
-        LOGE("%s:%d error %x (%s)", caller, line, error, egl_strerror(error));
-        tls->error = error;
-        char value[PROPERTY_VALUE_MAX];
-        property_get("debug.egl.callstack", value, "0");
-        if (atoi(value)) {
-            CallStack stack;
-            stack.update();
-            stack.dump();
+        if (!quiet) {
+            LOGE("%s:%d error %x (%s)",
+                    caller, line, error, egl_strerror(error));
+            char value[PROPERTY_VALUE_MAX];
+            property_get("debug.egl.callstack", value, "0");
+            if (atoi(value)) {
+                CallStack stack;
+                stack.update();
+                stack.dump();
+            }
         }
+        tls->error = error;
     }
 }
 

@@ -1480,7 +1480,7 @@ EGLuint64NV eglGetSystemTimeFrequencyNV()
         }
     }
 
-    return setError(EGL_BAD_DISPLAY, 0);;
+    return setErrorQuiet(EGL_BAD_DISPLAY, 0);
 }
 
 EGLuint64NV eglGetSystemTimeNV()
@@ -1500,5 +1500,5 @@ EGLuint64NV eglGetSystemTimeNV()
         }
     }
 
-    return setError(EGL_BAD_DISPLAY, 0);;
+    return setErrorQuiet(EGL_BAD_DISPLAY, 0);
 }
