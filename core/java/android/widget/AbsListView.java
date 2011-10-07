@@ -237,9 +237,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     SparseBooleanArray mCheckStates;
 
     /**
-     * Running state of which IDs are currently checked
+     * Running state of which IDs are currently checked.
+     * If there is a value for a given key, the checked state for that ID is true
+     * and the value holds the last known position in the adapter for that id.
      */
-    LongSparseArray<Boolean> mCheckedIdStates;
+    LongSparseArray<Integer> mCheckedIdStates;
 
     /**
      * Controls how the next layout will happen
@@ -470,6 +472,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Content height divided by this is the overscroll limit.
      */
     static final int OVERSCROLL_LIMIT_DIVISOR = 3;
+
+    /**
+     * How many positions in either direction we will search to try to
+     * find a checked item with a stable ID that moved position across
+     * a data set change. If the item isn't found it will be unselected.
+     */
+    private static final int CHECK_POSITION_SEARCH_DISTANCE = 20;
 
     /**
      * Used to request a layout when we changed touch mode
@@ -806,7 +815,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (adapter != null) {
             if (mChoiceMode != CHOICE_MODE_NONE && mAdapter.hasStableIds() &&
                     mCheckedIdStates == null) {
-                mCheckedIdStates = new LongSparseArray<Boolean>();
+                mCheckedIdStates = new LongSparseArray<Integer>();
             }
         }
 
@@ -901,7 +910,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return new long[0];
         }
 
-        final LongSparseArray<Boolean> idStates = mCheckedIdStates;
+        final LongSparseArray<Integer> idStates = mCheckedIdStates;
         final int count = idStates.size();
         final long[] ids = new long[count];
 
@@ -948,7 +957,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mCheckStates.put(position, value);
             if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
                 if (value) {
-                    mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                    mCheckedIdStates.put(mAdapter.getItemId(position), position);
                 } else {
                     mCheckedIdStates.delete(mAdapter.getItemId(position));
                 }
@@ -980,7 +989,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (value) {
                 mCheckStates.put(position, true);
                 if (updateIds) {
-                    mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                    mCheckedIdStates.put(mAdapter.getItemId(position), position);
                 }
                 mCheckedItemCount = 1;
             } else if (mCheckStates.size() == 0 || !mCheckStates.valueAt(0)) {
@@ -1010,7 +1019,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mCheckStates.put(position, newValue);
                 if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
                     if (newValue) {
-                        mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                        mCheckedIdStates.put(mAdapter.getItemId(position), position);
                     } else {
                         mCheckedIdStates.delete(mAdapter.getItemId(position));
                     }
@@ -1032,7 +1041,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mCheckStates.put(position, true);
                     if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
                         mCheckedIdStates.clear();
-                        mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                        mCheckedIdStates.put(mAdapter.getItemId(position), position);
                     }
                     mCheckedItemCount = 1;
                 } else if (mCheckStates.size() == 0 || !mCheckStates.valueAt(0)) {
@@ -1081,7 +1090,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mCheckStates = new SparseBooleanArray();
             }
             if (mCheckedIdStates == null && mAdapter != null && mAdapter.hasStableIds()) {
-                mCheckedIdStates = new LongSparseArray<Boolean>();
+                mCheckedIdStates = new LongSparseArray<Integer>();
             }
             // Modal multi-choice mode only has choices when the mode is active. Clear them.
             if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
@@ -1411,7 +1420,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean inActionMode;
         int checkedItemCount;
         SparseBooleanArray checkState;
-        LongSparseArray<Boolean> checkIdState;
+        LongSparseArray<Integer> checkIdState;
 
         /**
          * Constructor called from {@link AbsListView#onSaveInstanceState()}
@@ -1435,10 +1444,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             checkedItemCount = in.readInt();
             checkState = in.readSparseBooleanArray();
             long[] idState = in.createLongArray();
+            int[] idPositions = in.createIntArray();
 
-            if (idState.length > 0) {
-                checkIdState = new LongSparseArray<Boolean>();
-                checkIdState.setValues(idState, Boolean.TRUE);
+            final int idLength = idState.length;
+            if (idLength > 0) {
+                checkIdState = new LongSparseArray<Integer>();
+                for (int i = 0; i < idLength; i++) {
+                    checkIdState.put(idState[i], idPositions[i]);
+                }
             }
         }
 
@@ -1455,6 +1468,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             out.writeInt(checkedItemCount);
             out.writeSparseBooleanArray(checkState);
             out.writeLongArray(checkIdState != null ? checkIdState.getKeys() : new long[0]);
+
+            int size = checkIdState != null ? checkIdState.size() : 0;
+            int[] idPositions = new int[size];
+            if (size > 0) {
+                for (int i = 0; i < size; i++) {
+                    idPositions[i] = checkIdState.valueAt(i);
+                }
+                out.writeIntArray(idPositions);
+            }
         }
 
         @Override
@@ -1549,7 +1571,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             ss.checkState = mCheckStates.clone();
         }
         if (mCheckedIdStates != null) {
-            final LongSparseArray<Boolean> idState = new LongSparseArray<Boolean>();
+            final LongSparseArray<Integer> idState = new LongSparseArray<Integer>();
             final int count = mCheckedIdStates.size();
             for (int i = 0; i < count; i++) {
                 idState.put(mCheckedIdStates.keyAt(i), mCheckedIdStates.valueAt(i));
@@ -4770,15 +4792,63 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return selectedPos >= 0;
     }
 
+    void confirmCheckedPositionsById() {
+        // Clear out the positional check states, we'll rebuild it below from IDs.
+        mCheckStates.clear();
+
+        boolean checkedCountChanged = false;
+        for (int checkedIndex = 0; checkedIndex < mCheckedIdStates.size(); checkedIndex++) {
+            final long id = mCheckedIdStates.keyAt(checkedIndex);
+            final int lastPos = mCheckedIdStates.valueAt(checkedIndex);
+
+            final long lastPosId = mAdapter.getItemId(lastPos);
+            if (id != lastPosId) {
+                // Look around to see if the ID is nearby. If not, uncheck it.
+                final int start = Math.max(0, lastPos - CHECK_POSITION_SEARCH_DISTANCE);
+                final int end = Math.min(lastPos + CHECK_POSITION_SEARCH_DISTANCE, mItemCount);
+                boolean found = false;
+                for (int searchPos = start; searchPos < end; searchPos++) {
+                    final long searchId = mAdapter.getItemId(searchPos);
+                    if (id == searchId) {
+                        found = true;
+                        mCheckStates.put(searchPos, true);
+                        mCheckedIdStates.setValueAt(checkedIndex, searchPos);
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    mCheckedIdStates.delete(id);
+                    checkedIndex--;
+                    mCheckedItemCount--;
+                    checkedCountChanged = true;
+                    if (mChoiceActionMode != null && mMultiChoiceModeCallback != null) {
+                        mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode,
+                                lastPos, id, false);
+                    }
+                }
+            } else {
+                mCheckStates.put(lastPos, true);
+            }
+        }
+
+        if (checkedCountChanged && mChoiceActionMode != null) {
+            mChoiceActionMode.invalidate();
+        }
+    }
+
     @Override
     protected void handleDataChanged() {
         int count = mItemCount;
         int lastHandledItemCount = mLastHandledItemCount;
         mLastHandledItemCount = mItemCount;
+
+        if (mChoiceMode != CHOICE_MODE_NONE && mAdapter != null && mAdapter.hasStableIds()) {
+            confirmCheckedPositionsById();
+        }
+
         if (count > 0) {
-
             int newPos;
-
             int selectablePos;
 
             // Find the row we are supposed to sync to
