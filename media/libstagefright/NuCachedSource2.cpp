@@ -21,6 +21,7 @@
 #include "include/NuCachedSource2.h"
 #include "include/HTTPBase.h"
 
+#include <cutils/properties.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaErrors.h>
@@ -186,7 +187,12 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mLastAccessPos(0),
       mFetching(true),
       mLastFetchTimeUs(-1),
-      mNumRetriesLeft(kMaxNumRetries) {
+      mNumRetriesLeft(kMaxNumRetries),
+      mHighwaterThresholdBytes(kDefaultHighWaterThreshold),
+      mLowwaterThresholdBytes(kDefaultLowWaterThreshold),
+      mKeepAliveIntervalUs(kDefaultKeepAliveIntervalUs) {
+    updateCacheParamsFromSystemProperty();
+
     mLooper->setName("NuCachedSource2");
     mLooper->registerHandler(mReflector);
     mLooper->start();
@@ -318,7 +324,8 @@ void NuCachedSource2::onFetch() {
     bool keepAlive =
         !mFetching
             && mFinalStatus == OK
-            && ALooper::GetNowUs() >= mLastFetchTimeUs + kKeepAliveIntervalUs;
+            && mKeepAliveIntervalUs > 0
+            && ALooper::GetNowUs() >= mLastFetchTimeUs + mKeepAliveIntervalUs;
 
     if (mFetching || keepAlive) {
         if (keepAlive) {
@@ -329,7 +336,7 @@ void NuCachedSource2::onFetch() {
 
         mLastFetchTimeUs = ALooper::GetNowUs();
 
-        if (mFetching && mCache->totalSize() >= kHighWaterThreshold) {
+        if (mFetching && mCache->totalSize() >= mHighwaterThresholdBytes) {
             LOGI("Cache full, done prefetching for now");
             mFetching = false;
         }
@@ -392,7 +399,7 @@ void NuCachedSource2::restartPrefetcherIfNecessary_l(
 
     if (!ignoreLowWaterThreshold && !force
             && mCacheOffset + mCache->totalSize() - mLastAccessPos
-                >= kLowWaterThreshold) {
+                >= mLowwaterThresholdBytes) {
         return;
     }
 
@@ -482,7 +489,7 @@ size_t NuCachedSource2::approxDataRemaining_l(status_t *finalStatus) {
 }
 
 ssize_t NuCachedSource2::readInternal(off64_t offset, void *data, size_t size) {
-    CHECK_LE(size, (size_t)kHighWaterThreshold);
+    CHECK_LE(size, (size_t)mHighwaterThresholdBytes);
 
     LOGV("readInternal offset %lld size %d", offset, size);
 
@@ -578,6 +585,46 @@ String8 NuCachedSource2::getUri() {
 
 String8 NuCachedSource2::getMIMEType() const {
     return mSource->getMIMEType();
+}
+
+void NuCachedSource2::updateCacheParamsFromSystemProperty() {
+    char value[PROPERTY_VALUE_MAX];
+    if (!property_get("media.stagefright.cache-params", value, NULL)) {
+        return;
+    }
+
+    updateCacheParamsFromString(value);
+}
+
+void NuCachedSource2::updateCacheParamsFromString(const char *s) {
+    ssize_t lowwaterMarkKb, highwaterMarkKb;
+    unsigned keepAliveSecs;
+
+    if (sscanf(s, "%ld/%ld/%u",
+               &lowwaterMarkKb, &highwaterMarkKb, &keepAliveSecs) != 3
+        || lowwaterMarkKb >= highwaterMarkKb) {
+        LOGE("Failed to parse cache parameters from '%s'.", s);
+        return;
+    }
+
+    if (lowwaterMarkKb >= 0) {
+        mLowwaterThresholdBytes = lowwaterMarkKb * 1024;
+    } else {
+        mLowwaterThresholdBytes = kDefaultLowWaterThreshold;
+    }
+
+    if (highwaterMarkKb >= 0) {
+        mHighwaterThresholdBytes = highwaterMarkKb * 1024;
+    } else {
+        mHighwaterThresholdBytes = kDefaultHighWaterThreshold;
+    }
+
+    mKeepAliveIntervalUs = keepAliveSecs * 1000000ll;
+
+    LOGV("lowwater = %d bytes, highwater = %d bytes, keepalive = %lld us",
+         mLowwaterThresholdBytes,
+         mHighwaterThresholdBytes,
+         mKeepAliveIntervalUs);
 }
 
 }  // namespace android
