@@ -158,6 +158,9 @@
         <!-- The underline color and thickness for misspelled suggestion -->
         <attr name="textAppearanceMisspelledSuggestion" format="reference" />
 
+        <!-- The underline color and thickness for auto correction suggestion -->
+        <attr name="textAppearanceAutoCorrectionSuggestion" format="reference" />
+
         <!--  The underline color -->
         <attr name="textUnderlineColor" format="reference|color" />
         <!--  The underline thickness -->
