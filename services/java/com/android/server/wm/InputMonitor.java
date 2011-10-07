@@ -169,6 +169,11 @@ final class InputMonitor {
             }
         }
 
+        final int NFW = mService.mFakeWindows.size();
+        for (int i = 0; i < NFW; i++) {
+            addInputWindowHandleLw(mService.mFakeWindows.get(i).mWindowHandle);
+        }
+
         final int N = windows.size();
         for (int i = N - 1; i >= 0; i--) {
             final WindowState child = windows.get(i);
