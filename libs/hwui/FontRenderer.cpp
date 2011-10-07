@@ -185,7 +185,7 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
         return;
     }
 
-    SkFixed penX = SkIntToFixed(x);
+    float penX = x;
     int penY = y;
     int glyphsLeft = 1;
     if (numGlyphs > 0) {
@@ -193,7 +193,7 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     }
 
     SkFixed prevRsbDelta = 0;
-    penX += SK_Fixed1 / 2;
+    penX += 0.5f;
 
     text += start;
 
@@ -206,25 +206,25 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
         }
 
         CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
-        penX += SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta);
+        penX += SkFixedToFloat(SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta));
         prevRsbDelta = cachedGlyph->mRsbDelta;
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if (cachedGlyph->mIsValid) {
             switch(mode) {
             case FRAMEBUFFER:
-                drawCachedGlyph(cachedGlyph, SkFixedFloor(penX), penY);
+                drawCachedGlyph(cachedGlyph, (int) floorf(penX), penY);
                 break;
             case BITMAP:
-                drawCachedGlyph(cachedGlyph, SkFixedFloor(penX), penY, bitmap, bitmapW, bitmapH);
+                drawCachedGlyph(cachedGlyph, (int) floorf(penX), penY, bitmap, bitmapW, bitmapH);
                 break;
             case MEASURE:
-                measureCachedGlyph(cachedGlyph, SkFixedFloor(penX), penY, bounds);
+                measureCachedGlyph(cachedGlyph, (int) floorf(penX), penY, bounds);
                 break;
             }
         }
 
-        penX += cachedGlyph->mAdvanceX;
+        penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
 
         // If we were given a specific number of glyphs, decrement
         if (numGlyphs > 0) {
