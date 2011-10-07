@@ -115,6 +115,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/Lohit_Hindi.ttf)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************

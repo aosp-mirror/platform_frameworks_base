@@ -17,13 +17,56 @@
 
 LOCAL_PATH := $(call my-dir)
 
+##########################################
+# We may only afford small font footprint.
+##########################################
+# Use only symlinks.
+# Symlink: DroidSans.ttf -> Roboto-Regular.ttf
+LOCAL_MODULE := DroidSans.ttf
+font_symlink_src := $(PRODUCT_OUT)/system/fonts/Roboto-Regular.ttf
+font_symlink := $(dir $(font_symlink_src))$(LOCAL_MODULE)
+$(font_symlink) : $(font_symlink_src)
+	@echo "Symlink: $@ -> $<"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf $(notdir $<) $@
+
+# this magic makes LOCAL_REQUIRED_MODULES work
+ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
+    $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(font_symlink)
+
+################################
+# Symlink: DroidSans-Bold.ttf -> Roboto-Bold.ttf
+LOCAL_MODULE := DroidSans-Bold.ttf
+font_symlink_src := $(PRODUCT_OUT)/system/fonts/Roboto-Bold.ttf
+font_symlink := $(dir $(font_symlink_src))$(LOCAL_MODULE)
+$(font_symlink) : $(font_symlink_src)
+	@echo "Symlink: $@ -> $<"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf $(notdir $<) $@
+
+# this magic makes LOCAL_REQUIRED_MODULES work
+ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
+    $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(font_symlink)
+
+################################
+include $(CLEAR_VARS)
+LOCAL_MODULE := DroidSansEthiopic-Regular.ttf
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
+include $(BUILD_PREBUILT)
+
+################################
 ifeq ($(SMALLER_FONT_FOOTPRINT),true)
 droidsans_fallback_src := DroidSansFallback.ttf
-extra_droidsans_fonts :=
+extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf
 else
 droidsans_fallback_src := DroidSansFallbackFull.ttf
 extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf DroidSansEthiopic-Regular.ttf
-endif
+endif  # SMALLER_FONT_FOOTPRINT
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansFallback.ttf
@@ -32,30 +75,9 @@ LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 LOCAL_REQUIRED_MODULES := $(extra_droidsans_fonts)
+include $(BUILD_PREBUILT)
+
+font_symlink_src :=
+font_symlink :=
 droidsans_fallback_src :=
 extra_droidsans_fonts :=
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSans.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSans-Bold.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSansEthiopic-Regular.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
