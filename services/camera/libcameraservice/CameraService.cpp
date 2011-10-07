@@ -133,6 +133,8 @@ status_t CameraService::getCameraInfo(int cameraId,
 sp<ICamera> CameraService::connect(
         const sp<ICameraClient>& cameraClient, int cameraId) {
     int callingPid = getCallingPid();
+    sp<CameraHardwareInterface> hardware = NULL;
+
     LOG1("CameraService::connect E (pid %d, id %d)", callingPid, cameraId);
 
     if (!mModule) {
@@ -187,10 +189,13 @@ sp<ICamera> CameraService::connect(
     char camera_device_name[10];
     snprintf(camera_device_name, sizeof(camera_device_name), "%d", cameraId);
 
-    client = new Client(this, cameraClient,
-                new CameraHardwareInterface(&mModule->common,
-                                            camera_device_name),
-                cameraId, info.facing, callingPid);
+    hardware = new CameraHardwareInterface(camera_device_name);
+    if (hardware->initialize(&mModule->common) != OK) {
+        hardware.clear();
+        return NULL;
+    }
+
+    client = new Client(this, cameraClient, hardware, cameraId, info.facing, callingPid);
     mClient[cameraId] = client;
     LOG1("CameraService::connect X");
     return client;
