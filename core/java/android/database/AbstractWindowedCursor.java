@@ -18,8 +18,22 @@ package android.database;
 
 /**
  * A base class for Cursors that store their data in {@link CursorWindow}s.
+ * <p>
+ * Subclasses are responsible for filling the cursor window with data during
+ * {@link #onMove(int, int)}, allocating a new cursor window if necessary.
+ * During {@link #requery()}, the existing cursor window should be cleared and
+ * filled with new data.
+ * </p><p>
+ * If the contents of the cursor change or become invalid, the old window must be closed
+ * (because it is owned by the cursor) and set to null.
+ * </p>
  */
 public abstract class AbstractWindowedCursor extends AbstractCursor {
+    /**
+     * The cursor window owned by this cursor.
+     */
+    protected CursorWindow mWindow;
+
     @Override
     public byte[] getBlob(int columnIndex) {
         checkPosition();
@@ -126,25 +140,44 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
     public CursorWindow getWindow() {
         return mWindow;
     }
-    
+
     /**
-     * Set a new cursor window to cursor, usually set a remote cursor window
-     * @param window cursor window
+     * Sets a new cursor window for the cursor to use.
+     * <p>
+     * The cursor takes ownership of the provided cursor window; the cursor window
+     * will be closed when the cursor is closed or when the cursor adopts a new
+     * cursor window.
+     * </p><p>
+     * If the cursor previously had a cursor window, then it is closed when the
+     * new cursor window is assigned.
+     * </p>
+     *
+     * @param window The new cursor window, typically a remote cursor window.
      */
     public void setWindow(CursorWindow window) {
-        if (mWindow != null) {
-            mWindow.close();
+        if (window != mWindow) {
+            closeWindow();
+            mWindow = window;
         }
-        mWindow = window;
     }
-    
+
+    /**
+     * Returns true if the cursor has an associated cursor window.
+     *
+     * @return True if the cursor has an associated cursor window.
+     */
     public boolean hasWindow() {
         return mWindow != null;
     }
 
     /**
-     * This needs be updated in {@link #onMove} by subclasses, and
-     * needs to be set to NULL when the contents of the cursor change.
+     * Closes the cursor window and sets {@link #mWindow} to null.
+     * @hide
      */
-    protected CursorWindow mWindow;
+    protected void closeWindow() {
+        if (mWindow != null) {
+            mWindow.close();
+            mWindow = null;
+        }
+    }
 }

@@ -33,7 +33,9 @@ public class CursorWrapper implements Cursor {
     }
 
     /**
-     * @return the wrapped cursor
+     * Gets the underlying cursor that is wrapped by this instance.
+     *
+     * @return The wrapped cursor.
      */
     public Cursor getWrappedCursor() {
         return mCursor;
