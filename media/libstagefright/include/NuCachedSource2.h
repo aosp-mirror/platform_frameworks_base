@@ -28,7 +28,10 @@ struct ALooper;
 struct PageCache;
 
 struct NuCachedSource2 : public DataSource {
-    NuCachedSource2(const sp<DataSource> &source);
+    NuCachedSource2(
+            const sp<DataSource> &source,
+            const char *cacheConfig = NULL,
+            bool disconnectAtHighwatermark = false);
 
     virtual status_t initCheck() const;
 
@@ -55,6 +58,11 @@ struct NuCachedSource2 : public DataSource {
     // is returned.
     status_t getEstimatedBandwidthKbps(int32_t *kbps);
     status_t setCacheStatCollectFreq(int32_t freqMs);
+
+    static void RemoveCacheSpecificHeaders(
+            KeyedVector<String8, String8> *headers,
+            String8 *cacheConfig,
+            bool *disconnectAtHighwatermark);
 
 protected:
     virtual ~NuCachedSource2();
@@ -104,6 +112,8 @@ private:
 
     // If the keep-alive interval is 0, keep-alives are disabled.
     int64_t mKeepAliveIntervalUs;
+
+    bool mDisconnectAtHighwatermark;
 
     void onMessageReceived(const sp<AMessage> &msg);
     void onFetch();
