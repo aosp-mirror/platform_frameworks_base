@@ -106,7 +106,7 @@ void TextLayoutCache::clear() {
  * Caching
  */
 sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
-            const jchar* text, jint count, jint dirFlags) {
+            const jchar* text, jint start, jint count, jint contextCount, jint dirFlags) {
     AutoMutex _l(mLock);
     nsecs_t startTime = 0;
     if (mDebugEnabled) {
@@ -114,7 +114,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
     }
 
     // Create the key
-    TextLayoutCacheKey key(paint, text, count, dirFlags);
+    TextLayoutCacheKey key(paint, text, start, count, contextCount, dirFlags);
 
     // Get value from cache if possible
     sp<TextLayoutCacheValue> value = mCache.get(key);
@@ -128,7 +128,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
         value = new TextLayoutCacheValue();
 
         // Compute advances and store them
-        value->computeValues(paint, text, count, dirFlags);
+        value->computeValues(paint, text, start, count, contextCount, dirFlags);
 
         nsecs_t endTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
@@ -166,10 +166,10 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
         } else {
             if (mDebugEnabled) {
                 LOGD("CACHE MISS: Calculated but not storing entry because it is too big "
-                        "with count=%d, "
+                        "with start=%d count=%d contextCount=%d, "
                         "entry size %d bytes, remaining space %d bytes"
                         " - Compute time in nanos: %lld - Text='%s'",
-                        count, size, mMaxSize - mSize, endTime,
+                        start, count, contextCount, size, mMaxSize - mSize, endTime,
                         String8(text, count).string());
             }
             value.clear();
@@ -184,10 +184,10 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             if (value->getElapsedTime() > 0) {
                 float deltaPercent = 100 * ((value->getElapsedTime() - elapsedTimeThruCacheGet)
                         / ((float)value->getElapsedTime()));
-                LOGD("CACHE HIT #%d with count=%d "
+                LOGD("CACHE HIT #%d with start=%d count=%d contextCount=%d"
                         "- Compute time in nanos: %d - "
                         "Cache get time in nanos: %lld - Gain in percent: %2.2f - Text='%s' ",
-                        mCacheHitCount, count,
+                        mCacheHitCount, start, count, contextCount,
                         value->getElapsedTime(), elapsedTimeThruCacheGet, deltaPercent,
                         String8(text, count).string());
             }
@@ -218,14 +218,14 @@ void TextLayoutCache::dumpCacheStats() {
 /**
  * TextLayoutCacheKey
  */
-TextLayoutCacheKey::TextLayoutCacheKey(): text(NULL), count(0),
+TextLayoutCacheKey::TextLayoutCacheKey(): text(NULL), start(0), count(0), contextCount(0),
         dirFlags(0), typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
         hinting(SkPaint::kNo_Hinting)  {
 }
 
-TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint,
-        const UChar* text, size_t count, int dirFlags) :
-            text(text), count(count),
+TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint, const UChar* text,
+        size_t start, size_t count, size_t contextCount, int dirFlags) :
+            text(text), start(start), count(count), contextCount(contextCount),
             dirFlags(dirFlags) {
     typeface = paint->getTypeface();
     textSize = paint->getTextSize();
@@ -238,7 +238,9 @@ TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint,
 TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
         text(NULL),
         textCopy(other.textCopy),
+        start(other.start),
         count(other.count),
+        contextCount(other.contextCount),
         dirFlags(other.dirFlags),
         typeface(other.typeface),
         textSize(other.textSize),
@@ -252,7 +254,13 @@ TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
 }
 
 int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs) {
-    int deltaInt = lhs.count - rhs.count;
+    int deltaInt = lhs.start - rhs.start;
+    if (deltaInt != 0) return (deltaInt);
+
+    deltaInt = lhs.count - rhs.count;
+    if (deltaInt != 0) return (deltaInt);
+
+    deltaInt = lhs.contextCount - rhs.contextCount;
     if (deltaInt != 0) return (deltaInt);
 
     if (lhs.typeface < rhs.typeface) return -1;
@@ -276,16 +284,16 @@ int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutC
     deltaInt = lhs.dirFlags - rhs.dirFlags;
     if (deltaInt) return (deltaInt);
 
-    return memcmp(lhs.getText(), rhs.getText(), lhs.count * sizeof(UChar));
+    return memcmp(lhs.getText(), rhs.getText(), lhs.contextCount * sizeof(UChar));
 }
 
 void TextLayoutCacheKey::internalTextCopy() {
-    textCopy.setTo(text, count);
+    textCopy.setTo(text, contextCount);
     text = NULL;
 }
 
 size_t TextLayoutCacheKey::getSize() {
-    return sizeof(TextLayoutCacheKey) + sizeof(UChar) * count;
+    return sizeof(TextLayoutCacheKey) + sizeof(UChar) * contextCount;
 }
 
 /**
@@ -304,29 +312,32 @@ uint32_t TextLayoutCacheValue::getElapsedTime() {
 }
 
 void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars,
-        size_t contextCount, int dirFlags) {
+        size_t start, size_t count, size_t contextCount, int dirFlags) {
     // Give a hint for advances, glyphs and log clusters vectors size
     mAdvances.setCapacity(contextCount);
     mGlyphs.setCapacity(contextCount);
-    mLogClusters.setCapacity(contextCount);
 
-    computeValuesWithHarfbuzz(paint, chars, contextCount, dirFlags,
-            &mAdvances, &mTotalAdvance, &mGlyphs, &mLogClusters);
+    computeValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+            &mAdvances, &mTotalAdvance, &mGlyphs);
 #if DEBUG_ADVANCES
-    LOGD("Advances - countextCount=%d - totalAdvance=%f", contextCount, mTotalAdvance);
+    LOGD("Advances - start=%d, count=%d, countextCount=%d, totalAdvance=%f", start, count,
+            contextCount, mTotalAdvance);
 #endif
 }
 
 size_t TextLayoutCacheValue::getSize() {
     return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvances.capacity() +
-            sizeof(jchar) * mGlyphs.capacity() + sizeof(unsigned short) * mLogClusters.capacity();
+            sizeof(jchar) * mGlyphs.capacity();
 }
 
-void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font,
-        FontData* fontData, SkPaint* paint, const UChar* chars, size_t start, size_t count,
-        size_t contextCount, bool isRTL) {
+void TextLayoutCacheValue::initShaperItem(HB_ShaperItem& shaperItem, HB_FontRec* font,
+        FontData* fontData, SkPaint* paint, const UChar* chars, size_t contextCount) {
+    // Zero the Shaper struct
+    memset(&shaperItem, 0, sizeof(shaperItem));
+
     font->klass = &harfbuzzSkiaClass;
     font->userData = 0;
+
     // The values which harfbuzzSkiaClass returns are already scaled to
     // pixel units, so we just set all these to one to disable further
     // scaling.
@@ -335,33 +346,13 @@ void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec
     font->x_scale = 1;
     font->y_scale = 1;
 
-    memset(shaperItem, 0, sizeof(*shaperItem));
-    shaperItem->font = font;
-    shaperItem->face = HB_NewFace(shaperItem->font, harfbuzzSkiaGetTable);
+    shaperItem.font = font;
+    shaperItem.face = HB_NewFace(shaperItem.font, harfbuzzSkiaGetTable);
 
-    shaperItem->kerning_applied = false;
+    // Reset kerning
+    shaperItem.kerning_applied = false;
 
-    // We cannot know, ahead of time, how many glyphs a given script run
-    // will produce. We take a guess that script runs will not produce more
-    // than twice as many glyphs as there are code points plus a bit of
-    // padding and fallback if we find that we are wrong.
-    createGlyphArrays(shaperItem, (contextCount + 2) * 2);
-
-    // Free memory for clusters if needed and recreate the clusters array
-    if (shaperItem->log_clusters) {
-        delete shaperItem->log_clusters;
-    }
-    shaperItem->log_clusters = new unsigned short[contextCount];
-
-    shaperItem->item.pos = start;
-    shaperItem->item.length = count;
-    shaperItem->item.bidiLevel = isRTL;
-
-    shaperItem->item.script = isRTL ? HB_Script_Arabic : HB_Script_Common;
-
-    shaperItem->string = chars;
-    shaperItem->stringLength = contextCount;
-
+    // Define font data
     fontData->typeFace = paint->getTypeface();
     fontData->textSize = paint->getTextSize();
     fontData->textSkewX = paint->getTextSkewX();
@@ -369,31 +360,50 @@ void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec
     fontData->flags = paint->getFlags();
     fontData->hinting = paint->getHinting();
 
-    shaperItem->font->userData = fontData;
+    shaperItem.font->userData = fontData;
+
+    // We cannot know, ahead of time, how many glyphs a given script run
+    // will produce. We take a guess that script runs will not produce more
+    // than twice as many glyphs as there are code points plus a bit of
+    // padding and fallback if we find that we are wrong.
+    createGlyphArrays(shaperItem, (contextCount + 2) * 2);
+
+    // Create log clusters array
+    shaperItem.log_clusters = new unsigned short[contextCount];
+
+    // Set the string properties
+    shaperItem.string = chars;
+    shaperItem.stringLength = contextCount;
 }
 
-void TextLayoutCacheValue::shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontRec* font,
-        FontData* fontData, SkPaint* paint, const UChar* chars, size_t start, size_t count,
-        size_t contextCount, bool isRTL) {
-    // Setup Harfbuzz Shaper
-    setupShaperItem(shaperItem, font, fontData, paint, chars, start, count,
-            contextCount, isRTL);
+void TextLayoutCacheValue::freeShaperItem(HB_ShaperItem& shaperItem) {
+    deleteGlyphArrays(shaperItem);
+    delete[] shaperItem.log_clusters;
+    HB_FreeFace(shaperItem.face);
+}
+
+void TextLayoutCacheValue::shapeRun(HB_ShaperItem& shaperItem, size_t start, size_t count,
+        bool isRTL) {
+    // Update Harfbuzz Shaper
+    shaperItem.item.pos = start;
+    shaperItem.item.length = count;
+    shaperItem.item.bidiLevel = isRTL;
+
+    shaperItem.item.script = isRTL ? HB_Script_Arabic : HB_Script_Common;
 
     // Shape
-    resetGlyphArrays(shaperItem);
-    while (!HB_ShapeItem(shaperItem)) {
+    while (!HB_ShapeItem(&shaperItem)) {
         // We overflowed our arrays. Resize and retry.
         // HB_ShapeItem fills in shaperItem.num_glyphs with the needed size.
         deleteGlyphArrays(shaperItem);
-        createGlyphArrays(shaperItem, shaperItem->num_glyphs << 1);
-        resetGlyphArrays(shaperItem);
+        createGlyphArrays(shaperItem, shaperItem.num_glyphs << 1);
     }
 }
 
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
-        size_t contextCount, int dirFlags,
+        size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-        Vector<jchar>* const outGlyphs, Vector<unsigned short>* const outLogClusters) {
+        Vector<jchar>* const outGlyphs) {
 
         UBiDiLevel bidiReq = 0;
         bool forceLTR = false;
@@ -408,13 +418,21 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
             case kBidi_Force_RTL: forceRTL = true; break; // every char is RTL
         }
 
+        HB_ShaperItem shaperItem;
+        HB_FontRec font;
+        FontData fontData;
+
+        // Initialize Harfbuzz Shaper
+        initShaperItem(shaperItem, &font, &fontData, paint, chars, contextCount);
+
         if (forceLTR || forceRTL) {
 #if DEBUG_GLYPHS
                     LOGD("computeValuesWithHarfbuzz -- forcing run with LTR=%d RTL=%d",
                             forceLTR, forceRTL);
 #endif
-            computeRunValuesWithHarfbuzz(paint, chars, 0, contextCount, contextCount, forceRTL,
-                    outAdvances, outTotalAdvance, outGlyphs, outLogClusters);
+            computeRunValuesWithHarfbuzz(shaperItem, paint,
+                    start, count, forceRTL,
+                    outAdvances, outTotalAdvance, outGlyphs);
         } else {
             UBiDi* bidi = ubidi_open();
             if (bidi) {
@@ -427,32 +445,49 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                     int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
                     size_t rc = ubidi_countRuns(bidi, &status);
 #if DEBUG_GLYPHS
-                    LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d", dirFlags, rc, paraDir);
+                    LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d",
+                            dirFlags, rc, paraDir);
 #endif
                     if (rc == 1 || !U_SUCCESS(status)) {
                         bool isRTL = (paraDir == 1);
 #if DEBUG_GLYPHS
                         LOGD("computeValuesWithHarfbuzz -- processing SINGLE run "
-                                "-- run-start=%d run-len=%d isRTL=%d", 0, contextCount, isRTL);
+                                "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
 #endif
-                        computeRunValuesWithHarfbuzz(paint, chars, 0, contextCount, contextCount,
-                                isRTL, outAdvances, outTotalAdvance, outGlyphs, outLogClusters);
+                        computeRunValuesWithHarfbuzz(shaperItem, paint,
+                                start, count, isRTL,
+                                outAdvances, outTotalAdvance, outGlyphs);
                     } else {
+                        int32_t end = start + count;
                         for (size_t i = 0; i < rc; ++i) {
                             int32_t startRun;
                             int32_t lengthRun;
                             UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
 
+                            if (startRun >= end) {
+                                continue;
+                            }
+                            int32_t endRun = startRun + lengthRun;
+                            if (endRun <= start) {
+                                continue;
+                            }
+                            if (startRun < start) {
+                                startRun = start;
+                            }
+                            if (endRun > end) {
+                                endRun = end;
+                            }
+
+                            lengthRun = endRun - startRun;
                             bool isRTL = (runDir == UBIDI_RTL);
                             jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
                             LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d isRTL=%d",
                                     startRun, lengthRun, isRTL);
 #endif
-                            computeRunValuesWithHarfbuzz(paint, chars, startRun,
-                                    lengthRun, contextCount, isRTL,
-                                    outAdvances, &runTotalAdvance,
-                                    outGlyphs, outLogClusters);
+                            computeRunValuesWithHarfbuzz(shaperItem, paint,
+                                    startRun, lengthRun, isRTL,
+                                    outAdvances, &runTotalAdvance, outGlyphs);
 
                             *outTotalAdvance += runTotalAdvance;
                         }
@@ -464,12 +499,17 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                 bool isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
 #if DEBUG_GLYPHS
                 LOGD("computeValuesWithHarfbuzz -- cannot run BiDi, considering a SINGLE Run "
-                        "-- run-start=%d run-len=%d isRTL=%d", 0, contextCount, isRTL);
+                        "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
 #endif
-                computeRunValuesWithHarfbuzz(paint, chars, 0, contextCount, contextCount, isRTL,
-                        outAdvances, outTotalAdvance, outGlyphs, outLogClusters);
+                computeRunValuesWithHarfbuzz(shaperItem, paint,
+                        start, count, isRTL,
+                        outAdvances, outTotalAdvance, outGlyphs);
             }
         }
+
+        // Cleaning
+        freeShaperItem(shaperItem);
+
 #if DEBUG_GLYPHS
         LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", outGlyphs->size());
 #endif
@@ -484,17 +524,12 @@ static void logGlyphs(HB_ShaperItem shaperItem) {
     }
 }
 
-void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
-        size_t start, size_t count, size_t contextCount, bool isRTL,
+void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(HB_ShaperItem& shaperItem, SkPaint* paint,
+        size_t start, size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-        Vector<jchar>* const outGlyphs, Vector<unsigned short>* const outLogClusters) {
+        Vector<jchar>* const outGlyphs) {
 
-    HB_ShaperItem shaperItem;
-    HB_FontRec font;
-    FontData fontData;
-
-    shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, chars, start, count,
-            contextCount, isRTL);
+    shapeRun(shaperItem, start, count, isRTL);
 
 #if DEBUG_GLYPHS
     LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
@@ -511,10 +546,6 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
 #endif
         outAdvances->insertAt(0, outAdvances->size(), count);
         *outTotalAdvance = 0;
-
-        // Cleaning
-        deleteGlyphArrays(&shaperItem);
-        HB_FreeFace(shaperItem.face);
         return;
     }
 
@@ -553,103 +584,21 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
             outGlyphs->add(glyph);
         }
     }
-
-    // Get LogClusters
-    if (outLogClusters) {
-        size_t countLogClusters = outLogClusters->size();
-        for (size_t i = 0; i < count; i++) {
-            // As there may be successive runs, we need to shift the log clusters
-            unsigned short logCluster = shaperItem.log_clusters[i] + countLogClusters;
-#if DEBUG_GLYPHS
-            LOGD("HARFBUZZ  -- logCluster[%d] relative=%d - absolute=%d", i, shaperItem.log_clusters[i], logCluster);
-#endif
-            outLogClusters->add(logCluster);
-        }
-    }
-
-    // Cleaning
-    deleteGlyphArrays(&shaperItem);
-    HB_FreeFace(shaperItem.face);
 }
 
-void TextLayoutCacheValue::deleteGlyphArrays(HB_ShaperItem* shaperItem) {
-    delete[] shaperItem->glyphs;
-    delete[] shaperItem->attributes;
-    delete[] shaperItem->advances;
-    delete[] shaperItem->offsets;
+void TextLayoutCacheValue::deleteGlyphArrays(HB_ShaperItem& shaperItem) {
+    delete[] shaperItem.glyphs;
+    delete[] shaperItem.attributes;
+    delete[] shaperItem.advances;
+    delete[] shaperItem.offsets;
 }
 
-void TextLayoutCacheValue::createGlyphArrays(HB_ShaperItem* shaperItem, int size) {
-    shaperItem->glyphs = new HB_Glyph[size];
-    shaperItem->attributes = new HB_GlyphAttributes[size];
-    shaperItem->advances = new HB_Fixed[size];
-    shaperItem->offsets = new HB_FixedPoint[size];
-    shaperItem->num_glyphs = size;
-}
-
-void TextLayoutCacheValue::resetGlyphArrays(HB_ShaperItem* shaperItem) {
-    int size = shaperItem->num_glyphs;
-    // All the types here don't have pointers. It is safe to reset to
-    // zero unless Harfbuzz breaks the compatibility in the future.
-    memset(shaperItem->glyphs, 0, size * sizeof(shaperItem->glyphs[0]));
-    memset(shaperItem->attributes, 0, size * sizeof(shaperItem->attributes[0]));
-    memset(shaperItem->advances, 0, size * sizeof(shaperItem->advances[0]));
-    memset(shaperItem->offsets, 0, size * sizeof(shaperItem->offsets[0]));
-}
-
-void TextLayoutCacheValue::getAdvances(size_t start, size_t count, jfloat* outAdvances) const {
-    memcpy(outAdvances, mAdvances.array() + start, count * sizeof(jfloat));
-#if DEBUG_ADVANCES
-    LOGD("getAdvances - start=%d count=%d", start, count);
-    for (size_t i = 0; i < count; i++) {
-        LOGD("  adv[%d] = %f", i, outAdvances[i]);
-    }
-#endif
-}
-
-jfloat TextLayoutCacheValue::getTotalAdvance(size_t start, size_t count) const {
-    jfloat outTotalAdvance = 0;
-    for (size_t i = start; i < start + count; i++) {
-        outTotalAdvance += mAdvances[i];
-    }
-#if DEBUG_ADVANCES
-    LOGD("getTotalAdvance - start=%d count=%d - total=%f", start, count, outTotalAdvance);
-#endif
-     return outTotalAdvance;
-}
-
-void TextLayoutCacheValue::getGlyphsIndexAndCount(size_t start, size_t count, size_t* outStartIndex,
-        size_t* outGlyphsCount) const {
-    *outStartIndex = 0;
-    if (count == 0) {
-        *outGlyphsCount = 0;
-        return;
-    }
-    *outStartIndex = mLogClusters[start];
-    size_t endIndex = (start + count >= mAdvances.size()) ?
-            mGlyphs.size() : mLogClusters[start + count];
-    *outGlyphsCount = endIndex - *outStartIndex;
-#if DEBUG_GLYPHS
-    LOGD("getGlyphsIndexes - start=%d count=%d - startIndex=%d count=%d", start, count,
-            *outStartIndex, *outGlyphsCount);
-    for(size_t i = 0; i < mGlyphs.size(); i++) {
-        LOGD("getGlyphs - all - glyph[%d] = %d", i, mGlyphs[i]);
-    }
-    for(size_t i = 0; i < mAdvances.size(); i++) {
-        LOGD("getGlyphs - all - logcl[%d] = %d", i, mLogClusters[i]);
-    }
-#endif
-}
-
-const jchar* TextLayoutCacheValue::getGlyphs(size_t startIndex, size_t count) {
-    const jchar* glyphs = mGlyphs.array() + startIndex;
-#if DEBUG_GLYPHS
-    LOGD("getGlyphs - with startIndex = %d  count = %d", startIndex, count);
-    for (size_t i = 0; i < count; i++) {
-        LOGD("getGlyphs - result - glyph[%d] = %d", i, glyphs[i]);
-    }
-#endif
-    return glyphs;
+void TextLayoutCacheValue::createGlyphArrays(HB_ShaperItem& shaperItem, int size) {
+    shaperItem.glyphs = new HB_Glyph[size];
+    shaperItem.attributes = new HB_GlyphAttributes[size];
+    shaperItem.advances = new HB_Fixed[size];
+    shaperItem.offsets = new HB_FixedPoint[size];
+    shaperItem.num_glyphs = size;
 }
 
 } // namespace android
