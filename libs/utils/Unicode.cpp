@@ -542,11 +542,7 @@ ssize_t utf8_to_utf16_length(const uint8_t* u8str, size_t u8len)
     return u16measuredLen;
 }
 
-/**
- * Convert a UTF-8 string to UTF-16. The destination UTF-16 buffer must have
- * space for NULL at the end.
- */
-void utf8_to_utf16(const uint8_t* u8str, size_t u8len, char16_t* u16str)
+char16_t* utf8_to_utf16_no_null_terminator(const uint8_t* u8str, size_t u8len, char16_t* u16str)
 {
     const uint8_t* const u8end = u8str + u8len;
     const uint8_t* u8cur = u8str;
@@ -569,7 +565,12 @@ void utf8_to_utf16(const uint8_t* u8str, size_t u8len, char16_t* u16str)
 
         u8cur += u8len;
     }
-    *u16cur = 0;
+    return u16cur;
+}
+
+void utf8_to_utf16(const uint8_t* u8str, size_t u8len, char16_t* u16str) {
+    char16_t* end = utf8_to_utf16_no_null_terminator(u8str, u8len, u16str);
+    *end = 0;
 }
 
 }
