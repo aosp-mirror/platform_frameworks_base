@@ -1007,6 +1007,10 @@ public class Camera {
      *     camera.setDisplayOrientation(result);
      * }
      * </pre>
+     *
+     * <p>Starting from API level 14, this method can be called when preview is
+     * active.
+     *
      * @param degrees the angle that the picture will be rotated clockwise.
      *                Valid values are 0, 90, 180, and 270. The starting
      *                position is 0 (landscape).

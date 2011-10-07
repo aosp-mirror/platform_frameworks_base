@@ -849,16 +849,16 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
     if (result != NO_ERROR) return result;
 
     if (cmd == CAMERA_CMD_SET_DISPLAY_ORIENTATION) {
-        // The orientation cannot be set during preview.
-        if (mHardware->previewEnabled()) {
-            return INVALID_OPERATION;
-        }
         // Mirror the preview if the camera is front-facing.
         orientation = getOrientation(arg1, mCameraFacing == CAMERA_FACING_FRONT);
         if (orientation == -1) return BAD_VALUE;
 
         if (mOrientation != orientation) {
             mOrientation = orientation;
+            if (mPreviewWindow != 0) {
+                native_window_set_buffers_transform(mPreviewWindow.get(),
+                        mOrientation);
+            }
         }
         return OK;
     } else if (cmd == CAMERA_CMD_ENABLE_SHUTTER_SOUND) {
