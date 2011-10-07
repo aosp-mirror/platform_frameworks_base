@@ -77,53 +77,54 @@ class CallbackProxy extends Handler {
     // Used to call startActivity during url override.
     private final Context mContext;
 
-    // Message Ids
-    private static final int PAGE_STARTED                        = 100;
-    private static final int RECEIVED_ICON                       = 101;
-    private static final int RECEIVED_TITLE                      = 102;
-    private static final int OVERRIDE_URL                        = 103;
-    private static final int AUTH_REQUEST                        = 104;
-    private static final int SSL_ERROR                           = 105;
-    private static final int PROGRESS                            = 106;
-    private static final int UPDATE_VISITED                      = 107;
-    private static final int LOAD_RESOURCE                       = 108;
-    private static final int CREATE_WINDOW                       = 109;
-    private static final int CLOSE_WINDOW                        = 110;
-    private static final int SAVE_PASSWORD                       = 111;
-    private static final int JS_ALERT                            = 112;
-    private static final int JS_CONFIRM                          = 113;
-    private static final int JS_PROMPT                           = 114;
-    private static final int JS_UNLOAD                           = 115;
-    private static final int ASYNC_KEYEVENTS                     = 116;
-    private static final int DOWNLOAD_FILE                       = 118;
-    private static final int REPORT_ERROR                        = 119;
-    private static final int RESEND_POST_DATA                    = 120;
-    private static final int PAGE_FINISHED                       = 121;
-    private static final int REQUEST_FOCUS                       = 122;
-    private static final int SCALE_CHANGED                       = 123;
-    private static final int RECEIVED_CERTIFICATE                = 124;
-    private static final int SWITCH_OUT_HISTORY                  = 125;
-    private static final int EXCEEDED_DATABASE_QUOTA             = 126;
-    private static final int REACHED_APPCACHE_MAXSIZE            = 127;
-    private static final int JS_TIMEOUT                          = 128;
-    private static final int ADD_MESSAGE_TO_CONSOLE              = 129;
-    private static final int GEOLOCATION_PERMISSIONS_SHOW_PROMPT = 130;
-    private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT = 131;
-    private static final int RECEIVED_TOUCH_ICON_URL             = 132;
-    private static final int GET_VISITED_HISTORY                 = 133;
-    private static final int OPEN_FILE_CHOOSER                   = 134;
-    private static final int ADD_HISTORY_ITEM                    = 135;
-    private static final int HISTORY_INDEX_CHANGED               = 136;
-    private static final int AUTH_CREDENTIALS                    = 137;
-    private static final int SET_INSTALLABLE_WEBAPP              = 138;
-    private static final int NOTIFY_SEARCHBOX_LISTENERS          = 139;
-    private static final int AUTO_LOGIN                          = 140;
-    private static final int CLIENT_CERT_REQUEST                 = 141;
-    private static final int SEARCHBOX_IS_SUPPORTED_CALLBACK     = 142;
-    private static final int SEARCHBOX_DISPATCH_COMPLETE_CALLBACK= 143;
+    // Message IDs
+    private static final int PAGE_STARTED                         = 100;
+    private static final int RECEIVED_ICON                        = 101;
+    private static final int RECEIVED_TITLE                       = 102;
+    private static final int OVERRIDE_URL                         = 103;
+    private static final int AUTH_REQUEST                         = 104;
+    private static final int SSL_ERROR                            = 105;
+    private static final int PROGRESS                             = 106;
+    private static final int UPDATE_VISITED                       = 107;
+    private static final int LOAD_RESOURCE                        = 108;
+    private static final int CREATE_WINDOW                        = 109;
+    private static final int CLOSE_WINDOW                         = 110;
+    private static final int SAVE_PASSWORD                        = 111;
+    private static final int JS_ALERT                             = 112;
+    private static final int JS_CONFIRM                           = 113;
+    private static final int JS_PROMPT                            = 114;
+    private static final int JS_UNLOAD                            = 115;
+    private static final int ASYNC_KEYEVENTS                      = 116;
+    private static final int DOWNLOAD_FILE                        = 118;
+    private static final int REPORT_ERROR                         = 119;
+    private static final int RESEND_POST_DATA                     = 120;
+    private static final int PAGE_FINISHED                        = 121;
+    private static final int REQUEST_FOCUS                        = 122;
+    private static final int SCALE_CHANGED                        = 123;
+    private static final int RECEIVED_CERTIFICATE                 = 124;
+    private static final int SWITCH_OUT_HISTORY                   = 125;
+    private static final int EXCEEDED_DATABASE_QUOTA              = 126;
+    private static final int REACHED_APPCACHE_MAXSIZE             = 127;
+    private static final int JS_TIMEOUT                           = 128;
+    private static final int ADD_MESSAGE_TO_CONSOLE               = 129;
+    private static final int GEOLOCATION_PERMISSIONS_SHOW_PROMPT  = 130;
+    private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT  = 131;
+    private static final int RECEIVED_TOUCH_ICON_URL              = 132;
+    private static final int GET_VISITED_HISTORY                  = 133;
+    private static final int OPEN_FILE_CHOOSER                    = 134;
+    private static final int ADD_HISTORY_ITEM                     = 135;
+    private static final int HISTORY_INDEX_CHANGED                = 136;
+    private static final int AUTH_CREDENTIALS                     = 137;
+    private static final int SET_INSTALLABLE_WEBAPP               = 138;
+    private static final int NOTIFY_SEARCHBOX_LISTENERS           = 139;
+    private static final int AUTO_LOGIN                           = 140;
+    private static final int CLIENT_CERT_REQUEST                  = 141;
+    private static final int SEARCHBOX_IS_SUPPORTED_CALLBACK      = 142;
+    private static final int SEARCHBOX_DISPATCH_COMPLETE_CALLBACK = 143;
+    private static final int PROCEEDED_AFTER_SSL_ERROR            = 144;
 
     // Message triggered by the client to resume execution
-    private static final int NOTIFY                              = 200;
+    private static final int NOTIFY                               = 200;
 
     // Result transportation object for returning results across thread
     // boundaries.
@@ -346,6 +347,13 @@ class CallbackProxy extends Handler {
                     mWebViewClient.onReceivedSslError(mWebView,
                             (SslErrorHandler) map.get("handler"),
                             (SslError) map.get("error"));
+                }
+                break;
+
+            case PROCEEDED_AFTER_SSL_ERROR:
+                if (mWebViewClient != null) {
+                    mWebViewClient.onProceededAfterSslError(mWebView,
+                            (SslError) msg.obj);
                 }
                 break;
 
@@ -1021,6 +1029,15 @@ class CallbackProxy extends Handler {
         map.put("handler", handler);
         map.put("error", error);
         msg.obj = map;
+        sendMessage(msg);
+    }
+
+    public void onProceededAfterSslError(SslError error) {
+        if (mWebViewClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(PROCEEDED_AFTER_SSL_ERROR);
+        msg.obj = error;
         sendMessage(msg);
     }
 

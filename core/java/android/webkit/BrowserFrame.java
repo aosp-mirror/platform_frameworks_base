@@ -471,6 +471,7 @@ class BrowserFrame extends Handler {
 
     /**
      * We have received an SSL certificate for the main top-level page.
+     * Used by the Android HTTP stack only.
      */
     void certificate(SslCertificate certificate) {
         if (mIsMainFrame) {
@@ -1178,6 +1179,7 @@ class BrowserFrame extends Handler {
 
         if (SslCertLookupTable.getInstance().isAllowed(sslError)) {
             nativeSslCertErrorProceed(handle);
+            mCallbackProxy.onProceededAfterSslError(sslError);
             return;
         }
 
@@ -1267,7 +1269,8 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Called by JNI when we load a page over SSL.
+     * Called by JNI when we recieve a certificate for the page's main resource.
+     * Used by the Chromium HTTP stack only.
      */
     private void setCertificate(byte cert_der[]) {
         try {
