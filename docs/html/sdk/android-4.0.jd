@@ -1,0 +1,1740 @@
+page.title=Android 4.0 Platform
+sdk.platform.version=4.0
+sdk.platform.apiLevel=14
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-diff">API Differences Report</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/14/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+
+<p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android 4.0 (Ice Cream Sandwich) is a major platform release that adds new
+capabilities for users and developers. The sections below provide an overview
+of the new features and developer APIs.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes
+an Android library and system image, as well as a set of emulator skins and
+more. The downloadable platform includes no external libraries.</p>
+
+<p>To start developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK. For more
+information, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
+
+<p>For a high-level introduction to the new user and developer features in Android 4.0, see the
+<a href="http://developer.android.com/sdk/android-4.0-highlights.html">Platform Highlights</a>.</p>
+
+<p class="note"><strong>Reminder:</strong> If you've already published an
+Android application, please test your application on Android {@sdkPlatformVersion} as
+soon as possible to be sure your application provides the best
+experience possible on the latest Android-powered devices.</p>
+
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>To determine what revision of the Android {@sdkPlatformVersion} platform you
+have installed, refer to the "Installed Packages" listing in the Android SDK Manager.</p>
+
+
+<div class="toggle-content opened" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+    Android {@sdkPlatformVersion}, Revision 1</a> <em>(October 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Initial release. SDK Tools r14 or higher is recommended.</dt>
+</dl>
+
+  </div>
+</div>
+
+
+<h2 id="api">API Overview</h2>
+
+<p>The sections below provide a technical overview of new APIs in Android 4.0.</p>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    <strong>Table of Contents</strong>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <ol class="toc" style="margin-left:-1em">
+      <li><a href="#Contacts">Contacts</a></li>
+      <li><a href="#Calendar">Calendar</a></li>
+      <li><a href="#Camera">Camera</a></li>
+      <li><a href="#Multimedia">Multimedia</a></li>
+      <li><a href="#Bluetooth">Bluetooth</a></li>
+      <li><a href="#AndroidBeam">Android Beam (NDEF Push with NFC)</a></li>
+      <li><a href="#P2pWiFi">Peer-to-peer Wi-Fi</a></li>
+      <li><a href="#NetworkData">Network Data</a></li>
+      <li><a href="#Sensors">Device Sensors</a></li>
+      <li><a href="#Renderscript">Renderscript</a></li>
+      <li><a href="#A11y">Accessibility</a></li>
+      <li><a href="#Enterprise">Enterprise</a></li>
+      <li><a href="#Voicemail">Voicemail</a></li>
+      <li><a href="#SpellChecker">Spell Checker Services</a></li>
+      <li><a href="#TTS">Text-to-speech Engines</a></li>
+      <li><a href="#ActionBar">Action Bar</a></li>
+      <li><a href="#UI">User Interface and Views</a></li>
+      <li><a href="#Properties">Properties</a></li>
+      <li><a href="#HwAccel">Hardware Acceleration</a></li>
+      <li><a href="#Jni">JNI Changes</a></li>
+      <li><a href="#WebKit">WebKit</a></li>
+      <li><a href="#Permissions">Permissions</a></li>
+      <li><a href="#DeviceFeatures">Device Features</a></li>
+    </ol>
+  </div>
+</div>
+
+
+
+
+
+<h3 id="Contacts">Contacts</h3>
+
+<p>The Contact APIs that are defined by the {@link android.provider.ContactsContract} provider have
+been extended to support new features such as a personal profile for the device owner, large contact
+photos, and the ability for users to invite individual contacts to social networks that are
+installed on the device.</p>
+
+
+<h4>User Profile</h4>
+
+<p>Android now includes a personal profile that represents the device owner, as defined by the
+{@link
+android.provider.ContactsContract.Profile} table.  Social apps that maintain a user identity     can
+contribute to the user's profile data by creating a new {@link
+android.provider.ContactsContract.RawContacts} entry within the {@link
+android.provider.ContactsContract.Profile}. That is, raw contacts that represent the device user do
+not belong in the traditional raw contacts table defined by the {@link
+android.provider.ContactsContract.RawContacts} Uri; instead, you must add a profile raw contact in
+the table at {@link android.provider.ContactsContract.Profile#CONTENT_RAW_CONTACTS_URI}. Raw
+contacts in this table are then aggregated into the single user-visible profile information.</p>
+
+<p>Adding a new raw contact for the profile requires the {@link
+android.Manifest.permission#WRITE_PROFILE} permission. Likewise, in order to read from the profile
+table, you must request the {@link android.Manifest.permission#READ_PROFILE} permission. However,
+reading the user profile should not be required by most apps, even when contributing data to the
+profile. Reading the user profile is a sensitive permission and users will be very skeptical of apps
+that request reading their profile information.</p>
+
+<h4>Large photos</h4>
+
+<p>Android now supports high resolution photos for contacts. Now, when you push a photo into a
+contact
+record, the system processes it into both a 96x96 thumbnail (as it has previously) and a 256x256
+"display photo" stored in a new file-based photo store (the exact dimensions that the system chooses
+may vary in the future). You can add a large photo to a contact by putting a large photo in the
+usual {@link android.provider.ContactsContract.CommonDataKinds.Photo#PHOTO} column of a data row,
+which the system will then process into the appropriate thumbnail and display photo records.</p>
+
+<h4>Invite Intent</h4>
+
+<p>The {@link android.provider.ContactsContract.Intents#INVITE_CONTACT} intent action allows you to
+invoke an action that indicates the user wants to add a contact to a social network that understand
+this intent and use it to invite the contact specified in the contact to that social network.</p> 
+
+<p>Apps that use a sync adapter to provide information about contacts can register with the system
+to
+receive the invite intent when there’s an opportunity for the user to “invite” a contact to the
+app’s social network (such as from a contact card in the People app). To receive the invite intent,
+you simply need to add the {@code inviteContactActivity} attribute to your app’s XML sync
+configuration file, providing a fully-qualified name of the activity that the system should start
+when the user wants to “invite” a contact in your social network. The activity that starts can then
+retrieve the URI for the contact in question from the intent’s data and perform the necessary work
+to
+invite that contact to the network or add the person to the user’s connections.</p>
+
+<h4>Contact Usage Feedback</h4>
+
+<p>The new {@link android.provider.ContactsContract.DataUsageFeedback} APIs allow you to  help track
+how often the user uses particular methods of contacting people, such as how often the user uses
+each phone number or e-mail address. This information helps improve the ranking for each contact
+method associated with each person and provide such contact methods as suggestions.</p>
+
+
+
+
+
+<h3 id="Calendar">Calendar</h3>
+
+<p>The new calendar API allows you to access and modify the user’s calendars and events. The
+calendar
+APIs are provided with the {@link android.provider.CalendarContract} provider. Using the calendar
+provider, you can:</p>
+<ul>
+<li>Read, write, and modify calendars.</li>
+<li>Add and modify events, attendees, reminders, and alarms.</li>
+</ul>
+
+<p>{@link android.provider.CalendarContract} defines the data model of calendar and event-related
+information. All of the user’s calendar data is stored in a number of tables defined by subclasses
+of {@link android.provider.CalendarContract}:</p>
+
+<ul>
+<li>The {@link android.provider.CalendarContract.Calendars} table holds the calendar-specific
+information. Each row in this table contains the details for a single calendar, such as the name,
+color, sync information, and so on.</li>
+
+<li>The {@link android.provider.CalendarContract.Events} table holds event-specific information.
+Each
+row in this table has the information for a single event. It contains information such as event
+title, location, start time, end time, and so on. The event can occur one-time or can recur multiple
+times. Attendees, reminders, and extended properties are stored in separate tables and reference the
+event’s _ID to link them with the event.</li>
+
+<li>The {@link android.provider.CalendarContract.Instances} table holds the start and end time for
+occurrences of an event. Each row in this table represents a single occurrence. For one-time events
+there is a one-to-one mapping of instances to events. For recurring events, multiple rows are
+automatically generated to correspond to the multiple occurrences of that event.</li>
+
+<li>The {@link android.provider.CalendarContract.Attendees} table holds the event attendee or guest
+information. Each row represents a single guest of an event. It specifies the type of guest the
+person is and the person’s attendance response for the event.</li>
+
+<li>The {@link android.provider.CalendarContract.Reminders} table holds the alert/notification data.
+Each row represents a single alert for an event. An event can have multiple reminders. The number of
+reminders per event is specified in MAX_REMINDERS, which is set by the Sync Adapter that owns the
+given calendar. Reminders are specified in minutes before the event and have a type.</li>
+
+<li>The {@link android.provider.CalendarContract.ExtendedProperties} table hold opaque data fields
+used
+by the sync adapter. The provider takes no action with items in this table except to delete them
+when their related events are deleted.</li>
+</ul>
+
+<p>To access a user’s calendar data with the calendar provider, your application must request
+permission from the user by declaring <uses-permission
+android:name="android.permission.READ_CALENDAR" /> (for read access) and <uses-permission
+android:name="android.permission.WRITE_CALENDAR" /> (for write access) in their manifest files.</p>
+
+<p>However, if all you want to do is add an event to the user’s calendar, you can instead use an
+INSERT
+{@link android.content.Intent} to start an activity in the Calendar app that creates new events.
+Using the intent does not require the WRITE_CALENDAR permission and you can specify the {@link
+android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME} and {@link
+android.provider.CalendarContract#EXTRA_EVENT_END_TIME} extra fields to pre-populate the form with
+the time of the event. The values for these times must be in milliseconds from the epoch. You must
+also specify {@code “vnd.android.cursor.item/event”} as the intent type.</p>
+
+
+
+
+
+<h3 id="Camera">Camera</h3>
+
+<p>The {@link android.hardware.Camera} APIs now support face detection and control for metering and
+focus areas.</p>
+
+<h4>Face Detection</h4>
+
+<p>Camera apps can now enhance their abilities with Android’s face detection software, which not
+only
+detects the face of a subject, but also specific facial features, such as the eyes and mouth. </p>
+
+<p>To detect faces in your camera application, you must register a {@link
+android.hardware.Camera.FaceDetectionListener} by calling {@link
+android.hardware.Camera#setFaceDetectionListener setFaceDetectionListener()}. You can then start
+your camera surface and start  detecting faces by calling {@link
+android.hardware.Camera#startFaceDetection}.</p>
+
+<p>When the system detects a face, it calls the {@link
+android.hardware.Camera.FaceDetectionListener#onFaceDetection onFaceDetection()} callback in your
+implementation of {@link android.hardware.Camera.FaceDetectionListener}, including an array of
+{@link android.hardware.Camera.Face} objects.</p>
+
+<p>An instance of the {@link android.hardware.Camera.Face} class provides various information about
+the
+face detected by the camera, including:</p>
+<ul>
+<li>A {@link android.graphics.Rect} that specifies the bounds of the face, relative to the camera's
+current field of view</li>
+<li>An integer betwen 0 and 100 that indicates how confident the system is that the object is a
+human
+face</li>
+<li>A unique ID so you can track multiple faces</li>
+<li>Several {@link android.graphics.Point} objects that indicate where the eyes and mouth are
+located</li>
+</ul>
+
+  
+<h4>Focus and Metering Areas</h4>
+
+<p>Camera apps can now control the areas that the camera uses for focus and when metering white
+balance
+and auto-exposure (when supported by the hardware). Both features use the new {@link
+android.hardware.Camera.Area} class to specify the region of the camera’s current view that should
+be focused or metered. An instance of the {@link android.hardware.Camera.Area} class defines the
+bounds of the area with a {@link android.graphics.Rect} and the weight of the
+area&mdash;representing the level of importance of that area, relative to other areas in
+consideration&mdash;with an integer.</p>
+
+<p>Before setting either a focus area or metering area, you should first call {@link
+android.hardware.Camera.Parameters#getMaxNumFocusAreas} or {@link
+android.hardware.Camera.Parameters#getMaxNumMeteringAreas}, respectively. If these return zero, then
+the device does not support the respective feature. </p>
+
+<p>To specify the focus or metering areas to use, simply call {@link
+android.hardware.Camera.Parameters#setFocusAreas setFocusAreas()} or {@link
+android.hardware.Camera.Parameters#setFocusAreas setMeteringAreas()}. Each take a {@link
+java.util.List} of {@link android.hardware.Camera.Area} objects that indicate the areas to consider
+for focus or metering. For example, you might implement a feature that allows the user to set the
+focus area by touching an area of the preview, which you then translate to an {@link
+android.hardware.Camera.Area} object and set the focus to that spot. The focus or exposure in that
+area will continually update as the scene in the area changes.</p>
+
+
+<h4>Other Camera Features</h4>
+<ul>
+<li>Capture photos during video recording
+While recording video, you can now call {@link android.hardware.Camera#takePicture takePicture()} to
+save a photo without interrupting the video session. Before doing so, you should call {@link
+android.hardware.Camera.Parameters#isVideoSnapshotSupported} to be sure the hardware supports
+it.</li>
+
+<li>Lock auto exposure and white balance with {@link
+android.hardware.Camera.Parameters#setAutoExposureLock setAutoExposureLock()} and {@link
+android.hardware.Camera.Parameters#setAutoWhiteBalanceLock setAutoWhiteBalanceLock()}, to prevent
+these properties from changing.</li>
+</ul>
+
+<h4>Camera Broadcast Intents</h4>
+
+<ul>
+<li>{@link android.hardware.Camera#ACTION_NEW_PICTURE Camera.ACTION_NEW_PICTURE} 
+This indicates that the user has captured a new photo. The built-in camera app invokes this
+broadcast after a photo is captured and third-party camera apps should also broadcast this intent
+after capturing a photo.</li>
+<li>{@link android.hardware.Camera#ACTION_NEW_VIDEO Camera.ACTION_NEW_VIDEO}
+This indicates that the user has captured a new video. The built-in camera app invokes this
+broadcast after a video is recorded and third-party camera apps should also broadcast this intent
+after capturing a video.</li>
+</ul>
+
+  
+  
+
+  
+<h3 id="Multimedia">Multimedia</h3>
+
+<p>Android 4.0 adds several new APIs for applications that interact with media such as photos,
+videos,
+and music.</p>
+
+
+<h4>Media Player</h4>
+
+<ul>
+<li>Streaming online media from {@link android.media.MediaPlayer} now requires {@link
+android.Manifest.permission#INTERNET} permission. If you use {@link android.media.MediaPlayer} to
+play content from the internet, be sure to add the {@link android.Manifest.permission#INTERNET}
+permission or else your media playback will not work beginning with Android 4.0.</li>
+<li>{@link android.media.MediaPlayer#setSurface(Surface) setSurface()} allows you define a {@link
+android.view.Surface} to behave as the video sink.</li>
+<li>{@link android.media.MediaPlayer#setDataSource(Context,Uri,Map) setDataSource()} allows you to
+send additional HTTP headers with your request, which can be useful for HTTP(S) live streaming</li>
+<li>HTTP(S) live streaming now respects HTTP cookies across requests</li>
+</ul>
+
+<h4>Media Type Support</h4>
+
+<p>Android 4.0 adds support for:</p>
+<ul>
+<li>HTTP/HTTPS live streaming protocol version 3 </li>
+<li>ADTS raw AAC audio encoding</li>
+<li>WEBP images</li>
+<li>Matroska video</li>
+</ul>
+<p>For more info, see <a href=”{@docRoot}guide/appendix/media-formats.html”>Supported Media
+Formats</a>.</p>
+
+
+<h4>Remote Control Client</h4>
+
+<p>The new {@link android.media.RemoteControlClient} allows media players to enable playback
+controls
+from remote control clients such as the device lock screen. Media players can also expose
+information about the media currently playing for display on the remote control, such as track
+information and album art.</p>
+
+<p>To enable remote control clients for your media player, instantiate a {@link
+android.media.RemoteControlClient} with a {@link android.app.PendingIntent} that broadcasts {@link
+android.content.Intent#ACTION_MEDIA_BUTTON}. The intent must also declare the explicit {@link
+android.content.BroadcastReceiver} component in your app that handles the {@link
+android.content.Intent#ACTION_MEDIA_BUTTON} event.</p>
+
+<p>To declare which media control inputs your player can handle, you must call {@link
+android.media.RemoteControlClient#setTransportControlFlags setTransportControlFlags()} on your
+{@link android.media.RemoteControlClient}, passing a set of {@code FLAG_KEY_MEDIA_*} flags, such as
+{@link android.media.RemoteControlClient#FLAG_KEY_MEDIA_PREVIOUS} and {@link
+android.media.RemoteControlClient#FLAG_KEY_MEDIA_NEXT}.</p>
+
+<p>You must then register your {@link android.media.RemoteControlClient} by passing it to {@link
+android.media.AudioManager#registerRemoteControlClient MediaManager.registerRemoteControlClient()}.
+Once registered, the broadcast receiver you declared when you instantiated the {@link
+android.media.RemoteControlClient} will receive {@link android.content.Intent#ACTION_MEDIA_BUTTON}
+events when a button is pressed from a remote control. The intent you receive includes the {@link
+android.view.KeyEvent} for the media key pressed, which you can retrieve from the intent with {@link
+android.content.Intent#getParcelableExtra getParcelableExtra(Intent.EXTRA_KEY_EVENT)}.</p>
+
+<p>To display information on the remote control about the media playing, call {@link
+android.media.RemoteControlClient#editMetadata editMetaData()} and add metadata to the returned
+{@link android.media.RemoteControlClient.MetadataEditor}. You can supply a bitmap for media artwork,
+numerical information such as elapsed time, and text information such as the track title. For
+information on available keys see the {@code METADATA_KEY_*} flags in {@link
+android.media.MediaMetadataRetriever}.</p>
+
+<p>For a sample implementation, see the <a
+href=”{@docRoot}resources/samples/RandomMusicPlayer/index.html”>Random Music Player</a>, which
+provides compatibility logic such that it enables the remote control client while continuing to
+support Android 2.1 devices.</p>
+
+
+<h4>Media Effects</h4>
+
+<p>A new media effects framework allows you to apply a variety of visual effects to images and
+videos.
+The system performs all effects processing on the GPU to obtain maximum performance. Applications in
+Android 4.0 such as Google Talk or the Gallery editor make use of the effects API to apply real-time
+effects to video and photos.</p>
+
+<p>For maximum performance, effects are applied directly to OpenGL textures, so your application
+must
+have a valid OpenGL context before it can use the effects APIs. The textures to which you apply
+effects may be from bitmaps, videos or even the camera. However, there are certain restrictions that
+textures must meet:</p>
+<ol>
+<li>They must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture image</li>
+<li>They must contain at least one mipmap level</li>
+</ol>
+
+<p>An {@link android.media.effect.Effect} object defines a single media effect that you can apply to
+an
+image frame. The basic workflow to create an {@link android.media.effect.Effect} is:</p>
+
+<ol>
+<li>Call {@link android.media.effect.EffectContext#createWithCurrentGlContext
+EffectContext.createWithCurrentGlContext()} from your OpenGL ES 2.0 context.</li>
+<li>Use the returned {@link android.media.effect.EffectContext} to call {@link
+android.media.effect.EffectContext#getFactory EffectContext.getFactory()}, which returns an instance
+of {@link android.media.effect.EffectFactory}.</li>
+<li>Call {@link android.media.effect.EffectFactory#createEffect createEffect()}, passing it an
+effect
+name from @link android.media.effect.EffectFactory}, such as {@link
+android.media.effect.EffectFactory#EFFECT_FISHEYE} or {@link
+android.media.effect.EffectFactory#EFFECT_VIGNETTE}.</li>
+</ol>
+
+<p>Not all devices support all effects, so you must first check if the desired effect is supported
+by
+calling {@link android.media.effect.EffectFactory#isEffectSupported isEffectSupported()}.</p>
+
+<p>You can adjust the effect’s parameters by calling {@link android.media.effect.Effect#setParameter
+setParameter()} and passing a parameter name and parameter value. Each type of effect accepts
+different parameters, which are documented with the effect name. For example, {@link
+android.media.effect.EffectFactory#EFFECT_FISHEYE} has one parameter for the {@code scale} of the
+distortion.</p>
+
+<p>To apply an effect on a texture, call {@link android.media.effect.Effect#apply apply()} on the
+{@link
+android.media.effect.Effect} and pass in the input texture, it’s width and height, and the output
+texture. The input texture  must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture
+image (usually done by calling the {@link android.opengl.GLES20#glTexImage2D glTexImage2D()}
+function). You may provide multiple mipmap levels. If the output texture has not been bound to a
+texture image, it will be automatically bound by the effect as a {@link
+android.opengl.GLES20#GL_TEXTURE_2D}. It will contain one mipmap level (0), which will have the same
+size as the input.</p> 
+
+
+
+
+
+
+
+<h3 id="Bluetooth">Bluetooth</h3>
+
+<p>Android now supports Bluetooth Health Profile devices, so you can create applications that use
+Bluetooth to communicate with health devices that support Bluetooth, such as heart-rate monitors,
+blood meters, thermometers, and scales.</p>
+
+<p>Similar to regular headset and A2DP profile devices, you must call {@link
+android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with a {@link
+android.bluetooth.BluetoothProfile.ServiceListener} and the {@link
+android.bluetooth.BluetoothProfile#HEALTH} profile type to establish a connection with the profile
+proxy object.</p>
+
+<p>Once you’ve acquired the Health profile proxy (the {@link android.bluetooth.BluetoothHealth}
+object), connecting to and communicating with paired health devices involves the following new
+Bluetooth classes:</p>
+<ul>
+<li>{@link android.bluetooth.BluetoothHealthCallback}: You must extend this class and implement the
+callback methods to receive updates about changes in the application’s registration state and
+Bluetooth channel state.</li>
+<li>{@link android.bluetooth.BluetoothHealthAppConfiguration}: During callbacks to your {@link
+android.bluetooth.BluetoothHealthCallback}, you’ll receive an instance of this object, which
+provides configuration information about the available Bluetooth health device, which you must use
+to perform various operations such as initiate and terminate connections with the {@link
+android.bluetooth.BluetoothHealth} APIs.</li>
+</ul>
+
+<p>For more information about using the Bluetooth Health profile, see the documentation for {@link
+android.bluetooth.BluetoothHealth}.</p>
+
+
+<h3 id="AndroidBeam">Android Beam (NDEF Push with NFC)</h3>
+
+<p>Android Beam allows you to send NDEF messages (an NFC standard for data stored on NFC tags) from
+one
+device to another (a process also known as “NDEF Push”). The data transfer is initiated when two
+Android-powered devices that support Android Beam are in close proximity (about 4 cm), usually with
+their backs touching. The data inside the NDEF message can contain any data that you wish to share
+between devices. For example, the People app shares contacts, YouTube shares videos, and Browser
+shares URLs using Android Beam.</p>
+
+<p>To transmit data between devices using Android Beam, you need to create an {@link
+android.nfc.NdefMessage} that contains the information you want to share while your activity is in
+the foreground. You must then pass the
+{@link android.nfc.NdefMessage} to the system in one of two ways:</p>
+
+<ul>
+<li>Define a single {@link android.nfc.NdefMessage} to use from the activity:
+<p>Call {@link android.nfc.NfcAdapter#setNdefPushMessage setNdefPushMessage()} at any time to set
+the
+message you want to send. For instance, you might call this method and pass it your {@link
+android.nfc.NdefMessage} during your activity’s {@link android.app.Activity#onCreate onCreate()}
+method. Then, whenever Android Beam is activated with another device while your activity is in the
+foreground, the system sends that {@link android.nfc.NdefMessage} to the other device.</p></li>
+
+<li>Define the {@link android.nfc.NdefMessage} depending on the current context:
+<p>Implement {@link android.nfc.NfcAdapter.CreateNdefMessageCallback}, in which the {@link
+android.nfc.NfcAdapter.CreateNdefMessageCallback#createNdefMessage createNdefMessage()} callback
+method returns the {@link android.nfc.NdefMessage} you want to send. Then pass the {@link
+android.nfc.NfcAdapter.CreateNdefMessageCallback} to {@link
+android.nfc.NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback()}. In this case, when
+Android Beam is activated with another device while your activity is in the foreground, the system
+calls {@link android.nfc.NfcAdapter.CreateNdefMessageCallback#createNdefMessage createNdefMessage()}
+to retrieve the {@link android.nfc.NdefMessage} you want to send. This allows you to create a
+different {@link android.nfc.NdefMessage} for each occurrence, depending on the user context (such
+as which contact in the People app is currently visible).</p></li>
+</ul>
+
+<p>In case you want to run some specific code once the system has successfully delivered your NDEF
+message to the other device, you can implement {@link
+android.nfc.NfcAdapter.OnNdefPushCompleteCallback} and set it with {@link
+android.nfc.NfcAdapter#setOnNdefPushCompleteCallback setNdefPushCompleteCallback()}. The system will
+then call {@link android.nfc.NfcAdapter.OnNdefPushCompleteCallback#onNdefPushComplete
+onNdefPushComplete()} when the message is delivered.</p>
+
+<p>On the receiving device, the system dispatches NDEF Push messages in a similar way to regular NFC
+tags. The system invokes an intent with the {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED}
+action to start an activity, with either a URL or a MIME type set according to the first {@link
+android.nfc.NdefRecord} in the {@link android.nfc.NdefMessage}. For the activity you want to
+respond, you can set intent filters for the URLs or MIME types your app cares about. For more
+information about Tag Dispatch see the <a
+href=”{@docRoot}guide/topics/nfc/index.html#dispatch”>NFC</a> developer guide.</p>
+
+<p>If you want your {@link android.nfc.NdefMessage} to carry a URI, you can now use the convenience
+method {@link android.nfc.NdefRecord#createUri createUri} to construct a new {@link
+android.nfc.NdefRecord} based on either a string or a {@link android.net.Uri} object. If the URI is
+a special format that you want your application to also receive during an Android Beam event, you
+should create an intent filter for your activity using the same URI scheme in order to receive the
+incoming NDEF message.</p>
+
+<p>You may also want to pass an “Android application record” with your {@link
+android.nfc.NdefMessage}
+in order to guarantee a specific application handles an NDEF message, regardless of whether other
+applications filter for the same intent. You can create an Android application record by calling
+{@link android.nfc.NdefRecord#createApplicationRecord createApplicationRecord()}, passing it the
+application’s package name. When the other device receives the NDEF message with this record, the
+system automatically starts the application matching the package name. If the target device does not
+currently have the application installed, the system uses the Android application record to launch
+Android Market and take the user to the application to install it.</p>
+
+<p>If your application doesn’t use NFC APIs to perform NDEF Push messaging, then Android provides a
+default behavior: When your application is in the foreground on one device and Android Beam is
+invoked with another Android-powered device, then the other device receives an NDEF message with an
+Android application record that identifies your application. If the receiving device has the
+application installed, the system launches it; if it’s not installed, Android Market opens and takes
+the user to your application so they can install it.</p>
+
+
+
+
+
+<h3 id="P2pWiFi">Peer-to-peer Wi-Fi</h3>
+
+<p>Android now supports Wi-Fi Direct&trade; for peer-to-peer (P2P) connections between
+Android-powered
+devices and other device types without a hotspot or Internet connection. The Android framework
+provides a set of Wi-Fi P2P APIs that allow you to discover and connect to other devices when each
+device supports Wi-Fi Direct&trade;, then communicate over a speedy connection across distances much
+longer than a Bluetooth connection.</p>
+
+<p>A new package, {@link android.net.wifi.p2p}, contains all the APIs for performing peer-to-peer
+connections with Wi-Fi. The primary class you need to work with is {@link
+android.net.wifi.p2p.WifiP2pManager}, for which you can get an instance by calling {@link
+android.app.Activity#getSystemService getSystemService(WIFI_P2P_SERVICE)}. The {@link
+android.net.wifi.p2p.WifiP2pManager} provides methods that allow you to:</p>
+<ul>
+<li>Initialize your application for P2P connections by calling {@link
+android.net.wifi.p2p.WifiP2pManager#initialize initialize()}</li>
+<li>Discover nearby devices by calling {@link android.net.wifi.p2p.WifiP2pManager#discoverPeers
+discoverPeers()}</li>
+<li>Start a P2P connection by calling {@link android.net.wifi.p2p.WifiP2pManager#connect
+connect()}</li>
+<li>And more</li>
+</ul>
+
+<p>Several other interfaces and classes are necessary as well, such as:</p>
+<ul>
+<li>The {@link android.net.wifi.p2p.WifiP2pManager.ActionListener} interface allows you to receive
+callbacks when an operation such as discovering peers or connecting to them succeeds or fails.</li>
+<li>{@link android.net.wifi.p2p.WifiP2pManager.PeerListListener} interface allows you to receive
+information about discovered peers. The callback provides a {@link
+android.net.wifi.p2p.WifiP2pDeviceList}, from which you can retrieve a {@link
+android.net.wifi.p2p.WifiP2pDevice} object for each device within range and get information such as
+the device name, address, device type, the WPS configurations the device supports, and more.</li>
+<li>The {@link android.net.wifi.p2p.WifiP2pManager.GroupInfoListener} interface allows you to
+receive
+information about a P2P group. The callback provides a {@link android.net.wifi.p2p.WifiP2pGroup}
+object, which provides group information such as the owner, the network name, and passphrase.</li>
+<li>{@link android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener} interface allows you to
+receive
+information about the current connection. The callback provides a {@link
+android.net.wifi.p2p.WifiP2pInfo} object, which has information such as whether a group has been
+formed and who is the group owner.</li>
+</ul>
+
+<p>In order to use the Wi-Fi P2P APIs, your app must request the following user permissions:</p>
+<ul>
+<li>{@link android.Manifest.permission#ACCESS_WIFI_STATE}</li>
+<li>{@link android.Manifest.permission#CHANGE_WIFI_STATE}</li>
+<li>{@link android.Manifest.permission#INTERNET} (even though your app doesn’t technically connect
+to
+the Internet, the WiFi Direct implementation uses traditional sockets that do require Internet
+permission to work).</li>
+</ul>
+
+<p>The Android system also broadcasts several different actions during certain Wi-Fi P2P events:</p>
+<ul>
+<li>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_CONNECTION_CHANGED_ACTION}: The P2P
+connection
+state has changed. This carries {@link android.net.wifi.p2p.WifiP2pManager#EXTRA_WIFI_P2P_INFO} with
+a {@link android.net.wifi.p2p.WifiP2pInfo} object and {@link
+android.net.wifi.p2p.WifiP2pManager#EXTRA_NETWORK_INFO} with a {@link android.net.NetworkInfo}
+object.</li>
+<li>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_CHANGED_ACTION}: The P2P state has
+changed
+between enabled and disabled. It carries {@link
+android.net.wifi.p2p.WifiP2pManager#EXTRA_WIFI_STATE} with either {@link
+android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_DISABLED} or {@link
+android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_ENABLED}</li>
+<li>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION}: The list of peer
+devices
+has changed.</li>
+<li>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_THIS_DEVICE_CHANGED_ACTION}: The details for
+this device have changed.</li>
+</ul>
+
+<p>See the  {@link android.net.wifi.p2p.WifiP2pManager} documentation for more information. Also
+look
+at the <a href=”{@docRoot}resources/samples/WiFiDirectDemo/index.html”>Wi-Fi Direct</a> sample
+application for example code.</p>
+
+
+
+
+
+<h3 id="NetworkData">Network Data</h3>
+
+<p>Android 4.0 gives users precise visibility of how much network data applications are using. The
+Settings app provides controls that allow users to manage set limits for network data usage and even
+disable the use of background data for individual apps. In order to avoid users disabling your app’s
+access to data from the background, you should develop strategies to use use the data connection
+efficiently and vary your usage depending on the type of connection available.</p>
+
+<p>If your application performs a lot of network transactions, you should provide user settings that
+allow users to control your app’s data habits, such as how often your app syncs data, whether to
+perform uploads/downloads only when on Wi-Fi, whether to use data while roaming, etc. With these
+controls available to them, users are much less likely to disable your app’s access to data when
+they approach their limits, because they can instead precisely control how much data your app uses.
+When you provide an activity with these settings, you should include in its manifest declaration an
+intent filter for the {@link android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} action. For
+example:</p>
+
+<pre>
+&lt;activity android:name="DataPreferences" android:label="@string/title_preferences">
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>This intent filter indicates to the system that this is the application that controls your
+application’s data usage. Thus, when the user inspects how much data your app is using from the
+Settings app, a “View application settings” button is available that launches your activity so the
+user can refine how much data your app uses.</p>
+
+<p>Also beware that {@link android.net.ConnectivityManager#getBackgroundDataSetting()} is now
+deprecated and always returns true&mdash;use  {@link
+android.net.ConnectivityManager#getActiveNetworkInfo()} instead. Before you attempt any network
+transactions, you should always call {@link android.net.ConnectivityManager#getActiveNetworkInfo()}
+to get the {@link android.net.NetworkInfo} that represents the current network and query {@link
+android.net.NetworkInfo#isConnected()} to check whether the device has a
+connection. You can then check various other connection properties, such as whether the device is
+roaming or connected to Wi-Fi.</p>
+
+
+
+
+
+
+
+<h3 id="Sensors">Device Sensors</h3>
+
+<p>Two new sensor types have been added in Android 4.0: {@link
+android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} and {@link
+android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY}. </p>
+
+<p>{@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} is a temperature sensor that provides
+the ambient (room) temperature near a device. This sensor reports data in degrees Celsius. {@link
+android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY} is a humidity sensor that provides the relative
+ambient (room) humidity. The sensor reports data as a percentage. If a device has both {@link
+android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} and  {@link
+android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY} sensors, you can use them to calculate the dew point
+and the absolute humidity.</p>
+
+<p>The existing temperature sensor ({@link android.hardware.Sensor#TYPE_TEMPERATURE}) has been
+deprecated. You should use the {@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} sensor
+instead.</p>
+
+<p>Additionally, Android’s three synthetic sensors have been improved so they now have lower latency
+and smoother output. These sensors include the gravity sensor ({@link
+android.hardware.Sensor#TYPE_GRAVITY}), rotation vector sensor ({@link
+android.hardware.Sensor#TYPE_ROTATION_VECTOR}), and linear acceleration sensor ({@link
+android.hardware.Sensor#TYPE_LINEAR_ACCELERATION}). The improved sensors rely on the gyroscope
+sensor to improve their output so the sensors appear only on devices that have a gyroscope. If a
+device already provides one of the sensors, then that sensor appears as a second sensor on the
+device. The three improved sensors have a version number of 2.</p>
+
+
+
+
+
+
+
+
+<h3 id="Renderscript">Renderscript</h3>
+
+<p>Three major features have been added to Renderscript:</p>
+
+<ul>
+  <li>Off-screen rendering to a framebuffer object</li>
+  <li>Rendering inside a view</li>
+  <li>RS for each from the framework APIs</li>
+</ul>
+
+<p>The {@link android.renderscript.Allocation} class now supports a {@link
+android.renderscript.Allocation#USAGE_GRAPHICS_RENDER_TARGET} memory space, which allows you to
+render things directly into the {@link android.renderscript.Allocation} and use it as a framebuffer
+object.  </p>
+
+<p>{@link android.renderscript.RSTextureView} provides a means to display Renderscript graphics
+inside
+of a normal View,  unlike {@link android.renderscript.RSSurfaceView}, which creates a separate
+window. This key difference allows you to do things such as move, transform, or animate an {@link
+android.renderscript.RSTextureView} as well as draw Renderscript graphics inside the View alongside
+other traditional View widgets.</p>
+
+<p>The {@link android.renderscript.Script#forEach forEach()} method allows you to call Renderscript
+compute scripts from the VM level and have them automatically delegated to available cores on the
+device. You do not use this method directly, but any compute Renderscript that you write will have a
+{@link android.renderscript.Script#forEach forEach()}  method that you can call in the reflected
+Renderscript class. You can call the reflected {@link android.renderscript.Script#forEach forEach()}
+method by passing in an input {@link android.renderscript.Allocation} to process, an output {@link
+android.renderscript.Allocation} to write the result to, and a data structure if the Renderscript
+needs more information in addition to the {@link android.renderscript.Allocation}s to. Only one of
+the {@link android.renderscript.Allocation}s is necessary and the data structure is optional.</p>
+
+
+
+
+
+
+<h3 id="A11y">Accessibility</h3>
+
+<p>Android 4.0 improves accessibility for users with disabilities with the Touch Exploration service
+and provides extended APIs for developers of new accessibility services.</p>
+
+<h4>Touch Exploration</h4>
+
+<p>Users with vision loss can now explore applications by touching areas of the screen and hearing
+voice descriptions of the content. The “Explore by Touch” feature works like a virtual cursor as the
+user drags a finger across the screen.</p>
+
+<p>You don’t have to use any new APIs to enhance touch exploration in your application, because the
+existing {@link android.R.attr#contentDescription android:contentDescription}
+attribute and {@link android.view.View#setContentDescription setContentDescription()} method is all
+you need. Because touch exploration works like a virtual cursor, it allows screen readers to
+identify the descriptive the same way that screen readers can when navigating with a d-pad or
+trackball. So this is a reminder to provide descriptive text for the views in your application,
+especially for {@link android.widget.ImageButton}, {@link android.widget.EditText}, {@link
+android.widget.CheckBox} and other interactive widgets that might not contain text information by
+default.</p>
+
+<h4>Accessibility for Custom Views</h4>
+
+<p>Developers of custom Views, ViewGroups and widgets can make their components compatible with
+accessibility services like Touch Exploration. For custom views and widgets targeted for Android 4.0
+and later, developers should implement the following accessibility API methods in their classes:</p>
+<ul>
+<li>These two methods initiate the accessibility event generation process and must be implemented by
+your custom view class.
+  <ul>
+  <li>{@link android.view.View#sendAccessibilityEvent(int) sendAccessibilityEvent()} If
+accessibility
+  is
+  not enabled, this call has no effect.</li>
+  <li>{@link
+  android.view.View#sendAccessibilityEventUnchecked(android.view.accessibility.AccessibilityEvent)
+  sendAccessibilityEventUnchecked()} - This method executes regardless of whether accessibility is
+  enabled or not.</li>
+  </ul>
+</li>
+
+<li>These methods are called in order by the sendAccessibilityEvent methods listed above to collect
+accessibility information about the view, and its child views.
+  <ul>
+  <li>{@link
+  android.view.View#onInitializeAccessibilityEvent(android.view.accessibility.AccessibilityEvent)
+  onInitializeAccessibilityEvent()} - This method collects information about the view. If your
+  application has specific requirements for accessibility, you should extend this method to add that
+  information to the {@link android.view.accessibility.AccessibilityEvent}.</li>
+  
+  <li>{@link
+ 
+android.view.View#dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent)
+  dispatchPopulateAccessibilityEvent()} is called by the framework to request text information for
+  this view and its children. This method calls {@link
+  android.view.View#onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent)
+  onPopulateAccessibilityEvent()} first on the current view and then on its children.</li>
+  </ul>
+</li>
+
+<li>The {@link
+android.view.View#onInitializeAccessibilityNodeInfo onInitializeAccessibilityNodeInfo()} method
+provides additional context information for
+accessibility services. You should implement or override this method to provide improved information
+for accessibility services investigating your custom view.</li>
+
+<li>Custom {@link android.view.ViewGroup} classes should also implement {@link
+android.view.ViewGroup#onRequestSendAccessibilityEvent(android.view.View,
+android.view.accessibility.AccessibilityEvent) onRequestSendAccessibilityEvent()}  </li>
+</ul>
+
+<p>Developers who want to maintain compatibility with Android versions prior to 4.0, while still
+providing support for new the accessibility APIs, can use the {@link
+android.view.View#setAccessibilityDelegate(android.view.View.AccessibilityDelegate)
+setAccessibilityDelegate()} method to provide an {@link android.view.View.AccessibilityDelegate}
+containing implementations of the new accessibility API methods while maintaining compatibility with
+prior releases.</p>
+
+
+
+<h4>Accessibility Service APIs</h4>
+
+<p>Accessibility events have been significantly improved to provide better information for
+accessibility services. In particular, events are generated based on view composition, providing
+better context information and allowing accessibility service developers to traverse view
+hierarchies to get additional view information and deal with special cases.</p>
+
+<p>To access additional content information and traverse view hierarchies, accessibility service
+application developers should use the following procedure.</p>
+<ol>
+<li>Upon receiving an {@link android.view.accessibility.AccessibilityEvent} from an application,
+call
+the {@link android.view.accessibility.AccessibilityEvent#getRecord(int)
+AccessibilityEvent.getRecord()} to retrieve new accessibility information about the state of the
+view.</li>
+<li>From the {@link android.view.accessibility.AccessibilityRecord}, call {@link 
+android.view.accessibility.AccessibilityRecord#getSource() getSource()} to retrieve a {@link
+android.view.accessibility.AccessibilityNodeInfo} object.</li>
+<li>With the {@link android.view.accessibility.AccessibilityNodeInfo}, call {@link
+android.view.accessibility.AccessibilityNodeInfo#getParent getParent()} or {@link
+android.view.accessibility.AccessibilityNodeInfo#getChild getChild()} to traverse the view
+hierarchy and get additional context information.</li>
+</ol>
+
+<p>In order to retrieve {@link android.view.accessibility.AccessibilityNodeInfo} information, your
+application must request permission to retrieve application window content through a manifest
+declaration that includes a new, separate xml configuration file, which supercedes {@link
+android.accessibilityservice.AccessibilityServiceInfo}. For more information, see {@link
+android.accessibilityservice.AccessibilityService} and {@link
+android.accessibilityservice.AccessibilityService#SERVICE_META_DATA
+AccessibilityService.SERVICE_META_DATA}.</p>
+
+
+
+
+
+
+<h3 id="Enterprise">Enterprise</h3>
+
+<p>Android 4.0 expands the capabilities for enterprise application with the following features.</p>
+
+<h4>VPN Services</h4>
+
+<p>The new {@link android.net.VpnService} allows applications to build their own VPN (Virtual
+Private
+Network), running as a {@link android.app.Service}. A VPN service creates an interface for a virtual
+network with its own address and routing rules and performs all reading and writing with a file
+descriptor.</p>
+
+<p>To create a VPN service, use {@link android.net.VpnService.Builder}, which allows you to specify
+the network address, DNS server, network route, and more. When complete, you can establish the
+interface by calling {@link android.net.VpnService.Builder#establish()}, which returns a {@link
+android.os.ParcelFileDescriptor}. </p>
+
+<p>Because  a VPN service can intercept packets, there are security implications.  As such, if you
+implement {@link android.net.VpnService}, then your service must require the {@link
+android.Manifest.permission#BIND_VPN_SERVICE} to ensure that only the system can bind to it (only
+the system is granted this permission&mdash;apps cannot request it). To then use your VPN service,
+users must manually enable it in the system settings.</p>
+
+
+<h4>Device Restrictions</h4>
+
+<p>Applications that manage the device restrictions can now disable the camera using {@link
+android.app.admin.DevicePolicyManager#setCameraDisabled setCameraDisabled()} and the {@link
+android.app.admin.DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} property (applied with a {@code
+&lt;disable-camera /&gt;} element in the policy configuration file).</p>
+
+
+<h4>Certificate Management</h4>
+
+<p>The new {@link android.security.KeyChain} class provides APIs that allow you to import and access
+certificates and key stores in credential storage.  See the {@link android.security.KeyChain}
+documentation for more information.</p>
+
+
+
+
+<h3 id="Voicemail">Voicemail</h3>
+
+<p>A new voicemail APIs allows applications to add voicemails to the system. Because the APIs
+currently
+do not allow third party apps to read all the voicemails from the system, the only third-party apps
+that should use the voicemail APIs are those that have voicemail to deliver to the user. For
+instance, it’s possible that a users have multiple voicemail sources, such as one provided by their
+phone’s service provider and others from VoIP or other alternative services. These kinds of apps can
+use the APIs to add voicemail to the system. The built-in Phone application can then present all
+voicemails to the user with a single list. Although the system’s Phone application is the only
+application that can read all the voicemails, each application that provides voicemails can read
+those that it has added to the system.</p>
+
+<p>The {@link android.provider.VoicemailContract} class defines the content provider for the
+voicemail
+APIs. The subclasses {@link android.provider.VoicemailContract.Voicemails} and {@link
+android.provider.VoicemailContract.Status} provide tables in which the voicemail providers can
+insert voicemail data for storage on the device. For an example of a voicemail provider app, see the
+<a href=”{@docRoot}resources/samples/VoicemailProviderDemo/index.html”>Voicemail Provider
+Demo</a>.</p>
+
+
+
+
+<h3 id="SpellChecker">Spell Checker Services</h3>
+
+<p>The new spell checker framework allows apps to create spell checkers in a manner similar to the
+input method framework. To create a new spell checker, you must override the {@link
+android.service.textservice.SpellCheckerService.Session} class to provide spelling suggestions based
+on text provided by the interface callback methods, returning suggestions as a {@link
+android.view.textservice.SuggestionsInfo} object. </p>
+
+<p>Applications with a spell checker service must declare the {@link
+android.Manifest.permission#BIND_TEXT_SERVICE} permission as required by the service, such that
+other services must have this permission in order for them to bind with the spell checker service.
+The service must also declare an intent filter with <action
+android:name="android.service.textservice.SpellCheckerService" /> as the intent’s action and should
+include a {@code &lt;meta-data&gt;} element that declares configuration information for the spell
+checker. </p>
+
+
+
+
+
+<h3 id="TTS">Text-to-speech Engines</h3>
+
+<p>Android’s text-to-speech (TTS) APIs have been greatly extended to allow applications to more
+easily
+implement custom TTS engines, while applications that want to use a TTS engine have a couple new
+APIs for selecting the engine.</p>
+
+
+<h4>Using text-to-speech engines</h4>
+
+<p>In previous versions of Android, you could use the {@link android.speech.tts.TextToSpeech} class
+to
+perform text-to-speech (TTS) operations using the TTS engine provided by the system or set a custom
+engine using {@link android.speech.tts.TextToSpeech#setEngineByPackageName
+setEngineByPackageName()}.
+In Android 4.0, the {@link android.speech.tts.TextToSpeech#setEngineByPackageName
+setEngineByPackageName()} method has been deprecated and you can now specify the engine to use with
+a new {@link android.speech.tts.TextToSpeech} that accepts the package name of a TTS engine.</p>
+
+<p>You can also query the available TTS engines with {@link
+android.speech.tts.TextToSpeech#getEngines()}. This method returns a list of {@link
+android.speech.tts.TextToSpeech.EngineInfo} objects, which include meta data such as the engine’s
+icon, label, and package name.</p>
+
+
+<h4>Building text-to-speech engines</h4>
+
+<p>Previously, custom engines required that the engine be built using native code, based on a TTS
+engine header file. In Android 4.0, there is a framework API for building TTS engines. </p>
+
+<p>The basic setup requires an implementation of {@link android.speech.tts.TextToSpeechService} that
+responds to the {@link android.speech.tts.TextToSpeech.Engine#INTENT_ACTION_TTS_SERVICE} intent. The
+primary work for a TTS engine happens during the {@link
+android.speech.tts.TextToSpeechService#onSynthesizeText onSynthesizeText()} callback in the {@link
+android.speech.tts.TextToSpeechService}. The system delivers this method two objects:</p>
+<ul>
+<li>{@link android.speech.tts.SynthesisRequest}: This contains various data including the text to
+synthesize, the locale, the speech rate, and voice pitch.</li>
+<li>{@link android.speech.tts.SynthesisCallback}: This is the interface by which your TTS engine
+delivers the resulting speech data as streaming audio, by calling {@link
+android.speech.tts.SynthesisCallback#start start()} to indicate that the engine is ready to deliver
+the
+audio, then call {@link android.speech.tts.SynthesisCallback#audioAvailable audioAvailable()},
+passing it the audio
+data in a byte buffer. Once your engine has passed all audio through the buffer, call {@link
+android.speech.tts.SynthesisCallback#done()}.</li>
+</ul>
+
+<p>Now that the framework supports a true API for creating TTS engines, support for the previous
+technique using native code has been removed. Watch for a blog post about the compatibility layer
+that you can use to convert TTS engines built using the previous technique to the new framework.</p>
+
+<p>For an example TTS engine using the new APIs, see the <a
+href=”{@docRoot}resources/samples/TtsEngine/index.html”>Text To Speech Engine</a> sample app.</p>
+
+
+
+
+
+
+
+
+
+
+
+<h3 id="ActionBar">Action Bar</h3>
+
+<p>The {@link android.app.ActionBar} has been updated to support several new behaviors. Most
+importantly, the system gracefully manages the action bar’s size and configuration when running on
+smaller screens in order to provide an optimal user experience. For example, when the screen is
+narrow (such as when a handset is in portrait orientation), the action bar’s navigation tabs appear
+in a “stacked bar,” which appears directly below the main action bar. You can also opt-in to a
+“split action bar,” which will place all action items in a separate bar at the bottom of the screen
+when the screen is narrow.</p>
+
+
+<h4>Split Action Bar</h4>
+
+<p>If your action bar includes several action items, not all of them will fit into the action bar
+when on a narrow screen, so the system will place them into the overflow menu. However, Android 4.0
+allows you to enable “split action bar” so that more action items can appear on the screen in a
+separate bar at the bottom of the screen. To enable split action bar, add {@link
+android.R.attr#uiOptions android:uiOptions} with {@code ”splitActionBarWhenNarrow”} to either your
+{@code &lt;application&gt;} tag or individual {@code &lt;activity&gt;} tags in your manifest file.
+When enabled, the system will enable the additional bar for action items when the screen is narrow
+and add all action items to the new bar (no action items will appear in the primary action bar).</p>
+
+<p>If you want to use the navigation tabs provided by the {@link android.app.ActionBar.Tab} APIs,
+but
+don’t want the stacked bar&mdash;you want only the tabs to appear, then enable the split action bar
+as described above and also call {@link android.app.ActionBar#setDisplayShowHomeEnabled
+setDisplayShowHomeEnabled(false)} to disable the application icon in the action bar. With nothing
+left in the main action bar, it disappears&mdash;all that’s left are the navigation tabs at the top
+and the action items at the bottom of the screen.</p>
+
+
+<h4>Action Bar Styles</h4>
+
+<p>If you want to apply custom styling to the action bar, you can use new style properties {@link
+android.R.attr#backgroundStacked} and {@link android.R.attr#backgroundSplit} to apply a background
+drawable or color to the stacked bar and split bar, respectively. You can also set these styles at
+runtime with {@link android.app.ActionBar#setStackedBackgroundDrawable
+setStackedBackgroundDrawable()} and {@link android.app.ActionBar#setSplitBackgroundDrawable
+setSplitBackgroundDrawable()}.</p>
+
+
+<h4>Action Provider</h4>
+
+<p>The new {@link android.view.ActionProvider} class facilitates user actions to which several
+different applications may respond. For example, a “share” action in your application might invoke
+several different apps that can handle the {@link android.content.Intent#ACTION_SEND} intent and the
+associated data. In this case, you can use the {@link android.widget.ShareActionProvider} (an
+extension of {@link android.view.ActionProvider}) in your action bar, instead of a traditional menu
+item that invokes the intent. The {@link android.widget.ShareActionProvider} populates a drop-down
+menu with all the available apps that can handle the intent.</p>
+
+<p>To declare an action provider for an action item, include the {@code android:actionProviderClass}
+attribute in the {@code &lt;item&gt;} element for your activity’s options menu, with the class name
+of the action provider as the attribute value. For example:</p>
+
+<pre>
+&lt;item android:id="@+id/menu_share"
+      android:title="Share"
+      android:icon="@drawable/ic_share"
+      android:showAsAction="ifRoom"
+      android:actionProviderClass="android.widget.ShareActionProvider" /&gt;
+</pre>
+
+<p>In your activity’s {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()}
+callback
+method, retrieve an instance of the action provider from the menu item and set the intent:</p>
+
+<pre>
+public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.options, menu);
+    ShareActionProvider shareActionProvider =
+          (ShareActionProvider) menu.findItem(R.id.menu_share).getActionProvider();
+    // Set the share intent of the share action provider.
+    shareActionProvider.setShareIntent(createShareIntent());
+    ...
+    return super.onCreateOptionsMenu(menu);
+}
+</pre>
+
+<p>For an example using the {@link android.widget.ShareActionProvider}, see the <a
+href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarActionProviderActivity.html”>ActionBarActionProviderActivity</a>
+class in ApiDemos.</p>
+
+
+<h4>Collapsible Action Views</h4>
+
+<p>Menu items that appear as action items can now toggle between their action view state and
+traditional action item state. Previously only the {@link android.widget.SearchView} supported
+collapsing when used as an action view, but now you can add an action view for any action item and
+switch between the expanded state (action view is visible) and collapsed state (action item is
+visible).</p>
+
+<p>To declare that an action item that contains an action view be collapsible, include the {@code
+“collapseActionView”} flag in the {@code android:showAsAction} attribute for the {@code
+&lt;item&gt;} element in the menu’s XML file.</p>
+
+<p>To receive callbacks when an action view switches between expanded and collapsed, register an
+instance of {@link android.view.MenuItem.OnActionExpandListener} with the respective {@link
+android.view.MenuItem} by calling {@link android.view.MenuItem#setOnActionExpandListener
+setOnActionExpandListener()}. Typically, you should do so during the {@link
+android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} callback.</p>
+
+<p>To control a collapsible action view, you can call {@link
+android.view.MenuItem#collapseActionView()} and {@link android.view.MenuItem#expandActionView()} on
+the respective {@link android.view.MenuItem}.</p>
+
+<p>When creating a custom action view, you can also implement the new {@link
+android.view.CollapsibleActionView} interface to receive callbacks when the view is expanded and
+collapsed.</p>
+
+
+<h4>Other APIs for Action Bar</h4>
+<ul>
+<li>{@link android.app.ActionBar#setHomeButtonEnabled setHomeButtonEnabled()} allows you to disable
+the
+default behavior in which the application icon/logo behaves as a button (pass “false” to disable it
+as a button).</li>
+<li>{@link android.app.ActionBar#setIcon setIcon()} and {@link android.app.ActionBar#setLogo
+setLogo()}
+to define the action bar icon or logo at runtime.</li>
+<li>{@link android.app.Fragment#setMenuVisibility Fragment.setMenuVisibility()} allows you to enable
+or
+disable the visibility of the options menu items declared by the fragment. This is useful if the
+fragment has been added to the activity, but is not visible, so the menu items should be
+hidden.</li>
+<li>{@link android.app.FragmentManager#invalidateOptionsMenu
+FragmentManager.invalidateOptionsMenu()}
+allows you to invalidate the activity options menu during various states of the fragment lifecycle
+in which using the equivalent method from {@link android.app.Activity} might not be available.</li>
+</ul>
+
+
+
+
+
+
+
+
+<h3 id="UI">User Interface and Views</h3>
+
+<p>Android 4.0 introduces a variety of new views and other UI components.</p>
+
+<h4>System UI</h4>
+
+<p>Since the early days of Android, the system has managed a UI component known as the <em>status
+bar</em>, which resides at the top of handset devices to deliver information such as the carrier
+signal, time, notifications, and so on. Android 3.0 added the <em>system bar</em> for tablet
+devices, which resides at the bottom of the screen to provide system navigation controls (Home,
+Back, and so forth) and also an interface for elements traditionally provided by the status bar.  In
+Android 4.0, the system provides a new type of system UI called the <em>navigation bar</em>. The
+navigation bar shares some qualities with the system bar, because it provides navigation controls
+for devices that don’t have hardware counterparts for navigating the system, but the navigation
+controls is all that it provides (a device with the navigation bar, thus, also includes the status
+bar at the top of the screen).</p>
+
+<p>To this day, you can hide the status bar on handsets using the {@link
+android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN} flag. In Android 4.0, the APIs that control
+the system bar’s visibility have been updated to better reflect the behavior of both the system bar
+and navigation bar:</p>
+<ul>
+<li>The {@link android.view.View#SYSTEM_UI_FLAG_LOW_PROFILE} flag replaces View.STATUS_BAR_HIDDEN
+flag
+(now deprecated). When set, this flag enables “low profile” mode for the system bar or navigation
+bar. Navigation buttons dim and other elements in the system bar also hide.</li>
+<li>The {@link android.view.View#SYSTEM_UI_FLAG_VISIBLE} flag replaces the {@code
+STATUS_BAR_VISIBLE}
+flag to request the system bar or navigation bar be visible.</li>
+<li>The {@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} is a new flag that requests that
+the
+navigation bar hide completely. Take note that this works only for the <em>navigation bar</em> used
+by some handsets (it does <strong>not</strong> hide the system bar on tablets). The navigation bar
+returns as soon as the system receives user input. As such, this mode is generally used for video
+playback or other cases in which user input is not required.</li>
+</ul>
+
+<p>You can set each of these flags for the system bar by calling {@link
+android.view.View#setSystemUiVisibility setSystemUiVisibility()} on any view in your activity
+window. The window manager will combine (OR-together) all flags from all views in your window and
+apply them to the system UI as long as your window has input focus. When your window loses input
+focus (the user navigates away from your app, or a dialog appears), your flags cease to have effect.
+Similarly, if you remove those views from the view hierarchy their flags no longer apply.</p>
+
+<p>To synchronize other events in your activity with visibility changes to the system UI (for
+example,
+hide the action bar or other UI controls when the system UI hides), you can register a {@link
+android.view.View.OnSystemUiVisibilityChangeListener} to get a callback when the visibility
+changes.</p>
+
+<p>See the <a
+href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/OverscanActivity.html”>
+OverscanActivity</a> class for a demonstration of different system UI options.</p>
+
+
+<h4>GridLayout</h4>
+
+<p>{@link android.widget.GridLayout} is a new view group that places child views in a rectangular
+grid.
+Unlike {@link android.widget.TableLayout}, {@link android.widget.GridLayout} relies on a flat
+hierarchy and does not make use of intermediate views such as table rows for providing structure.
+Instead, children specify which row(s) and column(s) they should occupy (cells can span multiple
+rows and/or columns), and by default are laid out sequentially across the grid’s rows and columns.
+The {@link android.widget.GridLayout} orientation determines whether sequential children are by
+default laid out horizontally or vertically. Space between children may be specified either by using
+instances of the new {@link android.widget.Space} view or by setting the relevant margin parameters
+on children.</p>
+
+<p>See <a
+href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/index.html”>ApiDemos</a>
+for samples using {@link android.widget.GridLayout}.</p>
+
+
+
+<h4>TextureView</h4>
+
+<p>{@link android.view.TextureView} is a new view that allows you to display a content stream, such
+as
+a video or an OpenGL scene. Although similar to {@link android.view.SurfaceView}, {@link
+android.view.TextureView} is unique in that it behaves like a regular view, rather than creating a
+separate window, so you can treat it like any other {@link android.view.View} object. For example,
+you can apply transforms, animate it using {@link android.view.ViewPropertyAnimator}, or easily
+adjust its opacity with {@link android.view.View#setAlpha setAlpha()}.</p>
+
+<p>Beware that {@link android.view.TextureView} works only within a hardware accelerated window.</p>
+
+<p>For more information, see the {@link android.view.TextureView} documentation.</p>
+
+
+<h4>Switch Widget</h4>
+
+<p>The new {@link android.widget.Switch} widget is a two-state toggle that users can drag to one
+side
+or the other (or simply tap) to toggle an option between two states.</p>
+
+<p>You can declare a switch in your layout with the {@code &lt;Switch&gt;} element. You can use the
+{@code android:textOn} and {@code android:textOff} attributes to specify the text to appear on the
+switch when in the on and off setting. The {@code android:text} attribute also allows you to place a
+label alongside the switch.</p>
+
+<p>For a sample using switches, see the <a
+href=”{@docRoot}resources/samples/ApiDemos/res/layout/switches.html”>switches.xml</a> layout file
+and respective <a
+href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/Switches.html”>Switches
+</a> activity.</p>
+
+
+<h4>Popup Menus</h4>
+
+<p>Android 3.0 introduced {@link android.widget.PopupMenu} to create short contextual menus that pop
+up
+at an anchor point you specify (usually at the point of the item selected). Android 4.0 extends the
+{@link android.widget.PopupMenu} with a couple useful features:</p>
+<ul>
+<li>You can now easily inflate the contents of a popup menu from an XML <a
+href=”{@docRoot}guide/topics/resources/menu-resource.html”>menu resource</a> with {@link
+android.widget.PopupMenu#inflate inflate()}, passing it the menu resource ID.</li>
+<li>You can also now create a {@link android.widget.PopupMenu.OnDismissListener} that receives a
+callback when the menu is dismissed.</li>
+</ul>
+
+<h4>Preferences</h4>
+
+<p>A new {@link android.preference.TwoStatePreference} abstract class serves as the basis for
+preferences that provide a two-state selection option. The new {@link
+android.preference.SwitchPreference} is an extension of {@link
+android.preference.TwoStatePreference} that provides a {@link android.widget.Switch} widget in the
+preference view to allow users to toggle a setting on or off without the need to open an additional
+preference screen or dialog. For example, the Settings application uses a {@link
+android.preference.SwitchPreference} for the Wi-Fi and Bluetooth settings.</p>
+
+
+<h4>Hover Events</h4>
+
+<p>The {@link android.view.View} class now supports “hover” events to enable richer interactions
+through the use of pointer devices (such as a mouse or other device that drives an on-screen
+cursor).</p>
+
+<p>To receive hover events on a view, implement the {@link android.view.View.OnHoverListener} and
+register it with {@link android.view.View#setOnHoverListener setOnHoverListener()}. When a hover
+event occurs on the view, your listener receives a call to {@link
+android.view.View.OnHoverListener#onHover onHover()}, providing the {@link android.view.View} that
+received the event and a {@link android.view.MotionEvent} that describes the type of hover event
+that occurred. The hover event can be one of the following:</p>
+<ul>
+<li>{@link android.view.MotionEvent#ACTION_HOVER_ENTER}</li>
+<li>{@link android.view.MotionEvent#ACTION_HOVER_EXIT}</li>
+<li>{@link android.view.MotionEvent#ACTION_HOVER_MOVE}</li>
+</ul>
+
+<p>Your {@link android.view.View.OnHoverListener} should return true from {@link
+android.view.View.OnHoverListener#onHover onHover()} if it handles the hover event.  If your
+listener returns false, then the hover event will be dispatched to the parent view as usual.</p>
+
+<p>If your application uses buttons or other widgets that change their appearance based on the
+current
+state, you can now use the {@code android:state_hovered} attribute in a <a
+href=”{@docRoot}guide/topics/resources/drawable-resource.html#StateList”>state list drawable</a> to
+provide a different background drawable when a cursor hovers over the view.</p>
+
+<p>For a demonstration of the new hover events, see the <a
+href=”{@docRoot}samples/ApiDemos/src/com/example/android/apis/view/Hover.html”>Hover</a> class in
+ApiDemos.</p>
+
+
+<h4>Stylus and Mouse Button Input Events</h4>
+
+<p>Android now provides APIs for receiving input from a stylus input device such as a digitizer
+tablet
+peripheral or a stylus-enabled touch screen.</p>
+
+<p>Stylus input operates in a similar manner to touch or mouse input.  When the stylus is in contact
+with the digitizer, applications receive touch events just like they would when a finger is used to
+touch the display.  When the stylus is hovering above the digitizer, applications receive hover
+events just like they would when a mouse pointer was being moved across the display when no buttons
+are pressed.</p>
+
+<p>Your application can distinguish between finger, mouse, stylus and eraser input by querying the
+“tool type” associated with each pointer in a {@link android.view.MotionEvent} using {@link
+android.view.MotionEvent#getToolType getToolType()}.  The currently defined tool types are: {@link
+android.view.MotionEvent#TOOL_TYPE_UNKNOWN}, {@link android.view.MotionEvent#TOOL_TYPE_FINGER},
+{@link android.view.MotionEvent#TOOL_TYPE_MOUSE}, {@link android.view.MotionEvent#TOOL_TYPE_STYLUS},
+and {@link android.view.MotionEvent#TOOL_TYPE_ERASER}.  By querying the tool type, your application
+can choose to handle stylus input in different ways from finger or mouse input.</p>
+
+<p>Your application can also query which mouse or stylus buttons are pressed by querying the “button
+state” of a {@link android.view.MotionEvent} using {@link android.view.MotionEvent#getButtonState
+getButtonState()}.  The currently defined button states are: {@link
+android.view.MotionEvent#BUTTON_PRIMARY}, {@link
+android.view.MotionEvent#BUTTON_SECONDARY}, {@link
+android.view.MotionEvent#BUTTON_TERTIARY}, {@link android.view.MotionEvent#BUTTON_BACK},
+and {@link android.view.MotionEvent#BUTTON_FORWARD}.
+For convenience, the back and forward mouse buttons are automatically mapped to the {@link
+android.view.KeyEvent#KEYCODE_BACK} and {@link android.view.KeyEvent#KEYCODE_FORWARD} keys.  Your
+application can handle these keys to support mouse button based back and forward navigation.</p>
+
+<p>In addition to precisely measuring the position and pressure of a contact, some stylus input
+devices
+also report the distance between the stylus tip and the digitizer, the stylus tilt angle, and the
+stylus orientation angle.  Your application can query this information using {@link
+android.view.MotionEvent#getAxisValue getAxisValue()} with the axis codes {@link
+android.view.MotionEvent#AXIS_DISTANCE}, {@link android.view.MotionEvent#AXIS_TILT}, and {@link
+android.view.MotionEvent#AXIS_ORIENTATION}.</p>
+
+<p>For a demonstration of tool types, button states and the new axis codes, see the <a
+href=”{@docRoot}samples/ApiDemos/src/com/example/android/apis/graphics/TouchPaint.html”>TouchPaint
+</a> class in ApiDemos.</p>
+
+
+
+
+
+
+<h3 id="Properties">Properties</h3>
+
+<p>The new {@link android.util.Property} class provides a fast, efficient, and easy way to specify a
+property on any object that allows callers to generically set/get values on target objects. It also
+allows the functionality of passing around field/method references and allows code to set/get values
+of the property without knowing the details of what the fields/methods are.</p>
+
+<p>For example, if you want to set the value of field {@code bar} on object {@code foo}, you would
+previously do this:</p>
+<pre>
+foo.bar = value;
+</pre>
+
+<p>If you want to call the setter for an underlying private field {@code bar}, you would previously
+do this:</p>
+<pre>
+foo.setBar(value);
+</pre>
+
+<p>However, if you want to pass around the {@code foo} instance and have some other code set the
+{@code bar} value, there is really no way to do it prior to Android 4.0.</p>
+
+<p>Using the {@link android.util.Property} class, you can declare a {@link android.util.Property}
+object {@code BAR} on class {@code Foo} so that you can set the field on instance {@code foo} of
+class {@code Foo} like this:</p>
+<pre>
+BAR.set(foo, value);
+</pre>
+
+<p>The {@link android.view.View} class now leverages the {@link android.util.Property} class to
+allow you to set various fields, such as transform properties that were added in Android 3.0 ({@link
+android.view.View#ROTATION}, {@link android.view.View#ROTATION_X}, {@link
+android.view.View#TRANSLATION_X}, etc.).</p>
+
+<p>The {@link android.animation.ObjectAnimator} class also uses the {@link android.util.Property}
+class, so you can create an {@link android.animation.ObjectAnimator} with a {@link
+android.util.Property}, which is faster, more efficient, and more type-safe than the string-based
+approach.</p>
+
+
+
+
+
+
+<h3 id="HwAccel">Hardware Acceleration</h3>
+
+<p>Beginning with Android 4.0, hardware acceleration for all windows is enabled by default if your
+application has set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> or
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> to
+{@code “14”} or higher. Hardware acceleration generally results in smoother animations, smoother
+scrolling, and overall better performance and response to user interaction.</p>
+
+<p>If necessary, you can manually disable hardware acceleration with the <a
+href=”{@docRoot}guide/topics/manifest/activity-element.html#hwaccel”>{@code hardwareAccelerated}</a>
+attribute for individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> elements or the <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+element. You can alternatively disable hardware acceleration for individual views by calling {@link
+android.view.View#setLayerType setLayerType(LAYER_TYPE_SOFTWARE)}.</p>
+
+
+<h3 id="Jni">JNI Changes</h3>
+
+<p>In previous versions of Android, JNI local references weren’t indirect handles; we used direct
+pointers. This didn’t seem like a problem as long as we didn’t have a garbage collector that moves
+objects, but it was because it meant that it was possible to write buggy code that still seemed to
+work. In Android 4.0, we’ve moved to using indirect references so we can detect these bugs before we
+need third-party native code to be correct.</p>
+
+<p>The ins and outs of JNI local references are described in “Local and Global References” in
+<a href="{@docRoot}guide/practices/design/jni.html">JNI Tips</a>. In Android 4.0, <a
+href="http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">CheckJNI</a>
+has been
+enhanced to detect these errors. Watch the <a href=”http://android-developers.blogspot.com/”>Android
+Developers Blog</a> for an upcoming post about common errors with JNI references and how you can fix
+them.</p>
+
+<p>This change in the JNI implementation only affects apps that target Android 4.0 by setting either
+the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> or
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> to
+{@code “14”} or higher. If you’ve set these attributes to any lower
+value, then JNI local references will behave the same as in previous versions.</p>
+
+
+
+
+
+<h3 id="WebKit">WebKit</h3>
+<ul>
+<li>WebKit updated to version 534.30</li>
+<li>Support for Indic fonts (Devanagari, Bengali, and Tamil, including the complex character support
+needed for combining glyphs) in {@link android.webkit.WebView} and the built-in Browser</li>
+<li>Support for Ethiopic, Georgian, and Armenian fonts in {@link android.webkit.WebView} and the
+built-in Browser</li>
+<li>Support for <a
+href="http://google-opensource.blogspot.com/2009/05/introducing-webdriver.html">WebDriver</a> makes
+it easier for you to test apps that use {@link android.webkit.WebView}</li>
+</ul>
+
+
+<h4>Android Browser</h4>
+
+<p>The Browser application adds the following features to support web applications:</p>
+<ul>
+<li>Updated V8 JavaScript compiler for faster performance</li>
+<li>Plus other notable enhancements carried over from <a
+href=”{@docRoot}sdk/android-3.0.html”>Android
+3.0</a> are now available for handsets:
+<ul>
+<li>Support for fixed position elements on all pages</li>
+<li><a href="http://dev.w3.org/2009/dap/camera/">HTML media capture</a></li>
+<li><a href="http://dev.w3.org/geo/api/spec-source-orientation.html">Device orientation
+events</a></li>
+<li><a href="http://www.w3.org/TR/css3-3d-transforms/">CSS 3D transformations</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<h3 id="Permissions">Permissions</h3>
+
+<p>The following are new permissions:</p>
+<ul>
+<li>{@link android.Manifest.permission#ADD_VOICEMAIL}: Allows a voicemail service to add voicemail
+messages to the device.</li>
+<li>{@link android.Manifest.permission#BIND_TEXT_SERVICE}: A service that implements {@link
+android.service.textservice.SpellCheckerService} must require this permission for itself.</li>
+<li>{@link android.Manifest.permission#BIND_VPN_SERVICE}: A service that implements {@link
+android.net.VpnService} must require this permission for itself.</li>
+<li>{@link android.Manifest.permission#READ_PROFILE}: Provides read access to the {@link
+android.provider.ContactsContract.Profile} provider.</li>
+<li>{@link android.Manifest.permission#WRITE_PROFILE}: Provides write access to the {@link
+android.provider.ContactsContract.Profile} provider.</li>
+</ul>
+
+
+
+<h3 id="DeviceFeatures">Device Features</h3>
+
+<p>The following are new device features:</p>
+<ul>
+<li>{@link android.content.pm.PackageManager#FEATURE_WIFI_DIRECT}: Declares that the application
+uses
+Wi-Fi for peer-to-peer communications.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="api-diff">API Differences Report</h2>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API
+Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>.</p>
+
+
+
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of the framework API. The
+Android {@sdkPlatformVersion} API is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is stored in the system itself. This
+identifier, called the "API Level", allows the system to correctly determine whether an application
+is compatible with the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need compile the
+application against the Android library that is provided in the Android {@sdkPlatformVersion} SDK
+platform. Depending on your needs, you might also need to add an
+<code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code> attribute to the
+<code>&lt;uses-sdk&gt;</code> element in the application's manifest.</p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>API Demos</li>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Custom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+<li>Gallery</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gestures Builder</li>
+<li>Messaging</li>
+<li>Music</li>
+<li>People</li>
+<li>Phone</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Spare Parts</li>
+<li>Speech Recorder</li>
+<li>Widget Preview</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety
+of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android 3.0 system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, Zimbabwe (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian bokmål, Norway (nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WVGA800 (1280x800, extra high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
