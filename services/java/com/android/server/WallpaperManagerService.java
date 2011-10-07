@@ -786,7 +786,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
                 if (DEBUG) Slog.v(TAG, "settingsRestored: success=" + success);
                 if (success) {
-                    bindWallpaperComponentLocked(null, false);
+                    bindWallpaperComponentLocked(mNextWallpaperComponent, false);
                 }
             }
         }
