@@ -515,7 +515,7 @@ public class ConnectivityManager {
      * All applications that have background services that use the network
      * should listen to {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
      * <p>
-     * As of {@link VERSION_CODES#ICE_CREAM_SANDWICH}, availability of
+     * @deprecated As of {@link VERSION_CODES#ICE_CREAM_SANDWICH}, availability of
      * background data depends on several combined factors, and this method will
      * always return {@code true}. Instead, when background data is unavailable,
      * {@link #getActiveNetworkInfo()} will now appear disconnected.
