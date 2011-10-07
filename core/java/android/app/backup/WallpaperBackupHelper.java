@@ -35,7 +35,7 @@ import java.io.File;
  */
 public class WallpaperBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "WallpaperBackupHelper";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // This path must match what the WallpaperManagerService uses
     private static final String WALLPAPER_IMAGE = "/data/data/com.android.settings/files/wallpaper";
