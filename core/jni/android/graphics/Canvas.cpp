@@ -767,20 +767,17 @@ public:
 
         sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
-        value = TextLayoutCache::getInstance().getValue(paint, textArray, contextCount, flags);
+        value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
+                contextCount, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
         }
 #else
         value = new TextLayoutCacheValue();
-        value->computeValues(paint, textArray, contextCount, flags);
+        value->computeValues(paint, textArray, start, count, contextCount, flags);
 #endif
-        size_t startIndex = 0;
-        size_t glyphsCount = 0;
-        value->getGlyphsIndexAndCount(start, count, &startIndex, &glyphsCount);
-        const jchar* glyphs = value->getGlyphs(startIndex, glyphsCount);
-        doDrawGlyphs(canvas, glyphs, 0, glyphsCount, x, y, flags, paint);
+        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(), x, y, flags, paint);
     }
 
     static void doDrawGlyphs(SkCanvas* canvas, const jchar* glyphArray, int index, int count,
