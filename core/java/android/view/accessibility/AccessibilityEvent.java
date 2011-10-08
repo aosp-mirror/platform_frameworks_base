@@ -200,15 +200,6 @@ import java.util.List;
  *   <li>{@link #getBeforeText()} - The text of the source before the change.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
- * <em>Note:</em> This event type is not dispatched to descendants though
- * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
- * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
- * source {@link android.view.View} and the sub-tree rooted at it will not receive
- * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
- * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
- * text content to such events is by setting the
- * {@link android.R.styleable#View_contentDescription contentDescription} of the source
- * view.</br>
  * </p>
  * <p>
  * <b>View text selection changed</b> - represents the event of changing the text
