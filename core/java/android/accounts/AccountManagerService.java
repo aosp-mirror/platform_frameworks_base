@@ -1033,8 +1033,12 @@ public class AccountManagerService
                 mContext.getString(R.string.permission_request_notification_with_subtitle,
                 account.name);
         final int index = titleAndSubtitle.indexOf('\n');
-        final String title = titleAndSubtitle.substring(0, index);
-        final String subtitle = titleAndSubtitle.substring(index + 1);
+        String title = titleAndSubtitle;
+        String subtitle = "";
+        if (index > 0) {
+            title = titleAndSubtitle.substring(0, index);
+            subtitle = titleAndSubtitle.substring(index + 1);            
+        }
         n.setLatestEventInfo(mContext,
                 title, subtitle,
                 PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
