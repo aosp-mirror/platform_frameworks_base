@@ -12,8 +12,8 @@ these guidelines as we release them.</p>
  <dl>
   <dt><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon
 Design Guidelines</a> and <a
-href="{@docRoot}shareables/icon_templates-v2.3.zip">Android Icon Templates Pack
-&raquo; </a></dt>
+href="{@docRoot}shareables/icon_templates-v4.0.zip">Android Icon Templates Pack
+&raquo; </a> <span class="new">updated</span></dt>
   <dd>Your applications need a wide variety of icons, from a launcher icon to
 icons in menus, dialogs, tabs, the status bar, and lists. The Icon Guidelines
 describe each kind of icon in detail, with specifications for the size, color,
@@ -22,7 +22,7 @@ The Icon Templates Pack is an archive of Photoshop and Illustrator templates and
 filters that make it much simpler to create conforming icons.</dd>
 </dl>
  <dl>
-  <dt><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">Widget Design Guidelines</a> </dt>
+  <dt><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">Widget Design Guidelines</a> <span class="new">updated</span></dt>
   <dd>A widget displays an application's most important or timely information
 at a glance, on a user's Home screen. These design guidelines describe how to
 design widgets that fit with others on the Home screen. They include links to
