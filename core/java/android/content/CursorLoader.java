@@ -19,6 +19,7 @@ package android.content;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -49,6 +50,19 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
 
     Cursor mCursor;
 
+    final static class CloseTask extends AsyncTask<Cursor, Void, Void> {
+        @Override
+        protected Void doInBackground(Cursor... params) {
+            params[0].close();
+            return null;
+        }
+    }
+
+    static void closeAsync(Cursor cursor) {
+        CloseTask closeTask = new CloseTask();
+        closeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, cursor);
+    }
+
     /* Runs on a worker thread */
     @Override
     public Cursor loadInBackground() {
@@ -76,7 +90,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         if (isReset()) {
             // An async query came in while the loader is stopped
             if (cursor != null) {
-                cursor.close();
+                closeAsync(cursor);
             }
             return;
         }
@@ -88,7 +102,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         }
 
         if (oldCursor != null && oldCursor != cursor && !oldCursor.isClosed()) {
-            oldCursor.close();
+            closeAsync(oldCursor);
         }
     }
 
@@ -148,7 +162,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     @Override
     public void onCanceled(Cursor cursor) {
         if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
+            closeAsync(cursor);
         }
     }
 
@@ -160,7 +174,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         onStopLoading();
 
         if (mCursor != null && !mCursor.isClosed()) {
-            mCursor.close();
+            closeAsync(mCursor);
         }
         mCursor = null;
     }
