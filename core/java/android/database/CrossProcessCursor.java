@@ -16,7 +16,7 @@
 
 package android.database;
 
-public interface CrossProcessCursor extends Cursor{
+public interface CrossProcessCursor extends Cursor {
     /**
      * returns a pre-filled window, return NULL if no such window
      */
