@@ -47,7 +47,9 @@ public final class RingtonePickerActivity extends AlertActivity implements
     private static final String TAG = "RingtonePickerActivity";
 
     private static final int DELAY_MS_SELECTION_PLAYED = 300;
-    
+
+    private static final String SAVE_CLICKED_POS = "clicked_pos";
+
     private RingtoneManager mRingtoneManager;
     
     private Cursor mCursor;
@@ -120,7 +122,10 @@ public final class RingtonePickerActivity extends AlertActivity implements
         if (mUriForDefaultItem == null) {
             mUriForDefaultItem = Settings.System.DEFAULT_RINGTONE_URI;
         }
-        
+
+        if (savedInstanceState != null) {
+            mClickedPos = savedInstanceState.getInt(SAVE_CLICKED_POS, -1);
+        }
         // Get whether to show the 'Silent' item
         mHasSilentItem = intent.getBooleanExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
         
@@ -165,6 +170,12 @@ public final class RingtonePickerActivity extends AlertActivity implements
         }
         
         setupAlert();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SAVE_CLICKED_POS, mClickedPos);
     }
 
     public void onPrepareListView(ListView listView) {
