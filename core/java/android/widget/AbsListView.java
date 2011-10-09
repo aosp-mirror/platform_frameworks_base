@@ -1443,14 +1443,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             inActionMode = in.readByte() != 0;
             checkedItemCount = in.readInt();
             checkState = in.readSparseBooleanArray();
-            long[] idState = in.createLongArray();
-            int[] idPositions = in.createIntArray();
-
-            final int idLength = idState.length;
-            if (idLength > 0) {
+            final int N = in.readInt();
+            if (N > 0) {
                 checkIdState = new LongSparseArray<Integer>();
-                for (int i = 0; i < idLength; i++) {
-                    checkIdState.put(idState[i], idPositions[i]);
+                for (int i=0; i<N; i++) {
+                    final long key = in.readLong();
+                    final int value = in.readInt();
+                    checkIdState.put(key, value);
                 }
             }
         }
@@ -1467,15 +1466,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             out.writeByte((byte) (inActionMode ? 1 : 0));
             out.writeInt(checkedItemCount);
             out.writeSparseBooleanArray(checkState);
-            out.writeLongArray(checkIdState != null ? checkIdState.getKeys() : new long[0]);
-
-            int size = checkIdState != null ? checkIdState.size() : 0;
-            int[] idPositions = new int[size];
-            if (size > 0) {
-                for (int i = 0; i < size; i++) {
-                    idPositions[i] = checkIdState.valueAt(i);
-                }
-                out.writeIntArray(idPositions);
+            final int N = checkIdState != null ? checkIdState.size() : 0;
+            out.writeInt(N);
+            for (int i=0; i<N; i++) {
+                out.writeLong(checkIdState.keyAt(i));
+                out.writeInt(checkIdState.valueAt(i));
             }
         }
 
