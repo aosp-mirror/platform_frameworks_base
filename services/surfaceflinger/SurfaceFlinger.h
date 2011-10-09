@@ -192,6 +192,8 @@ public:
 
     sp<Layer> getLayer(const sp<ISurface>& sur) const;
 
+    GLuint getProtectedTexName() const { return mProtectedTexName; }
+
 private:
     // DeathRecipient interface
     virtual void binderDied(const wp<IBinder>& who);
@@ -349,6 +351,7 @@ private:
                 sp<IMemoryHeap>             mServerHeap;
                 surface_flinger_cblk_t*     mServerCblk;
                 GLuint                      mWormholeTexName;
+                GLuint                      mProtectedTexName;
                 nsecs_t                     mBootTime;
 
                 // Can only accessed from the main thread, these members

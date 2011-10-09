@@ -275,7 +275,7 @@ status_t SurfaceFlinger::readyToRun()
 
     const uint16_t g0 = pack565(0x0F,0x1F,0x0F);
     const uint16_t g1 = pack565(0x17,0x2f,0x17);
-    const uint16_t textureData[4] = { g0, g1, g1, g0 };
+    const uint16_t wormholeTexData[4] = { g0, g1, g1, g0 };
     glGenTextures(1, &mWormholeTexName);
     glBindTexture(GL_TEXTURE_2D, mWormholeTexName);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -283,7 +283,17 @@ status_t SurfaceFlinger::readyToRun()
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0,
-            GL_RGB, GL_UNSIGNED_SHORT_5_6_5, textureData);
+            GL_RGB, GL_UNSIGNED_SHORT_5_6_5, wormholeTexData);
+
+    const uint16_t protTexData[] = { pack565(0x03, 0x03, 0x03) };
+    glGenTextures(1, &mProtectedTexName);
+    glBindTexture(GL_TEXTURE_2D, mProtectedTexName);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0,
+            GL_RGB, GL_UNSIGNED_SHORT_5_6_5, protTexData);
 
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
@@ -2255,22 +2265,6 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
         return BAD_VALUE;
 
-    // make sure none of the layers are protected
-    const LayerVector& layers(mDrawingState.layersSortedByZ);
-    const size_t count = layers.size();
-    for (size_t i=0 ; i<count ; ++i) {
-        const sp<LayerBase>& layer(layers[i]);
-        const uint32_t flags = layer->drawingState().flags;
-        if (!(flags & ISurfaceComposer::eLayerHidden)) {
-            const uint32_t z = layer->drawingState().z;
-            if (z >= minLayerZ && z <= maxLayerZ) {
-                if (layer->isProtected()) {
-                    return INVALID_OPERATION;
-                }
-            }
-        }
-    }
-
     if (!GLExtensions::getInstance().haveFramebufferObject())
         return INVALID_OPERATION;
 
@@ -2320,6 +2314,8 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         glClearColor(0,0,0,1);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        const LayerVector& layers(mDrawingState.layersSortedByZ);
+        const size_t count = layers.size();
         for (size_t i=0 ; i<count ; ++i) {
             const sp<LayerBase>& layer(layers[i]);
             const uint32_t flags = layer->drawingState().flags;
