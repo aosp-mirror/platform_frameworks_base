@@ -908,6 +908,9 @@ public final class StrictMode {
 
         if (!IS_USER_BUILD) {
             threadPolicyMask |= StrictMode.PENALTY_DROPBOX;
+            if (IS_ENG_BUILD) {
+                threadPolicyMask |= StrictMode.PENALTY_LOG;
+            }
         }
         if (doFlashes) {
             threadPolicyMask |= StrictMode.PENALTY_FLASH;
@@ -918,7 +921,11 @@ public final class StrictMode {
         if (IS_USER_BUILD) {
             setCloseGuardEnabled(false);
         } else {
-            setVmPolicy(new VmPolicy.Builder().detectAll().penaltyDropBox().build());
+            VmPolicy.Builder policyBuilder = new VmPolicy.Builder().detectAll().penaltyDropBox();
+            if (IS_ENG_BUILD) {
+                policyBuilder.penaltyLog();
+            }
+            setVmPolicy(policyBuilder.build());
             setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
         }
         return true;
