@@ -16,6 +16,8 @@
 
 package android.content;
 
+import dalvik.system.CloseGuard;
+
 import android.accounts.Account;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
@@ -33,6 +35,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -1562,27 +1565,39 @@ public abstract class ContentResolver {
     private final class CursorWrapperInner extends CursorWrapper {
         private final IContentProvider mContentProvider;
         public static final String TAG="CursorWrapperInner";
-        private boolean mCloseFlag = false;
+
+        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private boolean mProviderReleased;
 
         CursorWrapperInner(Cursor cursor, IContentProvider icp) {
             super(cursor);
             mContentProvider = icp;
+            mCloseGuard.open("close");
         }
 
         @Override
         public void close() {
             super.close();
             ContentResolver.this.releaseProvider(mContentProvider);
-            mCloseFlag = true;
+            mProviderReleased = true;
+
+            if (mCloseGuard != null) {
+                mCloseGuard.close();
+            }
         }
 
         @Override
         protected void finalize() throws Throwable {
-            // TODO: integrate CloseGuard support.
             try {
-                if(!mCloseFlag) {
+                if (mCloseGuard != null) {
+                    mCloseGuard.warnIfOpen();
+                }
+
+                if (!mProviderReleased && mContentProvider != null) {
+                    // Even though we are using CloseGuard, log this anyway so that
+                    // application developers always see the message in the log.
                     Log.w(TAG, "Cursor finalized without prior close()");
-                    close();
+                    ContentResolver.this.releaseProvider(mContentProvider);
                 }
             } finally {
                 super.finalize();
