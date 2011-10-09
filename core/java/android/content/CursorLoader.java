@@ -50,19 +50,6 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
 
     Cursor mCursor;
 
-    final static class CloseTask extends AsyncTask<Cursor, Void, Void> {
-        @Override
-        protected Void doInBackground(Cursor... params) {
-            params[0].close();
-            return null;
-        }
-    }
-
-    static void closeAsync(Cursor cursor) {
-        CloseTask closeTask = new CloseTask();
-        closeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, cursor);
-    }
-
     /* Runs on a worker thread */
     @Override
     public Cursor loadInBackground() {
@@ -90,7 +77,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         if (isReset()) {
             // An async query came in while the loader is stopped
             if (cursor != null) {
-                closeAsync(cursor);
+                cursor.close();
             }
             return;
         }
@@ -102,7 +89,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         }
 
         if (oldCursor != null && oldCursor != cursor && !oldCursor.isClosed()) {
-            closeAsync(oldCursor);
+            oldCursor.close();
         }
     }
 
@@ -162,7 +149,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     @Override
     public void onCanceled(Cursor cursor) {
         if (cursor != null && !cursor.isClosed()) {
-            closeAsync(cursor);
+            cursor.close();
         }
     }
 
@@ -174,7 +161,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         onStopLoading();
 
         if (mCursor != null && !mCursor.isClosed()) {
-            closeAsync(mCursor);
+            mCursor.close();
         }
         mCursor = null;
     }
