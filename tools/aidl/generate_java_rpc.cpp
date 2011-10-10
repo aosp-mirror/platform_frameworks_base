@@ -18,13 +18,13 @@ Type* RPC_CONTAINER_TYPE = new Type("com.android.athome.connector", "ConnectorCo
 // TODO: Just use Endpoint, so this works for all endpoints.
 Type* RPC_CONNECTOR_TYPE = new Type("com.android.athome.connector", "Connector",
         Type::BUILT_IN, false, false, false);
-Type* RPC_ENDPOINT_INFO_TYPE = new ParcelableType("com.android.athome.rpc",
+Type* RPC_ENDPOINT_INFO_TYPE = new UserDataType("com.android.athome.rpc",
         "EndpointInfo", true, __FILE__, __LINE__);
-Type* RPC_RESULT_HANDLER_TYPE = new ParcelableType("com.android.athome.rpc", "RpcResultHandler",
+Type* RPC_RESULT_HANDLER_TYPE = new UserDataType("com.android.athome.rpc", "RpcResultHandler",
         true, __FILE__, __LINE__);
 Type* RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
         Type::BUILT_IN, false, false, false);
-Type* RPC_CONTEXT_TYPE = new ParcelableType("com.android.athome.rpc", "RpcContext", true,
+Type* RPC_CONTEXT_TYPE = new UserDataType("com.android.athome.rpc", "RpcContext", true,
         __FILE__, __LINE__);
 
 static void generate_create_from_data(Type* t, StatementBlock* addTo, const string& key,
