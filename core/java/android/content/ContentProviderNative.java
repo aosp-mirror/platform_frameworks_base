@@ -108,21 +108,22 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String sortOrder = data.readString();
                     IContentObserver observer = IContentObserver.Stub.asInterface(
                             data.readStrongBinder());
-                    CursorWindow window = CursorWindow.CREATOR.createFromParcel(data);
 
                     Cursor cursor = query(url, projection, selection, selectionArgs, sortOrder);
                     if (cursor != null) {
                         CursorToBulkCursorAdaptor adaptor = new CursorToBulkCursorAdaptor(
-                                cursor, observer, getProviderName(), window);
+                                cursor, observer, getProviderName());
                         final IBinder binder = adaptor.asBinder();
                         final int count = adaptor.count();
                         final int index = BulkCursorToCursorAdaptor.findRowIdColumnIndex(
                                 adaptor.getColumnNames());
+                        final boolean wantsAllOnMoveCalls = adaptor.getWantsAllOnMoveCalls();
 
                         reply.writeNoException();
                         reply.writeStrongBinder(binder);
                         reply.writeInt(count);
                         reply.writeInt(index);
+                        reply.writeInt(wantsAllOnMoveCalls ? 1 : 0);
                     } else {
                         reply.writeNoException();
                         reply.writeStrongBinder(null);
@@ -324,67 +325,58 @@ final class ContentProviderProxy implements IContentProvider
 
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException {
-        CursorWindow window = new CursorWindow(false /* window will be used remotely */);
+        BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
         try {
-            BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
-            Parcel data = Parcel.obtain();
-            Parcel reply = Parcel.obtain();
-            try {
-                data.writeInterfaceToken(IContentProvider.descriptor);
+            data.writeInterfaceToken(IContentProvider.descriptor);
 
-                url.writeToParcel(data, 0);
-                int length = 0;
-                if (projection != null) {
-                    length = projection.length;
-                }
-                data.writeInt(length);
-                for (int i = 0; i < length; i++) {
-                    data.writeString(projection[i]);
-                }
-                data.writeString(selection);
-                if (selectionArgs != null) {
-                    length = selectionArgs.length;
-                } else {
-                    length = 0;
-                }
-                data.writeInt(length);
-                for (int i = 0; i < length; i++) {
-                    data.writeString(selectionArgs[i]);
-                }
-                data.writeString(sortOrder);
-                data.writeStrongBinder(adaptor.getObserver().asBinder());
-                window.writeToParcel(data, 0);
-
-                mRemote.transact(IContentProvider.QUERY_TRANSACTION, data, reply, 0);
-
-                DatabaseUtils.readExceptionFromParcel(reply);
-
-                IBulkCursor bulkCursor = BulkCursorNative.asInterface(reply.readStrongBinder());
-                if (bulkCursor != null) {
-                    int rowCount = reply.readInt();
-                    int idColumnPosition = reply.readInt();
-                    adaptor.initialize(bulkCursor, rowCount, idColumnPosition);
-                } else {
-                    adaptor.close();
-                    adaptor = null;
-                }
-                return adaptor;
-            } catch (RemoteException ex) {
-                adaptor.close();
-                throw ex;
-            } catch (RuntimeException ex) {
-                adaptor.close();
-                throw ex;
-            } finally {
-                data.recycle();
-                reply.recycle();
+            url.writeToParcel(data, 0);
+            int length = 0;
+            if (projection != null) {
+                length = projection.length;
             }
+            data.writeInt(length);
+            for (int i = 0; i < length; i++) {
+                data.writeString(projection[i]);
+            }
+            data.writeString(selection);
+            if (selectionArgs != null) {
+                length = selectionArgs.length;
+            } else {
+                length = 0;
+            }
+            data.writeInt(length);
+            for (int i = 0; i < length; i++) {
+                data.writeString(selectionArgs[i]);
+            }
+            data.writeString(sortOrder);
+            data.writeStrongBinder(adaptor.getObserver().asBinder());
+
+            mRemote.transact(IContentProvider.QUERY_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+
+            IBulkCursor bulkCursor = BulkCursorNative.asInterface(reply.readStrongBinder());
+            if (bulkCursor != null) {
+                int rowCount = reply.readInt();
+                int idColumnPosition = reply.readInt();
+                boolean wantsAllOnMoveCalls = reply.readInt() != 0;
+                adaptor.initialize(bulkCursor, rowCount, idColumnPosition, wantsAllOnMoveCalls);
+            } else {
+                adaptor.close();
+                adaptor = null;
+            }
+            return adaptor;
+        } catch (RemoteException ex) {
+            adaptor.close();
+            throw ex;
+        } catch (RuntimeException ex) {
+            adaptor.close();
+            throw ex;
         } finally {
-            // We close the window now because the cursor adaptor does not
-            // take ownership of the window until the first call to onMove.
-            // The adaptor will obtain a fresh reference to the window when
-            // it is filled.
-            window.close();
+            data.recycle();
+            reply.recycle();
         }
     }
 
