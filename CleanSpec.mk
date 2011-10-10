@@ -116,6 +116,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
