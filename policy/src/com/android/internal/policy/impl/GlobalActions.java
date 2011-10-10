@@ -18,7 +18,6 @@ package com.android.internal.policy.impl;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,8 +55,6 @@ import java.util.ArrayList;
 class GlobalActions implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener  {
 
     private static final String TAG = "GlobalActions";
-
-    private StatusBarManager mStatusBar;
 
     private final Context mContext;
     private final AudioManager mAudioManager;
@@ -103,13 +100,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
         if (mDialog == null) {
-            mStatusBar = (StatusBarManager)mContext.getSystemService(Context.STATUS_BAR_SERVICE);
             mDialog = createDialog();
         }
         prepareDialog();
 
-        mStatusBar.disable(StatusBarManager.DISABLE_EXPAND);
         mDialog.show();
+        mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
     }
 
     /**
@@ -249,7 +245,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     /** {@inheritDoc} */
     public void onDismiss(DialogInterface dialog) {
-        mStatusBar.disable(StatusBarManager.DISABLE_NONE);
     }
 
     /** {@inheritDoc} */
