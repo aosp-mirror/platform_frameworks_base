@@ -353,8 +353,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     private boolean mCreatedWithASelection = false;
 
-    // Size of the window for the word iterator, should be greater than the longest word's length
-    private static final int WORD_ITERATOR_WINDOW_WIDTH = 50;
     private WordIterator mWordIterator;
 
     private SpellChecker mSpellChecker;
@@ -6124,7 +6122,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * not the full view width with padding.
      * {@hide}
      */
-    protected void makeNewLayout(int w, int hintWidth,
+    protected void makeNewLayout(int wantWidth, int hintWidth,
                                  BoringLayout.Metrics boring,
                                  BoringLayout.Metrics hintBoring,
                                  int ellipsisWidth, boolean bringIntoView) {
@@ -6136,8 +6134,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mHighlightPathBogus = true;
 
-        if (w < 0) {
-            w = 0;
+        if (wantWidth < 0) {
+            wantWidth = 0;
         }
         if (hintWidth < 0) {
             hintWidth = 0;
@@ -6157,12 +6155,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             resolveTextDirection();
         }
 
-        mLayout = makeSingleLayout(w, boring, ellipsisWidth, alignment, shouldEllipsize,
+        mLayout = makeSingleLayout(wantWidth, boring, ellipsisWidth, alignment, shouldEllipsize,
                 effectiveEllipsize, effectiveEllipsize == mEllipsize);
         if (switchEllipsize) {
             TruncateAt oppositeEllipsize = effectiveEllipsize == TruncateAt.MARQUEE ?
                     TruncateAt.END : TruncateAt.MARQUEE;
-            mSavedMarqueeModeLayout = makeSingleLayout(w, boring, ellipsisWidth, alignment,
+            mSavedMarqueeModeLayout = makeSingleLayout(wantWidth, boring, ellipsisWidth, alignment,
                     shouldEllipsize, oppositeEllipsize, effectiveEllipsize != mEllipsize);
         }
 
@@ -6170,7 +6168,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mHintLayout = null;
 
         if (mHint != null) {
-            if (shouldEllipsize) hintWidth = w;
+            if (shouldEllipsize) hintWidth = wantWidth;
 
             if (hintBoring == UNKNOWN_BORING) {
                 hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
@@ -6254,12 +6252,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         prepareCursorControllers();
     }
 
-    private Layout makeSingleLayout(int w, BoringLayout.Metrics boring, int ellipsisWidth,
+    private Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
             Layout.Alignment alignment, boolean shouldEllipsize, TruncateAt effectiveEllipsize,
             boolean useSaved) {
         Layout result = null;
         if (mText instanceof Spannable) {
-            result = new DynamicLayout(mText, mTransformed, mTextPaint, w,
+            result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
                     alignment, mTextDir, mSpacingMult,
                     mSpacingAdd, mIncludePad, mInput == null ? effectiveEllipsize : null,
                             ellipsisWidth);
@@ -6272,53 +6270,53 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (boring != null) {
-                if (boring.width <= w &&
+                if (boring.width <= wantWidth &&
                         (effectiveEllipsize == null || boring.width <= ellipsisWidth)) {
                     if (useSaved && mSavedLayout != null) {
                         result = mSavedLayout.replaceOrMake(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
+                                wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad);
                     } else {
                         result = BoringLayout.make(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
+                                wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad);
                     }
 
                     if (useSaved) {
                         mSavedLayout = (BoringLayout) result;
                     }
-                } else if (shouldEllipsize && boring.width <= w) {
+                } else if (shouldEllipsize && boring.width <= wantWidth) {
                     if (useSaved && mSavedLayout != null) {
                         result = mSavedLayout.replaceOrMake(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
+                                wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad, effectiveEllipsize,
                                 ellipsisWidth);
                     } else {
                         result = BoringLayout.make(mTransformed, mTextPaint,
-                                w, alignment, mSpacingMult, mSpacingAdd,
+                                wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad, effectiveEllipsize,
                                 ellipsisWidth);
                     }
                 } else if (shouldEllipsize) {
                     result = new StaticLayout(mTransformed,
                             0, mTransformed.length(),
-                            mTextPaint, w, alignment, mTextDir, mSpacingMult,
+                            mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
                             mSpacingAdd, mIncludePad, effectiveEllipsize,
                             ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 } else {
                     result = new StaticLayout(mTransformed, mTextPaint,
-                            w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
+                            wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
                             mIncludePad);
                 }
             } else if (shouldEllipsize) {
                 result = new StaticLayout(mTransformed,
                         0, mTransformed.length(),
-                        mTextPaint, w, alignment, mTextDir, mSpacingMult,
+                        mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
                         mSpacingAdd, mIncludePad, effectiveEllipsize,
                         ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             } else {
                 result = new StaticLayout(mTransformed, mTextPaint,
-                        w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
+                        wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
                         mIncludePad);
             }
         }
@@ -7749,98 +7747,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Create new SpellCheckSpans on the modified region.
      */
     private void updateSpellCheckSpans(int start, int end) {
-        if (!isTextEditable() || !isSuggestionsEnabled() || !getSpellChecker().isSessionActive())
-            return;
-        Editable text = (Editable) mText;
-
-        final int shift = prepareWordIterator(start, end);
-        final int shiftedStart = start - shift;
-        final int shiftedEnd = end - shift;
-
-        // Move back to the beginning of the current word, if any
-        int wordStart = mWordIterator.preceding(shiftedStart);
-        int wordEnd;
-        if (wordStart == BreakIterator.DONE) {
-            wordEnd = mWordIterator.following(shiftedStart);
-            if (wordEnd != BreakIterator.DONE) {
-                wordStart = mWordIterator.getBeginning(wordEnd);
-            }
-        } else {
-            wordEnd = mWordIterator.getEnd(wordStart);
-        }
-        if (wordEnd == BreakIterator.DONE) {
-            return;
-        }
-
-        // We need to expand by one character because we want to include the spans that end/start
-        // at position start/end respectively.
-        SpellCheckSpan[] spellCheckSpans = text.getSpans(start - 1, end + 1, SpellCheckSpan.class);
-        SuggestionSpan[] suggestionSpans = text.getSpans(start - 1, end + 1, SuggestionSpan.class);
-        final int numberOfSpellCheckSpans = spellCheckSpans.length;
-
-        // Iterate over the newly added text and schedule new SpellCheckSpans
-        while (wordStart <= shiftedEnd) {
-            if (wordEnd >= shiftedStart && wordEnd > wordStart) {
-                // A new word has been created across the interval boundaries. Remove previous spans
-                if (wordStart < shiftedStart && wordEnd > shiftedStart) {
-                    removeSpansAt(start, spellCheckSpans, text);
-                    removeSpansAt(start, suggestionSpans, text);
-                }
-
-                if (wordStart < shiftedEnd && wordEnd > shiftedEnd) {
-                    removeSpansAt(end, spellCheckSpans, text);
-                    removeSpansAt(end, suggestionSpans, text);
-                }
-
-                // Do not create new boundary spans if they already exist
-                boolean createSpellCheckSpan = true;
-                if (wordEnd == shiftedStart) {
-                    for (int i = 0; i < numberOfSpellCheckSpans; i++) {
-                        final int spanEnd = text.getSpanEnd(spellCheckSpans[i]);
-                        if (spanEnd == start) {
-                            createSpellCheckSpan = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (wordStart == shiftedEnd) {
-                    for (int i = 0; i < numberOfSpellCheckSpans; i++) {
-                        final int spanStart = text.getSpanStart(spellCheckSpans[i]);
-                        if (spanStart == end) {
-                            createSpellCheckSpan = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (createSpellCheckSpan) {
-                    mSpellChecker.addSpellCheckSpan(wordStart + shift, wordEnd + shift);
-                }
-            }
-
-            // iterate word by word
-            wordEnd = mWordIterator.following(wordEnd);
-            if (wordEnd == BreakIterator.DONE) break;
-            wordStart = mWordIterator.getBeginning(wordEnd);
-            if (wordStart == BreakIterator.DONE) {
-                Log.e(LOG_TAG, "No word beginning from " + (wordEnd + shift) + "in " + mText);
-                break;
-            }
-        }
-
-        mSpellChecker.spellCheck();
-    }
-
-    private static <T> void removeSpansAt(int offset, T[] spans, Editable text) {
-        final int length = spans.length;
-        for (int i = 0; i < length; i++) {
-            final T span = spans[i];
-            final int start = text.getSpanStart(span);
-            if (start > offset) continue;
-            final int end = text.getSpanEnd(span);
-            if (end < offset) continue;
-            text.removeSpan(span);
+        if (isTextEditable() && isSuggestionsEnabled()) {
+            getSpellChecker().spellCheck(start, end);
         }
     }
 
@@ -8930,15 +8838,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectionStart = ((Spanned) mText).getSpanStart(urlSpan);
             selectionEnd = ((Spanned) mText).getSpanEnd(urlSpan);
         } else {
-            final int shift = prepareWordIterator(minOffset, maxOffset);
+            if (mWordIterator == null) {
+                mWordIterator = new WordIterator();
+            }
+            mWordIterator.setCharSequence(mText, minOffset, maxOffset);
 
-            selectionStart = mWordIterator.getBeginning(minOffset - shift);
+            selectionStart = mWordIterator.getBeginning(minOffset);
             if (selectionStart == BreakIterator.DONE) return false;
-            selectionStart += shift;
 
-            selectionEnd = mWordIterator.getEnd(maxOffset - shift);
+            selectionEnd = mWordIterator.getEnd(maxOffset);
             if (selectionEnd == BreakIterator.DONE) return false;
-            selectionEnd += shift;
 
             if (selectionStart == selectionEnd) {
                 // Possible when the word iterator does not properly handle the text's language
@@ -8975,18 +8884,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return packRangeInLong(offset - 1,  offset);
         }
         return packRangeInLong(offset,  offset);
-    }
-
-    int prepareWordIterator(int start, int end) {
-        if (mWordIterator == null) {
-            mWordIterator = new WordIterator();
-        }
-
-        final int windowStart = Math.max(0, start - WORD_ITERATOR_WINDOW_WIDTH);
-        final int windowEnd = Math.min(mText.length(), end + WORD_ITERATOR_WINDOW_WIDTH);
-        mWordIterator.setCharSequence(mText.subSequence(windowStart, windowEnd));
-
-        return windowStart;
     }
 
     private SpellChecker getSpellChecker() {

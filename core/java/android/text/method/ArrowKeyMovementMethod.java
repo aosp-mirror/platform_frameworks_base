@@ -35,11 +35,11 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                 (MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0));
     }
 
-    private int getCurrentLineTop(Spannable buffer, Layout layout) {
+    private static int getCurrentLineTop(Spannable buffer, Layout layout) {
         return layout.getLineTop(layout.getLineForOffset(Selection.getSelectionEnd(buffer)));
     }
 
-    private int getPageHeight(TextView widget) {
+    private static int getPageHeight(TextView widget) {
         // This calculation does not take into account the view transformations that
         // may have been applied to the child or its containers.  In case of scaling or
         // rotation, the calculated page height may be incorrect.
@@ -196,14 +196,16 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
     /** {@hide} */
     @Override
     protected boolean leftWord(TextView widget, Spannable buffer) {
-        mWordIterator.setCharSequence(buffer);
+        final int selectionEnd = widget.getSelectionEnd();
+        mWordIterator.setCharSequence(buffer, selectionEnd, selectionEnd);
         return Selection.moveToPreceding(buffer, mWordIterator, isSelecting(buffer));
     }
 
     /** {@hide} */
     @Override
     protected boolean rightWord(TextView widget, Spannable buffer) {
-        mWordIterator.setCharSequence(buffer);
+        final int selectionEnd = widget.getSelectionEnd();
+        mWordIterator.setCharSequence(buffer, selectionEnd, selectionEnd);
         return Selection.moveToFollowing(buffer, mWordIterator, isSelecting(buffer));
     }
 
