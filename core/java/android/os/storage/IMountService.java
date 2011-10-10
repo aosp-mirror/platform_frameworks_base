@@ -658,6 +658,24 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
+            @Override
+            public int verifyEncryptionPassword(String password) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(password);
+                    mRemote.transact(Stub.TRANSACTION_verifyEncryptionPassword, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
             public Parcelable[] getVolumeList() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -760,6 +778,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_getSecureContainerFilesystemPath = IBinder.FIRST_CALL_TRANSACTION + 30;
 
         static final int TRANSACTION_getEncryptionState = IBinder.FIRST_CALL_TRANSACTION + 31;
+
+        static final int TRANSACTION_verifyEncryptionPassword = IBinder.FIRST_CALL_TRANSACTION + 32;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1284,6 +1304,12 @@ public interface IMountService extends IInterface {
      * Changes the encryption password.
      */
     public int changeEncryptionPassword(String password) throws RemoteException;
+
+    /**
+     * Verify the encryption password against the stored volume.  This method
+     * may only be called by the system process.
+     */
+    public int verifyEncryptionPassword(String password) throws RemoteException;
 
     /**
      * Returns list of all mountable volumes.
