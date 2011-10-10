@@ -23,4 +23,7 @@ limitations under the License.
     android:background="#ffffffff"
     android:singleLine="true"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/searchResultListItemHeight" />
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:paddingTop="3dip"
+    android:paddingBottom="3dip" />
