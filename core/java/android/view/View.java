@@ -10125,6 +10125,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         return mHardwareLayer;
     }
 
+    /**
+     * Destroys this View's hardware layer if possible.
+     * 
+     * @return True if the layer was destroyed, false otherwise.
+     * 
+     * @see #setLayerType(int, android.graphics.Paint) 
+     * @see #LAYER_TYPE_HARDWARE
+     */
     boolean destroyLayer() {
         if (mHardwareLayer != null) {
             mHardwareLayer.destroy();
