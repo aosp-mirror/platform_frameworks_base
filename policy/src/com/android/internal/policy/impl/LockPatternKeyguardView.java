@@ -98,7 +98,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     private View mLockScreen;
     private View mUnlockScreen;
 
-    private boolean mScreenOn = false;
+    private volatile boolean mScreenOn = false;
+    private volatile boolean mWindowFocused = false;
     private boolean mEnableFallback = false; // assume no fallback UI until we know better
 
     private boolean mShowLockBeforeUnlock = false;
@@ -110,6 +111,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     private boolean mFaceLockServiceRunning = false;
     private final Object mFaceLockServiceRunningLock = new Object();
+    private final Object mFaceLockStartupLock = new Object();
 
     private Handler mHandler;
     private final int MSG_SHOW_FACELOCK_AREA_VIEW = 0;
@@ -514,13 +516,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         stopAndUnbindFromFaceLock();
     }
 
-    @Override
-    public void onScreenTurnedOn() {
-        mScreenOn = true;
-        show();
-
-        // When screen is turned on, need to bind to FaceLock service if we are using FaceLock
-        // But only if not dealing with a call
+    /** When screen is turned on and focused, need to bind to FaceLock service if we are using
+     *  FaceLock, but only if we're not dealing with a call
+    */
+    private void activateFaceLockIfAble() {
         final boolean transportInvisible = mTransportControlView == null ? true :
                 mTransportControlView.getVisibility() != View.VISIBLE;
         if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
@@ -534,12 +533,34 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         }
     }
 
-    /** Unbind from facelock if something covers this window (such as an alarm) */
+    @Override
+    public void onScreenTurnedOn() {
+        boolean runFaceLock = false;
+        //Make sure to start facelock iff the screen is both on and focused
+        synchronized(mFaceLockStartupLock) {
+            mScreenOn = true;
+            runFaceLock = mWindowFocused;
+        }
+        show();
+        if(runFaceLock) activateFaceLockIfAble();
+    }
+
+    /** Unbind from facelock if something covers this window (such as an alarm)
+     * bind to facelock if the lockscreen window just came into focus, and the screen is on
+     */
     @Override
     public void onWindowFocusChanged (boolean hasWindowFocus) {
+        boolean runFaceLock = false;
+        //Make sure to start facelock iff the screen is both on and focused
+        synchronized(mFaceLockStartupLock) {
+            if(mScreenOn && !mWindowFocused) runFaceLock = hasWindowFocus;
+            mWindowFocused = hasWindowFocus;
+        }
         if(!hasWindowFocus) {
             stopAndUnbindFromFaceLock();
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+        } else if (runFaceLock) {
+            activateFaceLockIfAble();
         }
     }
 
