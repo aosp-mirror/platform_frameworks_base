@@ -1032,6 +1032,8 @@ public final class WebViewCore {
 
         static final int EXECUTE_JS = 194;
 
+        static final int PLUGIN_SURFACE_READY = 195;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1585,6 +1587,10 @@ public final class WebViewCore {
 
                         case HIDE_FULLSCREEN:
                             nativeFullScreenPluginHidden(msg.arg1);
+                            break;
+
+                        case PLUGIN_SURFACE_READY:
+                            nativePluginSurfaceReady();
                             break;
 
                         case ADD_PACKAGE_NAMES:
@@ -2826,6 +2832,7 @@ public final class WebViewCore {
     private native void nativeResume();
     private native void nativeFreeMemory();
     private native void nativeFullScreenPluginHidden(int npp);
+    private native void nativePluginSurfaceReady();
     private native boolean nativeValidNodeAndBounds(int frame, int node,
             Rect bounds);
 
