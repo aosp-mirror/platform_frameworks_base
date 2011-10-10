@@ -73,6 +73,7 @@ import android.util.SparseIntArray;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.telephony.Phone;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.google.android.collect.Lists;
@@ -1649,11 +1650,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleConnect(NetworkInfo info) {
-        int type = info.getType();
+        final int type = info.getType();
 
         // snapshot isFailover, because sendConnectedBroadcast() resets it
         boolean isFailover = info.isFailover();
-        NetworkStateTracker thisNet = mNetTrackers[type];
+        final NetworkStateTracker thisNet = mNetTrackers[type];
 
         // if this is a default net and other default is running
         // kill the one not preferred
@@ -1710,6 +1711,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         updateNetworkSettings(thisNet);
         handleConnectivityChange(type, false);
         sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
+
+        // notify battery stats service about this network
+        final String iface = thisNet.getLinkProperties().getInterfaceName();
+        if (iface != null) {
+            try {
+                BatteryStatsService.getService().noteNetworkInterfaceType(iface, type);
+            } catch (RemoteException e) {
+                // ignored; service lives in system_server
+            }
+        }
     }
 
     /**

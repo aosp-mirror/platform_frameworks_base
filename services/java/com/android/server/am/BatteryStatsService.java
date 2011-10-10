@@ -417,6 +417,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteNetworkInterfaceType(String iface, int type) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteNetworkInterfaceTypeLocked(iface, type);
+        }
+    }
+
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
