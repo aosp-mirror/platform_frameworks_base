@@ -17,14 +17,9 @@
 
 package android.text.method;
 
-import android.text.CharSequenceIterator;
-import android.text.Editable;
 import android.text.Selection;
-import android.text.Spanned;
-import android.text.TextWatcher;
 
 import java.text.BreakIterator;
-import java.text.CharacterIterator;
 import java.util.Locale;
 
 /**
@@ -36,8 +31,11 @@ import java.util.Locale;
  * {@hide}
  */
 public class WordIterator implements Selection.PositionIterator {
-    private CharSequence mCurrent;
-    private boolean mCurrentDirty = false;
+    // Size of the window for the word iterator, should be greater than the longest word's length
+    private static final int WINDOW_WIDTH = 50;
+
+    private String mString;
+    private int mOffsetShift;
 
     private BreakIterator mIterator;
 
@@ -56,70 +54,40 @@ public class WordIterator implements Selection.PositionIterator {
         mIterator = BreakIterator.getWordInstance(locale);
     }
 
-    private final TextWatcher mWatcher = new TextWatcher() {
-        /** {@inheritDoc} */
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // ignored
-        }
+    public void setCharSequence(CharSequence charSequence, int start, int end) {
+        mOffsetShift = Math.max(0, start - WINDOW_WIDTH);
+        final int windowEnd = Math.min(charSequence.length(), end + WINDOW_WIDTH);
 
-        /** {@inheritDoc} */
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            mCurrentDirty = true;
-        }
-
-        /** {@inheritDoc} */
-        public void afterTextChanged(Editable s) {
-            // ignored
-        }
-    };
-
-    public void setCharSequence(CharSequence incoming) {
-        // When incoming is different object, move listeners to new sequence
-        // and mark as dirty so we reload contents.
-        if (mCurrent != incoming) {
-            if (mCurrent instanceof Editable) {
-                ((Editable) mCurrent).removeSpan(mWatcher);
-            }
-
-            if (incoming instanceof Editable) {
-                ((Editable) incoming).setSpan(
-                        mWatcher, 0, incoming.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-            }
-
-            mCurrent = incoming;
-            mCurrentDirty = true;
-        }
-
-        if (mCurrentDirty) {
-            final CharacterIterator charIterator = new CharSequenceIterator(mCurrent);
-            mIterator.setText(charIterator);
-
-            mCurrentDirty = false;
-        }
+        mString = charSequence.toString().substring(mOffsetShift, windowEnd);
+        mIterator.setText(mString);
     }
 
     /** {@inheritDoc} */
     public int preceding(int offset) {
+        int shiftedOffset = offset - mOffsetShift;
         do {
-            offset = mIterator.preceding(offset);
-            if (offset == BreakIterator.DONE || isOnLetterOrDigit(offset)) {
-                break;
+            shiftedOffset = mIterator.preceding(shiftedOffset);
+            if (shiftedOffset == BreakIterator.DONE) {
+                return BreakIterator.DONE;
+            }
+            if (isOnLetterOrDigit(shiftedOffset)) {
+                return shiftedOffset + mOffsetShift;
             }
         } while (true);
-
-        return offset;
     }
 
     /** {@inheritDoc} */
     public int following(int offset) {
+        int shiftedOffset = offset - mOffsetShift;
         do {
-            offset = mIterator.following(offset);
-            if (offset == BreakIterator.DONE || isAfterLetterOrDigit(offset)) {
-                break;
+            shiftedOffset = mIterator.following(shiftedOffset);
+            if (shiftedOffset == BreakIterator.DONE) {
+                return BreakIterator.DONE;
+            }
+            if (isAfterLetterOrDigit(shiftedOffset)) {
+                return shiftedOffset + mOffsetShift;
             }
         } while (true);
-
-        return offset;
     }
 
     /** If <code>offset</code> is within a word, returns the index of the first character of that
@@ -135,17 +103,18 @@ public class WordIterator implements Selection.PositionIterator {
      * @throws IllegalArgumentException is offset is not valid.
      */
     public int getBeginning(int offset) {
-        checkOffsetIsValid(offset);
+        final int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
 
-        if (isOnLetterOrDigit(offset)) {
-            if (mIterator.isBoundary(offset)) {
-                return offset;
+        if (isOnLetterOrDigit(shiftedOffset)) {
+            if (mIterator.isBoundary(shiftedOffset)) {
+                return shiftedOffset + mOffsetShift;
             } else {
-                return mIterator.preceding(offset);
+                return mIterator.preceding(shiftedOffset) + mOffsetShift;
             }
         } else {
-            if (isAfterLetterOrDigit(offset)) {
-                return mIterator.preceding(offset);
+            if (isAfterLetterOrDigit(shiftedOffset)) {
+                return mIterator.preceding(shiftedOffset) + mOffsetShift;
             }
         }
         return BreakIterator.DONE;
@@ -164,58 +133,44 @@ public class WordIterator implements Selection.PositionIterator {
      * @throws IllegalArgumentException is offset is not valid.
      */
     public int getEnd(int offset) {
-        checkOffsetIsValid(offset);
+        final int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
 
-        if (isAfterLetterOrDigit(offset)) {
-            if (mIterator.isBoundary(offset)) {
-                return offset;
+        if (isAfterLetterOrDigit(shiftedOffset)) {
+            if (mIterator.isBoundary(shiftedOffset)) {
+                return shiftedOffset + mOffsetShift;
             } else {
-                return mIterator.following(offset);
+                return mIterator.following(shiftedOffset) + mOffsetShift;
             }
         } else {
-            if (isOnLetterOrDigit(offset)) {
-                return mIterator.following(offset);
+            if (isOnLetterOrDigit(shiftedOffset)) {
+                return mIterator.following(shiftedOffset) + mOffsetShift;
             }
         }
         return BreakIterator.DONE;
     }
 
-    private boolean isAfterLetterOrDigit(int offset) {
-        if (offset - 1 >= 0) {
-            final char previousChar = mCurrent.charAt(offset - 1);
-            if (Character.isLetterOrDigit(previousChar)) return true;
-            if (offset - 2 >= 0) {
-                final char previousPreviousChar = mCurrent.charAt(offset - 2);
-                if (Character.isSurrogatePair(previousPreviousChar, previousChar)) {
-                    final int codePoint = Character.toCodePoint(previousPreviousChar, previousChar);
-                    return Character.isLetterOrDigit(codePoint);
-                }
-            }
+    private boolean isAfterLetterOrDigit(int shiftedOffset) {
+        if (shiftedOffset >= 1 && shiftedOffset <= mString.length()) {
+            final int codePoint = mString.codePointBefore(shiftedOffset);
+            if (Character.isLetterOrDigit(codePoint)) return true;
         }
         return false;
     }
 
-    private boolean isOnLetterOrDigit(int offset) {
-        final int length = mCurrent.length();
-        if (offset < length) {
-            final char currentChar = mCurrent.charAt(offset);
-            if (Character.isLetterOrDigit(currentChar)) return true;
-            if (offset + 1 < length) {
-                final char nextChar = mCurrent.charAt(offset + 1);
-                if (Character.isSurrogatePair(currentChar, nextChar)) {
-                    final int codePoint = Character.toCodePoint(currentChar, nextChar);
-                    return Character.isLetterOrDigit(codePoint);
-                }
-            }
+    private boolean isOnLetterOrDigit(int shiftedOffset) {
+        if (shiftedOffset >= 0 && shiftedOffset < mString.length()) {
+            final int codePoint = mString.codePointAt(shiftedOffset);
+            if (Character.isLetterOrDigit(codePoint)) return true;
         }
         return false;
     }
 
-    private void checkOffsetIsValid(int offset) {
-        if (offset < 0 || offset > mCurrent.length()) {
-            final String message = "Invalid offset: " + offset +
-                    ". Valid range is [0, " + mCurrent.length() + "]";
-            throw new IllegalArgumentException(message);
+    private void checkOffsetIsValid(int shiftedOffset) {
+        if (shiftedOffset < 0 || shiftedOffset > mString.length()) {
+            throw new IllegalArgumentException("Invalid offset: " + (shiftedOffset + mOffsetShift) +
+                    ". Valid range is [" + mOffsetShift + ", " + (mString.length() + mOffsetShift) +
+                    "]");
         }
     }
 }

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spanned;
+import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
 import android.view.textservice.SpellCheckerSession;
@@ -30,6 +31,8 @@ import android.view.textservice.TextServicesManager;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.text.BreakIterator;
+
 
 /**
  * Helper class for TextView. Bridge between the TextView and the Dictionnary service.
@@ -38,23 +41,30 @@ import com.android.internal.util.ArrayUtils;
  */
 public class SpellChecker implements SpellCheckerSessionListener {
 
+    private final static int MAX_SPELL_BATCH_SIZE = 50;
+
     private final TextView mTextView;
+    private final Editable mText;
 
     final SpellCheckerSession mSpellCheckerSession;
     final int mCookie;
 
     // Paired arrays for the (id, spellCheckSpan) pair. A negative id means the associated
     // SpellCheckSpan has been recycled and can be-reused.
-    // May contain null SpellCheckSpans after a given index.
+    // Contains null SpellCheckSpans after index mLength.
     private int[] mIds;
     private SpellCheckSpan[] mSpellCheckSpans;
     // The mLength first elements of the above arrays have been initialized
     private int mLength;
 
+    // Parsers on chunck of text, cutting text into words that will be checked
+    private SpellParser[] mSpellParsers = new SpellParser[0];
+
     private int mSpanSequenceCounter = 0;
 
     public SpellChecker(TextView textView) {
         mTextView = textView;
+        mText = (Editable) textView.getText();
 
         final TextServicesManager textServicesManager = (TextServicesManager) textView.getContext().
                 getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
@@ -62,7 +72,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 null /* not currently used by the textServicesManager */,
                 null /* null locale means use the languages defined in Settings
                         if referToSpellCheckerLanguageSettings is true */,
-                this, true /* means use the languages defined in Settings */);
+                        this, true /* means use the languages defined in Settings */);
         mCookie = hashCode();
 
         // Arbitrary: 4 simultaneous spell check spans. Will automatically double size on demand
@@ -76,13 +86,18 @@ public class SpellChecker implements SpellCheckerSessionListener {
      * @return true if a spell checker session has successfully been created. Returns false if not,
      * for instance when spell checking has been disabled in settings.
      */
-    public boolean isSessionActive() {
+    private boolean isSessionActive() {
         return mSpellCheckerSession != null;
     }
 
     public void closeSession() {
         if (mSpellCheckerSession != null) {
             mSpellCheckerSession.close();
+        }
+
+        final int length = mSpellParsers.length;
+        for (int i = 0; i < length; i++) {
+            mSpellParsers[i].close();
         }
     }
 
@@ -106,10 +121,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
         return mLength - 1;
     }
 
-    public void addSpellCheckSpan(int wordStart, int wordEnd) {
+    private void addSpellCheckSpan(int start, int end) {
         final int index = nextSpellCheckSpanIndex();
-        ((Editable) mTextView.getText()).setSpan(mSpellCheckSpans[index], wordStart, wordEnd,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mText.setSpan(mSpellCheckSpans[index], start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         mIds[index] = mSpanSequenceCounter++;
     }
 
@@ -127,12 +141,35 @@ public class SpellChecker implements SpellCheckerSessionListener {
         spellCheck();
     }
 
-    public void spellCheck() {
+    public void spellCheck(int start, int end) {
+        if (!isSessionActive()) return;
+
+        final int length = mSpellParsers.length;
+        for (int i = 0; i < length; i++) {
+            final SpellParser spellParser = mSpellParsers[i];
+            if (spellParser.isDone()) {
+                spellParser.init(start, end);
+                spellParser.parse();
+                return;
+            }
+        }
+
+        // No available parser found in pool, create a new one
+        SpellParser[] newSpellParsers = new SpellParser[length + 1];
+        System.arraycopy(mSpellParsers, 0, newSpellParsers, 0, length);
+        mSpellParsers = newSpellParsers;
+
+        SpellParser spellParser = new SpellParser();
+        mSpellParsers[length] = spellParser;
+        spellParser.init(start, end);
+        spellParser.parse();
+    }
+
+    private void spellCheck() {
         if (mSpellCheckerSession == null) return;
 
-        final Editable editable = (Editable) mTextView.getText();
-        final int selectionStart = Selection.getSelectionStart(editable);
-        final int selectionEnd = Selection.getSelectionEnd(editable);
+        final int selectionStart = Selection.getSelectionStart(mText);
+        final int selectionEnd = Selection.getSelectionEnd(mText);
 
         TextInfo[] textInfos = new TextInfo[mLength];
         int textInfosCount = 0;
@@ -141,19 +178,19 @@ public class SpellChecker implements SpellCheckerSessionListener {
             final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[i];
             if (spellCheckSpan.isSpellCheckInProgress()) continue;
 
-            final int start = editable.getSpanStart(spellCheckSpan);
-            final int end = editable.getSpanEnd(spellCheckSpan);
+            final int start = mText.getSpanStart(spellCheckSpan);
+            final int end = mText.getSpanEnd(spellCheckSpan);
 
             // Do not check this word if the user is currently editing it
             if (start >= 0 && end > start && (selectionEnd < start || selectionStart > end)) {
-                final String word = editable.subSequence(start, end).toString();
+                final String word = mText.subSequence(start, end).toString();
                 spellCheckSpan.setSpellCheckInProgress(true);
                 textInfos[textInfosCount++] = new TextInfo(word, mCookie, mIds[i]);
             }
         }
 
         if (textInfosCount > 0) {
-            if (textInfosCount < mLength) {
+            if (textInfosCount < textInfos.length) {
                 TextInfo[] textInfosCopy = new TextInfo[textInfosCount];
                 System.arraycopy(textInfos, 0, textInfosCopy, 0, textInfosCount);
                 textInfos = textInfosCopy;
@@ -165,7 +202,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     @Override
     public void onGetSuggestions(SuggestionsInfo[] results) {
-        final Editable editable = (Editable) mTextView.getText();
         for (int i = 0; i < results.length; i++) {
             SuggestionsInfo suggestionsInfo = results[i];
             if (suggestionsInfo.getCookie() != mCookie) continue;
@@ -181,27 +217,35 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
                     SpellCheckSpan spellCheckSpan = mSpellCheckSpans[j];
                     if (!isInDictionary && looksLikeTypo) {
-                        createMisspelledSuggestionSpan(editable, suggestionsInfo, spellCheckSpan);
+                        createMisspelledSuggestionSpan(suggestionsInfo, spellCheckSpan);
                     }
-                    editable.removeSpan(spellCheckSpan);
+                    mText.removeSpan(spellCheckSpan);
                     break;
                 }
             }
         }
+
+        final int length = mSpellParsers.length;
+        for (int i = 0; i < length; i++) {
+            final SpellParser spellParser = mSpellParsers[i];
+            if (!spellParser.isDone()) {
+                spellParser.parse();
+            }
+        }
     }
 
-    private void createMisspelledSuggestionSpan(Editable editable, SuggestionsInfo suggestionsInfo,
+    private void createMisspelledSuggestionSpan(SuggestionsInfo suggestionsInfo,
             SpellCheckSpan spellCheckSpan) {
-        final int start = editable.getSpanStart(spellCheckSpan);
-        final int end = editable.getSpanEnd(spellCheckSpan);
+        final int start = mText.getSpanStart(spellCheckSpan);
+        final int end = mText.getSpanEnd(spellCheckSpan);
 
         // Other suggestion spans may exist on that region, with identical suggestions, filter
         // them out to avoid duplicates. First, filter suggestion spans on that exact region.
-        SuggestionSpan[] suggestionSpans = editable.getSpans(start, end, SuggestionSpan.class);
+        SuggestionSpan[] suggestionSpans = mText.getSpans(start, end, SuggestionSpan.class);
         final int length = suggestionSpans.length;
         for (int i = 0; i < length; i++) {
-            final int spanStart = editable.getSpanStart(suggestionSpans[i]);
-            final int spanEnd = editable.getSpanEnd(suggestionSpans[i]);
+            final int spanStart = mText.getSpanStart(suggestionSpans[i]);
+            final int spanEnd = mText.getSpanEnd(suggestionSpans[i]);
             if (spanStart != start || spanEnd != end) {
                 suggestionSpans[i] = null;
                 break;
@@ -249,9 +293,132 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
                 SuggestionSpan.FLAG_EASY_CORRECT | SuggestionSpan.FLAG_MISSPELLED);
-        editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mText.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         // TODO limit to the word rectangle region
         mTextView.invalidate();
+    }
+
+    private class SpellParser {
+        private WordIterator mWordIterator = new WordIterator(/*TODO Locale*/);
+        private Object mRange = new Object();
+
+        public void init(int start, int end) {
+            mText.setSpan(mRange, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        public void close() {
+            mText.removeSpan(mRange);
+        }
+
+        public boolean isDone() {
+            return mText.getSpanStart(mRange) < 0;
+        }
+
+        public void parse() {
+            // Iterate over the newly added text and schedule new SpellCheckSpans
+            final int start = mText.getSpanStart(mRange);
+            final int end = mText.getSpanEnd(mRange);
+            mWordIterator.setCharSequence(mText, start, end);
+
+            // Move back to the beginning of the current word, if any
+            int wordStart = mWordIterator.preceding(start);
+            int wordEnd;
+            if (wordStart == BreakIterator.DONE) {
+                wordEnd = mWordIterator.following(start);
+                if (wordEnd != BreakIterator.DONE) {
+                    wordStart = mWordIterator.getBeginning(wordEnd);
+                }
+            } else {
+                wordEnd = mWordIterator.getEnd(wordStart);
+            }
+            if (wordEnd == BreakIterator.DONE) {
+                mText.removeSpan(mRange);
+                return;
+            }
+
+            // We need to expand by one character because we want to include the spans that
+            // end/start at position start/end respectively.
+            SpellCheckSpan[] spellCheckSpans = mText.getSpans(start-1, end+1, SpellCheckSpan.class);
+            SuggestionSpan[] suggestionSpans = mText.getSpans(start-1, end+1, SuggestionSpan.class);
+
+            int nbWordsChecked = 0;
+            boolean scheduleOtherSpellCheck = false;
+
+            while (wordStart <= end) {
+                if (wordEnd >= start && wordEnd > wordStart) {
+                    // A new word has been created across the interval boundaries with this edit.
+                    // Previous spans (ended on start / started on end) removed, not valid anymore
+                    if (wordStart < start && wordEnd > start) {
+                        removeSpansAt(start, spellCheckSpans);
+                        removeSpansAt(start, suggestionSpans);
+                    }
+
+                    if (wordStart < end && wordEnd > end) {
+                        removeSpansAt(end, spellCheckSpans);
+                        removeSpansAt(end, suggestionSpans);
+                    }
+
+                    // Do not create new boundary spans if they already exist
+                    boolean createSpellCheckSpan = true;
+                    if (wordEnd == start) {
+                        for (int i = 0; i < spellCheckSpans.length; i++) {
+                            final int spanEnd = mText.getSpanEnd(spellCheckSpans[i]);
+                            if (spanEnd == start) {
+                                createSpellCheckSpan = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (wordStart == end) {
+                        for (int i = 0; i < spellCheckSpans.length; i++) {
+                            final int spanStart = mText.getSpanStart(spellCheckSpans[i]);
+                            if (spanStart == end) {
+                                createSpellCheckSpan = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (createSpellCheckSpan) {
+                        if (nbWordsChecked == MAX_SPELL_BATCH_SIZE) {
+                            scheduleOtherSpellCheck = true;
+                            break;
+                        }
+                        addSpellCheckSpan(wordStart, wordEnd);
+                        nbWordsChecked++;
+                    }
+                }
+
+                // iterate word by word
+                wordEnd = mWordIterator.following(wordEnd);
+                if (wordEnd == BreakIterator.DONE) break;
+                wordStart = mWordIterator.getBeginning(wordEnd);
+                if (wordStart == BreakIterator.DONE) {
+                    break;
+                }
+            }
+
+            if (scheduleOtherSpellCheck) {
+                mText.setSpan(mRange, wordStart, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                mText.removeSpan(mRange);
+            }
+
+            spellCheck();
+        }
+
+        private <T> void removeSpansAt(int offset, T[] spans) {
+            final int length = spans.length;
+            for (int i = 0; i < length; i++) {
+                final T span = spans[i];
+                final int start = mText.getSpanStart(span);
+                if (start > offset) continue;
+                final int end = mText.getSpanEnd(span);
+                if (end < offset) continue;
+                mText.removeSpan(span);
+            }
+        }
     }
 }
