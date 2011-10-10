@@ -91,8 +91,10 @@ class Composer : public Singleton<Composer>
 
     mutable Mutex               mLock;
     SortedVector<ComposerState> mStates;
+    int                         mOrientation;
 
-    Composer() : Singleton<Composer>() { }
+    Composer() : Singleton<Composer>(),
+        mOrientation(ISurfaceComposer::eOrientationUnchanged) { }
 
     void closeGlobalTransactionImpl();
 
@@ -119,6 +121,7 @@ public:
     status_t setFreezeTint(
             const sp<SurfaceComposerClient>& client, SurfaceID id,
             uint32_t tint);
+    status_t setOrientation(int orientation);
 
     static void closeGlobalTransaction() {
         Composer::getInstance().closeGlobalTransactionImpl();
@@ -133,14 +136,18 @@ void Composer::closeGlobalTransactionImpl() {
     sp<ISurfaceComposer> sm(getComposerService());
 
     Vector<ComposerState> transaction;
+    int orientation;
 
     { // scope for the lock
         Mutex::Autolock _l(mLock);
         transaction = mStates;
         mStates.clear();
+
+        orientation = mOrientation;
+        mOrientation = ISurfaceComposer::eOrientationUnchanged;
     }
 
-   sm->setTransactionState(transaction);
+   sm->setTransactionState(transaction, orientation);
 }
 
 layer_state_t* Composer::getLayerStateLocked(
@@ -257,6 +264,12 @@ status_t Composer::setFreezeTint(const sp<SurfaceComposerClient>& client,
         return BAD_INDEX;
     s->what |= ISurfaceComposer::eFreezeTintChanged;
     s->tint = tint;
+    return NO_ERROR;
+}
+
+status_t Composer::setOrientation(int orientation) {
+    Mutex::Autolock _l(mLock);
+    mOrientation = orientation;
     return NO_ERROR;
 }
 
@@ -427,6 +440,12 @@ status_t SurfaceComposerClient::setMatrix(SurfaceID id, float dsdx, float dtdx,
     return getComposer().setMatrix(this, id, dsdx, dtdx, dsdy, dtdy);
 }
 
+status_t SurfaceComposerClient::setOrientation(DisplayID dpy,
+        int orientation, uint32_t flags)
+{
+    return Composer::getInstance().setOrientation(orientation);
+}
+
 // ----------------------------------------------------------------------------
 
 status_t SurfaceComposerClient::getDisplayInfo(
@@ -491,21 +510,14 @@ ssize_t SurfaceComposerClient::getNumberOfDisplays()
 
 status_t SurfaceComposerClient::freezeDisplay(DisplayID dpy, uint32_t flags)
 {
-    sp<ISurfaceComposer> sm(getComposerService());
-    return sm->freezeDisplay(dpy, flags);
+    // This has been made a no-op because it can cause Gralloc buffer deadlocks.
+    return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::unfreezeDisplay(DisplayID dpy, uint32_t flags)
 {
-    sp<ISurfaceComposer> sm(getComposerService());
-    return sm->unfreezeDisplay(dpy, flags);
-}
-
-int SurfaceComposerClient::setOrientation(DisplayID dpy,
-        int orientation, uint32_t flags)
-{
-    sp<ISurfaceComposer> sm(getComposerService());
-    return sm->setOrientation(dpy, orientation, flags);
+    // This has been made a no-op because it can cause Gralloc buffer deadlocks.
+    return NO_ERROR;
 }
 
 // ----------------------------------------------------------------------------
@@ -572,4 +584,3 @@ size_t ScreenshotClient::getSize() const {
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-

@@ -78,7 +78,8 @@ public:
         return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
 
-    virtual void setTransactionState(const Vector<ComposerState>& state)
+    virtual void setTransactionState(const Vector<ComposerState>& state,
+            int orientation)
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
@@ -88,38 +89,8 @@ public:
         for ( ; b != e ; ++b ) {
             b->write(data);
         }
-        remote()->transact(BnSurfaceComposer::SET_TRANSACTION_STATE, data, &reply);
-    }
-
-    virtual status_t freezeDisplay(DisplayID dpy, uint32_t flags)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        data.writeInt32(dpy);
-        data.writeInt32(flags);
-        remote()->transact(BnSurfaceComposer::FREEZE_DISPLAY, data, &reply);
-        return reply.readInt32();
-    }
-
-    virtual status_t unfreezeDisplay(DisplayID dpy, uint32_t flags)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        data.writeInt32(dpy);
-        data.writeInt32(flags);
-        remote()->transact(BnSurfaceComposer::UNFREEZE_DISPLAY, data, &reply);
-        return reply.readInt32();
-    }
-
-    virtual int setOrientation(DisplayID dpy, int orientation, uint32_t flags)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        data.writeInt32(dpy);
         data.writeInt32(orientation);
-        data.writeInt32(flags);
-        remote()->transact(BnSurfaceComposer::SET_ORIENTATION, data, &reply);
-        return reply.readInt32();
+        remote()->transact(BnSurfaceComposer::SET_TRANSACTION_STATE, data, &reply);
     }
 
     virtual void bootFinished()
@@ -232,26 +203,8 @@ status_t BnSurfaceComposer::onTransact(
                 s.read(data);
                 state.add(s);
             }
-            setTransactionState(state);
-        } break;
-        case SET_ORIENTATION: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            DisplayID dpy = data.readInt32();
             int orientation = data.readInt32();
-            uint32_t flags = data.readInt32();
-            reply->writeInt32( setOrientation(dpy, orientation, flags) );
-        } break;
-        case FREEZE_DISPLAY: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            DisplayID dpy = data.readInt32();
-            uint32_t flags = data.readInt32();
-            reply->writeInt32( freezeDisplay(dpy, flags) );
-        } break;
-        case UNFREEZE_DISPLAY: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            DisplayID dpy = data.readInt32();
-            uint32_t flags = data.readInt32();
-            reply->writeInt32( unfreezeDisplay(dpy, flags) );
+            setTransactionState(state, orientation);
         } break;
         case BOOT_FINISHED: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);

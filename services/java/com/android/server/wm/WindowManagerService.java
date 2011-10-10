@@ -5230,32 +5230,27 @@ public class WindowManagerService extends IWindowManager.Stub
         startFreezingDisplayLocked(inTransaction);
         mInputManager.setDisplayOrientation(0, rotation);
 
-        // NOTE: We disable the rotation in the emulator because
-        //       it doesn't support hardware OpenGL emulation yet.
-        if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
-                && mScreenRotationAnimation.hasScreenshot()) {
-            Surface.freezeDisplay(0);
-            if (!inTransaction) {
-                if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                        ">>> OPEN TRANSACTION setRotationUnchecked");
-                Surface.openTransaction();
-            }
-            try {
-                if (mScreenRotationAnimation != null) {
-                    mScreenRotationAnimation.setRotation(rotation);
-                }
-            } finally {
-                if (!inTransaction) {
-                    Surface.closeTransaction();
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                            "<<< CLOSE TRANSACTION setRotationUnchecked");
-                }
-            }
-            Surface.setOrientation(0, rotation);
-            Surface.unfreezeDisplay(0);
-        } else {
-            Surface.setOrientation(0, rotation);
+        if (!inTransaction) {
+            if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                    ">>> OPEN TRANSACTION setRotationUnchecked");
+            Surface.openTransaction();
         }
+        try {
+            // NOTE: We disable the rotation in the emulator because
+            //       it doesn't support hardware OpenGL emulation yet.
+            if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
+                    && mScreenRotationAnimation.hasScreenshot()) {
+                mScreenRotationAnimation.setRotation(rotation);
+            }
+            Surface.setOrientation(0, rotation);
+        } finally {
+            if (!inTransaction) {
+                Surface.closeTransaction();
+                if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                        "<<< CLOSE TRANSACTION setRotationUnchecked");
+            }
+        }
+
         rebuildBlackFrame(inTransaction);
 
         for (int i=mWindows.size()-1; i>=0; i--) {
