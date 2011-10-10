@@ -286,7 +286,7 @@ public class MediaProperties {
      */
     public static final int FILE_3GP = 0;
     public static final int FILE_MP4 = 1;
-    // 2 is for AMRNB
+    public static final int FILE_AMR = 2;
     public static final int FILE_MP3 = 3;
     // 4 is for PCM
     public static final int FILE_JPEG = 5;

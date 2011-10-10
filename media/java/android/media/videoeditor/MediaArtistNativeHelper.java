@@ -3239,6 +3239,9 @@ class MediaArtistNativeHelper {
             case FileType.M4V:
                 retValue = MediaProperties.FILE_M4V;
                 break;
+            case FileType.AMR:
+                retValue = MediaProperties.FILE_AMR;
+                break;
 
             default:
                 retValue = -1;
