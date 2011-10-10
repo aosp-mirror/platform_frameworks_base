@@ -18,14 +18,12 @@ package com.android.server;
 
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
-import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
-import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -46,8 +44,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
+import com.android.internal.net.NetworkStatsFactory;
 import com.google.android.collect.Sets;
 
 import java.io.BufferedReader;
@@ -55,20 +52,16 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
-
-import libcore.io.IoUtils;
 
 /**
  * @hide
@@ -82,41 +75,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private static final int ADD = 1;
     private static final int REMOVE = 2;
 
-    /** Path to {@code /proc/uid_stat}. */
-    @Deprecated
-    private final File mStatsUid;
-    /** Path to {@code /proc/net/dev}. */
-    @Deprecated
-    private final File mStatsIface;
-    /** Path to {@code /proc/net/xt_qtaguid/iface_stat}. */
-    @Deprecated
-    private final File mStatsXtIface;
-    /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
-    private final File mStatsXtIfaceAll;
-    /** Path to {@code /proc/net/xt_qtaguid/stats}. */
-    private final File mStatsXtUid;
-
     /**
      * Name representing {@link #setGlobalAlert(long)} limit when delivered to
      * {@link INetworkManagementEventObserver#limitReached(String, String)}.
      */
     public static final String LIMIT_GLOBAL_ALERT = "globalAlert";
-
-    /** {@link #mStatsXtUid} and {@link #mStatsXtIfaceAll} headers. */
-    private static final String KEY_IDX = "idx";
-    private static final String KEY_IFACE = "iface";
-    private static final String KEY_ACTIVE = "active";
-    private static final String KEY_UID = "uid_tag_int";
-    private static final String KEY_COUNTER_SET = "cnt_set";
-    private static final String KEY_TAG_HEX = "acct_tag_hex";
-    private static final String KEY_SNAP_RX_BYTES = "snap_rx_bytes";
-    private static final String KEY_SNAP_RX_PACKETS = "snap_rx_packets";
-    private static final String KEY_SNAP_TX_BYTES = "snap_tx_bytes";
-    private static final String KEY_SNAP_TX_PACKETS = "snap_tx_packets";
-    private static final String KEY_RX_BYTES = "rx_bytes";
-    private static final String KEY_RX_PACKETS = "rx_packets";
-    private static final String KEY_TX_BYTES = "tx_bytes";
-    private static final String KEY_TX_PACKETS = "tx_packets";
 
     class NetdResponseCode {
         /* Keep in sync with system/netd/ResponseCode.h */
@@ -156,6 +119,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     // TODO: replace with RemoteCallbackList
     private ArrayList<INetworkManagementEventObserver> mObservers;
 
+    private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
+
     private Object mQuotaLock = new Object();
     /** Set of interfaces with active quotas. */
     private HashSet<String> mActiveQuotaIfaces = Sets.newHashSet();
@@ -171,15 +136,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      *
      * @param context  Binder context for this service
      */
-    private NetworkManagementService(Context context, File procRoot) {
+    private NetworkManagementService(Context context) {
         mContext = context;
         mObservers = new ArrayList<INetworkManagementEventObserver>();
-
-        mStatsUid = new File(procRoot, "uid_stat");
-        mStatsIface = new File(procRoot, "net/dev");
-        mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
-        mStatsXtIface = new File(procRoot, "net/xt_qtaguid/iface_stat");
-        mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
             return;
@@ -194,22 +153,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        NetworkManagementService service = new NetworkManagementService(
-                context, new File("/proc/"));
+        NetworkManagementService service = new NetworkManagementService(context);
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         service.mThread.start();
         if (DBG) Slog.d(TAG, "Awaiting socket connection");
         service.mConnectedSignal.await();
         if (DBG) Slog.d(TAG, "Connected");
-        return service;
-    }
-
-    // @VisibleForTesting
-    public static NetworkManagementService createForTest(
-            Context context, File procRoot, boolean bandwidthControlEnabled) {
-        // TODO: eventually connect with mock netd
-        final NetworkManagementService service = new NetworkManagementService(context, procRoot);
-        service.mBandwidthControlEnabled = bandwidthControlEnabled;
         return service;
     }
 
@@ -226,7 +175,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.doCommand("bandwidth enable");
                 mBandwidthControlEnabled = true;
             } catch (NativeDaemonConnectorException e) {
-                Slog.e(TAG, "problem enabling bandwidth controls", e);
+                Log.wtf(TAG, "problem enabling bandwidth controls", e);
             }
         } else {
             Slog.d(TAG, "not enabling bandwidth control");
@@ -1081,165 +1030,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public NetworkStats getNetworkStatsSummary() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-
-        if (mBandwidthControlEnabled && mStatsXtIfaceAll.exists()) {
-            return getNetworkStatsSummarySingleFile();
-        } else {
-            return getNetworkStatsSummaryMultipleFiles();
-        }
-    }
-
-    @Deprecated
-    private NetworkStats getNetworkStatsSummaryMultipleFiles() {
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-
-        final HashSet<String> knownIfaces = Sets.newHashSet();
-        final HashSet<String> activeIfaces = Sets.newHashSet();
-
-        // collect any historical stats and active state
-        // TODO: migrate to reading from single file
-        if (mBandwidthControlEnabled) {
-            for (String iface : fileListWithoutNull(mStatsXtIface)) {
-                final File ifacePath = new File(mStatsXtIface, iface);
-
-                final long active = readSingleLongFromFile(new File(ifacePath, "active"));
-                if (active == 1) {
-                    knownIfaces.add(iface);
-                    activeIfaces.add(iface);
-                } else if (active == 0) {
-                    knownIfaces.add(iface);
-                } else {
-                    continue;
-                }
-
-                entry.iface = iface;
-                entry.uid = UID_ALL;
-                entry.set = SET_DEFAULT;
-                entry.tag = TAG_NONE;
-                entry.rxBytes = readSingleLongFromFile(new File(ifacePath, "rx_bytes"));
-                entry.rxPackets = readSingleLongFromFile(new File(ifacePath, "rx_packets"));
-                entry.txBytes = readSingleLongFromFile(new File(ifacePath, "tx_bytes"));
-                entry.txPackets = readSingleLongFromFile(new File(ifacePath, "tx_packets"));
-
-                stats.addValues(entry);
-            }
-        }
-
-        final ArrayList<String> values = Lists.newArrayList();
-
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(mStatsIface));
-
-            // skip first two header lines
-            reader.readLine();
-            reader.readLine();
-
-            // parse remaining lines
-            String line;
-            while ((line = reader.readLine()) != null) {
-                splitLine(line, values);
-
-                try {
-                    entry.iface = values.get(0);
-                    entry.uid = UID_ALL;
-                    entry.set = SET_DEFAULT;
-                    entry.tag = TAG_NONE;
-                    entry.rxBytes = Long.parseLong(values.get(1));
-                    entry.rxPackets = Long.parseLong(values.get(2));
-                    entry.txBytes = Long.parseLong(values.get(9));
-                    entry.txPackets = Long.parseLong(values.get(10));
-
-                    if (activeIfaces.contains(entry.iface)) {
-                        // combine stats when iface is active
-                        stats.combineValues(entry);
-                    } else if (!knownIfaces.contains(entry.iface)) {
-                        // add stats when iface is unknown
-                        stats.addValues(entry);
-                    }
-                } catch (NumberFormatException e) {
-                    Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
-                }
-            }
-        } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } catch (IOException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } finally {
-            IoUtils.closeQuietly(reader);
-        }
-
-        return stats;
-    }
-
-    private NetworkStats getNetworkStatsSummarySingleFile() {
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-
-        // TODO: read directly from proc once headers are added
-        final ArrayList<String> keys = Lists.newArrayList(KEY_IFACE, KEY_ACTIVE, KEY_SNAP_RX_BYTES,
-                KEY_SNAP_RX_PACKETS, KEY_SNAP_TX_BYTES, KEY_SNAP_TX_PACKETS, KEY_RX_BYTES,
-                KEY_RX_PACKETS, KEY_TX_BYTES, KEY_TX_PACKETS);
-        final ArrayList<String> values = Lists.newArrayList();
-        final HashMap<String, String> parsed = Maps.newHashMap();
-
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(mStatsXtIfaceAll));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                splitLine(line, values);
-                parseLine(keys, values, parsed);
-
-                entry.iface = parsed.get(KEY_IFACE);
-                entry.uid = UID_ALL;
-                entry.set = SET_DEFAULT;
-                entry.tag = TAG_NONE;
-
-                // always include snapshot values
-                entry.rxBytes = getParsedLong(parsed, KEY_SNAP_RX_BYTES);
-                entry.rxPackets = getParsedLong(parsed, KEY_SNAP_RX_PACKETS);
-                entry.txBytes = getParsedLong(parsed, KEY_SNAP_TX_BYTES);
-                entry.txPackets = getParsedLong(parsed, KEY_SNAP_TX_PACKETS);
-
-                // fold in active numbers, but only when active
-                final boolean active = getParsedInt(parsed, KEY_ACTIVE) != 0;
-                if (active) {
-                    entry.rxBytes += getParsedLong(parsed, KEY_RX_BYTES);
-                    entry.rxPackets += getParsedLong(parsed, KEY_RX_PACKETS);
-                    entry.txBytes += getParsedLong(parsed, KEY_TX_BYTES);
-                    entry.txPackets += getParsedLong(parsed, KEY_TX_PACKETS);
-                }
-
-                stats.addValues(entry);
-            }
-        } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } catch (IOException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } finally {
-            IoUtils.closeQuietly(reader);
-        }
-
-        return stats;
+        return mStatsFactory.readNetworkStatsSummary();
     }
 
     @Override
     public NetworkStats getNetworkStatsDetail() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-
-        if (mBandwidthControlEnabled) {
-            return getNetworkStatsDetailNetfilter(UID_ALL);
-        } else {
-            return getNetworkStatsDetailUidstat(UID_ALL);
-        }
+        return mStatsFactory.readNetworkStatsDetail(UID_ALL);
     }
 
     @Override
@@ -1422,126 +1220,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         }
-
-        if (mBandwidthControlEnabled) {
-            return getNetworkStatsDetailNetfilter(uid);
-        } else {
-            return getNetworkStatsDetailUidstat(uid);
-        }
-    }
-
-    /**
-     * Build {@link NetworkStats} with detailed UID statistics.
-     */
-    private NetworkStats getNetworkStatsDetailNetfilter(int limitUid) {
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 24);
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-
-        // TODO: remove knownLines check once 5087722 verified
-        final HashSet<String> knownLines = Sets.newHashSet();
-        // TODO: remove lastIdx check once 5270106 verified
-        int lastIdx;
-
-        final ArrayList<String> keys = Lists.newArrayList();
-        final ArrayList<String> values = Lists.newArrayList();
-        final HashMap<String, String> parsed = Maps.newHashMap();
-
-        BufferedReader reader = null;
-        String line = null;
-        try {
-            reader = new BufferedReader(new FileReader(mStatsXtUid));
-
-            // parse first line as header
-            line = reader.readLine();
-            splitLine(line, keys);
-            lastIdx = 1;
-
-            // parse remaining lines
-            while ((line = reader.readLine()) != null) {
-                splitLine(line, values);
-                parseLine(keys, values, parsed);
-
-                if (!knownLines.add(line)) {
-                    throw new IllegalStateException("duplicate proc entry: " + line);
-                }
-
-                final int idx = getParsedInt(parsed, KEY_IDX);
-                if (idx != lastIdx + 1) {
-                    throw new IllegalStateException(
-                            "inconsistent idx=" + idx + " after lastIdx=" + lastIdx);
-                }
-                lastIdx = idx;
-
-                entry.iface = parsed.get(KEY_IFACE);
-                entry.uid = getParsedInt(parsed, KEY_UID);
-                entry.set = getParsedInt(parsed, KEY_COUNTER_SET);
-                entry.tag = kernelToTag(parsed.get(KEY_TAG_HEX));
-                entry.rxBytes = getParsedLong(parsed, KEY_RX_BYTES);
-                entry.rxPackets = getParsedLong(parsed, KEY_RX_PACKETS);
-                entry.txBytes = getParsedLong(parsed, KEY_TX_BYTES);
-                entry.txPackets = getParsedLong(parsed, KEY_TX_PACKETS);
-
-                if (limitUid == UID_ALL || limitUid == entry.uid) {
-                    stats.addValues(entry);
-                }
-            }
-        } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing line: " + line, e);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing line: " + line, e);
-        } catch (IOException e) {
-            throw new IllegalStateException("problem parsing line: " + line, e);
-        } finally {
-            IoUtils.closeQuietly(reader);
-        }
-
-        return stats;
-    }
-
-    private static int getParsedInt(HashMap<String, String> parsed, String key) {
-        final String value = parsed.get(key);
-        return value != null ? Integer.parseInt(value) : 0;
-    }
-
-    private static long getParsedLong(HashMap<String, String> parsed, String key) {
-        final String value = parsed.get(key);
-        return value != null ? Long.parseLong(value) : 0;
-    }
-
-    /**
-     * Build {@link NetworkStats} with detailed UID statistics.
-     *
-     * @deprecated since this uses older "uid_stat" data, and doesn't provide
-     *             tag-level granularity or additional variables.
-     */
-    @Deprecated
-    private NetworkStats getNetworkStatsDetailUidstat(int limitUid) {
-        final String[] knownUids;
-        if (limitUid == UID_ALL) {
-            knownUids = fileListWithoutNull(mStatsUid);
-        } else {
-            knownUids = new String[] { String.valueOf(limitUid) };
-        }
-
-        final NetworkStats stats = new NetworkStats(
-                SystemClock.elapsedRealtime(), knownUids.length);
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-        for (String uid : knownUids) {
-            final int uidInt = Integer.parseInt(uid);
-            final File uidPath = new File(mStatsUid, uid);
-
-            entry.iface = IFACE_ALL;
-            entry.uid = uidInt;
-            entry.tag = TAG_NONE;
-            entry.rxBytes = readSingleLongFromFile(new File(uidPath, "tcp_rcv"));
-            entry.rxPackets = readSingleLongFromFile(new File(uidPath, "tcp_rcv_pkt"));
-            entry.txBytes = readSingleLongFromFile(new File(uidPath, "tcp_snd"));
-            entry.txPackets = readSingleLongFromFile(new File(uidPath, "tcp_snd_pkt"));
-
-            stats.addValues(entry);
-        }
-
-        return stats;
+        return mStatsFactory.readNetworkStatsDetail(uid);
     }
 
     @Override
@@ -1668,56 +1347,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     public int getInterfaceTxThrottle(String iface) {
         return getInterfaceThrottle(iface, false);
-    }
-
-    /**
-     * Split given line into {@link ArrayList}.
-     */
-    private static void splitLine(String line, ArrayList<String> outSplit) {
-        outSplit.clear();
-
-        final StringTokenizer t = new StringTokenizer(line, " \t\n\r\f:");
-        while (t.hasMoreTokens()) {
-            outSplit.add(t.nextToken());
-        }
-    }
-
-    /**
-     * Zip the two given {@link ArrayList} as key and value pairs into
-     * {@link HashMap}.
-     */
-    private static void parseLine(
-            ArrayList<String> keys, ArrayList<String> values, HashMap<String, String> outParsed) {
-        outParsed.clear();
-
-        final int size = Math.min(keys.size(), values.size());
-        for (int i = 0; i < size; i++) {
-            outParsed.put(keys.get(i), values.get(i));
-        }
-    }
-
-    /**
-     * Utility method to read a single plain-text {@link Long} from the given
-     * {@link File}, usually from a {@code /proc/} filesystem.
-     */
-    private static long readSingleLongFromFile(File file) {
-        try {
-            final byte[] buffer = IoUtils.readFileAsByteArray(file.toString());
-            return Long.parseLong(new String(buffer).trim());
-        } catch (NumberFormatException e) {
-            return -1;
-        } catch (IOException e) {
-            return -1;
-        }
-    }
-
-    /**
-     * Wrapper for {@link File#list()} that returns empty array instead of
-     * {@code null}.
-     */
-    private static String[] fileListWithoutNull(File file) {
-        final String[] list = file.list();
-        return list != null ? list : new String[0];
     }
 
     public void setDefaultInterfaceForDns(String iface) throws IllegalStateException {

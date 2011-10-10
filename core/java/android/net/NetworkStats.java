@@ -229,6 +229,14 @@ public class NetworkStats implements Parcelable {
         return elapsedRealtime;
     }
 
+    /**
+     * Return age of this {@link NetworkStats} object with respect to
+     * {@link SystemClock#elapsedRealtime()}.
+     */
+    public long getElapsedRealtimeAge() {
+        return SystemClock.elapsedRealtime() - elapsedRealtime;
+    }
+
     public int size() {
         return size;
     }
@@ -354,26 +362,59 @@ public class NetworkStats implements Parcelable {
      * Return total of all fields represented by this snapshot object.
      */
     public Entry getTotal(Entry recycle) {
+        return getTotal(recycle, null, UID_ALL);
+    }
+
+    /**
+     * Return total of all fields represented by this snapshot object matching
+     * the requested {@link #uid}.
+     */
+    public Entry getTotal(Entry recycle, int limitUid) {
+        return getTotal(recycle, null, limitUid);
+    }
+
+    /**
+     * Return total of all fields represented by this snapshot object matching
+     * the requested {@link #iface}.
+     */
+    public Entry getTotal(Entry recycle, HashSet<String> limitIface) {
+        return getTotal(recycle, limitIface, UID_ALL);
+    }
+
+    /**
+     * Return total of all fields represented by this snapshot object matching
+     * the requested {@link #iface} and {@link #uid}.
+     *
+     * @param limitIface Set of {@link #iface} to include in total; or {@code
+     *            null} to include all ifaces.
+     */
+    private Entry getTotal(Entry recycle, HashSet<String> limitIface, int limitUid) {
         final Entry entry = recycle != null ? recycle : new Entry();
 
         entry.iface = IFACE_ALL;
-        entry.uid = UID_ALL;
+        entry.uid = limitUid;
         entry.set = SET_ALL;
         entry.tag = TAG_NONE;
         entry.rxBytes = 0;
         entry.rxPackets = 0;
         entry.txBytes = 0;
         entry.txPackets = 0;
+        entry.operations = 0;
 
         for (int i = 0; i < size; i++) {
-            // skip specific tags, since already counted in TAG_NONE
-            if (tag[i] != TAG_NONE) continue;
+            final boolean matchesUid = (limitUid == UID_ALL) || (limitUid == uid[i]);
+            final boolean matchesIface = (limitIface == null) || (limitIface.contains(iface[i]));
 
-            entry.rxBytes += rxBytes[i];
-            entry.rxPackets += rxPackets[i];
-            entry.txBytes += txBytes[i];
-            entry.txPackets += txPackets[i];
-            entry.operations += operations[i];
+            if (matchesUid && matchesIface) {
+                // skip specific tags, since already counted in TAG_NONE
+                if (tag[i] != TAG_NONE) continue;
+
+                entry.rxBytes += rxBytes[i];
+                entry.rxPackets += rxPackets[i];
+                entry.txBytes += txBytes[i];
+                entry.txPackets += txPackets[i];
+                entry.operations += operations[i];
+            }
         }
         return entry;
     }
@@ -489,6 +530,34 @@ public class NetworkStats implements Parcelable {
             entry.rxPackets = rxPackets[i];
             entry.txBytes = txBytes[i];
             entry.txPackets = txPackets[i];
+            stats.combineValues(entry);
+        }
+
+        return stats;
+    }
+
+    /**
+     * Return total statistics grouped by {@link #uid}; doesn't mutate the
+     * original structure.
+     */
+    public NetworkStats groupedByUid() {
+        final NetworkStats stats = new NetworkStats(elapsedRealtime, 10);
+
+        final Entry entry = new Entry();
+        entry.iface = IFACE_ALL;
+        entry.set = SET_ALL;
+        entry.tag = TAG_NONE;
+
+        for (int i = 0; i < size; i++) {
+            // skip specific tags, since already counted in TAG_NONE
+            if (tag[i] != TAG_NONE) continue;
+
+            entry.uid = uid[i];
+            entry.rxBytes = rxBytes[i];
+            entry.rxPackets = rxPackets[i];
+            entry.txBytes = txBytes[i];
+            entry.txPackets = txPackets[i];
+            entry.operations = operations[i];
             stats.combineValues(entry);
         }
 

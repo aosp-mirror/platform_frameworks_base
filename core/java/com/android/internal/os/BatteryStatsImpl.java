@@ -16,11 +16,15 @@
 
 package com.android.internal.os;
 
-import com.android.internal.util.JournaledFile;
+import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.UID_ALL;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
-import android.net.TrafficStats;
+import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkStats;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.FileUtils;
@@ -43,6 +47,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
+import com.android.internal.R;
+import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.util.JournaledFile;
+import com.google.android.collect.Sets;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +61,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +78,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
+
+    // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
@@ -313,6 +325,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             new HashMap<String, KernelWakelockStats>();
 
     private HashMap<String, Integer> mUidCache = new HashMap<String, Integer>();
+
+    private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
+
+    /** Network ifaces that {@link ConnectivityManager} has claimed as mobile. */
+    private HashSet<String> mMobileIfaces = Sets.newHashSet();
 
     // For debugging
     public BatteryStatsImpl() {
@@ -1036,7 +1053,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         String name;
         int count;
         long totalTime;
-        int startIndex, endIndex;
+        int startIndex;
+        int endIndex;
         int numUpdatedWlNames = 0;
 
         // Advance past the first line.
@@ -1390,30 +1408,48 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void doUnplugLocked(long batteryUptime, long batteryRealtime) {
-        for (int iu = mUidStats.size() - 1; iu >= 0; iu--) {
-            Uid u = mUidStats.valueAt(iu);
-            u.mStartedTcpBytesReceived = TrafficStats.getUidRxBytes(u.mUid);
-            u.mStartedTcpBytesSent = TrafficStats.getUidTxBytes(u.mUid);
+        NetworkStats.Entry entry = null;
+
+        // Track UID data usage
+        final NetworkStats uidStats = getNetworkStatsDetailGroupedByUid();
+        final int size = uidStats.size();
+        for (int i = 0; i < size; i++) {
+            entry = uidStats.getValues(i, entry);
+
+            final Uid u = mUidStats.get(entry.uid);
+            if (u == null) continue;
+
+            u.mStartedTcpBytesReceived = entry.rxBytes;
+            u.mStartedTcpBytesSent = entry.txBytes;
             u.mTcpBytesReceivedAtLastUnplug = u.mCurrentTcpBytesReceived;
             u.mTcpBytesSentAtLastUnplug = u.mCurrentTcpBytesSent;
         }
+
         for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
             mUnpluggables.get(i).unplug(batteryUptime, batteryRealtime);
         }
-        // Track total mobile data
-        doDataUnplug(mMobileDataRx, TrafficStats.getMobileRxBytes());
-        doDataUnplug(mMobileDataTx, TrafficStats.getMobileTxBytes());
-        doDataUnplug(mTotalDataRx, TrafficStats.getTotalRxBytes());
-        doDataUnplug(mTotalDataTx, TrafficStats.getTotalTxBytes());
+
+        // Track both mobile and total overall data
+        final NetworkStats ifaceStats = getNetworkStatsSummary();
+        entry = ifaceStats.getTotal(entry, mMobileIfaces);
+        doDataUnplug(mMobileDataRx, entry.rxBytes);
+        doDataUnplug(mMobileDataTx, entry.txBytes);
+        entry = ifaceStats.getTotal(entry);
+        doDataUnplug(mTotalDataRx, entry.rxBytes);
+        doDataUnplug(mTotalDataTx, entry.txBytes);
+
         // Track radio awake time
         mRadioDataStart = getCurrentRadioDataUptime();
         mRadioDataUptime = 0;
+
         // Track bt headset ping count
         mBluetoothPingStart = getCurrentBluetoothPingCount();
         mBluetoothPingCount = 0;
     }
 
     public void doPlugLocked(long batteryUptime, long batteryRealtime) {
+        NetworkStats.Entry entry = null;
+
         for (int iu = mUidStats.size() - 1; iu >= 0; iu--) {
             Uid u = mUidStats.valueAt(iu);
             if (u.mStartedTcpBytesReceived >= 0) {
@@ -1428,10 +1464,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
             mUnpluggables.get(i).plug(batteryUptime, batteryRealtime);
         }
-        doDataPlug(mMobileDataRx, TrafficStats.getMobileRxBytes());
-        doDataPlug(mMobileDataTx, TrafficStats.getMobileTxBytes());
-        doDataPlug(mTotalDataRx, TrafficStats.getTotalRxBytes());
-        doDataPlug(mTotalDataTx, TrafficStats.getTotalTxBytes());
+
+        // Track both mobile and total overall data
+        final NetworkStats ifaceStats = getNetworkStatsSummary();
+        entry = ifaceStats.getTotal(entry, mMobileIfaces);
+        doDataPlug(mMobileDataRx, entry.rxBytes);
+        doDataPlug(mMobileDataTx, entry.txBytes);
+        entry = ifaceStats.getTotal(entry);
+        doDataPlug(mTotalDataRx, entry.rxBytes);
+        doDataPlug(mTotalDataTx, entry.txBytes);
+
         // Track radio awake time
         mRadioDataUptime = getRadioDataUptime();
         mRadioDataStart = -1;
@@ -2216,6 +2258,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteNetworkInterfaceTypeLocked(String iface, int networkType) {
+        if (ConnectivityManager.isNetworkTypeMobile(networkType)) {
+            mMobileIfaces.add(iface);
+        } else {
+            mMobileIfaces.remove(iface);
+        }
+    }
+
     @Override public long getScreenOnTime(long batteryRealtime, int which) {
         return mScreenOnTimer.getTotalTimeLocked(batteryRealtime, which);
     }
@@ -2400,8 +2450,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public long computeCurrentTcpBytesReceived() {
+            final long uidRxBytes = getNetworkStatsDetailGroupedByUid().getTotal(
+                    null, mUid).rxBytes;
             return mCurrentTcpBytesReceived + (mStartedTcpBytesReceived >= 0
-                    ? (TrafficStats.getUidRxBytes(mUid) - mStartedTcpBytesReceived) : 0);
+                    ? (uidRxBytes - mStartedTcpBytesReceived) : 0);
         }
 
         @Override
@@ -2619,8 +2671,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public long computeCurrentTcpBytesSent() {
+            final long uidTxBytes = getNetworkStatsDetailGroupedByUid().getTotal(
+                    null, mUid).txBytes;
             return mCurrentTcpBytesSent + (mStartedTcpBytesSent >= 0
-                    ? (TrafficStats.getUidTxBytes(mUid) - mStartedTcpBytesSent) : 0);
+                    ? (uidTxBytes - mStartedTcpBytesSent) : 0);
         }
 
         /**
@@ -4518,22 +4572,26 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     /** Only STATS_UNPLUGGED works properly */
     public long getMobileTcpBytesSent(int which) {
-        return getTcpBytes(TrafficStats.getMobileTxBytes(), mMobileDataTx, which);
+        final long mobileTxBytes = getNetworkStatsSummary().getTotal(null, mMobileIfaces).txBytes;
+        return getTcpBytes(mobileTxBytes, mMobileDataTx, which);
     }
 
     /** Only STATS_UNPLUGGED works properly */
     public long getMobileTcpBytesReceived(int which) {
-        return getTcpBytes(TrafficStats.getMobileRxBytes(), mMobileDataRx, which);
+        final long mobileRxBytes = getNetworkStatsSummary().getTotal(null, mMobileIfaces).rxBytes;
+        return getTcpBytes(mobileRxBytes, mMobileDataRx, which);
     }
 
     /** Only STATS_UNPLUGGED works properly */
     public long getTotalTcpBytesSent(int which) {
-        return getTcpBytes(TrafficStats.getTotalTxBytes(), mTotalDataTx, which);
+        final long totalTxBytes = getNetworkStatsSummary().getTotal(null).txBytes;
+        return getTcpBytes(totalTxBytes, mTotalDataTx, which);
     }
 
     /** Only STATS_UNPLUGGED works properly */
     public long getTotalTcpBytesReceived(int which) {
-        return getTcpBytes(TrafficStats.getTotalRxBytes(), mTotalDataRx, which);
+        final long totalRxBytes = getNetworkStatsSummary().getTotal(null).rxBytes;
+        return getTcpBytes(totalRxBytes, mTotalDataRx, which);
     }
 
     @Override
@@ -5637,7 +5695,47 @@ public final class BatteryStatsImpl extends BatteryStats {
             mGlobalWifiRunningTimer.logState(pr, "  ");
             pr.println("*** Bluetooth timer:");
             mBluetoothOnTimer.logState(pr, "  ");
+            pr.println("*** Mobile ifaces:");
+            pr.println(mMobileIfaces.toString());
         }
         super.dumpLocked(pw);
+    }
+
+    private NetworkStats mNetworkSummaryCache;
+    private NetworkStats mNetworkDetailCache;
+
+    private NetworkStats getNetworkStatsSummary() {
+        // NOTE: calls from BatteryStatsService already hold this lock
+        synchronized (this) {
+            if (mNetworkSummaryCache == null
+                    || mNetworkSummaryCache.getElapsedRealtimeAge() > SECOND_IN_MILLIS) {
+                try {
+                    mNetworkSummaryCache = mNetworkStatsFactory.readNetworkStatsSummary();
+                } catch (IllegalStateException e) {
+                    // log problem and return empty object
+                    Log.wtf(TAG, "problem reading network stats", e);
+                    mNetworkSummaryCache = new NetworkStats(SystemClock.elapsedRealtime(), 0);
+                }
+            }
+            return mNetworkSummaryCache;
+        }
+    }
+
+    private NetworkStats getNetworkStatsDetailGroupedByUid() {
+        // NOTE: calls from BatteryStatsService already hold this lock
+        synchronized (this) {
+            if (mNetworkDetailCache == null
+                    || mNetworkDetailCache.getElapsedRealtimeAge() > SECOND_IN_MILLIS) {
+                try {
+                    mNetworkDetailCache = mNetworkStatsFactory
+                            .readNetworkStatsDetail().groupedByUid();
+                } catch (IllegalStateException e) {
+                    // log problem and return empty object
+                    Log.wtf(TAG, "problem reading network stats", e);
+                    mNetworkDetailCache = new NetworkStats(SystemClock.elapsedRealtime(), 0);
+                }
+            }
+            return mNetworkDetailCache;
+        }
     }
 }

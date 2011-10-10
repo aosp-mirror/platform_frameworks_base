@@ -25,7 +25,11 @@ import static android.net.NetworkStats.UID_ALL;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.google.android.collect.Sets;
+
 import junit.framework.TestCase;
+
+import java.util.HashSet;
 
 @SmallTest
 public class NetworkStatsTest extends TestCase {
@@ -233,13 +237,43 @@ public class NetworkStatsTest extends TestCase {
         assertValues(first, 2, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, 32L, 0L, 0L, 0L, 0L);
     }
 
+    public void testGetTotal() {
+        final NetworkStats stats = new NetworkStats(TEST_START, 3)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 64L, 4L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 128L, 8L, 0L, 0L, 0L);
+
+        assertValues(stats.getTotal(null), 1280L, 80L, 0L, 2L, 20L);
+        assertValues(stats.getTotal(null, 100), 1152L, 72L, 0L, 2L, 20L);
+        assertValues(stats.getTotal(null, 101), 128L, 8L, 0L, 0L, 0L);
+
+        final HashSet<String> ifaces = Sets.newHashSet();
+        assertValues(stats.getTotal(null, ifaces), 0L, 0L, 0L, 0L, 0L);
+
+        ifaces.add(TEST_IFACE2);
+        assertValues(stats.getTotal(null, ifaces), 1024L, 64L, 0L, 0L, 0L);
+    }
+
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
         final NetworkStats.Entry entry = stats.getValues(index, null);
+        assertValues(entry, iface, uid, set, tag);
+        assertValues(entry, rxBytes, rxPackets, txBytes, txPackets, operations);
+    }
+
+    private static void assertValues(
+            NetworkStats.Entry entry, String iface, int uid, int set, int tag) {
         assertEquals(iface, entry.iface);
         assertEquals(uid, entry.uid);
         assertEquals(set, entry.set);
         assertEquals(tag, entry.tag);
+    }
+
+    private static void assertValues(NetworkStats.Entry entry, long rxBytes, long rxPackets,
+            long txBytes, long txPackets, long operations) {
         assertEquals(rxBytes, entry.rxBytes);
         assertEquals(rxPackets, entry.rxPackets);
         assertEquals(txBytes, entry.txBytes);
