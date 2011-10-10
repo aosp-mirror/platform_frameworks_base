@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Membenarkan aplikasi untuk membaca maklumat profil peribadi yang disimpan pada peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna aplikasi itu boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"tulis ke data profil anda"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Membenarkan aplikasi untuk menukar atau menambah maklumat profil peribadi yang disimpan pada peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna aplikasi lain boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"baca aliran sosial anda"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Membenarkan aplikasi mengakses dan menyegerakkan kemas kini sosial daripada rakan-rakan anda. Aplikasi berniat jahat boleh menggunakan ini untuk membaca komunikasi peribadi di antara anda dan rakan-rakan anda pada rangkaian sosial."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"tulis ke aliran sosial anda"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Membenarkan aplikasi memaparkan kemas kini sosial daripada rakan-rakan anda. Aplikasi berniat jahat boleh menggunakan ini untuk berpura-pura menjadi rakan dan memperdayakan anda untuk mendedahkan kata laluan atau maklumat sulit lain."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalendar serta maklumat sulit"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Membenarkan aplikasi membaca semua acara kalendar yang disimpan pada tablet anda, termasuk acara rakan atau rakan sekerja. Aplikasi berniat jahat dengan kebenaran ini boleh menyari maklumat peribadi dari kalendar ini tanpa pengetahuan pemiliknya."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Membenarkan aplikasi untuk membaca semua acara kalendar yang disimpan pada telefon anda, termasuk acara rakan atau rakan sekerja. Aplikasi berniat jahat dengan kebenaran ini boleh menyari maklumat peribadi dari kalendar ini tanpa pengetahuan pemiliknya."</string>
@@ -860,7 +864,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"tambah ke kamus"</string>
+    <string name="addToDictionary" msgid="9090375111134433012">"tambahkan pada kamus"</string>
     <string name="deleteText" msgid="7070985395199629156">"padam"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Perubahan mod"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Masuk"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Pilih satu aplikasi"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Kongsi dengan"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Kongsi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Pemegang gelongsor. Ketik dan tahan."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Atas untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Bawah untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Senyap"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Bunyi dihidupkan"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Kekunci. Set kepala diperlukan untuk mendengar kekunci semasa menaip kata laluan."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Kekunci. Set kepala diperlukan untuk mendengar kekunci semasa menaip kata laluan."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi laman utama"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi ke atas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Lagi pilihan"</string>

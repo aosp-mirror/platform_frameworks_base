@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"允许应用程序读取您设备上存储的个人资料信息（如您的姓名和联系人信息）。这意味着应用程序可以识别您的身份并将您的个人资料发送给他人。"</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"写入到您的个人资料数据"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"允许应用程序更改您设备上存储的个人资料信息（如您的姓名和联系人信息），或者向其中添加信息。这意味着其他应用程序可以识别您的身份并将您的个人资料发送给他人。"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"读取您的社交视频流"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"允许应用程序访问并同步您和好友的社交最新动态。恶意应用程序可借此读取您与社交网络上的好友之间的私人交流信息。"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"写入您的社交视频流"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"允许应用程序显示好友的社交最新动态。恶意应用程序可借此冒充为您的一位好友，诱骗您泄露密码或其他机密信息。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"读取日历活动和机密信息"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"允许应用程序读取您平板电脑上存储的所有日历活动（包括朋友或同事的活动）。拥有此权限的恶意应用程序可在所有者不知情的情况下，从这些日历中提取个人信息。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"允许应用程序读取您手机上存储的所有日历活动（包括朋友或同事的活动）。拥有此权限的恶意应用程序可在所有者不知情的情况下，从这些日历中提取个人信息。"</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"模式更改"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"选择一个应用程序"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"共享对象"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"与“<xliff:g id="APPLICATION_NAME">%s</xliff:g>”共享"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"滑动手柄。点按并按住。"</string>
     <string name="description_direction_up" msgid="1983114130441878529">"向上滑动<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"向下滑动<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"相机"</string>
     <string name="description_target_silent" msgid="893551287746522182">"静音"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"打开声音"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"按键声。需要插入耳机才能在键入密码时听到按键声。"</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"按键声。需要插入耳机才能在键入密码时听到按键声。"</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"导航首页"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上导航"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多选项"</string>

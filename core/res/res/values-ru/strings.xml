@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Позволяет приложению получать доступ к хранящейся на вашем устройстве личной информации профиля, например к имени и контактным данным. Это означает, что приложение может идентифицировать вас и отправить эти данные другим пользователям."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"запись в данные профиля"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Позволяет приложению изменять или добавлять в личный профиль хранящуюся на вашем устройстве информацию, например имя или контактные данные. Это означает, что приложение может идентифицировать вас и отправить эти данные другим пользователям."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читать записи в вашей социальной ленте"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Позволяет приложению читать и синхронизировать новости от вас и ваших друзей. Вредоносные программы могут таким образом получить доступ к вашим личным записям в социальных сетях."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"добавлять записи в вашу социальную ленту"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Позволяет приложению отображать новости от друзей в социальных сетях. Вредоносные программы могут таким образом получить доступ к вашим паролям и другим конфиденциальным данным."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"просматривать в календаре мероприятия и конфиденциальную информацию"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Приложениe получит доступ ко всем данным календаря, сохраненным в вашем устройстве (в том числе к мероприятиям ваших друзей и коллег). Вредоносное ПО с таким уровнем доступа сможет извлекать личную информацию без ведома владельцев календарей."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Приложениe получит доступ ко всем данным календаря, сохраненным в вашем телефоне (в том числе к мероприятиям ваших друзей и коллег). Вредоносное ПО с таким уровнем доступа сможет извлекать личную информацию без ведома владельцев календарей."</string>
@@ -655,7 +659,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Батарея заряжена"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Подключите зарядное устройство."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставьте SIM-карту."</string>
@@ -1066,7 +1070,7 @@
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Чтобы закрыть приложение, нажмите здесь."</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Чтобы выйти, нажмите здесь."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем или точка доступа Wi-Fi активны"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Клавиша смены режима"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Клавиша смены регистра"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Клавиша ввода"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Выберите приложение"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Открыть доступ:"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Открыть доступ приложению \"<xliff:g id="APPLICATION_NAME">%s</xliff:g>\""</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Сенсорное управление. Нажмите и удерживайте."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Проведите вниз, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Без звука"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Включить звук"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Необходима гарнитура, чтобы услышать нажатие клавиш при вводе пароля."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Подключите гарнитуру, чтобы услышать ключи пароля."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Точка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на главную"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вверх"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ещё"</string>

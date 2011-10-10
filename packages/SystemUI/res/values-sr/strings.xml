@@ -26,6 +26,11 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Уклањање са листе"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Информације о апликацији"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Нема недавних апликација"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Одбаци недавне апликације"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 недавна апликација"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d недавних апликација"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нема обавештења"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текуће"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Обавештења"</string>
@@ -41,9 +46,6 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"УГАСИ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АУТОM."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Обавештења"</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"Недавно"</string>
-    <string name="recent_tasks_empty" msgid="1905484479067697884">"Нема недавних апликација"</string>
-    <string name="recent_tasks_app_label" msgid="3796483981246752469">"Google Apps"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Веза преко Bluetooth-а"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Конфигуриши методе уноса"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Користи физичку тастатуру"</string>
@@ -69,7 +71,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Назад"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Почетна"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Мени"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"Недавне апликације"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"Недавне апликације"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Дугме Промени метод уноса."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Дугме Зум компатибилности."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Зумирање са мањег на већи екран."</string>
@@ -106,9 +108,9 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth привезивање."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим рада у авиону."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерија је на <xliff:g id="NUMBER">%d</xliff:g> посто."</string>
-    <string name="accessibility_settings_button" msgid="7913780116850379698">"Дугме Подешавања."</string>
-    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Дугме Обавештења."</string>
-    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Уклони обавештење."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Системска подешавања."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Обавештења."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Обриши обавештење."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS је омогућен."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Учитавање GPS-а."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter је омогућен."</string>
@@ -124,4 +126,5 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi је повезан"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Тражи се GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Локацију је подесио GPS"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Обриши сва обавештења."</string>
 </resources>

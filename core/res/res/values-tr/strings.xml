@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Uygulamaya, adınız ve iletişim bilgileriniz gibi, cihazınızda saklı kişisel profil bilgilerinizi okuma izni verir. Bu, uygulamanın sizi tanımlayabilmesi ve profil bilgilerinizi başkalarına gönderebilmesi anlamına gelir."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"profil verilerime yaz"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Uygulamaya, adınız ve iletişim bilgileriniz gibi, cihazınızda saklı kişisel profil bilgilerinizi değiştirme veya ekleme izni verir. Bu, diğer uygulamaların sizi tanımlayabileceği ve profil bilgilerinizi başkalarına gönderebileceği anlamına gelir."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"sosyal akışımı oku"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Uygulamaya, sizden ve arkadaşlarınızdan gelen sosyal güncellemelere erişme ve bunları senkronize etme izni verir. Kötü amaçlı uygulamalar bu izni, sosyal ağlar üzerinde sizinle arkadaşlarınız arasındaki kişisel iletişimi okumak için kullanabilir."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"sosyal akışıma yaz"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Uygulamaya, arkadaşlarınızdan gelen sosyal güncellemeleri görüntüleme izni verir. Kötü amaçlı uygulamalar bu izni, kendisini sizin bir arkadaşınız gibi tanıtıp sizi kandırarak şifrelerinizi veya diğer gizli bilgilerinizi almak için kullanabilir."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"takvim etkinliklerini ve gizli bilgileri oku"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Uygulamaya, tabletinizde saklı takvim etkinliklerini (özel veya iş arkadaşlarınızınkiler dahil) okuma izni verir. Kötü amaçlı bir uygulama bu izni kullanarak, sahibin bilgisi olmadan bu takvimlerden kişisel bilgileri alabilir."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Uygulamaya, telefonunuzda saklı takvim etkinliklerini (özel veya iş arkadaşlarınızınkiler dahil) okuma izni verir. Kötü amaçlı bir uygulama bu izni kullanarak, sahibin bilgisi olmadan bu takvimlerden kişisel bilgileri alabilir."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mod değiştirme"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"ÜstKrkt"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Giriş"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Uygulama seçin"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Şununla paylaş:"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ile paylaş"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Kayar tutma yeri. Hafifçe vurun ve basılı tutun."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için yukarı."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için aşağı."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Sessiz"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ses açık"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tuş. Şifre yazarken tuşları duyabilmek için kulaklık gerekir."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tuş. Şifre yazarken tuşları duyabilmek için kulaklık gerekir."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ana sayfaya git"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Yukarı git"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Diğer seçenekler"</string>

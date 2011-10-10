@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Programu omogoča branje podatkov v osebnem profilu, shranjenih v napravi, na primer imen in podatkov za stik. To pomeni, da lahko program ugotovi, kdo ste, in pošlje podatke v profilu drugim."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje v podatke v profilu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Programu omogoča spreminjanje in dodajanje podatkov med podatke v osebnem profilu, shranjene v napravi, na primer imena in podatke za stik. To pomeni, da lahko program ugotovi, kdo ste, in pošlje podatke v profilu drugim."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"preberite svoj družabni tok"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Dovoli programom dostop do družabnih posodobitev vas in vaših prijateljev. Zlonamerni programi lahko to uporabijo za branje zasebne komunikacije med vami in prijatelji v družabnih omrežjih."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pišite v svoj družabni tok"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Dovoli programom prikaz družabnih posodobitev vaših prijateljev. Zlonamerni programi lahko to uporabijo, da se predstavijo kot prijatelji in vas zavedejo, da razkrijete gesla ali druge zaupne podatke."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"branje dogodkov v koledarju in zaupnih podatkov"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Programu dovoli, da bere dogodke v koledarju, shranjene v tabličnem računalniku, vključno z dogodki prijateljev in sodelavcev. Zlonamerni program lahko iz njih dobi osebne podatke brez vednosti lastnika."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Programu dovoli branje vseh dogodkov koledarja, shranjenih v telefonu, vključno z dogodki prijateljev in sodelavcev. Zlonamerni program lahko iz njih pridobi osebne podatke brez vednosti lastnika."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Sprememba načina"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Tipka Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Tipka Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Izberite program"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Delite z"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Delite s programom <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Drsna ročica. Tapnite in pridržite."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Gor za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Dol za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Fotoaparat"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tiho"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Vklopljen zvok"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Če želite med vnašanjem gesla slišati tipke, potrebujete slušalke."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Če želite med vnašanjem gesla slišati tipke, potrebujete slušalke."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Krmarjenje domov"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Krmarjenje navzgor"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>

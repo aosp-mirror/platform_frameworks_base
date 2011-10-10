@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profilinformationen einzusehen, darunter Ihren Namen und Ihre Kontaktinformationen. Die App kann Sie somit identifizieren und Ihre Profilinformationen an andere senden."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"In Ihre Profildaten schreiben"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profilinformationen zu ändern, darunter Ihren Namen und Ihre Kontaktinformationen, sowie Informationen hinzuzufügen. Andere Apps können Sie somit identifizieren und Ihre Profilinformationen an andere senden."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"In sozialem Stream lesen"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Diese Berechtigung ermöglicht der App, auf soziale Updates von Ihnen und Ihren Freunden zuzugreifen und diese zu synchronisieren. Schädliche Apps können mithilfe dieser Berechtigung private Kommunikationen zwischen Ihnen und Ihren Freunden in sozialen Netzwerken lesen."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"In sozialem Stream schreiben"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Diese Berechtigung ermöglicht der App, soziale Updates Ihrer Freunde anzuzeigen. Schädliche Apps können sich mithilfe dieser Berechtigung als Freund von Ihnen ausgeben, um an Ihre Passwörter oder andere vertrauliche Informationen zu gelangen."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"Kalendertermine sowie vertrauliche Informationen lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Ermöglicht einer App das Lesen aller Kalendertermine, die auf Ihrem Tablet gespeichert sind, einschließlich der Termine von Freunden oder Kollegen. Schädliche Apps mit dieser Berechtigung können aus diesen Kalendern ohne das Wissen der Eigentümer persönliche Informationen extrahieren."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Ermöglicht einer App das Lesen aller Kalendertermine, die auf Ihrem Telefon gespeichert sind, einschließlich der Termine von Freunden oder Kollegen. Schädliche Apps mit dieser Berechtigung können aus diesen Kalendern ohne das Wissen der Eigentümer persönliche Informationen extrahieren."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"App wählen"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Teilen mit"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Mit <xliff:g id="APPLICATION_NAME">%s</xliff:g> teilen"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Schieberegler: Tippen und halten"</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Für <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach unten"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Lautlos"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ton ein"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Zum Hören der Tasten bei der Eingabe eines Passworts ist ein Headset erforderlich."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Zum Hören der Tasten bei der Eingabe eines Passworts ist ein Headset erforderlich."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Zur Startseite navigieren"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Nach oben navigieren"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Weitere Optionen"</string>

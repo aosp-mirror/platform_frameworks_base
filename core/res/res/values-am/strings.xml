@@ -63,7 +63,7 @@
     <string name="RuacMmi" msgid="7827887459138308886">"የሚያበሳጭ የማይፈለጉ ጥሪዎች አለመቀበል።"</string>
     <string name="CndMmi" msgid="3116446237081575808">"መደወያ ቁጥር አስረከበ"</string>
     <string name="DndMmi" msgid="1265478932418334331">"አትረብሽ"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች። ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"የደዋይID  ወደ ተከልክሏል ነባሪዎች።ጥሪ ቀጥሎ ተከልክሏል፡"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች።ቀጥሎ ጥሪ፡ አልተከለከለም"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"የደዋይ  ID  ወደ አልተከለከለም ነባሪዎች።ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"የደዋይ ID ነባሪዎች ወደአልተከለከለም። ቀጥሎ ጥሪ፡አልተከለከለም"</string>
@@ -83,7 +83,7 @@
     <string name="serviceClassFAX" msgid="5566624998840486475">"ፋክስ"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"በተለያየ ጊዜ"</string>
-    <string name="serviceClassDataSync" msgid="7530000519646054776">"አሳምር"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"ሥምሪያ"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"ፓኬት"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <string name="roamingText0" msgid="7170335472198694945">"በዝውውር ላይ አመላካች በርቷል"</string>
@@ -124,8 +124,8 @@
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"የተጠየቀው ፋይል አልተገኘም ነበር።"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"እጅግ ብዙ ጥየቃዎች ተካሂደዋል። ትንሽ ቆይተው እንደገና ይሞክሩ።"</string>
     <string name="notification_title" msgid="1259940370369187045">"ለ<xliff:g id="ACCOUNT">%1$s</xliff:g> ስህተት ግባ"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"አሳምር"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"አሳምር"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"ሥምሪያ"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ሥምሪያ"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"በጣም ብዙ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ስርዞች።"</string>
     <string name="low_memory" product="tablet" msgid="2292820184396262278">"የጡባዊ ማከማቻ ሙሉ ነው! ቦታ ነፃ ለማድረግ አንዳንድ ፋይሎች ሰርዝ።"</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"የስልክ ማከማቻ ሙሉ ነው! ቦታ ነፃ ለማድረግ አንዳንድ ፋይሎች ሰርዝ።"</string>
@@ -222,7 +222,7 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"ትግበራ ምንም እንኳ ማህደረ ትውስታ አነስተኛ ባይሆንም ሌላ ትግበራዎች የዳራ ሂደታቸውን ለማቆም ይፈቅዳል።"</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"ሌላ ትግበራዎችን በኃይል አቁም"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"ትግበራ ሌሎች ትግበራዎችን በኃይል ለማስቆም ይፈቅዳል።"</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"ትግበራ  እንዲዘጋ አስገድድ"</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"ትግበራ እንዲዘጋ አስገድድ"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"ትግበራ ማንኛውም ቅድመገፅ እንቅስቃሴ በግድ ለመዝጋት እና ለመመለስ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_dump" msgid="1681799862438954752">"የስርዓት የውስጥ ሁኔታን ሰርስረህ አውጣ"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"ትግበራ የስረዓት ውስጣዊ ሁኔታ ሰርስረው ሊያወጡ ይፈቅዳል። ተንኮል አዘል ትግበራዎች በፍፁም የማያስፈልጋቸውን የተለያዩ ሰፋ ያለ የግል እና የተጠበቀ መረጃ ሰርስረ ው ሊያወጡይችላሉ።"</string>
@@ -250,7 +250,7 @@
     <string name="permdesc_backup" msgid="4837493065154256525">"ትግበራው  በስርዓተ መጠባበቅ እና እነበረበት መልስ አሰራር ለመቆጣጠር ይፈቅዳል።ለመደበኛ ትግበራዎች ጥቅም አይደለም።"</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"የሙሉ መጠበቂያ ወይም እነበረበት መልስ ከዋኝ አረጋግጥ"</string>
     <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"ትግበራ ሙሉ የመጠባበቂያ ማረጋገጫ UI ለማስነሳት ይፈቅዳል። በሌላ በማንኛውም እንዳይገለገል።"</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ያልተፈቀደ ዊንዶውዝ አሳይ"</string>
+    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ያልተፈቀደ Windows አሳይ"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"በውስጥ ስርዓት ተጠቃሚ በየነገፅ  ለመጠቀም የሚታሰብ ዊንዶውዝ መፍጠር ይፈቅዳል። ለመደበኛ ትግበራዎች ጥቅም አይደለም።"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"የስርዓት-ደረጃ ማንቂያ አሳይ"</string>
     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"ትግበ ራ የስርዓት ማንቂያ ዊንዶውዝ ለማሳየት ይፈቅዳል። ተንኮል አዘል ትግበራዎች የስልኩን ጠቅላላ ማያ ሊቆጣጠሩት ይችላሉ።"</string>
@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"ትግበራ በመሣሪያዎ ላይ የተከማቸውን የግል የመገለጫ መረጃ፣ እንደ ስምዎ እና የዕውቂያ መረጃ ለማንበብ ይፈቅዳል። ይህ ማለት ትግበራው እርስዎን ለይቶ የመገለጫ መረጃዎን ለሌሎች መላክ ይችላል።"</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"የአርስዎ መገለጫ ውሂብ ላይ ይፃፉ"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"ትግበራ በመሣሪያዎ ላይ የተከማቸውን የግል የመገለጫ መረጃ፣ እንደ ስምዎ እና የዕውቂያ መረጃ ለመለወጥ እና ለማከል ይፈቅዳል። ይህ ማለት ትግበራው እርስዎን ለይቶ የመገለጫ መረጃዎን ለሌሎች መላክ ይችላል።"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ያንተን ማህበራዊ የውይይት ክፍሎች አንብብ"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"መተግበሪያው ካንተ ጓደኞች ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስል ይፈቅዳል፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ባንተና በጓደኞችህ መካከል በማህበራዊ አውታረመረቦች ያሉ የግል ተግባቦቶችን ለመዳረስ ሊጠቀሙበት ይችላሉ፡፡"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ ያንተ ማህበራዊ የውይይት ክፍሎች ጻፍ"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"መተግበሪያው የጓደኞችህን ማህበራዊ ዝማኔዎችን ለማሳየት ይፈቅዳል፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ጓደኛ መስለው ለመቅረብ እና የይለፍ ቃልና ሌላ ምስጢራዊ መረጃ እንድትሰጡ ለማድረግ ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"ትግበራ በጡባዊዎ ላይ የተከማቸውን የቀን መቁጠሪያ ክስተቶች በሙሉ አብረው የሚሰሩትንም ሆነ የጓደኞችዎን ጨምሮ ለማንበብ ይፈቅዳል። ይህን ፈቃድ የያዘ ተንኮል አዘል ትግበራ ከባለቤቱ ዕውቅና ውጪ ከቀን አቆጣጠር ላይ የግል መረጃ ማውጣት ይችላል።\'"</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"ትግበራ በስልክዎ ላይ የተከማቸውን የቀን መቁጠሪያ ክስተቶች በሙሉ አብረው የሚሰሩትንም ሆነ የጓደኞችዎን ጨምሮ ለማንበብ ይፈቅዳል። ይህን ፈቃድ የያዘ ተንኮል አዘል ትግበራ ከባለቤቱ ዕውቅና ውጪ ከቀን አቆጣጠር ላይ የግል መረጃ ማውጣት ይችላል።\'"</string>
@@ -468,14 +472,14 @@
     <string name="permdesc_nfc" msgid="9171401851954407226">"ትግበራ የቅርብ ግኑኙነትመስክ (NFC) መለያዎች፣ ካርዶች እና አንባቢ ጋር ለማገናኘትይፈቅዳል።"</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"ቁልፍመቆለፊያአቦዝን"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"ትግበራ የቁልፍሽንጉር እና ማንኛውም ተያያዥ የይለፍ ቃል ደህንነት ላለማስቻል ይፈቅዳል። ለዚህ ህጋዊ ምሳሌ የገቢ ስልክ ጥሪ ሲቀበሉ የቁልፍሽንጉርአለማስቻል፣ ከዛም ጥሪው ሲጨርስ የቁልፍሽንጉሩን ድጋሚ  ማስቻል።"</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"የአሳምር ቅንብሮች አንብብ"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"የሥምሪያ ቅንብሮች አንብብ"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"ትግበራ የአሳምር ቅንብሮች እንደ አየር ሁኔታ አሳምር ለዕውቆች መንቃቱን ለማንበብ ይፈቅዳል።"</string>
-    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"የአሳምር ቅንብሮች ፃፍ"</string>
+    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"የሥምሪያ ቅንብሮችን ፃፍ"</string>
     <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"ትግበራ የአሳምር ቅንብሮች እንደ አየር ሁኔታ አሳምር ለዕውቆች መንቃቱን ለመቀየር ይፈቅዳል።"</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"የአሳምር ስታስቲክስ አንብብ"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"የሥምሪያ ስታስቲክስ አንብብ"</string>
     <string name="permdesc_readSyncStats" msgid="7511448343374465000">"ትግበራ የአሳምር ስታስቲክ ለምሳሌ የተከሰተ የአሳምር ታሪክ ለማንበብ ይፈቅዳል።"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"የምዝገባ መግቦች አንበብ"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"ትግበራ ስለ አሁኑጊዜ አሳምርምላሾች ዝርዝሮች ለማግኘት ይፈቅዳል።"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"ትግበራ ስለ አሁኑጊዜ ሥምሪያምላሾች ዝርዝሮች ለማግኘት ይፈቅዳል።"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"የተመዝጋቢዎች ምላሾች ፃፍ"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"ትግበራ በአሁን ጊዜ የእርስዎን አሳምር ምገባዎች ለመቀየር ይፈቅዳል።ይህ ለተንኮል አዘል ትግበራ የእርስዎን አሳምር ምገባ ዎች  ለመለወጥ መፍቀድ ይችላል።"</string>
     <string name="permlab_readDictionary" msgid="432535716804748781">"በተጠቃሚ  የተበየኑ መዝገበ ቃላት አንብብ"</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ሞድ ለውጥ"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"ቀይር"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"አስገባ"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"መተግበሪያ ምረጥ"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ተጋራ ከ"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"ከ <xliff:g id="APPLICATION_NAME">%s</xliff:g> ጋር ተጋራ"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Sliding handle. Tap and hold."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ወደላይ።"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ወደታች።"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"ካሜራ"</string>
     <string name="description_target_silent" msgid="893551287746522182">"ፀጥታ"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"ድምፅ አብራ"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"አዝራር፡፡ ይለፍቃል እየተየብክ አዝራሮችን ለመስማት ማዳመጫ መሳሪያ ያስፈልጋል፡፡"</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"አዝራር፡፡ ይለፍቃል እየተየብክ አዝራሮችን ለመስማት ማዳመጫ መሳሪያ ያስፈልጋል፡፡"</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"መነሻ ዳስስ"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"አስስ"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ተጨማሪ አማራጮች"</string>

@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permet à l\'application de lire les informations de profil personnelles stockées sur votre appareil, telles que votre nom et vos coordonnées. Cela signifie que l\'application peut vous identifier et envoyer vos informations de profil à d\'autres."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"modifier vos données de profil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permet à l\'application de modifier ou d\'ajouter des informations personnelles stockées sur le profil de votre appareil, telles que votre nom et vos coordonnées. Cela signifie que d\'autres applications peuvent vous identifier et envoyer vos informations de profil à d\'autres."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lire flux des réseaux sociaux"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Permet à l\'application d\'accéder aux mises à jour de vos amis sur les réseaux sociaux et de les synchroniser. Les applications malveillantes peuvent utiliser cette fonctionnalité pour accéder à des communications privées entre vous et vos amis sur ces réseaux."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Mettre à jour sur vos flux"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Permet à l\'application d\'afficher les mises à jour de vos amis sur les réseaux sociaux. Les applications malveillantes peuvent utiliser cette fonctionnalité pour se faire passer pour un ami et vous inciter à révéler des mots de passe ou autres informations confidentielles."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"consulter les événements d\'agenda ainsi que les informations confidentielles"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permet à une application de lire tous les événements d\'agendas stockés sur votre tablette, y compris ceux de vos amis ou de vos collègues. Une application malveillante disposant de cette autorisation peut extraire des informations personnelles de ces agendas à l\'insu de leur propriétaire."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permet à une application de consulter tous les événements d\'agendas stockés sur votre téléphone, y compris ceux de vos amis ou de vos collègues. Une application malveillante disposant de cette autorisation peut extraire des informations personnelles de ces agendas à l\'insu de leur propriétaire."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Changement de mode"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Entrée"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Sélectionnez une application"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Partager avec"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Partager avec <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Poignée coulissante. Appuyez de manière prolongée."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Vers le haut pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Vers le bas pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Appareil photo"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Mode silencieux"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Son activé"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Touche : casque nécessaire pour entendre le son des touches lorsque vous saisissez un mot de passe."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Touche : casque nécessaire pour entendre le son des touches lorsque vous saisissez un mot de passe."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Retour à l\'accueil"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Parcourir vers le haut"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Plus d\'options"</string>
