@@ -11,12 +11,15 @@ Type* PRESENTER_BASE_TYPE = new Type("com.android.athome.service",
         "AndroidAtHomePresenter", Type::BUILT_IN, false, false, false);
 Type* PRESENTER_LISTENER_BASE_TYPE = new Type("com.android.athome.service",
         "AndroidAtHomePresenter.Listener", Type::BUILT_IN, false, false, false);
-Type* RPC_BROKER_TYPE = new Type("com.android.athome.utils", "AndroidAtHomeBroker",
+Type* RPC_BROKER_TYPE = new Type("com.android.athome.connector", "Broker",
         Type::BUILT_IN, false, false, false);
-Type* RPC_SERVICE_BASE_TYPE = new Type("com.android.athome.service", "AndroidAtHomeService",
+Type* RPC_CONTAINER_TYPE = new Type("com.android.athome.connector", "ConnectorContainer",
         Type::BUILT_IN, false, false, false);
-Type* RPC_SERVICE_INFO_TYPE = new ParcelableType("com.android.athome.stubs",
-        "AndroidAtHomeServiceInfo", true, __FILE__, __LINE__);
+// TODO: Just use Endpoint, so this works for all endpoints.
+Type* RPC_CONNECTOR_TYPE = new Type("com.android.athome.connector", "Connector",
+        Type::BUILT_IN, false, false, false);
+Type* RPC_ENDPOINT_INFO_TYPE = new ParcelableType("com.android.athome.rpc",
+        "EndpointInfo", true, __FILE__, __LINE__);
 Type* RPC_RESULT_HANDLER_TYPE = new ParcelableType("com.android.athome.rpc", "RpcResultHandler",
         true, __FILE__, __LINE__);
 Type* RPC_ERROR_LISTENER_TYPE = new Type("com.android.athome.rpc", "RpcErrorHandler",
@@ -286,7 +289,7 @@ public:
     virtual ~RpcProxyClass();
 
     Variable* endpoint;
-    Variable* context;
+    Variable* broker;
 
 private:
     void generate_ctor();
@@ -300,11 +303,11 @@ RpcProxyClass::RpcProxyClass(const interface_type* iface, InterfaceType* interfa
     this->what = Class::CLASS;
     this->type = interfaceType;
 
-    // context
-    this->context = new Variable(CONTEXT_TYPE, "_context");
-    this->elements.push_back(new Field(PRIVATE, this->context));
+    // broker
+    this->broker = new Variable(RPC_BROKER_TYPE, "_broker");
+    this->elements.push_back(new Field(PRIVATE, this->broker));
     // endpoint
-    this->endpoint = new Variable(RPC_SERVICE_INFO_TYPE, "_endpoint");
+    this->endpoint = new Variable(RPC_ENDPOINT_INFO_TYPE, "_endpoint");
     this->elements.push_back(new Field(PRIVATE, this->endpoint));
 
     // methods
@@ -318,17 +321,17 @@ RpcProxyClass::~RpcProxyClass()
 void
 RpcProxyClass::generate_ctor()
 {
-    Variable* context = new Variable(CONTEXT_TYPE, "context");
-    Variable* endpoint = new Variable(RPC_SERVICE_INFO_TYPE, "endpoint");
+    Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
+    Variable* endpoint = new Variable(RPC_ENDPOINT_INFO_TYPE, "endpoint");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
-        ctor->parameters.push_back(context);
+        ctor->parameters.push_back(broker);
         ctor->parameters.push_back(endpoint);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new Assignment(this->context, context));
+    ctor->statements->Add(new Assignment(this->broker, broker));
     ctor->statements->Add(new Assignment(this->endpoint, endpoint));
 }
 
@@ -375,19 +378,19 @@ PresenterClass::~PresenterClass()
 void
 PresenterClass::generate_ctor()
 {
-    Variable* context = new Variable(CONTEXT_TYPE, "context");
-    Variable* endpoint = new Variable(RPC_SERVICE_INFO_TYPE, "endpoint");
+    Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
+    Variable* endpoint = new Variable(RPC_ENDPOINT_INFO_TYPE, "endpoint");
     Variable* listener = new Variable(this->_listener->type, "listener");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
-        ctor->parameters.push_back(context);
+        ctor->parameters.push_back(broker);
         ctor->parameters.push_back(endpoint);
         ctor->parameters.push_back(listener);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new MethodCall("super", 3, context, endpoint, listener));
+    ctor->statements->Add(new MethodCall("super", 3, broker, endpoint, listener));
     ctor->statements->Add(new Assignment(this->_listener, listener));
 }
 
@@ -422,11 +425,11 @@ ListenerClass::~ListenerClass()
 }
 
 // =================================================
-class ServiceBaseClass : public DispatcherClass
+class EndpointBaseClass : public DispatcherClass
 {
 public:
-    ServiceBaseClass(const interface_type* iface);
-    virtual ~ServiceBaseClass();
+    EndpointBaseClass(const interface_type* iface);
+    virtual ~EndpointBaseClass();
 
     bool needed;
 
@@ -434,7 +437,7 @@ private:
     void generate_ctor();
 };
 
-ServiceBaseClass::ServiceBaseClass(const interface_type* iface)
+EndpointBaseClass::EndpointBaseClass(const interface_type* iface)
     :DispatcherClass(iface, THIS_VALUE),
      needed(false)
 {
@@ -442,36 +445,32 @@ ServiceBaseClass::ServiceBaseClass(const interface_type* iface)
     this->modifiers = STATIC | PUBLIC | ABSTRACT;
     this->what = Class::CLASS;
     this->type = new Type(iface->package ? iface->package : "",
-                        append(iface->name.data, ".ServiceBase"),
+                        append(iface->name.data, ".EndpointBase"),
                         Type::GENERATED, false, false, false);
-    this->extends = RPC_SERVICE_BASE_TYPE;
+    this->extends = RPC_CONNECTOR_TYPE;
 
     // methods
     generate_ctor();
 }
 
-ServiceBaseClass::~ServiceBaseClass()
+EndpointBaseClass::~EndpointBaseClass()
 {
 }
 
 void
-ServiceBaseClass::generate_ctor()
+EndpointBaseClass::generate_ctor()
 {
-    Variable* context = new Variable(SERVICE_CONTEXT_TYPE, "context");
-    Variable* name = new Variable(STRING_TYPE, "name");
-    Variable* type = new Variable(STRING_TYPE, "type");
-    Variable* version = new Variable(INT_TYPE, "version");
+    Variable* container = new Variable(RPC_CONTAINER_TYPE, "container");
+    Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
-        ctor->parameters.push_back(context);
-        ctor->parameters.push_back(name);
-        ctor->parameters.push_back(type);
-        ctor->parameters.push_back(version);
+        ctor->parameters.push_back(container);
+        ctor->parameters.push_back(broker);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new MethodCall("super", 4, context, name, type, version));
+    ctor->statements->Add(new MethodCall("super", 2, container, broker));
 }
 
 // =================================================
@@ -711,10 +710,10 @@ generate_proxy_method(const method_type* method, RpcProxyClass* proxyClass,
     proxyMethod->parameters.push_back(errorListener);
 
     // Call the broker
-    proxyMethod->statements->Add(new MethodCall(RPC_BROKER_TYPE, "sendRequest", 6,
-                new FieldVariable(THIS_VALUE, "_context"),
-                new StringLiteralExpression(method->name.data),
+    proxyMethod->statements->Add(new MethodCall(new FieldVariable(THIS_VALUE, "_broker"),
+                "sendRpc", 5,
                 proxyClass->endpoint,
+                new StringLiteralExpression(method->name.data),
                 new MethodCall(_data, "serialize"),
                 resultParameter,
                 errorListener));
@@ -773,7 +772,7 @@ generate_result_dispatcher_method(const method_type* method,
 
 static void
 generate_regular_method(const method_type* method, RpcProxyClass* proxyClass,
-        ServiceBaseClass* serviceBaseClass, ResultDispatcherClass* resultsDispatcherClass,
+        EndpointBaseClass* serviceBaseClass, ResultDispatcherClass* resultsDispatcherClass,
         int index)
 {
     arg_type* arg;
@@ -818,7 +817,7 @@ generate_regular_method(const method_type* method, RpcProxyClass* proxyClass,
 
 static void
 generate_event_method(const method_type* method, RpcProxyClass* proxyClass,
-        ServiceBaseClass* serviceBaseClass, ListenerClass* listenerClass,
+        EndpointBaseClass* serviceBaseClass, ListenerClass* listenerClass,
         PresenterClass* presenterClass, int index)
 {
     arg_type* arg;
@@ -909,7 +908,7 @@ generate_listener_methods(RpcProxyClass* proxyClass, Type* presenterType, Type* 
 
     registerMethod->statements->Add(new MethodCall(THIS_VALUE, "unregisterListener"));
     registerMethod->statements->Add(new Assignment(_presenter, new NewExpression(presenterType,
-                    3, proxyClass->context, proxyClass->endpoint, listener)));
+                    3, proxyClass->broker, proxyClass->endpoint, listener)));
     registerMethod->statements->Add(new MethodCall(_presenter, "attachToModel"));
 
     Method* unregisterMethod = new Method;
@@ -942,7 +941,7 @@ generate_rpc_interface_class(const interface_type* iface)
     PresenterClass* presenter = new PresenterClass(iface, listener->type);
 
     // the service base class
-    ServiceBaseClass* base = new ServiceBaseClass(iface);
+    EndpointBaseClass* base = new EndpointBaseClass(iface);
     proxy->elements.push_back(base);
 
     // the result dispatcher
