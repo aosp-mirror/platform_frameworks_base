@@ -177,7 +177,10 @@ void PageCache::copy(size_t from, void *data, size_t size) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
+NuCachedSource2::NuCachedSource2(
+        const sp<DataSource> &source,
+        const char *cacheConfig,
+        bool disconnectAtHighwatermark)
     : mSource(source),
       mReflector(new AHandlerReflector<NuCachedSource2>(this)),
       mLooper(new ALooper),
@@ -190,8 +193,23 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mNumRetriesLeft(kMaxNumRetries),
       mHighwaterThresholdBytes(kDefaultHighWaterThreshold),
       mLowwaterThresholdBytes(kDefaultLowWaterThreshold),
-      mKeepAliveIntervalUs(kDefaultKeepAliveIntervalUs) {
+      mKeepAliveIntervalUs(kDefaultKeepAliveIntervalUs),
+      mDisconnectAtHighwatermark(disconnectAtHighwatermark) {
+    // We are NOT going to support disconnect-at-highwatermark indefinitely
+    // and we are not guaranteeing support for client-specified cache
+    // parameters. Both of these are temporary measures to solve a specific
+    // problem that will be solved in a better way going forward.
+
     updateCacheParamsFromSystemProperty();
+
+    if (cacheConfig != NULL) {
+        updateCacheParamsFromString(cacheConfig);
+    }
+
+    if (mDisconnectAtHighwatermark) {
+        // Makes no sense to disconnect and do keep-alives...
+        mKeepAliveIntervalUs = 0;
+    }
 
     mLooper->setName("NuCachedSource2");
     mLooper->registerHandler(mReflector);
@@ -339,6 +357,12 @@ void NuCachedSource2::onFetch() {
         if (mFetching && mCache->totalSize() >= mHighwaterThresholdBytes) {
             LOGI("Cache full, done prefetching for now");
             mFetching = false;
+
+            if (mDisconnectAtHighwatermark
+                    && (mSource->flags() & DataSource::kIsHTTPBasedSource)) {
+                LOGV("Disconnecting at high watermark");
+                static_cast<HTTPBase *>(mSource.get())->disconnect();
+            }
         }
     } else {
         Mutex::Autolock autoLock(mLock);
@@ -635,6 +659,36 @@ void NuCachedSource2::updateCacheParamsFromString(const char *s) {
          mLowwaterThresholdBytes,
          mHighwaterThresholdBytes,
          mKeepAliveIntervalUs);
+}
+
+// static
+void NuCachedSource2::RemoveCacheSpecificHeaders(
+        KeyedVector<String8, String8> *headers,
+        String8 *cacheConfig,
+        bool *disconnectAtHighwatermark) {
+    *cacheConfig = String8();
+    *disconnectAtHighwatermark = false;
+
+    if (headers == NULL) {
+        return;
+    }
+
+    ssize_t index;
+    if ((index = headers->indexOfKey(String8("x-cache-config"))) >= 0) {
+        *cacheConfig = headers->valueAt(index);
+
+        headers->removeItemsAt(index);
+
+        LOGV("Using special cache config '%s'", cacheConfig->string());
+    }
+
+    if ((index = headers->indexOfKey(
+                    String8("x-disconnect-at-highwatermark"))) >= 0) {
+        *disconnectAtHighwatermark = true;
+        headers->removeItemsAt(index);
+
+        LOGV("Client requested disconnection at highwater mark");
+    }
 }
 
 }  // namespace android
