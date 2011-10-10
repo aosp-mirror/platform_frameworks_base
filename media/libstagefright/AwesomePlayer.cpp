@@ -2005,6 +2005,11 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             mConnectingDataSource->setUID(mUID);
         }
 
+        String8 cacheConfig;
+        bool disconnectAtHighwatermark;
+        NuCachedSource2::RemoveCacheSpecificHeaders(
+                &mUriHeaders, &cacheConfig, &disconnectAtHighwatermark);
+
         mLock.unlock();
         status_t err = mConnectingDataSource->connect(mUri, &mUriHeaders);
         mLock.lock();
@@ -2024,7 +2029,10 @@ status_t AwesomePlayer::finishSetDataSource_l() {
                     new ThrottledSource(
                         mConnectingDataSource, 50 * 1024 /* bytes/sec */));
 #else
-            mCachedSource = new NuCachedSource2(mConnectingDataSource);
+            mCachedSource = new NuCachedSource2(
+                    mConnectingDataSource,
+                    cacheConfig.isEmpty() ? NULL : cacheConfig.string(),
+                    disconnectAtHighwatermark);
 #endif
 
             dataSource = mCachedSource;
