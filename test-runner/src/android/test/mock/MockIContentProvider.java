@@ -23,9 +23,6 @@ import android.content.EntityIterator;
 import android.content.IContentProvider;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.database.CursorWindow;
-import android.database.IBulkCursor;
-import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -44,12 +41,6 @@ import java.util.ArrayList;
  */
 public class MockIContentProvider implements IContentProvider {
     public int bulkInsert(Uri url, ContentValues[] initialValues) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    public IBulkCursor bulkQuery(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, IContentObserver observer,
-            CursorWindow window) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

@@ -20,6 +20,7 @@ import android.content.res.AssetFileDescriptor;
 import android.database.BulkCursorNative;
 import android.database.BulkCursorToCursorAdaptor;
 import android.database.Cursor;
+import android.database.CursorToBulkCursorAdaptor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
 import android.database.IBulkCursor;
@@ -65,6 +66,13 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
         return new ContentProviderProxy(obj);
     }
 
+    /**
+     * Gets the name of the content provider.
+     * Should probably be part of the {@link IContentProvider} interface.
+     * @return The content provider name.
+     */
+    public abstract String getProviderName();
+
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
             throws RemoteException {
@@ -98,33 +106,23 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     }
 
                     String sortOrder = data.readString();
-                    IContentObserver observer = IContentObserver.Stub.
-                        asInterface(data.readStrongBinder());
+                    IContentObserver observer = IContentObserver.Stub.asInterface(
+                            data.readStrongBinder());
                     CursorWindow window = CursorWindow.CREATOR.createFromParcel(data);
 
-                    // Flag for whether caller wants the number of
-                    // rows in the cursor and the position of the
-                    // "_id" column index (or -1 if non-existent)
-                    // Only to be returned if binder != null.
-                    boolean wantsCursorMetadata = data.readInt() != 0;
+                    Cursor cursor = query(url, projection, selection, selectionArgs, sortOrder);
+                    if (cursor != null) {
+                        CursorToBulkCursorAdaptor adaptor = new CursorToBulkCursorAdaptor(
+                                cursor, observer, getProviderName(), window);
+                        final IBinder binder = adaptor.asBinder();
+                        final int count = adaptor.count();
+                        final int index = BulkCursorToCursorAdaptor.findRowIdColumnIndex(
+                                adaptor.getColumnNames());
 
-                    IBulkCursor bulkCursor = bulkQuery(url, projection, selection,
-                            selectionArgs, sortOrder, observer, window);
-                    if (bulkCursor != null) {
-                        final IBinder binder = bulkCursor.asBinder();
-                        if (wantsCursorMetadata) {
-                            final int count = bulkCursor.count();
-                            final int index = BulkCursorToCursorAdaptor.findRowIdColumnIndex(
-                                    bulkCursor.getColumnNames());
-
-                            reply.writeNoException();
-                            reply.writeStrongBinder(binder);
-                            reply.writeInt(count);
-                            reply.writeInt(index);
-                        } else {
-                            reply.writeNoException();
-                            reply.writeStrongBinder(binder);
-                        }
+                        reply.writeNoException();
+                        reply.writeStrongBinder(binder);
+                        reply.writeInt(count);
+                        reply.writeInt(index);
                     } else {
                         reply.writeNoException();
                         reply.writeStrongBinder(null);
@@ -324,92 +322,70 @@ final class ContentProviderProxy implements IContentProvider
         return mRemote;
     }
 
-    // Like bulkQuery() but sets up provided 'adaptor' if not null.
-    private IBulkCursor bulkQueryInternal(
-        Uri url, String[] projection,
-        String selection, String[] selectionArgs, String sortOrder,
-        IContentObserver observer, CursorWindow window,
-        BulkCursorToCursorAdaptor adaptor) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            data.writeInterfaceToken(IContentProvider.descriptor);
-
-            url.writeToParcel(data, 0);
-            int length = 0;
-            if (projection != null) {
-                length = projection.length;
-            }
-            data.writeInt(length);
-            for (int i = 0; i < length; i++) {
-                data.writeString(projection[i]);
-            }
-            data.writeString(selection);
-            if (selectionArgs != null) {
-                length = selectionArgs.length;
-            } else {
-                length = 0;
-            }
-            data.writeInt(length);
-            for (int i = 0; i < length; i++) {
-                data.writeString(selectionArgs[i]);
-            }
-            data.writeString(sortOrder);
-            data.writeStrongBinder(observer.asBinder());
-            window.writeToParcel(data, 0);
-
-            // Flag for whether or not we want the number of rows in the
-            // cursor and the position of the "_id" column index (or -1 if
-            // non-existent).  Only to be returned if binder != null.
-            final boolean wantsCursorMetadata = (adaptor != null);
-            data.writeInt(wantsCursorMetadata ? 1 : 0);
-
-            mRemote.transact(IContentProvider.QUERY_TRANSACTION, data, reply, 0);
-
-            DatabaseUtils.readExceptionFromParcel(reply);
-
-            IBulkCursor bulkCursor = null;
-            IBinder bulkCursorBinder = reply.readStrongBinder();
-            if (bulkCursorBinder != null) {
-                bulkCursor = BulkCursorNative.asInterface(bulkCursorBinder);
-
-                if (wantsCursorMetadata) {
-                    int rowCount = reply.readInt();
-                    int idColumnPosition = reply.readInt();
-                    if (bulkCursor != null) {
-                        adaptor.set(bulkCursor, rowCount, idColumnPosition);
-                    }
-                }
-            }
-            return bulkCursor;
-        } finally {
-            data.recycle();
-            reply.recycle();
-        }
-    }
-
-    public IBulkCursor bulkQuery(Uri url, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder, IContentObserver observer,
-            CursorWindow window) throws RemoteException {
-        return bulkQueryInternal(
-            url, projection, selection, selectionArgs, sortOrder,
-            observer, window,
-            null /* BulkCursorToCursorAdaptor */);
-    }
-
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException {
-        //TODO make a pool of windows so we can reuse memory dealers
         CursorWindow window = new CursorWindow(false /* window will be used remotely */);
-        BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
-        IBulkCursor bulkCursor = bulkQueryInternal(
-            url, projection, selection, selectionArgs, sortOrder,
-            adaptor.getObserver(), window,
-            adaptor);
-        if (bulkCursor == null) {
-            return null;
+        try {
+            BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
+            Parcel data = Parcel.obtain();
+            Parcel reply = Parcel.obtain();
+            try {
+                data.writeInterfaceToken(IContentProvider.descriptor);
+
+                url.writeToParcel(data, 0);
+                int length = 0;
+                if (projection != null) {
+                    length = projection.length;
+                }
+                data.writeInt(length);
+                for (int i = 0; i < length; i++) {
+                    data.writeString(projection[i]);
+                }
+                data.writeString(selection);
+                if (selectionArgs != null) {
+                    length = selectionArgs.length;
+                } else {
+                    length = 0;
+                }
+                data.writeInt(length);
+                for (int i = 0; i < length; i++) {
+                    data.writeString(selectionArgs[i]);
+                }
+                data.writeString(sortOrder);
+                data.writeStrongBinder(adaptor.getObserver().asBinder());
+                window.writeToParcel(data, 0);
+
+                mRemote.transact(IContentProvider.QUERY_TRANSACTION, data, reply, 0);
+
+                DatabaseUtils.readExceptionFromParcel(reply);
+
+                IBulkCursor bulkCursor = BulkCursorNative.asInterface(reply.readStrongBinder());
+                if (bulkCursor != null) {
+                    int rowCount = reply.readInt();
+                    int idColumnPosition = reply.readInt();
+                    adaptor.initialize(bulkCursor, rowCount, idColumnPosition);
+                } else {
+                    adaptor.close();
+                    adaptor = null;
+                }
+                return adaptor;
+            } catch (RemoteException ex) {
+                adaptor.close();
+                throw ex;
+            } catch (RuntimeException ex) {
+                adaptor.close();
+                throw ex;
+            } finally {
+                data.recycle();
+                reply.recycle();
+            }
+        } finally {
+            // We close the window now because the cursor adaptor does not
+            // take ownership of the window until the first call to onMove.
+            // The adaptor will obtain a fresh reference to the window when
+            // it is filled.
+            window.close();
         }
-        return adaptor;
     }
 
     public String getType(Uri url) throws RemoteException

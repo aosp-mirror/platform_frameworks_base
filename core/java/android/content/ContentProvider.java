@@ -22,10 +22,6 @@ import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.CursorToBulkCursorAdaptor;
-import android.database.CursorWindow;
-import android.database.IBulkCursor;
-import android.database.IContentObserver;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -168,22 +164,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return ContentProvider.this;
         }
 
-        /**
-         * Remote version of a query, which returns an IBulkCursor. The bulk
-         * cursor should be wrapped with BulkCursorToCursorAdaptor before use.
-         */
-        public IBulkCursor bulkQuery(Uri uri, String[] projection,
-                String selection, String[] selectionArgs, String sortOrder,
-                IContentObserver observer, CursorWindow window) {
-            enforceReadPermission(uri);
-            Cursor cursor = ContentProvider.this.query(uri, projection,
-                    selection, selectionArgs, sortOrder);
-            if (cursor == null) {
-                return null;
-            }
-            return new CursorToBulkCursorAdaptor(cursor, observer,
-                    ContentProvider.this.getClass().getName(),
-                    hasWritePermission(uri), window);
+        @Override
+        public String getProviderName() {
+            return getContentProvider().getClass().getName();
         }
 
         public Cursor query(Uri uri, String[] projection,

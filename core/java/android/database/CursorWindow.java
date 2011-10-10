@@ -16,6 +16,8 @@
 
 package android.database;
 
+import dalvik.system.CloseGuard;
+
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
@@ -47,6 +49,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     public int mWindowPtr;
 
     private int mStartPos;
+
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private static native int nativeInitializeEmpty(int cursorWindowSize, boolean localOnly);
     private static native int nativeInitializeFromBinder(IBinder nativeBinder);
@@ -91,6 +95,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
                     (sCursorWindowSize / 1024) + " kb failed. " + printStats());
         }
+        mCloseGuard.open("close");
         recordNewWindow(Binder.getCallingPid(), mWindowPtr);
     }
 
@@ -102,11 +107,15 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             throw new CursorWindowAllocationException("Cursor window could not be "
                     + "created from binder.");
         }
+        mCloseGuard.open("close");
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
             dispose();
         } finally {
             super.finalize();
@@ -114,6 +123,9 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     }
 
     private void dispose() {
+        if (mCloseGuard != null) {
+            mCloseGuard.close();
+        }
         if (mWindowPtr != 0) {
             recordClosingOfWindow(mWindowPtr);
             nativeDispose(mWindowPtr);
@@ -677,6 +689,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongBinder(nativeGetBinder(mWindowPtr));
         dest.writeInt(mStartPos);
+
+        if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
+            releaseReference();
+        }
     }
 
     @Override
