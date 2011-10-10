@@ -118,6 +118,14 @@ public class ActionBarContainer extends FrameLayout {
         return true;
     }
 
+    @Override
+    public boolean onHoverEvent(MotionEvent ev) {
+        super.onHoverEvent(ev);
+
+        // An action bar always eats hover events.
+        return true;
+    }
+
     public void setTabContainer(ScrollingTabContainerView tabView) {
         if (mTabContainer != null) {
             removeView(mTabContainer);
