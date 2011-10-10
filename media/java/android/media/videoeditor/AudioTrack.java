@@ -147,14 +147,16 @@ public class AudioTrack {
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage() + " : " + filename);
         }
-        switch (mMANativeHelper.getFileType(properties.fileType)) {
+        int fileType = mMANativeHelper.getFileType(properties.fileType);
+        switch (fileType) {
             case MediaProperties.FILE_3GP:
             case MediaProperties.FILE_MP4:
             case MediaProperties.FILE_MP3:
+            case MediaProperties.FILE_AMR:
                 break;
 
             default: {
-                throw new IllegalArgumentException("Unsupported input file type");
+                throw new IllegalArgumentException("Unsupported input file type: " + fileType);
             }
         }
         switch (mMANativeHelper.getAudioCodecType(properties.audioFormat)) {
