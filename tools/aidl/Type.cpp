@@ -903,6 +903,14 @@ ParcelableType::ParcelableType(const string& package, const string& name,
 {
 }
 
+ParcelableType::ParcelableType(const string& package, const string& name,
+                            bool builtIn, bool canWriteToRpcData,
+                            const string& declFile, int declLine)
+    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, true, canWriteToRpcData, true,
+            declFile, declLine)
+{
+}
+
 string
 ParcelableType::CreatorName() const
 {
@@ -1258,7 +1266,7 @@ GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variabl
 // ================================================================
 
 RpcDataType::RpcDataType()
-    :Type("com.android.athome.rpc", "RpcData", Type::BUILT_IN, false, true, true)
+    :ParcelableType("com.android.athome.rpc", "RpcData", true, true)
 {
 }
 

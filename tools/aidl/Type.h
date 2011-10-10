@@ -355,6 +355,9 @@ class ParcelableType : public Type
 public:
                     ParcelableType(const string& package, const string& name,
                             bool builtIn, const string& declFile, int declLine);
+                    ParcelableType(const string& package, const string& name,
+                            bool builtIn, bool canWriteToRpcData,
+                            const string& declFile = "", int declLine = -1);
 
     virtual string  CreatorName() const;
 
@@ -434,6 +437,22 @@ private:
     vector<Type*> m_args;
 };
 
+class RpcDataType : public ParcelableType
+{
+public:
+                    RpcDataType();
+
+    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, int flags);
+    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+                                    Variable* data, Variable** cl);
+};
+
+class ClassLoaderType : public Type
+{
+public:
+                    ClassLoaderType();
+};
 
 class GenericListType : public GenericType
 {
@@ -458,23 +477,6 @@ public:
     
 private:
     string m_creator;
-};
-
-class RpcDataType : public Type
-{
-public:
-                    RpcDataType();
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
-};
-
-class ClassLoaderType : public Type
-{
-public:
-                    ClassLoaderType();
 };
 
 class Namespace
