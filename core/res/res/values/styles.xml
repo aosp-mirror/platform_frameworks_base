@@ -257,6 +257,10 @@ please see styles_device_defaults.xml.
         <item name="android:textUnderlineColor">@color/holo_red_light</item>
     </style>
 
+    <style name="TextAppearance.AutoCorrectionSuggestion" parent="TextAppearance.Suggestion">
+        <item name="android:textUnderlineColor">@color/holo_blue_light</item>
+    </style>
+
     <!-- Widget Styles -->
 
     <style name="Widget">
