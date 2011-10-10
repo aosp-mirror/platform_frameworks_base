@@ -132,6 +132,7 @@ public abstract class ApplicationThreadNative extends Binder
             IBinder b = data.readStrongBinder();
             int ident = data.readInt();
             ActivityInfo info = ActivityInfo.CREATOR.createFromParcel(data);
+            Configuration curConfig = Configuration.CREATOR.createFromParcel(data);
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             Bundle state = data.readBundle();
             List<ResultInfo> ri = data.createTypedArrayList(ResultInfo.CREATOR);
@@ -142,7 +143,7 @@ public abstract class ApplicationThreadNative extends Binder
             ParcelFileDescriptor profileFd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
             boolean autoStopProfiler = data.readInt() != 0;
-            scheduleLaunchActivity(intent, b, ident, info, compatInfo, state, ri, pi,
+            scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo, state, ri, pi,
                     notResumed, isForward, profileName, profileFd, autoStopProfiler);
             return true;
         }
@@ -630,10 +631,10 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-            ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
-            List<ResultInfo> pendingResults,
-		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
+            ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
+            Bundle state, List<ResultInfo> pendingResults,
+    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+    		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
     		throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -641,6 +642,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(token);
         data.writeInt(ident);
         info.writeToParcel(data, 0);
+        curConfig.writeToParcel(data, 0);
         compatInfo.writeToParcel(data, 0);
         data.writeBundle(state);
         data.writeTypedList(pendingResults);

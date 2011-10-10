@@ -362,4 +362,6 @@ interface IPackageManager {
     void verifyPendingInstall(int id, int verificationCode);
 
     VerifierDeviceIdentity getVerifierDeviceIdentity();
+
+    boolean isFirstBoot();
 }

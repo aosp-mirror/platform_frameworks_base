@@ -1238,9 +1238,8 @@ final class Settings {
                 mReadMessages.append("No start tag found in settings file\n");
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "No start tag found in package manager settings");
-                Log
-                        .wtf(PackageManagerService.TAG,
-                                "No start tag found in package manager settings");
+                Log.wtf(PackageManagerService.TAG,
+                        "No start tag found in package manager settings");
                 return false;
             }
 

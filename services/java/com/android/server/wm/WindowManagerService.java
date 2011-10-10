@@ -297,6 +297,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mHaveInputMethods;
 
+    final boolean mAllowBootMessages;
+
     final boolean mLimitedAlphaCompositing;
 
     final WindowManagerPolicy mPolicy = PolicyManager.makeNewWindowManager();
@@ -633,8 +635,8 @@ public class WindowManagerService extends IWindowManager.Stub
     float mCompatibleScreenScale;
 
     public static WindowManagerService main(Context context,
-            PowerManagerService pm, boolean haveInputMethods) {
-        WMThread thr = new WMThread(context, pm, haveInputMethods);
+            PowerManagerService pm, boolean haveInputMethods, boolean allowBootMsgs) {
+        WMThread thr = new WMThread(context, pm, haveInputMethods, allowBootMsgs);
         thr.start();
 
         synchronized (thr) {
@@ -654,19 +656,21 @@ public class WindowManagerService extends IWindowManager.Stub
         private final Context mContext;
         private final PowerManagerService mPM;
         private final boolean mHaveInputMethods;
+        private final boolean mAllowBootMessages;
 
         public WMThread(Context context, PowerManagerService pm,
-                boolean haveInputMethods) {
+                boolean haveInputMethods, boolean allowBootMsgs) {
             super("WindowManager");
             mContext = context;
             mPM = pm;
             mHaveInputMethods = haveInputMethods;
+            mAllowBootMessages = allowBootMsgs;
         }
 
         public void run() {
             Looper.prepare();
             WindowManagerService s = new WindowManagerService(mContext, mPM,
-                    mHaveInputMethods);
+                    mHaveInputMethods, mAllowBootMessages);
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_DISPLAY);
             android.os.Process.setCanSelfBackground(false);
@@ -728,9 +732,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, PowerManagerService pm,
-            boolean haveInputMethods) {
+            boolean haveInputMethods, boolean showBootMsgs) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
+        mAllowBootMessages = showBootMsgs;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
 
@@ -4846,6 +4851,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public void showBootMessage(final CharSequence msg, final boolean always) {
         boolean first = false;
         synchronized(mWindowMap) {
+            if (!mAllowBootMessages) {
+                return;
+            }
             if (!mShowingBootMessages) {
                 if (!always) {
                     return;

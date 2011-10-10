@@ -1157,6 +1157,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         } // synchronized (mInstallLock)
     }
 
+    public boolean isFirstBoot() {
+        return !mRestoredSettings;
+    }
+
     private String getRequiredVerifierLPr() {
         final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
         final List<ResolveInfo> receivers = queryIntentReceivers(verification, PACKAGE_MIME_TYPE,
@@ -2983,12 +2987,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (pkgs != null) {
             for (int i=0; i<pkgs.size(); i++) {
-                try {
-                    ActivityManagerNative.getDefault().showBootMessage(
-                            mContext.getResources().getString(
-                                    com.android.internal.R.string.android_upgrading_apk,
-                                    i+1, pkgs.size()), true);
-                } catch (RemoteException e) {
+                if (!isFirstBoot()) {
+                    try {
+                        ActivityManagerNative.getDefault().showBootMessage(
+                                mContext.getResources().getString(
+                                        com.android.internal.R.string.android_upgrading_apk,
+                                        i+1, pkgs.size()), true);
+                    } catch (RemoteException e) {
+                    }
                 }
                 PackageParser.Package p = pkgs.get(i);
                 synchronized (mInstallLock) {
