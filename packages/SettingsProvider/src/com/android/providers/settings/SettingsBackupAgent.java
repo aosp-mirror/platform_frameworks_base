@@ -350,16 +350,21 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private byte[] getSystemSettings() {
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, PROJECTION, null,
                 null, null);
-        byte[] result = extractRelevantValues(cursor, Settings.System.SETTINGS_TO_BACKUP);
-        cursor.close();
-        return result;
+        try {
+            return extractRelevantValues(cursor, Settings.System.SETTINGS_TO_BACKUP);
+        } finally {
+            cursor.close();
+        }
     }
 
     private byte[] getSecureSettings() {
         Cursor cursor = getContentResolver().query(Settings.Secure.CONTENT_URI, PROJECTION, null,
                 null, null);
-        byte[] result = extractRelevantValues(cursor, Settings.Secure.SETTINGS_TO_BACKUP);
-        return result;
+        try {
+            return extractRelevantValues(cursor, Settings.Secure.SETTINGS_TO_BACKUP);
+        } finally {
+            cursor.close();
+        }
     }
 
     private void restoreSettings(BackupDataInput data, Uri contentUri) {
