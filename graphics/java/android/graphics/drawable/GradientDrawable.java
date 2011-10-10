@@ -285,7 +285,7 @@ public class GradientDrawable extends Drawable {
             of the fill (if any) without worrying about blending artifacts.
          */
          final boolean useLayer = haveStroke && haveFill && st.mShape != LINE &&
-                 currStrokeAlpha < 255;
+                 currStrokeAlpha < 255 && (mAlpha < 255 || mColorFilter != null);
 
         /*  Drawing with a layer is slower than direct drawing, but it
             allows us to apply paint effects like alpha and colorfilter to
