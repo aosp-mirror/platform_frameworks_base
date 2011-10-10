@@ -502,9 +502,23 @@ public class TextureView extends View {
      * @see #isAvailable() 
      * @see #getBitmap(int, int)  
      * @see #getBitmap() 
+     * 
+     * @throws IllegalStateException if the hardware rendering context cannot be
+     *         acquired to capture the bitmap
      */
     public Bitmap getBitmap(Bitmap bitmap) {
         if (bitmap != null && isAvailable()) {
+            AttachInfo info = mAttachInfo;
+            if (info != null && info.mHardwareRenderer != null &&
+                    info.mHardwareRenderer.isEnabled()) {
+                if (!info.mHardwareRenderer.validate()) {
+                    throw new IllegalStateException("Could not acquire hardware rendering context");
+                }
+            }
+
+            applyUpdate();
+            applyTransformMatrix();
+
             mLayer.copyInto(bitmap);
         }
         return bitmap;
