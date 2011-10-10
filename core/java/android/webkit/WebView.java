@@ -2074,7 +2074,8 @@ public class WebView extends AbsoluteLayout
      * If the value of the encoding parameter is 'base64', then the data must
      * be encoded as base64. Otherwise, the data must use ASCII encoding for
      * octets inside the range of safe URL characters and use the standard %xx
-     * hex encoding of URLs for octets outside that range.
+     * hex encoding of URLs for octets outside that range. For example,
+     * '#', '%', '\', '?' should be replaced by %23, %25, %27, %3f respectively.
      * <p>
      * The 'data' scheme URL formed by this method uses the default US-ASCII
      * charset. If you need need to set a different charset, you should form a
