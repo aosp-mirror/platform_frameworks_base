@@ -1966,6 +1966,9 @@ class BackupManagerService extends IBackupManager.Stub {
             synchronized (mQueueLock) {
                 mBackupRunning = false;
                 if (mStatus == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                    // Make sure we back up everything and perform the one-time init
+                    clearMetadata();
+                    if (DEBUG) Slog.d(TAG, "Server requires init; rerunning");
                     backupNow();
                 }
             }
@@ -1973,6 +1976,12 @@ class BackupManagerService extends IBackupManager.Stub {
             // Only once we're entirely finished do we release the wakelock
             Slog.i(TAG, "Backup pass finished.");
             mWakelock.release();
+        }
+
+        // Remove the PM metadata state. This will generate an init on the next pass.
+        void clearMetadata() {
+            final File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
+            if (pmState.exists()) pmState.delete();
         }
 
         // Invoke an agent's doBackup() and start a timeout message spinning on the main
