@@ -23,9 +23,6 @@ import android.content.IContentProvider;
 import android.content.OperationApplicationException;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.database.CursorWindow;
-import android.database.IBulkCursor;
-import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -41,78 +38,84 @@ import java.util.ArrayList;
  * TODO: never return null when the method is not supposed to. Return fake data instead.
  */
 public final class BridgeContentProvider implements IContentProvider {
-
+    @Override
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> arg0)
             throws RemoteException, OperationApplicationException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int bulkInsert(Uri arg0, ContentValues[] arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    public IBulkCursor bulkQuery(Uri arg0, String[] arg1, String arg2, String[] arg3,
-            String arg4, IContentObserver arg5, CursorWindow arg6) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    @Override
     public Bundle call(String arg0, String arg1, Bundle arg2) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int delete(Uri arg0, String arg1, String[] arg2) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public String getType(Uri arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Uri insert(Uri arg0, ContentValues arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public AssetFileDescriptor openAssetFile(Uri arg0, String arg1) throws RemoteException,
             FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public ParcelFileDescriptor openFile(Uri arg0, String arg1) throws RemoteException,
             FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Cursor query(Uri arg0, String[] arg1, String arg2, String[] arg3, String arg4)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3)
             throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public IBinder asBinder() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String[] getStreamTypes(Uri arg0, String arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public AssetFileDescriptor openTypedAssetFile(Uri arg0, String arg1, Bundle arg2)
             throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub

@@ -24,19 +24,37 @@ import android.util.Log;
 
 /**
  * Wraps a BulkCursor around an existing Cursor making it remotable.
+ * <p>
+ * If the wrapped cursor is a {@link AbstractWindowedCursor} then it owns
+ * the cursor window.  Otherwise, the adaptor takes ownership of the
+ * cursor itself and ensures it gets closed as needed during deactivation
+ * and requeries.
+ * </p>
  *
  * {@hide}
  */
 public final class CursorToBulkCursorAdaptor extends BulkCursorNative 
         implements IBinder.DeathRecipient {
     private static final String TAG = "Cursor";
-    private final CrossProcessCursor mCursor;
-    private CursorWindow mWindow;
+
+    private final Object mLock = new Object();
     private final String mProviderName;
     private ContentObserverProxy mObserver;
 
-    private static final class ContentObserverProxy extends ContentObserver 
-            {
+    /**
+     * The cursor that is being adapted.
+     * This field is set to null when the cursor is closed.
+     */
+    private CrossProcessCursor mCursor;
+
+    /**
+     * The cursor window used by the cross process cursor.
+     * This field is always null for abstract windowed cursors since they are responsible
+     * for managing the lifetime of their window.
+     */
+    private CursorWindow mWindowForNonWindowedCursor;
+
+    private static final class ContentObserverProxy extends ContentObserver {
         protected IContentObserver mRemote;
 
         public ContentObserverProxy(IContentObserver remoteObserver, DeathRecipient recipient) {
@@ -70,7 +88,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
     }
 
     public CursorToBulkCursorAdaptor(Cursor cursor, IContentObserver observer, String providerName,
-            boolean allowWrite, CursorWindow window) {
+            CursorWindow window) {
         try {
             mCursor = (CrossProcessCursor) cursor;
             if (mCursor instanceof AbstractWindowedCursor) {
@@ -81,90 +99,167 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                                 + providerName, new RuntimeException());
                     }
                 }
-                windowedCursor.setWindow(window);
+                windowedCursor.setWindow(window); // cursor takes ownership of window
             } else {
-                mWindow = window;
+                mWindowForNonWindowedCursor = window; // we own the window
                 mCursor.fillWindow(0, window);
             }
         } catch (ClassCastException e) {
             // TODO Implement this case.
+            window.close();
             throw new UnsupportedOperationException(
                     "Only CrossProcessCursor cursors are supported across process for now", e);
         }
         mProviderName = providerName;
 
-        createAndRegisterObserverProxy(observer);
+        synchronized (mLock) {
+            createAndRegisterObserverProxyLocked(observer);
+        }
     }
-    
+
+    private void closeCursorAndWindowLocked() {
+        if (mCursor != null) {
+            unregisterObserverProxyLocked();
+            mCursor.close();
+            mCursor = null;
+        }
+
+        if (mWindowForNonWindowedCursor != null) {
+            mWindowForNonWindowedCursor.close();
+            mWindowForNonWindowedCursor = null;
+        }
+    }
+
+    private void throwIfCursorIsClosed() {
+        if (mCursor == null) {
+            throw new StaleDataException("Attempted to access a cursor after it has been closed.");
+        }
+    }
+
+    @Override
     public void binderDied() {
-        mCursor.close();
-        if (mWindow != null) {
-            mWindow.close();
+        synchronized (mLock) {
+            closeCursorAndWindowLocked();
         }
     }
-    
+
+    @Override
     public CursorWindow getWindow(int startPos) {
-        mCursor.moveToPosition(startPos);
-        
-        if (mWindow != null) {
-            if (startPos < mWindow.getStartPosition() ||
-                    startPos >= (mWindow.getStartPosition() + mWindow.getNumRows())) {
-                mCursor.fillWindow(startPos, mWindow);
-            }            
-            return mWindow;
-        } else {
-            return ((AbstractWindowedCursor)mCursor).getWindow();
-        }
-    }
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
 
-    public void onMove(int position) {
-        mCursor.onMove(mCursor.getPosition(), position);
-    }
+            mCursor.moveToPosition(startPos);
 
-    public int count() {
-        return mCursor.getCount();
-    }
-
-    public String[] getColumnNames() {
-        return mCursor.getColumnNames();
-    }
-
-    public void deactivate() {
-        maybeUnregisterObserverProxy();
-        mCursor.deactivate();
-    }
-
-    public void close() {
-        maybeUnregisterObserverProxy();
-        mCursor.close();
-    }
-
-    public int requery(IContentObserver observer, CursorWindow window) {
-        if (mWindow == null) {
-            ((AbstractWindowedCursor)mCursor).setWindow(window);
-        }
-        try {
-            if (!mCursor.requery()) {
-                return -1;
+            final CursorWindow window;
+            if (mCursor instanceof AbstractWindowedCursor) {
+                window = ((AbstractWindowedCursor)mCursor).getWindow();
+            } else {
+                window = mWindowForNonWindowedCursor;
+                if (window != null
+                        && (startPos < window.getStartPosition() ||
+                                startPos >= (window.getStartPosition() + window.getNumRows()))) {
+                    mCursor.fillWindow(startPos, window);
+                }
             }
-        } catch (IllegalStateException e) {
-            IllegalStateException leakProgram = new IllegalStateException(
-                    mProviderName + " Requery misuse db, mCursor isClosed:" +
-                    mCursor.isClosed(), e);
-            throw leakProgram;
+
+            // Acquire a reference before returning from this RPC.
+            // The Binder proxy will decrement the reference count again as part of writing
+            // the CursorWindow to the reply parcel as a return value.
+            if (window != null) {
+                window.acquireReference();
+            }
+            return window;
         }
-        
-        if (mWindow != null) {
-            mCursor.fillWindow(0, window);
-            mWindow = window;
-        }
-        maybeUnregisterObserverProxy();
-        createAndRegisterObserverProxy(observer);
-        return mCursor.getCount();
     }
 
+    @Override
+    public void onMove(int position) {
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            mCursor.onMove(mCursor.getPosition(), position);
+        }
+    }
+
+    @Override
+    public int count() {
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            return mCursor.getCount();
+        }
+    }
+
+    @Override
+    public String[] getColumnNames() {
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            return mCursor.getColumnNames();
+        }
+    }
+
+    @Override
+    public void deactivate() {
+        synchronized (mLock) {
+            if (mCursor != null) {
+                unregisterObserverProxyLocked();
+                mCursor.deactivate();
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        synchronized (mLock) {
+            closeCursorAndWindowLocked();
+        }
+    }
+
+    @Override
+    public int requery(IContentObserver observer, CursorWindow window) {
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            if (mCursor instanceof AbstractWindowedCursor) {
+                ((AbstractWindowedCursor) mCursor).setWindow(window);
+            } else {
+                if (mWindowForNonWindowedCursor != null) {
+                    mWindowForNonWindowedCursor.close();
+                }
+                mWindowForNonWindowedCursor = window;
+            }
+
+            try {
+                if (!mCursor.requery()) {
+                    return -1;
+                }
+            } catch (IllegalStateException e) {
+                IllegalStateException leakProgram = new IllegalStateException(
+                        mProviderName + " Requery misuse db, mCursor isClosed:" +
+                        mCursor.isClosed(), e);
+                throw leakProgram;
+            }
+
+            if (!(mCursor instanceof AbstractWindowedCursor)) {
+                if (window != null) {
+                    mCursor.fillWindow(0, window);
+                }
+            }
+
+            unregisterObserverProxyLocked();
+            createAndRegisterObserverProxyLocked(observer);
+            return mCursor.getCount();
+        }
+    }
+
+    @Override
     public boolean getWantsAllOnMoveCalls() {
-        return mCursor.getWantsAllOnMoveCalls();
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            return mCursor.getWantsAllOnMoveCalls();
+        }
     }
 
     /**
@@ -173,7 +268,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
      * @param observer the IContentObserver that wants to monitor the cursor
      * @throws IllegalStateException if an observer is already registered
      */
-    private void createAndRegisterObserverProxy(IContentObserver observer) {
+    private void createAndRegisterObserverProxyLocked(IContentObserver observer) {
         if (mObserver != null) {
             throw new IllegalStateException("an observer is already registered");
         }
@@ -182,7 +277,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
     }
 
     /** Unregister the observer if it is already registered. */
-    private void maybeUnregisterObserverProxy() {
+    private void unregisterObserverProxyLocked() {
         if (mObserver != null) {
             mCursor.unregisterContentObserver(mObserver);
             mObserver.unlinkToDeath(this);
@@ -190,11 +285,21 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
     }
 
+    @Override
     public Bundle getExtras() {
-        return mCursor.getExtras();
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            return mCursor.getExtras();
+        }
     }
 
+    @Override
     public Bundle respond(Bundle extras) {
-        return mCursor.respond(extras);
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            return mCursor.respond(extras);
+        }
     }
 }
