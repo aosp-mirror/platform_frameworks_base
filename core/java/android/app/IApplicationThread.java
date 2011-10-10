@@ -53,10 +53,10 @@ public interface IApplicationThread extends IInterface {
     void scheduleResumeActivity(IBinder token, boolean isForward) throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-            ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
-            List<ResultInfo> pendingResults,
-		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
+            ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
+            Bundle state, List<ResultInfo> pendingResults,
+    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+    		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
     		throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,

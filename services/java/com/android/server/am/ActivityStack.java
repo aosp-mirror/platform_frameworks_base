@@ -589,8 +589,8 @@ final class ActivityStack {
                 }
             }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
-                    System.identityHashCode(r),
-                    r.info, r.compat, r.icicle, results, newIntents, !andResume,
+                    System.identityHashCode(r), r.info, mService.mConfiguration,
+                    r.compat, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profileFile, profileFd,
                     profileAutoStop);
             
@@ -4035,7 +4035,18 @@ final class ActivityStack {
         // But then we need to figure out how it needs to deal with that.
         Configuration oldConfig = r.configuration;
         r.configuration = newConfig;
-        
+
+        // Determine what has changed.  May be nothing, if this is a config
+        // that has come back from the app after going idle.  In that case
+        // we just want to leave the official config object now in the
+        // activity and do nothing else.
+        final int changes = oldConfig.diff(newConfig);
+        if (changes == 0 && !r.forceNewConfig) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                    "Configuration no differences in " + r);
+            return true;
+        }
+
         // If the activity isn't currently running, just leave the new
         // configuration and it will pick that up next time it starts.
         if (r.app == null || r.app.thread == null) {
@@ -4046,8 +4057,7 @@ final class ActivityStack {
             return true;
         }
         
-        // Figure out what has changed between the two configurations.
-        int changes = oldConfig.diff(newConfig);
+        // Figure out how to handle the changes between the configurations.
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
             Slog.v(TAG, "Checking to restart " + r.info.name + ": changed=0x"
                     + Integer.toHexString(changes) + ", handles=0x"
