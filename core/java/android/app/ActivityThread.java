@@ -490,6 +490,15 @@ public final class ActivityThread {
         // Formatting for checkin service - update version if row format changes
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 1;
 
+        private void updatePendingConfiguration(Configuration config) {
+            synchronized (mPackages) {
+                if (mPendingConfiguration == null ||
+                        mPendingConfiguration.isOtherSeqNewer(config)) {
+                    mPendingConfiguration = config;
+                }
+            }
+        }
+
         public final void schedulePauseActivity(IBinder token, boolean finished,
                 boolean userLeaving, int configChanges) {
             queueOrSendMessage(
@@ -530,8 +539,8 @@ public final class ActivityThread {
         // we use token to identify this activity without having to send the
         // activity itself back to the activity manager. (matters more with ipc)
         public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-                ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
-                List<ResultInfo> pendingResults,
+                ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
+                Bundle state, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
                 String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
             ActivityClientRecord r = new ActivityClientRecord();
@@ -552,6 +561,8 @@ public final class ActivityThread {
             r.profileFile = profileName;
             r.profileFd = profileFd;
             r.autoStopProfiler = autoStopProfiler;
+
+            updatePendingConfiguration(curConfig);
 
             queueOrSendMessage(H.LAUNCH_ACTIVITY, r);
         }
@@ -697,12 +708,7 @@ public final class ActivityThread {
         }
 
         public void scheduleConfigurationChanged(Configuration config) {
-            synchronized (mPackages) {
-                if (mPendingConfiguration == null ||
-                        mPendingConfiguration.isOtherSeqNewer(config)) {
-                    mPendingConfiguration = config;
-                }
-            }
+            updatePendingConfiguration(config);
             queueOrSendMessage(H.CONFIGURATION_CHANGED, config);
         }
 
@@ -1965,6 +1971,9 @@ public final class ActivityThread {
             mProfiler.startProfiling();
             mProfiler.autoStopProfiler = r.autoStopProfiler;
         }
+
+        // Make sure we are running with the most recent config.
+        handleConfigurationChanged(null, null);
 
         if (localLOGV) Slog.v(
             TAG, "Handling launch of " + r);
