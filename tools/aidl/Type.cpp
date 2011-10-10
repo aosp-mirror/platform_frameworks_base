@@ -123,7 +123,7 @@ register_base_types()
     RPC_DATA_TYPE = new RpcDataType();
     NAMES.Add(RPC_DATA_TYPE);
 
-    RPC_ERROR_TYPE = new ParcelableType("com.android.athome.rpc", "RpcError",
+    RPC_ERROR_TYPE = new UserDataType("com.android.athome.rpc", "RpcError",
                                     true, __FILE__, __LINE__);
     NAMES.Add(RPC_ERROR_TYPE);
 
@@ -896,29 +896,22 @@ ListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, V
 
 // ================================================================
 
-ParcelableType::ParcelableType(const string& package, const string& name,
-                        bool builtIn, const string& declFile, int declLine)
-    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, true, false, true,
-            declFile, declLine)
-{
-}
-
-ParcelableType::ParcelableType(const string& package, const string& name,
-                            bool builtIn, bool canWriteToRpcData,
-                            const string& declFile, int declLine)
-    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, true, canWriteToRpcData, true,
-            declFile, declLine)
+UserDataType::UserDataType(const string& package, const string& name,
+                        bool builtIn, bool canWriteToParcel, bool canWriteToRpcData,
+                        const string& declFile, int declLine)
+    :Type(package, name, builtIn ? BUILT_IN : USERDATA, canWriteToParcel, canWriteToRpcData,
+            true, declFile, declLine)
 {
 }
 
 string
-ParcelableType::CreatorName() const
+UserDataType::CreatorName() const
 {
     return QualifiedName() + ".CREATOR";
 }
 
 void
-ParcelableType::WriteToParcel(StatementBlock* addTo, Variable* v, Variable* parcel, int flags)
+UserDataType::WriteToParcel(StatementBlock* addTo, Variable* v, Variable* parcel, int flags)
 {
     // if (v != null) {
     //     parcel.writeInt(1);
@@ -941,7 +934,7 @@ ParcelableType::WriteToParcel(StatementBlock* addTo, Variable* v, Variable* parc
 }
 
 void
-ParcelableType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, Variable**)
+UserDataType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, Variable**)
 {
     // if (0 != parcel.readInt()) {
     //     v = CLASS.CREATOR.createFromParcel(parcel)
@@ -962,7 +955,7 @@ ParcelableType::CreateFromParcel(StatementBlock* addTo, Variable* v, Variable* p
 }
 
 void
-ParcelableType::ReadFromParcel(StatementBlock* addTo, Variable* v,
+UserDataType::ReadFromParcel(StatementBlock* addTo, Variable* v,
                     Variable* parcel, Variable**)
 {
     // TODO: really, we don't need to have this extra check, but we
@@ -978,20 +971,20 @@ ParcelableType::ReadFromParcel(StatementBlock* addTo, Variable* v,
 }
 
 bool
-ParcelableType::CanBeArray() const
+UserDataType::CanBeArray() const
 {
     return true;
 }
 
 void
-ParcelableType::WriteArrayToParcel(StatementBlock* addTo, Variable* v, Variable* parcel, int flags)
+UserDataType::WriteArrayToParcel(StatementBlock* addTo, Variable* v, Variable* parcel, int flags)
 {
     addTo->Add(new MethodCall(parcel, "writeTypedArray", 2, v,
                 BuildWriteToParcelFlags(flags)));
 }
 
 void
-ParcelableType::CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
+UserDataType::CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
                             Variable* parcel, Variable**)
 {
     string creator = v->type->QualifiedName() + ".CREATOR";
@@ -1000,30 +993,15 @@ ParcelableType::CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
 }
 
 void
-ParcelableType::ReadArrayFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, Variable**)
+UserDataType::ReadArrayFromParcel(StatementBlock* addTo, Variable* v, Variable* parcel, Variable**)
 {
     string creator = v->type->QualifiedName() + ".CREATOR";
     addTo->Add(new MethodCall(parcel, "readTypedArray", 2,
                     v, new LiteralExpression(creator)));
 }
 
-// ================================================================
-
-FlattenableType::FlattenableType(const string& package, const string& name,
-                        bool builtIn, const string& declFile, int declLine)
-    :Type(package, name, builtIn ? BUILT_IN : PARCELABLE, false, true, true,
-            declFile, declLine)
-{
-}
-
-string
-FlattenableType::CreatorName() const
-{
-    return QualifiedName() + ".CREATOR";
-}
-
 void
-FlattenableType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+UserDataType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, int flags)
 {
     // if (v != null) {
@@ -1042,7 +1020,7 @@ FlattenableType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* 
 }
 
 void
-FlattenableType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
+UserDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, Variable** cl)
 {
     // RpcData _obj_XX = data.getRpcData(k);
@@ -1068,12 +1046,6 @@ FlattenableType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variabl
     elsepart->statements->Add(new Assignment(v, NULL_VALUE));
 
     block->Add(ifpart);
-}
-
-bool
-FlattenableType::CanBeArray() const
-{
-    return true;
 }
 
 // ================================================================
@@ -1266,7 +1238,7 @@ GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variabl
 // ================================================================
 
 RpcDataType::RpcDataType()
-    :ParcelableType("com.android.athome.rpc", "RpcData", true, true)
+    :UserDataType("com.android.athome.rpc", "RpcData", true, true, true)
 {
 }
 

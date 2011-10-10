@@ -50,13 +50,14 @@ test_document(document_item_type* d)
             }
             printf("}\n");
         }
-        else if (d->item_type == PARCELABLE_TYPE) {
-            parcelable_type* b = (parcelable_type*)d;
-            printf("parcelable %s %s;\n", b->package, b->name.data);
-        }
-        else if (d->item_type == FLATTENABLE_TYPE) {
-            parcelable_type* b = (parcelable_type*)d;
-            printf("flattenable %s %s;\n", b->package, b->name.data);
+        else if (d->item_type == USER_DATA_TYPE) {
+            user_data_type* b = (user_data_type*)d;
+            if ((b->flattening_methods & PARCELABLE_DATA) != 0) {
+                printf("parcelable %s %s;\n", b->package, b->name.data);
+            }
+            if ((b->flattening_methods & RPC_DATA) != 0) {
+                printf("flattenable %s %s;\n", b->package, b->name.data);
+            }
         }
         else {
             printf("UNKNOWN d=0x%08lx d->item_type=%d\n", (long)d, d->item_type);
@@ -242,9 +243,8 @@ check_filenames(const char* filename, document_item_type* items)
 {
     int err = 0;
     while (items) {
-        if (items->item_type == PARCELABLE_TYPE
-                || items->item_type == FLATTENABLE_TYPE) {
-            parcelable_type* p = (parcelable_type*)items;
+        if (items->item_type == USER_DATA_TYPE) {
+            user_data_type* p = (user_data_type*)items;
             err |= check_filename(filename, p->package, &p->name);
         }
         else if (items->item_type == INTERFACE_TYPE_BINDER
@@ -270,8 +270,8 @@ kind_to_string(int kind)
     {
         case Type::INTERFACE:
             return "an interface";
-        case Type::PARCELABLE:
-            return "a parcelable";
+        case Type::USERDATA:
+            return "a user data";
         default:
             return "ERROR";
     }
@@ -296,15 +296,11 @@ gather_types(const char* filename, document_item_type* items)
     int err = 0;
     while (items) {
         Type* type;
-        if (items->item_type == PARCELABLE_TYPE) {
-            parcelable_type* p = (parcelable_type*)items;
-            type = new ParcelableType(p->package ? p->package : "",
-                            p->name.data, false, filename, p->name.lineno);
-        }
-        else if (items->item_type == FLATTENABLE_TYPE) {
-            parcelable_type* p = (parcelable_type*)items;
-            type = new FlattenableType(p->package ? p->package : "",
-                            p->name.data, false, filename, p->name.lineno);
+        if (items->item_type == USER_DATA_TYPE) {
+            user_data_type* p = (user_data_type*)items;
+            type = new UserDataType(p->package ? p->package : "", p->name.data,
+                    false, ((p->flattening_methods & PARCELABLE_DATA) != 0),
+                    ((p->flattening_methods & RPC_DATA) != 0), filename, p->name.lineno);
         }
         else if (items->item_type == INTERFACE_TYPE_BINDER
                 || items->item_type == INTERFACE_TYPE_RPC) {
@@ -539,7 +535,7 @@ check_types(const char* filename, document_item_type* items)
 {
     int err = 0;
     while (items) {
-        // (nothing to check for PARCELABLE_TYPE or FLATTENABLE_TYPE)
+        // (nothing to check for USER_DATA_TYPE)
         if (items->item_type == INTERFACE_TYPE_BINDER
                 || items->item_type == INTERFACE_TYPE_RPC) {
             map<string,method_type*> methodNames;
@@ -593,26 +589,23 @@ exactly_one_interface(const char* filename, const document_item_type* items, con
         else if (next->item_type == INTERFACE_TYPE_RPC) {
             lineno = ((interface_type*)next)->interface_token.lineno;
         }
-        else if (next->item_type == PARCELABLE_TYPE) {
-            lineno = ((parcelable_type*)next)->parcelable_token.lineno;
-        }
-        else if (next->item_type == FLATTENABLE_TYPE) {
-            lineno = ((parcelable_type*)next)->parcelable_token.lineno;
+        else if (next->item_type == USER_DATA_TYPE) {
+            lineno = ((user_data_type*)next)->keyword_token.lineno;
         }
         fprintf(stderr, "%s:%d aidl can only handle one interface per file\n",
                             filename, lineno);
         return 1;
     }
 
-    if (items->item_type == PARCELABLE_TYPE || items->item_type == FLATTENABLE_TYPE) {
+    if (items->item_type == USER_DATA_TYPE) {
         *onlyParcelable = true;
         if (options.failOnParcelable) {
             fprintf(stderr, "%s:%d aidl can only generate code for interfaces, not"
                             " parcelables or flattenables,\n", filename,
-                            ((parcelable_type*)items)->parcelable_token.lineno);
+                            ((user_data_type*)items)->keyword_token.lineno);
             fprintf(stderr, "%s:%d .aidl files that only declare parcelables or flattenables"
                             "may not go in the Makefile.\n", filename,
-                            ((parcelable_type*)items)->parcelable_token.lineno);
+                            ((user_data_type*)items)->keyword_token.lineno);
             return 1;
         }
     } else {
@@ -711,8 +704,8 @@ generate_outputFileName(const Options& options, const document_item_type* items)
         interface_type* type = (interface_type*)items;
 
         return generate_outputFileName2(options, type->name, type->package);
-    } else if (items->item_type == PARCELABLE_TYPE || items->item_type == FLATTENABLE_TYPE) {
-        parcelable_type* type = (parcelable_type*)items;
+    } else if (items->item_type == USER_DATA_TYPE) {
+        user_data_type* type = (user_data_type*)items;
         return generate_outputFileName2(options, type->name, type->package);
     }
 
@@ -783,31 +776,33 @@ parse_preprocessed_file(const string& filename)
         document_item_type* doc;
         
         if (0 == strcmp("parcelable", type)) {
-            parcelable_type* parcl = (parcelable_type*)malloc(
-                    sizeof(parcelable_type));
-            memset(parcl, 0, sizeof(parcelable_type));
-            parcl->document_item.item_type = PARCELABLE_TYPE;
-            parcl->parcelable_token.lineno = lineno;
-            parcl->parcelable_token.data = strdup(type);
+            user_data_type* parcl = (user_data_type*)malloc(
+                    sizeof(user_data_type));
+            memset(parcl, 0, sizeof(user_data_type));
+            parcl->document_item.item_type = USER_DATA_TYPE;
+            parcl->keyword_token.lineno = lineno;
+            parcl->keyword_token.data = strdup(type);
             parcl->package = packagename ? strdup(packagename) : NULL;
             parcl->name.lineno = lineno;
             parcl->name.data = strdup(classname);
             parcl->semicolon_token.lineno = lineno;
             parcl->semicolon_token.data = strdup(";");
+            parcl->flattening_methods = PARCELABLE_DATA;
             doc = (document_item_type*)parcl;
         }
         else if (0 == strcmp("flattenable", type)) {
-            parcelable_type* parcl = (parcelable_type*)malloc(
-                    sizeof(parcelable_type));
-            memset(parcl, 0, sizeof(parcelable_type));
-            parcl->document_item.item_type = FLATTENABLE_TYPE;
-            parcl->parcelable_token.lineno = lineno;
-            parcl->parcelable_token.data = strdup(type);
+            user_data_type* parcl = (user_data_type*)malloc(
+                    sizeof(user_data_type));
+            memset(parcl, 0, sizeof(user_data_type));
+            parcl->document_item.item_type = USER_DATA_TYPE;
+            parcl->keyword_token.lineno = lineno;
+            parcl->keyword_token.data = strdup(type);
             parcl->package = packagename ? strdup(packagename) : NULL;
             parcl->name.lineno = lineno;
             parcl->name.data = strdup(classname);
             parcl->semicolon_token.lineno = lineno;
             parcl->semicolon_token.data = strdup(";");
+            parcl->flattening_methods = RPC_DATA;
             doc = (document_item_type*)parcl;
         }
         else if (0 == strcmp("interface", type)) {
@@ -986,18 +981,14 @@ preprocess_aidl(const Options& options)
         }
         document_item_type* doc = g_document;
         string line;
-        if (doc->item_type == PARCELABLE_TYPE) {
-            line = "parcelable ";
-            parcelable_type* parcelable = (parcelable_type*)doc;
-            if (parcelable->package) {
-                line += parcelable->package;
-                line += '.';
+        if (doc->item_type == USER_DATA_TYPE) {
+            user_data_type* parcelable = (user_data_type*)doc;
+            if ((parcelable->flattening_methods & PARCELABLE_DATA) != 0) {
+                line = "parcelable ";
             }
-            line += parcelable->name.data;
-        }
-        else if (doc->item_type == FLATTENABLE_TYPE) {
-            line = "parcelable ";
-            parcelable_type* parcelable = (parcelable_type*)doc;
+            if ((parcelable->flattening_methods & RPC_DATA) != 0) {
+                line = "flattenable ";
+            }
             if (parcelable->package) {
                 line += parcelable->package;
                 line += '.';

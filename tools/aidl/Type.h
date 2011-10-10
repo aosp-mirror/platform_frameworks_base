@@ -13,7 +13,7 @@ public:
     // kinds
     enum {
         BUILT_IN,
-        PARCELABLE,
+        USERDATA,
         INTERFACE,
         GENERATED
     };
@@ -350,13 +350,11 @@ public:
                                     Variable* data, Variable** cl);
 };
 
-class ParcelableType : public Type
+class UserDataType : public Type
 {
 public:
-                    ParcelableType(const string& package, const string& name,
-                            bool builtIn, const string& declFile, int declLine);
-                    ParcelableType(const string& package, const string& name,
-                            bool builtIn, bool canWriteToRpcData,
+                    UserDataType(const string& package, const string& name,
+                            bool builtIn, bool canWriteToParcel, bool canWriteToRpcData,
                             const string& declFile = "", int declLine = -1);
 
     virtual string  CreatorName() const;
@@ -376,22 +374,11 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
-};
-
-class FlattenableType : public Type
-{
-public:
-                    FlattenableType(const string& package, const string& name,
-                            bool builtIn, const string& declFile, int declLine);
-
-    virtual string  CreatorName() const;
 
     virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, int flags);
     virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, Variable** cl);
-
-    virtual bool    CanBeArray() const;
 };
 
 class InterfaceType : public Type
@@ -437,7 +424,7 @@ private:
     vector<Type*> m_args;
 };
 
-class RpcDataType : public ParcelableType
+class RpcDataType : public UserDataType
 {
 public:
                     RpcDataType();
