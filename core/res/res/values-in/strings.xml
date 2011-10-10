@@ -220,7 +220,7 @@
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Mengizinkan aplikasi mengaktifkan mode mobil."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"hentikan proses latar belakang"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Mengizinkan aplikasi menghentikan proses latar belakang dari aplikasi lainnya, meskipun memori rendah."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"paksa berhenti aplikasi yang lain"</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"paksa aplikasi lain berhenti"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Mengizinkan aplikasi menghentikan aplikasi lain secara paksa."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"tutup paksa aplikasi"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Mengizinkan aplikasi menutup dan mengembalikan aktivitas apa pun yang berada di latar depan secara paksa. Tidak pernah diperlukan untuk aplikasi normal."</string>
@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Memungkinkan aplikasi membaca informasi profil pribadi yang tersimpan pada perangkat Anda, seperti nama dan informasi kontak. Artinya aplikasi dapat mengidentifikasi Anda dan mengirimkan informasi profil Anda kepada orang lain."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"menulis ke data profil Anda"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Memungkinkan aplikasi mengubah atau menambah informasi profil pribadi yang tersimpan pada perangkat Anda, seperti nama dan informasi kontak. Artinya aplikasi lain dapat mengidentifikasi Anda dan mengirimkan informasi profil Anda kepada orang lain."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"membaca aliran sosial Anda"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Mengizinkan aplikasi untuk mengakses dan menyinkronkan pembaruan sosial dari Anda dan teman. Aplikasi berbahaya dapat menggunakan ini untuk membaca komunikasi pribadi antara Anda dan teman di jaringan sosial."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"menulis ke aliran sosial Anda"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Mengizinkan aplikasi untuk menampilkan pembaruan sosial dari teman Anda. Aplikasi berbahaya dapat menggunakan ini untuk berpura-pura menjadi seorang teman dan menipu Anda untuk mengungkapkan sandi atau informasi rahasia lainnya."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalender serta informasi rahasia"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Memungkinkan aplikasi membaca semua acara kalender yang disimpan pada tablet Anda, termasuk acara teman atau rekan kerja. Aplikasi berbahaya dengan izin ini dapat mengambil informasi pribadi dari kalender ini tanpa sepengetahuan pemilik."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Memungkinkan aplikasi membaca semua acara kalender yang disimpan di ponsel Anda, termasuk acara teman atau rekan kerja. Aplikasi berbahaya dengan izin ini dapat mengambil informasi pribadi dari kalender ini tanpa sepengetahuan pemilik."</string>
@@ -989,9 +993,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Jika Anda menghidupkan penyimpanan USB, sebagian aplikasi yang Anda gunakan akan berhenti dan mungkin tidak tersedia sampai Anda mematikan penyimpanan USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operasi USB gagal"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Terhubung sebagai perangkat media"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Terhubung sebagai kamera"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Terhubung sebagai pemasang"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tersambung sebagai perangkat media"</string>
+    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Tersambung sebagai kamera"</string>
+    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tersambung sebagai pemasang"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tersambung ke aksesori USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Sentuh untuk opsi USB lainnya"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format penyimpanan USB"</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Pengubahan mode"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Pilih aplikasi"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Berbagi dengan"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Berbagi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Gagang geser. Ketuk dan tahan."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Ke atas untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Ke bawah untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Senyap"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Suara hidup"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tombol. Perlu headset untuk mendengarkan suara tombol saat mengetik sandi."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tombol. Perlu headset untuk mendengarkan suara tombol saat mengetik sandi."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi ke beranda"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi naik"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Opsi lainnya"</string>

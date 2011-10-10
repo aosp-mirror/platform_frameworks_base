@@ -358,6 +358,14 @@
     <skip />
     <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
     <skip />
+    <!-- no translation found for permlab_readSocialStream (1268920956152419170) -->
+    <skip />
+    <!-- no translation found for permdesc_readSocialStream (6619997662735851111) -->
+    <skip />
+    <!-- no translation found for permlab_writeSocialStream (3504179222493235645) -->
+    <skip />
+    <!-- no translation found for permdesc_writeSocialStream (2689083745826002521) -->
+    <skip />
     <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"leger eveniments da chalender"</string>
     <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permetta ad ina applicaziun da leger tut ils eveniments da chalender memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia trametter Voss eveniments da chalender ad autras persunas."</string>
     <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permetta ad ina applicaziun da leger tut ils eveniments da chalender memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia trametter Voss eveniments da chalender ad autras persunas."</string>
@@ -1378,6 +1386,12 @@
     <skip />
     <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
     <skip />
+    <!-- no translation found for activitychooserview_choose_application (4540794444768613567) -->
+    <skip />
+    <!-- no translation found for shareactionprovider_share_with (806688056141131819) -->
+    <skip />
+    <!-- no translation found for shareactionprovider_share_with_application (5627411384638389738) -->
+    <skip />
     <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
     <skip />
     <!-- no translation found for description_direction_up (1983114130441878529) -->
@@ -1396,7 +1410,9 @@
     <skip />
     <!-- no translation found for description_target_soundon (30052466675500172) -->
     <skip />
-    <!-- no translation found for keyboard_headset_required_to_hear_password (4407722573911224960) -->
+    <!-- no translation found for keyboard_headset_required_to_hear_password (5913502399391940888) -->
+    <skip />
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
     <skip />
     <!-- no translation found for action_bar_home_description (5293600496601490216) -->
     <skip />

@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Tillåter att appen läser personlig profilinformation som lagrats på enheten, t.ex. ditt namn och kontaktuppgifter. Det innebär att appen kan identifiera dig och skicka din profilinformation till andra."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"skriver till data för din profil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Tillåter att appen ändrar eller lägger till personlig profilinformation som lagras på din enhet, t.ex. ditt namn och kontaktuppgifter. Det innebär att andra appar kan identifiera dig och skicka profilinformation till andra."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"läs mitt sociala flöde"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Gör det möjligt för appen få åtkomst till och synkronisera sociala uppdateringar från dig och dina vänner. Skadliga appar kan använda detta för att läsa privata konversationer mellan dig och dina vänner på sociala nätverk."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skriv till mitt sociala flöde"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Gör det möjligt för appen att visa sociala uppdateringar från dina vänner. Skadliga program kan använda detta för att låtsas vara en vän och lura dig att avslöja lösenord eller annan konfidentiell information."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"läsa kalenderuppgifter plus konfidentiell information"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Tillåter att en app läser alla kalenderuppgifter som sparats på din pekdator, inklusive dina vänners eller kollegors uppgifter. Skadliga appar kan använda detta för att hämta personliga uppgifter från kalendrarna utan ägarens vetskap."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Tillåter att en app läser kalenderuppgifter som har lagrats på din telefon, även dina vänners eller kollegors uppgifter. Skadliga appar kan använda detta för att hämta personliga uppgifter från kalendrar utan ägarens vetskap."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Funktionsändring"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Skift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retur"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Välj en app"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dela med"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Skärmlåsfunktion. Tryck och dra."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Upp för <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Ned för <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tyst"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ljud på"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Du behöver ett headset för att höra tangenterna när du skriver in ett lösenord."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Du behöver ett headset för att höra tangenterna när du skriver in ett lösenord."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Visa startsidan"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigera uppåt"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Fler alternativ"</string>

@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"به برنامه کاربردی اجازه می‌دهد اطلاعات مربوط به نمایه شخصی ذخیره شده بر روی دستگاه شما مانند نام و اطلاعات تماس شما را بخواند. این بدان معناست که برنامه می‌تواند شما را شناسایی کند و اطلاعات نمایه‌ شما را به دیگران ارسال نماید."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"نوشتن در داده‌های نمایه شما"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"به برنامه کاربردی اجازه می‌دهد به تغییر و یا اضافه کردن اطلاعات نمایه شخصی ذخیره شده بر روی دستگاه شما مانند نام و اطلاعات تماس شما، بپردازد. این بدان معناست که برنامه‌های دیگر می‌توانند شما را شناسایی کنند و اطلاعات نمایه شما را به دیگران ارسال نمایند."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"خواندن جریان اجتماعی شما"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"به برنامه کاربردی امکان میدهد تا به به‌روزرسانی‌های شما و دوستانتان دسترسی داشته باشند و آنها را همگام کنند. برنامه‌های مخرب می‌توانند از آن برای خواندن ارتباطات خصوصی بین شما و دوستانتان در شبکه‌های اجتماعی استفاده کنند."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"نوشتن در جریان اجتماعی شما"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"به برنامه کاربردی امکان میدهد تا به به‌روزرسانی‌های دوستان شما دسترسی داشته باشد. برنامه‌های مخرب می‌توانند از آن استفاده کرده و وانمود کنند که دوست شما هستند، و شما را فریب دهند تا گذرواژه یا دیگر اطلاعات محرمانه خود را در اختیار آنها قرار دهید."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"خواندن رویدادهای تقویم به همراه اطلاعات محرمانه"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"به برنامه اجازه خواندن تمام رویدادهای تقویم موجود در رایانه لوحی شما را می‌دهد که این شامل تقویم دوستان و همکاران نیز می‌شود. یک برنامه مخرب با این اجازه می‌تواند بدون اطلاع مالک، اطلاعات شخصی را از این تقویم‌ها استخراج کند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"به یک برنامه کاربردی اجازه خواندن تمام رویدادهای تقویم موجود در گوشی شما را می‌دهد که این شامل تقویم دوستان و همکاران نیز می‌شود. یک برنامه مخرب با این اجازه می‌تواند بدون اطلاع مالک، اطلاعات شخصی را از این تقویم‌ها استخراج کند."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغییر حالت"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"انتخاب برنامه کاربردی"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"اشتراک‌گذاری با"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"اشتراک‌گذاری با <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"کنترل کننده کشویی. ضربه زده و نگه دارید."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"بالا برای <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"پایین برای <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"دوربین"</string>
     <string name="description_target_silent" msgid="893551287746522182">"ساکت"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"صدا روشن"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"کلید. برای شنیدن کلیدها هنگام تایپ یک گذرواژه به گوشی نیاز است."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"کلید. برای شنیدن کلیدها هنگام تایپ یک گذرواژه به گوشی نیاز است."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحه اصلی"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه ها"</string>

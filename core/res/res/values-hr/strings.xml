@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Aplikaciji omogućuje čitanje osobnih informacija profila koje su pohranjene na vašem uređaju, poput vašeg imena i kontaktnih podataka. To znači da vas aplikacija može identificirati i slati informacije vašeg profila drugima."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje u podatke profila"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Aplikaciji omogućuje promjenu ili dodavanje informacija u osobne informacije profila koje su spremljene na vašem uređaju, poput vašeg imena i kontaktnih podataka. To znači da vas druge aplikacije mogu identificirati i slati informacije vašeg profila drugima."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čitanje društvenog streama"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Aplikaciji omogućuje pristup i sinkronizaciju društvenih ažuriranja vaših prijatelja. Zlonamjerne aplikacije to mogu upotrijebiti za pristup privatnim porukama između vas i vaših prijatelja na društvenim mrežama."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje društvenog streama"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Aplikaciji omogućuje prikazivanje društvenih ažuriranja vaših prijatelja. Zlonamjerne aplikacije to mogu upotrijebiti kako bi se predstavile kao prijatelj i zavarale vas da otkrijete zaporke ili druge povjerljive informacije."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čitajte kalendarske događaje i povjerljive informacije"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Aplikaciji omogućuje čitanje svih kalendarskih događaja pohranjenih na tabletnom računalu, uključujući događaje prijatelja ili suradnika. Zlonamjerna aplikacija s tim dopuštenjem može izdvajati osobne podatke iz tih kalendara bez znanja vlasnika."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Aplikaciji omogućuje čitanje svih kalendarskih događaja na vašem telefonu, uključujući događaje prijatelja ili suradnika. Zlonamjerne aplikacije s tim dopuštenjem mogu izdvajati osobne podatke iz tih kalendara bez znanja vlasnika."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Promjena načina"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Odaberite aplikaciju"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dijeljenje sa"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli s aplikacijom <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Klizna ručka. Dotaknite i držite."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Dolje za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Fotoaparat"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Bešumno"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Zvuk je uključen"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tipka. Da bi se pri upisivanju zaporke čule tipke, potrebne su slušalice."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tipka. Da bi se pri upisivanju zaporke čule tipke, potrebne su slušalice."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Kreni na početnu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Kreni gore"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Više opcija"</string>

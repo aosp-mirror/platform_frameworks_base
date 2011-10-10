@@ -29,8 +29,7 @@
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;ללא כותרת&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"???"</string>
-    <!-- no translation found for ellipsis_two_dots (1228078994866030736) -->
-    <skip />
+    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(אין מספר טלפון)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(לא ידוע)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"דואר קולי"</string>
@@ -331,11 +330,15 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"מאפשר ליישום לקרוא נתוני פרופיל אישי המאוחסנים במכשיר שלך, כגון שמך ופרטי הקשר שלך. משמעות הדבר היא שהיישום יכול לזהות אותך ולשלוח את נתוני הפרופיל שלך לאחרים."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"כתוב בנתוני הפרופיל שלך"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"מאפשר ליישום לשנות או להוסיף לנתוני הפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי הקשר שלך. משמעות הדבר היא שיישומים אחרים יכולים לזהות אותך ולשלוח את נתוני הפרופיל שלך לאחרים."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"קריאת הזרם החברתי שלך"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"מאפשר ליישום לגשת לעדכונים חברתיים מהחברים שלך ולסנכרן אותם. יישומים זדוניים יוכלו להשתמש בכך כדי לגשת למסרים שהועברו באופן פרטי בינך לבין חבריך ברשתות חברתיות."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"כתיבה בזרם החברתי שלך"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"מאפשר ליישום להציג עדכונים חברתיים מהחברים שלך. יישומים זדוניים יוכלו להשתמש בכך כדי להתחזות לאחד מחבריך ולדלות ממך בדרכי מרמה סיסמאות או מידע סודי אחר."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי לוח שנה וגם מידע סודי"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"מאפשר ליישום לקרוא את כל אירועי לוח השנה שמאוחסנים בטבלט שלך, כולל אירועים של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לחלץ מידע אישי מלוחות שנה אלה ללא ידיעת הבעלים."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"מאפשר ליישום לקרוא את כל אירועי לוח השנה המאוחסנים בטלפון שלך, כולל אירועים של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לחלץ מידע אישי מלוחות השנה האלה ללא ידיעת הבעלים."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי לוח שנה ושליחת דוא\"ל לאורחים ללא ידיעת הבעלים"</string>
-    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"מאפשר ליישום לשלוח הזמנות לאירוע בתור הבעלים של לוח השנה ולהוסיף, להסיר ולשנות אירועים שניתן לשנות במכשיר, כולל אלה של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לשלוח הודעות דואר זבל שייראו כאילו נשלחו מהבעלים של לוח השנה, לשנות אירועים ללא ידיעת הבעלים או להוסיף אירועים מזויפים."</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"מאפשר ליישום לשלוח הזמנות לאירוע בתור הבעלים של לוח השנה ולהוסיף, להסיר ולשנות אירועים שניתן לשנות במכשיר, כולל אלה של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לשלוח הודעות ספאם שייראו כאילו נשלחו מהבעלים של לוח השנה, לשנות אירועים ללא ידיעת הבעלים או להוסיף אירועים מזויפים."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"צור מקורות מיקום מדומים לצורך בדיקה"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"צור מקורות מיקום מדומים לצורך בדיקה. יישומים זדוניים עלולים להשתמש באפשרות זו כדי לעקוף את המיקום ו/או הסטטוס המוחזרים על ידי מקורות המיקום האמיתיים כגון GPS או ספקי רשת."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
@@ -1145,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"שינוי מצב"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"בחר יישום"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"שתף עם"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"שתף עם <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"ידית להחלקה. הקש והחזק."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"\'למעלה\' עבור <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"\'למטה\' עבור <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1154,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"מצלמה"</string>
     <string name="description_target_silent" msgid="893551287746522182">"שקט"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"הקול פועל"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"מקש. נדרשות אוזניות כדי לשמוע את המקשים בעת הקלדת סיסמה."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"מקש. נדרשות אוזניות כדי לשמוע את המקשים בעת הקלדת סיסמה."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"נווט לדף הבית"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"נווט למעלה"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"אפשרויות נוספות"</string>

@@ -26,6 +26,11 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ลบจากรายการ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ข้อมูลแอปพลิเคชัน"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ไม่มีแอปพลิเคชันล่าสุด"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ปิดแอปพลิเคชันล่าสุด"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 แอปพลิเคชันล่าสุด"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d แอปพลิเคชันล่าสุด"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ไม่มีการแจ้งเตือน"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
@@ -41,9 +46,6 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ปิดเสียง"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"อัตโนมัติ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"การแจ้งเตือน"</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"เมื่อเร็วๆ นี้"</string>
-    <string name="recent_tasks_empty" msgid="1905484479067697884">"ไม่มีแอปพลิเคชันล่าสุด"</string>
-    <string name="recent_tasks_app_label" msgid="3796483981246752469">"แอปพลิเคชัน"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"บลูทูธที่ปล่อยสัญญาณ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"กำหนดค่าวิธีการป้อนข้อมูล"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"ใช้แป้นพิมพ์จริง"</string>
@@ -69,7 +71,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"ย้อนกลับ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"หน้าแรก"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"เมนู"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"แอปพลิเคชันล่าสุด"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"แอปพลิเคชันล่าสุด"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
@@ -106,9 +108,9 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"แบตเตอรี่ <xliff:g id="NUMBER">%d</xliff:g> เปอร์เซ็นต์"</string>
-    <string name="accessibility_settings_button" msgid="7913780116850379698">"ปุ่มการตั้งค่า"</string>
-    <string name="accessibility_notifications_button" msgid="2933903195211483438">"ปุ่มแจ้งเตือน"</string>
-    <string name="accessibility_remove_notification" msgid="4883990503785778699">"นำการแจ้งเตือนออก"</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"การตั้งค่าระบบ"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"การแจ้งเตือน"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"ล้างการแจ้งเตือน"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"เปิดใช้งาน GPS แล้ว"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"การดึงข้อมูล GPS"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"เปิดใช้งาน TeleTypewriter อยู่"</string>
@@ -124,4 +126,5 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ Wi-Fi แล้ว"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"กำลังค้นหา GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ตำแหน่งที่กำหนดโดย GPS"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"ล้างการแจ้งเตือนทั้งหมด"</string>
 </resources>

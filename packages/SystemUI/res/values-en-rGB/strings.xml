@@ -26,6 +26,11 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remove from list"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"App info"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"No recent apps"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dismiss recent apps"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 recent app"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d recent apps"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No notifications"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ongoing"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
@@ -41,9 +46,6 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"MUTE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notifications"</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
-    <string name="recent_tasks_empty" msgid="1905484479067697884">"No recent applications."</string>
-    <string name="recent_tasks_app_label" msgid="3796483981246752469">"Apps"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth tethered"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Configure input methods"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Use physical keyboard"</string>
@@ -69,7 +71,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Back"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Home"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <string name="accessibility_recent" msgid="3027675523629738534">"Recent applications"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"Recent apps"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Switch input method button."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Compatibility zoom button."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom smaller to larger screen."</string>
@@ -106,9 +108,9 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Airplane mode"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Battery <xliff:g id="NUMBER">%d</xliff:g> per cent."</string>
-    <string name="accessibility_settings_button" msgid="7913780116850379698">"Settings button."</string>
-    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Notifications button."</string>
-    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Remove notification."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"System settings"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifications."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Clear notification."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS enabled."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS acquiring."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter enabled."</string>
@@ -124,4 +126,5 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi connected"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Searching for GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Location set by GPS"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Clear all notifications."</string>
 </resources>

@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Umożliwia aplikacji odczytywanie osobistych informacji z profilu, przechowywanych w urządzeniu – np. imienia, nazwiska czy danych kontaktowych. Oznacza to, że aplikacja może Cię zidentyfikować i wysyłać do innych osób informacje o Twoim profilu."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"zapis danych w Twoim profilu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Umożliwia aplikacji zmienianie lub dodawanie danych do osobistych informacji w profilu, przechowywanych w urządzeniu – np. imienia, nazwiska czy danych kontaktowych. Oznacza to, że inne aplikacje mogą Cię zidentyfikować i wysyłać do innych osób informacje o Twoim profilu."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"odczyt sieci społecznościowych"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Zezwala aplikacji na dostęp do aktualizacji społecznościowych od Ciebie i znajomych oraz na ich synchronizowanie. Złośliwe aplikacje mogą dzięki temu odczytywać prywatne informacje wymienianie przez Ciebie ze znajomymi w sieciach społecznościowych."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zapis sieci społecznościowych"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Zezwala aplikacji na wyświetlanie aktualizacji społecznościowych od znajomych. Złośliwe aplikacje mogą dzięki temu udawać znajomych i wyłudzać hasła lub inne poufne informacje."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"odczyt wydarzeń w kalendarzu wraz z informacjami poufnymi"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Zezwala aplikacji na odczyt wszystkich wydarzeń w kalendarzu zapisanych w tablecie, w tym dotyczących znajomych lub współpracowników. Złośliwa aplikacja z tym uprawnieniem może bez wiedzy właściciela pobierać z kalendarza informacje osobiste."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Zezwala aplikacji na odczyt wszystkich wydarzeń w kalendarzu zapisanych w telefonie, w tym dotyczących znajomych lub współpracowników. Złośliwa aplikacja z tym uprawnieniem może bez wiedzy właściciela pobierać z kalendarza informacje osobiste."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Zmiana trybu"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Wybierz aplikację"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>: w górę"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>: w dół"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Aparat"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Wyciszenie"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Włącz dźwięk"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Klawisz. Wymagany jest zestaw słuchawkowy, aby słyszeć klawisze podczas wpisywania hasła."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Klawisz. Wymagany jest zestaw słuchawkowy, aby słyszeć klawisze podczas wpisywania hasła."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Przejdź do strony głównej"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Przejdź wyżej"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Więcej opcji"</string>

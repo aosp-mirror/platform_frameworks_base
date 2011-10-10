@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Engedélyezi, hogy az alkalmazás a készüléken tárolt személyes profiladatokat olvassa, például az Ön nevét és elérhetőségét. Ez azt jelenti, az alkalmazás képes az Ön azonosítására, és elküldheti a profiladatokat másoknak."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"írás a profiladatokba"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Engedélyezi, hogy az alkalmazás megváltoztassa vagy hozzáadja a készüléken tárolt személyes profiladatokat, például az Ön nevét és elérhetőségét. Ez azt jelenti, hogy más alkalmazások is azonosíthatják Önt, és elküldhetik a profiladatokat másoknak."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"közösségi adatfolyam olvasása"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Lehetővé teszi az alkalmazásnak, hogy hozzáférjen közösségi frissítéseihez, és szinkronizálja azokat. Rosszindulatú alkalmazások használhatják ezt, hogy hozzáférjenek barátaival történő magánbeszélgetéseihez a közösségi hálózatokon."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"írás a közösség adatfolyamra"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Lehetővé teszi az alkalmazásnak, hogy megjelenítse barátai közösségi frissítéseit. Rosszindulatú alkalmazások használhatják ezt ismerősnek tettetve magukat, hogy jelszavakat és más bizalmas információt csaljanak ki Öntől."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"naptári események és bizalmas információk beolvasása"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Lehetővé teszi egy alkalmazás számára a táblagépén található összes naptári esemény beolvasását, beleértve az ismerőseihez vagy munkatársaihoz tartozó eseményeket is. Ha egy rosszindulatú alkalmazás megkapja ezt az engedélyt, akkor vissza tudja fejteni a személyes adatokat ezekből a naptárakból, a tulajdonos tudomása nélkül."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Lehetővé teszi egy alkalmazás részére, hogy beolvassa a telefonján tárolt összes naptáreseményt, beleértve az ismerősök és kollégák eseményeit is. Ha egy rosszindulatú alkalmazás megkapja ezt az engedélyt, akkor vissza tudja fejteni a személyes adatokat ezekből a naptárakból, a tulajdonos tudomása nélkül."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mód váltása"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Válasszon egy alkalmazást"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Megosztás a következővel:"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Ossza meg a következő alkalmazással: <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Csúsztatható fogantyú. Érintse meg és tartsa."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Fel: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Le: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Némítás"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Hang bekapcsolása"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Billentyű. Fülhallgató szükséges, ha hallani szeretné a billentyűket a jelszó megadása közben."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Billentyű. Fülhallgató szükséges, ha hallani szeretné a billentyűket a jelszó megadása közben."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ugrás a főoldalra"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Felfele mozgás"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"További lehetőségek"</string>

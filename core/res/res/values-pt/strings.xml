@@ -330,6 +330,10 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Permite que o aplicativo leia informações pessoais de seu perfil armazenadas em seu dispositivo, como seu nome e suas informações de contato. Isso significa que o aplicativo pode identificá-lo e enviar as informações de seu perfil para outras pessoas."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"escrever nos dados do perfil"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Permite que o aplicativo altere ou adicione informações de perfil pessoais armazenadas em seu dispositivo, como seu nome e suas informações de contato. Isso significa que outros aplicativos podem identificá-lo e enviar informações de seu perfil para outras pessoas."</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ler suas transmissões sociais"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Permite que o aplicativo acesse e sincronize suas atualizações sociais e as de seus amigos. Aplicativos maliciosos podem usar esse recurso para ler comunicações privadas entre você e seus amigos em redes sociais."</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"escrever p/ suas transm. soc."</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Permite que o aplicativo mostre atualizações sociais de seus amigos. Aplicativos maliciosos podem usar esse recurso para fingir ser um amigo e fazer você revelar senhas ou outras informações confidenciais."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ler compromissos e informações confidenciais"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permite que um aplicativo leia todos os compromissos armazenados na agenda de seu tablet, incluindo os de amigos ou de colegas de trabalho. Um aplicativo malicioso com essa permissão pode extrair informações pessoais dessa agenda sem que seus donos saibam."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permite que um aplicativo leia todos os compromissos armazenados na agenda de seu telefone, incluindo os de amigos ou de colegas de trabalho. Um aplicativo malicioso com essa permissão pode extrair informações pessoais dessa agenda sem que seus donos saibam."</string>
@@ -1144,6 +1148,9 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Alteração do modo"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Escolha um aplicativo"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Compartilhar com"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Compartilhar com <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="7311938669217173870">"Alça deslizante. Toque e segure."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Deslize para cima para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Deslize para baixo para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1153,7 +1160,9 @@
     <string name="description_target_camera" msgid="969071997552486814">"Câmera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencioso"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Som ativado"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="4407722573911224960">"Tecla. É necessário um fone de ouvido para ouvir as teclas durante a digitação de uma senha."</string>
+    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tecla. É necessário um fone de ouvido para ouvir as teclas durante a digitação de uma senha."</string>
+    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navegar na página inicial"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navegar para cima"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Mais opções"</string>
