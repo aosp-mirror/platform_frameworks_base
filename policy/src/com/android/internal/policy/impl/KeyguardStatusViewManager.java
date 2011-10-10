@@ -186,6 +186,9 @@ class KeyguardStatusViewManager implements OnClickListener {
 
         mTransientTextManager = new TransientTextManager(mCarrierView);
 
+        mUpdateMonitor.registerInfoCallback(mInfoCallback);
+        mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
+
         resetStatusInfo();
         refreshDate();
         updateOwnerInfo();
