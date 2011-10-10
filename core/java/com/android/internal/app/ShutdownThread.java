@@ -109,7 +109,6 @@ public final class ShutdownThread extends Thread {
         if (confirm) {
             final CloseDialogReceiver closer = new CloseDialogReceiver(context);
             final AlertDialog dialog = new AlertDialog.Builder(context)
-                    .setIconAttribute(android.R.attr.alertDialogIcon)
                     .setTitle(com.android.internal.R.string.power_off)
                     .setMessage(resourceId)
                     .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
