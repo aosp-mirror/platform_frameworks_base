@@ -29,8 +29,10 @@ import java.util.ArrayList;
  * be reused if possible when items change.
  */
 public abstract class BaseMenuPresenter implements MenuPresenter {
+    protected Context mSystemContext;
     protected Context mContext;
     protected MenuBuilder mMenu;
+    protected LayoutInflater mSystemInflater;
     protected LayoutInflater mInflater;
     private Callback mCallback;
 
@@ -44,10 +46,13 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
     /**
      * Construct a new BaseMenuPresenter.
      *
+     * @param context Context for generating system-supplied views
      * @param menuLayoutRes Layout resource ID for the menu container view
      * @param itemLayoutRes Layout resource ID for a single item view
      */
-    public BaseMenuPresenter(int menuLayoutRes, int itemLayoutRes) {
+    public BaseMenuPresenter(Context context, int menuLayoutRes, int itemLayoutRes) {
+        mSystemContext = context;
+        mSystemInflater = LayoutInflater.from(context);
         mMenuLayoutRes = menuLayoutRes;
         mItemLayoutRes = itemLayoutRes;
     }
@@ -62,7 +67,7 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
     @Override
     public MenuView getMenuView(ViewGroup root) {
         if (mMenuView == null) {
-            mMenuView = (MenuView) mInflater.inflate(mMenuLayoutRes, root, false);
+            mMenuView = (MenuView) mSystemInflater.inflate(mMenuLayoutRes, root, false);
             mMenuView.initialize(mMenu);
             updateMenuView(true);
         }
@@ -138,7 +143,7 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
      * @return The new item view
      */
     public MenuView.ItemView createItemView(ViewGroup parent) {
-        return (MenuView.ItemView) mInflater.inflate(mItemLayoutRes, parent, false);
+        return (MenuView.ItemView) mSystemInflater.inflate(mItemLayoutRes, parent, false);
     }
 
     /**
