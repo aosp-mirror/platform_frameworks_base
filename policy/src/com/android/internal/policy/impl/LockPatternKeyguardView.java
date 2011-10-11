@@ -615,6 +615,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     public void onRingerModeChanged(int state) {}
     @Override
     public void onClockVisibilityChanged() {}
+    @Override
+    public void onDeviceProvisioned() {}
 
     //We need to stop faceunlock when a phonecall comes in
     @Override

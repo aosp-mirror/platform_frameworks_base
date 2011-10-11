@@ -1323,4 +1323,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     public void onTimeChanged() {
         // ignored
     }
+
+    /** {@inheritDoc} */
+    public void onDeviceProvisioned() {
+        mContext.sendBroadcast(mUserPresentIntent);
+    }
 }

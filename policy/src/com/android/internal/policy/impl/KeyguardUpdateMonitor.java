@@ -99,6 +99,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_RINGER_MODE_CHANGED = 305;
     private static final int MSG_PHONE_STATE_CHANGED = 306;
     private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
+    private static final int MSG_DEVICE_PROVISIONED = 308;
 
     /**
      * When we receive a
@@ -178,6 +179,9 @@ public class KeyguardUpdateMonitor {
                     case MSG_CLOCK_VISIBILITY_CHANGED:
                         handleClockVisibilityChanged();
                         break;
+                    case MSG_DEVICE_PROVISIONED:
+                        handleDeviceProvisioned();
+                        break;
                 }
             }
         };
@@ -197,10 +201,8 @@ public class KeyguardUpdateMonitor {
                     super.onChange(selfChange);
                     mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(),
                         Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
-                    if (mDeviceProvisioned && mContentObserver != null) {
-                        // We don't need the observer anymore...
-                        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
-                        mContentObserver = null;
+                    if (mDeviceProvisioned) {
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
                     }
                     if (DEBUG) Log.d(TAG, "DEVICE_PROVISIONED state = " + mDeviceProvisioned);
                 }
@@ -212,8 +214,14 @@ public class KeyguardUpdateMonitor {
 
             // prevent a race condition between where we check the flag and where we register the
             // observer by grabbing the value once again...
-            mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(),
+            boolean provisioned = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+            if (provisioned != mDeviceProvisioned) {
+                mDeviceProvisioned = provisioned;
+                if (mDeviceProvisioned) {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
+                }
+            }
         }
 
         // take a guess to start
@@ -269,6 +277,17 @@ public class KeyguardUpdateMonitor {
                 }
             }
         }, filter);
+    }
+
+    protected void handleDeviceProvisioned() {
+        for (int i = 0; i < mInfoCallbacks.size(); i++) {
+            mInfoCallbacks.get(i).onDeviceProvisioned();
+        }
+        if (mContentObserver != null) {
+            // We don't need the observer anymore...
+            mContext.getContentResolver().unregisterContentObserver(mContentObserver);
+            mContentObserver = null;
+        }
     }
 
     protected void handlePhoneStateChanged(String newState) {
@@ -477,6 +496,10 @@ public class KeyguardUpdateMonitor {
          */
         void onClockVisibilityChanged();
 
+        /**
+         * Called when the device becomes provisioned
+         */
+        void onDeviceProvisioned();
     }
 
     /**

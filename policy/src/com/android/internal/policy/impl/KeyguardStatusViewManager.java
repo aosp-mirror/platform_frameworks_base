@@ -606,6 +606,10 @@ class KeyguardStatusViewManager implements OnClickListener {
         public void onClockVisibilityChanged() {
             // ignored
         }
+
+        public void onDeviceProvisioned() {
+            // ignored
+        }
     };
 
     private SimStateCallback mSimStateCallback = new SimStateCallback() {
