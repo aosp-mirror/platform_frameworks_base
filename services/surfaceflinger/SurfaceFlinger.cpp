@@ -84,7 +84,6 @@ SurfaceFlinger::SurfaceFlinger()
         mBootTime(systemTime()),
         mVisibleRegionsDirty(false),
         mHwWorkListDirty(false),
-        mDeferReleaseConsole(false),
         mFreezeDisplay(false),
         mElectronBeamAnimationMode(0),
         mFreezeCount(0),
@@ -503,17 +502,9 @@ void SurfaceFlinger::handleConsoleEvents()
         SurfaceFlinger::turnElectronBeamOn(mElectronBeamAnimationMode);
     }
 
-    if (mDeferReleaseConsole && hw.isScreenAcquired()) {
-        // We got the release signal before the acquire signal
-        mDeferReleaseConsole = false;
-        hw.releaseScreen();
-    }
-
     if (what & eConsoleReleased) {
         if (hw.isScreenAcquired()) {
             hw.releaseScreen();
-        } else {
-            mDeferReleaseConsole = true;
         }
     }
 
@@ -2177,7 +2168,6 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked(int32_t mode)
     glEnable(GL_SCISSOR_TEST);
     hw.flip( Region(hw.bounds()) );
 
-    hw.setCanDraw(false);
     return NO_ERROR;
 }
 
@@ -2226,7 +2216,6 @@ status_t SurfaceFlinger::turnElectronBeamOnImplLocked(int32_t mode)
     if (mode & ISurfaceComposer::eElectronBeamAnimationOn) {
         electronBeamOnAnimationImplLocked();
     }
-    hw.setCanDraw(true);
 
     // make sure to redraw the whole screen when the animation is done
     mDirtyRegion.set(hw.bounds());

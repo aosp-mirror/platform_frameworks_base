@@ -122,7 +122,7 @@ status_t DisplayHardwareBase::DisplayEventThread::initCheck() const
 
 DisplayHardwareBase::DisplayHardwareBase(const sp<SurfaceFlinger>& flinger,
         uint32_t displayIndex) 
-    : mCanDraw(true), mScreenAcquired(true)
+    : mScreenAcquired(true)
 {
     mDisplayEventThread = new DisplayEventThread(flinger);
 }
@@ -133,14 +133,9 @@ DisplayHardwareBase::~DisplayHardwareBase()
     mDisplayEventThread->requestExitAndWait();
 }
 
-void DisplayHardwareBase::setCanDraw(bool canDraw)
-{
-    mCanDraw = canDraw;
-}
-
 bool DisplayHardwareBase::canDraw() const
 {
-    return mCanDraw && mScreenAcquired;
+    return mScreenAcquired;
 }
 
 void DisplayHardwareBase::releaseScreen() const
