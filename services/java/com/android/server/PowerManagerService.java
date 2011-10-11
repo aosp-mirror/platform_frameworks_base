@@ -1677,6 +1677,18 @@ public class PowerManagerService extends IPowerManager.Stub
             e.fillInStackTrace();
             Slog.i(TAG, "Set screen state: " + on, e);
         }
+        if (on) {
+            if ((mPowerState & SCREEN_ON_BIT) == 0 || mSkippedScreenOn) {
+                // If we are turning the screen state on, but the screen
+                // light is currently off, then make sure that we set the
+                // light at this point to 0.  This is the case where we are
+                // turning on the screen and waiting for the UI to be drawn
+                // before showing it to the user.  We want the light off
+                // until it is ready to be shown to the user, not it using
+                // whatever the last value it had.
+                mScreenBrightness.forceValueLocked(Power.BRIGHTNESS_OFF);
+            }
+        }
         int err = Power.setScreenState(on);
         if (err == 0) {
             mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
@@ -2029,8 +2041,6 @@ public class PowerManagerService extends IPowerManager.Stub
                 RuntimeException e = new RuntimeException("here");
                 e.fillInStackTrace();
                 Slog.i(TAG, "Setting screen brightness: " + brightness, e);
-                mScreenBrightness.setTargetLocked(brightness, steps,
-                        INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
             }
         }
 
@@ -2101,6 +2111,15 @@ public class PowerManagerService extends IPowerManager.Stub
                     + " targetValue=" + targetValue
                     + " curValue=" + curValue
                     + " delta=" + delta);
+        }
+
+        void forceValueLocked(int value) {
+            targetValue = -1;
+            curValue = value;
+            setLightBrightness(mask, value);
+            if (animating) {
+                finishAnimationLocked(false, value);
+            }
         }
 
         void setTargetLocked(int target, int stepsToTarget, int initialValue,
