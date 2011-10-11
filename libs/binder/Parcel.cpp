@@ -752,7 +752,7 @@ status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)
 
     int result = ashmem_set_prot_region(fd, PROT_READ | PROT_WRITE);
     if (result < 0) {
-        status = -result;
+        status = result;
     } else {
         void* ptr = ::mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (ptr == MAP_FAILED) {
@@ -760,7 +760,7 @@ status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)
         } else {
             result = ashmem_set_prot_region(fd, PROT_READ);
             if (result < 0) {
-                status = -result;
+                status = result;
             } else {
                 status = writeInt32(1);
                 if (!status) {

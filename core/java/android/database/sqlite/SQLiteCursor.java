@@ -155,7 +155,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     }
 
     private void fillWindow(int startPos) {
-        clearOrCreateLocalWindow();
+        clearOrCreateLocalWindow(getDatabase().getPath());
         mWindow.setStartPosition(startPos);
         int count = getQuery().fillWindow(mWindow);
         if (startPos == 0) { // fillWindow returns count(*) only for startPos = 0
