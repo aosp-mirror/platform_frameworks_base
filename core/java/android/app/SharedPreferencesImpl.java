@@ -29,6 +29,7 @@ import dalvik.system.BlockGuard;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -107,7 +108,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
         FileStatus stat = new FileStatus();
         if (FileUtils.getFileStatus(mFile.getPath(), stat) && mFile.canRead()) {
             try {
-                FileInputStream str = new FileInputStream(mFile);
+                BufferedInputStream str = new BufferedInputStream(
+                        new FileInputStream(mFile), 16*1024);
                 map = XmlUtils.readMapXml(str);
                 str.close();
             } catch (XmlPullParserException e) {
