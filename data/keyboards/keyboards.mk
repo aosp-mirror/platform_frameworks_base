@@ -24,6 +24,3 @@ PRODUCT_COPY_FILES += $(foreach file,$(keycharmaps),\
 
 PRODUCT_COPY_FILES += $(foreach file,$(keyconfigs),\
     frameworks/base/data/keyboards/$(file):system/usr/idc/$(file))
-
-PRODUCT_PACKAGES := $(keylayouts) $(keycharmaps) $(keyconfigs)
-

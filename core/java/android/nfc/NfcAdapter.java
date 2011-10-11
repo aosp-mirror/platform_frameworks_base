@@ -768,61 +768,6 @@ public final class NfcAdapter {
     }
 
     /**
-     * TODO: Remove this once pre-built apk's (Maps, Youtube etc) are updated
-     * @deprecated use {@link CreateNdefMessageCallback} or {@link OnNdefPushCompleteCallback}
-     * @hide
-     */
-    @Deprecated
-    public interface NdefPushCallback {
-        /**
-         * @deprecated use {@link CreateNdefMessageCallback} instead
-         */
-        @Deprecated
-        NdefMessage createMessage();
-        /**
-         * @deprecated use{@link OnNdefPushCompleteCallback} instead
-         */
-        @Deprecated
-        void onMessagePushed();
-    }
-
-    /**
-     * TODO: Remove this
-     * Converts new callbacks to old callbacks.
-     */
-    static final class LegacyCallbackWrapper implements CreateNdefMessageCallback,
-            OnNdefPushCompleteCallback {
-        final NdefPushCallback mLegacyCallback;
-        LegacyCallbackWrapper(NdefPushCallback legacyCallback) {
-            mLegacyCallback = legacyCallback;
-        }
-        @Override
-        public void onNdefPushComplete(NfcEvent event) {
-            mLegacyCallback.onMessagePushed();
-        }
-        @Override
-        public NdefMessage createNdefMessage(NfcEvent event) {
-            return mLegacyCallback.createMessage();
-        }
-    }
-
-    /**
-     * TODO: Remove this once pre-built apk's (Maps, Youtube etc) are updated
-     * @deprecated use {@link #setNdefPushMessageCallback} instead
-     * @hide
-     */
-    @Deprecated
-    public void enableForegroundNdefPush(Activity activity, final NdefPushCallback callback) {
-        if (activity == null || callback == null) {
-            throw new NullPointerException();
-        }
-        enforceResumed(activity);
-        LegacyCallbackWrapper callbackWrapper = new LegacyCallbackWrapper(callback);
-        mNfcActivityManager.setNdefPushMessageCallback(activity, callbackWrapper);
-        mNfcActivityManager.setOnNdefPushCompleteCallback(activity, callbackWrapper);
-    }
-
-    /**
      * Enable NDEF Push feature.
      * <p>This API is for the Settings application.
      * @hide
