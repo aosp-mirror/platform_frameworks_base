@@ -43,7 +43,6 @@ public:
     bool isScreenAcquired() const;
 
     bool canDraw() const;
-    void setCanDraw(bool canDraw);
 
 
 private:
@@ -74,7 +73,6 @@ private:
     };
 
     sp<DisplayEventThreadBase>  mDisplayEventThread;
-    mutable int                 mCanDraw;
     mutable int                 mScreenAcquired;
 };
 
