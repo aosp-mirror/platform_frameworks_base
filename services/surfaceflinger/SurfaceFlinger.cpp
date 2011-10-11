@@ -1814,6 +1814,8 @@ status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
     // redraw the screen entirely...
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
     const size_t count = layers.size();
     for (size_t i=0 ; i<count ; ++i) {
@@ -1845,7 +1847,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t hw_w = hw.getWidth();
     const uint32_t hw_h = hw.getHeight();
-    const Region screenBounds(hw.bounds());
+    const Region screenBounds(hw.getBounds());
 
     GLfloat u, v;
     GLuint tname;
@@ -1855,7 +1857,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     }
 
     GLfloat vtx[8];
-    const GLfloat texCoords[4][2] = { {0,1}, {0,1-v}, {u,1-v}, {u,1} };
+    const GLfloat texCoords[4][2] = { {0,0}, {0,v}, {u,v}, {u,0} };
     glBindTexture(GL_TEXTURE_2D, tname);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1941,6 +1943,12 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     s_curve_interpolator itb(nbFrames, 8.5f);
 
     v_stretch vverts(hw_w, hw_h);
+
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
     for (int i=0 ; i<nbFrames ; i++) {
