@@ -249,7 +249,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
             final int spanEnd = editable.getSpanEnd(suggestionSpans[i]);
             if (spanStart != start || spanEnd != end) {
                 suggestionSpans[i] = null;
-                break;
             }
         }
 
