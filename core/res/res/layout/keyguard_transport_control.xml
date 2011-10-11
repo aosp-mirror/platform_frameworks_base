@@ -66,7 +66,8 @@
                     android:src="@drawable/ic_media_rew"
                     android:clickable="true"
                     android:background="?android:attr/selectableItemBackground"
-                    android:padding="10dip"/>
+                    android:padding="10dip"
+                    android:contentDescription="@string/lockscreen_transport_prev_description"/>
             </FrameLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -80,7 +81,8 @@
                     android:clickable="true"
                     android:src="@drawable/ic_media_play"
                     android:background="?android:attr/selectableItemBackground"
-                    android:padding="10dip"/>
+                    android:padding="10dip"
+                    android:contentDescription="@string/lockscreen_transport_play_description"/>
             </FrameLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -94,7 +96,8 @@
                     android:clickable="true"
                     android:src="@drawable/ic_media_ff"
                     android:background="?android:attr/selectableItemBackground"
-                    android:padding="10dip"/>
+                    android:padding="10dip"
+                    android:contentDescription="@string/lockscreen_transport_next_description"/>
             </FrameLayout>
         </LinearLayout>
     </LinearLayout>

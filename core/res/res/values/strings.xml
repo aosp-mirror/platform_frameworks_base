@@ -953,7 +953,7 @@
         social updates from your friends. Malicious apps can use this to pretend to be a friend
         and trick you into revealing passwords or other confidential information.</string>
 
-    
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events plus confidential information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1830,6 +1830,17 @@
     <!-- Shown in the lock screen to inform the user to SIM card is permanently disabled. -->
     <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM card is permanently disabled.\n
     Please contact your wireless service provider to obtain another SIM card.</string>
+
+    <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
+    <string name="lockscreen_transport_prev_description">Previous track button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
+    <string name="lockscreen_transport_next_description">Next track button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="lockscreen_transport_pause_description">Pause button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="lockscreen_transport_play_description">Play button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="lockscreen_transport_stop_description">Stop button</string>
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
