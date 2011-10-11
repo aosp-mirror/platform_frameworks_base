@@ -1958,6 +1958,15 @@
     <!-- Displayed on lock screen's right tab - turn sound off -->
     <string name="lockscreen_sound_off_label">Sound off</string>
 
+    <!-- Accessibility description sent when user starts drawing a lock pattern. [CHAR LIMIT=NONE] -->
+    <string name="lockscreen_access_pattern_start">Pattern started</string>
+    <!-- Accessibility description sent when the pattern times out and is cleared. [CHAR LIMIT=NONE] -->
+    <string name="lockscreen_access_pattern_cleared">Pattern cleared</string>
+    <!-- Accessibility description sent when user adds a cell to the pattern. [CHAR LIMIT=NONE]  -->
+    <string name="lockscreen_access_pattern_cell_added">Cell added</string>
+    <!-- Accessibility description sent when user completes drawing a pattern. [CHAR LIMIT=NONE] -->
+    <string name="lockscreen_access_pattern_detected">Pattern completed</string>
+
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
     <string name="password_keyboard_label_symbol_key">\?123</string>
