@@ -238,6 +238,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * Notify our observers of an interface removal.
      */
     private void notifyInterfaceRemoved(String iface) {
+        // netd already clears out quota and alerts for removed ifaces; update
+        // our sanity-checking state.
+        mActiveAlertIfaces.remove(iface);
+        mActiveQuotaIfaces.remove(iface);
+
         for (INetworkManagementEventObserver obs : mObservers) {
             try {
                 obs.interfaceRemoved(iface);
