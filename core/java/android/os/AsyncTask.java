@@ -282,6 +282,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
                 mTaskInvoked.set(true);
 
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                //noinspection unchecked
                 return postResult(doInBackground(mParams));
             }
         };
@@ -316,12 +317,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private Result postResult(Result result) {
-<<<<<<< HEAD
-        Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
-=======
         @SuppressWarnings({"unchecked"})
         Message message = mHandler.obtainMessage(MESSAGE_POST_RESULT,
->>>>>>> 6c0d0b8... Check whether an AsyncTask is created/executed on a looper thread.
                 new AsyncTaskResult<Result>(this, result));
         message.sendToTarget();
         return result;
