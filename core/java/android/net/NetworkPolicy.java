@@ -40,6 +40,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public long limitBytes;
     public long lastSnooze;
 
+    private static final long DEFAULT_MTU = 1500;
+
     public NetworkPolicy(NetworkTemplate template, int cycleDay, long warningBytes, long limitBytes,
             long lastSnooze) {
         this.template = checkNotNull(template, "missing NetworkTemplate");
@@ -69,6 +71,17 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     /** {@inheritDoc} */
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Test if given measurement is near enough to {@link #limitBytes} to be
+     * considered over-limit.
+     */
+    public boolean isOverLimit(long totalBytes) {
+        // over-estimate, since kernel will trigger limit once first packet
+        // trips over limit.
+        totalBytes += 2 * DEFAULT_MTU;
+        return limitBytes != LIMIT_DISABLED && totalBytes >= limitBytes;
     }
 
     /** {@inheritDoc} */
