@@ -32,12 +32,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <p>AsyncTask enables proper and easy use of the UI thread. This class allows to
- * perform background operations and publish results on the UI thread without
- * having to manipulate threads and/or handlers.</p>
+ * <p>AsyncTask enables proper and easy use of the UI thread (also called main thread) or
+ * any other looper thread. AsyncTask is most commonly used to interact with the UI thread.
+ * This class allows to perform background operations and publish results on a looper
+ * thread without having to manipulate threads and/or handlers.</p>
  *
  * <p>An asynchronous task is defined by a computation that runs on a background thread and
- * whose result is published on the UI thread. An asynchronous task is defined by 3 generic
+ * whose result is published on a looper thread. An asynchronous task is defined by 3 generic
  * types, called <code>Params</code>, <code>Progress</code> and <code>Result</code>,
  * and 4 steps, called <code>onPreExecute</code>, <code>doInBackground</code>,
  * <code>onProgressUpdate</code> and <code>onPostExecute</code>.</p>
@@ -101,7 +102,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <h2>The 4 steps</h2>
  * <p>When an asynchronous task is executed, the task goes through 4 steps:</p>
  * <ol>
- *     <li>{@link #onPreExecute()}, invoked on the UI thread immediately after the task
+ *     <li>{@link #onPreExecute()}, invoked on the looper thread immediately after the task
  *     is executed. This step is normally used to setup the task, for instance by
  *     showing a progress bar in the user interface.</li>
  *     <li>{@link #doInBackground}, invoked on the background thread
@@ -110,14 +111,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     of the asynchronous task are passed to this step. The result of the computation must
  *     be returned by this step and will be passed back to the last step. This step
  *     can also use {@link #publishProgress} to publish one or more units
- *     of progress. These values are published on the UI thread, in the
+ *     of progress. These values are published on the looper thread, in the
  *     {@link #onProgressUpdate} step.</li>
- *     <li>{@link #onProgressUpdate}, invoked on the UI thread after a
+ *     <li>{@link #onProgressUpdate}, invoked on the looper thread after a
  *     call to {@link #publishProgress}. The timing of the execution is
  *     undefined. This method is used to display any form of progress in the user
  *     interface while the background computation is still executing. For instance,
  *     it can be used to animate a progress bar or show logs in a text field.</li>
- *     <li>{@link #onPostExecute}, invoked on the UI thread after the background
+ *     <li>{@link #onPostExecute}, invoked on the looper thread after the background
  *     computation finishes. The result of the background computation is passed to
  *     this step as a parameter.</li>
  * </ol>
@@ -135,8 +136,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>There are a few threading rules that must be followed for this class to
  * work properly:</p>
  * <ul>
- *     <li>The task instance must be created on the UI thread.</li>
- *     <li>{@link #execute} must be invoked on the UI thread.</li>
+ *     <li>The task instance must be created on the looper thread.</li>
+ *     <li>{@link #execute} must be invoked on the looper thread.</li>
  *     <li>Do not call {@link #onPreExecute()}, {@link #onPostExecute},
  *     {@link #doInBackground}, {@link #onProgressUpdate} manually.</li>
  *     <li>The task can be executed only once (an exception will be thrown if
@@ -152,6 +153,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     <li>Set member fields in {@link #doInBackground}, and refer to them in
  *     {@link #onProgressUpdate} and {@link #onPostExecute}.
  * </ul>
+ * 
+ * @see Looper
+ * @see Handler
  */
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
@@ -187,7 +191,13 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final int MESSAGE_POST_RESULT = 0x1;
     private static final int MESSAGE_POST_PROGRESS = 0x2;
 
-    private static final InternalHandler sHandler = new InternalHandler();
+    private static final ThreadLocal<InternalHandler> sHandler =
+            new ThreadLocal<InternalHandler>() {
+                @Override
+                protected InternalHandler initialValue() {
+                    return new InternalHandler();
+                }
+            };
 
     private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
     private final WorkerRunnable<Params, Result> mWorker;
@@ -196,6 +206,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private volatile Status mStatus = Status.PENDING;
     
     private final AtomicBoolean mTaskInvoked = new AtomicBoolean();
+    private final InternalHandler mHandler;
 
     private static class SerialExecutor implements Executor {
         final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
@@ -242,9 +253,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
         FINISHED,
     }
 
-    /** @hide Used to force static handler to be created. */
+    /** @hide */
     public static void init() {
-        sHandler.getLooper();
     }
 
     /** @hide */
@@ -253,9 +263,20 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
-     * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
+     * Creates a new asynchronous task. This constructor must be invoked on the looper thread.
+     * 
+     * @throws IllegalStateException if this constructor is invoked on a non-looper thread
+     * 
+     * @see Looper
      */
     public AsyncTask() {
+        if (Looper.myLooper() == null) {
+            throw new IllegalStateException("AsyncTask can be only instanciated on a " 
+                    + "looper thread. The current thread is " + Thread.currentThread());
+        }
+
+        mHandler = sHandler.get();
+
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
                 mTaskInvoked.set(true);
@@ -295,7 +316,12 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private Result postResult(Result result) {
+<<<<<<< HEAD
         Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
+=======
+        @SuppressWarnings({"unchecked"})
+        Message message = mHandler.obtainMessage(MESSAGE_POST_RESULT,
+>>>>>>> 6c0d0b8... Check whether an AsyncTask is created/executed on a looper thread.
                 new AsyncTaskResult<Result>(this, result));
         message.sendToTarget();
         return result;
@@ -316,7 +342,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * by the caller of this task.
      *
      * This method can call {@link #publishProgress} to publish updates
-     * on the UI thread.
+     * on the looper thread.
      *
      * @param params The parameters of the task.
      *
@@ -329,7 +355,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     protected abstract Result doInBackground(Params... params);
 
     /**
-     * Runs on the UI thread before {@link #doInBackground}.
+     * Runs on the looper thread before {@link #doInBackground}.
      *
      * @see #onPostExecute
      * @see #doInBackground
@@ -338,7 +364,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
-     * <p>Runs on the UI thread after {@link #doInBackground}. The
+     * <p>Runs on the looper thread after {@link #doInBackground}. The
      * specified result is the value returned by {@link #doInBackground}.</p>
      * 
      * <p>This method won't be invoked if the task was cancelled.</p>
@@ -354,7 +380,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
-     * Runs on the UI thread after {@link #publishProgress} is invoked.
+     * Runs on the looper thread after {@link #publishProgress} is invoked.
      * The specified values are the values passed to {@link #publishProgress}.
      *
      * @param values The values indicating progress.
@@ -367,7 +393,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
-     * <p>Runs on the UI thread after {@link #cancel(boolean)} is invoked and
+     * <p>Runs on the looper thread after {@link #cancel(boolean)} is invoked and
      * {@link #doInBackground(Object[])} has finished.</p>
      * 
      * <p>The default implementation simply invokes {@link #onCancelled()} and
@@ -390,7 +416,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * This method is invoked by the default implementation of
      * {@link #onCancelled(Object)}.</p>
      * 
-     * <p>Runs on the UI thread after {@link #cancel(boolean)} is invoked and
+     * <p>Runs on the looper thread after {@link #cancel(boolean)} is invoked and
      * {@link #doInBackground(Object[])} has finished.</p>
      *
      * @see #onCancelled(Object) 
@@ -425,7 +451,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * an attempt to stop the task.</p>
      * 
      * <p>Calling this method will result in {@link #onCancelled(Object)} being
-     * invoked on the UI thread after {@link #doInBackground(Object[])}
+     * invoked on the looper thread after {@link #doInBackground(Object[])}
      * returns. Calling this method guarantees that {@link #onPostExecute(Object)}
      * is never invoked. After invoking this method, you should check the
      * value returned by {@link #isCancelled()} periodically from
@@ -498,14 +524,15 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * with {@link #THREAD_POOL_EXECUTOR}; however, see commentary there for warnings on
      * its use.
      *
-     * <p>This method must be invoked on the UI thread.
+     * <p>This method must be invoked on the looper thread.
      *
      * @param params The parameters of the task.
      *
      * @return This instance of AsyncTask.
      *
      * @throws IllegalStateException If {@link #getStatus()} returns either
-     *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
+     *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED} or
+     *         the current thread is not a looper thread.
      */
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
         return executeOnExecutor(sDefaultExecutor, params);
@@ -531,7 +558,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * executed in serial; to guarantee such work is serialized regardless of
      * platform version you can use this function with {@link #SERIAL_EXECUTOR}.
      *
-     * <p>This method must be invoked on the UI thread.
+     * <p>This method must be invoked on the looper thread.
      *
      * @param exec The executor to use.  {@link #THREAD_POOL_EXECUTOR} is available as a
      *              convenient process-wide thread pool for tasks that are loosely coupled.
@@ -540,10 +567,16 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @return This instance of AsyncTask.
      *
      * @throws IllegalStateException If {@link #getStatus()} returns either
-     *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
+     *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED} or
+     *         the current thread is not a looper thread.
      */
     public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
             Params... params) {
+        if (Looper.myLooper() == null) {
+            throw new IllegalStateException("AsyncTask can be only instanciated on a " 
+                    + "looper thread. The current thread is " + Thread.currentThread());
+        }
+        
         if (mStatus != Status.PENDING) {
             switch (mStatus) {
                 case RUNNING:
@@ -576,9 +609,9 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /**
      * This method can be invoked from {@link #doInBackground} to
-     * publish updates on the UI thread while the background computation is
+     * publish updates on the looper thread while the background computation is
      * still running. Each call to this method will trigger the execution of
-     * {@link #onProgressUpdate} on the UI thread.
+     * {@link #onProgressUpdate} on the looper thread.
      *
      * {@link #onProgressUpdate} will note be called if the task has been
      * canceled.
@@ -590,7 +623,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      */
     protected final void publishProgress(Progress... values) {
         if (!isCancelled()) {
-            sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
+            mHandler.obtainMessage(MESSAGE_POST_PROGRESS,
                     new AsyncTaskResult<Progress>(this, values)).sendToTarget();
         }
     }
