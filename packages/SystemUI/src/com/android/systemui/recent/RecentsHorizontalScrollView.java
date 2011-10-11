@@ -32,14 +32,14 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.recent.RecentsPanelView.ActivityDescriptionAdapter;
+import com.android.systemui.recent.RecentsPanelView.TaskDescriptionAdapter;
 
 public class RecentsHorizontalScrollView extends HorizontalScrollView
     implements SwipeHelper.Callback {
     private static final String TAG = RecentsPanelView.TAG;
     private static final boolean DEBUG = RecentsPanelView.DEBUG;
     private LinearLayout mLinearLayout;
-    private ActivityDescriptionAdapter mAdapter;
+    private TaskDescriptionAdapter mAdapter;
     private RecentsCallback mCallback;
     protected int mLastScrollPosition;
     private SwipeHelper mSwipeHelper;
@@ -304,7 +304,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         }
     }
 
-    public void setAdapter(ActivityDescriptionAdapter adapter) {
+    public void setAdapter(TaskDescriptionAdapter adapter) {
         mAdapter = adapter;
         mAdapter.registerDataSetObserver(new DataSetObserver() {
             public void onChanged() {
