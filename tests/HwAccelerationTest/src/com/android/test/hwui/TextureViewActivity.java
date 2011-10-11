@@ -17,16 +17,23 @@
 package com.android.test.hwui;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Gravity;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -44,6 +51,26 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
 
         mTextureView = new TextureView(this);
         mTextureView.setSurfaceTextureListener(this);
+        mTextureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bitmap b = mTextureView.getBitmap(800, 800);
+                BufferedOutputStream out = null;
+                try {
+                    File dump = new File(Environment.getExternalStorageDirectory(), "out.png");
+                    out = new BufferedOutputStream(new FileOutputStream(dump));
+                    b.compress(Bitmap.CompressFormat.PNG, 100, out);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (out != null) try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
         Button button = new Button(this);
         button.setText("Remove/Add");
@@ -73,6 +100,8 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mCamera = Camera.open();
+        mCamera.setDisplayOrientation(getCameraOrientation());
+
         Camera.Size previewSize = mCamera.getParameters().getPreviewSize();
         mTextureView.setLayoutParams(new FrameLayout.LayoutParams(
                 previewSize.width, previewSize.height, Gravity.CENTER));
@@ -84,6 +113,34 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
         }
 
         mCamera.startPreview();
+    }
+
+    private int getCameraOrientation() {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+            Camera.getCameraInfo(i, info);
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) break;
+        }
+        
+        int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        int degrees = 0;
+
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+
+        return (info.orientation - degrees + 360) % 360;
     }
 
     @Override
