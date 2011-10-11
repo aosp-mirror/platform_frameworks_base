@@ -43,8 +43,8 @@ public class IconMenuPresenter extends BaseMenuPresenter {
     private static final String VIEWS_TAG = "android:menu:icon";
     private static final String OPEN_SUBMENU_KEY = "android:menu:icon:submenu";
 
-    public IconMenuPresenter() {
-        super(com.android.internal.R.layout.icon_menu_layout,
+    public IconMenuPresenter(Context context) {
+        super(context, com.android.internal.R.layout.icon_menu_layout,
                 com.android.internal.R.layout.icon_menu_item_layout);
     }
 

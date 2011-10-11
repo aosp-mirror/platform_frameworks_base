@@ -1084,8 +1084,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         MenuView menuView = st.isInListMode()
-                ? st.getListMenuView(mPanelMenuPresenterCallback)
-                : st.getIconMenuView(mPanelMenuPresenterCallback);
+                ? st.getListMenuView(getContext(), mPanelMenuPresenterCallback)
+                : st.getIconMenuView(getContext(), mPanelMenuPresenterCallback);
 
         st.shownPanelView = (View) menuView;
 
@@ -3251,11 +3251,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        MenuView getListMenuView(MenuPresenter.Callback cb) {
+        MenuView getListMenuView(Context context, MenuPresenter.Callback cb) {
             if (menu == null) return null;
 
             if (!isCompact) {
-                getIconMenuView(cb); // Need this initialized to know where our offset goes
+                getIconMenuView(context, cb); // Need this initialized to know where our offset goes
             }
 
             if (listMenuPresenter == null) {
@@ -3275,11 +3275,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return result;
         }
 
-        MenuView getIconMenuView(MenuPresenter.Callback cb) {
+        MenuView getIconMenuView(Context context, MenuPresenter.Callback cb) {
             if (menu == null) return null;
 
             if (iconMenuPresenter == null) {
-                iconMenuPresenter = new IconMenuPresenter();
+                iconMenuPresenter = new IconMenuPresenter(context);
                 iconMenuPresenter.setCallback(cb);
                 iconMenuPresenter.setId(com.android.internal.R.id.icon_menu_presenter);
                 menu.addMenuPresenter(iconMenuPresenter);

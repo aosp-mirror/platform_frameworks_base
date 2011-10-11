@@ -373,7 +373,7 @@ public class ActionBarView extends AbsActionBarView {
             }
         }
         if (mActionMenuPresenter == null) {
-            mActionMenuPresenter = new ActionMenuPresenter();
+            mActionMenuPresenter = new ActionMenuPresenter(mContext);
             mActionMenuPresenter.setCallback(cb);
             mActionMenuPresenter.setId(com.android.internal.R.id.action_menu_presenter);
             mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter();
