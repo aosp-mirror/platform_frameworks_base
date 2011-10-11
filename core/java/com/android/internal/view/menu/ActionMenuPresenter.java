@@ -31,9 +31,6 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageButton;
 
 import java.util.ArrayList;
@@ -71,8 +68,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
 
-    public ActionMenuPresenter() {
-        super(com.android.internal.R.layout.action_menu_layout,
+    public ActionMenuPresenter(Context context) {
+        super(context, com.android.internal.R.layout.action_menu_layout,
                 com.android.internal.R.layout.action_menu_item_layout);
     }
 
@@ -98,7 +95,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         int width = mWidthLimit;
         if (mReserveOverflow) {
             if (mOverflowButton == null) {
-                mOverflowButton = new OverflowMenuButton(mContext);
+                mOverflowButton = new OverflowMenuButton(mSystemContext);
                 final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
                 mOverflowButton.measure(spec, spec);
             }
@@ -215,7 +212,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
         if (hasOverflow) {
             if (mOverflowButton == null) {
-                mOverflowButton = new OverflowMenuButton(mContext);
+                mOverflowButton = new OverflowMenuButton(mSystemContext);
             }
             ViewGroup parent = (ViewGroup) mOverflowButton.getParent();
             if (parent != mMenuView) {

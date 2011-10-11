@@ -207,7 +207,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         });
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
-        mActionMenuPresenter = new ActionMenuPresenter();
+        mActionMenuPresenter = new ActionMenuPresenter(mContext);
         mActionMenuPresenter.setReserveOverflow(true);
 
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
