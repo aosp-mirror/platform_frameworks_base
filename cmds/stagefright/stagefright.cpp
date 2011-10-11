@@ -30,7 +30,6 @@
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ALooper.h>
-#include "include/ARTSPController.h"
 #include "include/LiveSession.h"
 #include "include/NuCachedSource2.h"
 #include <media/stagefright/AudioPlayer.h>
@@ -636,7 +635,6 @@ int main(int argc, char **argv) {
     gDisplayHistogram = false;
 
     sp<ALooper> looper;
-    sp<ARTSPController> rtspController;
     sp<LiveSession> liveSession;
 
     int res;
@@ -948,7 +946,6 @@ int main(int argc, char **argv) {
         sp<DataSource> dataSource = DataSource::CreateFromURI(filename);
 
         if (strncasecmp(filename, "sine:", 5)
-                && strncasecmp(filename, "rtsp://", 7)
                 && strncasecmp(filename, "httplive://", 11)
                 && dataSource == NULL) {
             fprintf(stderr, "Unable to create data source.\n");
@@ -984,23 +981,7 @@ int main(int argc, char **argv) {
         } else {
             sp<MediaExtractor> extractor;
 
-            if (!strncasecmp("rtsp://", filename, 7)) {
-                if (looper == NULL) {
-                    looper = new ALooper;
-                    looper->start();
-                }
-
-                rtspController = new ARTSPController(looper);
-                status_t err = rtspController->connect(filename);
-                if (err != OK) {
-                    fprintf(stderr, "could not connect to rtsp server.\n");
-                    return -1;
-                }
-
-                extractor = rtspController.get();
-
-                syncInfoPresent = false;
-            } else if (!strncasecmp("httplive://", filename, 11)) {
+            if (!strncasecmp("httplive://", filename, 11)) {
                 String8 uri("http://");
                 uri.append(filename + 11);
 
@@ -1116,13 +1097,6 @@ int main(int argc, char **argv) {
             performSeekTest(mediaSource);
         } else {
             playSource(&client, mediaSource);
-        }
-
-        if (rtspController != NULL) {
-            rtspController->disconnect();
-            rtspController.clear();
-
-            sleep(3);
         }
     }
 

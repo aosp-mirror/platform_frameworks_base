@@ -68,6 +68,7 @@ private:
     struct Renderer;
     struct Source;
     struct StreamingSource;
+    struct RTSPSource;
 
     enum {
         kWhatSetDataSource              = '=DaS',

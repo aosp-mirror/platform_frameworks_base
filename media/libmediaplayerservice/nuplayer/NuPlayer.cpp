@@ -25,6 +25,7 @@
 #include "NuPlayerDriver.h"
 #include "NuPlayerRenderer.h"
 #include "NuPlayerSource.h"
+#include "RTSPSource.h"
 #include "StreamingSource.h"
 
 #include "ATSParser.h"
@@ -87,7 +88,14 @@ void NuPlayer::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
 
-    msg->setObject("source", new HTTPLiveSource(url, headers, mUIDValid, mUID));
+    if (!strncasecmp(url, "rtsp://", 7)) {
+        msg->setObject(
+                "source", new RTSPSource(url, headers, mUIDValid, mUID));
+    } else {
+        msg->setObject(
+                "source", new HTTPLiveSource(url, headers, mUIDValid, mUID));
+    }
+
     msg->post();
 }
 
@@ -568,8 +576,15 @@ void NuPlayer::finishReset() {
     CHECK(mAudioDecoder == NULL);
     CHECK(mVideoDecoder == NULL);
 
+    ++mScanSourcesGeneration;
+    mScanSourcesPending = false;
+
     mRenderer.clear();
-    mSource.clear();
+
+    if (mSource != NULL) {
+        mSource->stop();
+        mSource.clear();
+    }
 
     if (mDriver != NULL) {
         sp<NuPlayerDriver> driver = mDriver.promote();

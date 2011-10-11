@@ -584,6 +584,10 @@ player_type getPlayerType(const char* url)
         }
     }
 
+    if (!strncasecmp("rtsp://", url, 7)) {
+        return NU_PLAYER;
+    }
+
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
     for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
