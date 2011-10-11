@@ -218,7 +218,7 @@ public class KeyguardUpdateMonitor {
 
         // take a guess to start
         mSimState = IccCard.State.READY;
-        mBatteryStatus = BATTERY_STATUS_FULL;
+        mBatteryStatus = BATTERY_STATUS_UNKNOWN;
         mBatteryLevel = 100;
 
         mTelephonyPlmn = getDefaultPlmn();
