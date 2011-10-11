@@ -35,7 +35,6 @@ import dalvik.system.VMDebug;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -902,15 +901,13 @@ public final class StrictMode {
             return false;
         }
 
+        // Thread policy controls BlockGuard.
         int threadPolicyMask = StrictMode.DETECT_DISK_WRITE |
                 StrictMode.DETECT_DISK_READ |
                 StrictMode.DETECT_NETWORK;
 
         if (!IS_USER_BUILD) {
             threadPolicyMask |= StrictMode.PENALTY_DROPBOX;
-            if (IS_ENG_BUILD) {
-                threadPolicyMask |= StrictMode.PENALTY_LOG;
-            }
         }
         if (doFlashes) {
             threadPolicyMask |= StrictMode.PENALTY_FLASH;
@@ -918,6 +915,8 @@ public final class StrictMode {
 
         StrictMode.setThreadPolicyMask(threadPolicyMask);
 
+        // VM Policy controls CloseGuard, detection of Activity leaks,
+        // and instance counting.
         if (IS_USER_BUILD) {
             setCloseGuardEnabled(false);
         } else {
