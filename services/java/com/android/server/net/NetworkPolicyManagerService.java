@@ -85,7 +85,6 @@ import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
-import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.os.Binder;
 import android.os.Environment;
@@ -489,7 +488,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long end = currentTime;
             final long totalBytes = getTotalBytes(policy.template, start, end);
 
-            if (policy.limitBytes != LIMIT_DISABLED && totalBytes >= policy.limitBytes) {
+            if (policy.isOverLimit(totalBytes)) {
                 if (policy.lastSnooze >= start) {
                     enqueueNotification(policy, TYPE_LIMIT_SNOOZED, totalBytes);
                 } else {
@@ -574,7 +573,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final CharSequence title = res.getText(R.string.data_usage_warning_title);
                 final CharSequence body = res.getString(R.string.data_usage_warning_body);
 
-                builder.setSmallIcon(R.drawable.ic_menu_info_details);
+                builder.setSmallIcon(R.drawable.stat_notify_error);
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
@@ -606,7 +605,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         break;
                 }
 
-                builder.setSmallIcon(com.android.internal.R.drawable.ic_menu_block);
+                builder.setSmallIcon(R.drawable.stat_notify_disabled);
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
@@ -640,7 +639,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         break;
                 }
 
-                builder.setSmallIcon(R.drawable.ic_menu_info_details);
+                builder.setSmallIcon(R.drawable.stat_notify_error);
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
@@ -677,7 +676,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         builder.setOnlyAlertOnce(true);
         builder.setOngoing(true);
-        builder.setSmallIcon(R.drawable.ic_menu_info_details);
+        builder.setSmallIcon(R.drawable.stat_notify_error);
         builder.setTicker(title);
         builder.setContentTitle(title);
         builder.setContentText(body);
@@ -750,8 +749,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long totalBytes = getTotalBytes(policy.template, start, end);
 
             // disable data connection when over limit and not snoozed
-            final boolean overLimit = policy.limitBytes != LIMIT_DISABLED
-                    && totalBytes > policy.limitBytes && policy.lastSnooze < start;
+            final boolean overLimit = policy.isOverLimit(totalBytes) && policy.lastSnooze < start;
             final boolean enabled = !overLimit;
 
             setNetworkTemplateEnabled(policy.template, enabled);
@@ -1535,10 +1533,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
         try {
-            final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
-                    template, start, end);
-            final NetworkStats.Entry entry = stats.getValues(0, null);
-            return entry.rxBytes + entry.txBytes;
+            return mNetworkStats.getSummaryForNetwork(template, start, end).getTotalBytes();
         } catch (RemoteException e) {
             // ignored; service lives in system_server
             return 0;
