@@ -108,6 +108,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     private static final boolean DEBUG_TRACKBALL = false || LOCAL_LOGV;
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
+    private static final boolean DEBUG_FPS = false;
     private static final boolean WATCH_POINTER = false;
 
     /**
@@ -273,6 +274,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     private boolean mProfileRendering;    
     private Thread mRenderProfiler;
     private volatile boolean mRenderProfilingEnabled;
+
+    // Variables to track frames per second, enabled via DEBUG_FPS flag
+    private long mFpsStartTime = -1;
+    private long mFpsPrevTime = -1;
+    private int mFpsNumFrames;
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -1766,10 +1772,40 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    /**
+     * Called from draw() when DEBUG_FPS is enabled
+     */
+    private void trackFPS() {
+        // Tracks frames per second drawn. First value in a series of draws may be bogus
+        // because it down not account for the intervening idle time
+        long nowTime = System.currentTimeMillis();
+        if (mFpsStartTime < 0) {
+            mFpsStartTime = mFpsPrevTime = nowTime;
+            mFpsNumFrames = 0;
+        } else {
+            ++mFpsNumFrames;
+            String thisHash = Integer.toHexString(System.identityHashCode(this));
+            long frameTime = nowTime - mFpsPrevTime;
+            long totalTime = nowTime - mFpsStartTime;
+            Log.v(TAG, "0x" + thisHash + "\tFrame time:\t" + frameTime);
+            mFpsPrevTime = nowTime;
+            if (totalTime > 1000) {
+                float fps = (float) mFpsNumFrames * 1000 / totalTime;
+                Log.v(TAG, "0x" + thisHash + "\tFPS:\t" + fps);
+                mFpsStartTime = nowTime;
+                mFpsNumFrames = 0;
+            }
+        }
+    }
+
     private void draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
         if (surface == null || !surface.isValid()) {
             return;
+        }
+
+        if (DEBUG_FPS) {
+            trackFPS();
         }
 
         if (!sFirstDrawComplete) {

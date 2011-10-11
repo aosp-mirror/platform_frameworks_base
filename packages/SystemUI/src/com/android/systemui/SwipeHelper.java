@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
@@ -39,6 +40,8 @@ public class SwipeHelper {
 
     public static final int X = 0;
     public static final int Y = 1;
+
+    private static LinearInterpolator sLinearInterpolator = new LinearInterpolator();
 
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
@@ -199,6 +202,10 @@ public class SwipeHelper {
         return mDragging;
     }
 
+    /**
+     * @param view The view to be dismissed
+     * @param velocity The desired pixels/second speed at which the view should move
+     */
     public void dismissChild(final View view, float velocity) {
         final View animView = mCallback.getChildContentView(view);
         final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
@@ -221,22 +228,14 @@ public class SwipeHelper {
             duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
         }
 
+        animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         ObjectAnimator anim = createTranslationAnimation(animView, newPos);
-        anim.setInterpolator(new LinearInterpolator());
+        anim.setInterpolator(sLinearInterpolator);
         anim.setDuration(duration);
-        anim.addListener(new AnimatorListener() {
-            public void onAnimationStart(Animator animation) {
-            }
-
-            public void onAnimationRepeat(Animator animation) {
-            }
-
+        anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mCallback.onChildDismissed(view);
-            }
-
-            public void onAnimationCancel(Animator animation) {
-                mCallback.onChildDismissed(view);
+                animView.setLayerType(View.LAYER_TYPE_NONE, null);
             }
         });
         anim.addUpdateListener(new AnimatorUpdateListener() {
