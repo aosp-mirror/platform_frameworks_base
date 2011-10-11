@@ -922,15 +922,20 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         if (selectedView != null) {
             event.setEnabled(selectedView.isEnabled());
         }
+        event.setCurrentItemIndex(getSelectedItemPosition());
         event.setFromIndex(getFirstVisiblePosition());
         event.setToIndex(getLastVisiblePosition());
         event.setItemCount(getAdapter().getCount());
     }
 
     private boolean isScrollableForAccessibility() {
-        final int itemCount = getAdapter().getCount();
-        return itemCount > 0
-            && (getFirstVisiblePosition() > 0 || getLastVisiblePosition() < itemCount - 1);
+        T adapter = getAdapter();
+        if (adapter != null) {
+            final int itemCount = adapter.getCount();
+            return itemCount > 0
+                && (getFirstVisiblePosition() > 0 || getLastVisiblePosition() < itemCount - 1);
+        }
+        return false;
     }
 
     @Override
