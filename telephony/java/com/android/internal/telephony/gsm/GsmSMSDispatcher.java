@@ -122,6 +122,7 @@ public final class GsmSMSDispatcher extends SMSDispatcher {
                     PendingIntent intent = tracker.mDeliveryIntent;
                     Intent fillIn = new Intent();
                     fillIn.putExtra("pdu", IccUtils.hexStringToBytes(pduString));
+                    fillIn.putExtra("format", android.telephony.SmsMessage.FORMAT_3GPP);
                     try {
                         intent.send(mContext, Activity.RESULT_OK, fillIn);
                     } catch (CanceledException ex) {}
