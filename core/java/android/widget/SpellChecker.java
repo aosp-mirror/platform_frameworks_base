@@ -239,6 +239,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
             SuggestionsInfo suggestionsInfo, SpellCheckSpan spellCheckSpan) {
         final int start = editable.getSpanStart(spellCheckSpan);
         final int end = editable.getSpanEnd(spellCheckSpan);
+        if (start < 0 || end < 0) return; // span was removed in the meantime
 
         // Other suggestion spans may exist on that region, with identical suggestions, filter
         // them out to avoid duplicates. First, filter suggestion spans on that exact region.
