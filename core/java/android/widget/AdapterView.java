@@ -922,6 +922,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         if (selectedView != null) {
             event.setEnabled(selectedView.isEnabled());
         }
+        event.setCurrentItemIndex(getSelectedItemPosition());
         event.setFromIndex(getFirstVisiblePosition());
         event.setToIndex(getLastVisiblePosition());
         event.setItemCount(getAdapter().getCount());
