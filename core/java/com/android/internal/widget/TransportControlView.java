@@ -336,20 +336,27 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         if (state == mPlayState) {
             return;
         }
+        final int imageResId;
+        final int imageDescId;
         switch (state) {
             case RemoteControlClient.PLAYSTATE_PLAYING:
-                mBtnPlay.setImageResource(com.android.internal.R.drawable.ic_media_pause);
+                imageResId = com.android.internal.R.drawable.ic_media_pause;
+                imageDescId = com.android.internal.R.string.lockscreen_transport_pause_description;
                 break;
 
             case RemoteControlClient.PLAYSTATE_BUFFERING:
-                mBtnPlay.setImageResource(com.android.internal.R.drawable.ic_media_stop);
+                imageResId = com.android.internal.R.drawable.ic_media_stop;
+                imageDescId = com.android.internal.R.string.lockscreen_transport_stop_description;
                 break;
 
             case RemoteControlClient.PLAYSTATE_PAUSED:
             default:
-                mBtnPlay.setImageResource(com.android.internal.R.drawable.ic_media_play);
+                imageResId = com.android.internal.R.drawable.ic_media_play;
+                imageDescId = com.android.internal.R.string.lockscreen_transport_play_description;
                 break;
         }
+        mBtnPlay.setImageResource(imageResId);
+        mBtnPlay.setContentDescription(getResources().getString(imageDescId));
         mPlayState = state;
     }
 
