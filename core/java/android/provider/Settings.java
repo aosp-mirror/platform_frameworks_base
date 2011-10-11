@@ -4087,7 +4087,9 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE
+            UI_NIGHT_MODE,
+            LOCK_SCREEN_OWNER_INFO,
+            LOCK_SCREEN_OWNER_INFO_ENABLED
         };
 
         /**
