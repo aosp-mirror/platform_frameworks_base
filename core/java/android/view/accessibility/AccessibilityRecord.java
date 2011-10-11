@@ -391,8 +391,6 @@ public class AccessibilityRecord {
      * Gets the max scroll offset of the source left edge in pixels.
      *
      * @return The max scroll.
-     *
-     * @hide
      */
     public int getMaxScrollX() {
         return mMaxScrollX;
@@ -401,8 +399,6 @@ public class AccessibilityRecord {
      * Sets the max scroll offset of the source left edge in pixels.
      *
      * @param maxScrollX The max scroll.
-     *
-     * @hide
      */
     public void setMaxScrollX(int maxScrollX) {
         enforceNotSealed();
@@ -413,8 +409,6 @@ public class AccessibilityRecord {
      * Gets the max scroll offset of the source top edge in pixels.
      *
      * @return The max scroll.
-     *
-     * @hide
      */
     public int getMaxScrollY() {
         return mMaxScrollY;
@@ -424,8 +418,6 @@ public class AccessibilityRecord {
      * Sets the max scroll offset of the source top edge in pixels.
      *
      * @param maxScrollY The max scroll.
-     *
-     * @hide
      */
     public void setMaxScrollY(int maxScrollY) {
         enforceNotSealed();
