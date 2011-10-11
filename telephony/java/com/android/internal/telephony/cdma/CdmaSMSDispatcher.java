@@ -88,6 +88,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                 PendingIntent intent = tracker.mDeliveryIntent;
                 Intent fillIn = new Intent();
                 fillIn.putExtra("pdu", sms.getPdu());
+                fillIn.putExtra("format", android.telephony.SmsMessage.FORMAT_3GPP2);
                 try {
                     intent.send(mContext, Activity.RESULT_OK, fillIn);
                 } catch (CanceledException ex) {}
