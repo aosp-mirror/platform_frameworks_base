@@ -264,7 +264,7 @@ Layer* LayerRenderer::createTextureLayer(bool isOpaque) {
     layer->setFbo(0);
     layer->setAlpha(255, SkXfermode::kSrcOver_Mode);
     layer->layer.set(0.0f, 0.0f, 0.0f, 0.0f);
-    layer->texCoords.set(0.0f, 1.0f, 0.0f, 1.0f);
+    layer->texCoords.set(0.0f, 1.0f, 1.0f, 0.0f);
     layer->region.clear();
     layer->setRenderTarget(GL_NONE); // see ::updateTextureLayer()
 
@@ -400,6 +400,18 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
             renderer.setViewport(bitmap->width(), bitmap->height());
             renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
                     bitmap->width(), bitmap->height(), !layer->isBlend());
+
+            glDisable(GL_SCISSOR_TEST);
+            renderer.translate(0.0f, bitmap->height());
+            renderer.scale(1.0f, -1.0f);
+
+            mat4 texTransform(layer->getTexTransform());
+
+            mat4 invert;
+            invert.translate(0.0f, 1.0f, 0.0f);
+            invert.scale(1.0f, -1.0f, 1.0f);
+            layer->getTexTransform().multiply(invert);
+
             if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
             {
@@ -413,6 +425,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
                 if ((error = glGetError()) != GL_NO_ERROR) goto error;
             }
 
+            layer->getTexTransform().load(texTransform);
             status = true;
         }
 
