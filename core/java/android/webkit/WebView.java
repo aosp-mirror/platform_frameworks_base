@@ -9459,6 +9459,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeFocusCandidateIsTextInput();
     /* package */ native int      nativeFocusCandidateMaxLength();
     /* package */ native boolean  nativeFocusCandidateIsAutoComplete();
+    /* package */ native boolean  nativeFocusCandidateIsSpellcheck();
     /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
     /**
