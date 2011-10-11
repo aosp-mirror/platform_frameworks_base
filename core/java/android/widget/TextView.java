@@ -9889,14 +9889,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (suggestionInfo.suggestionIndex == DELETE_TEXT) {
                 final int spanUnionStart = editable.getSpanStart(mSuggestionRangeSpan);
                 int spanUnionEnd = editable.getSpanEnd(mSuggestionRangeSpan);
-                // Do not leave two adjacent spaces after deletion, or one at beginning of text
-                if (spanUnionEnd < editable.length() &&
-                        Character.isSpaceChar(editable.charAt(spanUnionEnd)) &&
-                        (spanUnionStart == 0 ||
-                        Character.isSpaceChar(editable.charAt(spanUnionStart - 1)))) {
+                if (spanUnionStart >= 0 && spanUnionEnd > spanUnionStart) {
+                    // Do not leave two adjacent spaces after deletion, or one at beginning of text
+                    if (spanUnionEnd < editable.length() &&
+                            Character.isSpaceChar(editable.charAt(spanUnionEnd)) &&
+                            (spanUnionStart == 0 ||
+                            Character.isSpaceChar(editable.charAt(spanUnionStart - 1)))) {
                         spanUnionEnd = spanUnionEnd + 1;
+                    }
+                    editable.replace(spanUnionStart, spanUnionEnd, "");
                 }
-                editable.replace(spanUnionStart, spanUnionEnd, "");
                 hide();
                 return;
             }
