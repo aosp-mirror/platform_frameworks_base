@@ -1204,22 +1204,20 @@ class BrowserFrame extends Handler {
      * We delegate the request to CallbackProxy, and route its response to
      * {@link #nativeSslClientCert(int, X509Certificate)}.
      */
-    private void requestClientCert(int handle, byte[] host_and_port_bytes) {
-        String host_and_port = new String(host_and_port_bytes, Charsets.UTF_8);
+    private void requestClientCert(int handle, String hostAndPort) {
         SslClientCertLookupTable table = SslClientCertLookupTable.getInstance();
-        if (table.IsAllowed(host_and_port)) {
+        if (table.IsAllowed(hostAndPort)) {
             // previously allowed
             nativeSslClientCert(handle,
-                                table.PrivateKey(host_and_port),
-                                table.CertificateChain(host_and_port));
-        } else if (table.IsDenied(host_and_port)) {
+                                table.PrivateKey(hostAndPort),
+                                table.CertificateChain(hostAndPort));
+        } else if (table.IsDenied(hostAndPort)) {
             // previously denied
             nativeSslClientCert(handle, null, null);
         } else {
             // previously ignored or new
             mCallbackProxy.onReceivedClientCertRequest(
-                    new ClientCertRequestHandler(this, handle, host_and_port, table),
-                    host_and_port);
+                    new ClientCertRequestHandler(this, handle, hostAndPort, table), hostAndPort);
         }
     }
 
