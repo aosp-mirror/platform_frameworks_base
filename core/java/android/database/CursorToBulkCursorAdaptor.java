@@ -89,11 +89,10 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
 
     public CursorToBulkCursorAdaptor(Cursor cursor, IContentObserver observer,
             String providerName) {
-        try {
-            mCursor = (CrossProcessCursor) cursor;
-        } catch (ClassCastException e) {
-            throw new UnsupportedOperationException(
-                    "Only CrossProcessCursor cursors are supported across process for now", e);
+        if (cursor instanceof CrossProcessCursor) {
+            mCursor = (CrossProcessCursor)cursor;
+        } else {
+            mCursor = new CrossProcessCursorWrapper(cursor);
         }
         mProviderName = providerName;
 
