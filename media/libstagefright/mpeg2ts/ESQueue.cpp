@@ -444,6 +444,10 @@ int64_t ElementaryStreamQueue::fetchTimestamp(size_t size) {
         }
     }
 
+    if (timeUs == 0ll) {
+        LOGV("Returning 0 timestamp");
+    }
+
     return timeUs;
 }
 

@@ -724,8 +724,10 @@ void ATSParser::Stream::onPayloadData(
         const uint8_t *data, size_t size) {
     LOGV("onPayloadData mStreamType=0x%02x", mStreamType);
 
-    CHECK(PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
-    int64_t timeUs = mProgram->convertPTSToTimestamp(PTS);
+    int64_t timeUs = 0ll;  // no presentation timestamp available.
+    if (PTS_DTS_flags == 2 || PTS_DTS_flags == 3) {
+        timeUs = mProgram->convertPTSToTimestamp(PTS);
+    }
 
     status_t err = mQueue->appendData(data, size, timeUs);
 
