@@ -43,7 +43,7 @@ import java.util.Set;
  * @hide
  */
 public class ChooseAccountTypeActivity extends Activity {
-    private static final String TAG = "AccountManager";
+    private static final String TAG = "AccountChooser";
 
     private HashMap<String, AuthInfo> mTypeToAuthenticatorInfo = new HashMap<String, AuthInfo>();
     private ArrayList<AuthInfo> mAuthenticatorInfosToDisplay;
@@ -51,6 +51,11 @@ public class ChooseAccountTypeActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseAccountTypeActivity.onCreate(savedInstanceState="
+                    + savedInstanceState + ")");
+        }
 
         // Read the validAccountTypes, if present, and add them to the setOfAllowableAccountTypes
         Set<String> setOfAllowableAccountTypes = null;
@@ -111,8 +116,10 @@ public class ChooseAccountTypeActivity extends Activity {
         Bundle bundle = new Bundle();
         bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, type);
         setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
-        Log.d(TAG, "ChooseAccountTypeActivity.setResultAndFinish: "
-                + "selected account type " + type);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseAccountTypeActivity.setResultAndFinish: "
+                    + "selected account type " + type);
+        }
         finish();
     }
 
