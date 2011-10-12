@@ -2986,6 +2986,13 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
+    /**
+     * Update the double-tap zoom.
+     */
+    /* package */ void updateDoubleTapZoom() {
+        mZoomManager.updateDoubleTapZoom();
+    }
+
     private int computeRealHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;

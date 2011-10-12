@@ -145,11 +145,11 @@ class ZoomManager {
     private float mInvDefaultScale;
 
     /*
-     * The scale factor that is used to determine the zoom level for reading text.
-     * The value is initially set to equal the display density.
-     * TODO: Support changing this in WebSettings
+     * The logical density of the display. This is a scaling factor for the
+     * Density Independent Pixel unit, where one DIP is one pixel on an
+     * approximately 160 dpi screen (see android.util.DisplayMetrics.density)
      */
-    private float mReadingLevelScale;
+    private float mDisplayDensity;
 
     /*
      * The scale factor that is used as the minimum increment when going from
@@ -233,11 +233,11 @@ class ZoomManager {
     public void init(float density) {
         assert density > 0;
 
+        mDisplayDensity = density;
         setDefaultZoomScale(density);
         mActualScale = density;
         mInvActualScale = 1 / density;
-        mReadingLevelScale = density;
-        mTextWrapScale = density;
+        mTextWrapScale = getReadingLevelScale();
     }
 
     /**
@@ -310,8 +310,11 @@ class ZoomManager {
         return mInitialScale > 0 ? mInitialScale : mDefaultScale;
     }
 
+    /**
+     * Returns the zoom scale used for reading text on a double-tap.
+     */
     public final float getReadingLevelScale() {
-        return mReadingLevelScale;
+        return mDisplayDensity * mWebView.getSettings().getDoubleTapZoom() / 100.0f;
     }
 
     public final float getInvDefaultScale() {
@@ -508,6 +511,13 @@ class ZoomManager {
 
     public boolean isFixedLengthAnimationInProgress() {
         return mZoomScale != 0 || mInHWAcceleratedZoom;
+    }
+
+    public void updateDoubleTapZoom() {
+        if (mInZoomOverview) {
+            mTextWrapScale = getReadingLevelScale();
+            refreshZoomScale(true);
+        }
     }
 
     public void refreshZoomScale(boolean reflowText) {
