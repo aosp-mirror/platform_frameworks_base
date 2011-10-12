@@ -292,75 +292,136 @@ void Shutdown(Context *rsc) {
 }
 
 static void rsdForEach17(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, uint32_t);
     (*(fe*)vRoot)(p->in, p->y);
 }
 
 static void rsdForEach18(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(void *, uint32_t);
     (*(fe*)vRoot)(p->out, p->y);
 }
 
 static void rsdForEach19(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, void *, uint32_t);
     (*(fe*)vRoot)(p->in, p->out, p->y);
 }
 
 static void rsdForEach21(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, const void *, uint32_t);
     (*(fe*)vRoot)(p->in, p->usr, p->y);
 }
 
 static void rsdForEach22(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(void *, const void *, uint32_t);
     (*(fe*)vRoot)(p->out, p->usr, p->y);
 }
 
 static void rsdForEach23(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, void *, const void *, uint32_t);
     (*(fe*)vRoot)(p->in, p->out, p->usr, p->y);
 }
 
 static void rsdForEach25(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, uint32_t, uint32_t);
-    (*(fe*)vRoot)(p->in, p->x, p->y);
+    const uint8_t *pin = (const uint8_t *)p->in;
+    uint32_t y = p->y;
+    for (uint32_t x = x1; x < x2; x++) {
+        (*(fe*)vRoot)(pin, x, y);
+        pin += instep;
+    }
 }
 
 static void rsdForEach26(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(void *, uint32_t, uint32_t);
-    (*(fe*)vRoot)(p->out, p->x, p->y);
+    uint8_t *pout = (uint8_t *)p->out;
+    uint32_t y = p->y;
+    for (uint32_t x = x1; x < x2; x++) {
+        (*(fe*)vRoot)(pout, x, y);
+        pout += outstep;
+    }
 }
 
 static void rsdForEach27(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, void *, uint32_t, uint32_t);
-    (*(fe*)vRoot)(p->in, p->out, p->x, p->y);
+    uint8_t *pout = (uint8_t *)p->out;
+    const uint8_t *pin = (const uint8_t *)p->in;
+    uint32_t y = p->y;
+    for (uint32_t x = x1; x < x2; x++) {
+        (*(fe*)vRoot)(pin, pout, x, y);
+        pin += instep;
+        pout += outstep;
+    }
 }
 
 static void rsdForEach29(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, const void *, uint32_t, uint32_t);
-    (*(fe*)vRoot)(p->in, p->usr, p->x, p->y);
+    const uint8_t *pin = (const uint8_t *)p->in;
+    const void *usr = p->usr;
+    const uint32_t y = p->y;
+    for (uint32_t x = x1; x < x2; x++) {
+        (*(fe*)vRoot)(pin, usr, x, y);
+        pin += instep;
+    }
 }
 
 static void rsdForEach30(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(void *, const void *, uint32_t, uint32_t);
-    (*(fe*)vRoot)(p->out, p->usr, p->x, p->y);
+    uint8_t *pout = (uint8_t *)p->out;
+    const void *usr = p->usr;
+    const uint32_t y = p->y;
+    for (uint32_t x = x1; x < x2; x++) {
+        (*(fe*)vRoot)(pout, usr, x, y);
+        pout += outstep;
+    }
 }
 
 static void rsdForEach31(const void *vRoot,
-        const android::renderscript::RsForEachStubParamStruct *p) {
+        const android::renderscript::RsForEachStubParamStruct *p,
+                                uint32_t x1, uint32_t x2,
+                                uint32_t instep, uint32_t outstep) {
     typedef void (*fe)(const void *, void *, const void *, uint32_t, uint32_t);
-    (*(fe*)vRoot)(p->in, p->out, p->usr, p->x, p->y);
+    uint8_t *pout = (uint8_t *)p->out;
+    const uint8_t *pin = (const uint8_t *)p->in;
+    const void *usr = p->usr;
+    const uint32_t y = p->y;
+    for (uint32_t x = x1; x < x2; x++) {
+        (*(fe*)vRoot)(pin, pout, usr, x, y);
+        pin += instep;
+        pout += outstep;
+    }
 }
 
 
