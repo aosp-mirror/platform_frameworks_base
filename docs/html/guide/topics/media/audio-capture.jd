@@ -1,0 +1,253 @@
+page.title=Audio Capture
+parent.title=Multimedia and Camera 
+parent.link=index.html
+@jd:body
+
+    <div id="qv-wrapper">
+    <div id="qv">
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#audiocapture">Performing Audio Capture</a>
+   <ol>
+      <li><a href='#example'>Code Example</a></li>
+   </ol>
+</li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.media.MediaRecorder}</li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/appendix/media-formats.html">Android Supported Media Formats</a></li>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a></li>
+  <li><a href="{@docRoot}guide/topics/media/mediaplayer.html">MediaPlayer</a>
+</ol>
+
+</div>
+</div>
+
+<p>The Android multimedia framework includes support for capturing and encoding a variety of common
+audio formats, so that you can easily integrate audio into your applications. You can record audio
+using the {@link android.media.MediaRecorder} APIs if supported by the device hardware.</p>
+
+<p>This document shows you how to write an application that captures audio from a device
+microphone, save the audio and play it back.</p>
+
+<p class="note"><strong>Note:</strong> The Android Emulator does not have the ability to capture
+audio, but actual devices are likely to provide these capabilities.</p>
+
+<h2 id="audiocapture">Performing Audio Capture</h2>
+
+<p>Audio capture from the device is a bit more complicated than audio and video playback, but still
+fairly simple:</p>
+<ol>
+  <li>Create a new instance of {@link android.media.MediaRecorder android.media.MediaRecorder}.</li>
+  <li>Set the audio source using
+        {@link android.media.MediaRecorder#setAudioSource MediaRecorder.setAudioSource()}. You will
+probably want to use
+  <code>MediaRecorder.AudioSource.MIC</code>.</li>
+  <li>Set output file format using
+        {@link android.media.MediaRecorder#setOutputFormat MediaRecorder.setOutputFormat()}.
+  </li>
+  <li>Set output file name using
+        {@link android.media.MediaRecorder#setOutputFile MediaRecorder.setOutputFile()}.
+  </li>
+  <li>Set the audio encoder using
+        {@link android.media.MediaRecorder#setAudioEncoder MediaRecorder.setAudioEncoder()}.
+  </li>
+  <li>Call {@link android.media.MediaRecorder#prepare MediaRecorder.prepare()}
+   on the MediaRecorder instance.</li>
+  <li>To start audio capture, call
+  {@link android.media.MediaRecorder#start MediaRecorder.start()}. </li>
+  <li>To stop audio capture, call {@link android.media.MediaRecorder#stop MediaRecorder.stop()}.
+  <li>When you are done with the MediaRecorder instance, call
+{@link android.media.MediaRecorder#release MediaRecorder.release()} on it. Calling
+{@link android.media.MediaRecorder#release MediaRecorder.release()} is always recommended to
+free the resource immediately.</li>
+</ol>
+
+<h3 id="example">Example: Record audio and play the recorded audio</h3>
+<p>The example class below illustrates how to set up, start and stop audio capture, and to play the
+recorded audio file.</p>
+<pre>
+/*
+ * The application needs to have the permission to write to external storage
+ * if the output file is written to the external storage, and also the
+ * permission to record audio. These permissions must be set in the
+ * application's AndroidManifest.xml file, with something like:
+ *
+ * &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /&gt;
+ * &lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
+ *
+ */
+package com.android.audiorecordtest;
+
+import android.app.Activity;
+import android.widget.LinearLayout;
+import android.os.Bundle;
+import android.os.Environment;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.content.Context;
+import android.util.Log;
+import android.media.MediaRecorder;
+import android.media.MediaPlayer;
+
+import java.io.IOException;
+
+
+public class AudioRecordTest extends Activity
+{
+    private static final String LOG_TAG = "AudioRecordTest";
+    private static String mFileName = null;
+
+    private RecordButton mRecordButton = null;
+    private MediaRecorder mRecorder = null;
+
+    private PlayButton   mPlayButton = null;
+    private MediaPlayer   mPlayer = null;
+
+    private void onRecord(boolean start) {
+        if (start) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+    private void onPlay(boolean start) {
+        if (start) {
+            startPlaying();
+        } else {
+            stopPlaying();
+        }
+    }
+
+    private void startPlaying() {
+        mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(mFileName);
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+    }
+
+    private void stopPlaying() {
+        mPlayer.release();
+        mPlayer = null;
+    }
+
+    private void startRecording() {
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFile(mFileName);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+
+        mRecorder.start();
+    }
+
+    private void stopRecording() {
+        mRecorder.stop();
+        mRecorder.release();
+        mRecorder = null;
+    }
+
+    class RecordButton extends Button {
+        boolean mStartRecording = true;
+
+        OnClickListener clicker = new OnClickListener() {
+            public void onClick(View v) {
+                onRecord(mStartRecording);
+                if (mStartRecording) {
+                    setText("Stop recording");
+                } else {
+                    setText("Start recording");
+                }
+                mStartRecording = !mStartRecording;
+            }
+        };
+
+        public RecordButton(Context ctx) {
+            super(ctx);
+            setText("Start recording");
+            setOnClickListener(clicker);
+        }
+    }
+
+    class PlayButton extends Button {
+        boolean mStartPlaying = true;
+
+        OnClickListener clicker = new OnClickListener() {
+            public void onClick(View v) {
+                onPlay(mStartPlaying);
+                if (mStartPlaying) {
+                    setText("Stop playing");
+                } else {
+                    setText("Start playing");
+                }
+                mStartPlaying = !mStartPlaying;
+            }
+        };
+
+        public PlayButton(Context ctx) {
+            super(ctx);
+            setText("Start playing");
+            setOnClickListener(clicker);
+        }
+    }
+
+    public AudioRecordTest() {
+        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+        mFileName += "/audiorecordtest.3gp";
+    }
+
+    &#64;Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+
+        LinearLayout ll = new LinearLayout(this);
+        mRecordButton = new RecordButton(this);
+        ll.addView(mRecordButton,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                0));
+        mPlayButton = new PlayButton(this);
+        ll.addView(mPlayButton,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                0));
+        setContentView(ll);
+    }
+
+    &#64;Override
+    public void onPause() {
+        super.onPause();
+        if (mRecorder != null) {
+            mRecorder.release();
+            mRecorder = null;
+        }
+
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
+    }
+}
+</pre>
