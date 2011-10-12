@@ -2476,6 +2476,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (gravity != mGravity) {
             invalidate();
+            mLayoutAlignment = null;
         }
 
         mGravity = gravity;
