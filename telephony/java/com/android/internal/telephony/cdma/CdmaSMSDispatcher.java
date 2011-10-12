@@ -198,13 +198,18 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     protected int processCdmaWapPdu(byte[] pdu, int referenceNumber, String address) {
         int index = 0;
 
-        int msgType = pdu[index++];
+        int msgType = (0xFF & pdu[index++]);
         if (msgType != 0) {
             Log.w(TAG, "Received a WAP SMS which is not WDP. Discard.");
             return Intents.RESULT_SMS_HANDLED;
         }
-        int totalSegments = pdu[index++];   // >= 1
-        int segment = pdu[index++];         // >= 0
+        int totalSegments = (0xFF & pdu[index++]);   // >= 1
+        int segment = (0xFF & pdu[index++]);         // >= 0
+
+        if (segment >= totalSegments) {
+            Log.e(TAG, "WDP bad segment #" + segment + " expecting 0-" + (totalSegments - 1));
+            return Intents.RESULT_SMS_HANDLED;
+        }
 
         // Only the first segment contains sourcePort and destination Port
         int sourcePort = 0;

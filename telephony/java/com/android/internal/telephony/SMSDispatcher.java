@@ -518,6 +518,7 @@ public abstract class SMSDispatcher extends Handler {
      * @param address the originating address
      * @param referenceNumber distinguishes concatenated messages from the same sender
      * @param sequenceNumber the order of this segment in the message
+     *          (starting at 0 for CDMA WDP datagrams and 1 for concatenated messages).
      * @param messageCount the number of segments in the message
      * @param timestamp the service center timestamp in millis
      * @param destPort the destination port for the message, or -1 for no destination port
@@ -583,7 +584,11 @@ public abstract class SMSDispatcher extends Handler {
             for (int i = 0; i < cursorCount; i++) {
                 cursor.moveToNext();
                 int cursorSequence = cursor.getInt(SEQUENCE_COLUMN);
-                pdus[cursorSequence - 1] = HexDump.hexStringToByteArray(
+                // GSM sequence numbers start at 1; CDMA WDP datagram sequence numbers start at 0
+                if (!isCdmaWapPush) {
+                    cursorSequence--;
+                }
+                pdus[cursorSequence] = HexDump.hexStringToByteArray(
                         cursor.getString(PDU_COLUMN));
 
                 // Read the destination port from the first segment (needed for CDMA WAP PDU).
@@ -593,7 +598,12 @@ public abstract class SMSDispatcher extends Handler {
                 }
             }
             // This one isn't in the DB, so add it
-            pdus[sequenceNumber - 1] = pdu;
+            // GSM sequence numbers start at 1; CDMA WDP datagram sequence numbers start at 0
+            if (isCdmaWapPush) {
+                pdus[sequenceNumber] = pdu;
+            } else {
+                pdus[sequenceNumber - 1] = pdu;
+            }
 
             // Remove the parts from the database
             mResolver.delete(mRawUri, where, whereArgs);
