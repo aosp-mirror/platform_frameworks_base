@@ -56,12 +56,12 @@
 
 #else
 
-#define IF_LOG_TRANSACTIONS() IF_LOG(LOG_VERBOSE, "transact")
-#define IF_LOG_COMMANDS() IF_LOG(LOG_VERBOSE, "ipc")
-#define LOG_REMOTEREFS(...) LOG(LOG_DEBUG, "remoterefs", __VA_ARGS__)
-#define IF_LOG_REMOTEREFS() IF_LOG(LOG_DEBUG, "remoterefs")
-#define LOG_THREADPOOL(...) LOG(LOG_DEBUG, "threadpool", __VA_ARGS__)
-#define LOG_ONEWAY(...) LOG(LOG_DEBUG, "ipc", __VA_ARGS__)
+#define IF_LOG_TRANSACTIONS() IF_ALOG(LOG_VERBOSE, "transact")
+#define IF_LOG_COMMANDS() IF_ALOG(LOG_VERBOSE, "ipc")
+#define LOG_REMOTEREFS(...) ALOG(LOG_DEBUG, "remoterefs", __VA_ARGS__)
+#define IF_LOG_REMOTEREFS() IF_ALOG(LOG_DEBUG, "remoterefs")
+#define LOG_THREADPOOL(...) ALOG(LOG_DEBUG, "threadpool", __VA_ARGS__)
+#define LOG_ONEWAY(...) ALOG(LOG_DEBUG, "ipc", __VA_ARGS__)
 
 #endif
 
