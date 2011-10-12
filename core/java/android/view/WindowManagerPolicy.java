@@ -104,23 +104,23 @@ public interface WindowManagerPolicy {
      */
     public final static String EXTRA_HDMI_PLUGGED_STATE = "state";
 
-    // flags for interceptKeyTq
     /**
-     * Pass this event to the user / app.  To be returned from {@link #interceptKeyTq}.
+     * Pass this event to the user / app.  To be returned from
+     * {@link #interceptKeyBeforeQueueing}.
      */
     public final static int ACTION_PASS_TO_USER = 0x00000001;
 
     /**
      * This key event should extend the user activity timeout and turn the lights on.
-     * To be returned from {@link #interceptKeyTq}. Do not return this and
-     * {@link #ACTION_GO_TO_SLEEP} or {@link #ACTION_PASS_TO_USER}.
+     * To be returned from {@link #interceptKeyBeforeQueueing}.
+     * Do not return this and {@link #ACTION_GO_TO_SLEEP} or {@link #ACTION_PASS_TO_USER}.
      */
     public final static int ACTION_POKE_USER_ACTIVITY = 0x00000002;
 
     /**
      * This key event should put the device to sleep (and engage keyguard if necessary)
-     * To be returned from {@link #interceptKeyTq}.  Do not return this and
-     * {@link #ACTION_POKE_USER_ACTIVITY} or {@link #ACTION_PASS_TO_USER}.
+     * To be returned from {@link #interceptKeyBeforeQueueing}.
+     * Do not return this and {@link #ACTION_POKE_USER_ACTIVITY} or {@link #ACTION_PASS_TO_USER}.
      */
     public final static int ACTION_GO_TO_SLEEP = 0x00000004;
 
@@ -677,10 +677,12 @@ public interface WindowManagerPolicy {
      *            event will normally go.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
-     * @return Returns true if the policy consumed the event and it should
-     * not be further dispatched.
+     * @return 0 if the key should be dispatched immediately, -1 if the key should
+     * not be dispatched ever, or a positive value indicating the number of
+     * milliseconds by which the key dispatch should be delayed before trying
+     * again.
      */
-    public boolean interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags);
+    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags);
 
     /**
      * Called from the input dispatcher thread when an application did not handle

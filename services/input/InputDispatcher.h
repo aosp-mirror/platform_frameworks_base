@@ -242,7 +242,7 @@ public:
     virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags) = 0;
 
     /* Allows the policy a chance to intercept a key before dispatching. */
-    virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
+    virtual nsecs_t interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
             const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
 
     /* Allows the policy a chance to perform default processing for an unhandled key.
@@ -481,8 +481,10 @@ private:
             INTERCEPT_KEY_RESULT_UNKNOWN,
             INTERCEPT_KEY_RESULT_SKIP,
             INTERCEPT_KEY_RESULT_CONTINUE,
+            INTERCEPT_KEY_RESULT_TRY_AGAIN_LATER,
         };
         InterceptKeyResult interceptKeyResult; // set based on the interception result
+        nsecs_t interceptKeyWakeupTime; // used with INTERCEPT_KEY_RESULT_TRY_AGAIN_LATER
 
         KeyEntry(nsecs_t eventTime,
                 int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,

@@ -575,7 +575,7 @@ public class InputManager implements Watchdog.Monitor {
         }
 
         @SuppressWarnings("unused")
-        public boolean interceptKeyBeforeDispatching(InputWindowHandle focus,
+        public long interceptKeyBeforeDispatching(InputWindowHandle focus,
                 KeyEvent event, int policyFlags) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(
                     focus, event, policyFlags);

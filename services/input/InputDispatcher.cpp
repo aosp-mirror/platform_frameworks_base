@@ -804,6 +804,18 @@ bool InputDispatcher::dispatchKeyLocked(nsecs_t currentTime, KeyEntry* entry,
         logOutboundKeyDetailsLocked("dispatchKey - ", entry);
     }
 
+    // Handle case where the policy asked us to try again later last time.
+    if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_TRY_AGAIN_LATER) {
+        if (currentTime < entry->interceptKeyWakeupTime) {
+            if (entry->interceptKeyWakeupTime < *nextWakeupTime) {
+                *nextWakeupTime = entry->interceptKeyWakeupTime;
+            }
+            return false; // wait until next wakeup
+        }
+        entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN;
+        entry->interceptKeyWakeupTime = 0;
+    }
+
     // Give the policy a chance to intercept the key.
     if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
         if (entry->policyFlags & POLICY_FLAG_PASS_TO_USER) {
@@ -3827,14 +3839,19 @@ void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
 
     mLock.unlock();
 
-    bool consumed = mPolicy->interceptKeyBeforeDispatching(commandEntry->inputWindowHandle,
+    nsecs_t delay = mPolicy->interceptKeyBeforeDispatching(commandEntry->inputWindowHandle,
             &event, entry->policyFlags);
 
     mLock.lock();
 
-    entry->interceptKeyResult = consumed
-            ? KeyEntry::INTERCEPT_KEY_RESULT_SKIP
-            : KeyEntry::INTERCEPT_KEY_RESULT_CONTINUE;
+    if (delay < 0) {
+        entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_SKIP;
+    } else if (!delay) {
+        entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_CONTINUE;
+    } else {
+        entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_TRY_AGAIN_LATER;
+        entry->interceptKeyWakeupTime = now() + delay;
+    }
     entry->release();
 }
 
@@ -4156,7 +4173,8 @@ InputDispatcher::KeyEntry::KeyEntry(nsecs_t eventTime,
         deviceId(deviceId), source(source), action(action), flags(flags),
         keyCode(keyCode), scanCode(scanCode), metaState(metaState),
         repeatCount(repeatCount), downTime(downTime),
-        syntheticRepeat(false), interceptKeyResult(KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
+        syntheticRepeat(false), interceptKeyResult(KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN),
+        interceptKeyWakeupTime(0) {
 }
 
 InputDispatcher::KeyEntry::~KeyEntry() {
@@ -4168,6 +4186,7 @@ void InputDispatcher::KeyEntry::recycle() {
     dispatchInProgress = false;
     syntheticRepeat = false;
     interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN;
+    interceptKeyWakeupTime = 0;
 }
 
 
