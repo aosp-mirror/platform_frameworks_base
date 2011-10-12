@@ -1002,6 +1002,9 @@ import junit.framework.Assert;
                 | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
         int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | EditorInfo.IME_FLAG_NO_FULLSCREEN;
+        if (!mWebView.nativeFocusCandidateIsSpellcheck()) {
+            inputType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        }
         if (TEXT_AREA != type
                 && mWebView.nativeFocusCandidateHasNextTextfield()) {
             imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
