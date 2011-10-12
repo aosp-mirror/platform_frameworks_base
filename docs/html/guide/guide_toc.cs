@@ -233,23 +233,32 @@
     </ul>
 
     <ul>
-      <li class="toggle-list">
+    <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
             <span class="en">Graphics</span>
-          </a></div>
+          </a><span class="new-child">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
-                <span class="en">2D Graphics</span>
-              </a></li>
+              <span class="en">Canvas and Drawables</span></a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/graphics/hardware-accel.html">
+              <span class="en">Hardware Acceleration</span></a>
+            <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
-                <span class="en">3D with OpenGL</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
-                <span class="en">Property Animation</span>
-              </a></li>
+              <span class="en">OpenGL</span>
+            </a><span class="new">updated</span></li>
+        </ul>
+      </li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
+            <span class="en">Animation</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/graphics/prop-animation.html">
+              <span class="en">Property Animation</span></a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/view-animation.html">
-                <span class="en">View Animation</span>
-              </a></li>
+              <span class="en">View Animation</span></a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/graphics/drawable-animation.html">
+              <span class="en">Drawable Animation</span></a></li>
         </ul>
       </li>
       <li class="toggle-list">
@@ -258,7 +267,7 @@
 	          </a></div>
 	        <ul>
 	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
-	                <span class="en">3D Graphics</span>
+	                <span class="en">Graphics</span>
 	              </a>
 	          </li>
 	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
