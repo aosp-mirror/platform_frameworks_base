@@ -1,0 +1,953 @@
+page.title=Property Animation
+parent.title=Animation
+parent.link=animation.html
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#how">How Property Animation Works</a></li>
+
+        <li><a href="#value-animator">Animating with ValueAnimator</a></li>
+
+        <li><a href="#object-animator">Animating with ObjectAnimator</a></li>
+
+        <li><a href="#choreography">Choreographing Multiple Animations with
+        AnimatorSet</a></li>
+
+        <li><a href="#listeners">Animation Listeners</a></li>
+
+        <li><a href="#type-evaluator">Using a TypeEvaluator</a></li>
+
+        <li><a href="#interpolators">Using Interpolators</a></li>
+
+        <li><a href="#keyframes">Specifying Keyframes</a></li>
+
+        <li><a href="#layout">Animating Layout Changes to ViewGroups</a></li>
+
+        <li><a href="#views">Animating Views</a>
+          <ol>
+            <li><a href="#view-prop-animator">ViewPropertyAnimator</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#declaring-xml">Declaring Animations in XML</a></li>
+      </ol>
+
+      <h2>Key classes</h2>
+
+      <ol>
+        <li><code><a href=
+        "/reference/android/animation/ValueAnimator.html">ValueAnimator</a></code></li>
+
+        <li><code><a href=
+        "/reference/android/animation/ObjectAnimator.html">ObjectAnimator</a></code></li>
+
+        <li><code><a href=
+        "/reference/android/animation/TypeEvaluator.html">TypeEvaluator</a></code></li>
+      </ol>
+
+      <h2>Related samples</h2>
+
+      <ol>
+        <li><a href=
+        "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
+        Demos</a></li>
+      </ol>
+    </div>
+  </div>
+  <p>The property animation system is a robust framework that allows you
+  to animate almost anything. You can define an animation to change any object property over time,
+  regardless of whether it draws to the screen or not. A property animation changes a property's
+  (a field in an object) value over a specified length of time. To animate something, you specify the
+  object property that you want to animate, such as an object's position on the screen, how long
+  you want to animate it for, and what values you want to animate between. </p>
+
+  <p>The property animation system lets you define the following characteristics of an
+  animation:</p>
+
+  <ul>
+    <li>Duration: You can specify the duration of an animation. The default length is 300 ms.</li>
+
+    <li>Time interpolation: You can specify how the values for the property are calculated as a
+    function of the animation's current elapsed time.</li>
+
+    <li>Repeat count and behavior: You can specify whether or not to have an animation repeat when
+    it reaches the end of a duration and how many times to repeat the animation. You can also
+    specify whether you want the animation to play back in reverse. Setting it to reverse plays
+    the animation forwards then backwards repeatedly, until the number of repeats is reached.</li>
+
+    <li>Animator sets: You can group animations into logical sets that play together or
+    sequentially or after specified delays.</li>
+
+    <li>Frame refresh delay: You can specify how often to refresh frames of your animation. The
+    default is set to  refresh every 10 ms, but the speed in which your application can refresh frames is
+    ultimately dependent on how busy the system is overall and how fast the system can service the underlying timer.</li>
+  </ul>
+
+
+  <h2 id="how">How Property Animation Works</h2>
+
+  <p>First, let's go over how an animation works with a simple example. Figure 1 depicts a
+  hypothetical object that is animated with its <code>x</code> property, which represents its
+  horizontal location on a screen. The duration of the animation is set to 40 ms and the distance
+  to travel is 40 pixels. Every 10 ms, which is the default frame refresh rate, the object moves
+  horizontally by 10 pixels. At the end of 40ms, the animation stops, and the object ends at
+  horizontal position 40. This is an example of an animation with linear interpolation, meaning the
+  object moves at a constant speed.</p><img src="{@docRoot}images/animation/animation-linear.png">
+
+  <p class="img-caption"><strong>Figure 1.</strong> Example of a linear animation</p>
+
+  <p>You can also specify animations to have a non-linear interpolation. Figure 2 illustrates a
+  hypothetical object that accelerates at the beginning of the animation, and decelerates at the
+  end of the animation. The object still moves 40 pixels in 40 ms, but non-linearly. In the
+  beginning, this animation accelerates up to the halfway point then decelerates from the
+  halfway point until the end of the animation. As Figure 2 shows, the distance traveled
+  at the beginning and end of the animation is less than in the middle.</p><img src=
+  "{@docRoot}images/animation/animation-nonlinear.png">
+
+  <p class="img-caption"><strong>Figure 2.</strong> Example of a non-linear animation</p>
+
+  <p>Let's take a detailed look at how the important components of the property animation system
+  would calculate animations like the ones illustrated above. Figure 3 depicts how the main classes
+  work with one another.</p><img src="{@docRoot}images/animation/valueanimator.png">
+
+  <p class="img-caption"><strong>Figure 3.</strong> How animations are calculated</p>
+
+  <p>The {@link android.animation.ValueAnimator} object keeps track of your animation's timing,
+  such as how long the animation has been running, and the current value of the property that it is
+  animating.</p>
+
+  <p>The {@link android.animation.ValueAnimator} encapsulates a {@link
+  android.animation.TimeInterpolator}, which defines animation interpolation, and a {@link
+  android.animation.TypeEvaluator}, which defines how to calculate values for the property being
+  animated. For example, in Figure 2, the {@link android.animation.TimeInterpolator} used would be
+  {@link android.view.animation.AccelerateDecelerateInterpolator} and the {@link
+  android.animation.TypeEvaluator} would be {@link android.animation.IntEvaluator}.</p>
+
+  <p>To start an animation, create a {@link android.animation.ValueAnimator} and give it the
+  starting and ending values for the property that you want to animate, along with the duration of
+  the animation. When you call {@link android.animation.ValueAnimator#start start()} the animation
+  begins. During the whole animation, the {@link android.animation.ValueAnimator} calculates an <em>elapsed fraction</em>
+  between 0 and 1, based on the duration of the animation and how much time has elapsed. The
+  elapsed fraction represents the percentage of time that the animation has completed, 0 meaning 0%
+  and 1 meaning 100%. For example, in Figure 1, the elapsed fraction at t = 10 ms would be .25
+  because the total duration is t = 40 ms.</p>
+
+  <p>When the {@link android.animation.ValueAnimator} is done calculating an elapsed fraction, it
+  calls the {@link android.animation.TimeInterpolator} that is currently set, to calculate an
+  <em>interpolated fraction</em>. An interpolated fraction maps the elapsed fraction to a new
+  fraction that takes into account the time interpolation that is set. For example, in Figure 2,
+  because the animation slowly accelerates, the interpolated fraction, about .15, is less than the
+  elapsed fraction, .25, at t = 10 ms. In Figure 1, the interpolated fraction is always the same as
+  the elapsed fraction.</p>
+
+  <p>When the interpolated fraction is calculated, {@link android.animation.ValueAnimator} calls
+  the appropriate {@link android.animation.TypeEvaluator}, to calculate the value of the
+  property that you are animating, based on the interpolated fraction, the starting value, and the
+  ending value of the animation. For example, in Figure 2, the interpolated fraction was .15 at t =
+  10 ms, so the value for the property at that time would be .15 X (40 - 0), or 6.</p>
+
+ <!-- <p>When the final value is calculated, the {@link android.animation.ValueAnimator} calls the
+  {@link android.animation.ValueAnimator.AnimatorUpdateListener#onAnimationUpdate
+  onAnimationUpdate()} method. Implement this callback to obtain the property value by
+  calling {@link android.animation.ValueAnimator#getAnimatedValue getAnimatedValue()} and set the
+  value for the property in the object that you are animating. Setting the property doesn't redraw
+  the object on the screen, so you need to call {@link
+  android.view.View#invalidate invalidate()} to refresh the View that the object
+  resides in. If the object is actually a View object, then the system calls {@link
+  android.view.View#invalidate invalidate()} when the property is changed.
+  The system redraws the window and the {@link android.animation.ValueAnimator}
+  repeats the process.</p>-->
+
+  <p>The <code>com.example.android.apis.animation</code> package in the <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
+  Demos</a> sample project provides many examples on how to use the property
+  animation system.</p>
+
+  <h2>API Overview</h2>
+
+  <p>You can find most of the property animation system's APIs in {@link android.animation
+  android.animation}. Because the view animation system already
+  defines many interpolators in {@link android.view.animation android.view.animation}, you can use
+  those interpolators in the property animation system as well. The following tables describe the main
+  components of the property animation system.</p>
+
+  <p>The {@link android.animation.Animator} class provides the basic structure for creating
+  animations. You normally do not use this class directly as it only provides minimal
+  functionality that must be extended to fully support animating values. The following
+  subclasses extend {@link android.animation.Animator}:
+  </p>
+  <p class="table-caption"><strong>Table 1.</strong> Animators</p>
+      <table>
+        <tr>
+          <th>Class</th>
+
+          <th>Description</th>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.ValueAnimator}</td>
+
+          <td>The main timing engine for property animation that also computes the values for the
+          property to be animated. It has all of the core functionality that calculates animation
+          values and contains the timing details of each animation, information about whether an
+          animation repeats, listeners that receive update events, and the ability to set custom
+          types to evaluate. There are two pieces to animating properties: calculating the animated
+          values and setting those values on the object and property that is being animated. {@link
+          android.animation.ValueAnimator} does not carry out the second piece, so you must listen
+          for updates to values calculated by the {@link android.animation.ValueAnimator} and
+          modify the objects that you want to animate with your own logic. See the section about
+          <a href="#value-animator">Animating with ValueAnimator</a> for more information.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.ObjectAnimator}</td>
+
+          <td>A subclass of {@link android.animation.ValueAnimator} that allows you to set a target
+          object and object property to animate. This class updates the property accordingly when
+          it computes a new value for the animation. You want to use
+          {@link android.animation.ObjectAnimator} most of the time,
+          because it makes the process of animating values on target objects much easier. However,
+          you sometimes want to use {@link android.animation.ValueAnimator} directly because {@link
+          android.animation.ObjectAnimator} has a few more restrictions, such as requiring specific
+          acessor methods to be present on the target object.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.AnimatorSet}</td>
+
+          <td>Provides a mechanism to group animations together so that they run in
+          relation to one another. You can set animations to play together, sequentially, or after
+          a specified delay. See the section about <a href="#choreography">Choreographing multiple
+          animations with Animator Sets</a> for more information.</td>
+        </tr>
+      </table>
+
+
+      <p>Evaluators tell the property animation system how to calculate values for a given
+      property. They take the timing data that is provided by an {@link android.animation.Animator}
+      class, the animation's start and end value, and calculate the animated values of the property
+      based on this data. The property animation system provides the following evaluators:</p>
+      <p class="table-caption"><strong>Table 2.</strong> Evaluators</p>
+      <table>
+        <tr>
+          <th>Class/Interface</th>
+
+          <th>Description</th>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.IntEvaluator}</td>
+
+          <td>The default evaluator to calculate values for <code>int</code> properties.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.FloatEvaluator}</td>
+
+          <td>The default evaluator to calculate values for <code>float</code> properties.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.ArgbEvaluator}</td>
+
+          <td>The default evaluator to calculate values for color properties that are represented
+          as hexidecimal values.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.TypeEvaluator}</td>
+
+          <td>An interface that allows you to create your own evaluator. If you are animating an
+          object property that is <em>not</em> an <code>int</code>, <code>float</code>, or color,
+          you must implement the {@link android.animation.TypeEvaluator} interface to specify how
+          to compute the object property's animated values. You can also specify a custom {@link
+          android.animation.TypeEvaluator} for <code>int</code>, <code>float</code>, and color
+          values as well, if you want to process those types differently than the default behavior.
+          See the section about <a href="#type-evaluator">Using a TypeEvaluator</a> for more
+          information on how to write a custom evaluator.</td>
+        </tr>
+      </table>
+
+
+
+
+      <p>A time interpolator defines how specific values in an animation are calculated as a
+      function of time. For example, you can specify animations to happen linearly across the whole
+      animation, meaning the animation moves evenly the entire time, or you can specify animations
+      to use non-linear time, for example, accelerating at the beginning and decelerating at the
+      end of the animation. Table 3 describes the interpolators that are contained in {@link
+      android.view.animation android.view.animation}. If none of the provided interpolators suits
+      your needs, implement the {@link android.animation.TimeInterpolator} interface and create your own. See <a href=
+  "#interpolators">Using interpolators</a> for more information on how to write a custom
+  interpolator.</p>
+      <p class="table-caption"><strong>Table 3.</strong> Interpolators</p>
+      <table>
+        <tr>
+          <th>Class/Interface</th>
+
+          <th>Description</th>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.AccelerateDecelerateInterpolator}</td>
+
+          <td>An interpolator whose rate of change starts and ends slowly but accelerates
+          through the middle.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.AccelerateInterpolator}</td>
+
+          <td>An interpolator whose rate of change starts out slowly and then
+          accelerates.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.AnticipateInterpolator}</td>
+
+          <td>An interpolator whose change starts backward then flings forward.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.AnticipateOvershootInterpolator}</td>
+
+          <td>An interpolator whose change starts backward, flings forward and overshoots
+          the target value, then finally goes back to the final value.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.BounceInterpolator}</td>
+
+          <td>An interpolator whose change bounces at the end.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.CycleInterpolator}</td>
+
+          <td>An interpolator whose animation repeats for a specified number of cycles.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.DecelerateInterpolator}</td>
+
+          <td>An interpolator whose rate of change starts out quickly and and then
+          decelerates.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.LinearInterpolator}</td>
+
+          <td>An interpolator whose rate of change is constant.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.view.animation.OvershootInterpolator}</td>
+
+          <td>An interpolator whose change flings forward and overshoots the last value then
+          comes back.</td>
+        </tr>
+
+        <tr>
+          <td>{@link android.animation.TimeInterpolator}</td>
+
+          <td>An interface that allows you to implement your own interpolator.</td>
+        </tr>
+      </table>
+
+  <h2 id="value-animator">Animating with ValueAnimator</h2>
+
+  <p>The {@link android.animation.ValueAnimator} class lets you animate values of some type for the
+  duration of an animation by specifying a set of <code>int</code>, <code>float</code>, or color
+  values to animate through. You obtain a {@link android.animation.ValueAnimator} by calling one of
+  its factory methods: {@link android.animation.ValueAnimator#ofInt ofInt()}, {@link
+  android.animation.ValueAnimator#ofFloat ofFloat()}, or {@link
+  android.animation.ValueAnimator#ofObject ofObject()}. For example:</p>
+  <pre>
+ValueAnimator animation = ValueAnimator.ofFloat(0f, 1f);
+animation.setDuration(1000);
+animation.start();
+</pre>
+
+  <p>In this code, the {@link android.animation.ValueAnimator} starts calculating the values of the
+  animation, between 0 and 1, for a duration of 1000 ms, when the <code>start()</code> method
+  runs.</p>
+
+  <p>You can also specify a custom type to animate by doing the following:</p>
+  <pre>
+ValueAnimator animation = ValueAnimator.ofObject(new MyTypeEvaluator(), startPropertyValue, endPropertyValue);
+animation.setDuration(1000);
+animation.start();
+</pre>
+
+  <p>In this code, the {@link android.animation.ValueAnimator} starts calculating the values of the
+  animation, between <code>startPropertyValue</code> and <code>endPropertyValue</code> using the
+  logic supplied by <code>MyTypeEvaluator</code> for a duration of 1000 ms, when the {@link
+  android.animation.ValueAnimator#start start()} method runs.</p>
+
+  <p>The previous code snippets, however, has no real effect on an object, because the {@link
+  android.animation.ValueAnimator} does not operate on objects or properties directly. The most likely thing
+  that you want to do is modify the objects that you want to animate with these calculated values. You do
+  this by defining listeners in the {@link android.animation.ValueAnimator} to appropriately handle important events
+  during the animation's lifespan, such as frame updates. When implementing the listeners, you can
+  obtain the calculated value for that specific frame refresh by calling {@link
+  android.animation.ValueAnimator#getAnimatedValue getAnimatedValue()}. For more information on listeners,
+  see the section about <a href="#listeners">Animation Listeners</a>.
+
+  <h2 id="object-animator">Animating with ObjectAnimator</h2>
+
+  <p>The {@link android.animation.ObjectAnimator} is a subclass of the {@link
+  android.animation.ValueAnimator} (discussed in the previous section) and combines the timing
+  engine and value computation of {@link android.animation.ValueAnimator} with the ability to
+  animate a named property of a target object. This makes animating any object much easier, as you
+  no longer need to implement the {@link android.animation.ValueAnimator.AnimatorUpdateListener},
+  because the animated property updates automatically.</p>
+
+  <p>Instantiating an {@link android.animation.ObjectAnimator} is similar to a {@link
+  android.animation.ValueAnimator}, but you also specify the object and the name of that object's property (as
+  a String) along with the values to animate between:</p>
+  <pre>
+ObjectAnimator anim = ObjectAnimator.ofFloat(foo, "alpha", 0f, 1f);
+anim.setDuration(1000);
+anim.start();
+</pre>
+
+  <p>To have the {@link android.animation.ObjectAnimator} update properties correctly, you must do
+  the following:</p>
+
+  <ul>
+    <li>The object property that you are animating must have a setter function (in camel case) in the form of
+    <code>set&lt;propertyName&gt;()</code>. Because the {@link android.animation.ObjectAnimator}
+    automatically updates the property during animation, it must be able to access the property
+    with this setter method. For example, if the property name is <code>foo</code>, you need to
+    have a <code>setFoo()</code> method. If this setter method does not exist, you have three
+    options:
+
+      <ul>
+        <li>Add the setter method to the class if you have the rights to do so.</li>
+
+        <li>Use a wrapper class that you have rights to change and have that wrapper receive the
+        value with a valid setter method and forward it to the original object.</li>
+
+        <li>Use {@link android.animation.ValueAnimator} instead.</li>
+      </ul>
+    </li>
+
+    <li>If you specify only one value for the <code>values...</code> parameter in one of the {@link
+    android.animation.ObjectAnimator} factory methods, it is assumed to be the ending value of the
+    animation. Therefore, the object property that you are animating must have a getter function
+    that is used to obtain the starting value of the animation. The getter function must be in the
+    form of <code>get&lt;propertyName&gt;()</code>. For example, if the property name is
+    <code>foo</code>, you need to have a <code>getFoo()</code> method.</li>
+
+    <li>The getter (if needed) and setter methods of the property that you are animating must
+    operate on the same type as the starting and ending values that you specify to {@link
+    android.animation.ObjectAnimator}. For example, you must have
+    <code>targetObject.setPropName(float)</code> and <code>targetObject.getPropName(float)</code>
+    if you construct the following {@link android.animation.ObjectAnimator}:
+      <pre>
+ObjectAnimator.ofFloat(targetObject, "propName", 1f)
+</pre>
+    </li>
+
+    <li>Depending on what property or object you are animating, you might need to call the {@link
+    android.view.View#invalidate invalidate()} method on a View force the screen to redraw itself with the
+    updated animated values. You do this in the
+    {@link android.animation.ValueAnimator.AnimatorUpdateListener#onAnimationUpdate onAnimationUpdate()}
+    callback. For example, animating the color property of a Drawable object only cause updates to the
+    screen when that object redraws itself. All of the property setters on View, such as
+    {@link android.view.View#setAlpha setAlpha()} and {@link android.view.View#setTranslationX setTranslationX()}
+    invalidate the View properly, so you do not need to invalidate the View when calling these
+    methods with new values. For more information on listeners, see the section about <a href="#listeners">Animation Listeners</a>.
+    </li>
+  </ul>
+
+  <h2 id="choreography">Choreographing Multiple Animations with AnimatorSet</h2>
+
+  <p>In many cases, you want to play an animation that depends on when another animation starts or
+  finishes. The Android system lets you bundle animations together into an {@link
+  android.animation.AnimatorSet}, so that you can specify whether to start animations
+  simultaneously, sequentially, or after a specified delay. You can also nest {@link
+  android.animation.AnimatorSet} objects within each other.</p>
+
+  <p>The following sample code taken from the <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/BouncingBalls.html">Bouncing
+  Balls</a> sample (modified for simplicity) plays the following {@link android.animation.Animator}
+  objects in the following manner:</p>
+
+  <ol>
+    <li>Plays <code>bounceAnim</code>.</li>
+
+    <li>Plays <code>squashAnim1</code>, <code>squashAnim2</code>, <code>stretchAnim1</code>, and
+    <code>stretchAnim2</code> at the same time.</li>
+
+    <li>Plays <code>bounceBackAnim</code>.</li>
+
+    <li>Plays <code>fadeAnim</code>.</li>
+  </ol>
+  <pre>
+AnimatorSet bouncer = new AnimatorSet();
+bouncer.play(bounceAnim).before(squashAnim1);
+bouncer.play(squashAnim1).with(squashAnim2);
+bouncer.play(squashAnim1).with(stretchAnim1);
+bouncer.play(squashAnim1).with(stretchAnim2);
+bouncer.play(bounceBackAnim).after(stretchAnim2);
+ValueAnimator fadeAnim = ObjectAnimator.ofFloat(newBall, "alpha", 1f, 0f);
+fadeAnim.setDuration(250);
+AnimatorSet animatorSet = new AnimatorSet();
+animatorSet.play(bouncer).before(fadeAnim);
+animatorSet.start();
+</pre>
+
+  <p>For a more complete example on how to use animator sets, see the <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/BouncingBalls.html">Bouncing
+  Balls</a> sample in APIDemos.</p>
+
+<h2 id="listeners">Animation Listeners</h2>
+<p>
+You can listen for important events during an animation's duration with the listeners described below.
+</p>
+
+  <ul>
+    <li>{@link android.animation.Animator.AnimatorListener}
+
+      <ul>
+        <li>{@link android.animation.Animator.AnimatorListener#onAnimationStart onAnimationStart()}
+        - Called when the animation starts.</li>
+
+        <li>{@link android.animation.Animator.AnimatorListener#onAnimationEnd onAnimationEnd()} -
+        Called when the animation ends.</li>
+
+        <li>{@link android.animation.Animator.AnimatorListener#onAnimationRepeat
+        onAnimationRepeat()} - Called when the animation repeats itself.</li>
+
+        <li>{@link android.animation.Animator.AnimatorListener#onAnimationCancel
+        onAnimationCancel()} - Called when the animation is canceled. A cancelled animation
+        also calls {@link android.animation.Animator.AnimatorListener#onAnimationEnd onAnimationEnd()},
+        regardless of how they were ended.</li>
+      </ul>
+    </li>
+
+    <li>{@link android.animation.ValueAnimator.AnimatorUpdateListener}
+
+      <ul>
+        <li>
+          <p>{@link android.animation.ValueAnimator.AnimatorUpdateListener#onAnimationUpdate
+          onAnimationUpdate()} - called on every frame of the animation. Listen to this event to
+          use the calculated values generated by {@link android.animation.ValueAnimator} during an
+          animation. To use the value, query the {@link android.animation.ValueAnimator} object
+          passed into the event to get the current animated value with the {@link
+          android.animation.ValueAnimator#getAnimatedValue getAnimatedValue()} method. Implementing this
+          listener is required if you use {@link android.animation.ValueAnimator}. </p>
+
+          <p>
+          Depending on what property or object you are animating, you might need to call
+          {@link android.view.View#invalidate invalidate()} on a View to force that area of the
+          screen to redraw itself with the new animated values. For example, animating the
+          color property of a Drawable object only cause updates to the screen when that object
+          redraws itself. All of the property setters on View,
+          such as {@link android.view.View#setAlpha setAlpha()} and
+          {@link android.view.View#setTranslationX setTranslationX()} invalidate the View
+          properly, so you do not need to invalidate the View when calling these methods with new values.
+          </p>
+
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+<p>You can extend the {@link android.animation.AnimatorListenerAdapter} class instead of
+implementing the {@link android.animation.Animator.AnimatorListener} interface, if you do not
+want to implement all of the methods of the {@link android.animation.Animator.AnimatorListener}
+interface. The {@link android.animation.AnimatorListenerAdapter} class provides empty
+implementations of the methods that you can choose to override.</p>
+  <p>For example, the <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/BouncingBalls.html">Bouncing
+  Balls</a> sample in the API demos creates an {@link android.animation.AnimatorListenerAdapter}
+  for just the {@link android.animation.Animator.AnimatorListener#onAnimationEnd onAnimationEnd()}
+  callback:</p>
+  <pre>
+ValueAnimatorAnimator fadeAnim = ObjectAnimator.ofFloat(newBall, "alpha", 1f, 0f);
+fadeAnim.setDuration(250);
+fadeAnim.addListener(new AnimatorListenerAdapter() {
+public void onAnimationEnd(Animator animation) {
+    balls.remove(((ObjectAnimator)animation).getTarget());
+}
+</pre>
+
+
+  <h2 id="layout">Animating Layout Changes to ViewGroups</h2>
+
+  <p>The property animation system provides the capability to animate changes to ViewGroup objects
+  as well as provide an easy way to animate View objects themselves.</p>
+
+  <p>You can animate layout changes within a ViewGroup with the {@link
+  android.animation.LayoutTransition} class. Views inside a ViewGroup can go through an appearing
+  and disappearing animation when you add them to or remove them from a ViewGroup or when you call
+  a View's {@link android.view.View#setVisibility setVisibility()} method with {@link
+  android.view.View#VISIBLE}, android.view.View#INVISIBLE}, or {@link android.view.View#GONE}. The remaining Views in the
+  ViewGroup can also animate into their new positions when you add or remove Views. You can define
+  the following animations in a {@link android.animation.LayoutTransition} object by calling {@link
+  android.animation.LayoutTransition#setAnimator setAnimator()} and passing in an {@link
+  android.animation.Animator} object with one of the following {@link
+  android.animation.LayoutTransition} constants:</p>
+
+  <ul>
+    <li><code>APPEARING</code> - A flag indicating the animation that runs on items that are
+    appearing in the container.</li>
+
+    <li><code>CHANGE_APPEARING</code> - A flag indicating the animation that runs on items that are
+    changing due to a new item appearing in the container.</li>
+
+    <li><code>DISAPPEARING</code> - A flag indicating the animation that runs on items that are
+    disappearing from the container.</li>
+
+    <li><code>CHANGE_DISAPPEARING</code> - A flag indicating the animation that runs on items that
+    are changing due to an item disappearing from the container.</li>
+  </ul>
+
+  <p>You can define your own custom animations for these four types of events to customize the look
+  of your layout transitions or just tell the animation system to use the default animations.</p>
+
+  <p>The <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/LayoutAnimations.html">
+  LayoutAnimations</a> sample in API Demos shows you how to define animations for layout
+  transitions and then set the animations on the View objects that you want to animate.</p>
+
+  <p>The <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/LayoutAnimationsByDefault.html">
+  LayoutAnimationsByDefault</a> and its corresponding <a href=
+  "{@docRoot}resources/samples/ApiDemos/res/layout/layout_animations_by_default.html">layout_animations_by_default.xml</a>
+  layout resource file show you how to enable the default layout transitions for ViewGroups in XML.
+  The only thing that you need to do is to set the <code>android:animateLayoutchanges</code>
+  attribute to <code>true</code> for the ViewGroup. For example:</p>
+  <pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:id="@+id/verticalContainer"
+    android:animateLayoutChanges="true" /&gt;
+</pre>
+
+  <p>Setting this attribute to true automatically animates Views that are added or removed from the
+  ViewGroup as well as the remaining Views in the ViewGroup.</p>
+
+  <h2 id="type-evaluator">Using a TypeEvaluator</h2>
+
+  <p>If you want to animate a type that is unknown to the Android system, you can create your own
+  evaluator by implementing the {@link android.animation.TypeEvaluator} interface. The types that
+  are known by the Android system are <code>int</code>, <code>float</code>, or a color, which are
+  supported by the {@link android.animation.IntEvaluator}, {@link
+  android.animation.FloatEvaluator}, and {@link android.animation.ArgbEvaluator} type
+  evaluators.</p>
+
+  <p>There is only one method to implement in the {@link android.animation.TypeEvaluator}
+  interface, the {@link android.animation.TypeEvaluator#evaluate evaluate()} method. This allows
+  the animator that you are using to return an appropriate value for your animated property at the
+  current point of the animation. The {@link android.animation.FloatEvaluator} class demonstrates
+  how to do this:</p>
+  <pre>
+public class FloatEvaluator implements TypeEvaluator {
+
+    public Object evaluate(float fraction, Object startValue, Object endValue) {
+        float startFloat = ((Number) startValue).floatValue();
+        return startFloat + fraction * (((Number) endValue).floatValue() - startFloat);
+    }
+}
+</pre>
+
+  <p class="note"><strong>Note:</strong> When {@link android.animation.ValueAnimator} (or {@link
+  android.animation.ObjectAnimator}) runs, it calculates a current elapsed fraction of the
+  animation (a value between 0 and 1) and then calculates an interpolated version of that depending
+  on what interpolator that you are using. The interpolated fraction is what your {@link
+  android.animation.TypeEvaluator} receives through the <code>fraction</code> parameter, so you do
+  not have to take into account the interpolator when calculating animated values.</p>
+
+  <h2 id="interpolators">Using Interpolators</h2>
+
+  <p>An interpolator define how specific values in an animation are calculated as a function of
+  time. For example, you can specify animations to happen linearly across the whole animation,
+  meaning the animation moves evenly the entire time, or you can specify animations to use
+  non-linear time, for example, using acceleration or deceleration at the beginning or end of the
+  animation.</p>
+
+  <p>Interpolators in the animation system receive a fraction from Animators that represent the
+  elapsed time of the animation. Interpolators modify this fraction to coincide with the type of
+  animation that it aims to provide. The Android system provides a set of common interpolators in
+  the {@link android.view.animation android.view.animation package}. If none of these suit your
+  needs, you can implement the {@link android.animation.TimeInterpolator} interface and create your
+  own.</p>
+
+  <p>As an example, how the default interpolator {@link
+  android.view.animation.AccelerateDecelerateInterpolator} and the {@link
+  android.view.animation.LinearInterpolator} calculate interpolated fractions are compared below.
+  The {@link android.view.animation.LinearInterpolator} has no effect on the elapsed fraction. The {@link
+  android.view.animation.AccelerateDecelerateInterpolator} accelerates into the animation and
+  decelerates out of it. The following methods define the logic for these interpolators:</p>
+
+  <p><strong>AccelerateDecelerateInterpolator</strong></p>
+  <pre>
+public float getInterpolation(float input) {
+    return (float)(Math.cos((input + 1) * Math.PI) / 2.0f) + 0.5f;
+}
+</pre>
+
+  <p><strong>LinearInterpolator</strong></p>
+  <pre>
+public float getInterpolation(float input) {
+    return input;
+}
+</pre>
+
+  <p>The following table represents the approximate values that are calculated by these
+  interpolators for an animation that lasts 1000ms:</p>
+
+  <table>
+    <tr>
+      <th>ms elapsed</th>
+
+      <th>Elapsed fraction/Interpolated fraction (Linear)</th>
+
+      <th>Interpolated fraction (Accelerate/Decelerate)</th>
+    </tr>
+
+    <tr>
+      <td>0</td>
+
+      <td>0</td>
+
+      <td>0</td>
+    </tr>
+
+    <tr>
+      <td>200</td>
+
+      <td>.2</td>
+
+      <td>.1</td>
+    </tr>
+
+    <tr>
+      <td>400</td>
+
+      <td>.4</td>
+
+      <td>.345</td>
+    </tr>
+
+    <tr>
+      <td>600</td>
+
+      <td>.6</td>
+
+      <td>.8</td>
+    </tr>
+
+    <tr>
+      <td>800</td>
+
+      <td>.8</td>
+
+      <td>.9</td>
+    </tr>
+
+    <tr>
+      <td>1000</td>
+
+      <td>1</td>
+
+      <td>1</td>
+    </tr>
+  </table>
+
+  <p>As the table shows, the {@link android.view.animation.LinearInterpolator} changes the values
+  at the same speed, .2 for every 200ms that passes. The {@link
+  android.view.animation.AccelerateDecelerateInterpolator} changes the values faster than {@link
+  android.view.animation.LinearInterpolator} between 200ms and 600ms and slower between 600ms and
+  1000ms.</p>
+
+  <h2 id="keyframes">Specifying Keyframes</h2>
+
+  <p>A {@link android.animation.Keyframe} object consists of a time/value pair that lets you define
+  a specific state at a specific time of an animation. Each keyframe can also have its own
+  interpolator to control the behavior of the animation in the interval between the previous
+  keyframe's time and the time of this keyframe.</p>
+
+  <p>To instantiate a {@link android.animation.Keyframe} object, you must use one of the factory
+  methods, {@link android.animation.Keyframe#ofInt ofInt()}, {@link
+  android.animation.Keyframe#ofFloat ofFloat()}, or {@link android.animation.Keyframe#ofObject
+  ofObject()} to obtain the appropriate type of {@link android.animation.Keyframe}. You then call
+  the {@link android.animation.PropertyValuesHolder#ofKeyframe ofKeyframe()} factory method to
+  obtain a {@link android.animation.PropertyValuesHolder} object. Once you have the object, you can
+  obtain an animator by passing in the {@link android.animation.PropertyValuesHolder} object and
+  the object to animate. The following code snippet demonstrates how to do this:</p>
+  <pre>
+Keyframe kf0 = Keyframe.ofFloat(0f, 0f);
+Keyframe kf1 = Keyframe.ofFloat(.5f, 360f);
+Keyframe kf2 = Keyframe.ofFloat(1f, 0f);
+PropertyValuesHolder pvhRotation = PropertyValuesHolder.ofKeyframe("rotation", kf0, kf1, kf2);
+ObjectAnimator rotationAnim = ObjectAnimator.ofPropertyValuesHolder(target, pvhRotation)
+rotationAnim.setDuration(5000ms);
+</pre>
+
+  <p>For a more complete example on how to use keyframes, see the <a href=
+  "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/MultiPropertyAnimation.html">
+  MultiPropertyAnimation</a> sample in APIDemos.</p>
+
+  <h2 id="views">Animating Views</h2>
+
+  <p>The property animation system allow streamlined animation of View objects and offerse
+  a few advantages over the view animation system. The view
+  animation system transformed View objects by changing the way that they were drawn. This was
+  handled in the container of each View, because the View itself had no properties to manipulate.
+  This resulted in the View being animated, but caused no change in the View object itself. This
+  led to behavior such as an object still existing in its original location, even though it was
+  drawn on a different location on the screen. In Android 3.0, new properties and the corresponding
+  getter and setter methods were added to eliminate this drawback.</p>
+  <p>The property animation system
+  can animate Views on the screen by changing the actual properties in the View objects. In
+  addition, Views also automatically call the {@link android.view.View#invalidate invalidate()}
+  method to refresh the screen whenever its properties are changed. The new properties in the {@link
+  android.view.View} class that facilitate property animations are:</p>
+
+  <ul>
+    <li><code>translationX</code> and <code>translationY</code>: These properties control where the
+    View is located as a delta from its left and top coordinates which are set by its layout
+    container.</li>
+
+    <li><code>rotation</code>, <code>rotationX</code>, and <code>rotationY</code>: These properties
+    control the rotation in 2D (<code>rotation</code> property) and 3D around the pivot point.</li>
+
+    <li><code>scaleX</code> and <code>scaleY</code>: These properties control the 2D scaling of a
+    View around its pivot point.</li>
+
+    <li><code>pivotX</code> and <code>pivotY</code>: These properties control the location of the
+    pivot point, around which the rotation and scaling transforms occur. By default, the pivot
+    point is located at the center of the object.</li>
+
+    <li><code>x</code> and <code>y</code>: These are simple utility properties to describe the
+    final location of the View in its container, as a sum of the left and top values and
+    translationX and translationY values.</li>
+
+    <li><code>alpha</code>: Represents the alpha transparency on the View. This value is 1 (opaque)
+    by default, with a value of 0 representing full transparency (not visible).</li>
+  </ul>
+
+  <p>To animate a property of a View object, such as its color or rotation value, all you need to
+  do is create a property animator and specify the View property that you want to
+  animate. For example:</p>
+  <pre>
+ObjectAnimator.ofFloat(myView, "rotation", 0f, 360f);
+</pre>
+
+<p>For more information on creating animators, see the sections on animating with
+<a href="#value-animator">ValueAnimator</a> and <a href="#object-animator">ObjectAnimator</a>.
+</p>
+
+<h3 id="view-prop-animator">Animating with ViewPropertyAnimator</h3>
+<p>The {@link android.view.ViewPropertyAnimator} provides a simple way to animate several
+properties of a {@link android.view.View} in parallel, using a single underlying {@link
+android.animation.Animator}
+object. It behaves much like an {@link android.animation.ObjectAnimator}, because it modifies the
+actual values of the view's properties, but is more efficient when animating many properties at
+once. In addition, the code for using the {@link android.view.ViewPropertyAnimator} is much
+more concise and easier to read. The following code snippets show the differences in using multiple
+{@link android.animation.ObjectAnimator} objects, a single
+{@link android.animation.ObjectAnimator}, and the {@link android.view.ViewPropertyAnimator} when
+simultaneously animating the <code>x</code> and <code>y</code> property of a view.</p>
+
+<p><strong>Multiple ObjectAnimator objects</strong></p>
+<pre>
+ObjectAnimator animX = ObjectAnimator.ofFloat(myView, "x", 50f);
+ObjectAnimator animY = ObjectAnimator.ofFloat(myView, "y", 100f);
+AnimatorSet animSetXY = new AnimatorSet();
+animSetXY.playTogether(animX, animY);
+animSetXY.start();
+</pre>
+
+<p><strong>One ObjectAnimator</strong></p>
+<pre>
+PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("x", 50f);
+PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("y", 100f);
+ObjectAnimator.ofPropertyValuesHolder(myView, pvhX, pvyY).start();
+</pre>
+
+<p><strong>ViewPropertyAnimator</strong></p>
+<pre>
+myView.animate().x(50f).y(100f);
+</pre>
+
+<p>
+For more detailed information about {@link
+android.view.ViewPropertyAnimator}, see the corresponding Android Developers
+<a href="http://android-developers.blogspot.com/2011/05/introducing-viewpropertyanimator.html">blog
+post</a>.</p>
+
+<h2 id="declaring-xml">Declaring Animations in XML</h2>
+
+  <p>The property animation system lets you declare property animations with XML instead of doing
+  it programmatically. By defining your animations in XML, you can easily reuse your animations
+in multiple activities and more easily edit the animation sequence.</p>
+
+<p>To distinguish animation files that use the new property animation APIs from those that use the
+legacy <a href="{@docRoot}guide/topics/graphics/view-animation.html">view animation</a> framework,
+starting with Android 3.1, you should save the XML files for property animations in the {@code
+res/animator/} directory (instead of {@code res/anim/}). Using the {@code animator} directory name
+is optional, but necessary if you want to use the layout editor tools in the Eclipse ADT plugin (ADT
+11.0.0+), because ADT only searches the {@code res/animator/} directory for property animation
+resources.</p>
+
+<p>The following property animation classes have XML declaration support with the
+  following XML tags:</p>
+
+  <ul>
+    <li>{@link android.animation.ValueAnimator} - <code>&lt;animator&gt;</code></li>
+
+    <li>{@link android.animation.ObjectAnimator} - <code>&lt;objectAnimator&gt;</code></li>
+
+    <li>{@link android.animation.AnimatorSet} - <code>&lt;set&gt;</code></li>
+  </ul>
+
+<p>The following example plays the two sets of object animations sequentially, with the first nested
+set playing two object animations together:</p>
+
+<pre>
+&lt;set android:ordering="sequentially"&gt;
+    &lt;set&gt;
+        &lt;objectAnimator
+            android:propertyName="x"
+            android:duration="500"
+            android:valueTo="400"
+            android:valueType="intType"/&gt;
+        &lt;objectAnimator
+            android:propertyName="y"
+            android:duration="500"
+            android:valueTo="300"
+            android:valueType="intType"/&gt;
+    &lt;/set&gt;
+    &lt;objectAnimator
+        android:propertyName="alpha"
+        android:duration="500"
+        android:valueTo="1f"/&gt;
+&lt;/set&gt;
+</pre>
+  <p>In order to run this animation, you must inflate the XML resources in your code to an {@link
+  android.animation.AnimatorSet} object, and then set the target objects for all of the animations
+  before starting the animation set. Calling {@link android.animation.AnimatorSet#setTarget
+  setTarget()} sets a single target object for all children of the {@link
+  android.animation.AnimatorSet} as a convenience. The following code shows how to do this:</p>
+
+<pre>
+AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(myContext,
+    R.anim.property_animator);
+set.setTarget(myObject);
+set.start();
+</pre>
+
+<p>For information about the XML syntax for defining property animations, see <a
+href="{@docRoot}guide/topics/resources/animation-resource.html#Property">Animation Resources</a>.
+
