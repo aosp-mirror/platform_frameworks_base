@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
+import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsPanelView;
 
 public class TabletStatusBar extends StatusBar implements
@@ -179,6 +180,7 @@ public class TabletStatusBar extends StatusBar implements
     int mDisabled = 0;
 
     private RecentsPanelView mRecentsPanel;
+    private RecentTasksLoader mRecentTasksLoader;
     private InputMethodsPanel mInputMethodsPanel;
     private CompatModePanel mCompatModePanel;
 
@@ -299,12 +301,15 @@ public class TabletStatusBar extends StatusBar implements
         }
 
         // Recents Panel
+        mRecentTasksLoader = new RecentTasksLoader(context);
         mRecentsPanel = (RecentsPanelView) View.inflate(context,
                 R.layout.status_bar_recent_panel, null);
         mRecentsPanel.setVisibility(View.GONE);
         mRecentsPanel.setSystemUiVisibility(View.STATUS_BAR_DISABLE_BACK);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                 mRecentsPanel));
+        mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
+        mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
         mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
 
         lp = new WindowManager.LayoutParams(
@@ -392,6 +397,7 @@ public class TabletStatusBar extends StatusBar implements
         mNotificationPanelParams.height = getNotificationPanelHeight();
         WindowManagerImpl.getDefault().updateViewLayout(mNotificationPanel,
                 mNotificationPanelParams);
+        mRecentsPanel.updateValuesFromResources();
     }
 
     protected void loadDimens() {

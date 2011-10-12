@@ -74,7 +74,9 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
+import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsPanelView;
+import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBar;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -193,6 +195,7 @@ public class PhoneStatusBar extends StatusBar {
 
     // Recent apps
     private RecentsPanelView mRecentsPanel;
+    private RecentTasksLoader mRecentTasksLoader;
 
     // Tracking finger for opening/closing.
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
@@ -363,6 +366,7 @@ public class PhoneStatusBar extends StatusBar {
         signalCluster.setNetworkController(mNetworkController);
 
         // Recents Panel
+        mRecentTasksLoader = new RecentTasksLoader(context);
         updateRecentsPanel();
 
         // receive broadcasts
@@ -399,16 +403,21 @@ public class PhoneStatusBar extends StatusBar {
     protected void updateRecentsPanel() {
         // Recents Panel
         boolean visible = false;
+        ArrayList<TaskDescription> recentTasksList = null;
         if (mRecentsPanel != null) {
             visible = mRecentsPanel.isShowing();
             WindowManagerImpl.getDefault().removeView(mRecentsPanel);
+            if (visible) {
+                recentTasksList = mRecentsPanel.getRecentTasksList();
+            }
         }
 
         // Provide RecentsPanelView with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
         mRecentsPanel = (RecentsPanelView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_recent_panel, tmpRoot, false);
-
+        mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
+        mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                 mRecentsPanel));
         mRecentsPanel.setVisibility(View.GONE);
@@ -417,7 +426,7 @@ public class PhoneStatusBar extends StatusBar {
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
         if (visible) {
-            mRecentsPanel.show(true, false);
+            mRecentsPanel.show(true, false, recentTasksList);
         }
 
     }
