@@ -195,4 +195,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
-
