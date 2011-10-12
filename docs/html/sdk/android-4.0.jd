@@ -71,7 +71,12 @@ class="toggle-content-img" alt="" />
   <div class="toggle-content-toggleme" style="padding-left:2em;">
 
 <dl>
-<dt>Initial release. SDK Tools r14 or higher is recommended.</dt>
+<dt>Initial release. SDK Tools r14 or higher is required.
+<p class="note"><strong>Important:</strong> To download the new Android
+4.0 system components from the Android SDK Manager, you must first update the
+SDK tools to revision 14 and restart the Android SDK Manager. If you do not,
+the Android 4.0 system components will not be available for download.</p>
+</dt>
 </dl>
 
   </div>
@@ -165,7 +170,7 @@ which the system will then process into the appropriate thumbnail and display ph
 
 <p>The {@link android.provider.ContactsContract.Intents#INVITE_CONTACT} intent action allows you to
 invoke an action that indicates the user wants to add a contact to a social network that understand
-this intent and use it to invite the contact specified in the contact to that social network.</p> 
+this intent and use it to invite the contact specified in the contact to that social network.</p>
 
 <p>Apps that use a sync adapter to provide information about contacts can register with the system
 to
@@ -290,7 +295,7 @@ face</li>
 located</li>
 </ul>
 
-  
+
 <h4>Focus and Metering Areas</h4>
 
 <p>Camera apps can now control the areas that the camera uses for focus and when metering white
@@ -334,7 +339,7 @@ these properties from changing.</li>
 <h4>Camera Broadcast Intents</h4>
 
 <ul>
-<li>{@link android.hardware.Camera#ACTION_NEW_PICTURE Camera.ACTION_NEW_PICTURE} 
+<li>{@link android.hardware.Camera#ACTION_NEW_PICTURE Camera.ACTION_NEW_PICTURE}
 This indicates that the user has captured a new photo. The built-in camera app invokes this
 broadcast after a photo is captured and third-party camera apps should also broadcast this intent
 after capturing a photo.</li>
@@ -344,10 +349,10 @@ broadcast after a video is recorded and third-party camera apps should also broa
 after capturing a video.</li>
 </ul>
 
-  
-  
 
-  
+
+
+
 <h3 id="Multimedia">Multimedia</h3>
 
 <p>Android 4.0 adds several new APIs for applications that interact with media such as photos,
@@ -476,7 +481,7 @@ image (usually done by calling the {@link android.opengl.GLES20#glTexImage2D glT
 function). You may provide multiple mipmap levels. If the output texture has not been bound to a
 texture image, it will be automatically bound by the effect as a {@link
 android.opengl.GLES20#GL_TEXTURE_2D}. It will contain one mipmap level (0), which will have the same
-size as the input.</p> 
+size as the input.</p>
 
 
 
@@ -844,9 +849,9 @@ accessibility information about the view, and its child views.
   onInitializeAccessibilityEvent()} - This method collects information about the view. If your
   application has specific requirements for accessibility, you should extend this method to add that
   information to the {@link android.view.accessibility.AccessibilityEvent}.</li>
-  
+
   <li>{@link
- 
+
 android.view.View#dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent)
   dispatchPopulateAccessibilityEvent()} is called by the framework to request text information for
   this view and its children. This method calls {@link
@@ -890,7 +895,7 @@ call
 the {@link android.view.accessibility.AccessibilityEvent#getRecord(int)
 AccessibilityEvent.getRecord()} to retrieve new accessibility information about the state of the
 view.</li>
-<li>From the {@link android.view.accessibility.AccessibilityRecord}, call {@link 
+<li>From the {@link android.view.accessibility.AccessibilityRecord}, call {@link
 android.view.accessibility.AccessibilityRecord#getSource() getSource()} to retrieve a {@link
 android.view.accessibility.AccessibilityNodeInfo} object.</li>
 <li>With the {@link android.view.accessibility.AccessibilityNodeInfo}, call {@link
