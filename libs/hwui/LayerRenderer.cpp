@@ -31,6 +31,12 @@ namespace uirenderer {
 // Rendering
 ///////////////////////////////////////////////////////////////////////////////
 
+LayerRenderer::LayerRenderer(Layer* layer): mLayer(layer) {
+}
+
+LayerRenderer::~LayerRenderer() {
+}
+
 void LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 

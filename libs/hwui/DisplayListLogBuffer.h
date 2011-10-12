@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_DISPLAY_LIST_LOG_BUFFER_H
 
 #include <utils/Singleton.h>
+
 #include <stdio.h>
 
 namespace android {

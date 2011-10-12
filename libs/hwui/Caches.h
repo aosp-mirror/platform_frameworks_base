@@ -23,6 +23,8 @@
 
 #include <utils/Singleton.h>
 
+#include <cutils/compiler.h>
+
 #include "Extensions.h"
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
@@ -82,7 +84,7 @@ struct CacheLogger {
 // Caches
 ///////////////////////////////////////////////////////////////////////////////
 
-class Caches: public Singleton<Caches> {
+class ANDROID_API Caches: public Singleton<Caches> {
     Caches();
     ~Caches();
 
