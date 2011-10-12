@@ -726,7 +726,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 isPrlLoaded = false;
             }
             if (!isPrlLoaded) {
-                newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_FLASH);
+                newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_OFF);
             } else if (!isSidsAllZeros()) {
                 if (!namMatch && !mIsInPrl) {
                     // Use default
