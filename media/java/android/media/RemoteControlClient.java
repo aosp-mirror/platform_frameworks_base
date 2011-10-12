@@ -35,14 +35,27 @@ import android.util.Log;
 import java.lang.IllegalArgumentException;
 
 /**
- * TODO javadoc update for ComponentName - PendingIntent change
  * RemoteControlClient enables exposing information meant to be consumed by remote controls
  * capable of displaying metadata, artwork and media transport control buttons.
- * A remote control client object is associated with a media button event receiver. This
+ *
+ * <p>A remote control client object is associated with a media button event receiver. This
  * event receiver must have been previously registered with
  * {@link AudioManager#registerMediaButtonEventReceiver(ComponentName)} before the
  * RemoteControlClient can be registered through
  * {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.
+ *
+ * <p>Here is an example of creating a RemoteControlClient instance after registering a media
+ * button event receiver:
+ * <pre>ComponentName myEventReceiver = new ComponentName(getPackageName(), MyRemoteControlEventReceiver.class.getName());
+ * AudioManager myAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+ * myAudioManager.registerMediaButtonEventReceiver(myEventReceiver);
+ * // build the PendingIntent for the remote control client
+ * Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+ * mediaButtonIntent.setComponent(myEventReceiver);
+ * PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, 0);
+ * // create and register the remote control client
+ * RemoteControlClient myRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
+ * myAudioManager.registerRemoteControlClient(myRemoteControlClient);</pre>
  */
 public class RemoteControlClient
 {
