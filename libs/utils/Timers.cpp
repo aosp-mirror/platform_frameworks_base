@@ -113,7 +113,7 @@ long long DurationTimer::durationUsecs(void) const
 /*static*/ void DurationTimer::addToTimeval(struct timeval* ptv, long usec)
 {
     if (usec < 0) {
-        LOG(LOG_WARN, "", "Negative values not supported in addToTimeval\n");
+        ALOG(LOG_WARN, "", "Negative values not supported in addToTimeval\n");
         return;
     }
 

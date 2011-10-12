@@ -28,7 +28,7 @@
 extern "C" {
 
 #if 0
-  #define TRACE(...) LOG(LOG_DEBUG, "NdefMessage", __VA_ARGS__)
+  #define TRACE(...) ALOG(LOG_DEBUG, "NdefMessage", __VA_ARGS__)
 #else
   #define TRACE(...)
 #endif
