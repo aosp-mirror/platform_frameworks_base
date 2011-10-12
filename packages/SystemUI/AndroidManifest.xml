@@ -101,5 +101,21 @@
             android:taskAffinity="com.android.systemui.net"
             android:excludeFromRecents="true" />
 
+        <!-- started from ... somewhere -->
+        <activity
+            android:name=".Nyandroid"
+            android:exported="true"
+            android:label="Nyandroid"
+            android:icon="@drawable/nyandroid04"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DREAM" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
