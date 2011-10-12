@@ -1464,6 +1464,8 @@ public class Camera {
         private static final String KEY_MAX_NUM_DETECTED_FACES_SW = "max-num-detected-faces-sw";
         private static final String KEY_RECORDING_HINT = "recording-hint";
         private static final String KEY_VIDEO_SNAPSHOT_SUPPORTED = "video-snapshot-supported";
+        private static final String KEY_VIDEO_STABILIZATION = "video-stabilization";
+        private static final String KEY_VIDEO_STABILIZATION_SUPPORTED = "video-stabilization-supported";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -2443,7 +2445,7 @@ public class Camera {
          *
          * @param value new white balance.
          * @see #getWhiteBalance()
-         * @see #setAutoWhiteBalanceLock()
+         * @see #setAutoWhiteBalanceLock(boolean)
          */
         public void setWhiteBalance(String value) {
             set(KEY_WHITE_BALANCE, value);
@@ -3205,6 +3207,59 @@ public class Camera {
          */
         public boolean isVideoSnapshotSupported() {
             String str = get(KEY_VIDEO_SNAPSHOT_SUPPORTED);
+            return TRUE.equals(str);
+        }
+
+        /**
+         * <p>Enables and disables video stabilization. Use
+         * {@link #isVideoStabilizationSupported} to determine if calling this
+         * method is valid.</p>
+         *
+         * <p>Video stabilization reduces the shaking due to the motion of the
+         * camera in both the preview stream and in recorded videos, including
+         * data received from the preview callback. It does not reduce motion
+         * blur in images captured with
+         * {@link Camera#takePicture takePicture}.</p>
+         *
+         * <p>Video stabilization can be enabled and disabled while preview or
+         * recording is active, but toggling it may cause a jump in the video
+         * stream that may be undesirable in a recorded video.</p>
+         *
+         * @param toggle Set to true to enable video stabilization, and false to
+         * disable video stabilization.
+         * @see #isVideoStabilizationSupported()
+         * @see #getVideoStabilization()
+         * @hide
+         */
+        public void setVideoStabilization(boolean toggle) {
+            set(KEY_VIDEO_STABILIZATION, toggle ? TRUE : FALSE);
+        }
+
+        /**
+         * Get the current state of video stabilization. See
+         * {@link #setVideoStabilization} for details of video stabilization.
+         *
+         * @return true if video stabilization is enabled
+         * @see #isVideoStabilizationSupported()
+         * @see #setVideoStabilization(boolean)
+         * @hide
+         */
+        public boolean getVideoStabilization() {
+            String str = get(KEY_VIDEO_STABILIZATION);
+            return TRUE.equals(str);
+        }
+
+        /**
+         * Returns true if video stabilization is supported. See
+         * {@link #setVideoStabilization} for details of video stabilization.
+         *
+         * @return true if video stabilization is supported
+         * @see #setVideoStabilization(boolean)
+         * @see #getVideoStabilization()
+         * @hide
+         */
+        public boolean isVideoStabilizationSupported() {
+            String str = get(KEY_VIDEO_STABILIZATION_SUPPORTED);
             return TRUE.equals(str);
         }
 
