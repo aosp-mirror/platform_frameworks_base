@@ -169,6 +169,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_SCREENSHOT = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
+    static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
     static final boolean HIDE_STACK_CRAWLS = true;
 
     static final boolean PROFILE_ORIENTATION = false;
@@ -2369,7 +2370,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
                 if ((w != null) && (w.mSurface != null)) {
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                    if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                             ">>> OPEN TRANSACTION setTransparentRegion");
                     Surface.openTransaction();
                     try {
@@ -2378,7 +2379,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mSurface.setTransparentRegionHint(region);
                     } finally {
                         Surface.closeTransaction();
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                                 "<<< CLOSE TRANSACTION setTransparentRegion");
                     }
                 }
@@ -4905,7 +4906,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION showStrictModeViolation");
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    ">>> OPEN TRANSACTION showStrictModeViolation");
             Surface.openTransaction();
             try {
                 if (mStrictModeFlash == null) {
@@ -4914,7 +4916,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStrictModeFlash.setVisibility(on);
             } finally {
                 Surface.closeTransaction();
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION showStrictModeViolation");
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                        "<<< CLOSE TRANSACTION showStrictModeViolation");
             }
         }
     }
@@ -5231,7 +5234,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager.setDisplayOrientation(0, rotation);
 
         if (!inTransaction) {
-            if (SHOW_TRANSACTIONS) Slog.i(TAG,
+            if (SHOW_TRANSACTIONS)  Slog.i(TAG,
                     ">>> OPEN TRANSACTION setRotationUnchecked");
             Surface.openTransaction();
         }
@@ -5246,7 +5249,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             if (!inTransaction) {
                 Surface.closeTransaction();
-                if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION setRotationUnchecked");
             }
         }
@@ -5843,6 +5846,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayMetrics dm = mDisplayMetrics;
         mAppDisplayWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
         mAppDisplayHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+        if (false) {
+            Slog.i(TAG, "Set app display size: " + mAppDisplayWidth
+                    + " x " + mAppDisplayHeight);
+        }
         mDisplay.getMetricsWithSize(dm, mAppDisplayWidth, mAppDisplayHeight);
 
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
@@ -5860,8 +5867,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Compute the screen layout size class.
         int screenLayout;
-        int longSize = dw;
-        int shortSize = dh;
+        int longSize = mAppDisplayWidth;
+        int shortSize = mAppDisplayHeight;
         if (longSize < shortSize) {
             int tmp = longSize;
             longSize = shortSize;
@@ -6847,7 +6854,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void rebuildBlackFrame(boolean inTransaction) {
         if (!inTransaction) {
-            if (SHOW_TRANSACTIONS) Slog.i(TAG,
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION rebuildBlackFrame");
             Surface.openTransaction();
         }
@@ -6882,7 +6889,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             if (!inTransaction) {
                 Surface.closeTransaction();
-                if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION rebuildBlackFrame");
             }
         }
@@ -7354,7 +7361,8 @@ public class WindowManagerService extends IWindowManager.Stub
             createWatermark = true;
         }
 
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
 
         Surface.openTransaction();
 
@@ -8463,7 +8471,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Surface.closeTransaction();
 
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
 
         if (mWatermark != null) {
             mWatermark.drawIfNeeded();
