@@ -21,21 +21,18 @@
 
     <!-- Recent Applications parameters -->
     <!-- Upper width limit for application icon -->
-    <dimen name="status_bar_recents_app_icon_max_width">64dp</dimen>
+    <dimen name="status_bar_recents_app_icon_max_width">48dp</dimen>
     <!-- Upper height limit for application icon -->
-    <dimen name="status_bar_recents_app_icon_max_height">64dp</dimen>
-    <!-- Where to place the app icon over the thumbnail -->
-    <dimen name="status_bar_recents_app_icon_left_margin">13dp</dimen>
-    <dimen name="status_bar_recents_app_icon_top_margin">13dp</dimen>
+    <dimen name="status_bar_recents_app_icon_max_height">48dp</dimen>
 
     <!-- Size of application thumbnail -->
     <dimen name="status_bar_recents_thumbnail_width">164dp</dimen>
     <dimen name="status_bar_recents_thumbnail_height">145dp</dimen>
 
     <!-- Size of application label text -->
-    <dimen name="status_bar_recents_app_label_text_size">16dip</dimen>
+    <dimen name="status_bar_recents_app_label_text_size">14dip</dimen>
     <!-- Size of application description text -->
-    <dimen name="status_bar_recents_app_description_text_size">16dip</dimen>
+    <dimen name="status_bar_recents_app_description_text_size">14dip</dimen>
     <!-- Size of fading edge for scroll effect -->
     <dimen name="status_bar_recents_fading_edge_length">20dip</dimen>
     <!-- Margin between recents container and glow on the right -->
