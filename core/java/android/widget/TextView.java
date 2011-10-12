@@ -9607,15 +9607,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             SpannableStringBuilder text = new SpannableStringBuilder();
             TextAppearanceSpan highlightSpan = new TextAppearanceSpan(mContext,
                     android.R.style.TextAppearance_SuggestionHighlight);
-
-            void removeMisspelledFlag() {
-                int suggestionSpanFlags = suggestionSpan.getFlags();
-                if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
-                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
-                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
-                    suggestionSpan.setFlags(suggestionSpanFlags);
-                }
-            }
         }
 
         private class SuggestionAdapter extends BaseAdapter {
@@ -9931,6 +9922,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
                     suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
                     suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
+
+                    // Remove potential misspelled flags
+                    int suggestionSpanFlags = suggestionSpan.getFlags();
+                    if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
+                        suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
+                        suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
+                        suggestionSpan.setFlags(suggestionSpanFlags);
+                    }
                 }
 
                 final int suggestionStart = suggestionInfo.suggestionStart;
@@ -9938,8 +9937,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final String suggestion = textView.getText().subSequence(
                         suggestionStart, suggestionEnd).toString();
                 editable.replace(spanStart, spanEnd, suggestion);
-
-                suggestionInfo.removeMisspelledFlag();
 
                 // Notify source IME of the suggestion pick. Do this before swaping texts.
                 if (!TextUtils.isEmpty(
