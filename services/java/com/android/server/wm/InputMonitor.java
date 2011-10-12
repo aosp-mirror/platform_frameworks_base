@@ -288,7 +288,7 @@ final class InputMonitor {
 
     /* Provides an opportunity for the window manager policy to process a key before
      * ordinary dispatch. */
-    public boolean interceptKeyBeforeDispatching(
+    public long interceptKeyBeforeDispatching(
             InputWindowHandle focus, KeyEvent event, int policyFlags) {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
         return mService.mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
