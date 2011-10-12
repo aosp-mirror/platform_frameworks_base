@@ -1,4 +1,4 @@
-page.title=3D with OpenGL
+page.title=OpenGL
 parent.title=Graphics
 parent.link=index.html
 @jd:body
@@ -6,7 +6,7 @@ parent.link=index.html
 <div id="qv-wrapper">
   <div id="qv">
     <h2>In this document</h2>
-    
+
     <ol>
       <li><a href="#basics">The Basics</a>
         <ol>
@@ -14,7 +14,7 @@ parent.link=index.html
         </ol>
       <li><a href="#manifest">Declaring OpenGL Requirements</a></li>
       </li>
-      <li><a href="#coordinate-mapping">Mapping Coordinates for Drawn Objects</a>  
+      <li><a href="#coordinate-mapping">Mapping Coordinates for Drawn Objects</a>
         <ol>
           <li><a href="#proj-es1">Projection and camera in ES 1.0</a></li>
           <li><a href="#proj-es1">Projection and camera in ES 2.0</a></li>
@@ -78,8 +78,7 @@ OpenGL ES 2.0 API specification.</p>
 Kit (NDK). This topic focuses on the Android framework interfaces. For more information about the
 NDK, see the <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a>.
 
-<p>
-  There are two foundational classes in the Android framework that let you create and manipulate
+<p>There are two foundational classes in the Android framework that let you create and manipulate
 graphics with the OpenGL ES API: {@link android.opengl.GLSurfaceView} and {@link
 android.opengl.GLSurfaceView.Renderer}. If your goal is to use OpenGL in your Android application,
 understanding how to implement these classes in an activity should be your first objective.
@@ -89,22 +88,22 @@ understanding how to implement these classes in an activity should be your first
   <dt><strong>{@link android.opengl.GLSurfaceView}</strong></dt>
   <dd>This class is a {@link android.view.View} where you can draw and manipulate objects using
     OpenGL API calls and is similar in function to a {@link android.view.SurfaceView}. You can use
-    this class by creating an instance of {@link android.opengl.GLSurfaceView} and adding your 
+    this class by creating an instance of {@link android.opengl.GLSurfaceView} and adding your
     {@link android.opengl.GLSurfaceView.Renderer Renderer} to it. However, if you want to capture
     touch screen events, you should extend the {@link android.opengl.GLSurfaceView} class to
-    implement the touch listeners, as shown in OpenGL Tutorials for 
-    <a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html#touch">ES 1.0</a>, 
+    implement the touch listeners, as shown in OpenGL Tutorials for
+    <a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html#touch">ES 1.0</a>,
     <a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html#touch">ES 2.0</a> and the <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity
 .html">TouchRotateActivity</a> sample.</dd>
-  
+
   <dt><strong>{@link android.opengl.GLSurfaceView.Renderer}</strong></dt>
   <dd>This interface defines the methods required for drawing graphics in an OpenGL {@link
     android.opengl.GLSurfaceView}. You must provide an implementation of this interface as a
     separate class and attach it to your {@link android.opengl.GLSurfaceView} instance using
     {@link android.opengl.GLSurfaceView#setRenderer(android.opengl.GLSurfaceView.Renderer)
     GLSurfaceView.setRenderer()}.
-    
+
     <p>The {@link android.opengl.GLSurfaceView.Renderer} interface requires that you implement the
       following methods:</p>
     <ul>
@@ -129,7 +128,7 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics
     android.opengl.GLSurfaceView} geometry changes, including changes in size of the {@link
     android.opengl.GLSurfaceView} or orientation of the device screen. For example, the system calls
     this method when the device changes from portrait to landscape orientation. Use this method to
-    respond to changes in the {@link android.opengl.GLSurfaceView} container. 
+    respond to changes in the {@link android.opengl.GLSurfaceView} container.
       </li>
     </ul>
     </dd>
@@ -173,13 +172,13 @@ interface to OpenGL ES 2.0 and is available starting with Android 2.2 (API Level
 </ul>
 
 <p>If you'd like to start building an app with OpenGL right away, have a look at the tutorials for
-<a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html">OpenGL ES 1.0</a> or 
+<a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html">OpenGL ES 1.0</a> or
 <a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html">OpenGL ES 2.0</a>!
 </p>
 
 <h2 id="manifest">Declaring OpenGL Requirements</h2>
 <p>If your application uses OpenGL features that are not available on all devices, you must include
-these requirements in your <a 
+these requirements in your <a
 href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a></code> file.
 Here are the most common OpenGL manifest declarations:</p>
 
@@ -200,14 +199,14 @@ shown below.
 compression formats, you must declare the formats your application supports in your manifest file
 using <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
 &lt;supports-gl-texture&gt;}</a>. For more information about available texture compression
-formats, see <a href="#textures">Texture compression support</a>. 
+formats, see <a href="#textures">Texture compression support</a>.
 
 <p>Declaring texture compression requirements in your manifest hides your application from users
 with devices that do not support at least one of your declared compression types. For more
 information on how Android Market filtering works for texture compressions, see the <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html#market-texture-filtering">
 Android Market and texture compression filtering</a> section of the {@code
-&lt;supports-gl-texture&gt;} documentation.</p> 
+&lt;supports-gl-texture&gt;} documentation.</p>
   </li>
 </ul>
 
@@ -237,7 +236,7 @@ matrix creates a transformation that renders objects from a specific eye positio
 <h3 id="proj-es1">Projection and camera view in OpenGL ES 1.0</h3>
 <p>In the ES 1.0 API, you apply projection and camera view by creating each matrix and then
 adding them to the OpenGL environment.</p>
-  
+
 <ol>
 <li><strong>Projection matrix</strong> - Create a projection matrix using the geometry of the
 device screen in order to recalculate object coordinates so they are drawn with correct proportions.
@@ -250,19 +249,19 @@ OpenGL rendering environment.
 <pre>
   public void onSurfaceChanged(GL10 gl, int width, int height) {
       gl.glViewport(0, 0, width, height);
-      
+
       // make adjustments for screen ratio
       float ratio = (float) width / height;
       gl.glMatrixMode(GL10.GL_PROJECTION);        // set matrix to projection mode
       gl.glLoadIdentity();                        // reset the matrix to its default state
       gl.glFrustumf(-ratio, ratio, -1, 1, 3, 7);  // apply the projection matrix
-  }  
+  }
 </pre>
 </li>
 
 <li><strong>Camera transformation matrix</strong> - Once you have adjusted the coordinate system
 using a projection matrix, you must also apply a camera view. The following example code shows how
-to modify the {@link        
+to modify the {@link
 android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.opengles.GL10)
 onDrawFrame()} method of a {@link android.opengl.GLSurfaceView.Renderer}
 implementation to apply a model view and use the
@@ -276,12 +275,12 @@ which simulates a camera position.
         // Set GL_MODELVIEW transformation mode
         gl.glMatrixMode(GL10.GL_MODELVIEW);
         gl.glLoadIdentity();                      // reset the matrix to its default state
-        
+
         // When using GL_MODELVIEW, you must set the camera view
-        GLU.gluLookAt(gl, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);        
+        GLU.gluLookAt(gl, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         ...
     }
-</pre>   
+</pre>
 </li>
 </ol>
 
@@ -294,26 +293,26 @@ tutorial</a>.</p>
 <p>In the ES 2.0 API, you apply projection and camera view by first adding a matrix member to
 the vertex shaders of your graphics objects. With this matrix member added, you can then
 generate and apply projection and camera viewing matrices to your objects.</p>
-  
+
 <ol>
 <li><strong>Add matrix to vertex shaders</strong> - Create a variable for the view projection matrix
 and include it as a multiplier of the shader's position. In the following example vertex shader
-code, the included {@code uMVPMatrix} member allows you to apply projection and camera viewing 
+code, the included {@code uMVPMatrix} member allows you to apply projection and camera viewing
 matrices to the coordinates of objects that use this shader.
 
 <pre>
-    private final String vertexShaderCode = 
-        
+    private final String vertexShaderCode =
+
         // This matrix member variable provides a hook to manipulate
         // the coordinates of objects that use this vertex shader
         "uniform mat4 uMVPMatrix;   \n" +
-        
+
         "attribute vec4 vPosition;  \n" +
         "void main(){               \n" +
-        
+
         // the matrix must be included as part of gl_Position
         " gl_Position = uMVPMatrix * vPosition; \n" +
-        
+
         "}  \n";
 </pre>
   <p class="note"><strong>Note:</strong> The example above defines a single transformation matrix
@@ -340,7 +339,7 @@ variable defined in the vertex shader above.
 </li>
 <li><strong>Create projection and camera viewing matrices</strong> - Generate the projection and
 viewing matrices to be applied the graphic objects. The following example code shows how to modify
-the {@link    
+the {@link
 android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,
 javax.microedition.khronos.egl.EGLConfig) onSurfaceCreated()} and {@link
 android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,
@@ -353,16 +352,16 @@ of the device.
         ...
         // Create a camera view matrix
         Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-    }    
-    
+    }
+
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-        
+
         float ratio = (float) width / height;
-        
+
         // create a projection matrix from device screen geometry
         Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
-    }  
+    }
 </pre>
 </li>
 
@@ -373,16 +372,16 @@ android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.ope
 onDrawFrame()} method of a {@link android.opengl.GLSurfaceView.Renderer} implementation to combine
 the projection matrix and camera view created in the code above and then apply it to the graphic
 objects to be rendered by OpenGL.
-  
+
 <pre>
     public void onDrawFrame(GL10 unused) {
         ...
         // Combine the projection and camera view matrices
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
-        
+
         // Apply the combined projection and camera view transformations
         GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        
+
         // Draw objects
         ...
     }
@@ -498,7 +497,7 @@ must run this call on several target devices to determine what compression types
 supported.</p>
   </li>
   <li>Review the output of this method to determine what OpenGL extensions are supported on the
-device.</li> 
+device.</li>
 </ol>
 
 
@@ -514,7 +513,7 @@ should carefully consider the following factors before starting development with
 than the ES 1.0/1.1 APIs. However, the performance difference can vary depending on the Android
 device your OpenGL application is running on, due to differences in the implementation of the OpenGL
 graphics pipeline.</li>
-  <li><strong>Device Compatibility</strong> - Developers should consider the types of devices, 
+  <li><strong>Device Compatibility</strong> - Developers should consider the types of devices,
 Android versions and the OpenGL ES versions available to their customers. For more information
 on OpenGL compatibility across devices, see the <a href="#compatibility">OpenGL Versions and Device
 Compatibility</a> section.</li>
@@ -526,7 +525,7 @@ of control by providing a fully programmable pipeline through the use of shaders
 direct control of the graphics processing pipeline, developers can create effects that would be
 very difficult to generate using the 1.0/1.1 API.</li>
 </ul>
-  
+
 <p>While performance, compatibility, convenience, control and other factors may influence your
 decision, you should pick an OpenGL API version based on what you think provides the best experience
 for your users.</p>
