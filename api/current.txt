@@ -6851,7 +6851,8 @@ package android.database {
   }
 
   public class CursorWindow extends android.database.sqlite.SQLiteClosable implements android.os.Parcelable {
-    ctor public CursorWindow(boolean);
+    ctor public CursorWindow(java.lang.String);
+    ctor public deprecated CursorWindow(boolean);
     method public boolean allocRow();
     method public void clear();
     method public void close();

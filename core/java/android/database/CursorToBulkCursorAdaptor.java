@@ -144,7 +144,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                 AbstractWindowedCursor windowedCursor = (AbstractWindowedCursor)mCursor;
                 window = windowedCursor.getWindow();
                 if (window == null) {
-                    window = new CursorWindow(mProviderName, false /*localOnly*/);
+                    window = new CursorWindow(mProviderName);
                     windowedCursor.setWindow(window);
                 }
 
@@ -152,7 +152,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
             } else {
                 window = mWindowForNonWindowedCursor;
                 if (window == null) {
-                    window = new CursorWindow(mProviderName, false /*localOnly*/);
+                    window = new CursorWindow(mProviderName);
                     mWindowForNonWindowedCursor = window;
                 }
 

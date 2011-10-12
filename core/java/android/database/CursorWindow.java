@@ -31,8 +31,8 @@ import android.util.SparseIntArray;
 /**
  * A buffer containing multiple cursor rows.
  * <p>
- * A {@link CursorWindow} is read-write when created and used locally.  When sent
- * to a remote process (by writing it to a {@link Parcel}), the remote process
+ * A {@link CursorWindow} is read-write when initially created and used locally.
+ * When sent to a remote process (by writing it to a {@link Parcel}), the remote process
  * receives a read-only view of the cursor window.  Typically the cursor window
  * will be allocated by the producer, filled with data, and then sent to the
  * consumer for reading.
@@ -58,8 +58,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private static native int nativeCreate(String name,
-            int cursorWindowSize, boolean localOnly);
+    private static native int nativeCreate(String name, int cursorWindowSize);
     private static native int nativeCreateFromParcel(Parcel parcel);
     private static native void nativeDispose(int windowPtr);
     private static native void nativeWriteToParcel(int windowPtr, Parcel parcel);
@@ -93,14 +92,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </p>
      *
      * @param name The name of the cursor window, or null if none.
-     * @param localWindow True if this window will be used in this process only,
-     * false if it might be sent to another processes.
-     *
-     * @hide
      */
-    public CursorWindow(String name, boolean localWindow) {
+    public CursorWindow(String name) {
         mStartPos = 0;
-        mWindowPtr = nativeCreate(name, sCursorWindowSize, localWindow);
+        mWindowPtr = nativeCreate(name, sCursorWindowSize);
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
                     (sCursorWindowSize / 1024) + " kb failed. " + printStats());
@@ -117,10 +112,14 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </p>
      *
      * @param localWindow True if this window will be used in this process only,
-     * false if it might be sent to another processes.
+     * false if it might be sent to another processes.  This argument is ignored.
+     *
+     * @deprecated There is no longer a distinction between local and remote
+     * cursor windows.  Use the {@link #CursorWindow(String)} constructor instead.
      */
+    @Deprecated
     public CursorWindow(boolean localWindow) {
-        this(null, localWindow);
+        this((String)null);
     }
 
     private CursorWindow(Parcel source) {
