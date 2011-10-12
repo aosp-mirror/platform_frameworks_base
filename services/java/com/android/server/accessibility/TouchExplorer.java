@@ -457,6 +457,9 @@ public class TouchExplorer implements Explorer {
             case MotionEvent.ACTION_MOVE: {
                 final int activePointerCount = mPointerTracker.getActivePointerCount();
                 switch (activePointerCount) {
+                    case 1: {
+                        // do nothing
+                    } break;
                     case 2: {
                         if (isDraggingGesture(event)) {
                             // If still dragging send a drag event.
@@ -484,10 +487,12 @@ public class TouchExplorer implements Explorer {
                 }
             } break;
             case MotionEvent.ACTION_POINTER_UP: {
-                mCurrentState = STATE_TOUCH_EXPLORING;
                 // Send an event to the end of the drag gesture.
                 sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
              } break;
+            case MotionEvent.ACTION_UP: {
+                mCurrentState = STATE_TOUCH_EXPLORING;
+            } break;
             case MotionEvent.ACTION_CANCEL: {
                 clear();
             } break;
@@ -500,7 +505,7 @@ public class TouchExplorer implements Explorer {
      * @param event The event to be handled.
      * @param policyFlags The policy flags associated with the event.
      */
-    public void handleMotionEventStateDelegating(MotionEvent event, int policyFlags) {
+    private void handleMotionEventStateDelegating(MotionEvent event, int policyFlags) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 throw new IllegalStateException("Delegating state can only be reached if "
