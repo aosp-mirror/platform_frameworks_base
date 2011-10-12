@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_RESOURCE_CACHE_H
 #define ANDROID_HWUI_RESOURCE_CACHE_H
 
+#include <cutils/compiler.h>
+
 #include <SkBitmap.h>
 #include <SkiaColorFilter.h>
 #include <SkiaShader.h>
@@ -49,7 +51,7 @@ public:
     ResourceType resourceType;
 };
 
-class ResourceCache {
+class ANDROID_API ResourceCache {
     KeyedVector<void *, ResourceReference *>* mCache;
 public:
     ResourceCache();

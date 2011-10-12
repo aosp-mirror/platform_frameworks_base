@@ -20,6 +20,8 @@
 #include <GLES2/gl2.h>
 #include <SkColorFilter.h>
 
+#include <cutils/compiler.h>
+
 #include "ProgramCache.h"
 #include "Extensions.h"
 
@@ -45,7 +47,7 @@ struct SkiaColorFilter {
         kBlend,
     };
 
-    SkiaColorFilter(SkColorFilter *skFilter, Type type, bool blend);
+    ANDROID_API SkiaColorFilter(SkColorFilter *skFilter, Type type, bool blend);
     virtual ~SkiaColorFilter();
 
     virtual void describe(ProgramDescription& description, const Extensions& extensions) = 0;
@@ -79,7 +81,7 @@ private:
  * A color filter that multiplies the source color with a matrix and adds a vector.
  */
 struct SkiaColorMatrixFilter: public SkiaColorFilter {
-    SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector);
+    ANDROID_API SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector);
     ~SkiaColorMatrixFilter();
 
     void describe(ProgramDescription& description, const Extensions& extensions);
@@ -95,7 +97,7 @@ private:
  * another fixed value. Ignores the alpha channel of both arguments.
  */
 struct SkiaLightingFilter: public SkiaColorFilter {
-    SkiaLightingFilter(SkColorFilter *skFilter, int multiply, int add);
+    ANDROID_API SkiaLightingFilter(SkColorFilter *skFilter, int multiply, int add);
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program);
@@ -110,7 +112,7 @@ private:
  * and PorterDuff blending mode.
  */
 struct SkiaBlendFilter: public SkiaColorFilter {
-    SkiaBlendFilter(SkColorFilter *skFilter, int color, SkXfermode::Mode mode);
+    ANDROID_API SkiaBlendFilter(SkColorFilter *skFilter, int color, SkXfermode::Mode mode);
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program);
