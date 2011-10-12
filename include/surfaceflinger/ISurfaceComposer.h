@@ -80,6 +80,7 @@ public:
         eOrientation90          = 1,
         eOrientation180         = 2,
         eOrientation270         = 3,
+        eOrientationUnchanged   = 4,
         eOrientationSwapMask    = 0x01
     };
     
@@ -101,15 +102,8 @@ public:
     virtual sp<IMemoryHeap> getCblk() const = 0;
 
     /* open/close transactions. requires ACCESS_SURFACE_FLINGER permission */
-    virtual void setTransactionState(const Vector<ComposerState>& state) = 0;
-
-    /* [un]freeze display. requires ACCESS_SURFACE_FLINGER permission */
-    virtual status_t freezeDisplay(DisplayID dpy, uint32_t flags) = 0;
-    virtual status_t unfreezeDisplay(DisplayID dpy, uint32_t flags) = 0;
-
-    /* Set display orientation. requires ACCESS_SURFACE_FLINGER permission
-     * No flags are currently defined.  Set flags to 0. */
-    virtual int setOrientation(DisplayID dpy, int orientation, uint32_t flags) = 0;
+    virtual void setTransactionState(const Vector<ComposerState>& state,
+            int orientation) = 0;
 
     /* signal that we're done booting.
      * Requires ACCESS_SURFACE_FLINGER permission
