@@ -8205,6 +8205,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             hideControllers();
+            if (mSuggestionsPopupWindow != null) {
+                mSuggestionsPopupWindow.onParentLostFocus();
+            }
         }
 
         startStopMarquee(hasWindowFocus);
@@ -9545,6 +9548,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private SuggestionInfo[] mSuggestionInfos;
         private int mNumberOfSuggestions;
         private boolean mCursorWasVisibleBeforeSuggestions;
+        private boolean mIsShowingUp = false;
         private SuggestionAdapter mSuggestionsAdapter;
         private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
@@ -9598,6 +9602,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             for (int i = 0; i < mSuggestionInfos.length; i++) {
                 mSuggestionInfos[i] = new SuggestionInfo();
             }
+        }
+
+        public boolean isShowingUp() {
+            return mIsShowingUp;
+        }
+
+        public void onParentLostFocus() {
+            mIsShowingUp = false;
         }
 
         private class SuggestionInfo {
@@ -9703,6 +9715,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updateSuggestions();
             mCursorWasVisibleBeforeSuggestions = mCursorVisible;
             setCursorVisible(false);
+            mIsShowingUp = true;
             super.show();
         }
 
@@ -11113,6 +11126,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void hideCursorControllers() {
+        if (mSuggestionsPopupWindow != null && !mSuggestionsPopupWindow.isShowingUp()) {
+            // Should be done before hide insertion point controller since it triggers a show of it
+            mSuggestionsPopupWindow.hide();
+        }
         hideInsertionPointCursorController();
         stopSelectionActionMode();
     }
