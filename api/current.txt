@@ -24097,6 +24097,8 @@ package android.view.accessibility {
     method public int getCurrentItemIndex();
     method public int getFromIndex();
     method public int getItemCount();
+    method public int getMaxScrollX();
+    method public int getMaxScrollY();
     method public android.os.Parcelable getParcelableData();
     method public int getRemovedCount();
     method public int getScrollX();
@@ -24123,6 +24125,8 @@ package android.view.accessibility {
     method public void setFromIndex(int);
     method public void setFullScreen(boolean);
     method public void setItemCount(int);
+    method public void setMaxScrollX(int);
+    method public void setMaxScrollY(int);
     method public void setParcelableData(android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
