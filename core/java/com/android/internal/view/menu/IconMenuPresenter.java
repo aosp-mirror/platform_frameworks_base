@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,15 +43,14 @@ public class IconMenuPresenter extends BaseMenuPresenter {
     private static final String OPEN_SUBMENU_KEY = "android:menu:icon:submenu";
 
     public IconMenuPresenter(Context context) {
-        super(context, com.android.internal.R.layout.icon_menu_layout,
+        super(new ContextThemeWrapper(context, com.android.internal.R.style.Theme_IconMenu),
+                com.android.internal.R.layout.icon_menu_layout,
                 com.android.internal.R.layout.icon_menu_item_layout);
     }
 
     @Override
     public void initForMenu(Context context, MenuBuilder menu) {
-        mContext = new ContextThemeWrapper(context, com.android.internal.R.style.Theme_IconMenu);
-        mInflater = LayoutInflater.from(mContext);
-        mMenu = menu;
+        super.initForMenu(context, menu);
         mMaxItems = -1;
     }
 
