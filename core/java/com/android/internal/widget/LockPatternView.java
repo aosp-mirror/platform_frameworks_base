@@ -32,9 +32,9 @@ import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -58,9 +58,6 @@ public class LockPatternView extends View {
     private static final int ASPECT_SQUARE = 0; // View will be the minimum of width/height
     private static final int ASPECT_LOCK_WIDTH = 1; // Fixed width; height will be minimum of (w,h)
     private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
-
-    // Vibrator pattern for creating a tactile bump
-    private static final long[] DEFAULT_VIBE_PATTERN = {0, 1, 40, 41};
 
     private static final boolean PROFILE_DRAWING = false;
     private boolean mDrawingProfilingStarted = false;
@@ -102,7 +99,7 @@ public class LockPatternView extends View {
     private DisplayMode mPatternDisplayMode = DisplayMode.Correct;
     private boolean mInputEnabled = true;
     private boolean mInStealthMode = false;
-    private boolean mTactileFeedbackEnabled = true;
+    private boolean mEnableHapticFeedback = true;
     private boolean mPatternInProgress = false;
 
     private float mDiameterFactor = 0.10f; // TODO: move to attrs
@@ -126,11 +123,6 @@ public class LockPatternView extends View {
 
     private int mBitmapWidth;
     private int mBitmapHeight;
-
-
-    private Vibrator vibe; // Vibrator for creating tactile feedback
-
-    private long[] mVibePattern;
 
     private int mAspect;
     private final Matrix mArrowMatrix = new Matrix();
@@ -250,7 +242,6 @@ public class LockPatternView extends View {
 
     public LockPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        vibe = new Vibrator();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView);
 
@@ -295,26 +286,6 @@ public class LockPatternView extends View {
             mBitmapHeight = Math.max(mBitmapHeight, bitmap.getHeight());
         }
 
-        // allow vibration pattern to be customized
-        mVibePattern = loadVibratePattern(com.android.internal.R.array.config_virtualKeyVibePattern);
-    }
-
-    private long[] loadVibratePattern(int id) {
-        int[] pattern = null;
-        try {
-            pattern = getResources().getIntArray(id);
-        } catch (Resources.NotFoundException e) {
-            Log.e(TAG, "Vibrate pattern missing, using default", e);
-        }
-        if (pattern == null) {
-            return DEFAULT_VIBE_PATTERN;
-        }
-
-        long[] tmpPattern = new long[pattern.length];
-        for (int i = 0; i < pattern.length; i++) {
-            tmpPattern[i] = pattern[i];
-        }
-        return tmpPattern;
     }
 
     private Bitmap getBitmapFor(int resId) {
@@ -332,7 +303,7 @@ public class LockPatternView extends View {
      * @return Whether the view has tactile feedback enabled.
      */
     public boolean isTactileFeedbackEnabled() {
-        return mTactileFeedbackEnabled;
+        return mEnableHapticFeedback;
     }
 
     /**
@@ -352,7 +323,7 @@ public class LockPatternView extends View {
      * @param tactileFeedbackEnabled Whether tactile feedback is enabled
      */
     public void setTactileFeedbackEnabled(boolean tactileFeedbackEnabled) {
-        mTactileFeedbackEnabled = tactileFeedbackEnabled;
+        mEnableHapticFeedback = tactileFeedbackEnabled;
     }
 
     /**
@@ -573,8 +544,10 @@ public class LockPatternView extends View {
                 addCellToPattern(fillInGapCell);
             }
             addCellToPattern(cell);
-            if (mTactileFeedbackEnabled){
-                vibe.vibrate(mVibePattern, -1); // Generate tactile feedback
+            if (mEnableHapticFeedback) {
+                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                        | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
             }
             return cell;
         }
@@ -1114,7 +1087,7 @@ public class LockPatternView extends View {
         return new SavedState(superState,
                 LockPatternUtils.patternToString(mPattern),
                 mPatternDisplayMode.ordinal(),
-                mInputEnabled, mInStealthMode, mTactileFeedbackEnabled);
+                mInputEnabled, mInStealthMode, mEnableHapticFeedback);
     }
 
     @Override
@@ -1127,7 +1100,7 @@ public class LockPatternView extends View {
         mPatternDisplayMode = DisplayMode.values()[ss.getDisplayMode()];
         mInputEnabled = ss.isInputEnabled();
         mInStealthMode = ss.isInStealthMode();
-        mTactileFeedbackEnabled = ss.isTactileFeedbackEnabled();
+        mEnableHapticFeedback = ss.isTactileFeedbackEnabled();
     }
 
     /**
