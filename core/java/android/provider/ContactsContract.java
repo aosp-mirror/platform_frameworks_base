@@ -187,6 +187,59 @@ public final class ContactsContract {
     public static final String DEFERRED_SNIPPETING_QUERY = "deferred_snippeting_query";
 
     /**
+     * <p>
+     * API for obtaining a pre-authorized version of a URI that normally requires special
+     * permission (beyond READ_CONTACTS) to read.  The caller obtaining the pre-authorized URI
+     * must already have the necessary permissions to access the URI; otherwise a
+     * {@link SecurityException} will be thrown.
+     * </p>
+     * <p>
+     * The authorized URI returned in the bundle contains an expiring token that allows the
+     * caller to execute the query without having the special permissions that would normally
+     * be required.
+     * </p>
+     * <p>
+     * This API does not access disk, and should be safe to invoke from the UI thread.
+     * </p>
+     * <p>
+     * Example usage:
+     * <pre>
+     * Uri profileUri = ContactsContract.Profile.CONTENT_VCARD_URI;
+     * Bundle uriBundle = new Bundle();
+     * uriBundle.putParcelable(ContactsContract.Authorization.KEY_URI_TO_AUTHORIZE, uri);
+     * Bundle authResponse = getContext().getContentResolver().call(
+     *         ContactsContract.AUTHORITY_URI,
+     *         ContactsContract.Authorization.AUTHORIZATION_METHOD,
+     *         null, // String arg, not used.
+     *         uriBundle);
+     * if (authResponse != null) {
+     *     Uri preauthorizedProfileUri = (Uri) authResponse.getParcelable(
+     *             ContactsContract.Authorization.KEY_AUTHORIZED_URI);
+     *     // This pre-authorized URI can be queried by a caller without READ_PROFILE
+     *     // permission.
+     * }
+     * </pre>
+     * </p>
+     * @hide
+     */
+    public static final class Authorization {
+        /**
+         * The method to invoke to create a pre-authorized URI out of the input argument.
+         */
+        public static final String AUTHORIZATION_METHOD = "authorize";
+
+        /**
+         * The key to set in the outbound Bundle with the URI that should be authorized.
+         */
+        public static final String KEY_URI_TO_AUTHORIZE = "uri_to_authorize";
+
+        /**
+         * The key to retrieve from the returned Bundle to obtain the pre-authorized URI.
+         */
+        public static final String KEY_AUTHORIZED_URI = "authorized_uri";
+    }
+
+    /**
      * @hide
      */
     public static final class Preferences {
