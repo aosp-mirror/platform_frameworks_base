@@ -2079,10 +2079,12 @@ public class WebView extends AbsoluteLayout
      * <p>
      * The 'data' scheme URL formed by this method uses the default US-ASCII
      * charset. If you need need to set a different charset, you should form a
-     * 'data' scheme URL which specifies a charset parameter and call
-     * {@link #loadUrl(String)} instead.
+     * 'data' scheme URL which explicitly specifies a charset parameter in the
+     * mediatype portion of the URL and call {@link #loadUrl(String)} instead.
+     * Note that the charset obtained from the mediatype portion of a data URL
+     * always overrides that specified in the HTML or XML document itself.
      * @param data A String of data in the given encoding.
-     * @param mimeType The MIMEType of the data, e.g. 'text/html'.
+     * @param mimeType The MIME type of the data, e.g. 'text/html'.
      * @param encoding The encoding of the data.
      */
     public void loadData(String data, String mimeType, String encoding) {
