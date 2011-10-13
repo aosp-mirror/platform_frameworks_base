@@ -1897,6 +1897,53 @@ class MountService extends IMountService.Stub
         }
     }
 
+    /**
+     * Validate a user-supplied password string with cryptfs
+     */
+    @Override
+    public int verifyEncryptionPassword(String password) throws RemoteException {
+        // Only the system process is permitted to validate passwords
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("no permission to access the crypt keeper");
+        }
+
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
+            "no permission to access the crypt keeper");
+
+        if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
+
+        waitForReady();
+
+        if (DEBUG_EVENTS) {
+            Slog.i(TAG, "validating encryption password...");
+        }
+
+        try {
+            ArrayList<String> response = mConnector.doCommand("cryptfs verifypw " + password);
+            String[] tokens = response.get(0).split(" ");
+
+            if (tokens == null || tokens.length != 2) {
+                String msg = "Unexpected result from cryptfs verifypw: {";
+                if (tokens == null) msg += "null";
+                else for (int i = 0; i < tokens.length; i++) {
+                    if (i != 0) msg += ',';
+                    msg += tokens[i];
+                }
+                msg += '}';
+                Slog.e(TAG, msg);
+                return -1;
+            }
+
+            Slog.i(TAG, "cryptfs verifypw => " + tokens[1]);
+            return Integer.parseInt(tokens[1]);
+        } catch (NativeDaemonConnectorException e) {
+            // Encryption failed
+            return e.getCode();
+        }
+    }
+
     public Parcelable[] getVolumeList() {
         synchronized(mVolumes) {
             int size = mVolumes.size();
