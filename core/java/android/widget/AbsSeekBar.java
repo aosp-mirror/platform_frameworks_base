@@ -335,7 +335,9 @@ public abstract class AbsSeekBar extends ProgressBar {
                     mTouchDownX = event.getX();
                 } else {
                     setPressed(true);
-                    invalidate(mThumb.getBounds()); // This may be within the padding region
+                    if (mThumb != null) {
+                        invalidate(mThumb.getBounds()); // This may be within the padding region
+                    }
                     onStartTrackingTouch();
                     trackTouchEvent(event);
                     attemptClaimDrag();
@@ -349,7 +351,9 @@ public abstract class AbsSeekBar extends ProgressBar {
                     final float x = event.getX();
                     if (Math.abs(x - mTouchDownX) > mScaledTouchSlop) {
                         setPressed(true);
-                        invalidate(mThumb.getBounds()); // This may be within the padding region
+                        if (mThumb != null) {
+                            invalidate(mThumb.getBounds()); // This may be within the padding region
+                        }
                         onStartTrackingTouch();
                         trackTouchEvent(event);
                         attemptClaimDrag();
