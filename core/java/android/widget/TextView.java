@@ -132,6 +132,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RemoteViews.RemoteView;
 
@@ -147,6 +148,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -2941,15 +2943,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     sp.removeSpan(cw);
                 }
 
-                SuggestionSpan[] suggestionSpans = sp.getSpans(0, sp.length(), SuggestionSpan.class);
-                for (int i = 0; i < suggestionSpans.length; i++) {
-                    int flags = suggestionSpans[i].getFlags();
-                    if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
-                            && (flags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
-                        sp.removeSpan(suggestionSpans[i]);
-                    }
-                }
-
+                removeMisspelledSpans(sp);
                 sp.removeSpan(mSuggestionRangeSpan);
 
                 ss.text = sp;
@@ -2967,6 +2961,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superState;
+    }
+
+    void removeMisspelledSpans(Spannable spannable) {
+        SuggestionSpan[] suggestionSpans = spannable.getSpans(0, spannable.length(),
+                SuggestionSpan.class);
+        for (int i = 0; i < suggestionSpans.length; i++) {
+            int flags = suggestionSpans[i].getFlags();
+            if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
+                    && (flags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                spannable.removeSpan(suggestionSpans[i]);
+            }
+        }
     }
 
     @Override
@@ -8838,15 +8844,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectionStart = ((Spanned) mText).getSpanStart(urlSpan);
             selectionEnd = ((Spanned) mText).getSpanEnd(urlSpan);
         } else {
-            if (mWordIterator == null) {
-                mWordIterator = new WordIterator();
-            }
-            mWordIterator.setCharSequence(mText, minOffset, maxOffset);
+            final WordIterator wordIterator = getWordIterator();
+            wordIterator.setCharSequence(mText, minOffset, maxOffset);
 
-            selectionStart = mWordIterator.getBeginning(minOffset);
+            selectionStart = wordIterator.getBeginning(minOffset);
             if (selectionStart == BreakIterator.DONE) return false;
 
-            selectionEnd = mWordIterator.getEnd(maxOffset);
+            selectionEnd = wordIterator.getEnd(maxOffset);
             if (selectionEnd == BreakIterator.DONE) return false;
 
             if (selectionStart == selectionEnd) {
@@ -8859,6 +8863,43 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
         return selectionEnd > selectionStart;
+    }
+
+    /**
+     * This is a temporary method. Future versions may support multi-locale text.
+     *
+     * @return The current locale used in this TextView, based on the current IME's locale,
+     * or the system default locale if this is not defined.
+     * @hide
+     */
+    public Locale getLocale() {
+        Locale locale = Locale.getDefault();
+        final InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null) {
+            final InputMethodSubtype currentInputMethodSubtype = imm.getCurrentInputMethodSubtype();
+            if (currentInputMethodSubtype != null) {
+                String localeString = currentInputMethodSubtype.getLocale();
+                if (!TextUtils.isEmpty(localeString)) {
+                    locale = new Locale(localeString);
+                }
+            }
+        }
+        return locale;
+    }
+
+    void onLocaleChanged() {
+        // Will be re-created on demand in getWordIterator with the proper new locale
+        mWordIterator = null;
+    }
+
+    /**
+     * @hide
+     */
+    public WordIterator getWordIterator() {
+        if (mWordIterator == null) {
+            mWordIterator = new WordIterator(getLocale());
+        }
+        return mWordIterator;
     }
 
     private long getCharRange(int offset) {

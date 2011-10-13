@@ -32,6 +32,7 @@ import android.view.textservice.TextServicesManager;
 import com.android.internal.util.ArrayUtils;
 
 import java.text.BreakIterator;
+import java.util.Locale;
 
 
 /**
@@ -45,7 +46,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private final TextView mTextView;
 
-    final SpellCheckerSession mSpellCheckerSession;
+    SpellCheckerSession mSpellCheckerSession;
     final int mCookie;
 
     // Paired arrays for the (id, spellCheckSpan) pair. A negative id means the associated
@@ -61,23 +62,54 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private int mSpanSequenceCounter = 0;
 
+    private Locale mCurrentLocale;
+
+    // Shared by all SpellParsers. Cannot be shared with TextView since it may be used
+    // concurrently due to the asynchronous nature of onGetSuggestions.
+    private WordIterator mWordIterator;
+
     public SpellChecker(TextView textView) {
         mTextView = textView;
 
-        final TextServicesManager textServicesManager = (TextServicesManager) textView.getContext().
-                getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
-                null /* not currently used by the textServicesManager */,
-                null /* null locale means use the languages defined in Settings
-                        if referToSpellCheckerLanguageSettings is true */,
-                        this, true /* means use the languages defined in Settings */);
-        mCookie = hashCode();
-
-        // Arbitrary: 4 simultaneous spell check spans. Will automatically double size on demand
+        // Arbitrary: these arrays will automatically double their sizes on demand
         final int size = ArrayUtils.idealObjectArraySize(1);
         mIds = new int[size];
         mSpellCheckSpans = new SpellCheckSpan[size];
+
+        setLocale(mTextView.getLocale());
+
+        mCookie = hashCode();
+    }
+
+    private void setLocale(Locale locale) {
+        final TextServicesManager textServicesManager = (TextServicesManager)
+                mTextView.getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
+        mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
+                null /* Bundle not currently used by the textServicesManager */,
+                locale, this, false /* means any available languages from current spell checker */);
+        mCurrentLocale = locale;
+
+        // Restore SpellCheckSpans in pool
+        for (int i = 0; i < mLength; i++) {
+            mSpellCheckSpans[i].setSpellCheckInProgress(false);
+            mIds[i] = -1;
+        }
         mLength = 0;
+
+        // Change SpellParsers' wordIterator locale
+        mWordIterator = new WordIterator(locale);
+
+        // Stop all SpellParsers
+        final int length = mSpellParsers.length;
+        for (int i = 0; i < length; i++) {
+            mSpellParsers[i].finish();
+        }
+
+        // Remove existing misspelled SuggestionSpans
+        mTextView.removeMisspelledSpans((Editable) mTextView.getText());
+
+        // This class is the listener for locale change: warn other locale-aware objects
+        mTextView.onLocaleChanged();
     }
 
     /**
@@ -95,7 +127,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
-            mSpellParsers[i].close();
+            mSpellParsers[i].finish();
         }
     }
 
@@ -140,12 +172,20 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     public void spellCheck(int start, int end) {
+        final Locale locale = mTextView.getLocale();
+        if (mCurrentLocale == null || (!(mCurrentLocale.equals(locale)))) {
+            setLocale(locale);
+            // Re-check the entire text
+            start = 0;
+            end = mTextView.getText().length();
+        }
+
         if (!isSessionActive()) return;
 
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
             final SpellParser spellParser = mSpellParsers[i];
-            if (spellParser.isDone()) {
+            if (spellParser.isFinished()) {
                 spellParser.init(start, end);
                 spellParser.parse();
                 return;
@@ -229,7 +269,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
             final SpellParser spellParser = mSpellParsers[i];
-            if (!spellParser.isDone()) {
+            if (!spellParser.isFinished()) {
                 spellParser.parse();
             }
         }
@@ -301,7 +341,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     private class SpellParser {
-        private WordIterator mWordIterator = new WordIterator(/*TODO Locale*/);
         private Object mRange = new Object();
 
         public void init(int start, int end) {
@@ -309,11 +348,11 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        public void close() {
+        public void finish() {
             ((Editable) mTextView.getText()).removeSpan(mRange);
         }
 
-        public boolean isDone() {
+        public boolean isFinished() {
             return ((Editable) mTextView.getText()).getSpanStart(mRange) < 0;
         }
 
