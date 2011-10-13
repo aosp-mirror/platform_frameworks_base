@@ -32,6 +32,12 @@ parent.link=index.html
         </ol>
       </li>
     </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}guide/developing/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
+  </ol>
 </div>
 </div>
 
@@ -60,8 +66,6 @@ notify the user, and render graphical transitions and themes. </p>
 from which you can log kernel output, simulate application interrupts (such as 
 arriving SMS messages or phone calls), and simulate latency effects and dropouts 
 on the data channel.</p>
-
-
 
 
 
@@ -166,7 +170,8 @@ on the Emulator</a> for information about how to install your application.</p>
 
 <p>To stop an emulator instance, just close the emulator's window.</p>
 
-
+<p>For a reference of the emulator's startup commands and keyboard mapping, see
+the <a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a> document.</p>
 
 
 

@@ -3,6 +3,25 @@ parent.title=Tools
 parent.link=index.html
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#startup-options">Emulator Startup Options</a></li>
+    <li><a href="#KeyMapping">Emulator Keyboard Mapping</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/developing/devices/emulator.html">Using the Android Emulator</a></li>
+    <li><a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a></li>
+  </ol>
+
+</div>
+</div>
+
+
 <p>The Android SDK includes a mobile device emulator &mdash; a virtual mobile device 
 that runs on your computer. The emulator lets you develop and test
 Android applications without using a physical device.</p>
@@ -451,7 +470,10 @@ Managing Virtual Devices with AVD Manager</a>.
   <td>See comments for <code>-skin</code>, above.</td></tr>
 </table>
 
-<h2>Emulator Keyboard Mapping</h2>
+
+
+<h2 id="KeyMapping">Emulator Keyboard Mapping</h2>
+
 <p>The table below summarizes the mappings between the emulator keys and and 
 the keys of your keyboard. </p>
 <p class="table-caption"><strong>Table 2.</strong> Emulator keyboard mapping</p>
