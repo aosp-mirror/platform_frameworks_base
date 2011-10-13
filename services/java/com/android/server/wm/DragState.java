@@ -274,7 +274,8 @@ class DragState {
         final int myPid = Process.myPid();
 
         // Move the surface to the given touch
-        if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION notifyMoveLw");
+        if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
+                WindowManagerService.TAG, ">>> OPEN TRANSACTION notifyMoveLw");
         Surface.openTransaction();
         try {
             mSurface.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
@@ -283,7 +284,8 @@ class DragState {
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
             Surface.closeTransaction();
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
+            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
+                    WindowManagerService.TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
         }
 
         // Tell the affected window
