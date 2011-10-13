@@ -211,6 +211,7 @@ public class WebSettings {
     private ZoomDensity     mDefaultZoom = ZoomDensity.MEDIUM;
     private RenderPriority  mRenderPriority = RenderPriority.NORMAL;
     private int             mOverrideCacheMode = LOAD_DEFAULT;
+    private int             mDoubleTapZoom = 100;
     private boolean         mSaveFormData = true;
     private boolean         mAutoFillEnabled = false;
     private boolean         mSavePassword = true;
@@ -766,6 +767,27 @@ public class WebSettings {
             }
         }
         return closestSize != null ? closestSize : TextSize.NORMAL;
+    }
+
+    /**
+     * Set the double-tap zoom of the page in percent. Default is 100.
+     * @param doubleTapZoom A percent value for increasing or decreasing the double-tap zoom.
+     * @hide
+     */
+    public void setDoubleTapZoom(int doubleTapZoom) {
+        if (mDoubleTapZoom != doubleTapZoom) {
+            mDoubleTapZoom = doubleTapZoom;
+            mWebView.updateDoubleTapZoom();
+        }
+    }
+
+    /**
+     * Get the double-tap zoom of the page in percent.
+     * @return A percent value describing the double-tap zoom.
+     * @hide
+     */
+    public int getDoubleTapZoom() {
+        return mDoubleTapZoom;
     }
 
     /**
