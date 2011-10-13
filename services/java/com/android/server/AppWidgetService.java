@@ -16,24 +16,6 @@
 
 package com.android.server;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-
-import org.apache.commons.logging.impl.SimpleLog;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -42,9 +24,9 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Intent.FilterComparison;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.Intent.FilterComparison;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -58,7 +40,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -68,20 +49,37 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.RemoteViews;
-import android.widget.RemoteViewsService;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
 class AppWidgetService extends IAppWidgetService.Stub
 {
     private static final String TAG = "AppWidgetService";
 
     private static final String SETTINGS_FILENAME = "appwidgets.xml";
-    private static final String SETTINGS_TMP_FILENAME = SETTINGS_FILENAME + ".tmp";
     private static final int MIN_UPDATE_PERIOD = 30 * 60 * 1000; // 30 minutes
 
     /*
@@ -1159,70 +1157,46 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     // only call from initialization -- it assumes that the data structures are all empty
     void loadStateLocked() {
-        File temp = savedStateTempFile();
-        File real = savedStateRealFile();
+        AtomicFile file = savedStateFile();
+        try {
+            FileInputStream stream = file.openRead();
+            readStateFromFileLocked(stream);
 
-        // prefer the real file.  If it doesn't exist, use the temp one, and then copy it to the
-        // real one.  if there is both a real file and a temp one, assume that the temp one isn't
-        // fully written and delete it.
-        if (real.exists()) {
-            readStateFromFileLocked(real);
-            if (temp.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                temp.delete();
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to close state FileInputStream " + e);
+                }
             }
-        } else if (temp.exists()) {
-            readStateFromFileLocked(temp);
-            //noinspection ResultOfMethodCallIgnored
-            temp.renameTo(real);
+        } catch (FileNotFoundException e) {
+            Slog.w(TAG, "Failed to read state: " + e);
         }
     }
-    
+
     void saveStateLocked() {
-        File temp = savedStateTempFile();
-        File real = savedStateRealFile();
-
-        if (!real.exists()) {
-            // If the real one doesn't exist, it's either because this is the first time
-            // or because something went wrong while copying them.  In this case, we can't
-            // trust anything that's in temp.  In order to have the loadState code not
-            // use the temporary one until it's fully written, create an empty file
-            // for real, which will we'll shortly delete.
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                real.createNewFile();
-            } catch (IOException e) {
-                // Ignore
+        AtomicFile file = savedStateFile();
+        FileOutputStream stream;
+        try {
+            stream = file.startWrite();
+            if (writeStateToFileLocked(stream)) {
+                file.finishWrite(stream);
+            } else {
+                file.failWrite(stream);
+                Slog.w(TAG, "Failed to save state, restoring backup.");
             }
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed open state file for write: " + e);
         }
-
-        if (temp.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            temp.delete();
-        }
-
-        if (!writeStateToFileLocked(temp)) {
-            Slog.w(TAG, "Failed to persist new settings");
-            return;
-        }
-
-        //noinspection ResultOfMethodCallIgnored
-        real.delete();
-        //noinspection ResultOfMethodCallIgnored
-        temp.renameTo(real);
     }
 
-    boolean writeStateToFileLocked(File file) {
-        FileOutputStream stream = null;
+    boolean writeStateToFileLocked(FileOutputStream stream) {
         int N;
 
         try {
-            stream = new FileOutputStream(file, false);
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(stream, "utf-8");
             out.startDocument(null, true);
-
-            
             out.startTag(null, "gs");
 
             int providerIndex = 0;
@@ -1264,31 +1238,17 @@ class AppWidgetService extends IAppWidgetService.Stub
             out.endTag(null, "gs");
 
             out.endDocument();
-            stream.close();
             return true;
         } catch (IOException e) {
-            try {
-                if (stream != null) {
-                    stream.close();
-                }
-            } catch (IOException ex) {
-                // Ignore
-            }
-            if (file.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                file.delete();
-            }
+            Slog.w(TAG, "Failed to write state: " + e);
             return false;
         }
     }
 
-    void readStateFromFileLocked(File file) {
-        FileInputStream stream = null;
-
+    void readStateFromFileLocked(FileInputStream stream) {
         boolean success = false;
 
         try {
-            stream = new FileInputStream(file);
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(stream, null);
 
@@ -1390,22 +1350,15 @@ class AppWidgetService extends IAppWidgetService.Stub
             } while (type != XmlPullParser.END_DOCUMENT);
             success = true;
         } catch (NullPointerException e) {
-            Slog.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + e);
         } catch (NumberFormatException e) {
-            Slog.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + e);
         } catch (XmlPullParserException e) {
-            Slog.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + e);
         } catch (IOException e) {
-            Slog.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + e);
         } catch (IndexOutOfBoundsException e) {
-            Slog.w(TAG, "failed parsing " + file, e);
-        }
-        try {
-            if (stream != null) {
-                stream.close();
-            }
-        } catch (IOException e) {
-            // Ignore
+            Slog.w(TAG, "failed parsing " + e);
         }
 
         if (success) {
@@ -1416,6 +1369,8 @@ class AppWidgetService extends IAppWidgetService.Stub
             }
         } else {
             // failed reading, clean up
+            Slog.w(TAG, "Failed to read state, clearing widgets and hosts.");
+
             mAppWidgetIds.clear();
             mHosts.clear();
             final int N = mInstalledProviders.size();
@@ -1425,14 +1380,8 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
-    File savedStateTempFile() {
-        return new File("/data/system/" + SETTINGS_TMP_FILENAME);
-        //return new File(mContext.getFilesDir(), SETTINGS_FILENAME);
-    }
-
-    File savedStateRealFile() {
-        return new File("/data/system/" + SETTINGS_FILENAME);
-        //return new File(mContext.getFilesDir(), SETTINGS_TMP_FILENAME);
+    AtomicFile savedStateFile() {
+        return new AtomicFile(new File("/data/system/" + SETTINGS_FILENAME));
     }
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
