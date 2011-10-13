@@ -29,12 +29,14 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.AbsListView.OnScrollListener;
 
 /**
  * Helper class for AbsListView to draw and control the Fast Scroll thumb
  */
 class FastScroller {
+    private static final String TAG = "FastScroller";
    
     // Minimum number of pages to justify showing a fast scroll thumb
     private static int MIN_PAGES = 4;
@@ -81,15 +83,15 @@ class FastScroller {
     private Drawable mOverlayDrawableLeft;
     private Drawable mOverlayDrawableRight;
 
-    private int mThumbH;
-    private int mThumbW;
-    private int mThumbY;
+    int mThumbH;
+    int mThumbW;
+    int mThumbY;
 
     private RectF mOverlayPos;
     private int mOverlaySize;
 
-    private AbsListView mList;
-    private boolean mScrollCompleted;
+    AbsListView mList;
+    boolean mScrollCompleted;
     private int mVisibleItem;
     private Paint mPaint;
     private int mListOffset;
@@ -105,7 +107,7 @@ class FastScroller {
     
     private Handler mHandler = new Handler();
     
-    private BaseAdapter mListAdapter;
+    BaseAdapter mListAdapter;
     private SectionIndexer mSectionIndexer;
 
     private boolean mChangedBounds;
@@ -118,9 +120,35 @@ class FastScroller {
 
     private boolean mMatchDragPosition;
 
+    float mInitialTouchY;
+    boolean mPendingDrag;
+    private int mScaledTouchSlop;
+
     private static final int FADE_TIMEOUT = 1500;
+    private static final int PENDING_DRAG_DELAY = 180;
 
     private final Rect mTmpRect = new Rect();
+
+    private final Runnable mDeferStartDrag = new Runnable() {
+        public void run() {
+            if (mList.mIsAttached) {
+                beginDrag();
+
+                final int viewHeight = mList.getHeight();
+                // Jitter
+                int newThumbY = (int) mInitialTouchY - mThumbH + 10;
+                if (newThumbY < 0) {
+                    newThumbY = 0;
+                } else if (newThumbY + mThumbH > viewHeight) {
+                    newThumbY = viewHeight - mThumbH;
+                }
+                mThumbY = newThumbY;
+                scrollTo((float) mThumbY / (viewHeight - mThumbH));
+            }
+
+            mPendingDrag = false;
+        }
+    };
 
     public FastScroller(Context context, AbsListView listView) {
         mList = listView;
@@ -263,6 +291,8 @@ class FastScroller {
         refreshDrawableState();
 
         ta.recycle();
+
+        mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         mMatchDragPosition = context.getApplicationInfo().targetSdkVersion >=
                 android.os.Build.VERSION_CODES.HONEYCOMB;
@@ -456,7 +486,7 @@ class FastScroller {
         return mSections;
     }
 
-    private void getSectionsFromIndexer() {
+    void getSectionsFromIndexer() {
         Adapter adapter = mList.getAdapter();
         mSectionIndexer = null;
         if (adapter instanceof HeaderViewListAdapter) {
@@ -489,7 +519,7 @@ class FastScroller {
         mListAdapter = null;
     }
 
-    private void scrollTo(float position) {
+    void scrollTo(float position) {
         int count = mList.getCount();
         mScrollCompleted = false;
         float fThreshold = (1.0f / count) / 8;
@@ -647,12 +677,45 @@ class FastScroller {
         cancelFling.recycle();
     }
     
+    void cancelPendingDrag() {
+        mList.removeCallbacks(mDeferStartDrag);
+        mPendingDrag = false;
+    }
+
+    void startPendingDrag() {
+        mPendingDrag = true;
+        mList.postDelayed(mDeferStartDrag, PENDING_DRAG_DELAY);
+    }
+
+    void beginDrag() {
+        setState(STATE_DRAGGING);
+        if (mListAdapter == null && mList != null) {
+            getSectionsFromIndexer();
+        }
+        if (mList != null) {
+            mList.requestDisallowInterceptTouchEvent(true);
+            mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+        }
+
+        cancelFling();
+    }
+
     boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mState > STATE_NONE && ev.getAction() == MotionEvent.ACTION_DOWN) {
-            if (isPointInside(ev.getX(), ev.getY())) {
-                setState(STATE_DRAGGING);
-                return true;
-            }
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                if (mState > STATE_NONE && isPointInside(ev.getX(), ev.getY())) {
+                    if (!mList.isInScrollingContainer()) {
+                        beginDrag();
+                        return true;
+                    }
+                    mInitialTouchY = ev.getY();
+                    startPendingDrag();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                cancelPendingDrag();
+                break;
         }
         return false;
     }
@@ -666,19 +729,32 @@ class FastScroller {
 
         if (action == MotionEvent.ACTION_DOWN) {
             if (isPointInside(me.getX(), me.getY())) {
-                setState(STATE_DRAGGING);
-                if (mListAdapter == null && mList != null) {
-                    getSectionsFromIndexer();
+                if (!mList.isInScrollingContainer()) {
+                    beginDrag();
+                    return true;
                 }
-                if (mList != null) {
-                    mList.requestDisallowInterceptTouchEvent(true);
-                    mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
-                }
-
-                cancelFling();
-                return true;
+                mInitialTouchY = me.getY();
+                startPendingDrag();
             }
         } else if (action == MotionEvent.ACTION_UP) { // don't add ACTION_CANCEL here
+            if (mPendingDrag) {
+                // Allow a tap to scroll.
+                beginDrag();
+
+                final int viewHeight = mList.getHeight();
+                // Jitter
+                int newThumbY = (int) me.getY() - mThumbH + 10;
+                if (newThumbY < 0) {
+                    newThumbY = 0;
+                } else if (newThumbY + mThumbH > viewHeight) {
+                    newThumbY = viewHeight - mThumbH;
+                }
+                mThumbY = newThumbY;
+                scrollTo((float) mThumbY / (viewHeight - mThumbH));
+
+                cancelPendingDrag();
+                // Will hit the STATE_DRAGGING check below
+            }
             if (mState == STATE_DRAGGING) {
                 if (mList != null) {
                     // ViewGroup does the right thing already, but there might
@@ -698,6 +774,23 @@ class FastScroller {
                 return true;
             }
         } else if (action == MotionEvent.ACTION_MOVE) {
+            if (mPendingDrag) {
+                final float y = me.getY();
+                if (Math.abs(y - mInitialTouchY) > mScaledTouchSlop) {
+                    setState(STATE_DRAGGING);
+                    if (mListAdapter == null && mList != null) {
+                        getSectionsFromIndexer();
+                    }
+                    if (mList != null) {
+                        mList.requestDisallowInterceptTouchEvent(true);
+                        mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+                    }
+
+                    cancelFling();
+                    cancelPendingDrag();
+                    // Will hit the STATE_DRAGGING check below
+                }
+            }
             if (mState == STATE_DRAGGING) {
                 final int viewHeight = mList.getHeight();
                 // Jitter
@@ -717,6 +810,8 @@ class FastScroller {
                 }
                 return true;
             }
+        } else if (action == MotionEvent.ACTION_CANCEL) {
+            cancelPendingDrag();
         }
         return false;
     }
