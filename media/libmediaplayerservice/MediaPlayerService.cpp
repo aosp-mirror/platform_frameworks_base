@@ -589,6 +589,10 @@ player_type getPlayerType(const char* url)
         }
     }
 
+    if (!strncasecmp("rtsp://", url, 7)) {
+        return NU_PLAYER;
+    }
+
     if (!strncasecmp("aahRX://", url, 8)) {
         return AAH_RX_PLAYER;
     }

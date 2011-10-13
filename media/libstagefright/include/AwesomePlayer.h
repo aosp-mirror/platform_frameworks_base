@@ -38,9 +38,6 @@ struct MediaSource;
 struct NuCachedSource2;
 struct ISurfaceTexture;
 
-struct ALooper;
-struct ARTSPController;
-
 class DrmManagerClinet;
 class DecryptHandle;
 
@@ -233,10 +230,6 @@ private:
     sp<HTTPBase> mConnectingDataSource;
     sp<NuCachedSource2> mCachedSource;
 
-    sp<ALooper> mLooper;
-    sp<ARTSPController> mRTSPController;
-    sp<ARTSPController> mConnectingRTSPController;
-
     DrmManagerClient *mDrmManagerClient;
     sp<DecryptHandle> mDecryptHandle;
 
@@ -286,9 +279,6 @@ private:
     status_t finishSetDataSource_l();
 
     static bool ContinuePreparation(void *cookie);
-
-    static void OnRTSPSeekDoneWrapper(void *cookie);
-    void onRTSPSeekDone();
 
     bool getBitrate(int64_t *bitrate);
 
