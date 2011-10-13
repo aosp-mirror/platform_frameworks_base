@@ -1,0 +1,1055 @@
+page.title=Camera
+parent.title=Multimedia and Camera
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#considerations">Considerations</a></li>
+    <li><a href="#basics">The Basics</a>
+    <li><a href="#manifest">Manifest Declarations</a></li>
+    <li><a href="#intents">Using Existing Camera Apps</a>
+      <ol>
+        <li><a href="#intent-image">Image capture intent</a></li>
+        <li><a href="#intent-video">Video capture intent</a></li>
+        <li><a href="#intent-receive">Receiving camera intent result</a></li>
+      </ol>
+    <li><a href="#custom-camera">Building a Camera App</a>
+      <ol>
+        <li><a href="#detect-camera">Detecting camera hardware</a></li>
+        <li><a href="#access-camera">Accessing cameras</a></li>
+        <li><a href="#check-camera-features">Checking camera features</a></li>
+        <li><a href="#camera-preview">Creating a preview class</a></li>
+        <li><a href="#preview-layout">Placing preview in a layout</a></li>
+        <li><a href="#capture-picture">Capturing pictures</a></li>
+        <li><a href="#capture-video">Capturing videos</a></li>
+        <li><a href="#release-camera">Releasing the camera</a></li>
+      </ol>
+    </li>
+    <li><a href="#saving-media">Saving Media Files</a></li>
+  </ol>
+  <h2>Key Classes</h2>
+  <ol>
+    <li>{@link android.hardware.Camera}</li>
+    <li>{@link android.view.SurfaceView}</li>
+    <li>{@link android.media.MediaRecorder}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}reference/android/hardware/Camera.html">Camera</a></li>
+    <li><a href="{@docRoot}reference/android/media/MediaRecorder.html">MediaRecorder</a></li>
+    <li><a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a></li>
+  </ol>
+  </div>
+</div>
+
+
+<p>The Android framework includes support for various cameras and camera features available on
+devices, allowing you to capture pictures and videos in your applications. This document discusses a
+quick, simple approach to image and video capture and outlines an advanced approach for creating
+custom camera experiences for your users.</p>
+
+<h2 id="considerations">Considerations</h2>
+<p>Before enabling your application to use cameras on Android devices, you should consider a few
+questions about how your app intends to use this hardware feature.</p>
+
+<ul>
+  <li><strong>Camera Requirement</strong> - Is the use of a camera so important to your
+application that you do not want your application installed on a device that does not have a
+camera? If so, you should declare the <a href="#manifest">camera requirement in your
+manifest</a>.</li>
+
+  <li><strong>Quick Picture or Customized Camera</strong> - How will your application use the
+camera? Are you just interested in snapping a quick picture or video clip, or will your application
+provide a new way to use cameras? For a getting a quick snap or clip, consider 
+<a href="#intents">Using Existing Camera Apps</a>. For developing a customized camera feature, check
+out the <a href="#custom-camera">Building a Camera App</a> section.</li>
+
+  <li><strong>Storage</strong> - Are the images or videos your application generates intended to be
+only visible to your application or shared so that other applications such as Gallery or other
+media and social apps can use them? Do you want the pictures and videos to be available even if your
+application is uninstalled? Check out the <a href="#saving-media">Saving Media Files</a> section to
+see how to implement these options.</li>
+</ul>
+
+
+
+<h2 id="basics">The Basics</h2>
+<p>The Android framework supports capturing images and video through the
+{@link android.hardware.Camera} API or camera {@link android.content.Intent}. Here are the relevant
+classes:</p>
+
+<dl>
+  <dt>{@link android.hardware.Camera}</dt>
+  <dd>This class is the primary API for controlling device cameras. This class is used to take
+pictures or videos when you are building a camera application.</a>.</dd>
+
+  <dt>{@link android.view.SurfaceView}</dt>
+  <dd>This class is used to present a live camera preview to the user.</dd>
+
+  <dt>{@link android.media.MediaRecorder}</dt>
+  <dd>This class is used to record video from the camera.</dd>
+
+  <dt>{@link android.content.Intent}</dt>
+  <dd>An intent action type of {@link android.provider.MediaStore#ACTION_IMAGE_CAPTURE
+MediaStore.ACTION_IMAGE_CAPTURE} or {@link android.provider.MediaStore#ACTION_VIDEO_CAPTURE
+MediaStore.ACTION_VIDEO_CAPTURE} can be used to capture images or videos without directly
+using the {@link android.hardware.Camera} object.</dd>
+</dl>
+
+
+<h2 id="manifest">Manifest Declarations</h2>
+<p>Before starting development on your application with the Camera API, you should make sure
+your manifest has the appropriate declarations to allow use of camera hardware and other
+related features.</p>
+
+<ul>
+  <li><strong>Camera Permission</strong> - Your application must request permission to use a device
+camera.
+<pre>
+&lt;uses-permission android:name=&quot;android.permission.CAMERA&quot; /&gt;
+</pre>
+  <p class="note"><strong>Note:</strong> If you are using the camera <a href="#intents">via an
+intent</a>, your application does not need to request this permission.</p>
+  </li>
+  <li><strong>Camera Features</strong> - Your application must also declare use of camera features,
+for example:
+<pre>
+&lt;uses-feature android:name=&quot;android.hardware.camera&quot; /&gt;
+</pre>
+  <p>For a list of camera features, see the manifest <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#features-reference">Features
+Reference</a>.</p>
+  <p>Adding camera features to your manifest causes Android Market to prevent your application from
+being installed to devices that do not include a camera or do not support the camera features you
+specify. For more information about using feature-based filtering with Android Market, see <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#market-feature-filtering">Android
+Market and Feature-Based Filtering</a>.</p>
+  <p>If your application <em>can use</em> a camera or camera feature for proper operation, but does
+not <em>require</em> it, you should specify this in the manifest by including the {@code
+android:required} attribute, and setting it to {@code false}:</p>
+<pre>
+&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;
+</pre>
+
+  </li>
+  <li><strong>Storage Permission</strong> - If your application saves images or videos to the
+device's external storage (SD Card), you must also specify this in the manifest.
+<pre>
+&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
+</pre>
+  </li>
+  <li><strong>Audio Recording Permission</strong> - For recording audio with video capture, your
+application must request the audio capture permission.
+<pre>
+&lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
+</pre>
+  </li>
+</ul>
+
+
+<h2 id="intents">Using Existing Camera Apps</h2>
+<p>A quick way to enable taking pictures or videos in your application without a lot of extra code
+is to use an {@link android.content.Intent} to invoke an existing Android camera application. A
+camera intent makes a request to capture a picture or video clip through an existing camera app and
+then returns control back to your application. This section shows you how to capture an image or
+video using this technique.</p>
+
+<p>The procedure for invoking a camera intent follows these general steps:</p>
+
+<ol>
+  <li><strong>Compose a Camera Intent</strong> - Create an {@link android.content.Intent} that
+requests an image or video, using one of these intent types:
+    <ul>
+      <li>{@link android.provider.MediaStore#ACTION_IMAGE_CAPTURE MediaStore.ACTION_IMAGE_CAPTURE} -
+Intent action type for requesting an image from an existing camera application.</li>
+      <li>{@link android.provider.MediaStore#ACTION_VIDEO_CAPTURE MediaStore.ACTION_VIDEO_CAPTURE} -
+Intent action type for requesting a video from an existing camera application. </li>
+    </ul>
+  </li>
+  <li><strong>Start the Camera Intent</strong> - Use the {@link
+android.app.Activity#startActivityForResult(android.content.Intent, int) startActivityForResult()}
+method to execute the camera intent. After you start the intent, the Camera application user
+interface appears on the device screen and the user can take a picture or video.</li>
+  <li><strong>Receive the Intent Result</strong> - Set up an {@link
+android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()} method
+in your application to receive the callback and data from the camera intent. When the user
+finishes taking a picture or video (or cancels the operation), the system calls this method.</li>
+</ol>
+
+
+<h3 id="intent-image">Image capture intent</h3>
+<p>Capturing images using a camera intent is quick way to enable your application to take pictures
+with minimal coding. An image capture intent can include the following extra information:</p>
+
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_OUTPUT MediaStore.EXTRA_OUTPUT} - This setting
+requires a {@link android.net.Uri} object specifying a path and file name where you'd like to
+save the picture. This setting is optional but strongly recommended. If you do not specify this
+value, the camera application saves the requested picture in the default location with a default
+name, specified in the returned intent's {@link android.content.Intent#getData() Intent.getData()}
+field.</li>
+</ul>
+
+<p>The following example demonstrates how to construct a image capture intent and execute it.
+The {@code getOutputMediaFileUri()} method in this example refers to the sample code shown in <a
+href= "#saving-media">Saving Media Files</a>.</p>
+
+<pre>
+private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+private Uri fileUri;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    // create Intent to take a picture and return control to the calling application
+    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+    fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
+    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+
+    // start the image capture Intent
+    startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+}
+</pre>
+
+<p>When the {@link android.app.Activity#startActivityForResult(android.content.Intent, int)
+startActivityForResult()} method is executed, users see a camera application interface.
+After the user finishes taking a picture (or cancels the operation), the user interface returns to
+your application, and you must intercept the {@link
+android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()}
+method to receive the result of the intent and continue your application execution. For information
+on how to receive the completed intent, see <a href="#intent-receive">Receiving Camera Intent
+Result</a>.</p>
+
+
+<h3 id="intent-video">Video capture intent</h3>
+<p>Capturing video using a camera intent is a quick way to enable your application to take videos
+with minimal coding. A video capture intent can include the following extra information:</p>
+
+<ul>
+  <li>{@link android.provider.MediaStore#EXTRA_OUTPUT MediaStore.EXTRA_OUTPUT} - This setting
+requires a {@link android.net.Uri} specifying a path and file name where you'd like to save the
+video. This setting is optional but strongly recommended. If you do not specify this value, the
+Camera application saves the requested video in the default location with a default name, specified
+in the returned intent's {@link android.content.Intent#getData() Intent.getData()} field.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_VIDEO_QUALITY MediaStore.EXTRA_VIDEO_QUALITY} -
+This value can be 0 for lowest quality and smallest file size or 1 for highest quality and
+larger file size.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_DURATION_LIMIT MediaStore.EXTRA_DURATION_LIMIT} -
+Set this value to limit the length, in seconds, of the video being captured.</li>
+  <li>{@link android.provider.MediaStore#EXTRA_SIZE_LIMIT MediaStore.EXTRA_SIZE_LIMIT} -
+Set this value to limit the file size, in bytes, of the video being captured.
+</li>
+</ul>
+
+<p>The following example demonstrates how to construct a video capture intent and execute it.
+The {@code getOutputMediaFileUri()} method in this example refers to the sample code shown in <a
+href= "#saving-media">Saving Media Files</a>.</p>
+
+<pre>
+private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
+private Uri fileUri;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    //create new Intent
+    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+
+    fileUri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);  // create a file to save the video
+    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);  // set the image file name
+
+    intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1); // set the video image quality to high
+
+    // start the Video Capture Intent
+    startActivityForResult(intent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
+}
+</pre>
+
+<p>When the {@link
+android.app.Activity#startActivityForResult(android.content.Intent, int)
+startActivityForResult()} method is executed, users see a modified camera application interface.
+After the user finishes taking a video (or cancels the operation), the user interface
+returns to your application, and you must intercept the {@link
+android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()}
+method to receive the result of the intent and continue your application execution. For information
+on how to receive the completed intent, see the next section.</p>
+
+<h3 id="intent-receive">Receiving camera intent result</h3>
+<p>Once you have constructed and executed an image or video camera intent, your application must be
+configured to receive the result of the intent. This section shows you how to intercept the callback
+from a camera intent so your application can do further processing of the captured image or
+video.</p>
+
+<p>In order to receive the result of an intent, you must override the {@link
+android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()} in the
+activity that started the intent. The following example demonstrates how to override {@link
+android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()} to
+capture the result of the <a href="#intent-image">image camera intent</a> or <a
+href="#intent-video">video camera intent</a> examples shown in the previous sections.</p>
+
+<pre>
+private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+        if (resultCode == RESULT_OK) {
+            // Image captured and saved to fileUri specified in the Intent
+            Toast.makeText(this, "Image saved to:\n" +
+                     data.getData(), Toast.LENGTH_LONG).show();
+        } else if (resultCode == RESULT_CANCELED) {
+            // User cancelled the image capture
+        } else {
+            // Image capture failed, advise user
+        }
+    }
+
+    if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
+        if (resultCode == RESULT_OK) {
+            // Video captured and saved to fileUri specified in the Intent
+            Toast.makeText(this, "Video saved to:\n" +
+                     data.getData(), Toast.LENGTH_LONG).show();
+        } else if (resultCode == RESULT_CANCELED) {
+            // User cancelled the video capture
+        } else {
+            // Video capture failed, advise user
+        }
+    }
+}
+</pre>
+
+<p>Once your activity receives a successful result, the captured image or video is available in the
+specified location for your application to access.</p>
+
+
+
+<h2 id="custom-camera">Building a Camera App</h2>
+<p>Some developers may require a camera user interface that is customized to the look of their
+application or provides special features. Creating a customized camera activity requires more
+code than <a href="#intents">using an intent</a>, but it can provide a more compelling experience
+for your users.</p>
+
+<p>The general steps for creating a custom camera interface for your application are as follows:</p>
+
+<ul>
+   <li><strong>Detect and Access Camera</strong> - Create code to check for the existence of
+cameras and request access.</li>
+   <li><strong>Create a Preview Class</strong> - Create a camera preview class that extends {@link
+android.view.SurfaceView} and implements the {@link android.view.SurfaceHolder} interface. This
+class previews the live images from the camera.</li>
+   <li><strong>Build a Preview Layout</strong> - Once you have the camera preview class, create a
+view layout that incorporates the preview and the user interface controls you want.</li>
+   <li><strong>Setup Listeners for Capture</strong> - Connect listeners for your interface
+controls to start image or video capture in response to user actions, such as pressing a
+button.</li>
+   <li><strong>Capture and Save Files</strong> - Setup the code for capturing pictures or
+videos and saving the output.</li>
+   <li><strong>Release the Camera</strong> - After using the camera, your application must
+properly release it for use by other applications.</li>
+</ul>
+
+<p>Camera hardware is a shared resource that must be carefully managed so your application does
+not collide with other applications that may also want to use it. The following sections discusses
+how to detect camera hardware, how to request access to a camera and how to release it when your
+application is done using it.</p>
+
+<p class="caution"><strong>Caution:</strong> Remember to release the {@link android.hardware.Camera}
+object by calling the {@link android.hardware.Camera#release() Camera.release()} when your
+application is done using it! If your application does not properly release the camera, all
+subsequent attempts to access the camera, including those by your own application, will fail and may
+cause your or other applications to be shut down.</p>
+
+
+<h3 id="detect-camera">Detecting camera hardware</h3>
+<p>If your application does not specifically require a camera using a manifest declaration, you
+should check to see if a camera is available at runtime. To perform this check, use the {@link
+android.content.pm.PackageManager#hasSystemFeature(java.lang.String)
+PackageManager.hasSystemFeature()} method, as shown in the example code below:</p>
+
+<pre>
+/** Check if this device has a camera */
+private boolean checkCameraHardware(Context context) {
+    if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        // this device has a camera
+        return true;
+    } else {
+        // no camera on this device
+        return false;
+    }
+}
+</pre>
+
+<p>Android devices can have multiple cameras, for example a back-facing camera for photography and a
+front-facing camera for video calls. Android 2.3 (API Level 9) and later allows you to check the
+number of cameras available on a device using the {@link
+android.hardware.Camera#getNumberOfCameras() Camera.getNumberOfCameras()} method.</p>
+
+<h3 id="access-camera">Accessing cameras</h3>
+<p>If you have determined that the device on which your application is running has a camera, you
+must request to access it by getting an instance of {@link android.hardware.Camera} (unless you
+are using an <a href="#intents">intent to access the camera</a>). </p>
+
+<p>To access the primary camera, use the {@link android.hardware.Camera#open() Camera.open()} method
+and be sure to catch any exceptions, as shown in the code below:</p>
+
+<pre>
+/** A safe way to get an instance of the Camera object. */
+public static Camera getCameraInstance(){
+    Camera c = null;
+    try {
+        c = Camera.open(); // attempt to get a Camera instance
+    }
+    catch (Exception e){
+        // Camera is not available (in use or does not exist)
+    }
+    return c; // returns null if camera is unavailable
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> Always check for exceptions when using {@link
+android.hardware.Camera#open() Camera.open()}. Failing to check for exceptions if the camera is in
+use or does not exist will cause your application to be shut down by the system.</p>
+
+<p>On devices running Android 2.3 (API Level 9) or higher, you can access specific cameras using
+{@link android.hardware.Camera#open(int) Camera.open(int)}. The example code above will access
+the first, back-facing camera on a device with more than one camera.</p>
+
+<h3 id="check-camera-features">Checking camera features</h3>
+<p>Once you obtain access to a camera, you can get further information about its capabilties using
+the {@link android.hardware.Camera#getParameters() Camera.getParameters()} method and checking the
+returned {@link android.hardware.Camera.Parameters} object for supported capabilities. When using
+API Level 9 or higher, use the {@link android.hardware.Camera#getCameraInfo(int,
+android.hardware.Camera.CameraInfo) Camera.getCameraInfo()} to determine if a camera is on the front
+or back of the device, and the orientation of the image.</p>
+
+
+
+<h3 id="camera-preview">Creating a preview class</h3>
+<p>For users to effectively take pictures or video, they must be able to see what the device camera
+sees. A camera preview class is a {@link android.view.SurfaceView} that can display the live image
+data coming from a camera, so users can frame and capture a picture or video.</p>
+
+<p>The following example code demonstrates how to create a basic camera preview class that can be
+included in a {@link android.view.View} layout. This class implements {@link
+android.view.SurfaceHolder.Callback SurfaceHolder.Callback} in order to capture the callback events
+for creating and destroying the view, which are needed for assigning the camera preview input.</p>
+
+<pre>
+/** A basic Camera preview class */
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+    private SurfaceHolder mHolder;
+    private Camera mCamera;
+
+    public CameraPreview(Context context, Camera camera) {
+        super(context);
+        mCamera = camera;
+
+        // Install a SurfaceHolder.Callback so we get notified when the
+        // underlying surface is created and destroyed.
+        mHolder = getHolder();
+        mHolder.addCallback(this);
+        // deprecated setting, but required on Android versions prior to 3.0
+        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    }
+
+    public void surfaceCreated(SurfaceHolder holder) {
+        // The Surface has been created, now tell the camera where to draw the preview.
+        try {
+            mCamera.setPreviewDisplay(holder);
+            mCamera.startPreview();
+        } catch (IOException e) {
+            Log.d(TAG, "Error setting camera preview: " + e.getMessage());
+        }
+    }
+
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        // empty. Take care of releasing the Camera preview in your activity.
+    }
+
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        // If your preview can change or rotate, take care of those events here.
+        // Make sure to stop the preview before resizing or reformatting it.
+
+        if (mHolder.getSurface() == null){
+          // preview surface does not exist
+          return;
+        }
+
+        // stop preview before making changes
+        try {
+            mCamera.stopPreview();
+        } catch (Exception e){
+          // ignore: tried to stop a non-existent preview
+        }
+
+        // make any resize, rotate or reformatting changes here
+
+        // start preview with new settings
+        try {
+            mCamera.setPreviewDisplay(mHolder);
+            mCamera.startPreview();
+
+        } catch (Exception e){
+            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+        }
+    }
+}
+</pre>
+
+
+<h3 id="preview-layout">Placing preview in a layout</h3>
+<p>A camera preview class, such as the example shown in the previous section, must be placed in the
+layout of an activity along with other user interface controls for taking a picture or video. This
+section shows you how to build a basic layout and activity for the preview.</p>
+
+<p>The following layout code provides a very basic view that can be used to display a camera
+preview. In this example, the {@link android.widget.FrameLayout} element is meant to be the
+container for the camera preview class. This layout type is used so that additional picture
+information or controls can be overlayed on the live camera preview images.</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:orientation=&quot;horizontal&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    &gt;
+  &lt;FrameLayout
+    android:id=&quot;@+id/camera_preview&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:layout_weight=&quot;1&quot;
+    /&gt;
+
+  &lt;Button
+    android:id=&quot;@+id/button_capture&quot;
+    android:text=&quot;Capture&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_gravity=&quot;center&quot;
+    /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>On most devices, the default orientation of the camera preview is landscape. This example layout
+specifies a horizontal (landscape) layout and the code below fixes the orientation of the
+application to landscape. For simplicity in rendering a camera preview, you should change your
+application's preview activity orientation to landscape by adding the following to your
+manifest.</p>
+
+<pre>
+&lt;activity android:name=&quot;.CameraActivity&quot;
+          android:label=&quot;@string/app_name&quot;
+
+          android:screenOrientation=&quot;landscape&quot;&gt;
+          &lt;!-- configure this activity to use landscape orientation --&gt;
+
+          &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> A camera preview does not have to be in landscape mode.
+Starting in Android 2.2 (API Level 8), you can use the {@link
+android.hardware.Camera#setDisplayOrientation(int) setDisplayOrientation()} method to set the
+rotation of the preview image. In order to change preview orientation as the user re-orients the
+phone, within the {@link
+android.view.SurfaceHolder.Callback#surfaceChanged(android.view.SurfaceHolder, int, int, int)
+surfaceChanged()} method of your preview class, first stop the preview with {@link
+android.hardware.Camera#stopPreview() Camera.stopPreview()} change the orientation and then
+start the preview again with {@link android.hardware.Camera#startPreview()
+Camera.startPreview()}.</p>
+
+<p>In the activity for your camera view, add your preview class to the {@link
+android.widget.FrameLayout} element shown in the example above. Your camera activity must also
+ensure that it releases the camera when it is paused or shut down. The following example shows how
+to modify a camera activity to attach the preview class shown in <a href="#camera-preview">Creating
+a preview class</a>.</p>
+
+<pre>
+public class CameraActivity extends Activity {
+
+    private Camera mCamera;
+    private CameraPreview mPreview;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
+
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = new CameraPreview(this, mCamera);
+        FrameLayout preview = (FrameLayout) findViewById(id.camera_preview);
+        preview.addView(mPreview);
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> The {@code getCameraInstance()} method in the example above
+refers to the example method shown in <a href="#access-camera">Accessing cameras</a>.</p>
+
+
+<h3 id="capture-picture">Capturing pictures</h3>
+<p>Once you have built a preview class and a view layout in which to display it, you are ready to
+start capturing images with your application. In your application code, you must set up listeners
+for your user interface controls to respond to a user action by taking a picture.</p>
+
+<p>In order to retrieve a picture, use the {@link
+android.hardware.Camera#takePicture(android.hardware.Camera.ShutterCallback,
+android.hardware.Camera.PictureCallback, android.hardware.Camera.PictureCallback)
+Camera.takePicture()} method. This method takes three parameters which receive data from the camera.
+In order to receive data in a JPEG format, you must implement an {@link
+android.hardware.Camera.PictureCallback} interface to receive the image data and
+write it to a file. The following code shows a basic implementation of the {@link
+android.hardware.Camera.PictureCallback} interface to save an image received from the camera.</p>
+
+<pre>
+private PictureCallback mPicture = new PictureCallback() {
+
+    &#64;Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+
+        File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+        if (pictureFile == null){
+            Log.d(TAG, "Error creating media file, check storage permissions: " +
+                e.getMessage());
+            return;
+        }
+
+        try {
+            FileOutputStream fos = new FileOutputStream(pictureFile);
+            fos.write(data);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "File not found: " + e.getMessage());
+        } catch (IOException e) {
+            Log.d(TAG, "Error accessing file: " + e.getMessage());
+        }
+    }
+};
+</pre>
+
+<p>Trigger capturing an image by calling the {@link
+android.hardware.Camera#takePicture(android.hardware.Camera.ShutterCallback,
+android.hardware.Camera.PictureCallback, android.hardware.Camera.PictureCallback)
+Camera.takePicture()} method. The following example code shows how to call this method from a
+button {@link android.view.View.OnClickListener}.</p>
+
+<pre>
+// Add a listener to the Capture button
+Button captureButton = (Button) findViewById(id.button_capture);
+    captureButton.setOnClickListener(
+        new View.OnClickListener() {
+        &#64;Override
+        public void onClick(View v) {
+            // get an image from the camera
+            mCamera.takePicture(null, null, mPicture);
+        }
+    }
+);
+</pre>
+
+<p class="note"><strong>Note:</strong> The {@code mPicture} member in the following example refers
+to the example code above.</p>
+
+<p class="caution"><strong>Caution:</strong> Remember to release the {@link android.hardware.Camera}
+object by calling the {@link android.hardware.Camera#release() Camera.release()} when your
+application is done using it! For information about how to release the camera, see <a
+href="#release-camera">Releasing the camera</a>.</p>
+
+
+<h3 id="capture-video">Capturing videos</h3>
+
+<p>Video capture using the Android framework requires careful management of the {@link
+android.hardware.Camera} object and coordination with the {@link android.media.MediaRecorder}
+class. When recording video with {@link android.hardware.Camera}, you must manage the {@link
+android.hardware.Camera#lock() Camera.lock()} and {@link android.hardware.Camera#unlock()
+Camera.unlock()} calls to allow {@link android.media.MediaRecorder} access to the camera hardware,
+in addition to the {@link android.hardware.Camera#open() Camera.open()} and {@link
+android.hardware.Camera#release() Camera.release()} calls.</p>
+
+<p class="note"><strong>Note:</strong> Starting with Android 4.0 (API level 14), the {@link
+android.hardware.Camera#lock() Camera.lock()} and {@link android.hardware.Camera#unlock()
+Camera.unlock()} calls are managed for you automatically.</p>
+
+<p>Unlike taking pictures with a device camera, capturing video requires a very particular call
+order. You must follow a specific order of execution to successfully prepare for and capture video
+with your application, as detailed below.</p>
+
+<ol>
+  <li><strong>Open Camera</strong> - Use the {@link android.hardware.Camera#open() Camera.open()}
+to get an instance of the camera object.</li>
+  <li><strong>Connect Preview</strong> - Prepare a live camera image preview by connecting a {@link
+android.view.SurfaceView} to the camera using {@link
+android.hardware.Camera#setPreviewDisplay(android.view.SurfaceHolder) Camera.setPreviewDisplay()}.
+  </li>
+  <li><strong>Start Preview</strong> - Call {@link android.hardware.Camera#startPreview()
+Camera.startPreview()} to begin displaying the live camera images.</li>
+  <li><strong>Start Recording Video</strong> - The following steps must be completed <em>in
+order</em> to successfully record video:
+    <ol style="list-style-type: lower-alpha;">
+      <li><strong>Unlock the Camera</strong> - Unlock the camera for use by {@link
+android.media.MediaRecorder} by calling {@link android.hardware.Camera#unlock()
+Camera.unlock()}.</li>
+      <li><strong>Configure MediaRecorder</strong> - Call in the following {@link
+android.media.MediaRecorder} methods <em>in this order</em>. For more information, see the {@link
+android.media.MediaRecorder} reference documentation.
+        <ol>
+          <li>{@link android.media.MediaRecorder#setCamera(android.hardware.Camera)
+setCamera()} - Set the camera to be used for video capture, use your application's current instance
+of {@link android.hardware.Camera}.</li>
+          <li>{@link android.media.MediaRecorder#setAudioSource(int) setAudioSource()} - Set the
+audio source, use {@link android.media.MediaRecorder.AudioSource#CAMCORDER
+MediaRecorder.AudioSource.CAMCORDER}. </li>
+          <li>{@link android.media.MediaRecorder#setVideoSource(int) setVideoSource()} - Set
+the video source, use {@link android.media.MediaRecorder.VideoSource#CAMERA
+MediaRecorder.VideoSource.CAMERA}.</li>
+          <li>Set the video output format and encoding. For Android 2.2 (API Level 8) and
+higher, use the {@link android.media.MediaRecorder#setProfile(android.media.CamcorderProfile)
+MediaRecorder.setProfile} method, and get a profile instance using {@link
+android.media.CamcorderProfile#get(int) CamcorderProfile.get()}. For versions of Android prior to
+2.2, you must set the video output format and encoding parameters:
+          <ol style="list-style-type: lower-roman;">
+            <li>{@link android.media.MediaRecorder#setOutputFormat(int) setOutputFormat()} - Set
+the output format, specify the default setting or {@link
+android.media.MediaRecorder.OutputFormat#MPEG_4 MediaRecorder.OutputFormat.MPEG_4}.</li>
+            <li>{@link android.media.MediaRecorder#setAudioEncoder(int) setAudioEncoder()} - Set
+the sound encoding type, specify the default setting or {@link
+android.media.MediaRecorder.AudioEncoder#AMR_NB MediaRecorder.AudioEncoder.AMR_NB}.</li>
+            <li>{@link android.media.MediaRecorder#setVideoEncoder(int) setVideoEncoder()} - Set
+the video encoding type, specify the default setting or {@link
+android.media.MediaRecorder.VideoEncoder#MPEG_4_SP MediaRecorder.VideoEncoder.MPEG_4_SP}.</li>
+          </ol>
+          </li>
+          <li>{@link android.media.MediaRecorder#setOutputFile(java.lang.String) setOutputFile()} -
+Set the output file, use {@code getOutputMediaFile(MEDIA_TYPE_VIDEO).toString()} from the example
+method in the <a href="#saving-media">Saving Media Files</a> section.</li>
+          <li>{@link android.media.MediaRecorder#setPreviewDisplay(android.view.Surface)
+setPreviewDisplay()} - Specify the {@link android.view.SurfaceView} preview layout element for
+your application. Use the same object you specified for <strong>Connect Preview</strong>.</li>
+        </ol>
+        <p class="caution"><strong>Caution:</strong> You must call these {@link
+android.media.MediaRecorder} configuration methods <em>in this order</em>, otherwise your
+application will encounter errors and the recording will fail.</p>
+      </li>
+      <li><strong>Prepare MediaRecorder</strong> - Prepare the {@link android.media.MediaRecorder}
+with provided configuration settings by calling {@link android.media.MediaRecorder#prepare()
+MediaRecorder.prepare()}.</li>
+      <li><strong>Start MediaRecorder</strong> - Start recording video by calling {@link
+android.media.MediaRecorder#start() MediaRecorder.start()}.</li>
+    </ol>
+  </li>
+  <li><strong>Stop Recording Video</strong> - Call the following methods <em>in order</em>, to
+successfully complete a video recording:
+    <ol style="list-style-type: lower-alpha;">
+      <li><strong>Stop MediaRecorder</strong> - Stop recording video by calling {@link
+android.media.MediaRecorder#stop() MediaRecorder.stop()}.</li>
+      <li><strong>Reset MediaRecorder</strong> - Optionally, remove the configuration settings from
+the recorder by calling {@link android.media.MediaRecorder#reset() MediaRecorder.reset()}.</li>
+      <li><strong>Release MediaRecorder</strong> - Release the {@link android.media.MediaRecorder}
+by calling {@link android.media.MediaRecorder#release() MediaRecorder.release()}.</li>
+      <li><strong>Lock the Camera</strong> - Lock the camera so that future {@link
+android.media.MediaRecorder} sessions can use it by calling {@link android.hardware.Camera#lock()
+Camera.lock()}. Starting with Android 4.0 (API level 14), this call is not required unless the
+{@link android.media.MediaRecorder#prepare() MediaRecorder.prepare()} call fails.</li>
+    </ol>
+  </li>
+  <li><strong>Stop the Preview</strong> - When your activity has finished using the camera, stop the
+preview using {@link android.hardware.Camera#stopPreview() Camera.stopPreview()}.</li>
+  <li><strong>Release Camera</strong> - Release the camera so that other applications can use
+it by calling {@link android.hardware.Camera#release() Camera.release()}.</li>
+</ol>
+
+<p class="note"><strong>Note:</strong> It is possible to use {@link android.media.MediaRecorder}
+without creating a camera preview first and skip the first few steps of this process. However,
+since users typically prefer to see a preview before starting a recording, that process is not
+discussed here.</p>
+
+<h4 id="configuring-mediarecorder">Configuring MediaRecorder</h4>
+<p>When using the {@link android.media.MediaRecorder} class to record video, you must perform
+configuration steps in a <em>specific order</em> and then call the {@link
+android.media.MediaRecorder#prepare() MediaRecorder.prepare()} method to check and implement the
+configuration. The following example code demonstrates how to properly configure and prepare the
+{@link android.media.MediaRecorder} class for video recording.</p>
+
+<pre>
+private boolean prepareVideoRecorder(){
+
+    mCamera = getCameraInstance();
+    mMediaRecorder = new MediaRecorder();
+
+    // Step 1: Unlock and set camera to MediaRecorder
+    mCamera.unlock();
+    mMediaRecorder.setCamera(mCamera);
+
+    // Step 2: Set sources
+    mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+    // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+    mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+
+    // Step 4: Set output file
+    mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
+
+    // Step 5: Set the preview output
+    mMediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
+
+    // Step 6: Prepare configured MediaRecorder
+    try {
+        mMediaRecorder.prepare();
+    } catch (IllegalStateException e) {
+        Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+        releaseMediaRecorder();
+        return false;
+    } catch (IOException e) {
+        Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+        releaseMediaRecorder();
+        return false;
+    }
+    return true;
+}
+</pre>
+
+<p>Prior to Android 2.2 (API Level 8), you must set the output format and encoding formats
+parameters directly, instead of using {@link android.media.CamcorderProfile}. This approach is
+demonstrated in the following code:</p>
+
+<pre>
+    // Step 3: Set output format and encoding (for versions prior to API Level 8)
+    mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+    mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+</pre>
+
+<p>The following video recording parameters for {@link android.media.MediaRecorder} are given
+default settings, however, you may want to adjust these settings for your application:</p>
+
+<ul>
+  <li>{@link android.media.MediaRecorder#setVideoEncodingBitRate(int)
+setVideoEncodingBitRate()}</li>
+  <li>{@link android.media.MediaRecorder#setVideoSize(int, int) setVideoSize()}</li>
+  <li>{@link android.media.MediaRecorder#setVideoFrameRate(int) setVideoFrameRate()}</li>
+  <li>{@link android.media.MediaRecorder#setAudioEncodingBitRate(int)
+setAudioEncodingBitRate()}</li>  <li>{@link android.media.MediaRecorder#setAudioChannels(int)
+setAudioChannels()}</li>
+  <li>{@link android.media.MediaRecorder#setAudioSamplingRate(int) setAudioSamplingRate()}</li>
+</ul>
+
+<h4 id="start-stop-mediarecorder">Starting and Stopping MediaRecorder</h4>
+<p>When starting and stopping video recording using the {@link android.media.MediaRecorder} class,
+you must follow a specific order, as listed below.</p>
+
+<ol>
+  <li>Unlock the camera with {@link android.hardware.Camera#unlock() Camera.unlock()}</li>
+  <li>Configure {@link android.media.MediaRecorder} as shown in the code example above</li>
+  <li>Start recording using {@link android.media.MediaRecorder#start()
+MediaRecorder.start()}</li>
+  <li>Record the video</li>
+  <li>Stop recording using {@link
+android.media.MediaRecorder#stop() MediaRecorder.stop()}</li>
+  <li>Release the media recorder with {@link android.media.MediaRecorder#release()
+MediaRecorder.release()}</li>
+  <li>Lock the camera using {@link android.hardware.Camera#lock() Camera.lock()}</li>
+</ol>
+
+<p>The following example code demonstrates how to wire up a button to properly start and stop
+video recording using the camera and the {@link android.media.MediaRecorder} class.</p>
+
+<p class="note"><strong>Note:</strong> When completing a video recording, do not release the camera
+or else your preview will be stopped.</p>
+
+<pre>
+private boolean isRecording = false;
+
+// Add a listener to the Capture button
+Button captureButton = (Button) findViewById(id.button_capture);
+captureButton.setOnClickListener(
+    new View.OnClickListener() {
+        &#64;Override
+        public void onClick(View v) {
+            if (isRecording) {
+                // stop recording and release camera
+                mMediaRecorder.stop();  // stop the recording
+                releaseMediaRecorder(); // release the MediaRecorder object
+                mCamera.lock();         // take camera access back from MediaRecorder
+
+                // inform the user that recording has stopped
+                setCaptureButtonText("Capture");
+                isRecording = false;
+            } else {
+                // initialize video camera
+                if (prepareVideoRecorder()) {
+                    // Camera is available and unlocked, MediaRecorder is prepared,
+                    // now you can start recording
+                    mMediaRecorder.start();
+
+                    // inform the user that recording has started
+                    setCaptureButtonText("Stop");
+                    isRecording = true;
+                } else {
+                    // prepare didn't work, release the camera
+                    releaseMediaRecorder();
+                    // inform user
+                }
+            }
+        }
+    }
+);
+</pre>
+
+<p class="note"><strong>Note:</strong> In the above example, the {@code prepareVideoRecorder()}
+method refers to the example code shown in <a
+href="#configuring-mediarecorder">Configuring MediaRecorder</a>. This method takes care of locking
+the camera, configuring and preparing the {@link android.media.MediaRecorder} instance.</p>
+
+
+<h3 id="release-camera">Releasing the camera</h3>
+<p>Cameras are a resource that is shared by applications on a device. Your application can make
+use of the camera after getting an instance of {@link android.hardware.Camera}, and you must be
+particularly careful to release the camera object when your application stops using it, and as
+soon as your application is paused ({@link android.app.Activity#onPause() Activity.onPause()}). If
+your application does not properly release the camera, all subsequent attempts to access the camera,
+including those by your own application, will fail and may cause your or other applications to be
+shut down.</p>
+
+<p>To release an instance of the {@link android.hardware.Camera} object, use the {@link
+android.hardware.Camera#release() Camera.release()} method, as shown in the example code below.</p>
+
+<pre>
+public class CameraActivity extends Activity {
+    private Camera mCamera;
+    private SurfaceView mPreview;
+    private MediaRecorder mMediaRecorder;
+
+    ...
+    
+    &#64;Override
+    protected void onPause() {
+        super.onPause();
+        releaseMediaRecorder();       // if you are using MediaRecorder, release it first
+        releaseCamera();              // release the camera immediately on pause event
+    }
+
+    private void releaseMediaRecorder(){
+        if (mMediaRecorder != null) {
+            mMediaRecorder.reset();   // clear recorder configuration
+            mMediaRecorder.release(); // release the recorder object
+            mMediaRecorder = null;
+            mCamera.lock();           // lock camera for later use
+        }
+    }
+
+    private void releaseCamera(){
+        if (mCamera != null){
+            mCamera.release();        // release the camera for other applications
+            mCamera = null;
+        }
+    }
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> If your application does not properly release the
+camera, all subsequent attempts to access the camera, including those by your own application, will
+fail and may cause your or other applications to be shut down.</p>
+
+
+<h2 id="saving-media">Saving Media Files</h2>
+<p>Media files created by users such as pictures and videos should be saved to a device's external
+storage directory (SD Card) to conserve system space and to allow users to access these files
+without their device. There are many possible directory locations to save media files on a device,
+however there are only two standard locations you should consider as a developer:</p>
+
+<ul>
+  <li><strong>{@link android.os.Environment#getExternalStoragePublicDirectory(java.lang.String)
+Environment.getExternalStoragePublicDirectory}({@link android.os.Environment#DIRECTORY_PICTURES
+Environment.DIRECTORY_PICTURES})</strong> - This method returns the standard, shared and recommended
+location for saving pictures and videos. This directory is shared (public), so other applications
+can easily discover, read, change and delete files saved in this location. If your application is
+uninstalled by the user, media files saved to this location will not be removed. To avoid
+interfering with users existing pictures and videos, you should create a sub-directory for your
+application's media files within this directory, as shown in the code sample below. This method is
+available in Android 2.2 (API Level 8), for equivalent calls in earlier API versions, see <a
+href="{@docRoot}guide/topics/data/data-storage.html#SavingSharedFiles">Saving Shared Files</a>.</li>
+  <li><strong>{@link android.content.Context#getExternalFilesDir(java.lang.String)
+Context.getExternalFilesDir}({@link android.os.Environment#DIRECTORY_PICTURES
+Environment.DIRECTORY_PICTURES})</strong> - This method returns a standard location for saving
+pictures and videos which are associated with your application. If your application is uninstalled,
+any files saved in this location are removed. Security is not enforced for files in this
+location and other applications may read, change and delete them.</li>
+</ul>
+
+<p>The following example code demonstrates how to create a {@link java.io.File} or {@link
+android.net.Uri} location for a media file that can be used when invoking a device's camera with
+an {@link android.content.Intent} or as part of a <a href="#custom-camera">Building a Camera
+App</a>.</p>
+
+<pre>
+public static final int MEDIA_TYPE_IMAGE = 1;
+public static final int MEDIA_TYPE_VIDEO = 2;
+
+/** Create a file Uri for saving an image or video */
+private static Uri getOutputMediaFileUri(int type){
+      return Uri.fromFile(getOutputMediaFile(type));
+}
+
+/** Create a File for saving an image or video */
+private static Uri getOutputMediaFile(int type){
+    // To be safe, you should check that the SDCard is mounted
+    // using Environment.getExternalStorageState() before doing this.
+
+    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+              Environment.DIRECTORY_PICTURES), "MyCameraApp");
+    // This location works best if you want the created images to be shared
+    // between applications and persist after your app has been uninstalled.
+
+    // Create the storage directory if it does not exist
+    if (! mediaStorageDir.exists()){
+        if (! mediaStorageDir.mkdirs()){
+            Log.d("MyCameraApp", "failed to create directory");
+            return null;
+        }
+    }
+
+    // Create a media file name
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    File mediaFile;
+    if (type == MEDIA_TYPE_IMAGE){
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+        "IMG_"+ timeStamp + ".jpg");
+    } else if(type == MEDIA_TYPE_VIDEO) {
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+        "VID_"+ timeStamp + ".mp4");
+    } else {
+        return null;
+    }
+
+    return mediaFile;
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> {@link
+android.os.Environment#getExternalStoragePublicDirectory(java.lang.String)
+Environment.getExternalStoragePublicDirectory()} is available in Android 2.2 (API Level 8) or
+higher. If you are targeting devices with earlier versions of Android, use {@link
+android.os.Environment#getExternalStorageDirectory() Environment.getExternalStorageDirectory()}
+instead. For more information, see <a
+href="{@docRoot}guide/topics/data/data-storage.html#SavingSharedFiles">Saving Shared Files</a>.</p>
+
+<p>For more information about saving files on an Android device, see <a
+href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>.</p>
