@@ -128,7 +128,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.FallbackAction;
-import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -180,26 +179,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int PRIORITY_PHONE_LAYER = 7;
     // like the ANR / app crashed dialogs
     static final int SYSTEM_ALERT_LAYER = 8;
-    // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 9;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_LAYER = 10;
+    static final int INPUT_METHOD_LAYER = 9;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_DIALOG_LAYER = 11;
+    static final int INPUT_METHOD_DIALOG_LAYER = 10;
     // the keyguard; nothing on top of these can take focus, since they are
     // responsible for power management when displayed.
-    static final int KEYGUARD_LAYER = 12;
-    static final int KEYGUARD_DIALOG_LAYER = 13;
-    static final int STATUS_BAR_SUB_PANEL_LAYER = 14;
-    static final int STATUS_BAR_LAYER = 15;
-    static final int STATUS_BAR_PANEL_LAYER = 16;
+    static final int KEYGUARD_LAYER = 11;
+    static final int KEYGUARD_DIALOG_LAYER = 12;
+    static final int STATUS_BAR_SUB_PANEL_LAYER = 13;
+    static final int STATUS_BAR_LAYER = 14;
+    static final int STATUS_BAR_PANEL_LAYER = 15;
     // the on-screen volume indicator and controller shown when the user
     // changes the device volume
-    static final int VOLUME_OVERLAY_LAYER = 17;
+    static final int VOLUME_OVERLAY_LAYER = 16;
     // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 18;
+    static final int SYSTEM_OVERLAY_LAYER = 17;
     // the navigation bar, if available, shows atop most things
-    static final int NAVIGATION_BAR_LAYER = 19;
+    static final int NAVIGATION_BAR_LAYER = 18;
+    // system-level error dialogs
+    static final int SYSTEM_ERROR_LAYER = 19;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
     static final int DRAG_LAYER = 20;

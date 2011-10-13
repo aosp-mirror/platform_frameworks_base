@@ -167,6 +167,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
+    static final boolean DEBUG_BOOT = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -4732,6 +4733,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void enableScreenAfterBoot() {
         synchronized(mWindowMap) {
+            if (DEBUG_BOOT) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.i(TAG, "enableScreenAfterBoot: mDisplayEnabled=" + mDisplayEnabled
+                        + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                        + " mShowingBootMessages=" + mShowingBootMessages
+                        + " mSystemBooted=" + mSystemBooted, here);
+            }
             if (mSystemBooted) {
                 return;
             }
@@ -4749,6 +4758,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void enableScreenIfNeededLocked() {
+        if (DEBUG_BOOT) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "enableScreenIfNeededLocked: mDisplayEnabled=" + mDisplayEnabled
+                    + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                    + " mShowingBootMessages=" + mShowingBootMessages
+                    + " mSystemBooted=" + mSystemBooted, here);
+        }
         if (mDisplayEnabled) {
             return;
         }
@@ -4771,6 +4788,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void performEnableScreen() {
         synchronized(mWindowMap) {
+            if (DEBUG_BOOT) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.i(TAG, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
+                        + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                        + " mShowingBootMessages=" + mShowingBootMessages
+                        + " mSystemBooted=" + mSystemBooted, here);
+            }
             if (mDisplayEnabled) {
                 return;
             }
@@ -4784,10 +4809,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean haveBootMsg = false;
                 boolean haveApp = false;
                 boolean haveWallpaper = false;
-                boolean haveKeyguard = false;
+                boolean haveKeyguard = true;
                 final int N = mWindows.size();
                 for (int i=0; i<N; i++) {
                     WindowState w = mWindows.get(i);
+                    if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD) {
+                        // Only if there is a keyguard attached to the window manager
+                        // will we consider ourselves as having a keyguard.  If it
+                        // isn't attached, we don't know if it wants to be shown or
+                        // hidden.  If it is attached, we will say we have a keyguard
+                        // if the window doesn't want to be visible, because in that
+                        // case it explicitly doesn't want to be shown so we should
+                        // not delay turning the screen on for it.
+                        boolean vis = w.mViewVisibility == View.VISIBLE
+                                && w.mPolicyVisibility;
+                        haveKeyguard = !vis;
+                    }
                     if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
                         return;
                     }
@@ -4804,7 +4841,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                if (DEBUG_SCREEN_ON) {
+                if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
                     Slog.i(TAG, "******** booted=" + mSystemBooted + " msg=" + mShowingBootMessages
                             + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
                             + " haveWall=" + haveWallpaper + " haveKeyguard=" + haveKeyguard);
@@ -4825,7 +4862,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mDisplayEnabled = true;
-            if (DEBUG_SCREEN_ON) Slog.i(TAG, "******************** ENABLING SCREEN!");
+            if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG, "******************** ENABLING SCREEN!");
             if (false) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
@@ -4856,6 +4893,14 @@ public class WindowManagerService extends IWindowManager.Stub
     public void showBootMessage(final CharSequence msg, final boolean always) {
         boolean first = false;
         synchronized(mWindowMap) {
+            if (DEBUG_BOOT) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.i(TAG, "showBootMessage: msg=" + msg + " always=" + always
+                        + " mAllowBootMessages=" + mAllowBootMessages
+                        + " mShowingBootMessages=" + mShowingBootMessages
+                        + " mSystemBooted=" + mSystemBooted, here);
+            }
             if (!mAllowBootMessages) {
                 return;
             }
@@ -4877,6 +4922,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void hideBootMessagesLocked() {
+        if (DEBUG_BOOT) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "hideBootMessagesLocked: mDisplayEnabled=" + mDisplayEnabled
+                    + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                    + " mShowingBootMessages=" + mShowingBootMessages
+                    + " mSystemBooted=" + mSystemBooted, here);
+        }
         if (mShowingBootMessages) {
             mShowingBootMessages = false;
             mPolicy.hideBootMessages();

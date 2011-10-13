@@ -3437,8 +3437,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ac.removePackage(name);
                 }
             }
-            mMainStack.resumeTopActivityLocked(null);
-            mMainStack.scheduleIdleLocked();
+            if (mBooted) {
+                mMainStack.resumeTopActivityLocked(null);
+                mMainStack.scheduleIdleLocked();
+            }
         }
         
         return didSomething;
