@@ -4499,6 +4499,9 @@ public class WebView extends AbsoluteLayout
             if (mHeldMotionless == MOTIONLESS_FALSE) {
                 mPrivateHandler.sendMessageDelayed(mPrivateHandler
                         .obtainMessage(DRAG_HELD_MOTIONLESS), MOTIONLESS_TIME);
+                mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                        .obtainMessage(AWAKEN_SCROLL_BARS),
+                            ViewConfiguration.getScrollDefaultDelay());
                 mHeldMotionless = MOTIONLESS_PENDING;
             }
         }
@@ -5996,6 +5999,7 @@ public class WebView extends AbsoluteLayout
                     mTouchMode = TOUCH_DRAG_START_MODE;
                     mConfirmMove = true;
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
+                    nativeSetIsScrolling(false);
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
                     if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
@@ -6278,9 +6282,16 @@ public class WebView extends AbsoluteLayout
                     }
                     mLastTouchX = x;
                     mLastTouchY = y;
-                    if ((deltaX | deltaY) != 0) {
+
+                    if (deltaX * deltaX + deltaY * deltaY > mTouchSlopSquare) {
                         mHeldMotionless = MOTIONLESS_FALSE;
+                        nativeSetIsScrolling(true);
+                    } else {
+                        mHeldMotionless = MOTIONLESS_TRUE;
+                        nativeSetIsScrolling(false);
+                        keepScrollBarsVisible = true;
                     }
+
                     mLastTouchTime = eventTime;
                 }
 
@@ -6296,9 +6307,15 @@ public class WebView extends AbsoluteLayout
                     // keep the scrollbar on the screen even there is no scroll
                     awakenScrollBars(ViewConfiguration.getScrollDefaultDelay(),
                             false);
+                    // Post a message so that we'll keep them alive while we're not scrolling.
+                    mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                            .obtainMessage(AWAKEN_SCROLL_BARS),
+                            ViewConfiguration.getScrollDefaultDelay());
                     // return false to indicate that we can't pan out of the
                     // view space
                     return !done;
+                } else {
+                    mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                 }
                 break;
             }
