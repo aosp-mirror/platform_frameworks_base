@@ -7,10 +7,10 @@
 
 Type* SERVICE_CONTEXT_TYPE = new Type("android.content",
         "Context", Type::BUILT_IN, false, false, false);
-Type* PRESENTER_BASE_TYPE = new Type("com.android.athome.service",
-        "AndroidAtHomePresenter", Type::BUILT_IN, false, false, false);
-Type* PRESENTER_LISTENER_BASE_TYPE = new Type("com.android.athome.service",
-        "AndroidAtHomePresenter.Listener", Type::BUILT_IN, false, false, false);
+Type* PRESENTER_BASE_TYPE = new Type("com.android.athome.connector",
+        "EventListener", Type::BUILT_IN, false, false, false);
+Type* PRESENTER_LISTENER_BASE_TYPE = new Type("com.android.athome.connector",
+        "EventListener.Listener", Type::BUILT_IN, false, false, false);
 Type* RPC_BROKER_TYPE = new Type("com.android.athome.connector", "Broker",
         Type::BUILT_IN, false, false, false);
 Type* RPC_CONTAINER_TYPE = new Type("com.android.athome.connector", "ConnectorContainer",
@@ -336,11 +336,11 @@ RpcProxyClass::generate_ctor()
 }
 
 // =================================================
-class PresenterClass : public DispatcherClass
+class EventListenerClass : public DispatcherClass
 {
 public:
-    PresenterClass(const interface_type* iface, Type* listenerType);
-    virtual ~PresenterClass();
+    EventListenerClass(const interface_type* iface, Type* listenerType);
+    virtual ~EventListenerClass();
 
     Variable* _listener;
 
@@ -354,8 +354,8 @@ generate_get_listener_expression(Type* cast)
     return new Cast(cast, new MethodCall(THIS_VALUE, "getView"));
 }
 
-PresenterClass::PresenterClass(const interface_type* iface, Type* listenerType)
-    :DispatcherClass(iface, generate_get_listener_expression(listenerType))
+EventListenerClass::EventListenerClass(const interface_type* iface, Type* listenerType)
+    :DispatcherClass(iface, new FieldVariable(THIS_VALUE, "_listener"))
 {
     this->modifiers = PRIVATE;
     this->what = Class::CLASS;
@@ -371,26 +371,24 @@ PresenterClass::PresenterClass(const interface_type* iface, Type* listenerType)
     generate_ctor();
 }
 
-PresenterClass::~PresenterClass()
+EventListenerClass::~EventListenerClass()
 {
 }
 
 void
-PresenterClass::generate_ctor()
+EventListenerClass::generate_ctor()
 {
     Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
-    Variable* endpoint = new Variable(RPC_ENDPOINT_INFO_TYPE, "endpoint");
     Variable* listener = new Variable(this->_listener->type, "listener");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
         ctor->parameters.push_back(broker);
-        ctor->parameters.push_back(endpoint);
         ctor->parameters.push_back(listener);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new MethodCall("super", 3, broker, endpoint, listener));
+    ctor->statements->Add(new MethodCall("super", 2, broker, listener));
     ctor->statements->Add(new Assignment(this->_listener, listener));
 }
 
@@ -818,7 +816,7 @@ generate_regular_method(const method_type* method, RpcProxyClass* proxyClass,
 static void
 generate_event_method(const method_type* method, RpcProxyClass* proxyClass,
         EndpointBaseClass* serviceBaseClass, ListenerClass* listenerClass,
-        PresenterClass* presenterClass, int index)
+        EventListenerClass* presenterClass, int index)
 {
     arg_type* arg;
     listenerClass->needed = true;
@@ -882,14 +880,14 @@ static void
 generate_listener_methods(RpcProxyClass* proxyClass, Type* presenterType, Type* listenerType)
 {
     // AndroidAtHomePresenter _presenter;
-    // void registerListener(Listener listener) {
-    //     unregisterListener();
-    //     _presenter = new Presenter(_context, _endpoint, listener);
-    //     _presenter.attachToModel();
+    // void startListening(Listener listener) {
+    //     stopListening();
+    //     _presenter = new Presenter(_broker, listener);
+    //     _presenter.startListening(_endpoint);
     // }
-    // void unregisterListener() {
+    // void stopListening() {
     //     if (_presenter != null) {
-    //         _presenter.detachFromModel();
+    //         _presenter.stopListening();
     //     }
     // }
 
@@ -898,31 +896,32 @@ generate_listener_methods(RpcProxyClass* proxyClass, Type* presenterType, Type* 
 
     Variable* listener = new Variable(listenerType, "listener");
 
-    Method* registerMethod = new Method;
-        registerMethod->modifiers = PUBLIC;
-        registerMethod->returnType = VOID_TYPE;
-        registerMethod->name = "registerListener";
-        registerMethod->statements = new StatementBlock;
-        registerMethod->parameters.push_back(listener);
-    proxyClass->elements.push_back(registerMethod);
+    Method* startListeningMethod = new Method;
+        startListeningMethod->modifiers = PUBLIC;
+        startListeningMethod->returnType = VOID_TYPE;
+        startListeningMethod->name = "startListening";
+        startListeningMethod->statements = new StatementBlock;
+        startListeningMethod->parameters.push_back(listener);
+    proxyClass->elements.push_back(startListeningMethod);
 
-    registerMethod->statements->Add(new MethodCall(THIS_VALUE, "unregisterListener"));
-    registerMethod->statements->Add(new Assignment(_presenter, new NewExpression(presenterType,
-                    3, proxyClass->broker, proxyClass->endpoint, listener)));
-    registerMethod->statements->Add(new MethodCall(_presenter, "attachToModel"));
+    startListeningMethod->statements->Add(new MethodCall(THIS_VALUE, "stopListening"));
+    startListeningMethod->statements->Add(new Assignment(_presenter,
+                new NewExpression(presenterType, 2, proxyClass->broker, listener)));
+    startListeningMethod->statements->Add(new MethodCall(_presenter,
+                "startListening", 1, proxyClass->endpoint));
 
-    Method* unregisterMethod = new Method;
-        unregisterMethod->modifiers = PUBLIC;
-        unregisterMethod->returnType = VOID_TYPE;
-        unregisterMethod->name = "unregisterListener";
-        unregisterMethod->statements = new StatementBlock;
-    proxyClass->elements.push_back(unregisterMethod);
+    Method* stopListeningMethod = new Method;
+        stopListeningMethod->modifiers = PUBLIC;
+        stopListeningMethod->returnType = VOID_TYPE;
+        stopListeningMethod->name = "stopListening";
+        stopListeningMethod->statements = new StatementBlock;
+    proxyClass->elements.push_back(stopListeningMethod);
 
     IfStatement* ifst = new IfStatement;
         ifst->expression = new Comparison(_presenter, "!=", NULL_VALUE);
-    unregisterMethod->statements->Add(ifst);
+    stopListeningMethod->statements->Add(ifst);
 
-    ifst->statements->Add(new MethodCall(_presenter, "detachFromModel"));
+    ifst->statements->Add(new MethodCall(_presenter, "stopListening"));
     ifst->statements->Add(new Assignment(_presenter, NULL_VALUE));
 }
 
@@ -938,7 +937,7 @@ generate_rpc_interface_class(const interface_type* iface)
     ListenerClass* listener = new ListenerClass(iface);
 
     // the presenter class
-    PresenterClass* presenter = new PresenterClass(iface, listener->type);
+    EventListenerClass* presenter = new EventListenerClass(iface, listener->type);
 
     // the service base class
     EndpointBaseClass* base = new EndpointBaseClass(iface);
