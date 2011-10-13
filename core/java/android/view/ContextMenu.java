@@ -29,6 +29,12 @@ import android.widget.AdapterView;
  * To show a context menu on long click, most clients will want to call
  * {@link Activity#registerForContextMenu} and override
  * {@link Activity#onCreateContextMenu}.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about creating menus, read the
+ * <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guide.</p>
+ * </div>
  */
 public interface ContextMenu extends Menu {
     /**

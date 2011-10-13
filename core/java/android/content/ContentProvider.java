@@ -45,9 +45,6 @@ import java.util.ArrayList;
  * multiple applications you can use a database directly via
  * {@link android.database.sqlite.SQLiteDatabase}.
  *
- * <p>For more information, read <a href="{@docRoot}guide/topics/providers/content-providers.html">Content
- * Providers</a>.</p>
- *
  * <p>When a request is made via
  * a {@link ContentResolver} the system inspects the authority of the given URI and passes the
  * request to the content provider registered with the authority. The content provider can interpret
@@ -73,6 +70,12 @@ import java.util.ArrayList;
  * <p>Requests to {@link ContentResolver} are automatically forwarded to the appropriate
  * ContentProvider instance, so subclasses don't have to worry about the details of
  * cross-process calls.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using content providers, read the
+ * <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+ * developer guide.</p>
  */
 public abstract class ContentProvider implements ComponentCallbacks2 {
     private static final String TAG = "ContentProvider";

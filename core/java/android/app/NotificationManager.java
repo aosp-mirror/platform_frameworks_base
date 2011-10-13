@@ -55,6 +55,13 @@ import android.util.Log;
  * You do not instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService}.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For a guide to creating notifications, read the
+ * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>
+ * developer guide.</p>
+ * </div>
+ *
  * @see android.app.Notification
  * @see android.content.Context#getSystemService
  */

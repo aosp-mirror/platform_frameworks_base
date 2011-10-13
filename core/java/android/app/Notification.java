@@ -38,9 +38,12 @@ import java.text.NumberFormat;
  * <p>The {@link Notification.Builder Notification.Builder} has been added to make it
  * easier to construct Notifications.</p>
  *
- * <p>For a guide to creating notifications, see the
- * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Creating Status 
- * Bar Notifications</a> document in the Dev Guide.</p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For a guide to creating notifications, read the
+ * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>
+ * developer guide.</p>
+ * </div>
  */
 public class Notification implements Parcelable
 {
