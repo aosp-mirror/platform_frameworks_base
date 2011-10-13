@@ -504,6 +504,25 @@ public:
     // Example value: "true" or "false". Read only.
     static const char KEY_VIDEO_SNAPSHOT_SUPPORTED[];
 
+    // The state of the video stabilization. If set to true, both the
+    // preview stream and the recorded video stream are stabilized by
+    // the camera. Only valid to set if KEY_VIDEO_STABILIZATION_SUPPORTED is
+    // set to true.
+    //
+    // The value of this key can be changed any time the camera is
+    // open. If preview or recording is active, it is acceptable for
+    // there to be a slight video glitch when video stabilization is
+    // toggled on and off.
+    //
+    // This only stabilizes video streams (between-frames stabilization), and
+    // has no effect on still image capture.
+    static const char KEY_VIDEO_STABILIZATION[];
+
+    // Returns true if video stabilization is supported. That is, applications
+    // can set KEY_VIDEO_STABILIZATION to true and have a stabilized preview
+    // stream and record stabilized videos.
+    static const char KEY_VIDEO_STABILIZATION_SUPPORTED[];
+
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
     static const char FALSE[];
