@@ -128,6 +128,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
 
     private boolean mRequiresSim;
+    private volatile boolean mEmergencyCall;
 
 
     /**
@@ -268,6 +269,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
+        mEmergencyCall = false;
 
         mUpdateMonitor.registerInfoCallback(this);
 
@@ -322,6 +324,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             }
 
             public void takeEmergencyCallAction() {
+                mEmergencyCall = true;
                 // FaceLock must be stopped if it is running when emergency call is pressed
                 stopAndUnbindFromFaceLock();
 
@@ -506,6 +509,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     public void onScreenTurnedOff() {
         mScreenOn = false;
         mForgotPattern = false;
+        mEmergencyCall = false;
         if (mMode == Mode.LockScreen) {
             ((KeyguardScreen) mLockScreen).onPause();
         } else {
@@ -550,6 +554,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
      */
     @Override
     public void onWindowFocusChanged (boolean hasWindowFocus) {
+        if(DEBUG) Log.d(TAG, hasWindowFocus ? "focused" : "unfocused");
         boolean runFaceLock = false;
         //Make sure to start facelock iff the screen is both on and focused
         synchronized(mFaceLockStartupLock) {
@@ -560,7 +565,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             stopAndUnbindFromFaceLock();
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
         } else if (runFaceLock) {
-            activateFaceLockIfAble();
+            //Don't activate facelock while the user is calling 911!
+            if(mEmergencyCall) mEmergencyCall = false;
+            else {
+                activateFaceLockIfAble();
+            }
         }
     }
 
@@ -640,6 +649,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     //We need to stop faceunlock when a phonecall comes in
     @Override
     public void onPhoneStateChanged(int phoneState) {
+        if (DEBUG) Log.d(TAG, "phone state: " + phoneState);
         if(phoneState == TelephonyManager.CALL_STATE_RINGING) {
             stopAndUnbindFromFaceLock();
             mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
