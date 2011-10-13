@@ -283,7 +283,8 @@ public:
     // outside the current field of view, even when using zoom.
     //
     // Focus area only has effect if the current focus mode is FOCUS_MODE_AUTO,
-    // FOCUS_MODE_MACRO, or FOCUS_MODE_CONTINOUS_VIDEO.
+    // FOCUS_MODE_MACRO, FOCUS_MODE_CONTINUOUS_VIDEO, or
+    // FOCUS_MODE_CONTINUOUS_PICTURE.
     // Example value: "(-10,-10,0,0,300),(0,0,10,10,700)". Read/write.
     static const char KEY_FOCUS_AREAS[];
     // Focal length in millimeter.
@@ -629,19 +630,29 @@ public:
     // recording because the focus changes smoothly . Applications still can
     // call CameraHardwareInterface.takePicture in this mode but the subject may
     // not be in focus. Auto focus starts when the parameter is set.
-    // Applications should not call CameraHardwareInterface.autoFocus in this
-    // mode. To stop continuous focus, applications should change the focus mode
-    // to other modes.
+    //
+    // Applications can call CameraHardwareInterface.autoFocus in this mode. The
+    // focus callback will immediately return with a boolean that indicates
+    // whether the focus is sharp or not. The focus position is locked after
+    // autoFocus call. If applications want to resume the continuous focus,
+    // cancelAutoFocus must be called. Restarting the preview will not resume
+    // the continuous autofocus. To stop continuous focus, applications should
+    // change the focus mode to other modes.
     static const char FOCUS_MODE_CONTINUOUS_VIDEO[];
     // Continuous auto focus mode intended for taking pictures. The camera
     // continuously tries to focus. The speed of focus change is more aggressive
     // than FOCUS_MODE_CONTINUOUS_VIDEO. Auto focus starts when the parameter is
-    // set. If applications call autoFocus in this mode, the focus callback will
-    // immediately return with a boolean that indicates the focus is sharp or
-    // not. The apps can then decide if they want to take a picture immediately
-    // or to change the focus mode to auto, and run a full autofocus cycle. To
-    // stop continuous focus, applications should change the focus mode to other
-    // modes.
+    // set.
+    //
+    // If applications call CameraHardwareInterface.autoFocus in this mode, the
+    // focus callback will immediately return with a boolean that indicates
+    // whether the focus is sharp or not. The apps can then decide if they want
+    // to take a picture immediately or to change the focus mode to auto, and
+    // run a full autofocus cycle. The focus position is locked after autoFocus
+    // call. If applications want to resume the continuous focus,
+    // cancelAutoFocus must be called. Restarting the preview will not resume
+    // the continuous autofocus. To stop continuous focus, applications should
+    // change the focus mode to other modes.
     static const char FOCUS_MODE_CONTINUOUS_PICTURE[];
 
 private:

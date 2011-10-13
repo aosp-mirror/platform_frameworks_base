@@ -337,7 +337,7 @@ public class Camera {
      * Camera objects are locked by default unless {@link #unlock()} is
      * called.  Normally {@link #reconnect()} is used instead.
      *
-     * <p>Since API level 13, camera is automatically locked for applications in
+     * <p>Since API level 14, camera is automatically locked for applications in
      * {@link android.media.MediaRecorder#start()}. Applications can use the
      * camera (ex: zoom) after recording starts. There is no need to call this
      * after recording starts or stops.
@@ -356,7 +356,7 @@ public class Camera {
      * which will re-acquire the lock and allow you to continue using the
      * camera.
      *
-     * <p>Since API level 13, camera is automatically locked for applications in
+     * <p>Since API level 14, camera is automatically locked for applications in
      * {@link android.media.MediaRecorder#start()}. Applications can use the
      * camera (ex: zoom) after recording starts. There is no need to call this
      * after recording starts or stops.
@@ -781,7 +781,7 @@ public class Camera {
          * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
          */
         void onAutoFocus(boolean success, Camera camera);
-    };
+    }
 
     /**
      * Starts camera auto-focus and registers a callback function to run when
@@ -804,10 +804,16 @@ public class Camera {
      * {@link android.hardware.Camera.Parameters#FLASH_MODE_OFF}, flash may be
      * fired during auto-focus, depending on the driver and camera hardware.<p>
      *
-     * Auto-exposure lock {@link android.hardware.Camera.Parameters#getAutoExposureLock()}
+     * <p>Auto-exposure lock {@link android.hardware.Camera.Parameters#getAutoExposureLock()}
      * and auto-white balance locks {@link android.hardware.Camera.Parameters#getAutoWhiteBalanceLock()}
      * do not change during and after autofocus. But auto-focus routine may stop
      * auto-exposure and auto-white balance transiently during focusing.
+     *
+     * <p>Stopping preview with {@link #stopPreview()}, or triggering still
+     * image capture with {@link #takePicture(Camera.ShutterCallback,
+     * Camera.PictureCallback, Camera.PictureCallback)}, will not change the
+     * the focus position. Applications must call cancelAutoFocus to reset the
+     * focus.</p>
      *
      * @param cb the callback to run
      * @see #cancelAutoFocus()
@@ -1059,8 +1065,7 @@ public class Camera {
         /**
          * Notify the listener of the detected faces in the preview frame.
          *
-         * @param faces The detected faces in a list sorted by the confidence score.
-         *              The highest scored face is the first element.
+         * @param faces The detected faces in a list
          * @param camera  The {@link Camera} service object
          */
         void onFaceDetection(Face[] faces, Camera camera);
@@ -1121,7 +1126,7 @@ public class Camera {
 
     /**
      * Information about a face identified through camera face detection.
-     * 
+     *
      * <p>When face detection is used with a camera, the {@link FaceDetectionListener} returns a
      * list of face objects for use in focusing and metering.</p>
      *
@@ -1140,7 +1145,9 @@ public class Camera {
          * the field of view. For example, suppose the size of the viewfinder UI
          * is 800x480. The rect passed from the driver is (-1000, -1000, 0, 0).
          * The corresponding viewfinder rect should be (0, 0, 400, 240). The
-         * width and height of the rect will not be 0 or negative.
+         * width and height of the rect will not be 0 or negative. The
+         * coordinates can be smaller than -1000 or bigger than 1000. But at
+         * least one vertex will be within (-1000, -1000) and (1000, 1000).
          *
          * <p>The direction is relative to the sensor orientation, that is, what
          * the sensor sees. The direction is not affected by the rotation or
@@ -1653,9 +1660,18 @@ public class Camera {
          * call {@link #takePicture(Camera.ShutterCallback,
          * Camera.PictureCallback, Camera.PictureCallback)} in this mode but the
          * subject may not be in focus. Auto focus starts when the parameter is
-         * set. Applications should not call {@link
-         * #autoFocus(AutoFocusCallback)} in this mode. To stop continuous
-         * focus, applications should change the focus mode to other modes.
+         * set.
+         *
+         * <p>Since API level 14, applications can call {@link
+         * #autoFocus(AutoFocusCallback)} in this mode. The focus callback will
+         * immediately return with a boolean that indicates whether the focus is
+         * sharp or not. The focus position is locked after autoFocus call. If
+         * applications want to resume the continuous focus, cancelAutoFocus
+         * must be called. Restarting the preview will not resume the continuous
+         * autofocus. To stop continuous focus, applications should change the
+         * focus mode to other modes.
+         *
+         * @see #FOCUS_MODE_CONTINUOUS_PICTURE
          */
         public static final String FOCUS_MODE_CONTINUOUS_VIDEO = "continuous-video";
 
@@ -1663,13 +1679,17 @@ public class Camera {
          * Continuous auto focus mode intended for taking pictures. The camera
          * continuously tries to focus. The speed of focus change is more
          * aggressive than {@link #FOCUS_MODE_CONTINUOUS_VIDEO}. Auto focus
-         * starts when the parameter is set. If applications call {@link
-         * #autoFocus(AutoFocusCallback)} in this mode, the focus callback will
-         * immediately return with a boolean that indicates whether the focus is
-         * sharp or not. The apps can then decide if they want to take a picture
-         * immediately or to change the focus mode to auto, and run a full
-         * autofocus cycle. To stop continuous focus, applications should change
-         * the focus mode to other modes.
+         * starts when the parameter is set.
+         *
+         * <p>If applications call {@link #autoFocus(AutoFocusCallback)} in this
+         * mode, the focus callback will immediately return with a boolean that
+         * indicates whether the focus is sharp or not. The apps can then decide
+         * if they want to take a picture immediately or to change the focus
+         * mode to auto, and run a full autofocus cycle. The focus position is
+         * locked after autoFocus call. If applications want to resume the
+         * continuous focus, cancelAutoFocus must be called. Restarting the
+         * preview will not resume the continuous autofocus. To stop continuous
+         * focus, applications should change the focus mode to other modes.
          *
          * @see #FOCUS_MODE_CONTINUOUS_VIDEO
          */
@@ -3061,8 +3081,9 @@ public class Camera {
          * when using zoom.</p>
          *
          * <p>Focus area only has effect if the current focus mode is
-         * {@link #FOCUS_MODE_AUTO}, {@link #FOCUS_MODE_MACRO}, or
-         * {@link #FOCUS_MODE_CONTINUOUS_VIDEO}.</p>
+         * {@link #FOCUS_MODE_AUTO}, {@link #FOCUS_MODE_MACRO},
+         * {@link #FOCUS_MODE_CONTINUOUS_VIDEO}, or
+         * {@link #FOCUS_MODE_CONTINUOUS_PICTURE}.</p>
          *
          * @return a list of current focus areas
          */
