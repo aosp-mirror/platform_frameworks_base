@@ -10,8 +10,8 @@ parent.link=manifest-intro.html
           android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
           android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
                                  "touchscreen", "keyboard", "keyboardHidden",
-                                 "navigation", "orientation", "screenLayout",
-                                 "fontScale", "uiMode"]
+                                 "navigation", "screenLayout", "fontScale", "uiMode",
+                                 "orientation", "screenSize", "smallestScreenSize"]
           android:<a href="#enabled">enabled</a>=["true" | "false"]
           android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
@@ -205,10 +205,6 @@ separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientat
    <td>"{@code navigation}"</td>
    <td>The navigation type (trackball/dpad) has changed.  (This should never normally happen.)</td>
 </tr><tr>
-   <td>"{@code orientation}"</td>
-   <td>The screen orientation has changed &mdash; the user has rotated
-       the device.</td>
- </tr><tr>
    <td>"{@code screenLayout}"</td>
    <td>The screen layout has changed &mdash; this might be caused by a
              different display being activated.</td>
@@ -221,7 +217,34 @@ separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientat
    <td>The user interface mode has changed &mdash; this can be caused when the user places the
 device into a desk/car dock or when the the night mode changes. See {@link
 android.app.UiModeManager}. <em>Introduced in API Level 8</em>.</td>
-  </tr>
+  </tr><tr>
+   <td>"{@code orientation}"</td>
+   <td>The screen orientation has changed &mdash; the user has rotated the device. 
+       <p class="note"><strong>Note:</strong> If your application targets API level 13 or higher (as
+declared by the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> and <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+targetSdkVersion}</a> attributes), then you should also declare the {@code "screenSize"}
+configuration, because it also changes when a device switches between portrait and landscape
+orientations.</p></td>
+ </tr><tr>
+   <td>"{@code screenSize}"</td>
+   <td>The current available screen size has changed. This represents a change in the currently
+available size, relative to the current aspect ratio, so will change when the user switches between
+landscape and portrait. However, if your application targets API level 12 or lower, then your
+activity always handles this configuration change itself (this configuration change does not restart
+your activity, even when running on an Android 3.2 or higher device).
+  <p><em>Added in API level 13.</em></p></td>
+ </tr><tr>
+   <td>"{@code smallestScreenSize}"</td>
+   <td>The physical screen size has changed. This represents a change in size regardless of
+orientation, so will only change when the actual physical screen size has changed such as switching
+to an external display. A change to this configuration corresponds to a change in the <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">
+smallestWidth configuration</a>. However, if your application targets API level 12 or lower, then
+your activity always handles this configuration change itself (this configuration change does not
+restart your activity, even when running on an Android 3.2 or higher device).
+  <p><em>Added in API level 13.</em></p></td>
+ </tr>
 </table>
 
 <p>

@@ -48,7 +48,7 @@ Mode</a>.</p>
 to resize for larger screens such as tablets. Since Android 1.6, Android has supported a
 variety of screen sizes and does most of the work to resize application layouts so that they
 properly fit each screen. However, if your application does not successfully follow the guide to
-<a href="{@docRoot}guide/topics/practices/screens_support.html">Supporting Multiple Screens</a>,
+<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>,
 then it might encounter some rendering issues on larger screens. For applications with this
 problem, screen compatibility mode can make the application a little more usable on larger
 screens.</p>
@@ -83,7 +83,7 @@ which will usually cause artifacts such as blurring and pixelation in your UI.
   <p>This was introduced with Android 3.2 to further
 assist applications on the latest tablet devices when the applications have not yet
 implemented techniques for <a
-href="{@docRoot}guide/topics/practices/screens_support.html">Supporting Multiple
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a>.</p>
   <p>In general, large screen devices running Android 3.2 or higher allow users to enable
 screen compatibility mode when the application does not <strong>explicitly declare that it supports
@@ -211,7 +211,7 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 which you should want your application to run&mdash;it causes pixelation and blurring in your UI,
 due to zooming. The proper way to make your application work well on large screens is to follow the
 guide to <a
-href="{@docRoot}guide/topics/practices/screens_support.html">Supporting Multiple Screens</a> and
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> and
 provide alternative layouts for different screen sizes.</p>
 
 <p>By default, when you've set either <a
