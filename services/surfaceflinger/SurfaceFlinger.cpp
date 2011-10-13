@@ -79,7 +79,7 @@ const String16 sDump("android.permission.DUMP");
 SurfaceFlinger::SurfaceFlinger()
     :   BnSurfaceComposer(), Thread(false),
         mTransactionFlags(0),
-        mResizeTransationPending(false),
+        mTransationPending(false),
         mLayersRemoved(false),
         mBootTime(systemTime()),
         mVisibleRegionsDirty(false),
@@ -748,7 +748,7 @@ void SurfaceFlinger::computeVisibleRegions(
 void SurfaceFlinger::commitTransaction()
 {
     mDrawingState = mCurrentState;
-    mResizeTransationPending = false;
+    mTransationPending = false;
     mTransactionCV.broadcast();
 }
 
@@ -1235,15 +1235,14 @@ uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
 
 
 void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
-        int orientation) {
+        int orientation, uint32_t flags) {
     Mutex::Autolock _l(mStateLock);
 
-    uint32_t flags = 0;
+    uint32_t transactionFlags = 0;
     if (mCurrentState.orientation != orientation) {
         if (uint32_t(orientation)<=eOrientation270 || orientation==42) {
             mCurrentState.orientation = orientation;
-            flags |= eTransactionNeeded;
-            mResizeTransationPending = true;
+            transactionFlags |= eTransactionNeeded;
         } else if (orientation != eOrientationUnchanged) {
             LOGW("setTransactionState: ignoring unrecognized orientation: %d",
                     orientation);
@@ -1254,23 +1253,24 @@ void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
     for (size_t i=0 ; i<count ; i++) {
         const ComposerState& s(state[i]);
         sp<Client> client( static_cast<Client *>(s.client.get()) );
-        flags |= setClientStateLocked(client, s.state);
+        transactionFlags |= setClientStateLocked(client, s.state);
     }
-    if (flags) {
-        setTransactionFlags(flags);
+    if (transactionFlags) {
+        setTransactionFlags(transactionFlags);
     }
 
-    signalEvent();
-
-    // if there is a transaction with a resize, wait for it to
-    // take effect before returning.
-    while (mResizeTransationPending) {
+    // if this is a synchronous transaction, wait for it to take effect before
+    // returning.
+    if (flags & eSynchronous) {
+        mTransationPending = true;
+    }
+    while (mTransationPending) {
         status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
         if (CC_UNLIKELY(err != NO_ERROR)) {
             // just in case something goes wrong in SF, return to the
             // called after a few seconds.
             LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
-            mResizeTransationPending = false;
+            mTransationPending = false;
             break;
         }
     }
@@ -1489,7 +1489,6 @@ uint32_t SurfaceFlinger::setClientStateLocked(
         if (what & eSizeChanged) {
             if (layer->setSize(s.w, s.h)) {
                 flags |= eTraversalNeeded;
-                mResizeTransationPending = true;
             }
         }
         if (what & eAlphaChanged) {

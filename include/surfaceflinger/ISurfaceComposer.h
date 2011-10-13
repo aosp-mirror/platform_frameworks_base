@@ -83,7 +83,11 @@ public:
         eOrientationUnchanged   = 4,
         eOrientationSwapMask    = 0x01
     };
-    
+
+    enum {
+        eSynchronous            = 0x01,
+    };
+
     enum {
         eElectronBeamAnimationOn  = 0x01,
         eElectronBeamAnimationOff = 0x10
@@ -103,7 +107,7 @@ public:
 
     /* open/close transactions. requires ACCESS_SURFACE_FLINGER permission */
     virtual void setTransactionState(const Vector<ComposerState>& state,
-            int orientation) = 0;
+            int orientation, uint32_t flags) = 0;
 
     /* signal that we're done booting.
      * Requires ACCESS_SURFACE_FLINGER permission

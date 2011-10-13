@@ -168,7 +168,7 @@ public:
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        setTransactionState(const Vector<ComposerState>& state,
-                                                            int orientation);
+                                                            int orientation, uint32_t flags);
     virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
@@ -341,7 +341,7 @@ private:
     volatile    int32_t                 mTransactionFlags;
                 Condition               mTransactionCV;
                 SortedVector< sp<LayerBase> > mLayerPurgatory;
-                bool                    mResizeTransationPending;
+                bool                    mTransationPending;
 
                 // protected by mStateLock (but we could use another lock)
                 GraphicPlane                mGraphicPlanes[1];
