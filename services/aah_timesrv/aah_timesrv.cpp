@@ -1016,9 +1016,21 @@ bool AAHTimeService::becomeMaster() {
 }
 
 bool AAHTimeService::becomeRonin() {
-    mRonin_WhoIsMasterRequestTimeouts = 0;
-    setState(STATE_RONIN);
-    return sendWhoIsMasterRequest();
+    // If we were the client of a given timeline, but had never received even a
+    // single time sync packet, then we transition back to Initial instead of
+    // Ronin.  If we transition to Ronin and end up becoming the new Master, we
+    // will be unable to service requests for other clients because we never
+    // actually knew what time it was.  By going to initial, we ensure that
+    // other clients who know what time it is, but would lose master arbitration
+    // in the Ronin case, will step up and become the proper new master of the
+    // old timeline.
+    if (mCommonClock.isValid()) {
+        mRonin_WhoIsMasterRequestTimeouts = 0;
+        setState(STATE_RONIN);
+        return sendWhoIsMasterRequest();
+    } else {
+        return becomeInitial();
+    }
 }
 
 bool AAHTimeService::becomeWaitForElection() {
