@@ -25,11 +25,11 @@
 #include "include/VBRISeeker.h"
 #include "include/XINGSeeker.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
@@ -289,9 +289,24 @@ MP3Extractor::MP3Extractor(
     GetMPEGAudioFrameSize(
             header, &frame_size, &sample_rate, &num_channels, &bitrate);
 
+    unsigned layer = 4 - ((header >> 17) & 3);
+
     mMeta = new MetaData;
 
-    mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+    switch (layer) {
+        case 1:
+            mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I);
+            break;
+        case 2:
+            mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II);
+            break;
+        case 3:
+            mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+            break;
+        default:
+            TRESPASS();
+    }
+
     mMeta->setInt32(kKeySampleRate, sample_rate);
     mMeta->setInt32(kKeyBitRate, bitrate * 1000);
     mMeta->setInt32(kKeyChannelCount, num_channels);

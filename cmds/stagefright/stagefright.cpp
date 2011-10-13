@@ -1021,6 +1021,7 @@ int main(int argc, char **argv) {
                 syncInfoPresent = false;
             } else {
                 extractor = MediaExtractor::Create(dataSource);
+
                 if (extractor == NULL) {
                     fprintf(stderr, "could not create extractor.\n");
                     return -1;
