@@ -1698,11 +1698,6 @@ public class PowerManagerService extends IPowerManager.Stub
                     // make sure button and key backlights are off too
                     mButtonLight.turnOff();
                     mKeyboardLight.turnOff();
-                    // clear current value so we will update based on the new conditions
-                    // when the sensor is reenabled.
-                    mLightSensorValue = -1;
-                    // reset our highest light sensor value when the screen turns off
-                    mHighestLightSensorValue = -1;
                 }
             }
         }
@@ -2472,6 +2467,7 @@ public class PowerManagerService extends IPowerManager.Stub
         synchronized (mLocks) {
             mIsDocked = (state != Intent.EXTRA_DOCK_STATE_UNDOCKED);
             if (mIsDocked) {
+                // allow brightness to decrease when docked
                 mHighestLightSensorValue = -1;
             }
             if ((mPowerState & SCREEN_ON_BIT) != 0) {
@@ -3047,11 +3043,21 @@ public class PowerManagerService extends IPowerManager.Stub
             long identity = Binder.clearCallingIdentity();
             try {
                 if (enable) {
+                    // reset our highest value when reenabling
+                    mHighestLightSensorValue = -1;
+                    // force recompute of backlight values
+                    if (mLightSensorValue >= 0) {
+                        int value = (int)mLightSensorValue;
+                        mLightSensorValue = -1;
+                        handleLightSensorValue(value);
+                    }
                     mSensorManager.registerListener(mLightListener, mLightSensor,
                             SensorManager.SENSOR_DELAY_NORMAL);
                 } else {
                     mSensorManager.unregisterListener(mLightListener);
                     mHandler.removeCallbacks(mAutoBrightnessTask);
+                    mLightSensorPendingDecrease = false;
+                    mLightSensorPendingIncrease = false;
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -3103,43 +3109,45 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     };
 
+    private void handleLightSensorValue(int value) {
+        long milliseconds = SystemClock.elapsedRealtime();
+        if (mLightSensorValue == -1 ||
+                milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
+            // process the value immediately if screen has just turned on
+            mHandler.removeCallbacks(mAutoBrightnessTask);
+            mLightSensorPendingDecrease = false;
+            mLightSensorPendingIncrease = false;
+            lightSensorChangedLocked(value);
+        } else {
+            if ((value > mLightSensorValue && mLightSensorPendingDecrease) ||
+                    (value < mLightSensorValue && mLightSensorPendingIncrease) ||
+                    (value == mLightSensorValue) ||
+                    (!mLightSensorPendingDecrease && !mLightSensorPendingIncrease)) {
+                // delay processing to debounce the sensor
+                mHandler.removeCallbacks(mAutoBrightnessTask);
+                mLightSensorPendingDecrease = (value < mLightSensorValue);
+                mLightSensorPendingIncrease = (value > mLightSensorValue);
+                if (mLightSensorPendingDecrease || mLightSensorPendingIncrease) {
+                    mLightSensorPendingValue = value;
+                    mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
+                }
+            } else {
+                mLightSensorPendingValue = value;
+            }
+        }
+    }
+
     SensorEventListener mLightListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
+            if (mDebugLightSensor) {
+                Slog.d(TAG, "onSensorChanged: light value: " + event.values[0]);
+            }
             synchronized (mLocks) {
                 // ignore light sensor while screen is turning off
                 if (isScreenTurningOffLocked()) {
                     return;
                 }
-
-                int value = (int)event.values[0];
-                long milliseconds = SystemClock.elapsedRealtime();
-                if (mDebugLightSensor) {
-                    Slog.d(TAG, "onSensorChanged: light value: " + value);
-                }
-                if (mLightSensorValue == -1 ||
-                        milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
-                    // process the value immediately if screen has just turned on
-                    mHandler.removeCallbacks(mAutoBrightnessTask);
-                    mLightSensorPendingDecrease = false;
-                    mLightSensorPendingIncrease = false;
-                    lightSensorChangedLocked(value);
-                } else {
-                    if ((value > mLightSensorValue && mLightSensorPendingDecrease) ||
-                            (value < mLightSensorValue && mLightSensorPendingIncrease) ||
-                            (value == mLightSensorValue) ||
-                            (!mLightSensorPendingDecrease && !mLightSensorPendingIncrease)) {
-                        // delay processing to debounce the sensor
-                        mHandler.removeCallbacks(mAutoBrightnessTask);
-                        mLightSensorPendingDecrease = (value < mLightSensorValue);
-                        mLightSensorPendingIncrease = (value > mLightSensorValue);
-                        if (mLightSensorPendingDecrease || mLightSensorPendingIncrease) {
-                            mLightSensorPendingValue = value;
-                            mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
-                        }
-                    } else {
-                        mLightSensorPendingValue = value;
-                    }
-                }
+                handleLightSensorValue((int)event.values[0]);
             }
         }
 
