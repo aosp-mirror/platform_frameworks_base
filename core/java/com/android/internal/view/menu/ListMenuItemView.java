@@ -34,6 +34,7 @@ import android.widget.TextView;
  * The item view for each item in the ListView-based MenuViews.
  */
 public class ListMenuItemView extends LinearLayout implements MenuView.ItemView {
+    private static final String TAG = "ListMenuItemView";
     private MenuItemImpl mItemData; 
     
     private ImageView mIconView;
@@ -121,16 +122,8 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
 
     public void setCheckable(boolean checkable) {
-        
         if (!checkable && mRadioButton == null && mCheckBox == null) {
             return;
-        }
-        
-        if (mRadioButton == null) {
-            insertRadioButton();
-        }
-        if (mCheckBox == null) {
-            insertCheckBox();
         }
         
         // Depending on whether its exclusive check or not, the checkbox or
@@ -139,9 +132,15 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         final CompoundButton otherCompoundButton; 
 
         if (mItemData.isExclusiveCheckable()) {
+            if (mRadioButton == null) {
+                insertRadioButton();
+            }
             compoundButton = mRadioButton;
             otherCompoundButton = mCheckBox;
         } else {
+            if (mCheckBox == null) {
+                insertCheckBox();
+            }
             compoundButton = mCheckBox;
             otherCompoundButton = mRadioButton;
         }
@@ -155,12 +154,12 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
             }
             
             // Make sure the other compound button isn't visible
-            if (otherCompoundButton.getVisibility() != GONE) {
+            if (otherCompoundButton != null && otherCompoundButton.getVisibility() != GONE) {
                 otherCompoundButton.setVisibility(GONE);
             }
         } else {
-            mCheckBox.setVisibility(GONE);
-            mRadioButton.setVisibility(GONE);
+            if (mCheckBox != null) mCheckBox.setVisibility(GONE);
+            if (mRadioButton != null) mRadioButton.setVisibility(GONE);
         }
     }
     
