@@ -240,7 +240,7 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     }
 
     LOGV("rtt %lld observed %lld nominal %lld delta = %5lld "
-          "int = %7d correction %3d (P %3d, I %3d, D %3d)\n",
+          "int = %7d correction %5d (P %5d, I %5d, D %5d)\n",
           filter_data_[min_rtt].rtt,
           observed_common,
           nominal_common_time,
@@ -270,20 +270,20 @@ void ClockRecoveryLoop::computePIDParams() {
     // level in case they have a HW clock discipline solution with parameters
     // tuned specifically for it.
 
-    // Correction factor is limited to +/-100 PPM.
-    pid_params_.correction_min = -100;
-    pid_params_.correction_max =  100;
+    // Correction factor is limited to MIN/MAX_INT_16
+    pid_params_.correction_min = -0x8000;
+    pid_params_.correction_max =  0x7FFF;
 
-    // Default proportional gain to 1:10.  (1 PPM of correction for
-    // every 10 uSec of instantaneous error)
+    // Default proportional gain to 2^15:1000.  (max proportional drive at 1mSec
+    // of instantaneous error)
     memset(&pid_params_.gain_P, 0, sizeof(pid_params_.gain_P));
-    pid_params_.gain_P.a_to_b_numer = 1;
-    pid_params_.gain_P.a_to_b_denom = 10;
+    pid_params_.gain_P.a_to_b_numer = 0x8000;
+    pid_params_.gain_P.a_to_b_denom = 1000;
 
-    // Set the integral gain to 1:50
+    // Set the integral gain to 2^15:5000
     memset(&pid_params_.gain_I, 0, sizeof(pid_params_.gain_I));
-    pid_params_.gain_I.a_to_b_numer = 1;
-    pid_params_.gain_I.a_to_b_denom = 50;
+    pid_params_.gain_I.a_to_b_numer = 0x8000;
+    pid_params_.gain_I.a_to_b_denom = 5000;
 
     // Default controller is just a PI controller.  Right now, the network based
     // measurements of the error are way to noisy to feed into the differential
@@ -352,10 +352,21 @@ int32_t ClockRecoveryLoop::doGainScale(const LinearTransform& gain,
 }
 
 void ClockRecoveryLoop::applySlew() {
-    if (local_clock_can_slew_)
+    if (local_clock_can_slew_) {
         local_clock_->setLocalSlew(correction_cur_);
-    else
-        common_clock_->setSlew(local_clock_->getLocalTime(), correction_cur_);
+    } else {
+        // The SW clock recovery implemented by the common clock class expects
+        // values expressed in PPM.  Map the MIN/MAX_INT_16 drive range to +/-
+        // 100ppm.
+        int sw_correction;
+        sw_correction  = correction_cur_ - pid_params_.correction_min;
+        sw_correction *= 200;
+        sw_correction /= (pid_params_.correction_max -
+                          pid_params_.correction_min);
+        sw_correction -= 100;
+
+        common_clock_->setSlew(local_clock_->getLocalTime(), sw_correction);
+    }
 }
 
 }  // namespace android
