@@ -300,8 +300,8 @@ public class SmsMessage extends SmsMessageBase {
                 return null;
             }
             // TP-Data-Coding-Scheme
-            // Class 3, UCS-2 encoding, uncompressed
-            bo.write(0x0b);
+            // UCS-2 encoding, uncompressed
+            bo.write(0x08);
         }
 
         // (no TP-Validity-Period)
