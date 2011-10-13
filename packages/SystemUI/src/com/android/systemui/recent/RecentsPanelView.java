@@ -38,6 +38,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -512,6 +513,12 @@ public class RecentsPanelView extends RelativeLayout
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
         am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+
+        // Accessibility feedback
+        setContentDescription(
+                mContext.getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        setContentDescription(null);
     }
 
     private void startApplicationDetailsActivity(String packageName) {
