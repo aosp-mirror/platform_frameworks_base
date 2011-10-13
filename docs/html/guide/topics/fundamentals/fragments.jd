@@ -117,7 +117,7 @@ launch separate activities that use different fragments.</p>
 two
 fragments in <em>Activity A</em>, when running on an extra large screen (a tablet, for example).
 However, on a normal-sized screen (a phone, for example),
-there's not be enough room for both fragments, so <em>Activity A</em> includes only the fragment for
+there would not be enough room for both fragments, so <em>Activity A</em> includes only the fragment for
 the list of articles, and when the user selects an article, it starts <em>Activity B</em>, which
 includes the fragment to read the article. Thus, the application supports both design patterns
 suggested in figure 1.</p>
