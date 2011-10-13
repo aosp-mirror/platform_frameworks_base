@@ -278,7 +278,8 @@ final class Session extends IWindowSession.Stub
 
             // Make the surface visible at the proper location
             final Surface surface = mService.mDragState.mSurface;
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION performDrag");
+            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
+                    WindowManagerService.TAG, ">>> OPEN TRANSACTION performDrag");
             Surface.openTransaction();
             try {
                 surface.setPosition(touchX - thumbCenterX,
@@ -288,7 +289,8 @@ final class Session extends IWindowSession.Stub
                 surface.show();
             } finally {
                 Surface.closeTransaction();
-                if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "<<< CLOSE TRANSACTION performDrag");
+                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
+                        WindowManagerService.TAG, "<<< CLOSE TRANSACTION performDrag");
             }
         }
 
