@@ -149,6 +149,12 @@ static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t styl
     }
 }
 
+enum {
+    WM_ACTION_PASS_TO_USER = 1,
+    WM_ACTION_POKE_USER_ACTIVITY = 2,
+    WM_ACTION_GO_TO_SLEEP = 4,
+};
+
 
 // --- NativeInputManager ---
 
@@ -199,7 +205,8 @@ public:
     virtual bool isKeyRepeatEnabled();
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
     virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
-    virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
+    virtual nsecs_t interceptKeyBeforeDispatching(
+            const sp<InputWindowHandle>& inputWindowHandle,
             const KeyEvent* keyEvent, uint32_t policyFlags);
     virtual bool dispatchUnhandledKey(const sp<InputWindowHandle>& inputWindowHandle,
             const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent);
@@ -819,12 +826,6 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
 
 void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
         uint32_t& policyFlags) {
-    enum {
-        WM_ACTION_PASS_TO_USER = 1,
-        WM_ACTION_POKE_USER_ACTIVITY = 2,
-        WM_ACTION_GO_TO_SLEEP = 4,
-    };
-
     if (wmActions & WM_ACTION_GO_TO_SLEEP) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
         LOGD("handleInterceptActions: Going to sleep.");
@@ -848,14 +849,14 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
     }
 }
 
-bool NativeInputManager::interceptKeyBeforeDispatching(
+nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
         const sp<InputWindowHandle>& inputWindowHandle,
         const KeyEvent* keyEvent, uint32_t policyFlags) {
     // Policy:
     // - Ignore untrusted events and pass them along.
     // - Filter normal events and trusted injected events through the window manager policy to
     //   handle the HOME key and the like.
-    bool result = false;
+    nsecs_t result = 0;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
@@ -863,13 +864,19 @@ bool NativeInputManager::interceptKeyBeforeDispatching(
         jobject inputWindowHandleObj = getInputWindowHandleObjLocalRef(env, inputWindowHandle);
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
-            jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
+            jlong delayMillis = env->CallLongMethod(mCallbacksObj,
                     gCallbacksClassInfo.interceptKeyBeforeDispatching,
                     inputWindowHandleObj, keyEventObj, policyFlags);
             bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
-            result = consumed && !error;
+            if (!error) {
+                if (delayMillis < 0) {
+                    result = -1;
+                } else if (delayMillis > 0) {
+                    result = milliseconds_to_nanoseconds(delayMillis);
+                }
+            }
         } else {
             LOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
         }
@@ -1433,7 +1440,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
-            "(Lcom/android/server/wm/InputWindowHandle;Landroid/view/KeyEvent;I)Z");
+            "(Lcom/android/server/wm/InputWindowHandle;Landroid/view/KeyEvent;I)J");
 
     GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
