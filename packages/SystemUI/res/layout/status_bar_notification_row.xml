@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/notification_item_background_color"
+        android:background="@drawable/status_bar_notification_row_background_color"
         />
 
 </RelativeLayout>
