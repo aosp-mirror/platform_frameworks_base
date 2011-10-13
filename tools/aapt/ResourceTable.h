@@ -549,19 +549,4 @@ private:
     map<String16, set<String8> > mLocalizations;
 };
 
-class ResourceFilter
-{
-public:
-    ResourceFilter() : mData(), mContainsPseudo(false) {}
-    status_t parse(const char* arg);
-    bool match(int axis, uint32_t value) const;
-    bool match(const ResTable_config& config) const;
-    inline bool containsPseudo() const { return mContainsPseudo; }
-
-private:
-    KeyedVector<int,SortedVector<uint32_t> > mData;
-    bool mContainsPseudo;
-};
-
-
 #endif

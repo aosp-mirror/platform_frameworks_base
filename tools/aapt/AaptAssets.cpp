@@ -3,6 +3,7 @@
 //
 
 #include "AaptAssets.h"
+#include "ResourceFilter.h"
 #include "Main.h"
 
 #include <utils/misc.h>
@@ -16,6 +17,8 @@ static const char* kDefaultLocale = "default";
 static const char* kWildcardName = "any";
 static const char* kAssetDir = "assets";
 static const char* kResourceDir = "res";
+static const char* kValuesDir = "values";
+static const char* kMipmapDir = "mipmap";
 static const char* kInvalidChars = "/\\:";
 static const size_t kMaxAssetFileName = 100;
 
@@ -257,9 +260,69 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
     return 1;
 }
 
+uint32_t
+AaptGroupEntry::getConfigValueForAxis(const ResTable_config& config, int axis)
+{
+    switch (axis) {
+        case AXIS_MCC:
+            return config.mcc;
+        case AXIS_MNC:
+            return config.mnc;
+        case AXIS_LANGUAGE:
+            return (((uint32_t)config.country[1]) << 24) | (((uint32_t)config.country[0]) << 16)
+                | (((uint32_t)config.language[1]) << 8) | (config.language[0]);
+        case AXIS_SCREENLAYOUTSIZE:
+            return config.screenLayout&ResTable_config::MASK_SCREENSIZE;
+        case AXIS_ORIENTATION:
+            return config.orientation;
+        case AXIS_UIMODETYPE:
+            return (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
+        case AXIS_UIMODENIGHT:
+            return (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
+        case AXIS_DENSITY:
+            return config.density;
+        case AXIS_TOUCHSCREEN:
+            return config.touchscreen;
+        case AXIS_KEYSHIDDEN:
+            return config.inputFlags;
+        case AXIS_KEYBOARD:
+            return config.keyboard;
+        case AXIS_NAVIGATION:
+            return config.navigation;
+        case AXIS_SCREENSIZE:
+            return config.screenSize;
+        case AXIS_SMALLESTSCREENWIDTHDP:
+            return config.smallestScreenWidthDp;
+        case AXIS_SCREENWIDTHDP:
+            return config.screenWidthDp;
+        case AXIS_SCREENHEIGHTDP:
+            return config.screenHeightDp;
+        case AXIS_VERSION:
+            return config.version;
+    }
+    return 0;
+}
+
+bool
+AaptGroupEntry::configSameExcept(const ResTable_config& config,
+        const ResTable_config& otherConfig, int axis)
+{
+    for (int i=AXIS_START; i<=AXIS_END; i++) {
+        if (i == axis) {
+            continue;
+        }
+        if (getConfigValueForAxis(config, i) != getConfigValueForAxis(otherConfig, i)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool
 AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
 {
+    mParamsChanged = true;
+
     Vector<String8> parts;
 
     String8 mcc, mnc, loc, layoutsize, layoutlong, orient, den;
@@ -629,79 +692,117 @@ AaptGroupEntry::toDirName(const String8& resType) const
 {
     String8 s = resType;
     if (this->mcc != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += mcc;
     }
     if (this->mnc != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += mnc;
     }
     if (this->locale != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += locale;
     }
     if (this->smallestScreenWidthDp != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += smallestScreenWidthDp;
     }
     if (this->screenWidthDp != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += screenWidthDp;
     }
     if (this->screenHeightDp != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += screenHeightDp;
     }
     if (this->screenLayoutSize != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += screenLayoutSize;
     }
     if (this->screenLayoutLong != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += screenLayoutLong;
     }
     if (this->orientation != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += orientation;
     }
     if (this->uiModeType != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += uiModeType;
     }
     if (this->uiModeNight != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += uiModeNight;
     }
     if (this->density != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += density;
     }
     if (this->touchscreen != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += touchscreen;
     }
     if (this->keysHidden != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += keysHidden;
     }
     if (this->keyboard != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += keyboard;
     }
     if (this->navHidden != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += navHidden;
     }
     if (this->navigation != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += navigation;
     }
     if (this->screenSize != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += screenSize;
     }
     if (this->version != "") {
-        s += "-";
+        if (s.length() > 0) {
+            s += "-";
+        }
         s += version;
     }
 
@@ -1286,9 +1387,14 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     return v;
 }
 
-ResTable_config AaptGroupEntry::toParams() const
+const ResTable_config& AaptGroupEntry::toParams() const
 {
-    ResTable_config params;
+    if (!mParamsChanged) {
+        return mParams;
+    }
+
+    mParamsChanged = false;
+    ResTable_config& params(mParams);
     memset(&params, 0, sizeof(params));
     getMccName(mcc.string(), &params);
     getMncName(mnc.string(), &params);
@@ -1403,8 +1509,7 @@ void AaptFile::clearData()
 String8 AaptFile::getPrintableSource() const
 {
     if (hasData()) {
-        String8 name(mGroupEntry.locale.string());
-        name.appendPath(mGroupEntry.vendor.string());
+        String8 name(mGroupEntry.toDirName(String8()));
         name.appendPath(mPath);
         name.append(" #generated");
         return name;
@@ -1424,6 +1529,13 @@ status_t AaptGroup::addFile(const sp<AaptFile>& file)
         return NO_ERROR;
     }
 
+#if 0
+    printf("Error adding file %s: group %s already exists in leaf=%s path=%s\n",
+            file->getSourceFile().string(),
+            file->getGroupEntry().toDirName(String8()).string(),
+            mLeaf.string(), mPath.string());
+#endif
+
     SourcePos(file->getSourceFile(), -1).error("Duplicate file.\n%s: Original is here.",
                                                getPrintableSource().string());
     return UNKNOWN_ERROR;
@@ -1434,20 +1546,23 @@ void AaptGroup::removeFile(size_t index)
 	mFiles.removeItemsAt(index);
 }
 
-void AaptGroup::print() const
+void AaptGroup::print(const String8& prefix) const
 {
-    printf("  %s\n", getPath().string());
+    printf("%s%s\n", prefix.string(), getPath().string());
     const size_t N=mFiles.size();
     size_t i;
     for (i=0; i<N; i++) {
         sp<AaptFile> file = mFiles.valueAt(i);
         const AaptGroupEntry& e = file->getGroupEntry();
         if (file->hasData()) {
-            printf("      Gen: (%s) %d bytes\n", e.toString().string(),
+            printf("%s  Gen: (%s) %d bytes\n", prefix.string(), e.toDirName(String8()).string(),
                     (int)file->getSize());
         } else {
-            printf("      Src: %s\n", file->getPrintableSource().string());
+            printf("%s  Src: (%s) %s\n", prefix.string(), e.toDirName(String8()).string(),
+                    file->getPrintableSource().string());
         }
+        //printf("%s  File Group Entry: %s\n", prefix.string(),
+        //        file->getGroupEntry().toDirName(String8()).string());
     }
 }
 
@@ -1512,38 +1627,6 @@ void AaptDir::removeFile(const String8& name)
 void AaptDir::removeDir(const String8& name)
 {
     mDirs.removeItem(name);
-}
-
-status_t AaptDir::renameFile(const sp<AaptFile>& file, const String8& newName)
-{
-	sp<AaptGroup> origGroup;
-
-	// Find and remove the given file with shear, brute force!
-	const size_t NG = mFiles.size();
-	size_t i;
-	for (i=0; origGroup == NULL && i<NG; i++) {
-		sp<AaptGroup> g = mFiles.valueAt(i);
-		const size_t NF = g->getFiles().size();
-		for (size_t j=0; j<NF; j++) {
-			if (g->getFiles().valueAt(j) == file) {
-				origGroup = g;
-				g->removeFile(j);
-				if (NF == 1) {
-					mFiles.removeItemsAt(i);
-				}
-				break;
-			}
-		}
-	}
-
-	//printf("Renaming %s to %s\n", file->getPath().getPathName(), newName.string());
-
-	// Place the file under its new name.
-	if (origGroup != NULL) {
-		return addLeafFile(newName, file);
-	}
-
-	return NO_ERROR;
 }
 
 status_t AaptDir::addLeafFile(const String8& leafName, const sp<AaptFile>& file)
@@ -1710,17 +1793,17 @@ status_t AaptDir::validate() const
     return NO_ERROR;
 }
 
-void AaptDir::print() const
+void AaptDir::print(const String8& prefix) const
 {
     const size_t ND=getDirs().size();
     size_t i;
     for (i=0; i<ND; i++) {
-        getDirs().valueAt(i)->print();
+        getDirs().valueAt(i)->print(prefix);
     }
 
     const size_t NF=getFiles().size();
     for (i=0; i<NF; i++) {
-        getFiles().valueAt(i)->print();
+        getFiles().valueAt(i)->print(prefix);
     }
 }
 
@@ -1743,6 +1826,24 @@ String8 AaptDir::getPrintableSource() const
 // =========================================================================
 // =========================================================================
 // =========================================================================
+
+AaptAssets::AaptAssets()
+    : AaptDir(String8(), String8()),
+      mChanged(false), mHaveIncludedAssets(false), mRes(NULL)
+{
+}
+
+const SortedVector<AaptGroupEntry>& AaptAssets::getGroupEntries() const {
+    if (mChanged) {
+    }
+    return mGroupEntries;
+}
+
+status_t AaptAssets::addFile(const String8& name, const sp<AaptGroup>& file)
+{
+    mChanged = true;
+    return AaptDir::addFile(name, file);
+}
 
 sp<AaptFile> AaptAssets::addFile(
         const String8& filePath, const AaptGroupEntry& entry,
@@ -1945,6 +2046,11 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
         goto bail;
     }
 
+    count = filter(bundle);
+    if (count != NO_ERROR) {
+        totalCount = count;
+        goto bail;
+    }
 
 bail:
     return totalCount;
@@ -2002,9 +2108,9 @@ ssize_t AaptAssets::slurpResourceTree(Bundle* bundle, const String8& srcDir)
             continue;
         }
 
-        if (bundle->getMaxResVersion() != NULL && group.version.length() != 0) {
+        if (bundle->getMaxResVersion() != NULL && group.getVersionString().length() != 0) {
             int maxResInt = atoi(bundle->getMaxResVersion());
-            const char *verString = group.version.string();
+            const char *verString = group.getVersionString().string();
             int dirVersionInt = atoi(verString + 1); // skip 'v' in version name
             if (dirVersionInt > maxResInt) {
               fprintf(stderr, "max res %d, skipping %s\n", maxResInt, entry->d_name);
@@ -2015,7 +2121,7 @@ ssize_t AaptAssets::slurpResourceTree(Bundle* bundle, const String8& srcDir)
         FileType type = getFileType(subdirName.string());
 
         if (type == kFileTypeDirectory) {
-            sp<AaptDir> dir = makeDir(String8(entry->d_name));
+            sp<AaptDir> dir = makeDir(resType);
             ssize_t res = dir->slurpFullTree(bundle, subdirName, group,
                                                 resType, mFullResPaths);
             if (res < 0) {
@@ -2027,7 +2133,13 @@ ssize_t AaptAssets::slurpResourceTree(Bundle* bundle, const String8& srcDir)
                 count += res;
             }
 
-            mDirs.add(dir);
+            // Only add this directory if we don't already have a resource dir
+            // for the current type.  This ensures that we only add the dir once
+            // for all configs.
+            sp<AaptDir> rdir = resDir(resType);
+            if (rdir == NULL) {
+                mResDirs.add(dir);
+            }
         } else {
             if (bundle->getVerbose()) {
                 fprintf(stderr, "   (ignoring file '%s')\n", subdirName.string());
@@ -2136,6 +2248,142 @@ bail:
     return count;
 }
 
+status_t AaptAssets::filter(Bundle* bundle)
+{
+    ResourceFilter reqFilter;
+    status_t err = reqFilter.parse(bundle->getConfigurations());
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    ResourceFilter prefFilter;
+    err = prefFilter.parse(bundle->getPreferredConfigurations());
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    if (reqFilter.isEmpty() && prefFilter.isEmpty()) {
+        return NO_ERROR;
+    }
+
+    if (true || bundle->getVerbose()) {
+        if (!reqFilter.isEmpty()) {
+            printf("Applying required filter: %s\n",
+                    bundle->getConfigurations());
+        }
+        if (!prefFilter.isEmpty()) {
+            printf("Applying preferred filter: %s\n",
+                    bundle->getPreferredConfigurations());
+        }
+    }
+
+    const Vector<sp<AaptDir> >& resdirs = mResDirs;
+    const size_t ND = resdirs.size();
+    for (size_t i=0; i<ND; i++) {
+        const sp<AaptDir>& dir = resdirs.itemAt(i);
+        if (dir->getLeaf() == kValuesDir) {
+            // The "value" dir is special since a single file defines
+            // multiple resources, so we can not do filtering on the
+            // files themselves.
+            continue;
+        }
+        if (dir->getLeaf() == kMipmapDir) {
+            // We also skip the "mipmap" directory, since the point of this
+            // is to include all densities without stripping.  If you put
+            // other configurations in here as well they won't be stripped
+            // either...  So don't do that.  Seriously.  What is wrong with you?
+            continue;
+        }
+
+        const size_t NG = dir->getFiles().size();
+        for (size_t j=0; j<NG; j++) {
+            sp<AaptGroup> grp = dir->getFiles().valueAt(j);
+
+            // First remove any configurations we know we don't need.
+            for (size_t k=0; k<grp->getFiles().size(); k++) {
+                sp<AaptFile> file = grp->getFiles().valueAt(k);
+                if (k == 0 && grp->getFiles().size() == 1) {
+                    // If this is the only file left, we need to keep it.
+                    // Otherwise the resource IDs we are using will be inconsistent
+                    // with what we get when not stripping.  Sucky, but at least
+                    // for now we can rely on the back-end doing another filtering
+                    // pass to take this out and leave us with this resource name
+                    // containing no entries.
+                    continue;
+                }
+                if (file->getPath().getPathExtension() == ".xml") {
+                    // We can't remove .xml files at this point, because when
+                    // we parse them they may add identifier resources, so
+                    // removing them can cause our resource identifiers to
+                    // become inconsistent.
+                    continue;
+                }
+                const ResTable_config& config(file->getGroupEntry().toParams());
+                if (!reqFilter.match(config)) {
+                    if (bundle->getVerbose()) {
+                        printf("Pruning unneeded resource: %s\n",
+                                file->getPrintableSource().string());
+                    }
+                    grp->removeFile(k);
+                    k--;
+                }
+            }
+
+            // Quick check: no preferred filters, nothing more to do.
+            if (prefFilter.isEmpty()) {
+                continue;
+            }
+
+            // Now deal with preferred configurations.
+            for (int axis=AXIS_START; axis<=AXIS_END; axis++) {
+                for (size_t k=0; k<grp->getFiles().size(); k++) {
+                    sp<AaptFile> file = grp->getFiles().valueAt(k);
+                    if (k == 0 && grp->getFiles().size() == 1) {
+                        // If this is the only file left, we need to keep it.
+                        // Otherwise the resource IDs we are using will be inconsistent
+                        // with what we get when not stripping.  Sucky, but at least
+                        // for now we can rely on the back-end doing another filtering
+                        // pass to take this out and leave us with this resource name
+                        // containing no entries.
+                        continue;
+                    }
+                    if (file->getPath().getPathExtension() == ".xml") {
+                        // We can't remove .xml files at this point, because when
+                        // we parse them they may add identifier resources, so
+                        // removing them can cause our resource identifiers to
+                        // become inconsistent.
+                        continue;
+                    }
+                    const ResTable_config& config(file->getGroupEntry().toParams());
+                    if (!prefFilter.match(axis, config)) {
+                        // This is a resource we would prefer not to have.  Check
+                        // to see if have a similar variation that we would like
+                        // to have and, if so, we can drop it.
+                        for (size_t m=0; m<grp->getFiles().size(); m++) {
+                            if (m == k) continue;
+                            sp<AaptFile> mfile = grp->getFiles().valueAt(m);
+                            const ResTable_config& mconfig(mfile->getGroupEntry().toParams());
+                            if (AaptGroupEntry::configSameExcept(config, mconfig, axis)) {
+                                if (prefFilter.match(axis, mconfig)) {
+                                    if (bundle->getVerbose()) {
+                                        printf("Pruning unneeded resource: %s\n",
+                                                file->getPrintableSource().string());
+                                    }
+                                    grp->removeFile(k);
+                                    k--;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return NO_ERROR;
+}
+
 sp<AaptSymbols> AaptAssets::getSymbolsFor(const String8& name)
 {
     sp<AaptSymbols> sym = mSymbols.valueFor(name);
@@ -2179,26 +2427,39 @@ const ResTable& AaptAssets::getIncludedResources() const
     return mIncludedAssets.getResources(false);
 }
 
-void AaptAssets::print() const
+void AaptAssets::print(const String8& prefix) const
 {
-    printf("Locale/Vendor pairs:\n");
+    String8 innerPrefix(prefix);
+    innerPrefix.append("  ");
+    String8 innerInnerPrefix(innerPrefix);
+    innerInnerPrefix.append("  ");
+    printf("%sConfigurations:\n", prefix.string());
     const size_t N=mGroupEntries.size();
     for (size_t i=0; i<N; i++) {
-        printf("   %s/%s\n",
-               mGroupEntries.itemAt(i).locale.string(),
-               mGroupEntries.itemAt(i).vendor.string());
+        String8 cname = mGroupEntries.itemAt(i).toDirName(String8());
+        printf("%s %s\n", prefix.string(),
+                cname != "" ? cname.string() : "(default)");
     }
 
-    printf("\nFiles:\n");
-    AaptDir::print();
+    printf("\n%sFiles:\n", prefix.string());
+    AaptDir::print(innerPrefix);
+
+    printf("\n%sResource Dirs:\n", prefix.string());
+    const Vector<sp<AaptDir> >& resdirs = mResDirs;
+    const size_t NR = resdirs.size();
+    for (size_t i=0; i<NR; i++) {
+        const sp<AaptDir>& d = resdirs.itemAt(i);
+        printf("%s  Type %s\n", prefix.string(), d->getLeaf().string());
+        d->print(innerInnerPrefix);
+    }
 }
 
-sp<AaptDir> AaptAssets::resDir(const String8& name)
+sp<AaptDir> AaptAssets::resDir(const String8& name) const
 {
-    const Vector<sp<AaptDir> >& dirs = mDirs;
-    const size_t N = dirs.size();
+    const Vector<sp<AaptDir> >& resdirs = mResDirs;
+    const size_t N = resdirs.size();
     for (size_t i=0; i<N; i++) {
-        const sp<AaptDir>& d = dirs.itemAt(i);
+        const sp<AaptDir>& d = resdirs.itemAt(i);
         if (d->getLeaf() == name) {
             return d;
         }

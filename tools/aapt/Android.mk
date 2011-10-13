@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
 	Package.cpp \
 	StringPool.cpp \
 	XMLNode.cpp \
+	ResourceFilter.cpp \
 	ResourceTable.cpp \
 	Images.cpp \
 	Resource.cpp \

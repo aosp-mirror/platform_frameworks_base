@@ -7,6 +7,7 @@
 #include "ResourceTable.h"
 
 #include "XMLNode.h"
+#include "ResourceFilter.h"
 
 #include <utils/ByteOrder.h>
 #include <utils/ResourceTypes.h>
@@ -2526,135 +2527,6 @@ ResourceTable::validateLocalizations(void)
     }
 
     return err;
-}
-
-
-status_t
-ResourceFilter::parse(const char* arg)
-{
-    if (arg == NULL) {
-        return 0;
-    }
-
-    const char* p = arg;
-    const char* q;
-
-    while (true) {
-        q = strchr(p, ',');
-        if (q == NULL) {
-            q = p + strlen(p);
-        }
-
-        String8 part(p, q-p);
-
-        if (part == "zz_ZZ") {
-            mContainsPseudo = true;
-        }
-        int axis;
-        uint32_t value;
-        if (AaptGroupEntry::parseNamePart(part, &axis, &value)) {
-            fprintf(stderr, "Invalid configuration: %s\n", arg);
-            fprintf(stderr, "                       ");
-            for (int i=0; i<p-arg; i++) {
-                fprintf(stderr, " ");
-            }
-            for (int i=0; i<q-p; i++) {
-                fprintf(stderr, "^");
-            }
-            fprintf(stderr, "\n");
-            return 1;
-        }
-
-        ssize_t index = mData.indexOfKey(axis);
-        if (index < 0) {
-            mData.add(axis, SortedVector<uint32_t>());
-        }
-        SortedVector<uint32_t>& sv = mData.editValueFor(axis);
-        sv.add(value);
-        // if it's a locale with a region, also match an unmodified locale of the
-        // same language
-        if (axis == AXIS_LANGUAGE) {
-            if (value & 0xffff0000) {
-                sv.add(value & 0x0000ffff);
-            }
-        }
-        p = q;
-        if (!*p) break;
-        p++;
-    }
-
-    return NO_ERROR;
-}
-
-bool
-ResourceFilter::match(int axis, uint32_t value) const
-{
-    if (value == 0) {
-        // they didn't specify anything so take everything
-        return true;
-    }
-    ssize_t index = mData.indexOfKey(axis);
-    if (index < 0) {
-        // we didn't request anything on this axis so take everything
-        return true;
-    }
-    const SortedVector<uint32_t>& sv = mData.valueAt(index);
-    return sv.indexOf(value) >= 0;
-}
-
-bool
-ResourceFilter::match(const ResTable_config& config) const
-{
-    if (config.locale) {
-        uint32_t locale = (config.country[1] << 24) | (config.country[0] << 16)
-                | (config.language[1] << 8) | (config.language[0]);
-        if (!match(AXIS_LANGUAGE, locale)) {
-            return false;
-        }
-    }
-    if (!match(AXIS_ORIENTATION, config.orientation)) {
-        return false;
-    }
-    if (!match(AXIS_UIMODETYPE, (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE))) {
-        return false;
-    }
-    if (!match(AXIS_UIMODENIGHT, (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT))) {
-        return false;
-    }
-    if (!match(AXIS_DENSITY, config.density)) {
-        return false;
-    }
-    if (!match(AXIS_TOUCHSCREEN, config.touchscreen)) {
-        return false;
-    }
-    if (!match(AXIS_KEYSHIDDEN, config.inputFlags)) {
-        return false;
-    }
-    if (!match(AXIS_KEYBOARD, config.keyboard)) {
-        return false;
-    }
-    if (!match(AXIS_NAVIGATION, config.navigation)) {
-        return false;
-    }
-    if (!match(AXIS_SCREENSIZE, config.screenSize)) {
-        return false;
-    }
-    if (!match(AXIS_SMALLESTSCREENWIDTHDP, config.smallestScreenWidthDp)) {
-        return false;
-    }
-    if (!match(AXIS_SCREENWIDTHDP, config.screenWidthDp)) {
-        return false;
-    }
-    if (!match(AXIS_SCREENHEIGHTDP, config.screenHeightDp)) {
-        return false;
-    }
-    if (!match(AXIS_SCREENLAYOUTSIZE, config.screenLayout&ResTable_config::MASK_SCREENSIZE)) {
-        return false;
-    }
-    if (!match(AXIS_VERSION, config.version)) {
-        return false;
-    }
-    return true;
 }
 
 status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)

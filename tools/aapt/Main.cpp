@@ -65,9 +65,10 @@ void usage(void)
         "        [--max-res-version VAL] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
-        "        [-S resource-sources [-S resource-sources ...]] "
+        "        [-S resource-sources [-S resource-sources ...]] \\\n"
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [--product product1,product2,...] \\\n"
+        "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
         "        [-o] \\\n"
         "        [raw-files-dir [raw-files-dir] ...]\n"
         "\n"
@@ -154,6 +155,10 @@ void usage(void)
         "       generate dependency files in the same directories for R.java and resource package\n"
         "   --auto-add-overlay\n"
         "       Automatically add resources that are only in overlays.\n"
+        "   --preferred-configurations\n"
+        "       Like the -c option for filtering out unneeded configurations, but\n"
+        "       only expresses a preference.  If there is no resource available with\n"
+        "       the preferred configuration then it will not be stripped.\n"
         "   --rename-manifest-package\n"
         "       Rewrite the manifest so that its package name is the package name\n"
         "       given here.  Relative class names (for example .Foo) will be\n"
@@ -509,6 +514,15 @@ int main(int argc, char* const argv[])
                     bundle.setGenDependencies(true);
                 } else if (strcmp(cp, "-utf16") == 0) {
                     bundle.setWantUTF16(true);
+                } else if (strcmp(cp, "-preferred-configurations") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--preferred-configurations' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.addPreferredConfigurations(argv[0]);
                 } else if (strcmp(cp, "-rename-manifest-package") == 0) {
                     argc--;
                     argv++;
