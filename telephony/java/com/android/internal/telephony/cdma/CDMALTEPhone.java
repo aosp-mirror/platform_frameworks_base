@@ -18,13 +18,17 @@ package com.android.internal.telephony.cdma;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.SQLException;
 import android.net.Uri;
+import android.os.AsyncResult;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
@@ -41,10 +45,36 @@ public class CDMALTEPhone extends CDMAPhone {
     /** Secondary SMSDispatcher for 3GPP format messages. */
     SMSDispatcher m3gppSMS;
 
+    /**
+     * Small container class used to hold information relevant to
+     * the carrier selection process. operatorNumeric can be ""
+     * if we are looking for automatic selection. operatorAlphaLong is the
+     * corresponding operator name.
+     */
+    private static class NetworkSelectMessage {
+        public Message message;
+        public String operatorNumeric;
+        public String operatorAlphaLong;
+    }
+
     // Constructors
     public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
         super(context, ci, notifier, false);
         m3gppSMS = new GsmSMSDispatcher(this, mSmsStorageMonitor, mSmsUsageMonitor);
+    }
+
+    @Override
+    public void handleMessage (Message msg) {
+        AsyncResult ar;
+        Message onComplete;
+        switch (msg.what) {
+            // handle the select network completion callbacks.
+            case EVENT_SET_NETWORK_MANUAL_COMPLETE:
+                handleSetSelectNetwork((AsyncResult) msg.obj);
+                break;
+            default:
+                super.handleMessage(msg);
+        }
     }
 
     @Override
@@ -106,6 +136,58 @@ public class CDMALTEPhone extends CDMAPhone {
 
         log("getDataConnectionState apnType=" + apnType + " ret=" + ret);
         return ret;
+    }
+
+    @Override
+    public void
+    selectNetworkManually(OperatorInfo network,
+            Message response) {
+        // wrap the response message in our own message along with
+        // the operator's id.
+        NetworkSelectMessage nsm = new NetworkSelectMessage();
+        nsm.message = response;
+        nsm.operatorNumeric = network.getOperatorNumeric();
+        nsm.operatorAlphaLong = network.getOperatorAlphaLong();
+
+        // get the message
+        Message msg = obtainMessage(EVENT_SET_NETWORK_MANUAL_COMPLETE, nsm);
+
+        mCM.setNetworkSelectionModeManual(network.getOperatorNumeric(), msg);
+    }
+
+    /**
+     * Used to track the settings upon completion of the network change.
+     */
+    private void handleSetSelectNetwork(AsyncResult ar) {
+        // look for our wrapper within the asyncresult, skip the rest if it
+        // is null.
+        if (!(ar.userObj instanceof NetworkSelectMessage)) {
+            if (DBG) Log.d(LOG_TAG, "unexpected result from user object.");
+            return;
+        }
+
+        NetworkSelectMessage nsm = (NetworkSelectMessage) ar.userObj;
+
+        // found the object, now we send off the message we had originally
+        // attached to the request.
+        if (nsm.message != null) {
+            if (DBG) Log.d(LOG_TAG, "sending original message to recipient");
+            AsyncResult.forMessage(nsm.message, ar.result, ar.exception);
+            nsm.message.sendToTarget();
+        }
+
+        // open the shared preferences editor, and write the value.
+        // nsm.operatorNumeric is "" if we're in automatic.selection.
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(NETWORK_SELECTION_KEY, nsm.operatorNumeric);
+        editor.putString(NETWORK_SELECTION_NAME_KEY, nsm.operatorAlphaLong);
+
+        // commit and log the result.
+        if (! editor.commit()) {
+            Log.e(LOG_TAG, "failed to commit network selection preference");
+        }
+
     }
 
     @Override
