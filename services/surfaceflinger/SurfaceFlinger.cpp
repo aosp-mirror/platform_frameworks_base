@@ -50,6 +50,7 @@
 #include "DdmConnection.h"
 #include "Layer.h"
 #include "LayerDim.h"
+#include "LayerScreenshot.h"
 #include "SurfaceFlinger.h"
 
 #include "DisplayHardware/DisplayHardware.h"
@@ -1353,6 +1354,9 @@ sp<ISurface> SurfaceFlinger::createSurface(
         case eFXSurfaceDim:
             layer = createDimSurface(client, d, w, h, flags);
             break;
+        case eFXSurfaceScreenshot:
+            layer = createScreenshotSurface(client, d, w, h, flags);
+            break;
     }
 
     if (layer != 0) {
@@ -1415,7 +1419,19 @@ sp<LayerDim> SurfaceFlinger::createDimSurface(
         uint32_t w, uint32_t h, uint32_t flags)
 {
     sp<LayerDim> layer = new LayerDim(this, display, client);
-    layer->initStates(w, h, flags);
+    return layer;
+}
+
+sp<LayerScreenshot> SurfaceFlinger::createScreenshotSurface(
+        const sp<Client>& client, DisplayID display,
+        uint32_t w, uint32_t h, uint32_t flags)
+{
+    sp<LayerScreenshot> layer = new LayerScreenshot(this, display, client);
+    status_t err = layer->capture();
+    if (err != NO_ERROR) {
+        layer.clear();
+        LOGW("createScreenshotSurface failed (%s)", strerror(-err));
+    }
     return layer;
 }
 
@@ -1778,6 +1794,13 @@ void SurfaceFlinger::repaintEverything() {
 
 // ---------------------------------------------------------------------------
 
+status_t SurfaceFlinger::renderScreenToTexture(DisplayID dpy,
+        GLuint* textureName, GLfloat* uOut, GLfloat* vOut)
+{
+    Mutex::Autolock _l(mStateLock);
+    return renderScreenToTextureLocked(dpy, textureName, uOut, vOut);
+}
+
 status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
         GLuint* textureName, GLfloat* uOut, GLfloat* vOut)
 {
@@ -1841,11 +1864,6 @@ status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
 
 status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
 {
-    status_t result = PERMISSION_DENIED;
-
-    if (!GLExtensions::getInstance().haveFramebufferObject())
-        return INVALID_OPERATION;
-
     // get screen geometry
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t hw_w = hw.getWidth();
@@ -1854,7 +1872,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
 
     GLfloat u, v;
     GLuint tname;
-    result = renderScreenToTextureLocked(0, &tname, &u, &v);
+    status_t result = renderScreenToTextureLocked(0, &tname, &u, &v);
     if (result != NO_ERROR) {
         return result;
     }
@@ -2029,10 +2047,6 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
     if (result != NO_ERROR) {
         return result;
     }
-
-    // back to main framebuffer
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-    glDisable(GL_SCISSOR_TEST);
 
     GLfloat vtx[8];
     const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
