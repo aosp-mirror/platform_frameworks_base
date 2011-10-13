@@ -319,8 +319,12 @@ void Context::destroyWorkerThreadResources() {
 
 void Context::printWatchdogInfo(void *ctx) {
     Context *rsc = (Context *)ctx;
-    LOGE("RS watchdog timeout: %i  %s  line %i %s", rsc->watchdog.inRoot,
-         rsc->watchdog.command, rsc->watchdog.line, rsc->watchdog.file);
+    if (rsc->watchdog.command && rsc->watchdog.file) {
+        LOGE("RS watchdog timeout: %i  %s  line %i %s", rsc->watchdog.inRoot,
+             rsc->watchdog.command, rsc->watchdog.line, rsc->watchdog.file);
+    } else {
+        LOGE("RS watchdog timeout: %i", rsc->watchdog.inRoot);
+    }
 }
 
 
