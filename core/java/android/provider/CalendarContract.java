@@ -309,7 +309,7 @@ public final class CalendarContract {
          * Type: TEXT
          * </P>
          * TODO UNHIDE
-         * 
+         *
          * @hide
          */
         public static final String CALENDAR_COLOR_INDEX = "calendar_color_index";
@@ -734,8 +734,7 @@ public final class CalendarContract {
         /**
          * The type of attendee. Column name.
          * <P>
-         * Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL},
-         * {@link #TYPE_RESOURCE})
+         * Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL}
          * </P>
          */
         public static final String ATTENDEE_TYPE = "attendeeType";
@@ -745,8 +744,8 @@ public final class CalendarContract {
         public static final int TYPE_OPTIONAL = 2;
         /**
          * This specifies that an attendee is a resource, such as a room, and
-         * not an actual person. TODO UNHIDE
-         *
+         * not an actual person. TODO UNHIDE and add to ATTENDEE_TYPE comment
+         * 
          * @hide
          */
         public static final int TYPE_RESOURCE = 3;
