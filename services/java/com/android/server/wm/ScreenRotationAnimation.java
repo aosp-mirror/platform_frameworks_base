@@ -81,7 +81,7 @@ class ScreenRotationAnimation {
         mOriginalHeight = originalHeight;
 
         if (!inTransaction) {
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation");
             Surface.openTransaction();
         }
@@ -117,7 +117,7 @@ class ScreenRotationAnimation {
                     mSurface = null;
                     return;
                 }
-        
+
                 Paint paint = new Paint(0);
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
                 c.drawBitmap(screenshot, 0, 0, paint);
@@ -127,7 +127,7 @@ class ScreenRotationAnimation {
         } finally {
             if (!inTransaction) {
                 Surface.closeTransaction();
-                if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation");
             }
     
@@ -254,7 +254,7 @@ class ScreenRotationAnimation {
         mEnterAnimation.restrictDuration(maxAnimationDuration);
         mEnterAnimation.scaleCurrentDuration(animationScale);
 
-        if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+        if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
                 ">>> OPEN TRANSACTION ScreenRotationAnimation.dismiss");
         Surface.openTransaction();
 
@@ -266,7 +266,7 @@ class ScreenRotationAnimation {
             Slog.w(TAG, "Unable to allocate black surface", e);
         } finally {
             Surface.closeTransaction();
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
                     "<<< CLOSE TRANSACTION ScreenRotationAnimation.dismiss");
         }
 

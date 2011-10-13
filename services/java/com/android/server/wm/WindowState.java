@@ -57,6 +57,7 @@ import java.util.ArrayList;
 final class WindowState implements WindowManagerPolicy.WindowState {
     static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
     static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
+    static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
     static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
 
     final WindowManagerService mService;
@@ -671,7 +672,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 WindowManagerService.TAG, "Got surface: " + mSurface
                 + ", set left=" + mFrame.left + " top=" + mFrame.top
                 + ", animLayer=" + mAnimLayer);
-            if (SHOW_TRANSACTIONS) {
+            if (SHOW_LIGHT_TRANSACTIONS) {
                 Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
                 WindowManagerService.logSurface(this, "CREATE pos=(" + mFrame.left
                         + "," + mFrame.top + ") (" +
@@ -700,7 +701,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mLastHidden = true;
             } finally {
                 Surface.closeTransaction();
-                if (SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "<<< CLOSE TRANSACTION createSurfaceLocked");
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+                        "<<< CLOSE TRANSACTION createSurfaceLocked");
             }
             if (WindowManagerService.localLOGV) Slog.v(
                     WindowManagerService.TAG, "Created surface " + this);

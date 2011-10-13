@@ -117,6 +117,11 @@ public class Display {
                 outSize.x = getRawWidth();
                 outSize.y = getRawHeight();
             }
+            if (false) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.v(TAG, "Returning display size: " + outSize, here);
+            }
             if (DEBUG_DISPLAY_SIZE && doCompat) Slog.v(
                     TAG, "Returning display size: " + outSize);
         } catch (RemoteException e) {
