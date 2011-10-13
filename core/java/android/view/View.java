@@ -1891,12 +1891,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
      * out of the public fields to keep the undefined bits out of the developer's way.
      *
-     * Flag to hide only the navigation buttons.  Don't use this
+     * Flag to hide only the home button.  Don't use this
      * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
-     *
-     * THIS DOES NOT DISABLE THE BACK BUTTON
      */
-    public static final int STATUS_BAR_DISABLE_NAVIGATION = 0x00200000;
+    public static final int STATUS_BAR_DISABLE_HOME = 0x00200000;
 
     /**
      * @hide
@@ -1904,7 +1902,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
      * out of the public fields to keep the undefined bits out of the developer's way.
      *
-     * Flag to hide only the back button.  Don't use this
+     * Flag to hide only the back button. Don't use this
      * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
      */
     public static final int STATUS_BAR_DISABLE_BACK = 0x00400000;
@@ -1919,6 +1917,28 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * its own clock making the status bar's clock redundant.
      */
     public static final int STATUS_BAR_DISABLE_CLOCK = 0x00800000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to hide only the recent apps button. Don't use this
+     * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
+     */
+    public static final int STATUS_BAR_DISABLE_RECENT = 0x01000000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility, etc. etc.
+     *
+     * This hides HOME and RECENT and is provided for compatibility with interim implementations.
+     */
+    @Deprecated
+    public static final int STATUS_BAR_DISABLE_NAVIGATION = 
+            STATUS_BAR_DISABLE_HOME | STATUS_BAR_DISABLE_RECENT;
 
     /**
      * @hide

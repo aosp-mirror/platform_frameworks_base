@@ -300,18 +300,6 @@ public class PhoneStatusBar extends StatusBar {
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
-
-                sb.setOnSystemUiVisibilityChangeListener(
-                    new View.OnSystemUiVisibilityChangeListener() {
-                        @Override
-                        public void onSystemUiVisibilityChange(int visibility) {
-                            if (DEBUG) {
-                                Slog.d(TAG, "systemUi: " + visibility);
-                            }
-                            boolean hide = (0 != (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION));
-                            mNavigationBarView.setHidden(hide);
-                        }
-                    });
             }
         } catch (Resources.NotFoundException ex) {
             // no nav bar for you
@@ -1064,10 +1052,12 @@ public class PhoneStatusBar extends StatusBar {
         flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_NAVIGATION) != 0) ? "NAVIGATION" : "navigation");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NAVIGATION) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_HOME) != 0) ? "HOME" : "home");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_HOME) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_RECENT) != 0) ? "RECENT" : "recent");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
         flagdbg.append(">");
@@ -1083,11 +1073,13 @@ public class PhoneStatusBar extends StatusBar {
             }
         }
 
-        if ((diff & (StatusBarManager.DISABLE_NAVIGATION | StatusBarManager.DISABLE_BACK)) != 0) {
-            // the nav bar will take care of DISABLE_NAVIGATION and DISABLE_BACK
+        if ((diff & (StatusBarManager.DISABLE_HOME 
+                        | StatusBarManager.DISABLE_RECENT 
+                        | StatusBarManager.DISABLE_BACK)) != 0) {
+            // the nav bar will take care of these
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
 
-            if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
+            if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
                 mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
                 mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);

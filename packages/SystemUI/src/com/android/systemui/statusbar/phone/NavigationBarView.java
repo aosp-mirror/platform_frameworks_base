@@ -116,15 +116,13 @@ public class NavigationBarView extends LinearLayout {
 
         mDisabledFlags = disabledFlags;
 
-        final boolean disableNavigation = ((disabledFlags & View.STATUS_BAR_DISABLE_NAVIGATION) != 0);
+        final boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+        final boolean disableRecent = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
 
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
-        getHomeButton()   .setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
-        getRecentsButton().setVisibility(disableNavigation ? View.INVISIBLE : View.VISIBLE);
- 
-        getMenuButton()   .setVisibility((disableNavigation || !mShowMenu)
-                                                           ? View.INVISIBLE : View.VISIBLE);
+        getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
+        getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void setMenuVisibility(final boolean show) {
@@ -136,9 +134,7 @@ public class NavigationBarView extends LinearLayout {
 
         mShowMenu = show;
 
-        getMenuButton().setVisibility(
-            (0 != (mDisabledFlags & View.STATUS_BAR_DISABLE_NAVIGATION) || !mShowMenu)
-                ? View.INVISIBLE : View.VISIBLE);
+        getMenuButton().setVisibility(mShowMenu ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void setLowProfile(final boolean lightsOut) {

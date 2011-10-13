@@ -1188,19 +1188,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 }
             }
 
+            // Disable aspects of the system/status/navigation bars that must not be re-enabled by
+            // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
             if (mShowing) {
-                // disable navigation status bar components if lock screen is up
-                flags |= StatusBarManager.DISABLE_NAVIGATION;
-                if (!mHidden) {
-                    // showing lockscreen exclusively (no activities in front of it)
-                    // disable back button too
-                    flags |= StatusBarManager.DISABLE_BACK;
-                    if (mUpdateMonitor.isClockVisible()) {
-                        // lockscreen showing a clock, so hide statusbar clock
-                        flags |= StatusBarManager.DISABLE_CLOCK;
-                    }
-                }
+                // disable navigation status bar components (home, recents) if lock screen is up
+                flags |= StatusBarManager.DISABLE_RECENT;
                 if (isSecure() || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
                     // showing secure lockscreen; disable expanding.
                     flags |= StatusBarManager.DISABLE_EXPAND;

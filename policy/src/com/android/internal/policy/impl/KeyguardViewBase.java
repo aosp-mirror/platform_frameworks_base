@@ -50,8 +50,6 @@ public abstract class KeyguardViewBase extends FrameLayout {
     public KeyguardViewBase(Context context) {
         super(context);
 
-        setSystemUiVisibility(STATUS_BAR_DISABLE_BACK);
-
         // This is a faster way to draw the background on devices without hardware acceleration
         setBackgroundDrawable(new Drawable() {
             @Override
