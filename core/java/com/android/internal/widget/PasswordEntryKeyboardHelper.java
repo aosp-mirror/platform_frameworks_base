@@ -26,6 +26,7 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
@@ -52,7 +53,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     private final View mTargetView;
     private final KeyboardView mKeyboardView;
     private long[] mVibratePattern;
-    private final Vibrator mVibrator;
+    private boolean mEnableHaptics = false;
 
     public PasswordEntryKeyboardHelper(Context context, KeyboardView keyboardView, View targetView) {
         this(context, keyboardView, targetView, true);
@@ -71,7 +72,10 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
                     mKeyboardView.getLayoutParams().height);
         }
         mKeyboardView.setOnKeyboardActionListener(this);
-        mVibrator = new Vibrator();
+    }
+
+    public void setEnableHaptics(boolean enabled) {
+        mEnableHaptics = enabled;
     }
 
     public boolean isAlpha() {
@@ -230,6 +234,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
 
     public void handleBackspace() {
         sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
+        performHapticFeedback();
     }
 
     private void handleShift() {
@@ -272,8 +277,14 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     }
 
     public void onPress(int primaryCode) {
-        if (mVibratePattern != null) {
-            mVibrator.vibrate(mVibratePattern, -1);
+        performHapticFeedback();
+    }
+
+    private void performHapticFeedback() {
+        if (mEnableHaptics) {
+            mKeyboardView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                    | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         }
     }
 

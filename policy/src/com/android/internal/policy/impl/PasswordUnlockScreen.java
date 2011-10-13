@@ -28,6 +28,7 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.security.KeyStore;
 import android.text.Editable;
 import android.text.InputType;
@@ -109,6 +110,10 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mPasswordEntry.setOnEditorActionListener(this);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this, false);
+        mKeyboardHelper.setEnableHaptics(
+                Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, 0)
+                        != 0);
         if (mIsAlpha) {
             // We always use the system IME for alpha keyboard, so hide lockscreen's soft keyboard
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
@@ -149,9 +154,6 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             //mStatusViewManager.setHelpMessage(R.string.keyguard_password_enter_pin_code,
                     //KeyguardStatusViewManager.LOCK_ICON);
         }
-
-        mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
-                com.android.internal.R.array.config_virtualKeyVibePattern : 0);
 
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
