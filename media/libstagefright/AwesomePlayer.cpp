@@ -22,7 +22,6 @@
 
 #include <dlfcn.h>
 
-#include "include/ARTSPController.h"
 #include "include/AwesomePlayer.h"
 #include "include/DRMExtractor.h"
 #include "include/SoftwareRenderer.h"
@@ -53,7 +52,6 @@
 #include <gui/SurfaceTextureClient.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 
-#include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
 
 #include <cutils/properties.h>
@@ -65,7 +63,6 @@ namespace android {
 
 static int64_t kLowWaterMarkUs = 2000000ll;  // 2secs
 static int64_t kHighWaterMarkUs = 5000000ll;  // 5secs
-static int64_t kHighWaterMarkRTSPUs = 4000000ll;  // 4secs
 static const size_t kLowWaterMarkBytes = 40000;
 static const size_t kHighWaterMarkBytes = 200000;
 
@@ -485,9 +482,6 @@ void AwesomePlayer::reset_l() {
         if (mConnectingDataSource != NULL) {
             LOGI("interrupting the connection process");
             mConnectingDataSource->disconnect();
-        } else if (mConnectingRTSPController != NULL) {
-            LOGI("interrupting the connection process");
-            mConnectingRTSPController->disconnect();
         }
 
         if (mFlags & PREPARING_CONNECTED) {
@@ -533,11 +527,6 @@ void AwesomePlayer::reset_l() {
     }
 
     mVideoRenderer.clear();
-
-    if (mRTSPController != NULL) {
-        mRTSPController->disconnect();
-        mRTSPController.clear();
-    }
 
     if (mVideoSource != NULL) {
         shutdownVideoDecoder_l();
@@ -612,10 +601,7 @@ bool AwesomePlayer::getBitrate(int64_t *bitrate) {
 bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
     int64_t bitrate;
 
-    if (mRTSPController != NULL) {
-        *durationUs = mRTSPController->getQueueDurationUs(eos);
-        return true;
-    } else if (mCachedSource != NULL && getBitrate(&bitrate)) {
+    if (mCachedSource != NULL && getBitrate(&bitrate)) {
         status_t finalStatus;
         size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&finalStatus);
         *durationUs = cachedDataRemaining * 8000000ll / bitrate;
@@ -751,9 +737,6 @@ void AwesomePlayer::onBufferingUpdate() {
         LOGV("cachedDurationUs = %.2f secs, eos=%d",
              cachedDurationUs / 1E6, eos);
 
-        int64_t highWaterMarkUs =
-            (mRTSPController != NULL) ? kHighWaterMarkRTSPUs : kHighWaterMarkUs;
-
         if ((mFlags & PLAYING) && !eos
                 && (cachedDurationUs < kLowWaterMarkUs)) {
             LOGI("cache is running low (%.2f secs) , pausing.",
@@ -763,7 +746,7 @@ void AwesomePlayer::onBufferingUpdate() {
             ensureCacheIsFetching_l();
             sendCacheStats();
             notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
-        } else if (eos || cachedDurationUs > highWaterMarkUs) {
+        } else if (eos || cachedDurationUs > kHighWaterMarkUs) {
             if (mFlags & CACHE_UNDERRUN) {
                 LOGI("cache has filled up (%.2f secs), resuming.",
                      cachedDurationUs / 1E6);
@@ -1264,10 +1247,7 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 }
 
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
-    if (mRTSPController != NULL) {
-        *positionUs = mRTSPController->getNormalPlayTimeUs();
-    }
-    else if (mSeeking != NO_SEEK) {
+    if (mSeeking != NO_SEEK) {
         *positionUs = mSeekTimeUs;
     } else if (mVideoSource != NULL
             && (mAudioPlayer == NULL || !(mFlags & VIDEO_AT_EOS))) {
@@ -1317,25 +1297,7 @@ status_t AwesomePlayer::setTimedTextTrackIndex(int32_t index) {
     }
 }
 
-// static
-void AwesomePlayer::OnRTSPSeekDoneWrapper(void *cookie) {
-    static_cast<AwesomePlayer *>(cookie)->onRTSPSeekDone();
-}
-
-void AwesomePlayer::onRTSPSeekDone() {
-    if (!mSeekNotificationSent) {
-        notifyListener_l(MEDIA_SEEK_COMPLETE);
-        mSeekNotificationSent = true;
-    }
-}
-
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
-    if (mRTSPController != NULL) {
-        mSeekNotificationSent = false;
-        mRTSPController->seekAsync(timeUs, OnRTSPSeekDoneWrapper, this);
-        return OK;
-    }
-
     if (mFlags & CACHE_UNDERRUN) {
         modifyFlags(CACHE_UNDERRUN, CLEAR);
         play_l();
@@ -1771,7 +1733,6 @@ void AwesomePlayer::onVideoEvent() {
         int64_t latenessUs = nowUs - timeUs;
 
         if (latenessUs > 500000ll
-                && mRTSPController == NULL
                 && mAudioPlayer != NULL
                 && mAudioPlayer->getMediaTimeMapping(
                     &realTimeUs, &mediaTimeUs)) {
@@ -2086,34 +2047,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
                 return UNKNOWN_ERROR;
             }
         }
-    } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
-        if (mLooper == NULL) {
-            mLooper = new ALooper;
-            mLooper->setName("rtsp");
-            mLooper->start();
-        }
-        mRTSPController = new ARTSPController(mLooper);
-        mConnectingRTSPController = mRTSPController;
-
-        if (mUIDValid) {
-            mConnectingRTSPController->setUID(mUID);
-        }
-
-        mLock.unlock();
-        status_t err = mRTSPController->connect(mUri.string());
-        mLock.lock();
-
-        mConnectingRTSPController.clear();
-
-        LOGI("ARTSPController::connect returned %d", err);
-
-        if (err != OK) {
-            mRTSPController.clear();
-            return err;
-        }
-
-        sp<MediaExtractor> extractor = mRTSPController.get();
-        return setDataSource_l(extractor);
     } else {
         dataSource = DataSource::CreateFromURI(mUri.string(), &mUriHeaders);
     }
@@ -2225,7 +2158,7 @@ void AwesomePlayer::onPrepareAsyncEvent() {
 
     modifyFlags(PREPARING_CONNECTED, SET);
 
-    if (isStreamingHTTP() || mRTSPController != NULL) {
+    if (isStreamingHTTP()) {
         postBufferingEvent_l();
     } else {
         finishAsyncPrepare_l();
