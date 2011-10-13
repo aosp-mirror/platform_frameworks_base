@@ -183,9 +183,15 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     filter_data_[min_rtt].point_used = true;
 
     // Compute the error then clamp to the panic threshold.  If we ever exceed
-    // this amt of error, its time to panic and reset the system.
+    // this amt of error, its time to panic and reset the system.  Given that
+    // the error in the measurement of the error could be as high as the RTT of
+    // the data point, we don't actually panic until the implied error (delta)
+    // is greater than the absolute panic threashold plus the RTT.  IOW - we
+    // don't panic until we are absoluely sure that our best case sync is worse
+    // than the absolute panic threshold.
+    int64_t effective_panic_thresh = panic_thresh_ + filter_data_[min_rtt].rtt;
     delta = nominal_common_time - observed_common;
-    if ((delta > panic_thresh_) || (delta < -panic_thresh_)) {
+    if ((delta > effective_panic_thresh) || (delta < -effective_panic_thresh)) {
         // PANIC!!!
         //
         // TODO(johngro) : need to report this to the upper levels of
@@ -233,8 +239,9 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
         applySlew();
     }
 
-    LOGV("observed %lld nominal %lld delta = %5lld "
+    LOGV("rtt %lld observed %lld nominal %lld delta = %5lld "
           "int = %7d correction %3d (P %3d, I %3d, D %3d)\n",
+          filter_data_[min_rtt].rtt,
           observed_common,
           nominal_common_time,
           nominal_common_time - observed_common,
@@ -294,8 +301,8 @@ void ClockRecoveryLoop::computePIDParams() {
     pid_params_.gain_I.doReverseTransform(pid_params_.correction_max, &tmp);
     pid_params_.integrated_delta_max = static_cast<int32_t>(tmp);
 
-    // By default, panic when the sync error is > 50mSec;
-    panic_thresh_ = 50000;
+    // By default, panic when are certain that the sync error is > 20mSec;
+    panic_thresh_ = 20000;
 }
 
 void ClockRecoveryLoop::reset_l(bool position, bool frequency) {
