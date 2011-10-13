@@ -102,6 +102,7 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.google.mp3.decoder" },
+    { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, "OMX.Nvidia.mp2.decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amr.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.google.amrnb.decoder" },
@@ -1462,7 +1463,9 @@ OMXCodec::OMXCodec(
       mOutputPortSettingsChangedPending(false),
       mLeftOverBuffer(NULL),
       mPaused(false),
-      mNativeWindow(!strncmp(componentName, "OMX.google.", 11)
+      mNativeWindow(
+              (!strncmp(componentName, "OMX.google.", 11)
+              || !strcmp(componentName, "OMX.Nvidia.mpeg2v.decode"))
                         ? NULL : nativeWindow) {
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
@@ -1481,6 +1484,12 @@ void OMXCodec::setComponentRole(
     };
 
     static const MimeToRole kMimeToRole[] = {
+        { MEDIA_MIMETYPE_AUDIO_MPEG,
+            "audio_decoder.mp3", "audio_encoder.mp3" },
+        { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I,
+            "audio_decoder.mp1", "audio_encoder.mp1" },
+        { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II,
+            "audio_decoder.mp2", "audio_encoder.mp2" },
         { MEDIA_MIMETYPE_AUDIO_MPEG,
             "audio_decoder.mp3", "audio_encoder.mp3" },
         { MEDIA_MIMETYPE_AUDIO_AMR_NB,

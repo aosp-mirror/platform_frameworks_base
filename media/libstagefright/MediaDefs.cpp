@@ -30,6 +30,8 @@ const char *MEDIA_MIMETYPE_VIDEO_RAW = "video/raw";
 const char *MEDIA_MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
 const char *MEDIA_MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
 const char *MEDIA_MIMETYPE_AUDIO_MPEG = "audio/mpeg";
+const char *MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I = "audio/mpeg-L1";
+const char *MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II = "audio/mpeg-L2";
 const char *MEDIA_MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
 const char *MEDIA_MIMETYPE_AUDIO_QCELP = "audio/qcelp";
 const char *MEDIA_MIMETYPE_AUDIO_VORBIS = "audio/vorbis";
@@ -45,6 +47,7 @@ const char *MEDIA_MIMETYPE_CONTAINER_OGG = "application/ogg";
 const char *MEDIA_MIMETYPE_CONTAINER_MATROSKA = "video/x-matroska";
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG2TS = "video/mp2ts";
 const char *MEDIA_MIMETYPE_CONTAINER_AVI = "video/avi";
+const char *MEDIA_MIMETYPE_CONTAINER_MPEG2PS = "video/mp2p";
 
 const char *MEDIA_MIMETYPE_CONTAINER_WVM = "video/wvm";
 

@@ -64,12 +64,9 @@ struct ATSParser : public RefBase {
 
     bool PTSTimeDeltaEstablished();
 
-protected:
-    virtual ~ATSParser();
-
-private:
     enum {
         // From ISO/IEC 13818-1: 2000 (E), Table 2-29
+        STREAMTYPE_RESERVED             = 0x00,
         STREAMTYPE_MPEG1_VIDEO          = 0x01,
         STREAMTYPE_MPEG2_VIDEO          = 0x02,
         STREAMTYPE_MPEG1_AUDIO          = 0x03,
@@ -79,6 +76,10 @@ private:
         STREAMTYPE_H264                 = 0x1b,
     };
 
+protected:
+    virtual ~ATSParser();
+
+private:
     struct Program;
     struct Stream;
 
