@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
+import android.view.WindowManager;
 
 class AppErrorDialog extends BaseErrorDialog {
     private final static String TAG = "AppErrorDialog";
@@ -73,6 +74,9 @@ class AppErrorDialog extends BaseErrorDialog {
         setTitle(res.getText(com.android.internal.R.string.aerr_title));
         getWindow().addFlags(FLAG_SYSTEM_ERROR);
         getWindow().setTitle("Application Error: " + app.info.processName);
+        if (app.persistent) {
+            getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+        }
 
         // After the timeout, pretend the user clicked the quit button
         mHandler.sendMessageDelayed(
