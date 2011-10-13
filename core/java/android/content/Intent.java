@@ -57,8 +57,8 @@ import java.util.Set;
  *
  * <p>An Intent provides a facility for performing late runtime binding between the code in
  * different applications. Its most significant use is in the launching of activities, where it
- * can be thought of as the glue between activities. It is basically a passive data structure 
- * holding an abstract description of an action to be performed.</p> 
+ * can be thought of as the glue between activities. It is basically a passive data structure
+ * holding an abstract description of an action to be performed.</p>
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -2566,7 +2566,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_LOCAL_ONLY =
         "android.intent.extra.LOCAL_ONLY";
-    
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
@@ -5291,7 +5291,7 @@ public class Intent implements Parcelable, Cloneable {
         if (r != null) {
             mSourceBounds = new Rect(r);
         } else {
-            r = null;
+            mSourceBounds = null;
         }
     }
 
