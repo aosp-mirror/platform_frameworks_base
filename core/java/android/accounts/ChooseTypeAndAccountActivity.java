@@ -47,7 +47,7 @@ import java.util.Set;
  */
 public class ChooseTypeAndAccountActivity extends Activity
         implements AccountManagerCallback<Bundle> {
-    private static final String TAG = "AccountManager";
+    private static final String TAG = "AccountChooser";
 
     /**
      * A Parcelable ArrayList of Account objects that limits the choosable accounts to those
@@ -100,12 +100,38 @@ public class ChooseTypeAndAccountActivity extends Activity
     public static final String EXTRA_DESCRIPTION_TEXT_OVERRIDE =
             "descriptionTextOverride";
 
+    public static final int REQUEST_NULL = 0;
+    public static final int REQUEST_CHOOSE_TYPE = 1;
+    public static final int REQUEST_ADD_ACCOUNT = 2;
+
+    private static final String KEY_INSTANCE_STATE_PENDING_REQUEST = "pendingRequest";
+    private static final String KEY_INSTANCE_STATE_EXISTING_ACCOUNTS = "existingAccounts";
+
     private ArrayList<AccountInfo> mAccountInfos;
+    private int mPendingRequest = REQUEST_NULL;
+    private Parcelable[] mExistingAccounts = null;
+    private Parcelable[] mSavedAccounts = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseTypeAndAccountActivity.onCreate(savedInstanceState="
+                    + savedInstanceState + ")");
+        }
+
         setContentView(R.layout.choose_type_and_account);
+
+        if (savedInstanceState != null) {
+            mPendingRequest = savedInstanceState.getInt(KEY_INSTANCE_STATE_PENDING_REQUEST);
+            mSavedAccounts =
+                    savedInstanceState.getParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS);
+            mExistingAccounts = null;
+        } else {
+            mPendingRequest = REQUEST_NULL;
+            mSavedAccounts = null;
+            mExistingAccounts = null;
+        }
 
         // save some items we use frequently
         final AccountManager accountManager = AccountManager.get(this);
@@ -171,20 +197,6 @@ public class ChooseTypeAndAccountActivity extends Activity
                     account.equals(selectedAccount)));
         }
 
-        // If there are no allowable accounts go directly to add account
-        if (mAccountInfos.isEmpty()) {
-            startChooseAccountTypeActivity();
-            return;
-        }
-
-        // if there is only one allowable account return it
-        if (!intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false)
-                && mAccountInfos.size() == 1) {
-            Account account = mAccountInfos.get(0).account;
-            setResultAndFinish(account.name, account.type);
-            return;
-        }
-
         // there is more than one allowable account. initialize the list adapter to allow
         // the user to select an account.
         ListView list = (ListView) findViewById(android.R.id.list);
@@ -204,6 +216,37 @@ public class ChooseTypeAndAccountActivity extends Activity
                 startChooseAccountTypeActivity();
             }
         });
+
+        if (mPendingRequest == REQUEST_NULL) {
+            // If there are no allowable accounts go directly to add account
+            if (mAccountInfos.isEmpty()) {
+                startChooseAccountTypeActivity();
+                return;
+            }
+
+            // if there is only one allowable account return it
+            if (!intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false)
+                    && mAccountInfos.size() == 1) {
+                Account account = mAccountInfos.get(0).account;
+                setResultAndFinish(account.name, account.type);
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseTypeAndAccountActivity.onDestroy()");
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_INSTANCE_STATE_PENDING_REQUEST, mPendingRequest);
+        outState.putParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS, mExistingAccounts);
     }
 
     // Called when the choose account type activity (for adding an account) returns.
@@ -212,20 +255,75 @@ public class ChooseTypeAndAccountActivity extends Activity
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode,
             final Intent data) {
-        if (resultCode == RESULT_OK && data != null) {
-            String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
-            if (accountType != null) {
-                runAddAccountForAuthenticator(accountType);
-                return;
-            }
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (data != null && data.getExtras() != null) data.getExtras().keySet();
+            Bundle extras = data != null ? data.getExtras() : null;
+            Log.v(TAG, "ChooseTypeAndAccountActivity.onActivityResult(reqCode=" + requestCode
+                    + ", resCode=" + resultCode + ", extras=" + extras + ")");
         }
-        Log.d(TAG, "ChooseTypeAndAccountActivity.onActivityResult: canceled");
+
+        // we got our result, so clear the fact that we had a pending request
+        mPendingRequest = REQUEST_NULL;
+        mExistingAccounts = null;
+
+        if (resultCode == RESULT_CANCELED) {
+            return;
+        }
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CHOOSE_TYPE) {
+                if (data != null) {
+                    String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                    if (accountType != null) {
+                        runAddAccountForAuthenticator(accountType);
+                        return;
+                    }
+                }
+                Log.d(TAG, "ChooseTypeAndAccountActivity.onActivityResult: unable to find account "
+                        + "type, pretending the request was canceled");
+            } else if (requestCode == REQUEST_ADD_ACCOUNT) {
+                String accountName = null;
+                String accountType = null;
+
+                if (data != null) {
+                    accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                }
+
+                if (accountName == null || accountType == null) {
+                    Account[] currentAccounts = AccountManager.get(this).getAccounts();
+                    Set<Account> preExistingAccounts = new HashSet<Account>();
+                    for (Parcelable accountParcel : mSavedAccounts) {
+                        preExistingAccounts.add((Account) accountParcel);
+                    }
+                    for (Account account : currentAccounts) {
+                        if (!preExistingAccounts.contains(account)) {
+                            accountName = account.name;
+                            accountType = account.type;
+                            break;
+                        }
+                    }
+                }
+
+                if (accountName != null || accountType != null) {
+                    setResultAndFinish(accountName, accountType);
+                    return;
+                }
+            }
+            Log.d(TAG, "ChooseTypeAndAccountActivity.onActivityResult: unable to find added "
+                    + "account, pretending the request was canceled");
+        }
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseTypeAndAccountActivity.onActivityResult: canceled");
+        }
         setResult(Activity.RESULT_CANCELED);
         finish();
     }
 
     protected void runAddAccountForAuthenticator(String type) {
-        Log.d(TAG, "selected account type " + type);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "runAddAccountForAuthenticator: " + type);
+        }
         final Bundle options = getIntent().getBundleExtra(
                 ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE);
         final String[] requiredFeatures = getIntent().getStringArrayExtra(
@@ -233,20 +331,19 @@ public class ChooseTypeAndAccountActivity extends Activity
         final String authTokenType = getIntent().getStringExtra(
                 ChooseTypeAndAccountActivity.EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING);
         AccountManager.get(this).addAccount(type, authTokenType, requiredFeatures,
-                options, this, this, null /* Handler */);
+                options, null /* activity */, this /* callback */, null /* Handler */);
     }
 
     public void run(final AccountManagerFuture<Bundle> accountManagerFuture) {
         try {
             final Bundle accountManagerResult = accountManagerFuture.getResult();
-            final String name = accountManagerResult.getString(AccountManager.KEY_ACCOUNT_NAME);
-            final String type = accountManagerResult.getString(AccountManager.KEY_ACCOUNT_TYPE);
-            if (name != null && type != null) {
-                final Bundle bundle = new Bundle();
-                bundle.putString(AccountManager.KEY_ACCOUNT_NAME, name);
-                bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, type);
-                setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
-                finish();
+            final Intent intent = (Intent)accountManagerResult.getParcelable(
+                    AccountManager.KEY_INTENT);
+            if (intent != null) {
+                mPendingRequest = REQUEST_ADD_ACCOUNT;
+                mExistingAccounts = AccountManager.get(this).getAccounts();
+                intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivityForResult(intent, REQUEST_ADD_ACCOUNT);
                 return;
             }
         } catch (OperationCanceledException e) {
@@ -297,12 +394,17 @@ public class ChooseTypeAndAccountActivity extends Activity
         bundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
         bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
         setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
-        Log.d(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: "
-                + "selected account " + accountName + ", " + accountType);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: "
+                    + "selected account " + accountName + ", " + accountType);
+        }
         finish();
     }
 
     private void startChooseAccountTypeActivity() {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "ChooseAccountTypeActivity.startChooseAccountTypeActivity()");
+        }
         final Intent intent = new Intent(this, ChooseAccountTypeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         intent.putExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
@@ -313,7 +415,8 @@ public class ChooseTypeAndAccountActivity extends Activity
                 getIntent().getStringArrayExtra(EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY));
         intent.putExtra(EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING,
                 getIntent().getStringExtra(EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING));
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, REQUEST_CHOOSE_TYPE);
+        mPendingRequest = REQUEST_CHOOSE_TYPE;
     }
 
     private static class AccountInfo {
