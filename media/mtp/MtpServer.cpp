@@ -947,7 +947,12 @@ MtpResponseCode MtpServer::doSendObject() {
 
     if (mSendObjectFileSize - initialData > 0) {
         mfr.offset = initialData;
-        mfr.length = mSendObjectFileSize - initialData;
+        if (mSendObjectFileSize == 0xFFFFFFFF) {
+            // tell driver to read until it receives a short packet
+            mfr.length = 0xFFFFFFFF;
+        } else {
+            mfr.length = mSendObjectFileSize - initialData;
+        }
 
         LOGV("receiving %s\n", (const char *)mSendObjectFilePath);
         // transfer the file
