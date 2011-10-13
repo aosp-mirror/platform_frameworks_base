@@ -34,8 +34,8 @@
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/foundation/base64.h>
 #include <media/stagefright/foundation/hexdump.h>
-#include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <utils/Vector.h>
 
@@ -402,42 +402,14 @@ static sp<ABuffer> MakeMPEG4VideoCodecSpecificData(
     return csd;
 }
 
-static bool GetClockRate(const AString &desc, uint32_t *clockRate) {
-    ssize_t slashPos = desc.find("/");
-    if (slashPos < 0) {
-        return false;
-    }
-
-    const char *s = desc.c_str() + slashPos + 1;
-
-    char *end;
-    unsigned long x = strtoul(s, &end, 10);
-
-    if (end == s || (*end != '\0' && *end != '/')) {
-        return false;
-    }
-
-    *clockRate = x;
-
-    return true;
-}
-
 APacketSource::APacketSource(
         const sp<ASessionDescription> &sessionDesc, size_t index)
     : mInitCheck(NO_INIT),
-      mFormat(new MetaData),
-      mEOSResult(OK),
-      mIsAVC(false),
-      mScanForIDR(true),
-      mRTPTimeBase(0),
-      mNormalPlayTimeBaseUs(0),
-      mLastNormalPlayTimeUs(0) {
+      mFormat(new MetaData) {
     unsigned long PT;
     AString desc;
     AString params;
     sessionDesc->getFormatType(index, &PT, &desc, &params);
-
-    CHECK(GetClockRate(desc, &mClockRate));
 
     int64_t durationUs;
     if (sessionDesc->getDurationUs(&durationUs)) {
@@ -448,8 +420,6 @@ APacketSource::APacketSource(
 
     mInitCheck = OK;
     if (!strncmp(desc.c_str(), "H264/", 5)) {
-        mIsAVC = true;
-
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
 
         int32_t width, height;
@@ -602,137 +572,8 @@ status_t APacketSource::initCheck() const {
     return mInitCheck;
 }
 
-status_t APacketSource::start(MetaData *params) {
-    return OK;
-}
-
-status_t APacketSource::stop() {
-    return OK;
-}
-
 sp<MetaData> APacketSource::getFormat() {
     return mFormat;
-}
-
-status_t APacketSource::read(
-        MediaBuffer **out, const ReadOptions *) {
-    *out = NULL;
-
-    Mutex::Autolock autoLock(mLock);
-    while (mEOSResult == OK && mBuffers.empty()) {
-        mCondition.wait(mLock);
-    }
-
-    if (!mBuffers.empty()) {
-        const sp<ABuffer> buffer = *mBuffers.begin();
-
-        updateNormalPlayTime_l(buffer);
-
-        int64_t timeUs;
-        CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
-
-        MediaBuffer *mediaBuffer = new MediaBuffer(buffer);
-        mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
-
-        *out = mediaBuffer;
-
-        mBuffers.erase(mBuffers.begin());
-        return OK;
-    }
-
-    return mEOSResult;
-}
-
-void APacketSource::updateNormalPlayTime_l(const sp<ABuffer> &buffer) {
-    uint32_t rtpTime;
-    CHECK(buffer->meta()->findInt32("rtp-time", (int32_t *)&rtpTime));
-
-    mLastNormalPlayTimeUs =
-        (((double)rtpTime - (double)mRTPTimeBase) / mClockRate)
-            * 1000000ll
-            + mNormalPlayTimeBaseUs;
-}
-
-void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
-    int32_t damaged;
-    if (buffer->meta()->findInt32("damaged", &damaged) && damaged) {
-        LOGV("discarding damaged AU");
-        return;
-    }
-
-    if (mScanForIDR && mIsAVC) {
-        // This pretty piece of code ensures that the first access unit
-        // fed to the decoder after stream-start or seek is guaranteed to
-        // be an IDR frame. This is to workaround limitations of a certain
-        // hardware h.264 decoder that requires this to be the case.
-
-        if (!IsIDR(buffer)) {
-            LOGV("skipping AU while scanning for next IDR frame.");
-            return;
-        }
-
-        mScanForIDR = false;
-    }
-
-    Mutex::Autolock autoLock(mLock);
-    mBuffers.push_back(buffer);
-    mCondition.signal();
-}
-
-void APacketSource::signalEOS(status_t result) {
-    CHECK(result != OK);
-
-    Mutex::Autolock autoLock(mLock);
-    mEOSResult = result;
-    mCondition.signal();
-}
-
-void APacketSource::flushQueue() {
-    Mutex::Autolock autoLock(mLock);
-    mBuffers.clear();
-
-    mScanForIDR = true;
-}
-
-int64_t APacketSource::getNormalPlayTimeUs() {
-    Mutex::Autolock autoLock(mLock);
-    return mLastNormalPlayTimeUs;
-}
-
-void APacketSource::setNormalPlayTimeMapping(
-        uint32_t rtpTime, int64_t normalPlayTimeUs) {
-    Mutex::Autolock autoLock(mLock);
-
-    mRTPTimeBase = rtpTime;
-    mNormalPlayTimeBaseUs = normalPlayTimeUs;
-}
-
-int64_t APacketSource::getQueueDurationUs(bool *eos) {
-    Mutex::Autolock autoLock(mLock);
-
-    *eos = (mEOSResult != OK);
-
-    if (mBuffers.size() < 2) {
-        return 0;
-    }
-
-    const sp<ABuffer> first = *mBuffers.begin();
-    const sp<ABuffer> last = *--mBuffers.end();
-
-    int64_t firstTimeUs;
-    CHECK(first->meta()->findInt64("timeUs", &firstTimeUs));
-
-    int64_t lastTimeUs;
-    CHECK(last->meta()->findInt64("timeUs", &lastTimeUs));
-
-    if (lastTimeUs < firstTimeUs) {
-        LOGE("Huh? Time moving backwards? %lld > %lld",
-             firstTimeUs, lastTimeUs);
-
-        return 0;
-    }
-
-    return lastTimeUs - firstTimeUs;
 }
 
 }  // namespace android

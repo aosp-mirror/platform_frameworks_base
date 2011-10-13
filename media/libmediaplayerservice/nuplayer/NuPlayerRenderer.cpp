@@ -219,7 +219,9 @@ void NuPlayer::Renderer::signalAudioSinkChanged() {
 
 bool NuPlayer::Renderer::onDrainAudioQueue() {
     uint32_t numFramesPlayed;
-    CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed), (status_t)OK);
+    if (mAudioSink->getPosition(&numFramesPlayed) != OK) {
+        return false;
+    }
 
     ssize_t numFramesAvailableToWrite =
         mAudioSink->frameCount() - (mNumFramesWritten - numFramesPlayed);
