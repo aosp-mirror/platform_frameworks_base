@@ -267,12 +267,12 @@ static void wc_x(void *usr, uint32_t idx) {
             return;
         }
 
-        //LOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
+        //LOGE("usr slice %i idx %i, x %i,%i", slice, idx, xStart, xEnd);
         //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
+
         p.out = mtls->ptrOut + (mtls->eStrideOut * xStart);
         p.in = mtls->ptrIn + (mtls->eStrideIn * xStart);
-        fn(&mtls->script->mHal.info.root, &p, mtls->xStart, mtls->xEnd,
-           mtls->eStrideIn, mtls->eStrideOut);
+        fn(&mtls->script->mHal.info.root, &p, xStart, xEnd, mtls->eStrideIn, mtls->eStrideOut);
     }
 }
 
