@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -498,8 +499,24 @@ public class SearchManager
                             ComponentName launchActivity,
                             Bundle appSearchData,
                             boolean globalSearch) {
+        startSearch(initialQuery, selectInitialQuery, launchActivity,
+                appSearchData, globalSearch, null);
+    }
+
+    /**
+     * As {@link #startSearch(String, boolean, ComponentName, Bundle, boolean)} but including
+     * source bounds for the global search intent.
+     *
+     * @hide
+     */
+    public void startSearch(String initialQuery,
+                            boolean selectInitialQuery,
+                            ComponentName launchActivity,
+                            Bundle appSearchData,
+                            boolean globalSearch,
+                            Rect sourceBounds) {
         if (globalSearch) {
-            startGlobalSearch(initialQuery, selectInitialQuery, appSearchData);
+            startGlobalSearch(initialQuery, selectInitialQuery, appSearchData, sourceBounds);
             return;
         }
 
@@ -520,7 +537,7 @@ public class SearchManager
      * Starts the global search activity.
      */
     /* package */ void startGlobalSearch(String initialQuery, boolean selectInitialQuery,
-            Bundle appSearchData) {
+            Bundle appSearchData, Rect sourceBounds) {
         ComponentName globalSearchActivity = getGlobalSearchActivity();
         if (globalSearchActivity == null) {
             Log.w(TAG, "No global search activity found.");
@@ -546,6 +563,7 @@ public class SearchManager
         if (selectInitialQuery) {
             intent.putExtra(EXTRA_SELECT_QUERY, selectInitialQuery);
         }
+        intent.setSourceBounds(sourceBounds);
         try {
             if (DBG) Log.d(TAG, "Starting global search: " + intent.toUri(0));
             mContext.startActivity(intent);
