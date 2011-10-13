@@ -4053,6 +4053,14 @@ public final class Settings {
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
         /**
+         * Duration in milliseconds before pre-authorized URIs for the contacts
+         * provider should expire.
+         * @hide
+         */
+        public static final String CONTACTS_PREAUTH_URI_EXPIRATION =
+                "contacts_preauth_uri_expiration";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
