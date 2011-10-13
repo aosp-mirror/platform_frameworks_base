@@ -1234,10 +1234,22 @@ uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
 }
 
 
-void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state) {
+void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
+        int orientation) {
     Mutex::Autolock _l(mStateLock);
 
     uint32_t flags = 0;
+    if (mCurrentState.orientation != orientation) {
+        if (uint32_t(orientation)<=eOrientation270 || orientation==42) {
+            mCurrentState.orientation = orientation;
+            flags |= eTransactionNeeded;
+            mResizeTransationPending = true;
+        } else if (orientation != eOrientationUnchanged) {
+            LOGW("setTransactionState: ignoring unrecognized orientation: %d",
+                    orientation);
+        }
+    }
+
     const size_t count = state.size();
     for (size_t i=0 ; i<count ; i++) {
         const ComposerState& s(state[i]);

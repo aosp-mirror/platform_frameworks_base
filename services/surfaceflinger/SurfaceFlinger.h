@@ -167,7 +167,8 @@ public:
     virtual sp<IGraphicBufferAlloc>     createGraphicBufferAlloc();
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
-    virtual void                        setTransactionState(const Vector<ComposerState>& state);
+    virtual void                        setTransactionState(const Vector<ComposerState>& state,
+                                                            int orientation);
     virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
