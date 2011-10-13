@@ -117,9 +117,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     private final int MSG_SHOW_FACELOCK_AREA_VIEW = 0;
     private final int MSG_HIDE_FACELOCK_AREA_VIEW = 1;
 
-    // Long enough to stay black while dialer comes up
-    // Short enough to not be black if the user goes back immediately
-    private final int FACELOCK_VIEW_AREA_EMERGENCY_HIDE_TIMEOUT = 1000;
+    // Long enough to stay visible while dialer comes up
+    // Short enough to not be visible if the user goes back immediately
+    private final int FACELOCK_VIEW_AREA_EMERGENCY_DIALER_TIMEOUT = 1000;
+
+    // Long enough to stay visible while the service starts
+    // Short enough to not have to wait long for backup if service fails to start or crashes
+    // The service can take a couple of seconds to start on the first try after boot
+    private final int FACELOCK_VIEW_AREA_SERVICE_TIMEOUT = 3000;
 
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
@@ -328,9 +333,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 // FaceLock must be stopped if it is running when emergency call is pressed
                 stopAndUnbindFromFaceLock();
 
-                // Delay hiding FaceLock area so unlock doesn't display while dialer is coming up
-                mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACELOCK_AREA_VIEW,
-                        FACELOCK_VIEW_AREA_EMERGENCY_HIDE_TIMEOUT);
+                // Continue showing FaceLock area until dialer comes up
+                showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_EMERGENCY_DIALER_TIMEOUT);
 
                 pokeWakelock(EMERGENCY_CALL_TIMEOUT);
                 if (TelephonyManager.getDefault().getCallState()
@@ -529,11 +533,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
                 && transportInvisible) {
             bindToFaceLock();
-            //Eliminate the black background so that the lockpattern will be visible
-            //If FaceUnlock is cancelled
-            mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACELOCK_AREA_VIEW, 4000);
+            // Show FaceLock area, but only for a little bit so lockpattern will become visible if
+            // FaceLock fails to start or crashes
+            showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_SERVICE_TIMEOUT);
         } else {
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+            hideFaceLockArea();
         }
     }
 
@@ -563,7 +567,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         }
         if(!hasWindowFocus) {
             stopAndUnbindFromFaceLock();
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+            hideFaceLockArea();
         } else if (runFaceLock) {
             //Don't activate facelock while the user is calling 911!
             if(mEmergencyCall) mEmergencyCall = false;
@@ -583,9 +587,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
         if (mLockPatternUtils.usingBiometricWeak() &&
                 mLockPatternUtils.isBiometricWeakInstalled()) {
-            mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW);
+            showFaceLockArea();
         } else {
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+            hideFaceLockArea();
         }
     }
 
@@ -652,7 +656,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         if (DEBUG) Log.d(TAG, "phone state: " + phoneState);
         if(phoneState == TelephonyManager.CALL_STATE_RINGING) {
             stopAndUnbindFromFaceLock();
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+            hideFaceLockArea();
         }
     }
 
@@ -1085,6 +1089,32 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         return true;
     }
 
+    // Removes show and hide messages from the message queue
+    private void removeFaceLockAreaDisplayMessages() {
+        mHandler.removeMessages(MSG_SHOW_FACELOCK_AREA_VIEW);
+        mHandler.removeMessages(MSG_HIDE_FACELOCK_AREA_VIEW);
+    }
+
+    // Shows the FaceLock area immediately
+    private void showFaceLockArea() {
+        // Remove messages to prevent a delayed hide message from undo-ing the show
+        removeFaceLockAreaDisplayMessages();
+        mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW);
+    }
+
+    // Hides the FaceLock area immediately
+    private void hideFaceLockArea() {
+        // Remove messages to prevent a delayed show message from undo-ing the hide
+        removeFaceLockAreaDisplayMessages();
+        mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW);
+    }
+
+    // Shows the FaceLock area for a period of time
+    private void showFaceLockAreaWithTimeout(long timeoutMillis) {
+        showFaceLockArea();
+        mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACELOCK_AREA_VIEW, timeoutMillis);
+    }
+
     // Binds to FaceLock service, but does not tell it to start
     public void bindToFaceLock() {
         if (mLockPatternUtils.usingBiometricWeak() &&
@@ -1130,7 +1160,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             try {
                 mFaceLockService.registerCallback(mFaceLockCallback);
             } catch (RemoteException e) {
-                throw new RuntimeException("Remote exception");
+                Log.e(TAG, "Caught exception connecting to FaceLock: " + e.toString());
+                mFaceLockService = null;
+                mBoundToFaceLockService = false;
+                return;
             }
 
             if (mFaceLockAreaView != null) {
@@ -1147,6 +1180,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 mFaceLockService = null;
                 mFaceLockServiceRunning = false;
             }
+            mBoundToFaceLockService = false;
             Log.w(TAG, "Unexpected disconnect from FaceLock service");
         }
     };
@@ -1162,7 +1196,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                     try {
                         mFaceLockService.startUi(windowToken, x, y, h, w);
                     } catch (RemoteException e) {
-                        throw new RuntimeException("Remote exception");
+                        Log.e(TAG, "Caught exception starting FaceLock: " + e.toString());
+                        return;
                     }
                     mFaceLockServiceRunning = true;
                 } else {
@@ -1186,7 +1221,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                         if (DEBUG) Log.d(TAG, "Stopping FaceLock");
                         mFaceLockService.stopUi();
                     } catch (RemoteException e) {
-                        throw new RuntimeException("Remote exception");
+                        Log.e(TAG, "Caught exception stopping FaceLock: " + e.toString());
                     }
                     mFaceLockServiceRunning = false;
                 }
@@ -1201,7 +1236,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         @Override
         public void unlock() {
             if (DEBUG) Log.d(TAG, "FaceLock unlock()");
-            mHandler.sendEmptyMessage(MSG_SHOW_FACELOCK_AREA_VIEW); // Keep fallback covered
+            showFaceLockArea(); // Keep fallback covered
             stopFaceLock();
 
             mKeyguardScreenCallback.keyguardDone(true);
@@ -1213,7 +1248,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         @Override
         public void cancel() {
             if (DEBUG) Log.d(TAG, "FaceLock cancel()");
-            mHandler.sendEmptyMessage(MSG_HIDE_FACELOCK_AREA_VIEW); // Expose fallback
+            hideFaceLockArea(); // Expose fallback
             stopFaceLock();
         }
 
