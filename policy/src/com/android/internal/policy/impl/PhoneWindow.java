@@ -349,8 +349,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         // Already prepared (isPrepared will be reset to false later)
-        if (st.isPrepared)
+        if (st.isPrepared) {
             return true;
+        }
         
         if ((mPreparedPanel != null) && (mPreparedPanel != st)) {
             // Another Panel is prepared and possibly open, so close it
@@ -800,14 +801,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     closePanel(st, true);
 
                 } else if (st.isPrepared) {
+                    boolean show = true;
+                    if (st.refreshMenuContent) {
+                        // Something may have invalidated the menu since we prepared it.
+                        // Re-prepare it to refresh.
+                        st.isPrepared = false;
+                        show = preparePanel(st, event);
+                    }
 
-                    // Write 'menu opened' to event log
-                    EventLog.writeEvent(50001, 0);
+                    if (show) {
+                        // Write 'menu opened' to event log
+                        EventLog.writeEvent(50001, 0);
 
-                    // Show menu
-                    openPanel(st, event);
+                        // Show menu
+                        openPanel(st, event);
 
-                    playSoundEffect = true;
+                        playSoundEffect = true;
+                    }
                 }
             }
 
