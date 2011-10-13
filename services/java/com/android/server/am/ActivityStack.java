@@ -2067,7 +2067,7 @@ final class ActivityStack {
      * task starting at a specified index.
      */
     private final void performClearTaskAtIndexLocked(int taskId, int i) {
-        while (i < (mHistory.size()-1)) {
+        while (i < mHistory.size()) {
             ActivityRecord r = mHistory.get(i);
             if (r.task.taskId != taskId) {
                 // Whoops hit the end.
