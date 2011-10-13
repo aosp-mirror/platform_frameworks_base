@@ -66,7 +66,12 @@ padding: .25em 1em;
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
     width="9px" />SDK Tools, Revision 14</a> <em>(October 2011)</em>
+
   <div class="toggleme">
+    <p class="note"><strong>Important:</strong> To download the new Android
+    4.0 system components from the Android SDK Manager, you must first update the
+    SDK tools to revision 14 and restart the Android SDK Manager. If you do not,
+    the Android 4.0 system components will not be available for download.</p>
   <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -81,6 +86,9 @@ padding: .25em 1em;
 <dt>General notes:</dt>
 <dd>
   <ul>
+    <li>Added webcam support to Android 4.0 or later platforms to emulate rear-facing cameras when one webcam is present,
+    and to emulate both rear-facing and front-facing cameras when two webcams are present. Webcam suport is for Windows and Linux only.
+    Mac support will come in a later release.</li>
      <li>Changed <code>default.properties</code> to <code>project.properties</code> and
     <code>build.properties</code> to <code>ant.properties</code>. Any existing
     projects that you build with Ant must be updated with the <code>android update project</code>
@@ -90,7 +98,6 @@ padding: .25em 1em;
 commands, see the
 <a href="{@docRoot}guide/developing/building/building-cmdline.html#AntReference">Ant Command
 Reference</a>.</li>
-
     <li>Changed how library projects are built.</a></li>
     <li>Improved incremental builds, so that resource compilation runs less frequently. Builds no
     longer run when you edit strings or layouts (unless you add a new <code>id</code>) and no longer
