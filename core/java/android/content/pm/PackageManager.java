@@ -2124,6 +2124,9 @@ public abstract class PackageManager {
         if (pkg == null) {
             return null;
         }
+        if ((flags & GET_SIGNATURES) != 0) {
+            packageParser.collectCertificates(pkg, 0);
+        }
         return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0);
     }
 
