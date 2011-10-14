@@ -29,7 +29,7 @@ application</li>
 especially <a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a></li>
     <li>Read the <a href="{@docRoot}guide/topics/fundamentals/index.html">Application
 Fundamentals</a></li>
-    <li>Read the <a href="{@docRoot}guide/developing/index.html">Overview</a> for using the SDK
+    <li>Read the <a href="{@docRoot}guide/developing/index.html">Introduction</a> for using the SDK
 tools</li>
   </ul>
 </div>
@@ -43,9 +43,6 @@ will help you setup your development environment.</p>
 <h3>If you've installed new SDK components using the SDK and AVD Manager</h3>
 
 <p>There's no additional setup.</p>
-
-<p>New Android platforms are saved in the <code>&lt;sdk>/platforms/</code> directory of
-your existing SDK and new add-ons are saved in the <code>&lt;sdk>/add-ons/</code> directory.</p>
 
 
 <div class="note">
