@@ -100,8 +100,8 @@ class="toggle-content-img" alt="" />
       <li><a href="#Multimedia">Multimedia</a></li>
       <li><a href="#Bluetooth">Bluetooth</a></li>
       <li><a href="#AndroidBeam">Android Beam (NDEF Push with NFC)</a></li>
-      <li><a href="#P2pWiFi">Peer-to-peer Wi-Fi</a></li>
-      <li><a href="#NetworkData">Network Data</a></li>
+      <li><a href="#WiFiDirect">Wi-Fi Direct</a></li>
+      <li><a href="#NetworkUsage">Network Usage</a></li>
       <li><a href="#RenderScript">RenderScript</a></li>
       <li><a href="#A11y">Accessibility</a></li>
       <li><a href="#Enterprise">Enterprise</a></li>
@@ -653,7 +653,7 @@ Beam Demo</a> sample app.</p>
 
 
 
-<h3 id="P2pWiFi">Peer-to-peer Wi-Fi</h3>
+<h3 id="WiFiDirect">Wi-Fi Direct</h3>
 
 <p>Android now supports Wi-Fi Direct for peer-to-peer (P2P) connections between Android-powered
 devices and other device types without a hotspot or Internet connection. The Android framework
@@ -739,7 +739,7 @@ sample application.</p>
 
 
 
-<h3 id="NetworkData">Network Data</h3>
+<h3 id="NetworkUsage">Network Usage</h3>
 
 <p>Android 4.0 gives users precise visibility of how much network data their applications are using.
 The Settings app provides controls that allow users to manage set limits for network data usage and
