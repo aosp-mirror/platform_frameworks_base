@@ -402,8 +402,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
 		-samplecode $(sample_dir)/ActionBarCompat \
 		            resources/samples/ActionBarCompat "Action Bar Compatibility" \
-                -samplecode $(sample_dir)/AndroidBeam \
-		            resources/samples/AndroidBeam "Android Beam" \
+                -samplecode $(sample_dir)/AndroidBeamDemo \
+		            resources/samples/AndroidBeam "Android Beam Demo" \
 		-samplecode $(sample_dir)/ApiDemos \
 		            resources/samples/ApiDemos "API Demos" \
 		-samplecode $(sample_dir)/Support4Demos \
