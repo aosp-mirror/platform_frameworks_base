@@ -341,7 +341,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         }
         final int imageResId;
         final int imageDescId;
-        final boolean showIfHidden;
+        boolean showIfHidden = false;
         switch (state) {
             case RemoteControlClient.PLAYSTATE_ERROR:
                 imageResId = com.android.internal.R.drawable.stat_sys_warning;
