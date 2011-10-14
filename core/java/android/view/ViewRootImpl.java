@@ -425,20 +425,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     }
                 }
 
+                CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
+                mTranslator = compatibilityInfo.getTranslator();
+
                 // If the application owns the surface, don't enable hardware acceleration
                 if (mSurfaceHolder == null) {
                     enableHardwareAcceleration(attrs);
                 }
 
-                CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
-                mTranslator = compatibilityInfo.getTranslator();
-
-                if (mTranslator != null) {
-                    mSurface.setCompatibilityTranslator(mTranslator);
-                }
-
                 boolean restore = false;
                 if (mTranslator != null) {
+                    mSurface.setCompatibilityTranslator(mTranslator);
                     restore = true;
                     attrs.backup();
                     mTranslator.translateWindowLayout(attrs);
@@ -589,6 +586,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;
+
+        // Don't enable hardware acceleration when the application is in compatibility mode
+        if (mTranslator != null) return;
 
         // Try to enable hardware acceleration if requested
         final boolean hardwareAccelerated = 
