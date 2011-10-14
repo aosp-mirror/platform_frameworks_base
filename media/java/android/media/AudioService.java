@@ -85,8 +85,7 @@ public class AudioService extends IAudioService.Stub {
     private static final String TAG = "AudioService";
 
     /** Debug remote control client/display feature */
-    // TODO set to false before release
-    protected static final boolean DEBUG_RC = true;
+    protected static final boolean DEBUG_RC = false;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 3000;
