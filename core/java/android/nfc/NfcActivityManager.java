@@ -162,6 +162,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub {
     synchronized void maybeRemoveState(Activity activity, NfcActivityState state) {
         if (state.ndefMessage == null && state.ndefMessageCallback == null &&
                 state.onNdefPushCompleteCallback == null) {
+            NfcFragment.remove(activity);
             mNfcState.remove(activity);
         }
     }
