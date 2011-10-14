@@ -22,8 +22,8 @@ uint8_t *buf;
 
 void root(uchar *v_out, uint32_t x) {
     uint8_t *p = buf;
-    p += x * 2048;
-    for (int i=0; i<2048; i++) {
+    p += x * dim;
+    for (int i=0; i<dim; i++) {
         p[i] = 1;
     }
 }
