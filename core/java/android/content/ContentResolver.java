@@ -54,6 +54,12 @@ import java.util.Random;
 
 /**
  * This class provides applications access to the content model.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using a ContentResolver with content providers, read the
+ * <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+ * developer guide.</p>
  */
 public abstract class ContentResolver {
     /**

@@ -418,7 +418,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <h3>Drawing</h3>
  * <p>
  * Drawing is handled by walking the tree and rendering each view that
- * intersects the the invalid region. Because the tree is traversed in-order,
+ * intersects the invalid region. Because the tree is traversed in-order,
  * this means that parents will draw before (i.e., behind) their children, with
  * siblings drawn in the order they appear in the tree.
  * If you set a background drawable for a View, then the View will draw it for you
@@ -8364,7 +8364,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         !((ViewGroup) mParent).isViewTransitioning(this));
     }
     /**
-     * Mark the the area defined by dirty as needing to be drawn. If the view is
+     * Mark the area defined by dirty as needing to be drawn. If the view is
      * visible, {@link #onDraw(android.graphics.Canvas)} will be called at some point
      * in the future. This must be called from a UI thread. To call from a non-UI
      * thread, call {@link #postInvalidate()}.
@@ -8409,7 +8409,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Mark the the area defined by the rect (l,t,r,b) as needing to be drawn.
+     * Mark the area defined by the rect (l,t,r,b) as needing to be drawn.
      * The coordinates of the dirty rect are relative to the view.
      * If the view is visible, {@link #onDraw(android.graphics.Canvas)}
      * will be called at some point in the future. This must be called from
@@ -13095,6 +13095,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *  {@link android.graphics.Canvas} object, then it calls {@link #onDrawShadow(Canvas) onDrawShadow()}
      *  so that your application can draw the shadow image in the Canvas.
      * </p>
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For a guide to implementing drag and drop features, read the
+     * <a href="{@docRoot}guide/topics/ui/drag-drop.html">Drag and Drop</a> developer guide.</p>
+     * </div>
      */
     public static class DragShadowBuilder {
         private final WeakReference<View> mView;
@@ -14086,6 +14092,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * to this view.  The callback will be invoked before the hosting view's own
      * onDrag(event) method.  If the listener wants to fall back to the hosting view's
      * onDrag(event) behavior, it should return 'false' from this callback.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For a guide to implementing drag and drop features, read the
+     * <a href="{@docRoot}guide/topics/ui/drag-drop.html">Drag and Drop</a> developer guide.</p>
+     * </div>
      */
     public interface OnDragListener {
         /**
