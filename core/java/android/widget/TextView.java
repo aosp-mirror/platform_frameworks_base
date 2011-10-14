@@ -7682,8 +7682,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         
-        if (what instanceof UpdateAppearance ||
-            what instanceof ParagraphStyle) {
+        if (what instanceof UpdateAppearance || what instanceof ParagraphStyle
+                || (what instanceof SuggestionSpan && (((SuggestionSpan)what).getFlags()
+                        & SuggestionSpan.FLAG_AUTO_CORRECTION) != 0)) {
             if (ims == null || ims.mBatchEditNesting == 0) {
                 invalidate();
                 mHighlightPathBogus = true;
