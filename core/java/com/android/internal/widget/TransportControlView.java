@@ -34,6 +34,8 @@ import android.media.IRemoteControlDisplay;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.Spannable;
@@ -61,7 +63,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
     private static final int MSG_SET_GENERATION_ID = 104;
     private static final int MAXDIM = 512;
     private static final int DISPLAY_TIMEOUT_MS = 5000; // 5s
-    protected static final boolean DEBUG = true;
+    protected static final boolean DEBUG = false;
     protected static final String TAG = "TransportControlView";
 
     private ImageView mAlbumArt;
@@ -74,7 +76,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
     private boolean mAttached;
     private PendingIntent mClientIntent;
     private int mTransportControlFlags;
-    private int mPlayState;
+    private int mCurrentPlayState;
     private AudioManager mAudioManager;
     private LockScreenWidgetCallback mWidgetCallbacks;
     private IRemoteControlDisplayWeak mIRCD;
@@ -83,6 +85,11 @@ public class TransportControlView extends FrameLayout implements OnClickListener
      * The metadata which should be populated into the view once we've been attached
      */
     private Bundle mPopulateMetadataWhenAttached = null;
+
+    /**
+     * Whether to clear the interface next time it is shown (i.e. the generation id changed)
+     */
+    private boolean mClearOnNextShow;
 
     // This handler is required to ensure messages from IRCD are handled in sequence and on
     // the UI thread.
@@ -113,15 +120,10 @@ public class TransportControlView extends FrameLayout implements OnClickListener
                 break;
 
             case MSG_SET_GENERATION_ID:
-                if (mWidgetCallbacks != null) {
-                    boolean clearing = msg.arg2 != 0;
-                    if (DEBUG) Log.v(TAG, "New genId = " + msg.arg1 + ", clearing = " + clearing);
-                    if (!clearing) {
-                        mWidgetCallbacks.requestShow(TransportControlView.this);
-                    } else {
-                        mWidgetCallbacks.requestHide(TransportControlView.this);
-                    }
+                if (msg.arg2 != 0) {
+                    mClearOnNextShow = true; // TODO: handle this
                 }
+                if (DEBUG) Log.v(TAG, "New genId = " + msg.arg1 + ", clearing = " + msg.arg2);
                 mClientGeneration = msg.arg1;
                 mClientIntent = (PendingIntent) msg.obj;
                 break;
@@ -195,6 +197,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         super(context, attrs);
         Log.v(TAG, "Create TCV " + this);
         mAudioManager = new AudioManager(mContext);
+        mCurrentPlayState = RemoteControlClient.PLAYSTATE_NONE; // until we get a callback
         mIRCD = new IRemoteControlDisplayWeak(mHandler);
     }
 
@@ -319,7 +322,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
                 | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE
                 | RemoteControlClient.FLAG_KEY_MEDIA_STOP);
 
-        updatePlayPauseState(mPlayState);
+        updatePlayPauseState(mCurrentPlayState);
     }
 
     private static void setVisibilityBasedOnFlag(View view, int flags, int flag) {
@@ -332,12 +335,13 @@ public class TransportControlView extends FrameLayout implements OnClickListener
 
     private void updatePlayPauseState(int state) {
         if (DEBUG) Log.v(TAG,
-                "updatePlayPauseState(), old=" + mPlayState + ", state=" + state);
-        if (state == mPlayState) {
+                "updatePlayPauseState(), old=" + mCurrentPlayState + ", state=" + state);
+        if (state == mCurrentPlayState) {
             return;
         }
         final int imageResId;
         final int imageDescId;
+        final boolean showIfHidden;
         switch (state) {
             case RemoteControlClient.PLAYSTATE_ERROR:
                 imageResId = com.android.internal.R.drawable.stat_sys_warning;
@@ -349,22 +353,81 @@ public class TransportControlView extends FrameLayout implements OnClickListener
             case RemoteControlClient.PLAYSTATE_PLAYING:
                 imageResId = com.android.internal.R.drawable.ic_media_pause;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_pause_description;
+                showIfHidden = true;
                 break;
 
             case RemoteControlClient.PLAYSTATE_BUFFERING:
                 imageResId = com.android.internal.R.drawable.ic_media_stop;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_stop_description;
+                showIfHidden = true;
                 break;
 
             case RemoteControlClient.PLAYSTATE_PAUSED:
             default:
                 imageResId = com.android.internal.R.drawable.ic_media_play;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_play_description;
+                showIfHidden = false;
                 break;
         }
         mBtnPlay.setImageResource(imageResId);
         mBtnPlay.setContentDescription(getResources().getString(imageDescId));
-        mPlayState = state;
+        if (showIfHidden && mWidgetCallbacks != null && !mWidgetCallbacks.isVisible(this)) {
+            mWidgetCallbacks.requestShow(this);
+        }
+        mCurrentPlayState = state;
+    }
+
+    static class SavedState extends BaseSavedState {
+        boolean wasShowing;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            this.wasShowing = in.readInt() != 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(this.wasShowing ? 1 : 0);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        if (DEBUG) Log.v(TAG, "onSaveInstanceState()");
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.wasShowing = mWidgetCallbacks.isVisible(this);
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (DEBUG) Log.v(TAG, "onRestoreInstanceState()");
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        if (ss.wasShowing) {
+            mWidgetCallbacks.requestShow(this);
+        }
     }
 
     public void onClick(View v) {
