@@ -608,7 +608,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'accountsync'],
+    tags: ['sample', 'accountsync', 'updated'],
     path: 'samples/SampleSyncAdapter/index.html',
     title: {
       en: 'SampleSyncAdapter'
