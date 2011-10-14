@@ -136,7 +136,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
 
     private boolean mRequiresSim;
-    private volatile boolean mEmergencyCall;
+    //True if we have some sort of overlay on top of the Lockscreen
+    //Also true if we've activated a phone call, either emergency dialing or incoming
+    //This resets when the phone is turned off with no current call
+    private boolean mHasOverlay;
 
 
     /**
@@ -243,8 +246,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         }
     };
 
-    private TransportControlView mTransportControlView;
-
     /**
      * @return Whether we are stuck on the lock screen because the sim is
      *   missing.
@@ -277,7 +278,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
-        mEmergencyCall = false;
+        mHasOverlay = false;
 
         mUpdateMonitor.registerInfoCallback(this);
 
@@ -332,7 +333,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             }
 
             public void takeEmergencyCallAction() {
-                mEmergencyCall = true;
+                mHasOverlay = true;
                 // FaceLock must be stopped if it is running when emergency call is pressed
                 stopAndUnbindFromFaceLock();
 
@@ -517,9 +518,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     @Override
     public void onScreenTurnedOff() {
+        if (DEBUG) Log.d(TAG, "screen off");
         mScreenOn = false;
         mForgotPattern = false;
-        mEmergencyCall = false;
+        mHasOverlay = mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE;
         if (mMode == Mode.LockScreen) {
             ((KeyguardScreen) mLockScreen).onPause();
         } else {
@@ -534,10 +536,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
      *  FaceLock, but only if we're not dealing with a call
     */
     private void activateFaceLockIfAble() {
-        final boolean transportInvisible = mTransportControlView == null ? true :
-                mTransportControlView.getVisibility() != View.VISIBLE;
-        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
-                && transportInvisible) {
+        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE && !mHasOverlay) {
             bindToFaceLock();
             // Show FaceLock area, but only for a little bit so lockpattern will become visible if
             // FaceLock fails to start or crashes
@@ -552,6 +551,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     @Override
     public void onScreenTurnedOn() {
+        if (DEBUG) Log.d(TAG, "screen on");
         boolean runFaceLock = false;
         //Make sure to start facelock iff the screen is both on and focused
         synchronized(mFaceLockStartupLock) {
@@ -567,7 +567,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
      */
     @Override
     public void onWindowFocusChanged (boolean hasWindowFocus) {
-        if(DEBUG) Log.d(TAG, hasWindowFocus ? "focused" : "unfocused");
+        if (DEBUG) Log.d(TAG, hasWindowFocus ? "focused" : "unfocused");
         boolean runFaceLock = false;
         //Make sure to start facelock iff the screen is both on and focused
         synchronized(mFaceLockStartupLock) {
@@ -575,14 +575,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             mWindowFocused = hasWindowFocus;
         }
         if(!hasWindowFocus) {
+            mHasOverlay = true;
             stopAndUnbindFromFaceLock();
             hideFaceLockArea();
         } else if (runFaceLock) {
-            //Don't activate facelock while the user is calling 911!
-            if(mEmergencyCall) mEmergencyCall = false;
-            else {
-                activateFaceLockIfAble();
-            }
+            activateFaceLockIfAble();
         }
     }
 
@@ -595,7 +592,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         }
 
         if (mLockPatternUtils.usingBiometricWeak() &&
-                mLockPatternUtils.isBiometricWeakInstalled()) {
+            mLockPatternUtils.isBiometricWeakInstalled() && !mHasOverlay) {
             // Note that show() gets called before the screen turns off to set it up for next time
             // it is turned on.  We don't want to set a timeout on the FaceLock area here because it
             // may be gone by the time the screen is turned on again.  We set the timout when the
@@ -670,6 +667,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     public void onPhoneStateChanged(int phoneState) {
         if (DEBUG) Log.d(TAG, "phone state: " + phoneState);
         if(phoneState == TelephonyManager.CALL_STATE_RINGING) {
+            mHasOverlay = true;
             stopAndUnbindFromFaceLock();
             hideFaceLockArea();
         }
@@ -897,13 +895,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     }
 
     private void initializeTransportControlView(View view) {
-        mTransportControlView = (TransportControlView) view.findViewById(R.id.transport);
-        if (mTransportControlView == null) {
+        TransportControlView tcv = (TransportControlView) view.findViewById(R.id.transport);
+        if (tcv == null) {
             if (DEBUG) Log.w(TAG, "Couldn't find transport control widget");
         } else {
             mUpdateMonitor.reportClockVisible(true);
-            mTransportControlView.setVisibility(View.GONE); // hide until it requests being shown.
-            mTransportControlView.setCallback(mWidgetCallback);
+            tcv.setVisibility(View.GONE); // hide until it requests being shown.
+            tcv.setCallback(mWidgetCallback);
         }
     }
 
