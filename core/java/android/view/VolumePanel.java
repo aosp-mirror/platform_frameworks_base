@@ -97,6 +97,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     protected AudioService mAudioService;
     private boolean mRingIsSilent;
     private boolean mShowCombinedVolumes;
+    private boolean mVoiceCapable;
 
     /** Dialog containing all the sliders */
     private final Dialog mDialog;
@@ -117,40 +118,56 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     /** All the slider controls mapped by stream type */
     private HashMap<Integer,StreamControl> mStreamControls;
 
+    private enum StreamResources {
+        BluetoothSCOStream(AudioManager.STREAM_BLUETOOTH_SCO,
+                R.string.volume_icon_description_bluetooth,
+                R.drawable.ic_audio_bt,
+                R.drawable.ic_audio_bt,
+                false),
+        RingerStream(AudioManager.STREAM_RING,
+                R.string.volume_icon_description_ringer,
+                R.drawable.ic_audio_ring_notif,
+                R.drawable.ic_audio_ring_notif_mute,
+                false),
+        VoiceStream(AudioManager.STREAM_VOICE_CALL,
+                R.string.volume_icon_description_incall,
+                R.drawable.ic_audio_phone,
+                R.drawable.ic_audio_phone,
+                false),
+        MediaStream(AudioManager.STREAM_MUSIC,
+                R.string.volume_icon_description_media,
+                R.drawable.ic_audio_vol,
+                R.drawable.ic_audio_vol_mute,
+                true),
+        NotificationStream(AudioManager.STREAM_NOTIFICATION,
+                R.string.volume_icon_description_notification,
+                R.drawable.ic_audio_notification,
+                R.drawable.ic_audio_notification_mute,
+                true);
+
+        int streamType;
+        int descRes;
+        int iconRes;
+        int iconMuteRes;
+        // RING, VOICE_CALL & BLUETOOTH_SCO are hidden unless explicitly requested
+        boolean show;
+
+        StreamResources(int streamType, int descRes, int iconRes, int iconMuteRes, boolean show) {
+            this.streamType = streamType;
+            this.descRes = descRes;
+            this.iconRes = iconRes;
+            this.iconMuteRes = iconMuteRes;
+            this.show = show;
+        }
+    };
+
     // List of stream types and their order
-    // RING, VOICE_CALL & BLUETOOTH_SCO are hidden unless explicitly requested
-    private static final int [] STREAM_TYPES = {
-        AudioManager.STREAM_BLUETOOTH_SCO,
-        AudioManager.STREAM_RING,
-        AudioManager.STREAM_VOICE_CALL,
-        AudioManager.STREAM_MUSIC,
-        AudioManager.STREAM_NOTIFICATION
-    };
-
-    private static final int [] CONTENT_DESCRIPTIONS = {
-        R.string.volume_icon_description_bluetooth,
-        R.string.volume_icon_description_ringer,
-        R.string.volume_icon_description_incall,
-        R.string.volume_icon_description_media,
-        R.string.volume_icon_description_notification
-    };
-
-    // These icons need to correspond to the ones above.
-    private static final int [] STREAM_ICONS_NORMAL = {
-        R.drawable.ic_audio_bt,
-        R.drawable.ic_audio_ring_notif,
-        R.drawable.ic_audio_phone,
-        R.drawable.ic_audio_vol,
-        R.drawable.ic_audio_notification,
-    };
-
-    // These icons need to correspond to the ones above.
-    private static final int [] STREAM_ICONS_MUTED = {
-        R.drawable.ic_audio_bt,
-        R.drawable.ic_audio_ring_notif_mute,
-        R.drawable.ic_audio_phone,
-        R.drawable.ic_audio_vol_mute,
-        R.drawable.ic_audio_notification_mute,
+    private static final StreamResources[] STREAMS = {
+        StreamResources.BluetoothSCOStream,
+        StreamResources.RingerStream,
+        StreamResources.VoiceStream,
+        StreamResources.MediaStream,
+        StreamResources.NotificationStream
     };
 
     /** Object that contains data for each slider */
@@ -221,7 +238,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = new Vibrator();
 
-        mShowCombinedVolumes = !context.getResources().getBoolean(R.bool.config_voice_capable);
+        mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
+        mShowCombinedVolumes = !mVoiceCapable;
         // If we don't want to show multiple volumes, hide the settings button and divider
         if (!mShowCombinedVolumes) {
             mMoreButton.setVisibility(View.GONE);
@@ -260,10 +278,14 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mStreamControls = new HashMap<Integer,StreamControl>(STREAM_TYPES.length);
+        mStreamControls = new HashMap<Integer, StreamControl>(STREAMS.length);
         Resources res = mContext.getResources();
-        for (int i = 0; i < STREAM_TYPES.length; i++) {
-            final int streamType = STREAM_TYPES[i];
+        for (int i = 0; i < STREAMS.length; i++) {
+            StreamResources streamRes = STREAMS[i];
+            int streamType = streamRes.streamType;
+            if (mVoiceCapable && streamRes == StreamResources.NotificationStream) {
+                streamRes = StreamResources.RingerStream;
+            }
             StreamControl sc = new StreamControl();
             sc.streamType = streamType;
             sc.group = (ViewGroup) inflater.inflate(R.layout.volume_adjust_item, null);
@@ -273,9 +295,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 sc.icon.setOnClickListener(this);
             }
             sc.icon.setTag(sc);
-            sc.icon.setContentDescription(res.getString(CONTENT_DESCRIPTIONS[i]));
-            sc.iconRes = STREAM_ICONS_NORMAL[i];
-            sc.iconMuteRes = STREAM_ICONS_MUTED[i];
+            sc.icon.setContentDescription(res.getString(streamRes.descRes));
+            sc.iconRes = streamRes.iconRes;
+            sc.iconMuteRes = streamRes.iconMuteRes;
             sc.icon.setImageResource(sc.iconRes);
             sc.seekbarView = (SeekBar) sc.group.findViewById(R.id.seekbar);
             int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
@@ -307,13 +329,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private void addOtherVolumes() {
         if (!mShowCombinedVolumes) return;
 
-        for (int i = 0; i < STREAM_TYPES.length; i++) {
+        for (int i = 0; i < STREAMS.length; i++) {
             // Skip the phone specific ones and the active one
-            final int streamType = STREAM_TYPES[i];
-            if (streamType == AudioManager.STREAM_RING
-                    || streamType == AudioManager.STREAM_VOICE_CALL
-                    || streamType == AudioManager.STREAM_BLUETOOTH_SCO
-                    || streamType == mActiveStreamType) {
+            final int streamType = STREAMS[i].streamType;
+            if (!STREAMS[i].show || streamType == mActiveStreamType) {
                 continue;
             }
             StreamControl sc = mStreamControls.get(streamType);
