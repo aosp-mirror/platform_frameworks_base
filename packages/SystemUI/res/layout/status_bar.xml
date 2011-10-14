@@ -77,7 +77,6 @@
             android:layout_height="match_parent"
             android:singleLine="true"
             android:paddingRight="6dip"
-            android:textSize="16sp"
             android:gravity="center_vertical|left"
             />
     </LinearLayout>
@@ -91,7 +90,7 @@
         <ImageSwitcher android:id="@+id/tickerIcon"
             android:layout_width="@dimen/status_bar_icon_size"
             android:layout_height="@dimen/status_bar_icon_size"
-            android:layout_marginRight="2dip"
+            android:layout_marginRight="4dip"
             >
             <com.android.systemui.statusbar.AnimatedImageView
                 android:layout_width="@dimen/status_bar_icon_size"
@@ -111,13 +110,13 @@
             android:paddingTop="2dip"
             android:paddingRight="10dip">
             <TextView
-                android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
+                android:textAppearance="@style/TextAppearance.StatusBar.PhoneTicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 />
             <TextView
-                android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
+                android:textAppearance="@style/TextAppearance.StatusBar.PhoneTicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
