@@ -126,6 +126,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     // The service can take a couple of seconds to start on the first try after boot
     private final int FACELOCK_VIEW_AREA_SERVICE_TIMEOUT = 3000;
 
+    // So the user has a consistent amount of time when brought to the backup method from FaceLock
+    private final int BACKUP_LOCK_TIMEOUT = 5000;
+
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
      */
@@ -587,6 +590,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
         if (mLockPatternUtils.usingBiometricWeak() &&
                 mLockPatternUtils.isBiometricWeakInstalled()) {
+            // Note that show() gets called before the screen turns off to set it up for next time
+            // it is turned on.  We don't want to set a timeout on the FaceLock area here because it
+            // may be gone by the time the screen is turned on again.  We set the timout when the
+            // screen turns on instead.
             showFaceLockArea();
         } else {
             hideFaceLockArea();
@@ -1250,6 +1257,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             if (DEBUG) Log.d(TAG, "FaceLock cancel()");
             hideFaceLockArea(); // Expose fallback
             stopFaceLock();
+            mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
         }
 
         // Allows the Face Unlock service to poke the wake lock to keep the lockscreen alive
