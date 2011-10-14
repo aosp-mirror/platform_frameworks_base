@@ -75,7 +75,7 @@ TEST_F(SurfaceTest, QueuesToWindowComposerIsTrueWhenPurgatorized) {
 }
 
 // This test probably doesn't belong here.
-TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
+TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersSucceed) {
     sp<ANativeWindow> anw(mSurface);
 
     // Verify the screenshot works with no protected buffers.
@@ -114,31 +114,8 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
     }
     heap = 0;
     w = h = fmt = 0;
-    ASSERT_EQ(INVALID_OPERATION, sf->captureScreen(0, &heap, &w, &h, &fmt,
+    ASSERT_EQ(NO_ERROR, sf->captureScreen(0, &heap, &w, &h, &fmt,
             64, 64, 0, 0x7fffffff));
-    ASSERT_TRUE(heap == NULL);
-
-    // XXX: This should not be needed, but it seems that the new buffers don't
-    // correctly show up after the upcoming dequeue/lock/queue loop without it.
-    // We should look into this at some point.
-    ASSERT_EQ(NO_ERROR, native_window_set_buffer_count(anw.get(), 3));
-
-    // Un-set the PROTECTED usage bit and verify that the screenshot works
-    // again.  Note that we have to change the buffers geometry to ensure that
-    // the buffers get reallocated, as the new usage bits are a subset of the
-    // old.
-    ASSERT_EQ(NO_ERROR, native_window_set_usage(anw.get(), 0));
-    ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(anw.get(), 32, 32, 0));
-    for (int i = 0; i < 4; i++) {
-        // Loop to make sure SurfaceFlinger has retired a protected buffer.
-        ASSERT_EQ(NO_ERROR, anw->dequeueBuffer(anw.get(), &buf));
-        ASSERT_EQ(NO_ERROR, anw->lockBuffer(anw.get(), buf));
-        ASSERT_EQ(NO_ERROR, anw->queueBuffer(anw.get(), buf));
-    }
-    heap = 0;
-    w = h = fmt = 0;
-    ASSERT_EQ(NO_ERROR, sf->captureScreen(0, &heap, &w, &h, &fmt, 64, 64, 0,
-            0x7fffffff));
     ASSERT_TRUE(heap != NULL);
 }
 
