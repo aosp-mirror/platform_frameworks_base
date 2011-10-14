@@ -62,14 +62,15 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
+import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.StringBuilderPrinter;
 
 import com.android.internal.backup.BackupConstants;
@@ -187,6 +188,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private IActivityManager mActivityManager;
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
+    private IMountService mMountService;
     IBackupManager mBackupManagerBinder;
 
     boolean mEnabled;   // access to this is synchronized on 'this'
@@ -660,6 +662,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
 
         mBackupManagerBinder = asInterface(asBinder());
 
@@ -1037,6 +1040,40 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Backup password management
     boolean passwordMatchesSaved(String candidatePw, int rounds) {
+        // First, on an encrypted device we require matching the device pw
+        final boolean isEncrypted;
+        try {
+            isEncrypted = (mMountService.getEncryptionState() != MountService.ENCRYPTION_STATE_NONE);
+            if (isEncrypted) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Device encrypted; verifying against device data pw");
+                }
+                // 0 means the password validated
+                // -2 means device not encrypted
+                // Any other result is either password failure or an error condition,
+                // so we refuse the match
+                final int result = mMountService.verifyEncryptionPassword(candidatePw);
+                if (result == 0) {
+                    if (MORE_DEBUG) Slog.d(TAG, "Pw verifies");
+                    return true;
+                } else if (result != -2) {
+                    if (MORE_DEBUG) Slog.d(TAG, "Pw mismatch");
+                    return false;
+                } else {
+                    // ...else the device is supposedly not encrypted.  HOWEVER, the
+                    // query about the encryption state said that the device *is*
+                    // encrypted, so ... we may have a problem.  Log it and refuse
+                    // the backup.
+                    Slog.e(TAG, "verified encryption state mismatch against query; no match allowed");
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            // Something went wrong talking to the mount service.  This is very bad;
+            // assume that we fail password validation.
+            return false;
+        }
+
         if (mPasswordHash == null) {
             // no current password case -- require that 'currentPw' be null or empty
             if (candidatePw == null || "".equals(candidatePw)) {
@@ -1114,7 +1151,15 @@ class BackupManagerService extends IBackupManager.Stub {
     public boolean hasBackupPassword() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "hasBackupPassword");
-        return (mPasswordHash != null && mPasswordHash.length() > 0);
+
+        try {
+            return (mMountService.getEncryptionState() != IMountService.ENCRYPTION_STATE_NONE)
+                || (mPasswordHash != null && mPasswordHash.length() > 0);
+        } catch (Exception e) {
+            // If we can't talk to the mount service we have a serious problem; fail
+            // "secure" i.e. assuming that we require a password
+            return true;
+        }
     }
 
     // Maintain persistent state around whether need to do an initialize operation.
@@ -5007,7 +5052,17 @@ class BackupManagerService extends IBackupManager.Stub {
 
                         params.observer = observer;
                         params.curPassword = curPassword;
-                        params.encryptPassword = encPpassword;
+
+                        boolean isEncrypted;
+                        try {
+                            isEncrypted = (mMountService.getEncryptionState() != MountService.ENCRYPTION_STATE_NONE);
+                            if (isEncrypted) Slog.w(TAG, "Device is encrypted; forcing enc password");
+                        } catch (RemoteException e) {
+                            // couldn't contact the mount service; fail "safe" and assume encryption
+                            Slog.e(TAG, "Unable to contact mount service!");
+                            isEncrypted = true;
+                        }
+                        params.encryptPassword = (isEncrypted) ? curPassword : encPpassword;
 
                         if (DEBUG) Slog.d(TAG, "Sending conf message with verb " + verb);
                         mWakelock.acquire();

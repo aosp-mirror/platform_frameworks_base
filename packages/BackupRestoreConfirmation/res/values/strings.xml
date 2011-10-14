@@ -35,8 +35,12 @@
 
     <!-- Text for message to user that they must enter their predefined backup password in order to perform this operation. -->
     <string name="current_password_text">Please enter your current backup password below:</string>
+    <!-- Text for message to user that they must enter their device encryption password in order to perform this restore operation. -->
+    <string name="device_encryption_restore_text">Please enter your device encryption password below.</string>
+    <!-- Text for message to user that they must enter their device encryption password in order to perform this backup operation. -->
+    <string name="device_encryption_backup_text">Please enter your device encryption password below. This will also be used to encrypt the backup archive.</string>
 
-    <!-- Text for message to user that they can must enter an encryption password to use for the full backup operation. -->
+    <!-- Text for message to user that they must enter an encryption password to use for the full backup operation. -->
     <string name="backup_enc_password_text">Please enter a password to use for encrypting the full backup data. If this is left blank, your current backup password will be used:</string>
     <!-- Text for message to user that they may optionally supply an encryption password to use for a full backup operation. -->
     <string name="backup_enc_password_optional">If you wish to encrypt the full backup data, enter a password below:</string>
