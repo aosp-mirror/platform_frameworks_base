@@ -146,6 +146,8 @@ android_hardware_SerialPort_open(JNIEnv *env, jobject thiz, jobject fileDescript
         memset(&tio, 0, sizeof(tio));
 
     tio.c_cflag =  speed | CS8 | CLOCAL | CREAD;
+    // Disable output processing, including messing with end-of-line characters.
+    tio.c_oflag &= ~OPOST;
     tio.c_iflag = IGNPAR;
     tio.c_lflag = 0; /* turn of CANON, ECHO*, etc */
     /* no timeout but request at least one character per read */
