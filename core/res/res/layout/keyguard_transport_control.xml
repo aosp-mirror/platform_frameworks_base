@@ -63,7 +63,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_media_rew"
+                    android:src="@drawable/ic_media_previous"
                     android:clickable="true"
                     android:background="?android:attr/selectableItemBackground"
                     android:padding="10dip"
@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:clickable="true"
-                    android:src="@drawable/ic_media_ff"
+                    android:src="@drawable/ic_media_next"
                     android:background="?android:attr/selectableItemBackground"
                     android:padding="10dip"
                     android:contentDescription="@string/lockscreen_transport_next_description"/>
