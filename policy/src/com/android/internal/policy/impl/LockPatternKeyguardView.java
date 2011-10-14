@@ -129,6 +129,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     // So the user has a consistent amount of time when brought to the backup method from FaceLock
     private final int BACKUP_LOCK_TIMEOUT = 5000;
 
+    // Needed to keep track of failed FaceUnlock attempts
+    private int mFailedFaceUnlockAttempts = 0;
+    private static final int FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 15;
+
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
      */
@@ -424,6 +428,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             }
 
             public void reportSuccessfulUnlockAttempt() {
+                mFailedFaceUnlockAttempts = 0;
                 mLockPatternUtils.reportSuccessfulPasswordAttempt();
             }
         };
@@ -536,7 +541,16 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
      *  FaceLock, but only if we're not dealing with a call
     */
     private void activateFaceLockIfAble() {
-        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE && !mHasOverlay) {
+        final boolean tooManyFaceUnlockTries =
+                (mFailedFaceUnlockAttempts >= FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP);
+        final int failedBackupAttempts = mUpdateMonitor.getFailedAttempts();
+        final boolean backupIsTimedOut =
+                (failedBackupAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
+        if (tooManyFaceUnlockTries) Log.i(TAG, "tooManyFaceUnlockTries: " + tooManyFaceUnlockTries);
+        if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
+                && !mHasOverlay
+                && !tooManyFaceUnlockTries
+                && !backupIsTimedOut) {
             bindToFaceLock();
             // Show FaceLock area, but only for a little bit so lockpattern will become visible if
             // FaceLock fails to start or crashes
@@ -1257,10 +1271,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         }
 
         // Stops the FaceLock UI and exposes the backup method without unlocking
-        // This means either the user has cancelled out or FaceLock failed to recognize them
+        // This means the user has cancelled out
         @Override
         public void cancel() {
             if (DEBUG) Log.d(TAG, "FaceLock cancel()");
+            hideFaceLockArea(); // Expose fallback
+            stopFaceLock();
+            mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
+        }
+
+        // Stops the FaceLock UI and exposes the backup method without unlocking
+        // This means FaceLock failed to recognize them
+        @Override
+        public void reportFailedAttempt() {
+            if (DEBUG) Log.d(TAG, "FaceLock reportFailedAttempt()");
+            mFailedFaceUnlockAttempts++;
             hideFaceLockArea(); // Expose fallback
             stopFaceLock();
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
