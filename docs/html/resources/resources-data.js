@@ -428,7 +428,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'layout', 'ui'],
+    tags: ['sample', 'layout', 'ui', 'updated'],
     path: 'samples/ApiDemos/index.html',
     title: {
       en: 'API Demos'
