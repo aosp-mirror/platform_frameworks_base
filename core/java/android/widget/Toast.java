@@ -48,6 +48,13 @@ import android.view.accessibility.AccessibilityManager;
  * <p>
  * The easiest way to use this class is to call one of the static methods that constructs
  * everything you need and returns a new Toast object.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about creating Toast notifications, read the
+ * <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Toast Notifications</a> developer
+ * guide.</p>
+ * </div>
  */ 
 public class Toast {
     static final String TAG = "Toast";

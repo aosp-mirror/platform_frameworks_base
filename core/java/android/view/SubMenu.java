@@ -22,6 +22,12 @@ import android.graphics.drawable.Drawable;
  * Subclass of {@link Menu} for sub menus.
  * <p>
  * Sub menus do not support item icons, or nested sub menus.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about creating menus, read the
+ * <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guide.</p>
+ * </div>
  */
 
 public interface SubMenu extends Menu {
