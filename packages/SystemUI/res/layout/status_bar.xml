@@ -89,17 +89,19 @@
         android:animationCache="false"
         android:orientation="horizontal" >
         <ImageSwitcher android:id="@+id/tickerIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginRight="8dip"
+            android:layout_width="@dimen/status_bar_icon_size"
+            android:layout_height="@dimen/status_bar_icon_size"
+            android:layout_marginRight="2dip"
             >
             <com.android.systemui.statusbar.AnimatedImageView
-                android:layout_width="25dip"
-                android:layout_height="25dip"
+                android:layout_width="@dimen/status_bar_icon_size"
+                android:layout_height="@dimen/status_bar_icon_size"
+                android:scaleType="center"
                 />
             <com.android.systemui.statusbar.AnimatedImageView
-                android:layout_width="25dip"
-                android:layout_height="25dip"
+                android:layout_width="@dimen/status_bar_icon_size"
+                android:layout_height="@dimen/status_bar_icon_size"
+                android:scaleType="center"
                 />
         </ImageSwitcher>
         <com.android.systemui.statusbar.phone.TickerView android:id="@+id/tickerText"
