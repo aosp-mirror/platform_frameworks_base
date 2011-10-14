@@ -35,7 +35,7 @@
         android:background="@drawable/notification_header_bg"
         >
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:textAppearance="@style/TextAppearance.StatusBar.Date"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
