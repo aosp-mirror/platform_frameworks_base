@@ -1402,7 +1402,7 @@ public class WifiService extends IWifiManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             if (hadLock) {
-                noteAcquireWifiLock(wifiLock);
+                noteReleaseWifiLock(wifiLock);
                 switch(wifiLock.mMode) {
                     case WifiManager.WIFI_MODE_FULL:
                         ++mFullLocksReleased;
