@@ -339,6 +339,13 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         final int imageResId;
         final int imageDescId;
         switch (state) {
+            case RemoteControlClient.PLAYSTATE_ERROR:
+                imageResId = com.android.internal.R.drawable.stat_sys_warning;
+                // TODO use more specific image description string for warning, but here the "play"
+                //      message is still valid because this button triggers a play command.
+                imageDescId = com.android.internal.R.string.lockscreen_transport_play_description;
+                break;
+
             case RemoteControlClient.PLAYSTATE_PLAYING:
                 imageResId = com.android.internal.R.drawable.ic_media_pause;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_pause_description;
