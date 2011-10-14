@@ -4512,7 +4512,7 @@ public class WebView extends AbsoluteLayout
         boolean UIAnimationsRunning = false;
         // Currently for each draw we compute the animation values;
         // We may in the future decide to do that independently.
-        if (mNativeClass != 0 && nativeEvaluateLayersAnimations()) {
+        if (mNativeClass != 0 && nativeEvaluateLayersAnimations(mNativeClass)) {
             UIAnimationsRunning = true;
             // If we have unfinished (or unstarted) animations,
             // we ask for a repaint. We only need to do this in software
@@ -4528,9 +4528,9 @@ public class WebView extends AbsoluteLayout
             extras = DRAW_EXTRAS_FIND;
         } else if (mSelectingText && !USE_JAVA_TEXT_SELECTION) {
             extras = DRAW_EXTRAS_SELECTION;
-            nativeSetSelectionPointer(mDrawSelectionPointer,
-                    mZoomManager.getInvScale(),
-                    mSelectX, mSelectY - getTitleHeight());
+            nativeSetSelectionPointer(mNativeClass,
+                    mDrawSelectionPointer,
+                    mZoomManager.getInvScale(), mSelectX, mSelectY - getTitleHeight());
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
@@ -4544,8 +4544,8 @@ public class WebView extends AbsoluteLayout
         }
 
         if (canvas.isHardwareAccelerated()) {
-            int functor = nativeGetDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
-                    mGLViewportEmpty ? null : mViewRectViewport, getScale(), extras);
+            int functor = nativeGetDrawGLFunction(mNativeClass,
+                    mGLViewportEmpty ? null : mGLRectViewport, mGLViewportEmpty ? null : mViewRectViewport, getScale(), extras);
             ((HardwareCanvas) canvas).callDrawGLFunction(functor);
 
             if (mHardwareAccelSkia != getSettings().getHardwareAccelSkiaEnabled()) {
@@ -9414,9 +9414,9 @@ public class WebView extends AbsoluteLayout
             // We never want to change button state if we are hardware accelerated,
             // but we DO want to invalidate as necessary so that the GL ring
             // can be drawn
-            nativeRecordButtons(false, false, inval);
+            nativeRecordButtons(mNativeClass, false, false, inval);
         } else {
-            nativeRecordButtons(focus, pressed, inval);
+            nativeRecordButtons(mNativeClass, focus, pressed, inval);
         }
     }
 
@@ -9451,9 +9451,9 @@ public class WebView extends AbsoluteLayout
     private native int nativeDraw(Canvas canvas, int color, int extra,
             boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
-    private native boolean  nativeEvaluateLayersAnimations();
-    private native int      nativeGetDrawGLFunction(Rect rect, Rect viewRect,
-            float scale, int extras);
+    private native boolean  nativeEvaluateLayersAnimations(int nativeInstance);
+    private native int      nativeGetDrawGLFunction(int nativeInstance, Rect rect,
+            Rect viewRect, float scale, int extras);
     private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper,
@@ -9516,8 +9516,8 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativePointInNavCache(int x, int y, int slop);
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
-    private native void     nativeRecordButtons(boolean focused,
-            boolean pressed, boolean invalidate);
+    private native void     nativeRecordButtons(int nativeInstance,
+            boolean focused, boolean pressed, boolean invalidate);
     private native void     nativeResetSelection();
     private native Point    nativeSelectableText();
     private native void     nativeSelectAll();
@@ -9538,8 +9538,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();
-    private native void     nativeSetSelectionPointer(boolean set,
-            float scale, int x, int y);
+    private native void     nativeSetSelectionPointer(int nativeInstance,
+            boolean set, float scale, int x, int y);
     private native boolean  nativeStartSelection(int x, int y);
     private native void     nativeStopGL();
     private native Rect     nativeSubtractLayers(Rect content);
