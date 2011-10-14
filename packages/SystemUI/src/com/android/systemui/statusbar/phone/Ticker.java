@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.text.StaticLayout;
@@ -50,6 +51,7 @@ public abstract class Ticker {
     private View mTickerView;
     private ImageSwitcher mIconSwitcher;
     private TextSwitcher mTextSwitcher;
+    private float mIconScale;
 
     private final class Segment {
         StatusBarNotification notification;
@@ -145,6 +147,11 @@ public abstract class Ticker {
 
     public Ticker(Context context, View sb) {
         mContext = context;
+        final Resources res = context.getResources();
+        final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
+        mIconScale = (float)imageBounds / (float)outerBounds;
+
         mTickerView = sb.findViewById(R.id.ticker);
 
         mIconSwitcher = (ImageSwitcher)sb.findViewById(R.id.tickerIcon);
@@ -152,6 +159,8 @@ public abstract class Ticker {
                     AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_in));
         mIconSwitcher.setOutAnimation(
                     AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_out));
+        mIconSwitcher.setScaleX(mIconScale);
+        mIconSwitcher.setScaleY(mIconScale);
 
         mTextSwitcher = (TextSwitcher)sb.findViewById(R.id.tickerText);
         mTextSwitcher.setInAnimation(
