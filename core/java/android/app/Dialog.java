@@ -66,9 +66,14 @@ import java.lang.ref.WeakReference;
  * your Dialog takes input focus, as it the default) with the following code:
  * 
  * <pre>
- *     getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
- *             WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
- * </pre>
+ * getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+ *         WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);</pre>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating dialogs, read the
+ * <a href="{@docRoot}guide/topics/ui/dialogs.html">Dialogs</a> developer guide.</p>
+ * </div>
  */
 public class Dialog implements DialogInterface, Window.Callback,
         KeyEvent.Callback, OnCreateContextMenuListener {

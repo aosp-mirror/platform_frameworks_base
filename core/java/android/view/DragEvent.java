@@ -114,6 +114,12 @@ import android.os.Parcelable;
  *  {@link android.view.DragEvent#writeToParcel(Parcel,int)}, and
  *  {@link android.view.DragEvent#toString()} methods always return valid data.
  * </p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For a guide to implementing drag and drop features, read the
+ * <a href="{@docRoot}guide/topics/ui/drag-drop.html">Drag and Drop</a> developer guide.</p>
+ * </div>
  */
 public class DragEvent implements Parcelable {
     private static final boolean TRACK_RECYCLED_LOCATION = false;

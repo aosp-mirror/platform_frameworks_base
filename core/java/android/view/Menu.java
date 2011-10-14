@@ -41,6 +41,12 @@ import android.content.Intent;
  * item check marks are discouraged.
  * <li><b>Sub menus</b>: Do not support item icons, or nested sub menus.
  * </ol>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating menus, read the
+ * <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guide.</p>
+ * </div>
  */
 public interface Menu {
 

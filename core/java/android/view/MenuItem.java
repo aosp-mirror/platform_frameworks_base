@@ -29,6 +29,12 @@ import android.view.View.OnCreateContextMenuListener;
  * methods.
  * <p>
  * For a feature set of specific menu types, see {@link Menu}.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about creating menus, read the
+ * <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guide.</p>
+ * </div>
  */
 public interface MenuItem {
     /*
