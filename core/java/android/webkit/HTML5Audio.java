@@ -238,24 +238,27 @@ class HTML5Audio extends Handler
         switch (focusChange) {
         case AudioManager.AUDIOFOCUS_GAIN:
             // resume playback
-            if (mMediaPlayer == null) resetMediaPlayer();
-            else if (!mMediaPlayer.isPlaying()) mMediaPlayer.start();
-            mState = STARTED;
+            if (mMediaPlayer == null) {
+                resetMediaPlayer();
+            } else if (mState != ERROR && !mMediaPlayer.isPlaying()) {
+                mMediaPlayer.start();
+                mState = STARTED;
+            }
             break;
 
         case AudioManager.AUDIOFOCUS_LOSS:
-            // Lost focus for an unbounded amount of time: stop playback and release media player
-            if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
+            // Lost focus for an unbounded amount of time: stop playback.
+            if (mState != ERROR && mMediaPlayer.isPlaying()) {
+                mMediaPlayer.stop();
+                mState = STOPPED;
+            }
             break;
 
         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
             // Lost focus for a short time, but we have to stop
-            // playback. We don't release the media player because playback
-            // is likely to resume
-            if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
+            // playback.
+            if (mState != ERROR && mMediaPlayer.isPlaying()) pause();
             break;
         }
     }
@@ -273,10 +276,7 @@ class HTML5Audio extends Handler
             int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
 
-            if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                // could not get audio focus.
-                teardown();
-            } else {
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 mMediaPlayer.start();
                 mState = STARTED;
             }
@@ -299,8 +299,13 @@ class HTML5Audio extends Handler
         }
     }
 
+    /**
+     * Called only over JNI when WebKit is happy to
+     * destroy the media player.
+     */
     private void teardown() {
         mMediaPlayer.release();
+        mMediaPlayer = null;
         mState = ERROR;
         mNativePointer = 0;
     }
