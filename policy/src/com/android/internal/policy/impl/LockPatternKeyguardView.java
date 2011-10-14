@@ -337,7 +337,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 stopAndUnbindFromFaceLock();
 
                 // Continue showing FaceLock area until dialer comes up
-                showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_EMERGENCY_DIALER_TIMEOUT);
+                if (mLockPatternUtils.usingBiometricWeak() &&
+                        mLockPatternUtils.isBiometricWeakInstalled()) {
+                    showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_EMERGENCY_DIALER_TIMEOUT);
+                }
 
                 pokeWakelock(EMERGENCY_CALL_TIMEOUT);
                 if (TelephonyManager.getDefault().getCallState()
@@ -538,7 +541,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             bindToFaceLock();
             // Show FaceLock area, but only for a little bit so lockpattern will become visible if
             // FaceLock fails to start or crashes
-            showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_SERVICE_TIMEOUT);
+            if (mLockPatternUtils.usingBiometricWeak() &&
+                    mLockPatternUtils.isBiometricWeakInstalled()) {
+                showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_SERVICE_TIMEOUT);
+            }
         } else {
             hideFaceLockArea();
         }
