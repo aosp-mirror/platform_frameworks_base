@@ -35,6 +35,31 @@ import java.util.Locale;
  *
  * The user can change the current text services in Settings. And also applications can specify
  * the target text services.
+ *
+ * <h3>Architecture Overview</h3>
+ *
+ * <p>There are three primary parties involved in the text services
+ * framework (TSF) architecture:</p>
+ *
+ * <ul>
+ * <li> The <strong>text services manager</strong> as expressed by this class
+ * is the central point of the system that manages interaction between all
+ * other parts.  It is expressed as the client-side API here which exists
+ * in each application context and communicates with a global system service
+ * that manages the interaction across all processes.
+ * <li> A <strong>text service</strong> implements a particular
+ * interaction model allowing the client application to retrieve information of text.
+ * The system binds to the current text service that is in use, causing it to be created and run.
+ * <li> Multiple <strong>client applications</strong> arbitrate with the text service
+ * manager for connections to text services.
+ * </ul>
+ *
+ * <h3>Text services sessions</h3>
+ * <ul>
+ * <li>The <strong>spell checker session</strong> is one of the text services.
+ * {@link android.view.textservice.SpellCheckerSession}</li>
+ * </ul>
+ *
  */
 public final class TextServicesManager {
     private static final String TAG = TextServicesManager.class.getSimpleName();
