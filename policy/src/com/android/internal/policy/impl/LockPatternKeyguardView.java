@@ -49,6 +49,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -221,6 +222,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     private Runnable mRecreateRunnable = new Runnable() {
         public void run() {
             updateScreen(mMode, true);
+            restoreWidgetState();
         }
     };
 
@@ -244,7 +246,19 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             // TODO: examine all widgets to derive clock status
             mUpdateMonitor.reportClockVisible(true);
         }
+
+        public boolean isVisible(View self) {
+            // TODO: this should be up to the lockscreen to determine if the view
+            // is currently showing. The idea is it can be used for the widget to
+            // avoid doing work if it's not visible. For now just returns the view's
+            // actual visibility.
+            return self.getVisibility() == View.VISIBLE;
+        }
     };
+
+    private TransportControlView mTransportControlView;
+
+    private Parcelable mSavedState;
 
     /**
      * @return Whether we are stuck on the lock screen because the sim is
@@ -365,6 +379,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
             public void keyguardDone(boolean authenticated) {
                 getCallback().keyguardDone(authenticated);
+                mSavedState = null; // clear state so we re-establish when locked again
             }
 
             public void keyguardDoneDrawing() {
@@ -528,6 +543,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             ((KeyguardScreen) mUnlockScreen).onPause();
         }
 
+        saveWidgetState();
+
         // When screen is turned off, need to unbind from FaceLock service if using FaceLock
         stopAndUnbindFromFaceLock();
     }
@@ -558,8 +575,28 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             mScreenOn = true;
             runFaceLock = mWindowFocused;
         }
+
         show();
-        if(runFaceLock) activateFaceLockIfAble();
+
+        restoreWidgetState();
+
+        if (runFaceLock) activateFaceLockIfAble();
+    }
+
+    private void saveWidgetState() {
+        if (mTransportControlView != null) {
+            if (DEBUG) Log.v(TAG, "Saving widget state");
+            mSavedState = mTransportControlView.onSaveInstanceState();
+        }
+    }
+
+    private void restoreWidgetState() {
+        if (mTransportControlView != null) {
+            if (DEBUG) Log.v(TAG, "Restoring widget state");
+            if (mSavedState != null) {
+                mTransportControlView.onRestoreInstanceState(mSavedState);
+            }
+        }
     }
 
     /** Unbind from facelock if something covers this window (such as an alarm)
@@ -643,6 +680,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mShowLockBeforeUnlock = resources.getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
         mConfiguration = newConfig;
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
+        saveWidgetState();
         removeCallbacks(mRecreateRunnable);
         post(mRecreateRunnable);
     }
@@ -895,13 +933,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     }
 
     private void initializeTransportControlView(View view) {
-        TransportControlView tcv = (TransportControlView) view.findViewById(R.id.transport);
-        if (tcv == null) {
+        mTransportControlView = (TransportControlView) view.findViewById(R.id.transport);
+        if (mTransportControlView == null) {
             if (DEBUG) Log.w(TAG, "Couldn't find transport control widget");
         } else {
             mUpdateMonitor.reportClockVisible(true);
-            tcv.setVisibility(View.GONE); // hide until it requests being shown.
-            tcv.setCallback(mWidgetCallback);
+            mTransportControlView.setVisibility(View.GONE); // hide until it requests being shown.
+            mTransportControlView.setCallback(mWidgetCallback);
         }
     }
 

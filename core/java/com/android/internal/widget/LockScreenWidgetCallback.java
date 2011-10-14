@@ -29,6 +29,9 @@ public interface LockScreenWidgetCallback {
     // Sends a message to lock screen requesting the view to be hidden.
     public void requestHide(View self);
 
+    // Whether or not this view is currently visible on LockScreen
+    public boolean isVisible(View self);
+
     // Sends a message to lock screen that user has interacted with widget. This should be used
     // exclusively in response to user activity, i.e. user hits a button in the view.
     public void userActivity(View self);
