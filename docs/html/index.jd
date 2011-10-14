@@ -129,15 +129,14 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 3.2",
-      'img':"honeycomb-android.png",
-      'title':"Android 3.2 is here!",
-      'desc': "<p>Android 3.2 is a minor feature update that includes new APIs that allow you to "
-+ "better target your layouts for specific screen sizes and other miscellaneous new APIs.</p>"
+      'name':"Android 4.0",
+      'img':"ics-android.png",
+      'title':"Ice Cream Sandwich!",
+      'desc': "<br/><br/><br/><p>Oh my goodness, that looks tasty!</p>"
+/*
 + "<p>For more information about all the changes in Android 3.2, read the "
 + "<a href='{@docRoot}sdk/android-3.2.html'>version notes</a> and <a "
 + "href='{@docRoot}sdk/api_diff/13/changes.html'>diff report</a>.</p>"
-/*
 + "<p>If you have an existing SDK, add Android 3.0 as an "
 + "<a href='{@docRoot}sdk/adding-components.html'>SDK "
 + "component</a>. If you're new to Android, install the "
