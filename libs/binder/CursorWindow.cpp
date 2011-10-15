@@ -40,11 +40,9 @@ CursorWindow::~CursorWindow() {
     ::close(mAshmemFd);
 }
 
-status_t CursorWindow::create(const String8& name, size_t size, bool localOnly,
-        CursorWindow** outCursorWindow) {
+status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** outCursorWindow) {
     String8 ashmemName("CursorWindow: ");
     ashmemName.append(name);
-    ashmemName.append(localOnly ? " (local)" : " (remote)");
 
     status_t result;
     int ashmemFd = ashmem_create_region(ashmemName.string(), size);
