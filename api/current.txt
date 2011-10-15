@@ -6782,6 +6782,13 @@ package android.database {
     method public abstract boolean onMove(int, int);
   }
 
+  public class CrossProcessCursorWrapper extends android.database.CursorWrapper implements android.database.CrossProcessCursor {
+    ctor public CrossProcessCursorWrapper(android.database.Cursor);
+    method public void fillWindow(int, android.database.CursorWindow);
+    method public android.database.CursorWindow getWindow();
+    method public boolean onMove(int, int);
+  }
+
   public abstract interface Cursor {
     method public abstract void close();
     method public abstract void copyStringToBuffer(int, android.database.CharArrayBuffer);

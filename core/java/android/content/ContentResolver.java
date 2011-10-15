@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.IContentObserver;
@@ -1568,7 +1569,7 @@ public abstract class ContentResolver {
             samplePercent);
     }
 
-    private final class CursorWrapperInner extends CursorWrapper {
+    private final class CursorWrapperInner extends CrossProcessCursorWrapper {
         private final IContentProvider mContentProvider;
         public static final String TAG="CursorWrapperInner";
 
