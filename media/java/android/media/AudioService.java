@@ -517,8 +517,8 @@ public class AudioService extends IAudioService.Stub {
         ensureValidDirection(direction);
         ensureValidStreamType(streamType);
 
-
-        VolumeStreamState streamState = mStreamStates[STREAM_VOLUME_ALIAS[streamType]];
+        int streamTypeAlias = STREAM_VOLUME_ALIAS[streamType];
+        VolumeStreamState streamState = mStreamStates[streamTypeAlias];
         final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
         boolean adjustVolume = true;
 
@@ -527,14 +527,14 @@ public class AudioService extends IAudioService.Stub {
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
              (!mVoiceCapable && streamType != AudioSystem.STREAM_VOICE_CALL &&
                streamType != AudioSystem.STREAM_BLUETOOTH_SCO) ||
-                (mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
+                (mVoiceCapable && streamTypeAlias == AudioSystem.STREAM_RING)) {
             //  do not vibrate if already in silent mode
             if (mRingerMode != AudioManager.RINGER_MODE_NORMAL) {
                 flags &= ~AudioManager.FLAG_VIBRATE;
             }
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
-            adjustVolume = checkForRingerModeChange(oldIndex, direction);
+            adjustVolume = checkForRingerModeChange(oldIndex, direction, streamTypeAlias);
         }
 
         // If stream is muted, adjust last audible index only
@@ -551,7 +551,7 @@ public class AudioService extends IAudioService.Stub {
             if (adjustVolume && streamState.adjustIndex(direction)) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist). Do not change volume if stream is muted.
-                sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, STREAM_VOLUME_ALIAS[streamType], SENDMSG_NOOP, 0, 0,
+                sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamTypeAlias, SENDMSG_NOOP, 0, 0,
                         streamState, 0);
             }
             index = streamState.mIndex;
@@ -566,6 +566,23 @@ public class AudioService extends IAudioService.Stub {
         VolumeStreamState streamState = mStreamStates[STREAM_VOLUME_ALIAS[streamType]];
 
         final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
+
+        // setting ring or notifications volume to 0 on voice capable devices enters silent mode
+        if (mVoiceCapable && (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+                (STREAM_VOLUME_ALIAS[streamType] == AudioSystem.STREAM_RING))) {
+            int newRingerMode = mRingerMode;
+            if (index == 0) {
+                newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
+                    ? AudioManager.RINGER_MODE_VIBRATE
+                    : AudioManager.RINGER_MODE_SILENT;
+                setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, false, true);
+            } else {
+                newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+            }
+            if (newRingerMode != mRingerMode) {
+                setRingerMode(newRingerMode);
+            }
+        }
 
         index = rescaleIndex(index * 10, streamType, STREAM_VOLUME_ALIAS[streamType]);
         setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, false, true);
@@ -692,6 +709,13 @@ public class AudioService extends IAudioService.Stub {
             if (isStreamMutedByRingerMode(streamType)) {
                 if (!isStreamAffectedByRingerMode(streamType) ||
                     mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+                    // ring and notifications volume should never be 0 when not silenced
+                    // on voice capable devices
+                    if (mVoiceCapable &&
+                            STREAM_VOLUME_ALIAS[streamType] == AudioSystem.STREAM_RING &&
+                            mStreamStates[streamType].mLastAudibleIndex == 0) {
+                        mStreamStates[streamType].mLastAudibleIndex = 10;
+                    }
                     mStreamStates[streamType].mute(null, false);
                     mRingerModeMutedStreams &= ~(1 << streamType);
                 }
@@ -1593,7 +1617,7 @@ public class AudioService extends IAudioService.Stub {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private boolean checkForRingerModeChange(int oldIndex, int direction) {
+    private boolean checkForRingerModeChange(int oldIndex, int direction, int streamType) {
         boolean adjustVolumeIndex = true;
         int newRingerMode = mRingerMode;
         int uiIndex = (oldIndex + 5) / 10;
@@ -1608,7 +1632,8 @@ public class AudioService extends IAudioService.Stub {
                         ? AudioManager.RINGER_MODE_VIBRATE
                         : AudioManager.RINGER_MODE_SILENT;
                 }
-                if (uiIndex == 0) {
+                if (uiIndex == 0 || (mPrevVolDirection == AudioManager.ADJUST_LOWER &&
+                        mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
                     adjustVolumeIndex = false;
                 }
             }
@@ -1616,13 +1641,8 @@ public class AudioService extends IAudioService.Stub {
             if (direction == AudioManager.ADJUST_RAISE) {
                 // exiting silent mode
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
-                if (uiIndex != 0) {
-                    adjustVolumeIndex = false;
-                }
-            } else {
-                // prevent last audible index to reach 0
-                adjustVolumeIndex = false;
             }
+            adjustVolumeIndex = false;
         }
 
         if (newRingerMode != mRingerMode) {
