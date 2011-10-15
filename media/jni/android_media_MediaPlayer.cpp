@@ -274,8 +274,14 @@ setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlaye
     sp<ISurfaceTexture> new_st;
     if (jsurface) {
         sp<Surface> surface(Surface_getSurface(env, jsurface));
-        new_st = surface->getSurfaceTexture();
-        new_st->incStrong(thiz);
+        if (surface != NULL) {
+            new_st = surface->getSurfaceTexture();
+            new_st->incStrong(thiz);
+        } else {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                    "The surface has been released");
+            return;
+        }
     }
 
     env->SetIntField(thiz, fields.surface_texture, (int)new_st.get());
