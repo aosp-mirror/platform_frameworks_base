@@ -271,8 +271,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Returns true if the field at the specified row and column index
      * has type {@link Cursor#FIELD_TYPE_NULL}.
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if the field has type {@link Cursor#FIELD_TYPE_NULL}.
      * @deprecated Use {@link #getType(int, int)} instead.
@@ -286,8 +285,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Returns true if the field at the specified row and column index
      * has type {@link Cursor#FIELD_TYPE_BLOB} or {@link Cursor#FIELD_TYPE_NULL}.
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if the field has type {@link Cursor#FIELD_TYPE_BLOB} or
      * {@link Cursor#FIELD_TYPE_NULL}.
@@ -303,8 +301,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Returns true if the field at the specified row and column index
      * has type {@link Cursor#FIELD_TYPE_INTEGER}.
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if the field has type {@link Cursor#FIELD_TYPE_INTEGER}.
      * @deprecated Use {@link #getType(int, int)} instead.
@@ -318,8 +315,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Returns true if the field at the specified row and column index
      * has type {@link Cursor#FIELD_TYPE_FLOAT}.
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if the field has type {@link Cursor#FIELD_TYPE_FLOAT}.
      * @deprecated Use {@link #getType(int, int)} instead.
@@ -333,8 +329,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Returns true if the field at the specified row and column index
      * has type {@link Cursor#FIELD_TYPE_STRING} or {@link Cursor#FIELD_TYPE_NULL}.
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if the field has type {@link Cursor#FIELD_TYPE_STRING}
      * or {@link Cursor#FIELD_TYPE_NULL}.
@@ -359,8 +354,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </ul>
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The field type.
      */
@@ -390,8 +384,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </ul>
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as a byte array.
      */
@@ -426,8 +419,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </ul>
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as a string.
      */
@@ -465,8 +457,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </ul>
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @param buffer The {@link CharArrayBuffer} to hold the string.  It is automatically
      * resized if the requested string is larger than the buffer's current capacity.
@@ -501,8 +492,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </ul>
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as a <code>long</code>.
      */
@@ -534,8 +524,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * </ul>
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as a <code>double</code>.
      */
@@ -556,8 +545,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * result to <code>short</code>.
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as a <code>short</code>.
      */
@@ -573,8 +561,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * result to <code>int</code>.
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as an <code>int</code>.
      */
@@ -590,8 +577,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * result to <code>float</code>.
      * </p>
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return The value of the field as an <code>float</code>.
      */
@@ -603,8 +589,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Copies a byte array into the field at the specified row and column index.
      *
      * @param value The value to store.
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if successful.
      */
@@ -621,8 +606,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Copies a string into the field at the specified row and column index.
      *
      * @param value The value to store.
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if successful.
      */
@@ -639,8 +623,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * Puts a long integer into the field at the specified row and column index.
      *
      * @param value The value to store.
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if successful.
      */
@@ -658,8 +641,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * specified row and column index.
      *
      * @param value The value to store.
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if successful.
      */
@@ -675,8 +657,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     /**
      * Puts a null value into the field at the specified row and column index.
      *
-     * @param row The zero-based row index, relative to the cursor window's
-     * start position ({@link #getStartPosition()}).
+     * @param row The zero-based row index.
      * @param column The zero-based column index.
      * @return True if successful.
      */
