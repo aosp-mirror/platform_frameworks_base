@@ -16,11 +16,11 @@
 
 package android.widget;
 
-import com.android.common.ArrayListCursor;
 import com.google.android.collect.Lists;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -52,14 +52,14 @@ public class SimpleCursorAdapterTest extends AndroidTestCase {
         super.setUp();
         
         // all the pieces needed for the various tests
-        mFrom = new String[]{"Column1", "Column2"};
+        mFrom = new String[]{"Column1", "Column2", "_id"};
         mTo = new int[]{com.android.internal.R.id.text1, com.android.internal.R.id.text2};
         mLayout = com.android.internal.R.layout.simple_list_item_2;
         mContext = getContext();
 
         // raw data for building a basic test cursor
         mData2x2 = createTestList(2, 2);
-        mCursor2x2 = new ArrayListCursor(mFrom, mData2x2);
+        mCursor2x2 = createCursor(mFrom, mData2x2);
     }
     
     /**
@@ -77,6 +77,7 @@ public class SimpleCursorAdapterTest extends AndroidTestCase {
                 Integer r = generator.nextInt();
                 col.add(r);
             }
+            col.add(i);
         }
         return list;
     }
@@ -115,7 +116,7 @@ public class SimpleCursorAdapterTest extends AndroidTestCase {
         
         // now put in a different cursor (5 rows)
         ArrayList<ArrayList> data2 = createTestList(5, 2);
-        Cursor c2 = new ArrayListCursor(mFrom, data2);
+        Cursor c2 = createCursor(mFrom, data2);
         ca.changeCursor(c2);
         
         // Now see if we can pull 5 rows from the adapter
@@ -155,8 +156,8 @@ public class SimpleCursorAdapterTest extends AndroidTestCase {
         assertEquals(columns[1], 1);
 
         // Now make a new cursor with similar data but rearrange the columns
-        String[] swappedFrom = new String[]{"Column2", "Column1"};
-        Cursor c2 = new ArrayListCursor(swappedFrom, mData2x2);
+        String[] swappedFrom = new String[]{"Column2", "Column1", "_id"};
+        Cursor c2 = createCursor(swappedFrom, mData2x2);
         ca.changeCursor(c2);
         assertEquals(2, ca.getCount());
 
@@ -235,7 +236,15 @@ public class SimpleCursorAdapterTest extends AndroidTestCase {
         assertEquals(1, viewIds.length);
         assertEquals(com.android.internal.R.id.text2, viewIds[0]);
     }
-    
+
+    private static MatrixCursor createCursor(String[] columns, ArrayList<ArrayList> list) {
+        MatrixCursor cursor = new MatrixCursor(columns, list.size());
+        for (ArrayList row : list) {
+            cursor.addRow(row);
+        }
+        return cursor;
+    }
+
     /**
      * This is simply a way to sneak a look at the protected mFrom() array.  A more API-
      * friendly way to do this would be to mock out a View and a ViewBinder and exercise
