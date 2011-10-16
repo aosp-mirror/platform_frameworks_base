@@ -25,23 +25,16 @@ namespace android {
 namespace renderscript {
 
 class ProgramStoreState;
-
+/*****************************************************************************
+ * CAUTION
+ *
+ * Any layout changes for this class may require a corresponding change to be
+ * made to frameworks/compile/libbcc/lib/ScriptCRT/rs_core.c, which contains
+ * a partial copy of the information below.
+ *
+ *****************************************************************************/
 class ProgramStore : public ProgramBase {
 public:
-    virtual void setup(const Context *, ProgramStoreState *);
-
-    virtual void serialize(OStream *stream) const;
-    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_STORE; }
-    static ProgramStore *createFromStream(Context *rsc, IStream *stream);
-    static ObjectBaseRef<ProgramStore> getProgramStore(Context *,
-                                                       bool colorMaskR, bool colorMaskG,
-                                                       bool colorMaskB, bool colorMaskA,
-                                                       bool depthMask, bool ditherEnable,
-                                                       RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
-                                                       RsDepthFunc depthFunc);
-
-    void init();
-
     struct Hal {
         mutable void *drv;
 
@@ -64,6 +57,18 @@ public:
     };
     Hal mHal;
 
+    virtual void setup(const Context *, ProgramStoreState *);
+
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_STORE; }
+    static ProgramStore *createFromStream(Context *rsc, IStream *stream);
+    static ObjectBaseRef<ProgramStore> getProgramStore(Context *,
+                                                       bool colorMaskR, bool colorMaskG,
+                                                       bool colorMaskB, bool colorMaskA,
+                                                       bool depthMask, bool ditherEnable,
+                                                       RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
+                                                       RsDepthFunc depthFunc);
+    void init();
 protected:
     virtual void preDestroy() const;
     virtual ~ProgramStore();
