@@ -353,8 +353,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDockLeft, mDockTop, mDockRight, mDockBottom;
     // During layout, the layer at which the doc window is placed.
     int mDockLayer;
-    int mLastSystemUiVisibility;
-    int mForceClearingStatusBarVisibility = 0;
+    int mLastSystemUiFlags;
+    // Bits that we are in the process of clearing, so we want to prevent
+    // them from being set by applications until everything has been updated
+    // to have them clear.
+    int mResettingSystemUiFlags = 0;
+    // Bits that we are currently always keeping cleared.
+    int mForceClearedSystemUiFlags = 0;
 
     FakeWindow mHideNavFakeWindow = null;
 
@@ -1719,6 +1724,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    /**
+     * A delayed callback use to determine when it is okay to re-allow applications
+     * to use certain system UI flags.  This is used to prevent applications from
+     * spamming system UI changes that prevent the navigation bar from being shown.
+     */
+    final Runnable mAllowSystemUiDelay = new Runnable() {
+        @Override public void run() {
+        }
+    };
+
+    /**
+     * Input handler used while nav bar is hidden.  Captures any touch on the screen,
+     * to determine when the nav bar should be shown and prevent applications from
+     * receiving those touches.
+     */
     final InputHandler mHideNavInputHandler = new BaseInputHandler() {
         @Override
         public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
@@ -1731,11 +1751,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         synchronized (mLock) {
                             // Any user activity always causes us to show the navigation controls,
                             // if they had been hidden.
-                            int newVal = mForceClearingStatusBarVisibility
+                            int newVal = mResettingSystemUiFlags
                                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-                            if (mForceClearingStatusBarVisibility != newVal) {
-                                mForceClearingStatusBarVisibility = newVal;
+                            if (mResettingSystemUiFlags != newVal) {
+                                mResettingSystemUiFlags = newVal;
                                 changed = true;
+                            }
+                            // We don't allow the system's nav bar to be hidden
+                            // again for 1 second, to prevent applications from
+                            // spamming us and keeping it from being shown.
+                            newVal = mForceClearedSystemUiFlags
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                            if (mForceClearedSystemUiFlags != newVal) {
+                                mForceClearedSystemUiFlags = newVal;
+                                changed = true;
+                                mHandler.postDelayed(new Runnable() {
+                                    @Override public void run() {
+                                        synchronized (mLock) {
+                                            mForceClearedSystemUiFlags &=
+                                                    ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                                        }
+                                        mWindowManagerFuncs.reevaluateStatusBarVisibility();
+                                    }
+                                }, 1000);
                             }
                         }
                         if (changed) {
@@ -1753,10 +1791,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int adjustSystemUiVisibilityLw(int visibility) {
         // Reset any bits in mForceClearingStatusBarVisibility that
         // are now clear.
-        mForceClearingStatusBarVisibility &= visibility;
+        mResettingSystemUiFlags &= visibility;
         // Clear any bits in the new visibility that are currently being
         // force cleared, before reporting it.
-        return visibility & ~mForceClearingStatusBarVisibility;
+        return visibility & ~mResettingSystemUiFlags
+                & ~mForceClearedSystemUiFlags;
     }
 
     public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset) {
@@ -1795,11 +1834,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pf.right = df.right = vf.right = mDockRight;
         pf.bottom = df.bottom = vf.bottom = mDockBottom;
 
+        final boolean navVisible = mNavigationBar != null && mNavigationBar.isVisibleLw() &&
+                (mLastSystemUiFlags&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+
+        // When the navigation bar isn't visible, we put up a fake
+        // input window to catch all touch events.  This way we can
+        // detect when the user presses anywhere to bring back the nav
+        // bar and ensure the application doesn't see the event.
+        if (navVisible) {
+            if (mHideNavFakeWindow != null) {
+                mHideNavFakeWindow.dismiss();
+                mHideNavFakeWindow = null;
+            }
+        } else if (mHideNavFakeWindow == null) {
+            mHideNavFakeWindow = mWindowManagerFuncs.addFakeWindow(
+                    mHandler.getLooper(), mHideNavInputHandler,
+                    "hidden nav", WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER,
+                    0, false, false, true);
+        }
+
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
             if (mNavigationBar != null) {
-                final boolean navVisible = mNavigationBar.isVisibleLw() &&
-                        (mLastSystemUiVisibility&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
                 // Force the navigation bar to its appropriate place and
                 // size.  We need to do this directly, instead of relying on
                 // it to bubble up from the nav bar, because this needs to
@@ -1830,21 +1886,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // to know when to be re-shown.
                         mTmpNavigationFrame.offset(mNavigationBarWidth, 0);
                     }
-                }
-                // When the navigation bar isn't visible, we put up a fake
-                // input window to catch all touch events.  This way we can
-                // detect when the user presses anywhere to bring back the nav
-                // bar and ensure the application doesn't see the event.
-                if (navVisible) {
-                    if (mHideNavFakeWindow != null) {
-                        mHideNavFakeWindow.dismiss();
-                        mHideNavFakeWindow = null;
-                    }
-                } else if (mHideNavFakeWindow == null) {
-                    mHideNavFakeWindow = mWindowManagerFuncs.addFakeWindow(
-                            mHandler.getLooper(), mHideNavInputHandler,
-                            "hidden nav", WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER,
-                            0, false, false, true);
                 }
                 // And compute the final frame.
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
@@ -3653,12 +3694,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         }
         final int visibility = mFocusedWindow.getSystemUiVisibility()
-                & ~mForceClearingStatusBarVisibility;
-        int diff = visibility ^ mLastSystemUiVisibility;
+                & ~mResettingSystemUiFlags
+                & ~mForceClearedSystemUiFlags;
+        int diff = visibility ^ mLastSystemUiFlags;
         if (diff == 0) {
             return 0;
         }
-        mLastSystemUiVisibility = visibility;
+        mLastSystemUiFlags = visibility;
         mHandler.post(new Runnable() {
                 public void run() {
                     if (mStatusBarService == null) {
@@ -3685,11 +3727,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mLidOpen="); pw.print(mLidOpen);
                 pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
                 pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);
-        if (mLastSystemUiVisibility != 0 || mForceClearingStatusBarVisibility != 0) {
-            pw.print(prefix); pw.print("mLastSystemUiVisibility=0x");
-                    pw.println(Integer.toHexString(mLastSystemUiVisibility));
-                    pw.print("  mForceClearingStatusBarVisibility=0x");
-                    pw.println(Integer.toHexString(mForceClearingStatusBarVisibility));
+        if (mLastSystemUiFlags != 0 || mResettingSystemUiFlags != 0
+                || mForceClearedSystemUiFlags != 0) {
+            pw.print(prefix); pw.print("mLastSystemUiFlags=0x");
+                    pw.print(Integer.toHexString(mLastSystemUiFlags));
+                    pw.print(" mResettingSystemUiFlags=0x");
+                    pw.print(Integer.toHexString(mResettingSystemUiFlags));
+                    pw.print(" mForceClearedSystemUiFlags=0x");
+                    pw.println(Integer.toHexString(mForceClearedSystemUiFlags));
         }
         pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
                 pw.print(" mDockMode="); pw.print(mDockMode);
