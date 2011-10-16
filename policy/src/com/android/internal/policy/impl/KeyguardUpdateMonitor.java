@@ -524,6 +524,7 @@ public class KeyguardUpdateMonitor {
             callback.onRingerModeChanged(mRingMode);
             callback.onPhoneStateChanged(mPhoneState);
             callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
+            callback.onClockVisibilityChanged();
         } else {
             if (DEBUG) Log.e(TAG, "Object tried to add another INFO callback",
                     new Exception("Whoops"));
