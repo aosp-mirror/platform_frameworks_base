@@ -70,7 +70,7 @@
     <string name="status_bar_latest_events_title">Notifications</string>
 
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
-    <string name="battery_low_title">Please connect charger</string>
+    <string name="battery_low_title">Connect charger</string>
 
     <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. [CHAR LIMIT=NONE] -->
     <string name="battery_low_subtitle">The battery is getting low.</string>
@@ -122,16 +122,16 @@
     <!-- Network connection string for Bluetooth Reverse Tethering -->
     <string name="bluetooth_tethered">Bluetooth tethered</string>
     <!-- Title of a button to open the settings for input methods [CHAR LIMIT=30] -->
-    <string name="status_bar_input_method_settings_configure_input_methods">Configure input methods</string>
+    <string name="status_bar_input_method_settings_configure_input_methods">Set up input methods</string>
 
     <!-- Label of a toggle switch to disable use of the physical keyboard in favor of the IME. [CHAR LIMIT=25] -->
     <string name="status_bar_use_physical_keyboard">Use physical keyboard</string>
 
     <!-- Prompt for the USB device permission dialog [CHAR LIMIT=80] -->
-    <string name="usb_device_permission_prompt">Allow the application <xliff:g id="application">%1$s</xliff:g> to access the USB device?</string>
+    <string name="usb_device_permission_prompt">Allow the app <xliff:g id="application">%1$s</xliff:g> to access the USB device?</string>
 
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_permission_prompt">Allow the application <xliff:g id="application">%1$s</xliff:g> to access the USB accessory?</string>
+    <string name="usb_accessory_permission_prompt">Allow the app <xliff:g id="application">%1$s</xliff:g> to access the USB accessory?</string>
 
     <!-- Prompt for the USB device confirm dialog [CHAR LIMIT=80] -->
     <string name="usb_device_confirm_prompt">Open <xliff:g id="activity">%1$s</xliff:g> when this USB device is connected?</string>
@@ -140,7 +140,7 @@
     <string name="usb_accessory_confirm_prompt">Open <xliff:g id="activity">%1$s</xliff:g> when this USB accessory is connected?</string>
 
     <!-- Prompt for the USB accessory URI dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_uri_prompt">No installed applications work with this USB accessory. Learn more about this accessory at <xliff:g id="url">%1$s</xliff:g></string>
+    <string name="usb_accessory_uri_prompt">No installed apps work with this USB accessory. Learn more about this accessory at <xliff:g id="url">%1$s</xliff:g></string>
 
     <!-- Title for USB accessory dialog.  Used when the name of the accessory cannot be determined.  [CHAR LIMIT=50] -->
     <string name="title_usb_accessory">USB accessory</string>
@@ -163,25 +163,25 @@
     <string name="compat_mode_off">Stretch to fill screen</string>
 
     <!-- Compatibility mode help screen: header text. [CHAR LIMIT=50] -->
-    <string name="compat_mode_help_header">Compatibility Zoom</string>
+    <string name="compat_mode_help_header">Compatibility zoom</string>
 
     <!-- Compatibility mode help screen: body text. [CHAR LIMIT=150] -->
     <string name="compat_mode_help_body">When an app was designed for a smaller screen, a zoom control will appear by the clock.</string>
 
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
-    <string name="screenshot_saving_ticker">Saving...</string>
+    <string name="screenshot_saving_ticker">Saving\u2026</string>
     <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
-    <string name="screenshot_saving_title">Saving screenshot...</string>
+    <string name="screenshot_saving_title">Saving screenshot\u2026</string>
     <!-- Notification text displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=100] -->
-    <string name="screenshot_saving_text">Please wait for screenshot to be saved</string>
+    <string name="screenshot_saving_text">Screenshot is being saved.</string>
     <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
-    <string name="screenshot_saved_title">Screenshot captured</string>
+    <string name="screenshot_saved_title">Screenshot captured.</string>
     <!-- Notification text displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=100] -->
-    <string name="screenshot_saved_text">Touch to view your screenshot</string>
+    <string name="screenshot_saved_text">Touch to view your screenshot.</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
-    <string name="screenshot_failed_title">Screenshot failed</string>
+    <string name="screenshot_failed_title">Couldn\'t capture screenshot.</string>
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
-    <string name="screenshot_failed_text">Failed to save screenshot. External storage may be in use.</string>
+    <string name="screenshot_failed_text">Couldn\'t save screenshot. External storage may be in use.</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>
@@ -190,7 +190,7 @@
     <!-- Label for the PTP USB function in UsbPreferenceActivity. [CHAR LIMIT=50] -->
     <string name="use_ptp_button_title">Mount as a camera (PTP)</string>
     <!-- Label for the installer CD image option in UsbPreferenceActivity. [CHAR LIMIT=50] -->
-    <string name="installer_cd_button_title">Install Android File Transfer application for Mac</string>
+    <string name="installer_cd_button_title">Install Android File Transfer app for Mac</string>
 
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_back">Back</string>
@@ -248,15 +248,15 @@
     <string name="accessibility_data_signal_full">Data signal full.</string>
 
     <!-- Content description of the WIFI signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_wifi">No WiFi.</string>
+    <string name="accessibility_no_wifi">No Wi-Fi.</string>
     <!-- Content description of the WIFI signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_one_bar">WiFi one bar.</string>
+    <string name="accessibility_wifi_one_bar">Wi-Fi one bar.</string>
     <!-- Content description of the WIFI signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_two_bars">WiFi two bars.</string>
+    <string name="accessibility_wifi_two_bars">Wi-Fi two bars.</string>
     <!-- Content description of the WIFI signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_three_bars">WiFi three bars.</string>
+    <string name="accessibility_wifi_three_bars">Wi-Fi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_signal_full">WiFi signal full.</string>
+    <string name="accessibility_wifi_signal_full">Wi-Fi signal full.</string>
 
     <!-- Content description of the data connection type GPRS for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_gprs">GPRS</string>
@@ -277,7 +277,7 @@
     <string name="accessibility_data_connection_edge">Edge</string>
 
     <!-- Content description of the data connection type WiFi for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_data_connection_wifi">WiFi</string>
+    <string name="accessibility_data_connection_wifi">Wi-Fi</string>
 
     <!-- Content description of the data connection with no SIM for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_sim">No SIM.</string>
@@ -327,7 +327,7 @@
     <!-- Title of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_title">Data disabled</string>
     <!-- Body of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=NONE] -->
-    <string name="data_usage_disabled_dialog">The specified data usage limit has been reached.\n\nAdditional data use may incur carrier charges.</string>
+    <string name="data_usage_disabled_dialog">You\'ve reached the specified data usage limit.\n\nIf you re-enable data, you may be charged by the operator.</string>
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
     <string name="data_usage_disabled_dialog_enable">Re-enable data</string>
 
