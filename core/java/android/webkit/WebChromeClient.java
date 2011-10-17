@@ -95,27 +95,33 @@ public class WebChromeClient {
     public void onHideCustomView() {}
 
     /**
-     * Request the host application to create a new Webview. The host
-     * application should handle placement of the new WebView in the view
-     * system. The default behavior returns null.
-     * @param view The WebView that initiated the callback.
-     * @param dialog True if the new window is meant to be a small dialog
-     *               window.
-     * @param userGesture True if the request was initiated by a user gesture
-     *                    such as clicking a link.
-     * @param resultMsg The message to send when done creating a new WebView.
-     *                  Set the new WebView through resultMsg.obj which is 
-     *                  WebView.WebViewTransport() and then call
-     *                  resultMsg.sendToTarget();
-     * @return Similar to javscript dialogs, this method should return true if
-     *         the client is going to handle creating a new WebView. Note that
-     *         the WebView will halt processing if this method returns true so
-     *         make sure to call resultMsg.sendToTarget(). It is undefined
-     *         behavior to call resultMsg.sendToTarget() after returning false
-     *         from this method.
+     * Request the host application to create a new window. If the host
+     * application chooses to honor this request, it should return true from
+     * this method, create a new WebView to host the window, insert it into the
+     * View system and send the supplied resultMsg message to its target with
+     * the new WebView as an argument. If the host application chooses not to
+     * honor the request, it should return false from this method. The default
+     * implementation of this method does nothing and hence returns false.
+     * @param view The WebView from which the request for a new window
+     *             originated.
+     * @param isDialog True if the new window should be a dialog, rather than
+     *                 a full-size window.
+     * @param isUserGesture True if the request was initiated by a user gesture,
+     *                      such as the user clicking a link.
+     * @param resultMsg The message to send when once a new WebView has been
+     *                  created. resultMsg.obj is a
+     *                  {@link WebView#WebViewTransport WebView.WebViewTransport}
+     *                  object. This should be used to transport the new
+     *                  WebView, by calling
+     *                  {@link WebView#WebViewTransport#setWebView() WebView.WebViewTransport.setWebView()}.
+     * @return This method should return true if the host application will
+     *         create a new window, in which case resultMsg should be sent to
+     *         its target. Otherwise, this method should return false. Returning
+     *         false from this method but also sending resultMsg will result in
+     *         undefined behavior.
      */
-    public boolean onCreateWindow(WebView view, boolean dialog,
-            boolean userGesture, Message resultMsg) {
+    public boolean onCreateWindow(WebView view, boolean isDialog,
+            boolean isUserGesture, Message resultMsg) {
         return false;
     }
 
