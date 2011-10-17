@@ -49,10 +49,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * </p>
  * <p>
  * <code>
- * <pre>
- *   AccessibilityManager accessibilityManager =
- *           (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
- * </pre>
+ * <pre>AccessibilityManager accessibilityManager =
+ *        (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);</pre>
  * </code>
  * </p>
  *
@@ -91,7 +89,10 @@ public final class AccessibilityManager {
         new CopyOnWriteArrayList<AccessibilityStateChangeListener>();
 
     /**
-     * Listener for the accessibility state.
+     * Listener for the system accessibility state. To listen for changes to the accessibility
+     * state on the device, implement this interface and register it with the system by
+     * calling {@link AccessibilityManager#addAccessibilityStateChangeListener
+     * addAccessibilityStateChangeListener()}.
      */
     public interface AccessibilityStateChangeListener {
 

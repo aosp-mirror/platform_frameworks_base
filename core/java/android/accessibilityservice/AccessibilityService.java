@@ -32,11 +32,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * when {@link AccessibilityEvent}s are fired. Such events denote some state transition
  * in the user interface, for example, the focus has changed, a button has been clicked,
  * etc. Such a service can optionally request the capability for querying the content
- * of the active window. Development of an accessibility service requires extends this
- * class and implements its abstract methods.
- * <p>
- * <strong>Lifecycle</strong>
- * </p>
+ * of the active window. Development of an accessibility service requires extending this
+ * class and implementing its abstract methods.
+ * <h3>Lifecycle</h3>
  * <p>
  * The lifecycle of an accessibility service is managed exclusively by the system and
  * follows the established service life cycle. Additionally, starting or stopping an
@@ -45,30 +43,20 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * calls {@link AccessibilityService#onServiceConnected()}. This method can be
  * overriden by clients that want to perform post binding setup.
  * </p>
- * <p>
- * <strong>Declaration</strong>
- * </p>
+ * <h3>Declaration</h3>
  * <p>
  * An accessibility is declared as any other service in an AndroidManifest.xml but it
  * must also specify that it handles the "android.accessibilityservice.AccessibilityService"
  * {@link android.content.Intent}. Failure to declare this intent will cause the system to
  * ignore the accessibility service. Following is an example declaration:
  * </p>
- * <p>
- * <code>
- * <pre>
- *   &lt;service android:name=".MyAccessibilityService"&gt;
+ * <pre> &lt;service android:name=".MyAccessibilityService"&gt;
  *     &lt;intent-filter&gt;
- *       &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
+ *         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
  *     &lt;/intent-filter&gt;
  *     . . .
- *   &lt;/service&gt;
- * </pre>
- * </code>
- * </p>
- * <p>
- * <strong>Configuration</strong>
- * </p>
+ * &lt;/service&gt;</pre>
+ * <h3>Configuration</h3>
  * <p>
  * An accessibility service can be configured to receive specific types of accessibility events,
  * listen only to specific packages, get events from each type only once in a given time frame,
@@ -81,30 +69,24 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * <li>
  * Providing a {@link #SERVICE_META_DATA meta-data} entry in the manifest when declaring
  * the service. A service declaration with a meta-data tag is presented below:
- * <p>
- * <code>
- * <pre>
- *   &lt;service android:name=".MyAccessibilityService"&gt;
+ * <pre> &lt;service android:name=".MyAccessibilityService"&gt;
  *     &lt;intent-filter&gt;
- *       &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
+ *         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
  *     &lt;/intent-filter&gt;
  *     &lt;meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibilityservice" /&gt;
- *   &lt;/service&gt;
- * </pre>
- * </code>
- * </p>
- * <p>
- * <strong>Note:</strong>This approach enables setting all properties.
+ * &lt;/service&gt;</pre>
+ * <p class="note">
+ * <strong>Note:</strong> This approach enables setting all properties.
  * </p>
  * <p>
  * For more details refer to {@link #SERVICE_META_DATA} and
- * <code>&lt;{@link android.R.styleable#AccessibilityService accessibility-service}&gt;</code>..
+ * <code>&lt;{@link android.R.styleable#AccessibilityService accessibility-service}&gt;</code>.
  * </p>
  * </li>
  * <li>
  * Calling {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}. Note
  * that this method can be called any time to dynamically change the service configuration.
- * <p>
+ * <p class="note">
  * <strong>Note:</strong> This approach enables setting only dynamically configurable properties:
  * {@link AccessibilityServiceInfo#eventTypes},
  * {@link AccessibilityServiceInfo#feedbackType},
@@ -117,9 +99,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * </p>
  * </li>
  * </ul>
- * <p>
- * <strong>Retrieving window content</strong>
- * </p>
+ * <h3>Retrieving window content</h3>
  * <p>
  * An service can specify in its declaration that it can retrieve the active window
  * content which is represented as a tree of {@link AccessibilityNodeInfo}. Note that
@@ -144,8 +124,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * this method will return an {@link AccessibilityNodeInfo} that can be used to traverse the
  * window content which represented as a tree of such objects.
  * </p>
- * <p>
- * <strong>Note</strong>An accessibility service may have requested to be notified for
+ * <p class="note">
+ * <strong>Note</strong> An accessibility service may have requested to be notified for
  * a subset of the event types, thus be unaware that the active window has changed. Therefore
  * accessibility service that would like to retrieve window content should:
  * <ul>
@@ -158,15 +138,13 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * <li>
  * Prepare that a retrieval method on {@link AccessibilityNodeInfo} may fail since the
  * active window has changed and the service did not get the accessibility event yet. Note
- * that it is possible to have a retrieval method failing event adopting the strategy
+ * that it is possible to have a retrieval method failing even adopting the strategy
  * specified in the previous bullet because the accessibility event dispatch is asynchronous
  * and crosses process boundaries.
  * </li>
  * </ul>
  * </p>
- * <p>
- * <b>Notification strategy</b>
- * </p>
+ * <h3>Notification strategy</h3>
  * <p>
  * For each feedback type only one accessibility service is notified. Services are notified
  * in the order of registration. Hence, if two services are registered for the same
@@ -178,40 +156,39 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * well with most applications to coexist with "polished" ones that are targeted for
  * specific applications.
  * </p>
- * <p>
- * <b>Event types</b>
- * </p>
- * {@link AccessibilityEvent#TYPE_VIEW_CLICKED}
- * {@link AccessibilityEvent#TYPE_VIEW_LONG_CLICKED}
- * {@link AccessibilityEvent#TYPE_VIEW_FOCUSED}
- * {@link AccessibilityEvent#TYPE_VIEW_SELECTED}
- * {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED}
- * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}
- * {@link AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED}
- * {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START}
- * {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END}
- * {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER}
- * {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}
- * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED}
- * {@link AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED}
- * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}
- * <p>
- * <b>Feedback types</b>
- * <p>
- * {@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}
- * {@link AccessibilityServiceInfo#FEEDBACK_HAPTIC}
- * {@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}
- * {@link AccessibilityServiceInfo#FEEDBACK_VISUAL}
- * {@link AccessibilityServiceInfo#FEEDBACK_GENERIC}
- *
- * @see AccessibilityEvent
- * @see AccessibilityServiceInfo
- * @see android.view.accessibility.AccessibilityManager
- *
+ * <p class="note">
  * <strong>Note:</strong> The event notification timeout is useful to avoid propagating
  * events to the client too frequently since this is accomplished via an expensive
  * interprocess call. One can think of the timeout as a criteria to determine when
- * event generation has settled down.
+ * event generation has settled down.</p>
+ * <h3>Event types</h3>
+ * <ul>
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_CLICKED}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_LONG_CLICKED}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_FOCUSED}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_SELECTED}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED}
+ * <li>{@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}
+ * <li>{@link AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED}
+ * <li>{@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START}
+ * <li>{@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_SCROLLED}
+ * <li>{@link AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED}
+ * <li>{@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}
+ * </ul>
+ * <h3>Feedback types</h3>
+ * <ul>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_HAPTIC}
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_VISUAL}
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_GENERIC}
+ * </ul>
+ * @see AccessibilityEvent
+ * @see AccessibilityServiceInfo
+ * @see android.view.accessibility.AccessibilityManager
  */
 public abstract class AccessibilityService extends Service {
     /**
@@ -225,10 +202,7 @@ public abstract class AccessibilityService extends Service {
      * about itself. This meta-data must reference an XML resource containing an
      * <code>&lt;{@link android.R.styleable#AccessibilityService accessibility-service}&gt;</code>
      * tag. This is a a sample XML file configuring an accessibility service:
-     * <p>
-     * <code>
-     * <pre>
-     *   &lt;accessibility-service
+     * <pre> &lt;accessibility-service
      *     android:accessibilityEventTypes="typeViewClicked|typeViewFocused"
      *     android:packageNames="foo.bar, foo.baz"
      *     android:accessibilityFeedbackType="feedbackSpoken"
@@ -237,10 +211,7 @@ public abstract class AccessibilityService extends Service {
      *     android:settingsActivity="foo.bar.TestBackActivity"
      *     android:canRetrieveWindowContent="true"
      *     . . .
-     *   /&gt;
-     * </pre>
-     * </code>
-     * </p>
+     * /&gt;</pre>
      */
     public static final String SERVICE_META_DATA = "android.accessibilityservice";
 

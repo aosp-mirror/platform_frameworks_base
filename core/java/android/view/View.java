@@ -3830,7 +3830,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * responsible for handling this call.
      * </p>
      *
-     * @param eventType The type of the event to send.
+     * @param eventType The type of the event to send, as defined by several types from
+     * {@link android.view.accessibility.AccessibilityEvent}, such as
+     * {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CLICKED} or
+     * {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_HOVER_ENTER}.
      *
      * @see #onInitializeAccessibilityEvent(AccessibilityEvent)
      * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
@@ -3943,26 +3946,27 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Called from {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
      * giving a chance to this View to populate the accessibility event with its
-     * text content. While the implementation is free to modify other event
-     * attributes this should be performed in
+     * text content. While this method is free to modify event
+     * attributes other than text content, doing so should normally be performed in
      * {@link #onInitializeAccessibilityEvent(AccessibilityEvent)}.
      * <p>
      * Example: Adding formatted date string to an accessibility event in addition
-     *          to the text added by the super implementation.
-     * </p><p><pre><code>
-     * public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+     *          to the text added by the super implementation:
+     * <pre> public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
      *     super.onPopulateAccessibilityEvent(event);
      *     final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY;
      *     String selectedDateUtterance = DateUtils.formatDateTime(mContext,
      *         mCurrentDate.getTimeInMillis(), flags);
      *     event.getText().add(selectedDateUtterance);
-     * }
-     * </code></pre></p>
+     * }</pre>
      * <p>
      * If an {@link AccessibilityDelegate} has been specified via calling
      * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
      * {@link AccessibilityDelegate#onPopulateAccessibilityEvent(View, AccessibilityEvent)}
      * is responsible for handling this call.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Always call the super implementation before adding
+     * information to the event, in case the default implementation has basic information to add.
      * </p>
      *
      * @param event The accessibility event which to populate.
@@ -3994,20 +3998,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * the event.
      * <p>
      * Example: Setting the password property of an event in addition
-     *          to properties set by the super implementation.
-     * </p><p><pre><code>
-     * public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-     *    super.onInitializeAccessibilityEvent(event);
-     *    event.setPassword(true);
-     * }
-     * </code></pre></p>
+     *          to properties set by the super implementation:
+     * <pre> public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+     *     super.onInitializeAccessibilityEvent(event);
+     *     event.setPassword(true);
+     * }</pre>
      * <p>
      * If an {@link AccessibilityDelegate} has been specified via calling
      * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
      * {@link AccessibilityDelegate#onInitializeAccessibilityEvent(View, AccessibilityEvent)}
      * is responsible for handling this call.
      * </p>
-     *
+     * <p class="note"><strong>Note:</strong> Always call the super implementation before adding
+     * information to the event, in case the default implementation has basic information to add.
+     * </p>
      * @param event The event to initialize.
      *
      * @see #sendAccessibilityEvent(int)
@@ -6179,8 +6183,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * are delivered to the view under the pointer.  All other generic motion events are
      * delivered to the focused view.
      * </p>
-     * <code>
-     * public boolean onGenericMotionEvent(MotionEvent event) {
+     * <pre> public boolean onGenericMotionEvent(MotionEvent event) {
      *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
      *         if (event.getAction() == MotionEvent.ACTION_MOVE) {
      *             // process the joystick movement...
@@ -6198,8 +6201,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         }
      *     }
      *     return super.onGenericMotionEvent(event);
-     * }
-     * </code>
+     * }</pre>
      *
      * @param event The generic motion event being processed.
      * @return True if the event was handled, false otherwise.
