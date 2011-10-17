@@ -46,7 +46,6 @@ namespace android {
 
 class Client;
 class DisplayHardware;
-class FreezeLock;
 class Layer;
 class LayerDim;
 class LayerScreenshot;
@@ -169,9 +168,7 @@ public:
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        setTransactionState(const Vector<ComposerState>& state,
-                                                            int orientation);
-    virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
-    virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
+                                                            int orientation, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual bool                        authenticateSurfaceTexture(const sp<ISurfaceTexture>& surface) const;
 
@@ -269,12 +266,10 @@ private:
     struct State {
         State() {
             orientation = ISurfaceComposer::eOrientationDefault;
-            freezeDisplay = 0;
         }
         LayerVector     layersSortedByZ;
         uint8_t         orientation;
         uint8_t         orientationFlags;
-        uint8_t         freezeDisplay;
     };
 
     virtual bool        threadLoop();
@@ -333,20 +328,6 @@ private:
             status_t renderScreenToTextureLocked(DisplayID dpy,
                     GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
 
-            friend class FreezeLock;
-            sp<FreezeLock> getFreezeLock() const;
-            inline void incFreezeCount() {
-                if (mFreezeCount == 0)
-                    mFreezeDisplayTime = 0;
-                mFreezeCount++;
-            }
-            inline void decFreezeCount() { if (mFreezeCount > 0) mFreezeCount--; }
-            inline bool hasFreezeRequest() const { return mFreezeDisplay; }
-            inline bool isFrozen() const { 
-                return (mFreezeDisplay || mFreezeCount>0) && mBootFinished;
-            }
-
-            
             void        debugFlashRegions();
             void        debugShowFPS() const;
             void        drawWormhole() const;
@@ -360,7 +341,7 @@ private:
     volatile    int32_t                 mTransactionFlags;
                 Condition               mTransactionCV;
                 SortedVector< sp<LayerBase> > mLayerPurgatory;
-                bool                    mResizeTransationPending;
+                bool                    mTransationPending;
 
                 // protected by mStateLock (but we could use another lock)
                 GraphicPlane                mGraphicPlanes[1];
@@ -383,10 +364,7 @@ private:
                 Region                      mWormholeRegion;
                 bool                        mVisibleRegionsDirty;
                 bool                        mHwWorkListDirty;
-                bool                        mFreezeDisplay;
                 int32_t                     mElectronBeamAnimationMode;
-                int32_t                     mFreezeCount;
-                nsecs_t                     mFreezeDisplayTime;
                 Vector< sp<LayerBase> >     mVisibleLayersSortedByZ;
 
 
@@ -419,20 +397,6 @@ private:
 
    // only written in the main thread, only read in other threads
    volatile     int32_t                     mSecureFrameBuffer;
-};
-
-// ---------------------------------------------------------------------------
-
-class FreezeLock : public LightRefBase<FreezeLock> {
-    SurfaceFlinger* mFlinger;
-public:
-    FreezeLock(SurfaceFlinger* flinger)
-        : mFlinger(flinger) {
-        mFlinger->incFreezeCount();
-    }
-    ~FreezeLock() {
-        mFlinger->decFreezeCount();
-    }
 };
 
 // ---------------------------------------------------------------------------

@@ -92,11 +92,14 @@ class Composer : public Singleton<Composer>
     mutable Mutex               mLock;
     SortedVector<ComposerState> mStates;
     int                         mOrientation;
+    uint32_t                    mForceSynchronous;
 
     Composer() : Singleton<Composer>(),
-        mOrientation(ISurfaceComposer::eOrientationUnchanged) { }
+        mOrientation(ISurfaceComposer::eOrientationUnchanged),
+        mForceSynchronous(0)
+    { }
 
-    void closeGlobalTransactionImpl();
+    void closeGlobalTransactionImpl(bool synchronous);
 
     layer_state_t* getLayerStateLocked(
             const sp<SurfaceComposerClient>& client, SurfaceID id);
@@ -123,8 +126,8 @@ public:
             uint32_t tint);
     status_t setOrientation(int orientation);
 
-    static void closeGlobalTransaction() {
-        Composer::getInstance().closeGlobalTransactionImpl();
+    static void closeGlobalTransaction(bool synchronous) {
+        Composer::getInstance().closeGlobalTransactionImpl(synchronous);
     }
 };
 
@@ -132,11 +135,12 @@ ANDROID_SINGLETON_STATIC_INSTANCE(Composer);
 
 // ---------------------------------------------------------------------------
 
-void Composer::closeGlobalTransactionImpl() {
+void Composer::closeGlobalTransactionImpl(bool synchronous) {
     sp<ISurfaceComposer> sm(getComposerService());
 
     Vector<ComposerState> transaction;
     int orientation;
+    uint32_t flags = 0;
 
     { // scope for the lock
         Mutex::Autolock _l(mLock);
@@ -145,9 +149,14 @@ void Composer::closeGlobalTransactionImpl() {
 
         orientation = mOrientation;
         mOrientation = ISurfaceComposer::eOrientationUnchanged;
+
+        if (synchronous || mForceSynchronous) {
+            flags |= ISurfaceComposer::eSynchronous;
+        }
+        mForceSynchronous = false;
     }
 
-   sm->setTransactionState(transaction, orientation);
+   sm->setTransactionState(transaction, orientation, flags);
 }
 
 layer_state_t* Composer::getLayerStateLocked(
@@ -188,6 +197,10 @@ status_t Composer::setSize(const sp<SurfaceComposerClient>& client,
     s->what |= ISurfaceComposer::eSizeChanged;
     s->w = w;
     s->h = h;
+
+    // Resizing a surface makes the transaction synchronous.
+    mForceSynchronous = true;
+
     return NO_ERROR;
 }
 
@@ -270,6 +283,10 @@ status_t Composer::setFreezeTint(const sp<SurfaceComposerClient>& client,
 status_t Composer::setOrientation(int orientation) {
     Mutex::Autolock _l(mLock);
     mOrientation = orientation;
+
+    // Changing the orientation makes the transaction synchronous.
+    mForceSynchronous = true;
+
     return NO_ERROR;
 }
 
@@ -375,8 +392,8 @@ void SurfaceComposerClient::openGlobalTransaction() {
     // Currently a no-op
 }
 
-void SurfaceComposerClient::closeGlobalTransaction() {
-    Composer::closeGlobalTransaction();
+void SurfaceComposerClient::closeGlobalTransaction(bool synchronous) {
+    Composer::closeGlobalTransaction(synchronous);
 }
 
 // ----------------------------------------------------------------------------

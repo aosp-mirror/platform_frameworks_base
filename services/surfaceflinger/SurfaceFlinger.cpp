@@ -80,15 +80,12 @@ const String16 sDump("android.permission.DUMP");
 SurfaceFlinger::SurfaceFlinger()
     :   BnSurfaceComposer(), Thread(false),
         mTransactionFlags(0),
-        mResizeTransationPending(false),
+        mTransationPending(false),
         mLayersRemoved(false),
         mBootTime(systemTime()),
         mVisibleRegionsDirty(false),
         mHwWorkListDirty(false),
-        mFreezeDisplay(false),
         mElectronBeamAnimationMode(0),
-        mFreezeCount(0),
-        mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugBackground(0),
         mDebugDDMS(0),
@@ -190,11 +187,6 @@ void SurfaceFlinger::bootFinished()
 void SurfaceFlinger::binderDied(const wp<IBinder>& who)
 {
     // the window manager died on us. prepare its eulogy.
-
-    // unfreeze the screen in case it was... frozen
-    mFreezeDisplayTime = 0;
-    mFreezeCount = 0;
-    mFreezeDisplay = false;
 
     // reset screen orientation
     setOrientation(0, eOrientationDefault, 0);
@@ -323,33 +315,7 @@ void SurfaceFlinger::waitForEvent()
 {
     while (true) {
         nsecs_t timeout = -1;
-        const nsecs_t freezeDisplayTimeout = ms2ns(5000);
-        if (UNLIKELY(isFrozen())) {
-            // wait 5 seconds
-            const nsecs_t now = systemTime();
-            if (mFreezeDisplayTime == 0) {
-                mFreezeDisplayTime = now;
-            }
-            nsecs_t waitTime = freezeDisplayTimeout - (now - mFreezeDisplayTime);
-            timeout = waitTime>0 ? waitTime : 0;
-        }
-
         sp<MessageBase> msg = mEventQueue.waitMessage(timeout);
-
-        // see if we timed out
-        if (isFrozen()) {
-            const nsecs_t now = systemTime();
-            nsecs_t frozenTime = (now - mFreezeDisplayTime);
-            if (frozenTime >= freezeDisplayTimeout) {
-                // we timed out and are still frozen
-                LOGW("timeout expired mFreezeDisplay=%d, mFreezeCount=%d",
-                        mFreezeDisplay, mFreezeCount);
-                mFreezeDisplayTime = 0;
-                mFreezeCount = 0;
-                mFreezeDisplay = false;
-            }
-        }
-
         if (msg != 0) {
             switch (msg->what) {
                 case MessageQueue::INVALIDATE:
@@ -452,7 +418,7 @@ bool SurfaceFlinger::threadLoop()
     }
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    if (LIKELY(hw.canDraw() && !isFrozen())) {
+    if (LIKELY(hw.canDraw())) {
         // repaint the framebuffer (if needed)
 
         const int index = hw.getCurrentBufferIndex();
@@ -583,13 +549,6 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
             mDirtyRegion.set(hw.bounds());
         }
 
-        if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
-            // freezing or unfreezing the display -> trigger animation if needed
-            mFreezeDisplay = mCurrentState.freezeDisplay;
-            if (mFreezeDisplay)
-                 mFreezeDisplayTime = 0;
-        }
-
         if (currentLayers.size() > mDrawingState.layersSortedByZ.size()) {
             // layers have been added
             mVisibleRegionsDirty = true;
@@ -613,11 +572,6 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
     }
 
     commitTransaction();
-}
-
-sp<FreezeLock> SurfaceFlinger::getFreezeLock() const
-{
-    return new FreezeLock(const_cast<SurfaceFlinger *>(this));
 }
 
 void SurfaceFlinger::computeVisibleRegions(
@@ -749,7 +703,7 @@ void SurfaceFlinger::computeVisibleRegions(
 void SurfaceFlinger::commitTransaction()
 {
     mDrawingState = mCurrentState;
-    mResizeTransationPending = false;
+    mTransationPending = false;
     mTransactionCV.broadcast();
 }
 
@@ -1236,15 +1190,14 @@ uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
 
 
 void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
-        int orientation) {
+        int orientation, uint32_t flags) {
     Mutex::Autolock _l(mStateLock);
 
-    uint32_t flags = 0;
+    uint32_t transactionFlags = 0;
     if (mCurrentState.orientation != orientation) {
         if (uint32_t(orientation)<=eOrientation270 || orientation==42) {
             mCurrentState.orientation = orientation;
-            flags |= eTransactionNeeded;
-            mResizeTransationPending = true;
+            transactionFlags |= eTransactionNeeded;
         } else if (orientation != eOrientationUnchanged) {
             LOGW("setTransactionState: ignoring unrecognized orientation: %d",
                     orientation);
@@ -1255,54 +1208,27 @@ void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
     for (size_t i=0 ; i<count ; i++) {
         const ComposerState& s(state[i]);
         sp<Client> client( static_cast<Client *>(s.client.get()) );
-        flags |= setClientStateLocked(client, s.state);
+        transactionFlags |= setClientStateLocked(client, s.state);
     }
-    if (flags) {
-        setTransactionFlags(flags);
+    if (transactionFlags) {
+        setTransactionFlags(transactionFlags);
     }
 
-    signalEvent();
-
-    // if there is a transaction with a resize, wait for it to
-    // take effect before returning.
-    while (mResizeTransationPending) {
+    // if this is a synchronous transaction, wait for it to take effect before
+    // returning.
+    if (flags & eSynchronous) {
+        mTransationPending = true;
+    }
+    while (mTransationPending) {
         status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
         if (CC_UNLIKELY(err != NO_ERROR)) {
             // just in case something goes wrong in SF, return to the
             // called after a few seconds.
             LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
-            mResizeTransationPending = false;
+            mTransationPending = false;
             break;
         }
     }
-}
-
-status_t SurfaceFlinger::freezeDisplay(DisplayID dpy, uint32_t flags)
-{
-    if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
-        return BAD_VALUE;
-
-    Mutex::Autolock _l(mStateLock);
-    mCurrentState.freezeDisplay = 1;
-    setTransactionFlags(eTransactionNeeded);
-
-    // flags is intended to communicate some sort of animation behavior
-    // (for instance fading)
-    return NO_ERROR;
-}
-
-status_t SurfaceFlinger::unfreezeDisplay(DisplayID dpy, uint32_t flags)
-{
-    if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
-        return BAD_VALUE;
-
-    Mutex::Autolock _l(mStateLock);
-    mCurrentState.freezeDisplay = 0;
-    setTransactionFlags(eTransactionNeeded);
-
-    // flags is intended to communicate some sort of animation behavior
-    // (for instance fading)
-    return NO_ERROR;
 }
 
 int SurfaceFlinger::setOrientation(DisplayID dpy,
@@ -1505,7 +1431,6 @@ uint32_t SurfaceFlinger::setClientStateLocked(
         if (what & eSizeChanged) {
             if (layer->setSize(s.w, s.h)) {
                 flags |= eTraversalNeeded;
-                mResizeTransationPending = true;
             }
         }
         if (what & eAlphaChanged) {
@@ -1625,8 +1550,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         mWormholeRegion.dump(result, "WormholeRegion");
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         snprintf(buffer, SIZE,
-                "  display frozen: %s, freezeCount=%d, orientation=%d, canDraw=%d\n",
-                mFreezeDisplay?"yes":"no", mFreezeCount,
+                "  orientation=%d, canDraw=%d\n",
                 mCurrentState.orientation, hw.canDraw());
         result.append(buffer);
         snprintf(buffer, SIZE,
@@ -1679,8 +1603,6 @@ status_t SurfaceFlinger::onTransact(
         case CREATE_CONNECTION:
         case SET_TRANSACTION_STATE:
         case SET_ORIENTATION:
-        case FREEZE_DISPLAY:
-        case UNFREEZE_DISPLAY:
         case BOOT_FINISHED:
         case TURN_ELECTRON_BEAM_OFF:
         case TURN_ELECTRON_BEAM_ON:
@@ -1752,10 +1674,6 @@ status_t SurfaceFlinger::onTransact(
                 GraphicLog::getInstance().setEnabled(enabled);
                 return NO_ERROR;
             }
-            case 1007: // set mFreezeCount
-                mFreezeCount = data.readInt32();
-                mFreezeDisplayTime = 0;
-                return NO_ERROR;
             case 1008:  // toggle use of hw composer
                 n = data.readInt32();
                 mDebugDisableHWC = n ? 1 : 0;
