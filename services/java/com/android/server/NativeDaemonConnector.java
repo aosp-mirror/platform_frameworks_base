@@ -207,6 +207,13 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     private void sendCommandLocked(String command, String argument)
             throws NativeDaemonConnectorException {
+        if (command != null && command.indexOf('\0') >= 0) {
+            throw new IllegalArgumentException("unexpected command: " + command);
+        }
+        if (argument != null && argument.indexOf('\0') >= 0) {
+            throw new IllegalArgumentException("unexpected argument: " + argument);
+        }
+
         if (LOCAL_LOGD) Slog.d(TAG, String.format("SND -> {%s} {%s}", command, argument));
         if (mOutputStream == null) {
             Slog.e(TAG, "No connection to daemon", new IllegalStateException());
