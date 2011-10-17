@@ -58,13 +58,16 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(bufferIdx);
-        remote()->transact(REQUEST_BUFFER, data, &reply);
+        status_t result =remote()->transact(REQUEST_BUFFER, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
         bool nonNull = reply.readInt32();
         if (nonNull) {
             *buf = new GraphicBuffer();
             reply.read(**buf);
         }
-        status_t result = reply.readInt32();
+        result = reply.readInt32();
         return result;
     }
 
@@ -73,9 +76,12 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(bufferCount);
-        remote()->transact(SET_BUFFER_COUNT, data, &reply);
-        status_t err = reply.readInt32();
-        return err;
+        status_t result =remote()->transact(SET_BUFFER_COUNT, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
+        result = reply.readInt32();
+        return result;
     }
 
     virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
@@ -86,9 +92,12 @@ public:
         data.writeInt32(h);
         data.writeInt32(format);
         data.writeInt32(usage);
-        remote()->transact(DEQUEUE_BUFFER, data, &reply);
+        status_t result = remote()->transact(DEQUEUE_BUFFER, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
         *buf = reply.readInt32();
-        int result = reply.readInt32();
+        result = reply.readInt32();
         return result;
     }
 
@@ -98,11 +107,14 @@ public:
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(buf);
         data.writeInt64(timestamp);
-        remote()->transact(QUEUE_BUFFER, data, &reply);
+        status_t result = remote()->transact(QUEUE_BUFFER, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
         *outWidth = reply.readInt32();
         *outHeight = reply.readInt32();
         *outTransform = reply.readInt32();
-        status_t result = reply.readInt32();
+        result = reply.readInt32();
         return result;
     }
 
@@ -120,8 +132,11 @@ public:
         data.writeFloat(reg.top);
         data.writeFloat(reg.right);
         data.writeFloat(reg.bottom);
-        remote()->transact(SET_CROP, data, &reply);
-        status_t result = reply.readInt32();
+        status_t result = remote()->transact(SET_CROP, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
+        result = reply.readInt32();
         return result;
     }
 
@@ -129,8 +144,11 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(transform);
-        remote()->transact(SET_TRANSFORM, data, &reply);
-        status_t result = reply.readInt32();
+        status_t result = remote()->transact(SET_TRANSFORM, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
+        result = reply.readInt32();
         return result;
     }
 
@@ -138,8 +156,11 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(mode);
-        remote()->transact(SET_SCALING_MODE, data, &reply);
-        status_t result = reply.readInt32();
+        status_t result = remote()->transact(SET_SCALING_MODE, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
+        result = reply.readInt32();
         return result;
     }
 
@@ -147,9 +168,12 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(what);
-        remote()->transact(QUERY, data, &reply);
+        status_t result = remote()->transact(QUERY, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
         value[0] = reply.readInt32();
-        status_t result = reply.readInt32();
+        result = reply.readInt32();
         return result;
     }
 
@@ -157,8 +181,11 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(enabled);
-        remote()->transact(SET_SYNCHRONOUS_MODE, data, &reply);
-        status_t result = reply.readInt32();
+        status_t result = remote()->transact(SET_SYNCHRONOUS_MODE, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
+        result = reply.readInt32();
         return result;
     }
 
@@ -167,11 +194,14 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(api);
-        remote()->transact(CONNECT, data, &reply);
+        status_t result = remote()->transact(CONNECT, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
         *outWidth = reply.readInt32();
         *outHeight = reply.readInt32();
         *outTransform = reply.readInt32();
-        status_t result = reply.readInt32();
+        result = reply.readInt32();
         return result;
     }
 
@@ -179,8 +209,11 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(api);
-        remote()->transact(DISCONNECT, data, &reply);
-        status_t result = reply.readInt32();
+        status_t result =remote()->transact(DISCONNECT, data, &reply);
+        if (result != NO_ERROR) {
+            return result;
+        }
+        result = reply.readInt32();
         return result;
     }
 };
