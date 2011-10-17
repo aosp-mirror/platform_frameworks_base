@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <binder/IBinder.h>
+
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
@@ -41,7 +43,9 @@ class SensorEventQueue;
 
 // ----------------------------------------------------------------------------
 
-class SensorManager : public ASensorManager, public Singleton<SensorManager>
+class SensorManager :
+    public ASensorManager,
+    public Singleton<SensorManager>
 {
 public:
     SensorManager();
@@ -52,9 +56,17 @@ public:
     sp<SensorEventQueue> createEventQueue();
 
 private:
-    sp<ISensorServer> mSensorServer;
-    Sensor const** mSensorList;
-    Vector<Sensor> mSensors;
+    // DeathRecipient interface
+    void sensorManagerDied();
+
+    status_t assertStateLocked() const;
+
+private:
+    mutable Mutex mLock;
+    mutable sp<ISensorServer> mSensorServer;
+    mutable Sensor const** mSensorList;
+    mutable Vector<Sensor> mSensors;
+    mutable sp<IBinder::DeathRecipient> mDeathObserver;
 };
 
 // ----------------------------------------------------------------------------
