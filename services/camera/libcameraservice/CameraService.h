@@ -76,6 +76,9 @@ private:
     void                setCameraFree(int cameraId);
 
     // sounds
+    audio_stream_type_t mAudioStreamType;
+    MediaPlayer*        newMediaPlayer(const char *file);
+
     Mutex               mSoundLock;
     sp<MediaPlayer>     mSoundPlayer[NUM_SOUNDS];
     int                 mSoundRef;  // reference count (release all MediaPlayer when 0)

@@ -97,6 +97,16 @@ void CameraService::onFirstRef()
             setCameraFree(i);
         }
     }
+
+    // Read the system property to determine if we have to use the
+    // AUDIO_STREAM_ENFORCED_AUDIBLE type.
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.camera.sound.forced", value, "0");
+    if (strcmp(value, "0") != 0) {
+        mAudioStreamType = AUDIO_STREAM_ENFORCED_AUDIBLE;
+    } else {
+        mAudioStreamType = AUDIO_STREAM_MUSIC;
+    }
 }
 
 CameraService::~CameraService() {
@@ -282,21 +292,10 @@ void CameraService::setCameraFree(int cameraId) {
 // A reference count is kept to determine when we will actually release the
 // media players.
 
-static MediaPlayer* newMediaPlayer(const char *file) {
-    // Read the system property to determine if we have need to use the
-    // AUDIO_STREAM_ENFORCED_AUDIBLE type.
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.camera.sound.forced", value, "0");
-    int audioStreamType;
-    if (strcmp(value, "0") != 0) {
-        audioStreamType = AUDIO_STREAM_ENFORCED_AUDIBLE;
-    } else {
-        audioStreamType = AUDIO_STREAM_MUSIC;
-    }
-
+MediaPlayer* CameraService::newMediaPlayer(const char *file) {
     MediaPlayer* mp = new MediaPlayer();
     if (mp->setDataSource(file, NULL) == NO_ERROR) {
-        mp->setAudioStreamType(audioStreamType);
+        mp->setAudioStreamType(mAudioStreamType);
         mp->prepare();
     } else {
         LOGE("Failed to load CameraService sounds: %s", file);
@@ -335,7 +334,7 @@ void CameraService::playSound(sound_kind kind) {
         // do not play the sound if stream volume is 0
         // (typically because ringer mode is silent).
         int index;
-        AudioSystem::getStreamVolumeIndex(AUDIO_STREAM_ENFORCED_AUDIBLE, &index);
+        AudioSystem::getStreamVolumeIndex(mAudioStreamType, &index);
         if (index != 0) {
             player->seekTo(0);
             player->start();
