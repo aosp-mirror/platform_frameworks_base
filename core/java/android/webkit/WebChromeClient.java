@@ -110,10 +110,10 @@ public class WebChromeClient {
      *                      such as the user clicking a link.
      * @param resultMsg The message to send when once a new WebView has been
      *                  created. resultMsg.obj is a
-     *                  {@link WebView#WebViewTransport WebView.WebViewTransport}
-     *                  object. This should be used to transport the new
-     *                  WebView, by calling
-     *                  {@link WebView#WebViewTransport#setWebView() WebView.WebViewTransport.setWebView()}.
+     *                  {@link WebView.WebViewTransport} object. This should be
+     *                  used to transport the new WebView, by calling
+     *                  {@link WebView.WebViewTransport#setWebView(WebView)
+     *                  WebView.WebViewTransport.setWebView(WebView)}.
      * @return This method should return true if the host application will
      *         create a new window, in which case resultMsg should be sent to
      *         its target. Otherwise, this method should return false. Returning
