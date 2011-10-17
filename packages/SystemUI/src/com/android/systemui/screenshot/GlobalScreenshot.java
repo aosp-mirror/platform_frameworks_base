@@ -19,27 +19,27 @@ package com.android.systemui.screenshot;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.Environment;
 import android.os.ServiceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -50,16 +50,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.systemui.R;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.Thread;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -83,6 +78,46 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_FILE_PATH_TEMPLATE = "%s/%s/%s";
 
+    private int mNotificationId;
+    private NotificationManager mNotificationManager;
+    private Notification.Builder mNotificationBuilder;
+    private Intent mLaunchIntent;
+    private String mImageDir;
+    private String mImageFileName;
+    private String mImageFilePath;
+    private String mImageDate;
+    private long mImageTime;
+
+    SaveImageInBackgroundTask(Context context, NotificationManager nManager, int nId) {
+        Resources r = context.getResources();
+
+        // Prepare all the output metadata
+        mImageTime = System.currentTimeMillis();
+        mImageDate = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date(mImageTime));
+        mImageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES).getAbsolutePath();
+        mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, mImageDate);
+        mImageFilePath = String.format(SCREENSHOT_FILE_PATH_TEMPLATE, mImageDir,
+                SCREENSHOTS_DIR_NAME, mImageFileName);
+
+        // Show the intermediate notification
+        mLaunchIntent = new Intent(Intent.ACTION_VIEW);
+        mLaunchIntent.setDataAndType(Uri.fromFile(new File(mImageFilePath)), "image/png");
+        mLaunchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mNotificationId = nId;
+        mNotificationBuilder = new Notification.Builder(context)
+            .setTicker(r.getString(R.string.screenshot_saving_ticker))
+            .setContentTitle(r.getString(R.string.screenshot_saving_title))
+            .setContentText(r.getString(R.string.screenshot_saving_text))
+            .setSmallIcon(android.R.drawable.ic_menu_gallery)
+            .setWhen(System.currentTimeMillis());
+        Notification n = mNotificationBuilder.getNotification();
+        n.flags |= Notification.FLAG_NO_CLEAR;
+
+        mNotificationManager = nManager;
+        mNotificationManager.notify(nId, n);
+    }
+
     @Override
     protected SaveImageInBackgroundData doInBackground(SaveImageInBackgroundData... params) {
         if (params.length != 1) return null;
@@ -91,23 +126,15 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         Bitmap image = params[0].image;
 
         try {
-            long currentTime = System.currentTimeMillis();
-            String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date(currentTime));
-            String imageDir = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES).getAbsolutePath();
-            String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, date);
-            String imageFilePath = String.format(SCREENSHOT_FILE_PATH_TEMPLATE, imageDir,
-                    SCREENSHOTS_DIR_NAME, imageFileName);
-
             // Save the screenshot to the MediaStore
             ContentValues values = new ContentValues();
             ContentResolver resolver = context.getContentResolver();
-            values.put(MediaStore.Images.ImageColumns.DATA, imageFilePath);
-            values.put(MediaStore.Images.ImageColumns.TITLE, imageFileName);
-            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, imageFileName);
-            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, currentTime);
-            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, currentTime);
-            values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, currentTime);
+            values.put(MediaStore.Images.ImageColumns.DATA, mImageFilePath);
+            values.put(MediaStore.Images.ImageColumns.TITLE, mImageFileName);
+            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, mImageFileName);
+            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, mImageTime);
+            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, mImageTime);
+            values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, mImageTime);
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
@@ -118,7 +145,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
             // update file size in the database
             values.clear();
-            values.put(MediaStore.Images.ImageColumns.SIZE, new File(imageFilePath).length());
+            values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
             resolver.update(uri, values, null, null);
 
             params[0].result = 0;
@@ -135,12 +162,22 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     protected void onPostExecute(SaveImageInBackgroundData params) {
         if (params.result > 0) {
             // Show a message that we've failed to save the image to disk
-            Toast.makeText(params.context, R.string.screenshot_failed_toast,
-                    Toast.LENGTH_SHORT).show();
+            GlobalScreenshot.notifyScreenshotError(params.context, mNotificationManager);
         } else {
-            // Show a message that we've saved the screenshot to disk
-            Toast.makeText(params.context, R.string.screenshot_saving_toast,
-                    Toast.LENGTH_SHORT).show();
+            // Show the final notification to indicate screenshot saved
+            Resources r = params.context.getResources();
+
+            mNotificationBuilder
+                .setTicker(r.getString(R.string.screenshot_saved_title))
+                .setContentTitle(r.getString(R.string.screenshot_saved_title))
+                .setContentText(r.getString(R.string.screenshot_saved_text))
+                .setContentIntent(PendingIntent.getActivity(params.context, 0, mLaunchIntent, 0))
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true);
+
+            Notification n = mNotificationBuilder.getNotification();
+            n.flags &= ~Notification.FLAG_NO_CLEAR;
+            mNotificationManager.notify(mNotificationId, n);
         }
         params.finisher.run();
     };
@@ -154,22 +191,21 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
  */
 class GlobalScreenshot {
     private static final String TAG = "GlobalScreenshot";
-    private static final int SCREENSHOT_FADE_IN_DURATION = 900;
+    private static final int SCREENSHOT_NOTIFICATION_ID = 789;
+    private static final int SCREENSHOT_FADE_IN_DURATION = 500;
     private static final int SCREENSHOT_FADE_OUT_DELAY = 1000;
-    private static final int SCREENSHOT_FADE_OUT_DURATION = 450;
-    private static final int TOAST_FADE_IN_DURATION = 500;
-    private static final int TOAST_FADE_OUT_DELAY = 1000;
-    private static final int TOAST_FADE_OUT_DURATION = 500;
+    private static final int SCREENSHOT_FADE_OUT_DURATION = 300;
     private static final float BACKGROUND_ALPHA = 0.65f;
-    private static final float SCREENSHOT_SCALE = 0.85f;
-    private static final float SCREENSHOT_MIN_SCALE = 0.7f;
-    private static final float SCREENSHOT_ROTATION = -6.75f; // -12.5f;
+    private static final float SCREENSHOT_SCALE_FUDGE = 0.075f; // To account for the border padding
+    private static final float SCREENSHOT_SCALE = 0.8f;
+    private static final float SCREENSHOT_MIN_SCALE = 0.775f;
 
     private Context mContext;
     private LayoutInflater mLayoutInflater;
     private IWindowManager mIWindowManager;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mWindowLayoutParams;
+    private NotificationManager mNotificationManager;
     private Display mDisplay;
     private DisplayMetrics mDisplayMetrics;
     private Matrix mDisplayMatrix;
@@ -182,10 +218,15 @@ class GlobalScreenshot {
 
     private AnimatorSet mScreenshotAnimation;
 
-    // General use cubic interpolator
-    final TimeInterpolator mCubicInterpolator = new TimeInterpolator() {
+    // Fade interpolators
+    final TimeInterpolator mFadeInInterpolator = new TimeInterpolator() {
         public float getInterpolation(float t) {
-            return t*t*t;
+            return (float) Math.pow(t, 1.5f);
+        }
+    };
+    final TimeInterpolator mFadeOutInterpolator = new TimeInterpolator() {
+        public float getInterpolation(float t) {
+            return (float) t;
         }
     };
     // The interpolator used to control the background alpha at the start of the animation
@@ -237,6 +278,8 @@ class GlobalScreenshot {
                 PixelFormat.TRANSLUCENT);
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mNotificationManager =
+            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
     }
 
@@ -248,7 +291,8 @@ class GlobalScreenshot {
         data.context = mContext;
         data.image = mScreenBitmap;
         data.finisher = finisher;
-        new SaveImageInBackgroundTask().execute(data);
+        new SaveImageInBackgroundTask(mContext, mNotificationManager, SCREENSHOT_NOTIFICATION_ID)
+                .execute(data);
     }
 
     /**
@@ -300,8 +344,7 @@ class GlobalScreenshot {
 
         // If we couldn't take the screenshot, notify the user
         if (mScreenBitmap == null) {
-            Toast.makeText(mContext, R.string.screenshot_failed_toast,
-                    Toast.LENGTH_SHORT).show();
+            notifyScreenshotError(mContext, mNotificationManager);
             finisher.run();
             return;
         }
@@ -341,12 +384,13 @@ class GlobalScreenshot {
     }
     private ValueAnimator createScreenshotFadeInAnimation() {
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setInterpolator(mCubicInterpolator);
+        anim.setInterpolator(mFadeInInterpolator);
         anim.setDuration(SCREENSHOT_FADE_IN_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mBackgroundView.setVisibility(View.VISIBLE);
+                mScreenshotContainerView.setTranslationY(0f);
                 mScreenshotContainerView.setVisibility(View.VISIBLE);
             }
         });
@@ -356,18 +400,19 @@ class GlobalScreenshot {
                 float t = ((Float) animation.getAnimatedValue()).floatValue();
                 mBackgroundView.setAlpha(mBackgroundViewAlphaInterpolator.getInterpolation(t) *
                         BACKGROUND_ALPHA);
-                float scaleT = SCREENSHOT_SCALE + (1f - t) * SCREENSHOT_SCALE;
+                float scaleT = SCREENSHOT_SCALE
+                        + (1f - t) * (1f - SCREENSHOT_SCALE)
+                        + SCREENSHOT_SCALE_FUDGE;
                 mScreenshotContainerView.setAlpha(t*t*t*t);
                 mScreenshotContainerView.setScaleX(scaleT);
                 mScreenshotContainerView.setScaleY(scaleT);
-                mScreenshotContainerView.setRotation(t * SCREENSHOT_ROTATION);
             }
         });
         return anim;
     }
     private ValueAnimator createScreenshotFadeOutAnimation() {
         ValueAnimator anim = ValueAnimator.ofFloat(1f, 0f);
-        anim.setInterpolator(mCubicInterpolator);
+        anim.setInterpolator(mFadeOutInterpolator);
         anim.setStartDelay(SCREENSHOT_FADE_OUT_DELAY);
         anim.setDuration(SCREENSHOT_FADE_OUT_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
@@ -381,8 +426,9 @@ class GlobalScreenshot {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float t = ((Float) animation.getAnimatedValue()).floatValue();
-                float scaleT = SCREENSHOT_MIN_SCALE +
-                        t*(SCREENSHOT_SCALE - SCREENSHOT_MIN_SCALE);
+                float scaleT = SCREENSHOT_MIN_SCALE
+                        + t * (SCREENSHOT_SCALE - SCREENSHOT_MIN_SCALE)
+                        + SCREENSHOT_SCALE_FUDGE;
                 mScreenshotContainerView.setAlpha(t);
                 mScreenshotContainerView.setScaleX(scaleT);
                 mScreenshotContainerView.setScaleY(scaleT);
@@ -390,5 +436,20 @@ class GlobalScreenshot {
             }
         });
         return anim;
+    }
+
+    static void notifyScreenshotError(Context context, NotificationManager nManager) {
+        Resources r = context.getResources();
+
+        // Clear all existing notification, compose the new notification and show it
+        Notification n = new Notification.Builder(context)
+            .setTicker(r.getString(R.string.screenshot_failed_title))
+            .setContentTitle(r.getString(R.string.screenshot_failed_title))
+            .setContentText(r.getString(R.string.screenshot_failed_text))
+            .setSmallIcon(android.R.drawable.ic_menu_report_image)
+            .setWhen(System.currentTimeMillis())
+            .setAutoCancel(true)
+            .getNotification();
+        nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
     }
 }
