@@ -168,10 +168,20 @@
     <!-- Compatibility mode help screen: body text. [CHAR LIMIT=150] -->
     <string name="compat_mode_help_body">When an app was designed for a smaller screen, a zoom control will appear by the clock.</string>
 
-    <!-- toast message displayed when a screenshot is saved to the Gallery. -->
-    <string name="screenshot_saving_toast">Screenshot saved to Gallery</string>
-    <!-- toast message displayed when we fail to take a screenshot. -->
-    <string name="screenshot_failed_toast">Could not save screenshot. External storage may be in use.</string>
+    <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
+    <string name="screenshot_saving_ticker">Saving...</string>
+    <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
+    <string name="screenshot_saving_title">Saving screenshot...</string>
+    <!-- Notification text displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=100] -->
+    <string name="screenshot_saving_text">Please wait for screenshot to be saved</string>
+    <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
+    <string name="screenshot_saved_title">Screenshot captured</string>
+    <!-- Notification text displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=100] -->
+    <string name="screenshot_saved_text">Touch to view your screenshot</string>
+    <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
+    <string name="screenshot_failed_title">Screenshot failed</string>
+    <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
+    <string name="screenshot_failed_text">Failed to save screenshot. External storage may be in use.</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>

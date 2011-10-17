@@ -840,6 +840,9 @@ public class TabletStatusBar extends StatusBar implements
         boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
                 && notification.priority == oldNotification.priority;
                 // priority now encompasses isOngoing()
+        boolean updateTicker = notification.notification.tickerText != null
+                && !TextUtils.equals(notification.notification.tickerText,
+                        oldEntry.notification.notification.tickerText);
         boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
         if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {
             if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
@@ -896,9 +899,8 @@ public class TabletStatusBar extends StatusBar implements
         }
 
         // Restart the ticker if it's still running
-        if (notification.notification.tickerText != null
-                && !TextUtils.equals(notification.notification.tickerText,
-                    oldEntry.notification.notification.tickerText)) {
+        if (updateTicker) {
+            mTicker.halt();
             tick(key, notification, false);
         }
 
@@ -1736,23 +1738,7 @@ public class TabletStatusBar extends StatusBar implements
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
         workAroundBadLayerDrawableOpacity(row);
-        View vetoButton = row.findViewById(R.id.veto);
-        if (entry.notification.isClearable()) {
-            final String _pkg = sbn.pkg;
-            final String _tag = sbn.tag;
-            final int _id = sbn.id;
-            vetoButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        try {
-                            mBarService.onNotificationClear(_pkg, _tag, _id);
-                        } catch (RemoteException ex) {
-                            // system process is dead if we're here.
-                        }
-                    }
-                });
-        } else {
-            vetoButton.setVisibility(View.GONE);
-        }
+        View vetoButton = updateNotificationVetoButton(row, entry.notification);
         vetoButton.setContentDescription(mContext.getString(
                 R.string.accessibility_remove_notification));
 

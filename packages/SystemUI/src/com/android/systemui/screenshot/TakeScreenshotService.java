@@ -17,26 +17,12 @@
 package com.android.systemui.screenshot;
 
 import android.app.Service;
-import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
-import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
-
-import com.android.internal.app.AlertActivity;
-import com.android.internal.app.AlertController;
-
-import com.android.systemui.R;
 
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
