@@ -767,6 +767,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             this.removeView(mUnlockScreen);
             mUnlockScreen = null;
         }
+        mUpdateMonitor.removeCallback(this);
     }
 
     private boolean isSecure() {
