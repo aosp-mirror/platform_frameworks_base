@@ -146,4 +146,26 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
 
         mDoNotDisturb = new DoNotDisturb(mContext);
     }
+
+    protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
+        View vetoButton = row.findViewById(R.id.veto);
+        if (n.isClearable()) {
+            final String _pkg = n.pkg;
+            final String _tag = n.tag;
+            final int _id = n.id;
+            vetoButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        try {
+                            mBarService.onNotificationClear(_pkg, _tag, _id);
+                        } catch (RemoteException ex) {
+                            // system process is dead if we're here.
+                        }
+                    }
+                });
+            vetoButton.setVisibility(View.VISIBLE);
+        } else {
+            vetoButton.setVisibility(View.GONE);
+        }
+        return vetoButton;
+    }
 }
