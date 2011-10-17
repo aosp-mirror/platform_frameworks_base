@@ -230,10 +230,11 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.StatusBar.Icon">
     </style>
     <style name="TextAppearance.StatusBar.EventContent">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">13sp</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>

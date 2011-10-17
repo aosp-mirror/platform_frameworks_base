@@ -25,14 +25,12 @@
         android:fadingEdge="horizontal"
         android:ellipsize="marquee"
         android:visibility="gone"
-        android:alpha="0.7"
         />
     <LinearLayout
         android:id="@+id/line3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:alpha="0.7"
         >
         <TextView android:id="@+id/text"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
@@ -62,6 +60,7 @@
             android:scaleType="center"
             android:paddingLeft="8dp"
             android:visibility="gone"
+            android:drawableAlpha="180"
             />
     </LinearLayout>
     <ProgressBar
