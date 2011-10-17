@@ -94,7 +94,7 @@ public class PhoneStatusBar extends StatusBar {
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
 
     // additional instrumentation for testing purposes; intended to be left on during development
-    public static final boolean CHATTY = DEBUG || true;
+    public static final boolean CHATTY = DEBUG;
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
