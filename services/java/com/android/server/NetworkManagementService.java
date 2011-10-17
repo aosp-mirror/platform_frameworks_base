@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -350,6 +352,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public InterfaceConfiguration getInterfaceConfig(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         String rsp;
         try {
             rsp = mConnector.doCommand("interface getcfg " + iface).get(0);
@@ -404,6 +407,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     public void setInterfaceConfig(
             String iface, InterfaceConfiguration cfg) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         LinkAddress linkAddr = cfg.addr;
         if (linkAddr == null || linkAddr.getAddress() == null) {
             throw new IllegalStateException("Null LinkAddress given");
@@ -421,6 +425,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public void setInterfaceDown(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             InterfaceConfiguration ifcg = getInterfaceConfig(iface);
             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
@@ -432,6 +437,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public void setInterfaceUp(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             InterfaceConfiguration ifcg = getInterfaceConfig(iface);
             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
@@ -444,6 +450,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     public void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable)
             throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         String cmd = String.format("interface ipv6privacyextensions %s %s", iface,
                 enable ? "enable" : "disable");
         try {
@@ -459,7 +466,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /* TODO: This is right now a IPv4 only function. Works for wifi which loses its
        IPv6 addresses on interface down, but we need to do full clean up here */
     public void clearInterfaceAddresses(String iface) throws IllegalStateException {
-         String cmd = String.format("interface clearaddrs %s", iface);
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        String cmd = String.format("interface clearaddrs %s", iface);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
@@ -491,10 +499,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public void addRoute(String interfaceName, RouteInfo route) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         modifyRoute(interfaceName, ADD, route);
     }
 
     public void removeRoute(String interfaceName, RouteInfo route) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         modifyRoute(interfaceName, REMOVE, route);
     }
 
@@ -578,6 +588,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public RouteInfo[] getRoutes(String interfaceName) {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
 
         // v4 routes listed as:
