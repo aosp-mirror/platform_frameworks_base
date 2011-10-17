@@ -78,9 +78,23 @@ Sensor const* SensorManager::getDefaultSensor(int type)
 
 sp<SensorEventQueue> SensorManager::createEventQueue()
 {
-    sp<SensorEventQueue> result = new SensorEventQueue(
-            mSensorServer->createSensorEventConnection());
-    return result;
+    sp<SensorEventQueue> queue;
+
+    if (mSensorServer == NULL) {
+        LOGE("createEventQueue: mSensorSever is NULL");
+        return queue;
+    }
+
+    sp<ISensorEventConnection> connection =
+            mSensorServer->createSensorEventConnection();
+    if (connection == NULL) {
+        LOGE("createEventQueue: connection is NULL");
+        return queue;
+    }
+
+    queue = new SensorEventQueue(connection);
+
+    return queue;
 }
 
 // ----------------------------------------------------------------------------
