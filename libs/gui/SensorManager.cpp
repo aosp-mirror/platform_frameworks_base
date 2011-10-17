@@ -23,6 +23,7 @@
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
 
+#include <binder/IBinder.h>
 #include <binder/IServiceManager.h>
 
 #include <gui/ISensorServer.h>
@@ -40,17 +41,8 @@ ANDROID_SINGLETON_STATIC_INSTANCE(SensorManager)
 SensorManager::SensorManager()
     : mSensorList(0)
 {
-    const String16 name("sensorservice");
-    while (getService(name, &mSensorServer) != NO_ERROR) {
-        usleep(250000);
-    }
-
-    mSensors = mSensorServer->getSensorList();
-    size_t count = mSensors.size();
-    mSensorList = (Sensor const**)malloc(count * sizeof(Sensor*));
-    for (size_t i=0 ; i<count ; i++) {
-        mSensorList[i] = mSensors.array() + i;
-    }
+    // okay we're not locked here, but it's not needed during construction
+    assertStateLocked();
 }
 
 SensorManager::~SensorManager()
@@ -58,20 +50,79 @@ SensorManager::~SensorManager()
     free(mSensorList);
 }
 
+void SensorManager::sensorManagerDied()
+{
+    Mutex::Autolock _l(mLock);
+    mSensorServer.clear();
+    free(mSensorList);
+    mSensorList = NULL;
+    mSensors.clear();
+}
+
+status_t SensorManager::assertStateLocked() const {
+    if (mSensorServer == NULL) {
+        // try for one second
+        const String16 name("sensorservice");
+        for (int i=0 ; i<4 ; i++) {
+            status_t err = getService(name, &mSensorServer);
+            if (err == NAME_NOT_FOUND) {
+                usleep(250000);
+                continue;
+            }
+            if (err != NO_ERROR) {
+                return err;
+            }
+            break;
+        }
+
+        class DeathObserver : public IBinder::DeathRecipient {
+            SensorManager& mSensorManger;
+            virtual void binderDied(const wp<IBinder>& who) {
+                LOGW("sensorservice died [%p]", who.unsafe_get());
+                mSensorManger.sensorManagerDied();
+            }
+        public:
+            DeathObserver(SensorManager& mgr) : mSensorManger(mgr) { }
+        };
+
+        mDeathObserver = new DeathObserver(*const_cast<SensorManager *>(this));
+        mSensorServer->asBinder()->linkToDeath(mDeathObserver);
+
+        mSensors = mSensorServer->getSensorList();
+        size_t count = mSensors.size();
+        mSensorList = (Sensor const**)malloc(count * sizeof(Sensor*));
+        for (size_t i=0 ; i<count ; i++) {
+            mSensorList[i] = mSensors.array() + i;
+        }
+    }
+
+    return NO_ERROR;
+}
+
+
+
 ssize_t SensorManager::getSensorList(Sensor const* const** list) const
 {
+    Mutex::Autolock _l(mLock);
+    status_t err = assertStateLocked();
+    if (err < 0) {
+        return ssize_t(err);
+    }
     *list = mSensorList;
     return mSensors.size();
 }
 
 Sensor const* SensorManager::getDefaultSensor(int type)
 {
-    // For now we just return the first sensor of that type we find.
-    // in the future it will make sense to let the SensorService make
-    // that decision.
-    for (size_t i=0 ; i<mSensors.size() ; i++) {
-        if (mSensorList[i]->getType() == type)
-            return mSensorList[i];
+    Mutex::Autolock _l(mLock);
+    if (assertStateLocked() == NO_ERROR) {
+        // For now we just return the first sensor of that type we find.
+        // in the future it will make sense to let the SensorService make
+        // that decision.
+        for (size_t i=0 ; i<mSensors.size() ; i++) {
+            if (mSensorList[i]->getType() == type)
+                return mSensorList[i];
+        }
     }
     return NULL;
 }
@@ -80,20 +131,18 @@ sp<SensorEventQueue> SensorManager::createEventQueue()
 {
     sp<SensorEventQueue> queue;
 
-    if (mSensorServer == NULL) {
-        LOGE("createEventQueue: mSensorSever is NULL");
-        return queue;
+    Mutex::Autolock _l(mLock);
+    while (assertStateLocked() == NO_ERROR) {
+        sp<ISensorEventConnection> connection =
+                mSensorServer->createSensorEventConnection();
+        if (connection == NULL) {
+            // SensorService just died.
+            LOGE("createEventQueue: connection is NULL. SensorService died.");
+            continue;
+        }
+        queue = new SensorEventQueue(connection);
+        break;
     }
-
-    sp<ISensorEventConnection> connection =
-            mSensorServer->createSensorEventConnection();
-    if (connection == NULL) {
-        LOGE("createEventQueue: connection is NULL");
-        return queue;
-    }
-
-    queue = new SensorEventQueue(connection);
-
     return queue;
 }
 
