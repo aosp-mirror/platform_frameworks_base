@@ -200,15 +200,14 @@ method associated with each person and provide better suggestions for contacting
 
 <h3 id="Calendar">Calendar Provider</h3>
 
-<p>The new calendar APIs allow you to access and modify the user’s calendars and events using the
-Calendar Provider. You can read, add, modify and delete calendars, events, attendees, reminders and
-alerts.</p>
+<p>The new calendar APIs allow you to read, add, modify and delete calendars, events, attendees,
+reminders and alerts, which are stored in the Calendar Provider.</p>
 
 <p>A variety of apps and widgets can use these APIs to read and modify calendar events. However,
 some of the most compelling use cases are sync adapters that synchronize the user's calendar from
-other calendar services with the Calendar Provider, in order to offer a unified location for
-all the user's events. Google Calendar, for example, uses a sync adapter to synchronize Google
-Calendar events with the Calendar Provider, which can then be viewed with Android's built-in
+other calendar services with the Calendar Provider, in order to offer a unified location for all the
+user's events. Google Calendar events, for example, are synchronized with the Calendar Provider by
+the Google Calendar Sync Adapter, allowing these events to be viewed with Android's built-in
 Calendar app.</p>
 
 <p>The data model for calendars and event-related information in the Calendar Provider is
@@ -303,7 +302,7 @@ read voicemails from other services).</p>
 voicemail APIs. The subclasses {@link android.provider.VoicemailContract.Voicemails} and {@link
 android.provider.VoicemailContract.Status} provide tables in which the Voicemail Providers can
 insert voicemail data for storage on the device. For an example of a voicemail provider app, see the
-<a href=”{@docRoot}resources/samples/VoicemailProviderDemo/index.html”>Voicemail Provider
+<a href="{@docRoot}resources/samples/VoicemailProviderDemo/index.html">Voicemail Provider
 Demo</a>.</p>
 
 
@@ -337,12 +336,18 @@ the face detected, including:</p>
 <ul>
 <li>A {@link android.graphics.Rect} that specifies the bounds of the face, relative to the camera's
 current field of view</li>
-<li>An integer betwen 0 and 100 that indicates how confident the system is that the object is a
+<li>An integer betwen 1 and 100 that indicates how confident the system is that the object is a
 human face</li>
 <li>A unique ID so you can track multiple faces</li>
 <li>Several {@link android.graphics.Point} objects that indicate where the eyes and mouth are
 located</li>
 </ul>
+
+<p class="note"><strong>Note:</strong> Face detection may not be supported on some
+devices, so you should check by calling {@link
+android.hardware.Camera.Parameters#getMaxNumDetectedFaces()} and ensure the return
+value is greater than zero. Also, some devices may not support identification of eyes and mouth,
+in which case, those fields in the {@link android.hardware.Camera.Face} object will be null.</p>
 
   
 <h4>Focus and metering areas</h4>
@@ -370,18 +375,37 @@ android.hardware.Camera.Area} object and request that the camera focus on that a
 The focus or exposure in that area will continually update as the scene in the area changes.</p>
 
 
+<h4>Continuous auto focus for photos</h4>
+
+<p>You can now enable continuous auto focusing (CAF) when taking photos. To enable CAF in your
+camera app, pass {@link android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}
+to {@link android.hardware.Camera.Parameters#setFocusMode setFocusMode()}. When ready to capture
+a photo, call {@link android.hardware.Camera#autoFocus autoFocus()}. Your {@link
+android.hardware.Camera.AutoFocusCallback} immediately receives a callback to indicate whether
+focus was acheived. To resume CAF after receiving the callback, you must call {@link
+android.hardware.Camera#cancelAutoFocus()}.</p>
+
+<p class="note"><strong>Note:</strong> Continuous auto focus is also supported when capturing
+video, using {@link android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS_VIDEO}, which was
+added in API level 9.</p>
+
+
 <h4>Other camera features</h4>
 
-<ul>
+<ul>  
 <li>While recording video, you can now call {@link android.hardware.Camera#takePicture
 takePicture()} to save a photo without interrupting the video session. Before doing so, you should
 call {@link android.hardware.Camera.Parameters#isVideoSnapshotSupported} to be sure the hardware
 supports it.</li>
 
-<li>Lock auto exposure and white balance with {@link
+<li>You can now lock auto exposure and white balance with {@link
 android.hardware.Camera.Parameters#setAutoExposureLock setAutoExposureLock()} and {@link
-android.hardware.Camera.Parameters#setAutoWhiteBalanceLock setAutoWhiteBalanceLock()}, to prevent
+android.hardware.Camera.Parameters#setAutoWhiteBalanceLock setAutoWhiteBalanceLock()} to prevent
 these properties from changing.</li>
+
+<li>You can now call {@link android.hardware.Camera#setDisplayOrientation
+setDisplayOrientation()} while the camera preview is running. Previously, you could call this
+only before beginning the preview, but you can now change the orientation at any time.</li>
 </ul>
 
 
@@ -436,7 +460,7 @@ send additional HTTP headers with your request, which can be useful for HTTP(S) 
 <li>WEBP images</li>
 <li>Matroska video</li>
 </ul>
-<p>For more info, see <a href=”{@docRoot}guide/appendix/media-formats.html”>Supported Media
+<p>For more info, see <a href="{@docRoot}guide/appendix/media-formats.html">Supported Media
 Formats</a>.</p>
 
 
@@ -477,7 +501,7 @@ information on available keys see the {@code METADATA_KEY_*} flags in {@link
 android.media.MediaMetadataRetriever}.</p>
 
 <p>For a sample implementation, see the <a
-href=”{@docRoot}resources/samples/RandomMusicPlayer/index.html”>Random Music Player</a>, which
+href="{@docRoot}resources/samples/RandomMusicPlayer/index.html">Random Music Player</a>, which
 provides compatibility logic such that it enables the remote control client on Android 4.0
 devices while continuing to support devices back to Android 2.1.</p>
 
@@ -485,9 +509,9 @@ devices while continuing to support devices back to Android 2.1.</p>
 <h4>Media Effects</h4>
 
 <p>A new media effects framework allows you to apply a variety of visual effects to images and
-videos. The system performs all effects processing on the GPU to obtain maximum performance.
-New applications for Android 4.0 such as Google Talk and the Gallery editor make use of the
-effects API to apply real-time effects to video and photos.</p>
+videos. For example, image effects allow you to easily fix red-eye, convert an image to grayscale,
+adjust brightness, adjust saturation, rotate an image, apply a fisheye effect, and much more. The
+system performs all effects processing on the GPU to obtain maximum performance.</p>
 
 <p>For maximum performance, effects are applied directly to OpenGL textures, so your application
 must have a valid OpenGL context before it can use the effects APIs. The textures to which you apply
@@ -572,7 +596,7 @@ android.bluetooth.BluetoothHealth}.</p>
 <h3 id="AndroidBeam">Android Beam (NDEF Push with NFC)</h3>
 
 <p>Android Beam is a new NFC feature that allows you to send NDEF messages from one device to
-another (a process also known as “NDEF Push”). The data transfer is initiated when two
+another (a process also known as “NDEF Push"). The data transfer is initiated when two
 Android-powered devices that support Android Beam are in close proximity (about 4 cm), usually with
 their backs touching. The data inside the NDEF message can contain any data that you wish to share
 between devices. For example, the People app shares contacts, YouTube shares videos, and Browser
@@ -619,7 +643,7 @@ action to start an activity, with either a URL or a MIME type set according to t
 android.nfc.NdefRecord} in the {@link android.nfc.NdefMessage}. For the activity you want to
 respond, you can declare intent filters for the URLs or MIME types your app cares about. For more
 information about Tag Dispatch see the <a
-href=”{@docRoot}guide/topics/nfc/index.html#dispatch”>NFC</a> developer guide.</p>
+href="{@docRoot}guide/topics/nfc/index.html#dispatch">NFC</a> developer guide.</p>
 
 <p>If you want your {@link android.nfc.NdefMessage} to carry a URI, you can now use the convenience
 method {@link android.nfc.NdefRecord#createUri createUri} to construct a new {@link
@@ -628,7 +652,7 @@ a special format that you want your application to also receive during an Androi
 should create an intent filter for your activity using the same URI scheme in order to receive the
 incoming NDEF message.</p>
 
-<p>You should also pass an “Android application record” with your {@link android.nfc.NdefMessage} in
+<p>You should also pass an “Android application record" with your {@link android.nfc.NdefMessage} in
 order to guarantee that your application handles the incoming NDEF message, even if other
 applications filter for the same intent action. You can create an Android application record by
 calling {@link android.nfc.NdefRecord#createApplicationRecord createApplicationRecord()}, passing it
@@ -705,8 +729,8 @@ formed and who is the group owner.</li>
 <li>{@link android.Manifest.permission#ACCESS_WIFI_STATE}</li>
 <li>{@link android.Manifest.permission#CHANGE_WIFI_STATE}</li>
 <li>{@link android.Manifest.permission#INTERNET} (although your app doesn’t technically connect
-to the Internet, the WiFi Direct implementation uses sockets that do require Internet
-permission to work).</li>
+to the Internet, communicating to Wi-Fi Direct peers with standard java sockets requires Internet
+permission).</li>
 </ul>
 
 <p>The Android system also broadcasts several different actions during certain Wi-Fi P2P events:</p>
@@ -732,7 +756,7 @@ this device have changed.</li>
 </ul>
 
 <p>See the  {@link android.net.wifi.p2p.WifiP2pManager} documentation for more information. Also
-look at the <a href=”{@docRoot}resources/samples/WiFiDirectDemo/index.html”>Wi-Fi Direct Demo</a>
+look at the <a href="{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a>
 sample application.</p>
 
 
@@ -767,7 +791,7 @@ action. For example:</p>
 
 <p>This intent filter indicates to the system that this is the activity that controls your
 application’s data usage. Thus, when the user inspects how much data your app is using from the
-Settings app, a “View application settings” button is available that launches your
+Settings app, a “View application settings" button is available that launches your
 preference activity so the user can refine how much data your app uses.</p>
 
 <p>Also beware that {@link android.net.ConnectivityManager#getBackgroundDataSetting()} is now
@@ -1102,7 +1126,7 @@ implementation has been removed. Look for a blog post about a compatibility laye
 that you can use to convert your old TTS engines to the new framework.</p>
 
 <p>For an example TTS engine using the new APIs, see the <a
-href=”{@docRoot}resources/samples/TtsEngine/index.html”>Text To Speech Engine</a> sample app.</p>
+href="{@docRoot}resources/samples/TtsEngine/index.html">Text To Speech Engine</a> sample app.</p>
 
 
 
@@ -1141,8 +1165,8 @@ checker. </p>
 importantly, the system gracefully manages the action bar’s size and configuration when running on
 smaller screens in order to provide an optimal user experience on all screen sizes. For example,
 when the screen is narrow (such as when a handset is in portrait orientation), the action bar’s
-navigation tabs appear in a “stacked bar,” which appears directly below the main action bar. You can
-also opt-in to a “split action bar,” which places all action items in a separate bar at the bottom
+navigation tabs appear in a “stacked bar," which appears directly below the main action bar. You can
+also opt-in to a “split action bar," which places all action items in a separate bar at the bottom
 of the screen when the screen is narrow.</p>
 
 
@@ -1150,9 +1174,9 @@ of the screen when the screen is narrow.</p>
 
 <p>If your action bar includes several action items, not all of them will fit into the action bar on
 a narrow screen, so the system will place more of them into the overflow menu. However, Android 4.0
-allows you to enable “split action bar” so that more action items can appear on the screen in a
+allows you to enable “split action bar" so that more action items can appear on the screen in a
 separate bar at the bottom of the screen. To enable split action bar, add {@link
-android.R.attr#uiOptions android:uiOptions} with {@code ”splitActionBarWhenNarrow”} to either your
+android.R.attr#uiOptions android:uiOptions} with {@code "splitActionBarWhenNarrow"} to either your
 <a href="guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> tag or
 individual <a href="guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> tags
 in your manifest file. When enabled, the system will add an additional bar at the bottom of the
@@ -1188,7 +1212,7 @@ android.view.ActionProvider} is a good solution in order to create a reusable co
 handling the various action item transformations in your fragment or activity.</p>
 
 <p>For example, the {@link android.widget.ShareActionProvider} is an extension of {@link
-android.view.ActionProvider} that facilitates a “share” action from the action bar. Instead of using
+android.view.ActionProvider} that facilitates a “share" action from the action bar. Instead of using
 traditional action item that invokes the {@link android.content.Intent#ACTION_SEND} intent, you can
 use this action provider to present an action view with a drop-down list of applications that handle
 the {@link android.content.Intent#ACTION_SEND} intent. When the user selects an application to use
@@ -1224,7 +1248,8 @@ public boolean onCreateOptionsMenu(Menu menu) {
 </pre>
 
 <p>For an example using the {@link android.widget.ShareActionProvider}, see the <a
-href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarActionProviderActivity.html”>ActionBarActionProviderActivity</a>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/
+ActionBarActionProviderActivity.html">ActionBarActionProviderActivity</a>
 class in ApiDemos.</p>
 
 
@@ -1237,7 +1262,7 @@ switch between the expanded state (action view is visible) and collapsed state (
 visible).</p>
 
 <p>To declare that an action item that contains an action view be collapsible, include the {@code
-“collapseActionView”} flag in the {@code android:showAsAction} attribute for the <a
+“collapseActionView"} flag in the {@code android:showAsAction} attribute for the <a
 href="{@docRoot}guide/topics/resources/menu-resource.html#item-element">{@code
 &lt;item&gt;}</a> element in the menu’s XML file.</p>
 
@@ -1259,7 +1284,7 @@ collapsed.</p>
 <h4>Other APIs for action bar</h4>
 <ul>
 <li>{@link android.app.ActionBar#setHomeButtonEnabled setHomeButtonEnabled()} allows you to specify
-whether the icon/logo behaves as a button to navigate home or “up” (pass “true” to make it behave as
+whether the icon/logo behaves as a button to navigate home or “up" (pass “true" to make it behave as
 a button).</li>
 
 <li>{@link android.app.ActionBar#setIcon setIcon()} and {@link android.app.ActionBar#setLogo
@@ -1307,7 +1332,7 @@ the system bar’s visibility have been updated to better reflect the behavior o
 and navigation bar:</p>
 <ul>
 <li>The {@link android.view.View#SYSTEM_UI_FLAG_LOW_PROFILE} flag replaces View.STATUS_BAR_HIDDEN
-flag. When set, this flag enables “low profile” mode for the system bar or
+flag. When set, this flag enables “low profile" mode for the system bar or
 navigation bar. Navigation buttons dim and other elements in the system bar also hide.</li>
 
 <li>The {@link android.view.View#SYSTEM_UI_FLAG_VISIBLE} flag replaces the {@code
@@ -1334,7 +1359,7 @@ example, hide the action bar or other UI controls when the system UI hides), you
 of the system bar or navigation bar changes.</p>
 
 <p>See the <a
-href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/OverscanActivity.html”>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/OverscanActivity.html">
 OverscanActivity</a> class for a demonstration of different system UI options.</p>
 
 
@@ -1351,7 +1376,8 @@ instances of the new {@link android.widget.Space} view or by setting the relevan
 on children.</p>
 
 <p>See <a
-href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/index.html”>ApiDemos</a>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/index.html">ApiDemos</a
+>
 for samples using {@link android.widget.GridLayout}.</p>
 
 
@@ -1380,9 +1406,9 @@ to appear on the switch when in the on and off setting. The {@code android:text}
 allows you to place a label alongside the switch.</p>
 
 <p>For a sample using switches, see the <a
-href=”{@docRoot}resources/samples/ApiDemos/res/layout/switches.html”>switches.xml</a> layout file
+href="{@docRoot}resources/samples/ApiDemos/res/layout/switches.html">switches.xml</a> layout file
 and respective <a
-href=”{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/Switches.html”>Switches
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/Switches.html">Switches
 </a> activity.</p>
 
 
@@ -1393,7 +1419,7 @@ up at an anchor point you specify (usually at the point of the item selected). A
 the {@link android.widget.PopupMenu} with a couple useful features:</p>
 <ul>
 <li>You can now easily inflate the contents of a popup menu from an XML <a
-href=”{@docRoot}guide/topics/resources/menu-resource.html”>menu resource</a> with {@link
+href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> with {@link
 android.widget.PopupMenu#inflate inflate()}, passing it the menu resource ID.</li>
 <li>You can also now create a {@link android.widget.PopupMenu.OnDismissListener} that receives a
 callback when the menu is dismissed.</li>
@@ -1413,7 +1439,7 @@ android.preference.SwitchPreference} for the Wi-Fi and Bluetooth settings.</p>
 
 <h4>Hover events</h4>
 
-<p>The {@link android.view.View} class now supports “hover” events to enable richer interactions
+<p>The {@link android.view.View} class now supports “hover" events to enable richer interactions
 through the use of pointer devices (such as a mouse or other devices that drive an on-screen
 cursor).</p>
 
@@ -1435,11 +1461,11 @@ listener returns false, then the hover event will be dispatched to the parent vi
 
 <p>If your application uses buttons or other widgets that change their appearance based on the
 current state, you can now use the {@code android:state_hovered} attribute in a <a
-href=”{@docRoot}guide/topics/resources/drawable-resource.html#StateList”>state list drawable</a> to
+href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">state list drawable</a> to
 provide a different background drawable when a cursor hovers over the view.</p>
 
 <p>For a demonstration of the new hover events, see the <a
-href=”{@docRoot}samples/ApiDemos/src/com/example/android/apis/view/Hover.html”>Hover</a> class in
+href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/view/Hover.html">Hover</a> class in
 ApiDemos.</p>
 
 
@@ -1455,7 +1481,7 @@ events just like they would when a mouse pointer was being moved across the disp
 are pressed.</p>
 
 <p>Your application can distinguish between finger, mouse, stylus and eraser input by querying the
-“tool type” associated with each pointer in a {@link android.view.MotionEvent} using {@link
+“tool type" associated with each pointer in a {@link android.view.MotionEvent} using {@link
 android.view.MotionEvent#getToolType getToolType()}.  The currently defined tool types are: {@link
 android.view.MotionEvent#TOOL_TYPE_UNKNOWN}, {@link android.view.MotionEvent#TOOL_TYPE_FINGER},
 {@link android.view.MotionEvent#TOOL_TYPE_MOUSE}, {@link android.view.MotionEvent#TOOL_TYPE_STYLUS},
@@ -1463,7 +1489,7 @@ and {@link android.view.MotionEvent#TOOL_TYPE_ERASER}.  By querying the tool typ
 can choose to handle stylus input in different ways from finger or mouse input.</p>
 
 <p>Your application can also query which mouse or stylus buttons are pressed by querying the “button
-state” of a {@link android.view.MotionEvent} using {@link android.view.MotionEvent#getButtonState
+state" of a {@link android.view.MotionEvent} using {@link android.view.MotionEvent#getButtonState
 getButtonState()}.  The currently defined button states are: {@link
 android.view.MotionEvent#BUTTON_PRIMARY}, {@link android.view.MotionEvent#BUTTON_SECONDARY}, {@link
 android.view.MotionEvent#BUTTON_TERTIARY}, {@link android.view.MotionEvent#BUTTON_BACK}, and {@link
@@ -1480,7 +1506,7 @@ android.view.MotionEvent#AXIS_DISTANCE}, {@link android.view.MotionEvent#AXIS_TI
 android.view.MotionEvent#AXIS_ORIENTATION}.</p>
 
 <p>For a demonstration of tool types, button states and the new axis codes, see the <a
-href=”{@docRoot}samples/ApiDemos/src/com/example/android/apis/graphics/TouchPaint.html”>TouchPaint
+href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/graphics/TouchPaint.html">TouchPaint
 </a> class in ApiDemos.</p>
 
 
@@ -1538,11 +1564,11 @@ approach.</p>
 application has set either <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> or
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> to
-{@code “14”} or higher. Hardware acceleration generally results in smoother animations, smoother
+{@code “14"} or higher. Hardware acceleration generally results in smoother animations, smoother
 scrolling, and overall better performance and response to user interaction.</p>
 
 <p>If necessary, you can manually disable hardware acceleration with the <a
-href=”{@docRoot}guide/topics/manifest/activity-element.html#hwaccel”>{@code hardwareAccelerated}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html#hwaccel">{@code hardwareAccelerated}</a>
 attribute for individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
 &lt;activity&gt;}</a> elements or the <a
 href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
@@ -1562,17 +1588,17 @@ direct pointers. This wasn't a problem as long as the garbage collector didn't m
 seemed to work because it made it possible to write buggy code. In Android 4.0, the system now uses
 indirect references in order to detect these bugs.</p>
 
-<p>The ins and outs of JNI local references are described in “Local and Global References” in <a
+<p>The ins and outs of JNI local references are described in “Local and Global References" in <a
 href="{@docRoot}guide/practices/design/jni.html">JNI Tips</a>. In Android 4.0, <a
 href="http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">
 CheckJNI</a> has been enhanced to detect these errors. Watch the <a
-href=”http://android-developers.blogspot.com/”>Android Developers Blog</a> for an upcoming post
+href="http://android-developers.blogspot.com/">Android Developers Blog</a> for an upcoming post
 about common errors with JNI references and how you can fix them.</p>
 
 <p>This change in the JNI implementation only affects apps that target Android 4.0 by setting either
 the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 targetSdkVersion}</a> or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-minSdkVersion}</a> to {@code “14”} or higher. If you’ve set these attributes to any lower value,
+minSdkVersion}</a> to {@code “14"} or higher. If you’ve set these attributes to any lower value,
 then JNI local references behave the same as in previous versions.</p>
 
 
@@ -1598,7 +1624,7 @@ it easier for you to test apps that use {@link android.webkit.WebView}</li>
 <ul>
 <li>Updated V8 JavaScript compiler for faster performance</li>
 <li>Plus other notable enhancements carried over from <a
-href=”{@docRoot}sdk/android-3.0.html”>Android
+href="{@docRoot}sdk/android-3.0.html">Android
 3.0</a> are now available for handsets:
 <ul>
 <li>Support for fixed position elements on all pages</li>
