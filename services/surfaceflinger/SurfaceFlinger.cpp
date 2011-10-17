@@ -452,7 +452,7 @@ bool SurfaceFlinger::threadLoop()
     }
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    if (LIKELY(hw.canDraw() && !isFrozen())) {
+    if (LIKELY(hw.canDraw())) {
         // repaint the framebuffer (if needed)
 
         const int index = hw.getCurrentBufferIndex();
@@ -479,15 +479,13 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
-    if (!mSwapRegion.isEmpty()) {
-        const DisplayHardware& hw(graphicPlane(0).displayHardware());
-        const nsecs_t now = systemTime();
-        mDebugInSwapBuffers = now;
-        hw.flip(mSwapRegion);
-        mLastSwapBufferTime = systemTime() - now;
-        mDebugInSwapBuffers = 0;
-        mSwapRegion.clear();
-    }
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    const nsecs_t now = systemTime();
+    mDebugInSwapBuffers = now;
+    hw.flip(mSwapRegion);
+    mLastSwapBufferTime = systemTime() - now;
+    mDebugInSwapBuffers = 0;
+    mSwapRegion.clear();
 }
 
 void SurfaceFlinger::handleConsoleEvents()
