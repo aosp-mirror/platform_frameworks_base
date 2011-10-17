@@ -2097,6 +2097,9 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+#if DEBUG_GLYPHS
+    LOGD("OpenGLRenderer drawText() with FontID=%d", SkTypeface::UniqueID(paint->getTypeface()));
+#endif
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
