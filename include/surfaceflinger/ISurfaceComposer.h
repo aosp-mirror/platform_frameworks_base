@@ -53,7 +53,6 @@ public:
         eFXSurfaceNormal    = 0x00000000,
         eFXSurfaceBlur      = 0x00010000,
         eFXSurfaceDim       = 0x00020000,
-        eFXSurfaceScreenshot= 0x00030000,
         eFXSurfaceMask      = 0x000F0000,
     };
 
