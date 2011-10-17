@@ -88,4 +88,10 @@
     <!-- Initial acceleration of an collapse animation after fling -->
     <dimen name="collapse_accel">2000dp</dimen>
 
+    <!-- The padding on the global screenshot background image -->
+    <dimen name="global_screenshot_bg_padding">0dp</dimen>
+    <!-- The top-left offset for the screenshot drop animation target bounds -->
+    <dimen name="global_screenshot_drop_offset_x">6dp</dimen>
+    <dimen name="global_screenshot_drop_offset_y">0dp</dimen>
+
 </resources>
