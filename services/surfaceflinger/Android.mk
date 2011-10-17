@@ -5,7 +5,6 @@ LOCAL_SRC_FILES:= \
     Layer.cpp 								\
     LayerBase.cpp 							\
     LayerDim.cpp 							\
-    LayerScreenshot.cpp						\
     DdmConnection.cpp						\
     DisplayHardware/DisplayHardware.cpp 	\
     DisplayHardware/DisplayHardwareBase.cpp \

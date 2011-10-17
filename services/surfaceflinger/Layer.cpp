@@ -88,8 +88,16 @@ void Layer::onFirstRef()
 
 Layer::~Layer()
 {
-    mFlinger->postMessageAsync(
-            new SurfaceFlinger::MessageDestroyGLTexture(mTextureName) );
+    class MessageDestroyGLState : public MessageBase {
+        GLuint texture;
+    public:
+        MessageDestroyGLState(GLuint texture) : texture(texture) { }
+        virtual bool handler() {
+            glDeleteTextures(1, &texture);
+            return true;
+        }
+    };
+    mFlinger->postMessageAsync( new MessageDestroyGLState(mTextureName) );
 }
 
 void Layer::onFrameQueued() {
