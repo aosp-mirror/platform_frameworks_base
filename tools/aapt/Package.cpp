@@ -6,6 +6,7 @@
 #include "Main.h"
 #include "AaptAssets.h"
 #include "ResourceTable.h"
+#include "ResourceFilter.h"
 
 #include <utils/Log.h>
 #include <utils/threads.h>
