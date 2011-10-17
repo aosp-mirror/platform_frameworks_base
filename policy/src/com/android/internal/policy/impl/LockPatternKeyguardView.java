@@ -782,6 +782,15 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             mUnlockScreen = null;
         }
         mUpdateMonitor.removeCallback(this);
+        if (mFaceLockService != null) {
+            try {
+                mFaceLockService.unregisterCallback(mFaceLockCallback);
+            } catch (RemoteException e) {
+                // Not much we can do
+            }
+            stopFaceLock();
+            mFaceLockService = null;
+        }
     }
 
     private boolean isSecure() {
@@ -1206,6 +1215,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
             if (mBoundToFaceLockService) {
                 if (DEBUG) Log.d(TAG, "before unbind from FaceLock service");
+                if (mFaceLockService != null) {
+                    try {
+                        mFaceLockService.unregisterCallback(mFaceLockCallback);
+                    } catch (RemoteException e) {
+                        // Not much we can do
+                    }
+                }
                 mContext.unbindService(mFaceLockConnection);
                 if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
                 mBoundToFaceLockService = false;
