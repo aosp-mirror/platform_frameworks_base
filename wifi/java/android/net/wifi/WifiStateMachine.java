@@ -2698,6 +2698,19 @@ public class WifiStateMachine extends StateMachine {
                             handleNetworkDisconnect();
                         }
                         transitionTo(mDriverStoppedState);
+                        break;
+                    }
+
+                    // Supplicant can fail to report a NETWORK_DISCONNECTION_EVENT
+                    // when authentication times out after a successful connection,
+                    // we can figure this from the supplicant state. If supplicant
+                    // state is DISCONNECTED, but the mNetworkInfo says we are not
+                    // disconnected, we need to handle a disconnection
+                    if (state == SupplicantState.DISCONNECTED &&
+                            mNetworkInfo.getState() != NetworkInfo.State.DISCONNECTED) {
+                        if (DBG) log("Missed CTRL-EVENT-DISCONNECTED, disconnect");
+                        handleNetworkDisconnect();
+                        transitionTo(mDisconnectedState);
                     }
                     break;
                     /* Do a redundant disconnect without transition */
