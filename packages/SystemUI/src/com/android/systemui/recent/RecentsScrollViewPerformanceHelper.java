@@ -83,7 +83,7 @@ public class RecentsScrollViewPerformanceHelper {
             mLinearLayout = layout;
             mAttachedToWindow = true;
             mBackgroundDrawable = mContext.getResources()
-                .getDrawable(R.drawable.status_bar_recents_background).getConstantState();
+                .getDrawable(R.drawable.status_bar_recents_background_solid).getConstantState();
             updateShowBackground();
         }
 
