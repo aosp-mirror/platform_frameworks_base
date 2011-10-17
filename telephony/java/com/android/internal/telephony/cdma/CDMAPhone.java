@@ -848,6 +848,14 @@ public class CDMAPhone extends PhoneBase {
         mUnknownConnectionRegistrants.notifyResult(this);
     }
 
+    public boolean isInEmergencyCall() {
+        return mCT.isInEmergencyCall();
+    }
+
+    public boolean isInEcm() {
+        return mIsPhoneInEcmState;
+    }
+
     void sendEmergencyCallbackModeChange(){
         //Send an Intent
         Intent intent = new Intent(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);

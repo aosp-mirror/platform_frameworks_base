@@ -686,7 +686,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
 
         if ((apnContext.getState() == State.IDLE || apnContext.getState() == State.SCANNING) &&
-                isDataAllowed(apnContext) && getAnyDataEnabled()) {
+                isDataAllowed(apnContext) && getAnyDataEnabled() && !isEmergency()) {
 
             if (apnContext.getState() == State.IDLE) {
                 ArrayList<ApnSetting> waitingApns = buildWaitingApns(apnContext.getApnType());

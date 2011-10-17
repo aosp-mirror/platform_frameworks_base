@@ -248,7 +248,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
         if ((mState == State.IDLE || mState == State.SCANNING) &&
-                isDataAllowed() && getAnyDataEnabled()) {
+                isDataAllowed() && getAnyDataEnabled() && !isEmergency()) {
             boolean retValue = setupData(reason);
             notifyOffApnsOfAvailability(reason, retValue);
             return retValue;
