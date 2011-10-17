@@ -980,6 +980,10 @@ status_t preProcessImage(Bundle* bundle, const sp<AaptAssets>& assets,
 
     String8 printableName(file->getPrintableSource());
 
+    if (bundle->getVerbose()) {
+        printf("Processing image: %s\n", printableName.string());
+    }
+
     png_structp read_ptr = NULL;
     png_infop read_info = NULL;
     FILE* fp;
@@ -1093,6 +1097,10 @@ status_t preProcessImageToCache(Bundle* bundle, String8 source, String8 dest)
     png_infop write_info = NULL;
 
     status_t error = UNKNOWN_ERROR;
+
+    if (bundle->getVerbose()) {
+        printf("Processing image to cache: %s => %s\n", source.string(), dest.string());
+    }
 
     // Get a file handler to read from
     fp = fopen(source.string(),"rb");

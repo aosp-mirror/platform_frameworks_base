@@ -5,6 +5,7 @@
 //
 #include "Main.h"
 #include "Bundle.h"
+#include "ResourceFilter.h"
 #include "ResourceTable.h"
 #include "XMLNode.h"
 
@@ -1572,7 +1573,7 @@ int doPackage(Bundle* bundle)
     }
 
     if (bundle->getVerbose()) {
-        assets->print();
+        assets->print(String8());
     }
 
     // If they asked for any fileAs that need to be compiled, do so.

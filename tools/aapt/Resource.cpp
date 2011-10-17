@@ -352,18 +352,27 @@ static void collect_files(const sp<AaptDir>& dir,
 
         if (index < 0) {
             sp<ResourceTypeSet> set = new ResourceTypeSet();
+            NOISY(printf("Creating new resource type set for leaf %s with group %s (%p)\n",
+                    leafName.string(), group->getPath().string(), group.get()));
             set->add(leafName, group);
             resources->add(resType, set);
         } else {
             sp<ResourceTypeSet> set = resources->valueAt(index);
             index = set->indexOfKey(leafName);
             if (index < 0) {
+                NOISY(printf("Adding to resource type set for leaf %s group %s (%p)\n",
+                        leafName.string(), group->getPath().string(), group.get()));
                 set->add(leafName, group);
             } else {
                 sp<AaptGroup> existingGroup = set->valueAt(index);
-                int M = files.size();
-                for (int j=0; j<M; j++) {
-                    existingGroup->addFile(files.valueAt(j));
+                NOISY(printf("Extending to resource type set for leaf %s group %s (%p)\n",
+                        leafName.string(), group->getPath().string(), group.get()));
+                for (size_t j=0; j<files.size(); j++) {
+                    NOISY(printf("Adding file %s in group %s resType %s\n",
+                        files.valueAt(j)->getSourceFile().string(),
+                        files.keyAt(j).toDirName(String8()).string(),
+                        resType.string()));
+                    status_t err = existingGroup->addFile(files.valueAt(j));
                 }
             }
         }
@@ -378,9 +387,12 @@ static void collect_files(const sp<AaptAssets>& ass,
 
     for (int i=0; i<N; i++) {
         sp<AaptDir> d = dirs.itemAt(i);
+        NOISY(printf("Collecting dir #%d %p: %s, leaf %s\n", i, d.get(), d->getPath().string(),
+                d->getLeaf().string()));
         collect_files(d, resources);
 
         // don't try to include the res dir
+        NOISY(printf("Removing dir leaf %s\n", d->getLeaf().string()));
         ass->removeDir(d->getLeaf());
     }
 }
@@ -570,7 +582,7 @@ static bool applyFileOverlay(Bundle *bundle,
                         size_t baseFileIndex =
                                 baseGroup->getFiles().indexOfKey(overlayFiles.
                                 keyAt(overlayGroupIndex));
-                        if(baseFileIndex < UNKNOWN_ERROR) {
+                        if (baseFileIndex < UNKNOWN_ERROR) {
                             if (bundle->getVerbose()) {
                                 printf("found a match (%zd) for overlay file %s, for flavor %s\n",
                                         baseFileIndex,
@@ -580,6 +592,11 @@ static bool applyFileOverlay(Bundle *bundle,
                             baseGroup->removeFile(baseFileIndex);
                         } else {
                             // didn't find a match fall through and add it..
+                            if (true || bundle->getVerbose()) {
+                                printf("nothing matches overlay file %s, for flavor %s\n",
+                                        overlayGroup->getLeaf().string(),
+                                        overlayFiles.keyAt(overlayGroupIndex).toString().string());
+                            }
                         }
                         baseGroup->addFile(overlayFiles.valueAt(overlayGroupIndex));
                         assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
