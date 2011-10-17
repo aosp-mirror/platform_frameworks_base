@@ -113,6 +113,8 @@ public class PhoneStatusBar extends StatusBar {
     // will likely move to a resource or other tunable param at some point
     private static final int INTRUDER_ALERT_DECAY_MS = 10000;
 
+    private static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
+
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
@@ -695,6 +697,10 @@ public class PhoneStatusBar extends StatusBar {
 
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+
+            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating) {
+                animateCollapse();
+            }
         }
 
         setAreThereNotifications();
