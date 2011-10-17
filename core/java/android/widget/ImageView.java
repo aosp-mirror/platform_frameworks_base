@@ -147,6 +147,11 @@ public class ImageView extends View {
             setColorFilter(tint);
         }
         
+        int alpha = a.getInt(com.android.internal.R.styleable.ImageView_drawableAlpha, 255);
+        if (alpha != 255) {
+            setAlpha(alpha);
+        }
+
         mCropToPadding = a.getBoolean(
                 com.android.internal.R.styleable.ImageView_cropToPadding, false);
         

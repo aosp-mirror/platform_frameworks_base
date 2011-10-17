@@ -2639,6 +2639,9 @@
         <!-- The offset of the baseline within this view. See {see android.view.View#getBaseline}
              for details -->
         <attr name="baseline" format="dimension" />
+        <!-- @hide The alpha value (0-255) set on the ImageView's drawable. Equivalent
+             to calling ImageView.setAlpha(int), not the same as View.setAlpha(float). -->
+        <attr name="drawableAlpha" format="integer" />
     </declare-styleable>
     <declare-styleable name="ToggleButton">
         <!-- The text for the button when it is checked. -->
