@@ -1839,7 +1839,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pf.right = df.right = vf.right = mDockRight;
         pf.bottom = df.bottom = vf.bottom = mDockBottom;
 
-        final boolean navVisible = mNavigationBar != null && mNavigationBar.isVisibleLw() &&
+        final boolean navVisible = (mNavigationBar == null || mNavigationBar.isVisibleLw()) &&
                 (mLastSystemUiFlags&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
 
         // When the navigation bar isn't visible, we put up a fake
