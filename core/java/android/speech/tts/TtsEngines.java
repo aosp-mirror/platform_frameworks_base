@@ -344,7 +344,10 @@ public class TtsEngines {
         String v1Locale = lang;
         if (!TextUtils.isEmpty(country)) {
             v1Locale += LOCALE_DELIMITER + country;
+        } else {
+            return v1Locale;
         }
+
         if (!TextUtils.isEmpty(variant)) {
             v1Locale += LOCALE_DELIMITER + variant;
         }
@@ -355,8 +358,28 @@ public class TtsEngines {
     private String getDefaultLocale() {
         final Locale locale = Locale.getDefault();
 
-        return locale.getISO3Language() + LOCALE_DELIMITER + locale.getISO3Country() +
-                LOCALE_DELIMITER + locale.getVariant();
+        // Note that the default locale might have an empty variant
+        // or language, and we take care that the construction is
+        // the same as {@link #getV1Locale} i.e no trailing delimiters
+        // or spaces.
+        String defaultLocale = locale.getISO3Language();
+        if (TextUtils.isEmpty(defaultLocale)) {
+            Log.w(TAG, "Default locale is empty.");
+            return "";
+        }
+
+        if (!TextUtils.isEmpty(locale.getISO3Country())) {
+            defaultLocale += LOCALE_DELIMITER + locale.getISO3Country();
+        } else {
+            // Do not allow locales of the form lang--variant with
+            // an empty country.
+            return defaultLocale;
+        }
+        if (!TextUtils.isEmpty(locale.getVariant())) {
+            defaultLocale += LOCALE_DELIMITER + locale.getVariant();
+        }
+
+        return defaultLocale;
     }
 
     /**
