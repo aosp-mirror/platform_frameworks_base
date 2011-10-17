@@ -2266,7 +2266,7 @@ status_t AaptAssets::filter(Bundle* bundle)
         return NO_ERROR;
     }
 
-    if (true || bundle->getVerbose()) {
+    if (bundle->getVerbose()) {
         if (!reqFilter.isEmpty()) {
             printf("Applying required filter: %s\n",
                     bundle->getConfigurations());
