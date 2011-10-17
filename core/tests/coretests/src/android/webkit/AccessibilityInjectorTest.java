@@ -1677,7 +1677,7 @@ public class AccessibilityInjectorTest
                         }
                     });
                 }
-                mWebView.loadData(html, "text/html", "utf-8");
+                mWebView.loadData(html, "text/html", null);
             }
         });
         synchronized (sTestLock) {
