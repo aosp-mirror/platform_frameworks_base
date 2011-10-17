@@ -132,16 +132,14 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
       'name':"Android 4.0",
       'img':"ics-android.png",
       'title':"Ice Cream Sandwich!",
-      'desc': "<br/><br/><br/><p>Oh my goodness, that looks tasty!</p>"
-/*
-+ "<p>For more information about all the changes in Android 3.2, read the "
-+ "<a href='{@docRoot}sdk/android-3.2.html'>version notes</a> and <a "
-+ "href='{@docRoot}sdk/api_diff/13/changes.html'>diff report</a>.</p>"
-+ "<p>If you have an existing SDK, add Android 3.0 as an "
-+ "<a href='{@docRoot}sdk/adding-components.html'>SDK "
-+ "component</a>. If you're new to Android, install the "
-+ "<a href='{@docRoot}sdk/index.html'>SDK starter package</a>."
-*/
+      'desc': "<p>Android 4.0 is here, delivering a unified UI for phones and tablets and "
++ "innovative features for users and developers. Check out the <a "
++ "href='http://developer.android.com/sdk/android-4.0-highlights.html'>Platform Highlights</a> "
++ "for an overview of the new features in Android 4.0.</p>"
++ "<p>For more information about API changes, read the "
++ "<a href='{@docRoot}sdk/android-4.0.html'>platform notes</a> and <a "
++ "href='{@docRoot}sdk/api_diff/14/changes.html'>diff report</a>. If you're new to Android, "
++ "get started with the <a href='/sdk/index.html'>SDK starter package</a>.</p>"
     },
 
     'tv': {
@@ -158,7 +156,7 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
                 +  "<p><a href='http://code.google.com/tv'>Develop for Google TV &raquo;</a></p>"
     },
 
-
+/*
     'devphone': {
       'layout':"imgLeft",
       'icon':"devphone-small.png",
@@ -172,6 +170,7 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
  + "<a href='http://market.android.com/publish'>Visit Android Market "
  + "to learn more &raquo;</a></p>"
     },
+    */
 
     'mapskey': {
       'layout':"imgLeft",
