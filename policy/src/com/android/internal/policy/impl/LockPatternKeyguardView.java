@@ -1136,14 +1136,25 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     // Everything below pertains to FaceLock - might want to separate this out
 
-    // Only pattern and pin unlock screens actually have a view for the FaceLock area, so it's not
-    // uncommon for it to not exist.  But if it does exist, we need to make sure it's shown (hiding
-    // the fallback) if FaceLock is enabled, and make sure it's hidden (showing the unlock) if
-    // FaceLock is disabled
+    // Take care of FaceLock area when layout is created
     private void initializeFaceLockAreaView(View view) {
-        mFaceLockAreaView = view.findViewById(R.id.faceLockAreaView);
-        if (mFaceLockAreaView == null) {
-            if (DEBUG) Log.d(TAG, "Layout does not have faceLockAreaView");
+        if (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled()) {
+            mFaceLockAreaView = view.findViewById(R.id.faceLockAreaView);
+            if (mFaceLockAreaView == null) {
+                Log.e(TAG, "Layout does not have faceLockAreaView and FaceLock is enabled");
+            } else {
+                if (mBoundToFaceLockService) {
+                    // If we are creating a layout when we are already bound to FaceLock, then we
+                    // are undergoing an orientation change.  Stop FaceLock and restart it in the
+                    // new location.
+                    if (DEBUG) Log.d(TAG, "Restarting FL - creating view while already bound");
+                    stopAndUnbindFromFaceLock();
+                    activateFaceLockIfAble();
+                }
+            }
+        } else {
+            mFaceLockAreaView = null; // Set to null if not using FaceLock
         }
     }
 
@@ -1160,7 +1171,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             break;
         case MSG_HIDE_FACELOCK_AREA_VIEW:
             if (mFaceLockAreaView != null) {
-                mFaceLockAreaView.setVisibility(View.GONE);
+                mFaceLockAreaView.setVisibility(View.INVISIBLE);
             }
             break;
         default:
@@ -1196,7 +1207,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACELOCK_AREA_VIEW, timeoutMillis);
     }
 
-    // Binds to FaceLock service, but does not tell it to start
+    // Binds to FaceLock service.  This call does not tell it to start, but it causes the service
+    // to call the onServiceConnected callback, which then starts FaceLock.
     public void bindToFaceLock() {
         if (mLockPatternUtils.usingBiometricWeak() &&
                 mLockPatternUtils.isBiometricWeakInstalled()) {
@@ -1232,9 +1244,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
                 mBoundToFaceLockService = false;
             } else {
-                // This could probably happen after the session when someone activates FaceLock
-                // because it wasn't active when the phone was turned on
-                Log.w(TAG, "Attempt to unbind from FaceLock when not bound");
+                // This is usually not an error when this happens.  Sometimes we will tell it to
+                // unbind multiple times because it's called from both onWindowFocusChanged and
+                // onDetachedFromWindow.
+                if (DEBUG) Log.d(TAG, "Attempt to unbind from FaceLock when not bound");
             }
         }
     }
