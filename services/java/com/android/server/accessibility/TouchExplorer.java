@@ -487,8 +487,16 @@ public class TouchExplorer implements Explorer {
                 }
             } break;
             case MotionEvent.ACTION_POINTER_UP: {
-                // Send an event to the end of the drag gesture.
-                sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
+                final int activePointerCount = mPointerTracker.getActivePointerCount();
+                switch (activePointerCount) {
+                    case 1: {
+                        // Send an event to the end of the drag gesture.
+                        sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
+                    } break;
+                    default: {
+                        mCurrentState = STATE_TOUCH_EXPLORING;
+                    }
+                }
              } break;
             case MotionEvent.ACTION_UP: {
                 mCurrentState = STATE_TOUCH_EXPLORING;
