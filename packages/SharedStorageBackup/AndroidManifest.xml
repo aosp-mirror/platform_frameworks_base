@@ -23,7 +23,6 @@
 
     <application android:allowClearUserData="false"
                  android:permission="android.permission.CONFIRM_FULL_BACKUP"
-                 android:backupAgent=".SharedStorageAgent"
-                 android:allowBackup="false" >
+                 android:backupAgent="SharedStorageAgent" >
     </application>
 </manifest>
