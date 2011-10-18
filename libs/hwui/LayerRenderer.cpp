@@ -216,7 +216,8 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
         layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
 
         if (glGetError() != GL_NO_ERROR) {
-            LOGD("Could not allocate texture");
+            LOGD("Could not allocate texture for layer (fbo=%d %dx%d)",
+                    fbo, width, height);
 
             glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
             Caches::getInstance().fboCache.put(fbo);

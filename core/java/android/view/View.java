@@ -10092,8 +10092,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 mLocalDirtyRect.setEmpty();
             }
 
+            // The layer is not valid if the underlying GPU resources cannot be allocated
+            if (!mHardwareLayer.isValid()) {
+                return null;
+            }
+
             HardwareCanvas currentCanvas = mAttachInfo.mHardwareCanvas;
             final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
+
+            // Make sure all the GPU resources have been properly allocated
+            if (canvas == null) {
+                mHardwareLayer.end(currentCanvas);
+                return null;
+            }
+
             mAttachInfo.mHardwareCanvas = canvas;
             try {
                 canvas.setViewport(width, height);
