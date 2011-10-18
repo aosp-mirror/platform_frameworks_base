@@ -676,6 +676,15 @@ public abstract class DataConnectionTracker extends Handler {
         return result;
     }
 
+    protected boolean isEmergency() {
+        final boolean result;
+        synchronized (mDataEnabledLock) {
+            result = mPhone.isInEcm() || mPhone.isInEmergencyCall();
+        }
+        log("isEmergency: result=" + result);
+        return result;
+    }
+
     protected int apnTypeToId(String type) {
         if (TextUtils.equals(type, Phone.APN_TYPE_DEFAULT)) {
             return APN_DEFAULT_ID;
@@ -981,17 +990,14 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected void onSetInternalDataEnabled(boolean enabled) {
         synchronized (mDataEnabledLock) {
-            final boolean prevEnabled = getAnyDataEnabled();
-            if (mInternalDataEnabled != enabled) {
-                mInternalDataEnabled = enabled;
-                if (prevEnabled != getAnyDataEnabled()) {
-                    if (!prevEnabled) {
-                        resetAllRetryCounts();
-                        onTrySetupData(Phone.REASON_DATA_ENABLED);
-                    } else {
-                        cleanUpAllConnections(null);
-                    }
-                }
+            mInternalDataEnabled = enabled;
+            if (enabled) {
+                log("onSetInternalDataEnabled: changed to enabled, try to setup data call");
+                resetAllRetryCounts();
+                onTrySetupData(Phone.REASON_DATA_ENABLED);
+            } else {
+                log("onSetInternalDataEnabled: changed to disabled, cleanUpAllConnections");
+                cleanUpAllConnections(null);
             }
         }
     }
