@@ -273,7 +273,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 break;
             case ConnectivityManager.TYPE_MOBILE_HIPRI:
                 apnContext = addApnContext(Phone.APN_TYPE_HIPRI);
-                break;
+                ApnContext defaultContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
+                if (defaultContext != null) {
+                    applyNewState(apnContext, apnContext.isEnabled(),
+                            defaultContext.getDependencyMet());
+                } else {
+                    // the default will set the hipri dep-met when it is created
+                }
+                continue;
             case ConnectivityManager.TYPE_MOBILE_FOTA:
                 apnContext = addApnContext(Phone.APN_TYPE_FOTA);
                 break;
