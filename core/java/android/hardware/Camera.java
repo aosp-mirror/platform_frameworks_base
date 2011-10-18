@@ -116,6 +116,12 @@ import java.util.StringTokenizer;
  * auto-focus capabilities. In order for your application to be compatible with
  * more devices, you should not make assumptions about the device camera
  * specifications.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using cameras, read the
+ * <a href="{@docRoot}guide/topics/media/camera.html">Camera</a> developer guide.</p>
+ * </div>
  */
 public class Camera {
     private static final String TAG = "Camera";
