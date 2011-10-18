@@ -38,6 +38,7 @@ import android.graphics.RectF;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Process;
 import android.os.ServiceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
@@ -54,7 +55,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.android.server.wm.WindowManagerService;
 import com.android.systemui.R;
 
 import java.io.File;
@@ -68,6 +68,7 @@ import java.util.Date;
 class SaveImageInBackgroundData {
     Context context;
     Bitmap image;
+    Uri imageUri;
     Runnable finisher;
     int iconSize;
     int result;
@@ -128,9 +129,6 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 (iconHeight - data.iconSize) / 2, data.iconSize, data.iconSize);
 
         // Show the intermediate notification
-        mLaunchIntent = new Intent(Intent.ACTION_VIEW);
-        mLaunchIntent.setDataAndType(Uri.fromFile(new File(mImageFilePath)), "image/png");
-        mLaunchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mTickerAddSpace = !mTickerAddSpace;
         mNotificationId = nId;
         mNotificationBuilder = new Notification.Builder(context)
@@ -151,6 +149,10 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     @Override
     protected SaveImageInBackgroundData doInBackground(SaveImageInBackgroundData... params) {
         if (params.length != 1) return null;
+
+        // By default, AsyncTask sets the worker thread to have background thread priority, so bump
+        // it back up so that we save a little quicker.
+        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
         Context context = params[0].context;
         Bitmap image = params[0].image;
@@ -178,6 +180,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
             resolver.update(uri, values, null, null);
 
+            params[0].imageUri = uri;
             params[0].result = 0;
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is not
@@ -196,6 +199,11 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         } else {
             // Show the final notification to indicate screenshot saved
             Resources r = params.context.getResources();
+
+            // Create the intent to show the screenshot in gallery
+            mLaunchIntent = new Intent(Intent.ACTION_VIEW);
+            mLaunchIntent.setDataAndType(params.imageUri, "image/png");
+            mLaunchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             mNotificationBuilder
                 .setContentTitle(r.getString(R.string.screenshot_saved_title))
