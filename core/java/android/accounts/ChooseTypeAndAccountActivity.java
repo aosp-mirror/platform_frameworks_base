@@ -72,7 +72,7 @@ public class ChooseTypeAndAccountActivity extends Activity
      * This is passed as the requiredFeatures parameter in AccountManager.addAccount()
      * if it is called.
      */
-    public static final String EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY = 
+    public static final String EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY =
             "addAccountRequiredFeatures";
 
     /**
@@ -110,7 +110,6 @@ public class ChooseTypeAndAccountActivity extends Activity
     private ArrayList<AccountInfo> mAccountInfos;
     private int mPendingRequest = REQUEST_NULL;
     private Parcelable[] mExistingAccounts = null;
-    private Parcelable[] mSavedAccounts = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -124,12 +123,10 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         if (savedInstanceState != null) {
             mPendingRequest = savedInstanceState.getInt(KEY_INSTANCE_STATE_PENDING_REQUEST);
-            mSavedAccounts =
+            mExistingAccounts =
                     savedInstanceState.getParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS);
-            mExistingAccounts = null;
         } else {
             mPendingRequest = REQUEST_NULL;
-            mSavedAccounts = null;
             mExistingAccounts = null;
         }
 
@@ -246,7 +243,9 @@ public class ChooseTypeAndAccountActivity extends Activity
     protected void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(KEY_INSTANCE_STATE_PENDING_REQUEST, mPendingRequest);
-        outState.putParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS, mExistingAccounts);
+        if (mPendingRequest == REQUEST_ADD_ACCOUNT) {
+            outState.putParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS, mExistingAccounts);
+        }
     }
 
     // Called when the choose account type activity (for adding an account) returns.
@@ -264,7 +263,6 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         // we got our result, so clear the fact that we had a pending request
         mPendingRequest = REQUEST_NULL;
-        mExistingAccounts = null;
 
         if (resultCode == RESULT_CANCELED) {
             return;
@@ -293,7 +291,7 @@ public class ChooseTypeAndAccountActivity extends Activity
                 if (accountName == null || accountType == null) {
                     Account[] currentAccounts = AccountManager.get(this).getAccounts();
                     Set<Account> preExistingAccounts = new HashSet<Account>();
-                    for (Parcelable accountParcel : mSavedAccounts) {
+                    for (Parcelable accountParcel : mExistingAccounts) {
                         preExistingAccounts.add((Account) accountParcel);
                     }
                     for (Account account : currentAccounts) {
