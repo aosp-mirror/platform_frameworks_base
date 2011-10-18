@@ -69,7 +69,7 @@ void RsdShader::init() {
     uint32_t attribCount = 0;
     uint32_t uniformCount = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
-        initAddUserElement(mRSProgram->mHal.state.inputElements[ct].get(), mAttribNames, NULL, &attribCount, RS_SHADER_ATTR);
+        initAddUserElement(mRSProgram->mHal.state.inputElements[ct], mAttribNames, NULL, &attribCount, RS_SHADER_ATTR);
     }
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
         initAddUserElement(mRSProgram->mHal.state.constantTypes[ct]->getElement(), mUniformNames, mUniformArraySizes, &uniformCount, RS_SHADER_UNI);
@@ -89,7 +89,7 @@ void RsdShader::init() {
 String8 RsdShader::getGLSLInputString() const {
     String8 s;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
-        const Element *e = mRSProgram->mHal.state.inputElements[ct].get();
+        const Element *e = mRSProgram->mHal.state.inputElements[ct];
         for (uint32_t field=0; field < e->getFieldCount(); field++) {
             const Element *f = e->getField(field);
 
@@ -113,7 +113,7 @@ String8 RsdShader::getGLSLInputString() const {
 
 void RsdShader::appendAttributes() {
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
-        const Element *e = mRSProgram->mHal.state.inputElements[ct].get();
+        const Element *e = mRSProgram->mHal.state.inputElements[ct];
         for (uint32_t field=0; field < e->getFieldCount(); field++) {
             const Element *f = e->getField(field);
             const char *fn = e->getFieldName(field);
@@ -414,7 +414,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
         RSD_CALL_GL(glActiveTexture, GL_TEXTURE0 + ct);
         RSD_CALL_GL(glUniform1i, sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
 
-        if (!mRSProgram->mHal.state.textures[ct].get()) {
+        if (!mRSProgram->mHal.state.textures[ct]) {
             // if nothing is bound, reset to default GL texture
             RSD_CALL_GL(glBindTexture, mTextureTargets[ct], 0);
             continue;
@@ -427,9 +427,9 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
         }
         RSD_CALL_GL(glBindTexture, drvTex->glTarget, drvTex->textureID);
         rsdGLCheckError(rsc, "ProgramFragment::setup tex bind");
-        if (mRSProgram->mHal.state.samplers[ct].get()) {
-            setupSampler(rsc, mRSProgram->mHal.state.samplers[ct].get(),
-                         mRSProgram->mHal.state.textures[ct].get());
+        if (mRSProgram->mHal.state.samplers[ct]) {
+            setupSampler(rsc, mRSProgram->mHal.state.samplers[ct],
+                         mRSProgram->mHal.state.textures[ct]);
         } else {
             RSD_CALL_GL(glTexParameteri, drvTex->glTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             RSD_CALL_GL(glTexParameteri, drvTex->glTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -448,7 +448,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
 void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool isFragment) {
     uint32_t uidx = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
-        Allocation *alloc = mRSProgram->mHal.state.constants[ct].get();
+        Allocation *alloc = mRSProgram->mHal.state.constants[ct];
         if (!alloc) {
             LOGE("Attempting to set constants on shader id %u, but alloc at slot %u is not set",
                  (uint32_t)this, ct);
@@ -504,7 +504,7 @@ void RsdShader::setup(const android::renderscript::Context *rsc, RsdShaderCache 
 void RsdShader::initAttribAndUniformArray() {
     mAttribCount = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
-        const Element *elem = mRSProgram->mHal.state.inputElements[ct].get();
+        const Element *elem = mRSProgram->mHal.state.inputElements[ct];
         for (uint32_t field=0; field < elem->getFieldCount(); field++) {
             if (elem->getFieldName(field)[0] != '#') {
                 mAttribCount ++;

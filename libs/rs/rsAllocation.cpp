@@ -30,7 +30,7 @@ Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages,
     mHal.state.usageFlags = usages;
     mHal.state.mipmapControl = mc;
 
-    mHal.state.type.set(type);
+    setType(type);
     updateCache();
 }
 
@@ -47,7 +47,7 @@ Allocation * Allocation::createAllocation(Context *rsc, const Type *type, uint32
 }
 
 void Allocation::updateCache() {
-    const Type *type = mHal.state.type.get();
+    const Type *type = mHal.state.type;
     mHal.state.dimensionX = type->getDimX();
     mHal.state.dimensionY = type->getDimY();
     mHal.state.dimensionZ = type->getDimZ();
@@ -187,7 +187,7 @@ void Allocation::dumpLOGV(const char *prefix) const {
 
     String8 s(prefix);
     s.append(" type ");
-    if (mHal.state.type.get()) {
+    if (mHal.state.type) {
         mHal.state.type->dumpLOGV(s.string());
     }
 
@@ -314,7 +314,7 @@ void Allocation::resize1D(Context *rsc, uint32_t dimX) {
         decRefs(getPtr(), oldDimX - dimX, dimX);
     }
     rsc->mHal.funcs.allocation.resize(rsc, this, t.get(), mHal.state.hasReferences);
-    mHal.state.type.set(t.get());
+    setType(t.get());
     updateCache();
 }
 

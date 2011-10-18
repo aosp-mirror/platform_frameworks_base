@@ -32,13 +32,6 @@ public:
     Mesh(Context *, uint32_t vertexBuffersCount, uint32_t primitivesCount);
     ~Mesh();
 
-    // Either mIndexBuffer, mPrimitiveBuffer or both could have a NULL reference
-    // If both are null, mPrimitive only would be used to render the mesh
-    struct Primitive_t {
-        ObjectBaseRef<Allocation> mIndexBuffer;
-        RsPrimitive mPrimitive;
-    };
-
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
     static Mesh *createFromStream(Context *rsc, IStream *stream);
@@ -51,10 +44,13 @@ public:
             // Contains vertex data
             // Position, normal, texcoord, etc could either be strided in one allocation
             // of provided separetely in multiple ones
-            ObjectBaseRef<Allocation> *vertexBuffers;
+            Allocation **vertexBuffers;
             uint32_t vertexBuffersCount;
 
-            Primitive_t ** primitives;
+            // indexBuffers[i] could be NULL, in which case only primitives[i] is used
+            Allocation **indexBuffers;
+            uint32_t indexBuffersCount;
+            RsPrimitive *primitives;
             uint32_t primitivesCount;
         };
         State state;
@@ -62,12 +58,14 @@ public:
     Hal mHal;
 
     void setVertexBuffer(Allocation *vb, uint32_t index) {
-        mHal.state.vertexBuffers[index].set(vb);
+        mVertexBuffers[index].set(vb);
+        mHal.state.vertexBuffers[index] = vb;
     }
 
     void setPrimitive(Allocation *idx, RsPrimitive prim, uint32_t index) {
-        mHal.state.primitives[index]->mIndexBuffer.set(idx);
-        mHal.state.primitives[index]->mPrimitive = prim;
+        mIndexBuffers[index].set(idx);
+        mHal.state.indexBuffers[index] = idx;
+        mHal.state.primitives[index] = prim;
     }
 
     void render(Context *) const;
@@ -80,6 +78,8 @@ public:
     float mBBoxMax[3];
     void computeBBox();
 protected:
+    ObjectBaseRef<Allocation> *mVertexBuffers;
+    ObjectBaseRef<Allocation> *mIndexBuffers;
     bool mInitialized;
 };
 
