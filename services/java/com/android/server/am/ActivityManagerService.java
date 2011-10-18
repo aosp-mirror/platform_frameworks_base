@@ -165,7 +165,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
-    static final boolean DEBUG_BACKUP = localLOGV || true;
+    static final boolean DEBUG_BACKUP = localLOGV || false;
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
     static final boolean DEBUG_POWER = localLOGV || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
@@ -2607,9 +2607,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 TAG, "Record #" + i + " " + r + ": app=" + r.app);
             if (r.app == app) {
                 if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
-                    if (localLOGV) Slog.v(
-                        TAG, "Removing this entry!  frozen=" + r.haveState
-                        + " finishing=" + r.finishing);
+                    if (ActivityStack.DEBUG_ADD_REMOVE) {
+                        RuntimeException here = new RuntimeException("here");
+                        here.fillInStackTrace();
+                        Slog.i(TAG, "Removing activity " + r + " from stack at " + i
+                                + ": haveState=" + r.haveState
+                                + " stateNotNeeded=" + r.stateNotNeeded
+                                + " finishing=" + r.finishing
+                                + " state=" + r.state, here);
+                    }
+                    if (!r.finishing) {
+                        Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
+                    }
                     r.makeFinishing();
                     mMainStack.mHistory.remove(i);
                     r.takeFromHistory();
@@ -2630,6 +2639,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     r.app = null;
                     r.nowVisible = false;
                     if (!r.haveState) {
+                        if (ActivityStack.DEBUG_SAVED_STATE) Slog.i(TAG,
+                                "App died, clearing saved state of " + r);
                         r.icicle = null;
                     }
                 }
@@ -4479,7 +4490,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (pi == null) {
-            Slog.w(TAG, "No content provider found for: " + name);
+            Slog.w(TAG, "No content provider found for permission check: " + uri.toSafeString());
             return -1;
         }
 
@@ -4735,7 +4746,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (pi == null) {
-            Slog.w(TAG, "No content provider found for: " + authority);
+            Slog.w(TAG, "No content provider found for permission revoke: " + uri.toSafeString());
             return;
         }
 
@@ -4829,7 +4840,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             if (pi == null) {
-                Slog.w(TAG, "No content provider found for: " + authority);
+                Slog.w(TAG, "No content provider found for permission revoke: "
+                        + uri.toSafeString());
                 return;
             }
 
@@ -13054,11 +13066,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.foregroundServices) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.hidden = false;
                 app.adjType = "foreground-service";
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             } else if (app.forcingToForeground != null) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.hidden = false;
                 app.adjType = "force-foreground";
                 app.adjSource = app.forcingToForeground;
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
@@ -13069,6 +13083,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // We don't want to kill the current heavy-weight process.
             adj = ProcessList.HEAVY_WEIGHT_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.hidden = false;
             app.adjType = "heavy";
         }
 
@@ -13077,11 +13092,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             // home app, so we don't want to let it go into the background.
             adj = ProcessList.HOME_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.hidden = false;
             app.adjType = "home";
         }
-        
-        //Slog.i(TAG, "OOM " + app + ": initial adj=" + adj);
-        
+
+        if (false) Slog.i(TAG, "OOM " + app + ": initial adj=" + adj
+                + " reason=" + app.adjType);
+
         // By default, we use the computed adjustment.  It may be changed if
         // there are applications dependent on our services or providers, but
         // this gives us a baseline and makes sure we don't get into an
@@ -13108,7 +13125,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             while (jt.hasNext() && adj > ProcessList.FOREGROUND_APP_ADJ) {
                 ServiceRecord s = jt.next();
                 if (s.startRequested) {
-                    if (app.hasShownUi) {
+                    if (app.hasShownUi && app != mHomeProcess) {
                         // If this process has shown some UI, let it immediately
                         // go to the LRU list because it may be pretty heavy with
                         // UI stuff.  We'll tag it with a label just to help
@@ -13169,7 +13186,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
                                     // Not doing bind OOM management, so treat
                                     // this guy more like a started service.
-                                    if (app.hasShownUi) {
+                                    if (app.hasShownUi && app != mHomeProcess) {
                                         // If this process has shown some UI, let it immediately
                                         // go to the LRU list because it may be pretty heavy with
                                         // UI stuff.  We'll tag it with a label just to help
@@ -13177,6 +13194,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         if (adj > clientAdj) {
                                             adjType = "bound-bg-ui-services";
                                         }
+                                        app.hidden = false;
                                         clientAdj = adj;
                                     } else {
                                         if (now >= (s.lastActivity+MAX_SERVICE_INACTIVITY)) {
@@ -13200,7 +13218,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     // about letting this process get into the LRU
                                     // list to be killed and restarted if needed for
                                     // memory.
-                                    if (app.hasShownUi && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                                    if (app.hasShownUi && app != mHomeProcess
+                                            && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                                         adjType = "bound-bg-ui-services";
                                     } else {
                                         if ((cr.flags&(Context.BIND_ABOVE_CLIENT
@@ -13294,7 +13313,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         int clientAdj = computeOomAdjLocked(
                             client, myHiddenAdj, TOP_APP, true);
                         if (adj > clientAdj) {
-                            if (app.hasShownUi && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                            if (app.hasShownUi && app != mHomeProcess
+                                    && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                                 app.adjType = "bg-ui-provider";
                             } else {
                                 adj = clientAdj > ProcessList.FOREGROUND_APP_ADJ
