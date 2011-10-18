@@ -33,9 +33,6 @@ use the {@link android.nfc.Tag#getTechList getTechList()} method to determine th
 supported by the tag and create the corresponding {@link android.nfc.tech.TagTechnology}
 object with one of classes provided by {@link android.nfc.tech} </p>
 
-
-<table>
-
 <p class="table-caption" id="table1">
 <strong>Table 1.</strong> Supported tag technologies</p>
 <table id="tech-table">
@@ -230,7 +227,7 @@ priority over other activities that handle the same intent. Using this system in
   <ol>
     <li>Add the following code in the <code>onCreate()</code> method of your activity:
 
-      <ol type="a">
+      <ol>
         <li>Create a {@link android.app.PendingIntent} object so the Android system can populate it
         with the details of the tag when it is scanned.
           <pre>
