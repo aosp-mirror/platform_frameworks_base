@@ -556,7 +556,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             notifyDataConnection(Phone.REASON_DATA_ATTACHED);
         } else {
             // update APN availability so that APN can be enabled.
-            notifyDataAvailability(Phone.REASON_DATA_ATTACHED);
+            notifyOffApnsOfAvailability(Phone.REASON_DATA_ATTACHED);
         }
 
         setupDataOnReadyApns(Phone.REASON_DATA_ATTACHED);
@@ -693,7 +693,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 if (waitingApns.isEmpty()) {
                     if (DBG) log("trySetupData: No APN found");
                     notifyNoData(GsmDataConnection.FailCause.MISSING_UNKNOWN_APN, apnContext);
-                    notifyOffApnsOfAvailability(apnContext.getReason(), false);
+                    notifyOffApnsOfAvailability(apnContext.getReason());
                     return false;
                 } else {
                     apnContext.setWaitingApns(waitingApns);
@@ -708,7 +708,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
             // apnContext.setReason(apnContext.getReason());
             boolean retValue = setupData(apnContext);
-            notifyOffApnsOfAvailability(apnContext.getReason(), retValue);
+            notifyOffApnsOfAvailability(apnContext.getReason());
             return retValue;
         } else {
             // TODO: check the condition.
@@ -716,23 +716,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 && (apnContext.getState() == State.IDLE
                     || apnContext.getState() == State.SCANNING))
                 mPhone.notifyDataConnectionFailed(apnContext.getReason(), apnContext.getApnType());
-            notifyOffApnsOfAvailability(apnContext.getReason(), false);
+            notifyOffApnsOfAvailability(apnContext.getReason());
             return false;
         }
     }
 
     @Override
     // Disabled apn's still need avail/unavail notificiations - send them out
-    protected void notifyOffApnsOfAvailability(String reason, boolean availability) {
-        if (mAvailability == availability) return;
-        mAvailability = availability;
-
+    protected void notifyOffApnsOfAvailability(String reason) {
         for (ApnContext apnContext : mApnContexts.values()) {
             if (!apnContext.isReady()) {
                 if (DBG) log("notifyOffApnOfAvailability type:" + apnContext.getApnType());
                 mPhone.notifyDataConnection(reason != null ? reason : apnContext.getReason(),
                                             apnContext.getApnType(),
                                             Phone.DataState.DISCONNECTED);
+            } else {
+                if (DBG) {
+                    log("notifyOffApnsOfAvailability skipped apn due to isReady==false: " +
+                            apnContext.toString());
+                }
             }
         }
     }
@@ -1572,7 +1574,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         createAllApnList();
         if (mPhone.mCM.getRadioState().isOn()) {
             if (DBG) log("onRecordsLoaded: notifying data availability");
-            notifyDataAvailability(Phone.REASON_SIM_LOADED);
+            notifyOffApnsOfAvailability(Phone.REASON_SIM_LOADED);
         }
         setupDataOnReadyApns(Phone.REASON_SIM_LOADED);
     }
@@ -1681,7 +1683,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (DBG) log("onRoamingOff");
 
         if (getDataOnRoamingEnabled() == false) {
-            notifyDataAvailability(Phone.REASON_ROAMING_OFF);
+            notifyOffApnsOfAvailability(Phone.REASON_ROAMING_OFF);
             setupDataOnReadyApns(Phone.REASON_ROAMING_OFF);
         } else {
             notifyDataConnection(Phone.REASON_ROAMING_OFF);
@@ -1697,7 +1699,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             if (DBG) log("onRoamingOn: Tear down data connection on roaming.");
             cleanUpAllConnections(true, Phone.REASON_ROAMING_ON);
-            notifyDataAvailability(Phone.REASON_ROAMING_ON);
+            notifyOffApnsOfAvailability(Phone.REASON_ROAMING_ON);
         }
     }
 
@@ -1714,7 +1716,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (mPhone.mIccRecords.getRecordsLoaded()) {
-            notifyDataAvailability(null);
+            notifyOffApnsOfAvailability(null);
         }
 
         if (getOverallState() != State.IDLE) {
@@ -1740,7 +1742,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (DBG) log("onRadioOffOrNotAvailable: is off and clean up all connections");
             cleanUpAllConnections(false, Phone.REASON_RADIO_TURNED_OFF);
         }
-        notifyDataAvailability(null);
+        notifyOffApnsOfAvailability(null);
     }
 
     @Override
@@ -1985,7 +1987,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         apnContext.getApnType());
             }
         }
-        notifyDataAvailability(reason);
+        notifyOffApnsOfAvailability(reason);
     }
 
     /**
