@@ -46,7 +46,7 @@ public class TakeScreenshotService extends Service {
                             } catch (RemoteException e) {
                             }
                         }
-                    });
+                    }, msg.arg1 > 0, msg.arg2 > 0);
             }
         }
     };
