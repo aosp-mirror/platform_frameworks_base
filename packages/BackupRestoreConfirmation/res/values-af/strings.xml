@@ -25,6 +25,8 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Laai my data terug"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Moenie herstel nie"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Voer asseblief jou huidige rugsteunwagwoord hieronder in:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Voer jou toestelenkripsie-wagwoord hier onder in."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Voer jou toestelenkripsie-wagwoord hier onder in. Dit sal ook gebruik word om die rugsteunargief te enkripteer."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Voer asb. \'n wagwoord in om te gebruik vir enkripsie van die volle rugsteundata. As dit leeg gelaat word, sal jou huidige rugsteunwagwoord gebruik word:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"As jy die volle rugsteundata wil enkripteer, voer \'n wagwoord hieronder in:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"As die hersteldata geïnkripteer  word, voer asb. die wagwoord hieronder in:"</string>

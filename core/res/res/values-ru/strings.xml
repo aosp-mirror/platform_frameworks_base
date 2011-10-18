@@ -326,9 +326,9 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"перезаписывать данные контакта"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти планшетного ПК. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
-    <string name="permlab_readProfile" msgid="6824681438529842282">"получать данные профиля"</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"просматривать данные профиля"</string>
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Позволяет приложению получать доступ к хранящейся на вашем устройстве личной информации профиля, например к имени и контактным данным. Это означает, что приложение может идентифицировать вас и отправить эти данные другим пользователям."</string>
-    <string name="permlab_writeProfile" msgid="4679878325177177400">"запись в данные профиля"</string>
+    <string name="permlab_writeProfile" msgid="4679878325177177400">"изменение данных профиля"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Позволяет приложению изменять или добавлять в личный профиль хранящуюся на вашем устройстве информацию, например имя или контактные данные. Это означает, что приложение может идентифицировать вас и отправить эти данные другим пользователям."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читать записи в вашей социальной ленте"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Позволяет приложению читать и синхронизировать новости от вас и ваших друзей. Вредоносные программы могут таким образом получить доступ к вашим личным записям в социальных сетях."</string>
@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставьте SIM-карту."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"SIM-карта отсутствует или не читается. Вставьте SIM-карту."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Ваша SIM-карта окончательно заблокирована."\n"Чтобы получить новую SIM-карту, обратитесь к оператору мобильной связи."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Кнопка перехода к предыдущему треку"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Кнопка перехода к следующему треку"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Кнопка паузы"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Кнопка воспроизведения"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Кнопка остановки"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренные вызовы"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Разблокировать"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Вкл. звук"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Откл. звук"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ввод графического ключа начался"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Графический ключ сброшен"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ячейка добавлена"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Графический ключ введен"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -927,10 +936,10 @@
     <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Громкость Bluetooth-устройства"</string>
-    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Громкость мелодии звонка"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Громкость рингтона"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Громкости мелодии вызова"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Громкость мультимедиа"</string>
-    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Громкость мелодии оповещений"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Громкость уведомлений"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Мелодия по умолчанию"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"По умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Без звука"</string>
@@ -1160,8 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Без звука"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Включить звук"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Подключите гарнитуру, чтобы услышать ключи пароля."</string>
-    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Точка."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Подключите гарнитуру, чтобы услышать пароль."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Точка"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на главную"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вверх"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ещё"</string>

@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Уметните SIM картицу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Недостаје SIM картица или не може да се прочита. Уметните SIM картицу."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"SIM картица је трајно онемогућена."\n" Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Дугме за претходну песму"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Дугме за следећу песму"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Дугме за паузу"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Дугме Пусти"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Дугме за заустављање"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Само хитни позиви"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Мрежа је закључана"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM картица је закључана PUK кодом."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Откључај"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Укључи звук"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Искључи звук"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Образац је започет"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Образац је обрисан"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ћелија је додата"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Образац је довршен"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Нечујно"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Укључи звук"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Тастер. Потребне су слушалице да бисте чули тастере док куцате лозинку."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Укључите слушалице да бисте чули наглас изговорене тастере за лозинку."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Тачка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Кретање до Почетне"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Кретање нагоре"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Још опција"</string>

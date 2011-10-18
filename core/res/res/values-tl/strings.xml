@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Mangyaring magpasok ng SIM card."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Nawawala o hindi nababasa ang SIM card. Mangyaring magpasok ng isang SIM card."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Ang iyong SIM card ay permanenteng hindi pinagana."\n" Mangyaring makipag-ugnay sa iyong wireless service provider upang makakuha ng isa pang SIM card."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Button na nakaraang track"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Button na Susunod na track"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Button na I-pause"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Button na I-play"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Button na Itigil"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Mga pang-emergency na tawag lang"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Naka-lock ang network"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Naka-PUK-lock ang SIM card."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"I-unlock"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"I-on ang tunog"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"I-off ang tunog"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Sinimulan ang pattern"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Na-clear ang pattern"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Idinagdag ang cell"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Nakumpleto ang pattern"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"I-cut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyahin"</string>
     <string name="paste" msgid="5629880836805036433">"I-paste"</string>
-    <string name="replace" msgid="5781686059063148930">"Palitan???"</string>
+    <string name="replace" msgid="5781686059063148930">"Palitan..."</string>
     <string name="delete" msgid="6098684844021697789">"Tanggalin"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopyahin ang URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pumili ng teksto..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tahimik"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"I-on ang tunog"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Key. Kinakailangan ng headset upang marinig ang mga key habang nata-type ng password."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Mag-plug in ng isang headset upang marinig ang mga password key na binabanggit nang malakas."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Dot."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Magnabiga sa home"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Magnabiga pataas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Higit pang mga pagpipilian"</string>

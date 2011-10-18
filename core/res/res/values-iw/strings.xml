@@ -334,10 +334,10 @@
     <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"מאפשר ליישום לגשת לעדכונים חברתיים מהחברים שלך ולסנכרן אותם. יישומים זדוניים יוכלו להשתמש בכך כדי לגשת למסרים שהועברו באופן פרטי בינך לבין חבריך ברשתות חברתיות."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"כתיבה בזרם החברתי שלך"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"מאפשר ליישום להציג עדכונים חברתיים מהחברים שלך. יישומים זדוניים יוכלו להשתמש בכך כדי להתחזות לאחד מחבריך ולדלות ממך בדרכי מרמה סיסמאות או מידע סודי אחר."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי לוח שנה וגם מידע סודי"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי יומן וגם מידע סודי"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"מאפשר ליישום לקרוא את כל אירועי לוח השנה שמאוחסנים בטבלט שלך, כולל אירועים של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לחלץ מידע אישי מלוחות שנה אלה ללא ידיעת הבעלים."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"מאפשר ליישום לקרוא את כל אירועי לוח השנה המאוחסנים בטלפון שלך, כולל אירועים של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לחלץ מידע אישי מלוחות השנה האלה ללא ידיעת הבעלים."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי לוח שנה ושליחת דוא\"ל לאורחים ללא ידיעת הבעלים"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי יומן ושליחת דוא\"ל לאורחים ללא ידיעת הבעלים"</string>
     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"מאפשר ליישום לשלוח הזמנות לאירוע בתור הבעלים של לוח השנה ולהוסיף, להסיר ולשנות אירועים שניתן לשנות במכשיר, כולל אלה של חברים או עמיתים לעבודה. יישום זדוני בעל הרשאה זו יוכל לשלוח הודעות ספאם שייראו כאילו נשלחו מהבעלים של לוח השנה, לשנות אירועים ללא ידיעת הבעלים או להוסיף אירועים מזויפים."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"צור מקורות מיקום מדומים לצורך בדיקה"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"צור מקורות מיקום מדומים לצורך בדיקה. יישומים זדוניים עלולים להשתמש באפשרות זו כדי לעקוף את המיקום ו/או הסטטוס המוחזרים על ידי מקורות המיקום האמיתיים כגון GPS או ספקי רשת."</string>
@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"הכנס כרטיס SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"כרטיס ה-SIM חסר או לא קריא. הכנס כרטיס SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"כרטיס ה-SIM שלך מושבת לצמיתות."\n" צור קשר עם ספק השירות האלחוטי שלך כדי לקבל כרטיס SIM אחר."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"לחצן הרצועה הקודמת"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"לחצן הרצועה הבאה"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"לחצן ההשהיה"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"לחצן ההפעלה"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"לחצן העצירה"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"שיחות חירום בלבד"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"רשת נעולה"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"כרטיס SIM נעול באמצעות PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"בטל נעילה"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"קול פועל"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"ללא קול"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"יצירת התבנית החלה"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"התבנית נמחקה"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"התא נוסף"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"התבנית הושלמה"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"אבג"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"חתוך"</string>
     <string name="copy" msgid="2681946229533511987">"העתק"</string>
     <string name="paste" msgid="5629880836805036433">"הדבק"</string>
-    <string name="replace" msgid="5781686059063148930">"להחליף???"</string>
+    <string name="replace" msgid="5781686059063148930">"להחליף..."</string>
     <string name="delete" msgid="6098684844021697789">"מחק"</string>
     <string name="copyUrl" msgid="2538211579596067402">"העתק כתובת אתר"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"בחר טקסט..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"מצלמה"</string>
     <string name="description_target_silent" msgid="893551287746522182">"שקט"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"הקול פועל"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"מקש. נדרשות אוזניות כדי לשמוע את המקשים בעת הקלדת סיסמה."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"חבר אוזניות כדי לשמוע הקראה של מפתחות סיסמה."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"נקודה."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"נווט לדף הבית"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"נווט למעלה"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"אפשרויות נוספות"</string>
