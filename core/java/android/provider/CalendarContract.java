@@ -1411,7 +1411,9 @@ public final class CalendarContract {
      * <dd>When inserting a new event the following fields must be included:
      * <ul>
      * <li>dtstart</li>
-     * <li>dtend -or- a (rrule or rdate) and a duration</li>
+     * <li>dtend for non-recurring events</li>
+     * <li>duration for recurring events</li>
+     * <li>rrule or rdate for recurring events</li>
      * <li>a calendar_id</li>
      * </ul>
      * There are also further requirements when inserting or updating an event.
