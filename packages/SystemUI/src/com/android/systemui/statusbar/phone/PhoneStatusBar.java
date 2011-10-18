@@ -50,7 +50,6 @@ import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
@@ -213,6 +212,8 @@ public class PhoneStatusBar extends StatusBar {
     boolean mAnimatingReveal = false;
     int mViewDelta;
     int[] mAbsPos = new int[2];
+    Runnable mPostCollapseCleanup = null;
+
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -1238,6 +1239,10 @@ public class PhoneStatusBar extends StatusBar {
             return;
         }
         mExpanded = false;
+        if (mPostCollapseCleanup != null) {
+            mPostCollapseCleanup.run();
+            mPostCollapseCleanup = null;
+        }
     }
 
     void doAnimation() {
@@ -2066,49 +2071,67 @@ public class PhoneStatusBar extends StatusBar {
         }
         public void onClick(View v) {
             synchronized (mNotificationData) {
-                // let's also queue up 400ms worth of animated dismissals
-                final int N = mini(5, mPile.getChildCount());
+                // animate-swipe all dismissable notifications, then animate the shade closed
+                int numChildren = mPile.getChildCount();
 
-                final ArrayList<View> snapshot = new ArrayList<View>(N);
-                for (int i=0; i<N; i++) {
+                int scrollTop = mScrollView.getScrollY();
+                int scrollBottom = scrollTop + mScrollView.getHeight();
+                final ArrayList<View> snapshot = new ArrayList<View>(numChildren);
+                for (int i=0; i<numChildren; i++) {
                     final View child = mPile.getChildAt(i);
-                    if (mPile.canChildBeDismissed(child)) snapshot.add(child);
+                    if (mPile.canChildBeDismissed(child) && child.getBottom() > scrollTop &&
+                            child.getTop() < scrollBottom) {
+                        snapshot.add(child);
+                    }
                 }
+                final int N = snapshot.size();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        final int ROW_DELAY = 100;
+                        // Decrease the delay for every row we animate to give the sense of
+                        // accelerating the swipes
+                        final int ROW_DELAY_DECREMENT = 10;
+                        int currentDelay = 140;
+                        int totalDelay = 0;
 
-                        mHandler.postDelayed(new Runnable() {
-                            public void run() {
-                                animateCollapse(false, 0f);
-                            }
-                        }, (N-1) * ROW_DELAY);
+                        // Set the shade-animating state to avoid doing other work during
+                        // all of these animations. In particular, avoid layout and
+                        // redrawing when collapsing the shade.
+                        mPile.setViewRemoval(false);
 
-                        mHandler.postDelayed(new Runnable() {
+                        mPostCollapseCleanup = new Runnable() {
                             public void run() {
                                 try {
+                                    mPile.setViewRemoval(true);
                                     mBarService.onClearAllNotifications();
-                                } catch (RemoteException ex) { }
+                                } catch (Exception ex) { }
                             }
-                        }, N * ROW_DELAY + 500);
+                        };
 
-                        mPile.setAnimateBounds(false); // temporarily disable some re-layouts
-
+                        View sampleView = snapshot.get(0);
+                        int width = sampleView.getWidth();
+                        final int velocity = (int)(width * 8); // 1000/8 = 125 ms duration
                         for (View v : snapshot) {
                             final View _v = v;
-                            mHandler.post(new Runnable() {
+                            mHandler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mPile.dismissRowAnimated(_v, (int)(ROW_DELAY*0.25f));
+                                    mPile.dismissRowAnimated(_v, velocity);
                                 }
-                            });
-                            try {
-                                Thread.sleep(ROW_DELAY);
-                            } catch (InterruptedException ex) { }
+                            }, totalDelay);
+                            currentDelay = Math.max(50, currentDelay - ROW_DELAY_DECREMENT);
+                            totalDelay += currentDelay;
                         }
-                        
-                        mPile.setAnimateBounds(true); // reenable layout animation
+                        // Delay the collapse animation until after all swipe animations have
+                        // finished. Provide some buffer because there may be some extra delay
+                        // before actually starting each swipe animation. Ideally, we'd
+                        // synchronize the end of those animations with the start of the collaps
+                        // exactly.
+                        mHandler.postDelayed(new Runnable() {
+                            public void run() {
+                                animateCollapse(false);
+                            }
+                        }, totalDelay + 225);
                     }
                 }).start();
             }
