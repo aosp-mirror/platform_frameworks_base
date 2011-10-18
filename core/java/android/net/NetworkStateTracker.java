@@ -132,6 +132,9 @@ public interface NetworkStateTracker {
      * Returns an indication of whether this network is available for
      * connections. A value of {@code false} means that some quasi-permanent
      * condition prevents connectivity to this network.
+     *
+     * NOTE that this is broken on multi-connection devices.  Should be fixed in J release
+     * TODO - fix on multi-pdp devices
      */
     public boolean isAvailable();
 
