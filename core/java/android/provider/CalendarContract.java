@@ -745,7 +745,7 @@ public final class CalendarContract {
         /**
          * This specifies that an attendee is a resource, such as a room, and
          * not an actual person. TODO UNHIDE and add to ATTENDEE_TYPE comment
-         * 
+         *
          * @hide
          */
         public static final int TYPE_RESOURCE = 3;
@@ -2335,26 +2335,16 @@ public final class CalendarContract {
         public static final String COLOR_INDEX = "color_index";
 
         /**
-         * The version of this color that will work with dark text as an 8-bit
-         * ARGB integer value. Colors should specify alpha as fully opaque (eg
-         * 0xFF993322) as the alpha may be ignored or modified for display.
-         * Column name.
+         * The color as an 8-bit ARGB integer value. Colors should specify alpha
+         * as fully opaque (eg 0xFF993322) as the alpha may be ignored or
+         * modified for display. It is reccomended that colors be usable with
+         * light (near white) text. Apps should not depend on that assumption,
+         * however. Column name.
          * <P>
          * Type: INTEGER (NOT NULL)
          * </P>
          */
-        public static final String COLOR_LIGHT = "color_light";
-
-        /**
-         * The version of this color that will work with light text as an 8-bit
-         * ARGB integer value. Colors should specify alpha as fully opaque (eg
-         * 0xFF993322) as the alpha may be ignored or modified for display.
-         * Column name.
-         * <P>
-         * Type: INTEGER (NOT NULL)
-         * </P>
-         */
-        public static final String COLOR_DARK = "color_dark";
+        public static final String COLOR = "color";
 
     }
 
