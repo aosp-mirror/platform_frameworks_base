@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Insira um cartão SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"O cartão SIM não foi inserido ou não está legível. Insira um cartão SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Seu cartão SIM está permanentemente desativado."\n" Entre em contato com seu provedor de serviços de rede sem fio para obter outro cartão SIM."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Botão \"Faixa anterior\""</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Botão \"Próxima faixa\""</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Botão \"Pausar\""</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Botão \"Reproduzir\""</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Botão \"Parar\""</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Apenas chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rede bloqueada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"O cartão SIM está bloqueado pelo PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloquear"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Som ativado"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Som desativado"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Padrão iniciado"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Padrão apagado"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Célula adicionada"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Padrão concluído"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"Recortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Colar"</string>
-    <string name="replace" msgid="5781686059063148930">"Substituir???"</string>
+    <string name="replace" msgid="5781686059063148930">"Substituir..."</string>
     <string name="delete" msgid="6098684844021697789">"Excluir"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Selecionar texto..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Câmera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencioso"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Som ativado"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tecla. É necessário um fone de ouvido para ouvir as teclas durante a digitação de uma senha."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Conecte um fone de ouvido para ouvir as teclas da senha em voz alta."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Ponto final."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navegar na página inicial"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navegar para cima"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Mais opções"</string>

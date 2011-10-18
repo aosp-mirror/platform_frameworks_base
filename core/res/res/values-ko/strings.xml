@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"SIM 카드를 삽입하세요."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"SIM 카드가 없거나 읽을 수 없습니다. SIM 카드를 삽입하세요."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"SIM 카드 사용이 영구적으로 중지됩니다."\n"다른 SIM 카드를 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"이전 트랙 버튼"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"다음 트랙 버튼"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"일시중지 버튼"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"재생 버튼"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"중지 버튼"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"긴급 통화만"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"네트워크 잠김"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 카드가 PUK 잠김 상태입니다."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"잠금해제"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"사운드 켜기"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"사운드 끄기"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"패턴 시작됨"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"패턴 삭제됨"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"셀 추가됨"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"패턴 완료됨"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"카메라"</string>
     <string name="description_target_silent" msgid="893551287746522182">"무음"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"사운드 켜기"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"키. 비밀번호를 입력할 때 키 소리를 들으려면 헤드셋이 필요합니다."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"비밀번호 키를 음성으로 들으려면 헤드셋을 연결하세요."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"점"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"위로 탐색"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"옵션 더보기"</string>

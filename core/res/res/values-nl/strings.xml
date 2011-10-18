@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Plaats een SIM-kaart."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"De simkaart ontbreekt of kan niet worden gelezen. Plaats een simkaart."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Uw simkaart is permanent uitgeschakeld."\n" Neem contact op met uw draadloze serviceprovider voor een nieuwe simkaart."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Knop voor vorig nummer"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Knop voor volgend nummer"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Knop voor onderbreken"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Knop voor afspelen"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Knop voor stoppen"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Alleen noodoproepen"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netwerk vergrendeld"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kaart is vergrendeld met PUK-code."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ontgrendelen"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Geluid aan"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Geluid uit"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Patroon gestart"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Patroon gewist"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cel toegevoegd"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Patroon voltooid"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"Alt"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Stil"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Geluid aan"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Toetsaanslag. Headset vereist om toetsaanslagen te kunnen horen bij het typen van een wachtwoord."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Sluit een headset aan om wachtwoordtoetsen hardop te laten voorlezen."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Stip."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigeren naar startpositie"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Omhoog navigeren"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Meer opties"</string>

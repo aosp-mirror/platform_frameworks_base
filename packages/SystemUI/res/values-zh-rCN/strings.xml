@@ -62,8 +62,20 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"兼容性缩放"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"如果应用程序是针对较小屏幕设计的，则时钟旁会显示缩放控件。"</string>
-    <string name="screenshot_saving_toast" msgid="8592630119048713208">"屏幕截图已保存到“图库”"</string>
-    <string name="screenshot_failed_toast" msgid="1990979819772906912">"无法保存屏幕截图。外部存储设备可能在使用中。"</string>
+    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 文件传输选项"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"作为媒体播放器 (MTP) 装载"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"作为摄像头 (PTP) 装载"</string>
@@ -118,6 +130,8 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"电传打字机已启用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"振铃器振动。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"振铃器静音。"</string>
+    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据已停用"</string>

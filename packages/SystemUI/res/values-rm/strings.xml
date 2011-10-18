@@ -92,9 +92,19 @@
     <skip />
     <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
     <skip />
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
+    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
     <skip />
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
+    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
     <skip />
     <!-- no translation found for usb_preference_title (6551050377388882787) -->
     <skip />
@@ -199,6 +209,8 @@
     <!-- no translation found for accessibility_ringer_vibrate (666585363364155055) -->
     <skip />
     <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
+    <skip />
+    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
     <skip />
     <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
     <skip />
