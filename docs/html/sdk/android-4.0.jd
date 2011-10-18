@@ -11,7 +11,6 @@ sdk.platform.apiLevel=14
   <li><a href="#relnotes">Revisions</a></li>
   <li><a href="#api">API Overview</a></li>
   <li><a href="#Honeycomb">Previous APIs</a></li>
-  <li><a href="#api-diff">API Differences Report</a></li>
   <li><a href="#api-level">API Level</a></li>
   <li><a href="#apps">Built-in Applications</a></li>
   <li><a href="#locs">Locales</a></li>
@@ -31,14 +30,19 @@ Differences Report &raquo;</a> </li>
 
 <p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android 4.0 (Ice Cream Sandwich) is a major platform release that adds new
-capabilities for users and developers. The sections below provide an overview
-of the new features and developer APIs.</p>
+<p>Android 4.0 is a major platform release that adds a variety of new features for users and app
+developers. Besides all the new features and APIs discussed below, Android 4.0 is an important
+platform release because it brings the extensive set of APIs and Holographic themes from Android 3.x
+to smaller screens. As an app developer, you now have a single platform and unified API framework
+that enables you to develop and publish your application with a single APK that provides an
+optimized user experience for handsets, tablets, and more, when running the same version of
+Android&mdash;Android 4.0 (API level 14) or greater. </p>
 
-<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
-downloadable component for the Android SDK. The downloadable platform includes
+<p>The Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK so you can begin developing and testing your
+applications on Android 4.0 with the Android emulator. The downloadable platform includes
 an Android library and system image, as well as a set of emulator skins and
-more. The downloadable platform includes no external libraries.</p>
+more. The downloadable platform does not include any external libraries.</p>
 
 <p>To start developing or testing against Android {@sdkPlatformVersion},
 use the Android SDK Manager to download the platform into your SDK. For more
@@ -51,8 +55,9 @@ Android application, please test your application on Android {@sdkPlatformVersio
 soon as possible to be sure your application provides the best
 experience possible on the latest Android-powered devices.</p>
 
-<p>For a high-level introduction to the new user and developer features in Android 4.0, see the
+<p>For a high-level overview of the new user and developer features in Android 4.0, see the
 <a href="http://developer.android.com/sdk/android-4.0-highlights.html">Platform Highlights</a>.</p>
+
 
 
 <h2 id="relnotes">Revisions</h2>
@@ -93,23 +98,24 @@ class="toggle-content-img" alt="" />
 
   <div class="toggle-content-toggleme" style="padding-left:2em;">
     <ol class="toc" style="margin-left:-1em">
-      <li><a href="#Contacts">Contact Provider</a></li>
+      <li><a href="#Contacts">Social APIs in Contacts Provider</a></li>
       <li><a href="#Calendar">Calendar Provider</a></li>
       <li><a href="#Voicemail">Voicemail Provider</a></li>
-      <li><a href="#Camera">Camera</a></li>
       <li><a href="#Multimedia">Multimedia</a></li>
-      <li><a href="#Bluetooth">Bluetooth</a></li>
+      <li><a href="#Camera">Camera</a></li>
       <li><a href="#AndroidBeam">Android Beam (NDEF Push with NFC)</a></li>
       <li><a href="#WiFiDirect">Wi-Fi Direct</a></li>
+      <li><a href="#Bluetooth">Bluetooth Health Devices</a></li>
+      <li><a href="#A11y">Accessibility</a></li>
+      <li><a href="#SpellChecker">Spell Checker Services</a></li>
+      <li><a href="#TTS">Text-to-speech Engines</a></li>
       <li><a href="#NetworkUsage">Network Usage</a></li>
       <li><a href="#RenderScript">RenderScript</a></li>
-      <li><a href="#A11y">Accessibility</a></li>
       <li><a href="#Enterprise">Enterprise</a></li>
       <li><a href="#Sensors">Device Sensors</a></li>
-      <li><a href="#TTS">Text-to-speech Engines</a></li>
-      <li><a href="#SpellChecker">Spell Checker Services</a></li>
       <li><a href="#ActionBar">Action Bar</a></li>
       <li><a href="#UI">User Interface and Views</a></li>
+      <li><a href="#Input">Input Framework</a></li>
       <li><a href="#Properties">Properties</a></li>
       <li><a href="#HwAccel">Hardware Acceleration</a></li>
       <li><a href="#Jni">JNI Changes</a></li>
@@ -124,12 +130,12 @@ class="toggle-content-img" alt="" />
 
 
 
-<h3 id="Contacts">Contact Provider</h3>
+<h3 id="Contacts">Social APIs in Contacts Provider</h3>
 
-<p>The contact APIs that are defined by the {@link android.provider.ContactsContract} provider have
-been extended to support new features such as a personal profile for the device owner, high
-resolution contact photos, and the ability for users to invite individual contacts to social
-networks that are installed on the device.</p>
+<p>The contact APIs defined by the {@link android.provider.ContactsContract} provider have been
+extended to support new social-oriented features such as a personal profile for the device owner and
+the ability for users to invite individual contacts to social networks that are installed on the
+device.</p>
 
 
 <h4>User Profile</h4>
@@ -150,17 +156,6 @@ table, you must request the {@link android.Manifest.permission#READ_PROFILE} per
 most apps should need to read the user profile, even when contributing data to the
 profile. Reading the user profile is a sensitive permission and you should expect users to be
 skeptical of apps that request it.</p>
-
-
-<h4>Large photos</h4>
-
-<p>Android now supports high resolution photos for contacts. Now, when you push a photo into a
-contact record, the system processes it into both a 96x96 thumbnail (as it has previously) and a
-256x256 "display photo" that's stored in a new file-based photo store (the exact dimensions that the
-system chooses may vary in the future). You can add a large photo to a contact by putting a large
-photo in the usual {@link android.provider.ContactsContract.CommonDataKinds.Photo#PHOTO} column of a
-data row, which the system will then process into the appropriate thumbnail and display photo
-records.</p>
 
 
 <h4>Invite Intent</h4>
@@ -185,6 +180,17 @@ user’s connections.</p>
 Adapter</a> app for an example (specifically, see the <a
 href="{@docRoot}resources/samples/SampleSyncAdapter/res/xml-v14/contacts.html">contacts.xml</a>
 file).</p>
+
+
+<h4>Large photos</h4>
+
+<p>Android now supports high resolution photos for contacts. Now, when you push a photo into a
+contact record, the system processes it into both a 96x96 thumbnail (as it has previously) and a
+256x256 "display photo" that's stored in a new file-based photo store (the exact dimensions that the
+system chooses may vary in the future). You can add a large photo to a contact by putting a large
+photo in the usual {@link android.provider.ContactsContract.CommonDataKinds.Photo#PHOTO} column of a
+data row, which the system will then process into the appropriate thumbnail and display photo
+records.</p>
 
 
 <h4>Contact Usage Feedback</h4>
@@ -287,23 +293,162 @@ Whether the time period of this event allows for other events to be scheduled at
 
 <h3 id="Voicemail">Voicemail Provider</h3>
 
-<p>The new voicemail APIs allows applications to add voicemails to a content provider on the device.
-Because the APIs currently do not allow third party apps to read all the voicemails from the system,
-the only third-party apps that should use the voicemail APIs are those that have voicemail to
-deliver to the user. For instance, it’s possible that a user has multiple voicemail sources, such as
-one provided by the phone’s service provider and others from VoIP or other alternative voice
-services. These apps can use the APIs to add their voicemails to the system for quick playback. The
-built-in Phone application presents all voicemails from the Voicemail Provider with a single list.
+<p>The new Voicemail Provider allows applications to add voicemails to the
+device, in order to present all the user's voicemails in a single visual presentation. For instance,
+it’s possible that a user has multiple voicemail sources, such as
+one from the phone’s service provider and others from VoIP or other alternative voice
+services. These apps can use the Voicemail Provider APIs to add their voicemails to the device. The
+built-in Phone application then presents all voicemails to the user in a unified presentation.
 Although the system’s Phone application is the only application that can read all the voicemails,
 each application that provides voicemails can read those that it has added to the system (but cannot
 read voicemails from other services).</p>
 
+<p>Because the APIs currently do not allow third-party apps to read all the voicemails from the
+system, the only third-party apps that should use the voicemail APIs are those that have voicemail
+to deliver to the user.</p>
+
 <p>The {@link android.provider.VoicemailContract} class defines the content provider for the
-voicemail APIs. The subclasses {@link android.provider.VoicemailContract.Voicemails} and {@link
-android.provider.VoicemailContract.Status} provide tables in which the Voicemail Providers can
+Voicemail Provder. The subclasses {@link android.provider.VoicemailContract.Voicemails} and {@link
+android.provider.VoicemailContract.Status} provide tables in which apps can
 insert voicemail data for storage on the device. For an example of a voicemail provider app, see the
 <a href="{@docRoot}resources/samples/VoicemailProviderDemo/index.html">Voicemail Provider
 Demo</a>.</p>
+
+
+
+
+
+<h3 id="Multimedia">Multimedia</h3>
+
+<p>Android 4.0 adds several new APIs for applications that interact with media such as photos,
+videos, and music.</p>
+
+
+<h4>Media Effects</h4>
+
+<p>A new media effects framework allows you to apply a variety of visual effects to images and
+videos. For example, image effects allow you to easily fix red-eye, convert an image to grayscale,
+adjust brightness, adjust saturation, rotate an image, apply a fisheye effect, and much more. The
+system performs all effects processing on the GPU to obtain maximum performance.</p>
+
+<p>For maximum performance, effects are applied directly to OpenGL textures, so your application
+must have a valid OpenGL context before it can use the effects APIs. The textures to which you apply
+effects may be from bitmaps, videos or even the camera. However, there are certain restrictions that
+textures must meet:</p>
+<ol>
+<li>They must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture image</li>
+<li>They must contain at least one mipmap level</li>
+</ol>
+
+<p>An {@link android.media.effect.Effect} object defines a single media effect that you can apply to
+an image frame. The basic workflow to create an {@link android.media.effect.Effect} is:</p>
+
+<ol>
+<li>Call {@link android.media.effect.EffectContext#createWithCurrentGlContext
+EffectContext.createWithCurrentGlContext()} from your OpenGL ES 2.0 context.</li>
+<li>Use the returned {@link android.media.effect.EffectContext} to call {@link
+android.media.effect.EffectContext#getFactory EffectContext.getFactory()}, which returns an instance
+of {@link android.media.effect.EffectFactory}.</li>
+<li>Call {@link android.media.effect.EffectFactory#createEffect createEffect()}, passing it an
+effect name from @link android.media.effect.EffectFactory}, such as {@link
+android.media.effect.EffectFactory#EFFECT_FISHEYE} or {@link
+android.media.effect.EffectFactory#EFFECT_VIGNETTE}.</li>
+</ol>
+
+<p>You can adjust an effect’s parameters by calling {@link android.media.effect.Effect#setParameter
+setParameter()} and passing a parameter name and parameter value. Each type of effect accepts
+different parameters, which are documented with the effect name. For example, {@link
+android.media.effect.EffectFactory#EFFECT_FISHEYE} has one parameter for the {@code scale} of the
+distortion.</p>
+
+<p>To apply an effect on a texture, call {@link android.media.effect.Effect#apply apply()} on the
+{@link
+android.media.effect.Effect} and pass in the input texture, it’s width and height, and the output
+texture. The input texture  must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture
+image (usually done by calling the {@link android.opengl.GLES20#glTexImage2D glTexImage2D()}
+function). You may provide multiple mipmap levels. If the output texture has not been bound to a
+texture image, it will be automatically bound by the effect as a {@link
+android.opengl.GLES20#GL_TEXTURE_2D} and with one mipmap level (0), which will have the same
+size as the input.</p> 
+
+<p>All effects listed in {@link android.media.effect.EffectFactory} are guaranteed to be supported.
+However, some additional effects available from external libraries are not supported by all devices,
+so you must first check if the desired effect from the external library is supported by calling
+{@link android.media.effect.EffectFactory#isEffectSupported isEffectSupported()}.</p>
+
+
+<h4>Remote control client</h4>
+
+<p>The new {@link android.media.RemoteControlClient} allows media players to enable playback
+controls from remote control clients such as the device lock screen. Media players can also expose
+information about the media currently playing for display on the remote control, such as track
+information and album art.</p>
+
+<p>To enable remote control clients for your media player, instantiate a {@link
+android.media.RemoteControlClient} with its constructor, passing it a {@link
+android.app.PendingIntent} that broadcasts {@link
+android.content.Intent#ACTION_MEDIA_BUTTON}. The intent must also declare the explicit {@link
+android.content.BroadcastReceiver} component in your app that handles the {@link
+android.content.Intent#ACTION_MEDIA_BUTTON} event.</p>
+
+<p>To declare which media control inputs your player can handle, you must call {@link
+android.media.RemoteControlClient#setTransportControlFlags setTransportControlFlags()} on your
+{@link android.media.RemoteControlClient}, passing a set of {@code FLAG_KEY_MEDIA_*} flags, such as
+{@link android.media.RemoteControlClient#FLAG_KEY_MEDIA_PREVIOUS} and {@link
+android.media.RemoteControlClient#FLAG_KEY_MEDIA_NEXT}.</p>
+
+<p>You must then register your {@link android.media.RemoteControlClient} by passing it to {@link
+android.media.AudioManager#registerRemoteControlClient MediaManager.registerRemoteControlClient()}.
+Once registered, the broadcast receiver you declared when you instantiated the {@link
+android.media.RemoteControlClient} will receive {@link android.content.Intent#ACTION_MEDIA_BUTTON}
+events when a button is pressed from a remote control. The intent you receive includes the {@link
+android.view.KeyEvent} for the media key pressed, which you can retrieve from the intent with {@link
+android.content.Intent#getParcelableExtra getParcelableExtra(Intent.EXTRA_KEY_EVENT)}.</p>
+
+<p>To display information on the remote control about the media playing, call {@link
+android.media.RemoteControlClient#editMetadata editMetaData()} and add metadata to the returned
+{@link android.media.RemoteControlClient.MetadataEditor}. You can supply a bitmap for media artwork,
+numerical information such as elapsed time, and text information such as the track title. For
+information on available keys see the {@code METADATA_KEY_*} flags in {@link
+android.media.MediaMetadataRetriever}.</p>
+
+<p>For a sample implementation, see the <a
+href="{@docRoot}resources/samples/RandomMusicPlayer/index.html">Random Music Player</a>, which
+provides compatibility logic such that it enables the remote control client on Android 4.0
+devices while continuing to support devices back to Android 2.1.</p>
+
+
+<h4>Media player</h4>
+
+<ul>
+<li>Streaming online media from {@link android.media.MediaPlayer} now requires the {@link
+android.Manifest.permission#INTERNET} permission. If you use {@link android.media.MediaPlayer} to
+play content from the Internet, be sure to add the {@link android.Manifest.permission#INTERNET}
+permission to your manifest or else your media playback will not work beginning with Android
+4.0.</li>
+
+<li>{@link android.media.MediaPlayer#setSurface(Surface) setSurface()} allows you define a {@link
+android.view.Surface} to behave as the video sink.</li>
+
+<li>{@link android.media.MediaPlayer#setDataSource(Context,Uri,Map) setDataSource()} allows you to
+send additional HTTP headers with your request, which can be useful for HTTP(S) live streaming</li>
+
+<li>HTTP(S) live streaming now respects HTTP cookies across requests</li>
+</ul>
+
+
+<h4>Media types</h4>
+
+<p>Android 4.0 adds support for:</p>
+<ul>
+<li>HTTP/HTTPS live streaming protocol version 3 </li>
+<li>ADTS raw AAC audio encoding</li>
+<li>WEBP images</li>
+<li>Matroska video</li>
+</ul>
+<p>For more info, see <a href="{@docRoot}guide/appendix/media-formats.html">Supported Media
+Formats</a>.</p>
+
 
 
 
@@ -382,7 +527,7 @@ camera app, pass {@link android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS
 to {@link android.hardware.Camera.Parameters#setFocusMode setFocusMode()}. When ready to capture
 a photo, call {@link android.hardware.Camera#autoFocus autoFocus()}. Your {@link
 android.hardware.Camera.AutoFocusCallback} immediately receives a callback to indicate whether
-focus was acheived. To resume CAF after receiving the callback, you must call {@link
+focus was achieved. To resume CAF after receiving the callback, you must call {@link
 android.hardware.Camera#cancelAutoFocus()}.</p>
 
 <p class="note"><strong>Note:</strong> Continuous auto focus is also supported when capturing
@@ -423,173 +568,6 @@ after capturing a video.</li>
 </ul>
 
 
-
-
-
-<h3 id="Multimedia">Multimedia</h3>
-
-<p>Android 4.0 adds several new APIs for applications that interact with media such as photos,
-videos, and music.</p>
-
-
-<h4>Media player</h4>
-
-<ul>
-<li>Streaming online media from {@link android.media.MediaPlayer} now requires the {@link
-android.Manifest.permission#INTERNET} permission. If you use {@link android.media.MediaPlayer} to
-play content from the Internet, be sure to add the {@link android.Manifest.permission#INTERNET}
-permission to your manifest or else your media playback will not work beginning with Android
-4.0.</li>
-
-<li>{@link android.media.MediaPlayer#setSurface(Surface) setSurface()} allows you define a {@link
-android.view.Surface} to behave as the video sink.</li>
-
-<li>{@link android.media.MediaPlayer#setDataSource(Context,Uri,Map) setDataSource()} allows you to
-send additional HTTP headers with your request, which can be useful for HTTP(S) live streaming</li>
-
-<li>HTTP(S) live streaming now respects HTTP cookies across requests</li>
-</ul>
-
-
-<h4>Media types</h4>
-
-<p>Android 4.0 adds support for:</p>
-<ul>
-<li>HTTP/HTTPS live streaming protocol version 3 </li>
-<li>ADTS raw AAC audio encoding</li>
-<li>WEBP images</li>
-<li>Matroska video</li>
-</ul>
-<p>For more info, see <a href="{@docRoot}guide/appendix/media-formats.html">Supported Media
-Formats</a>.</p>
-
-
-
-<h4>Remote control client</h4>
-
-<p>The new {@link android.media.RemoteControlClient} allows media players to enable playback
-controls from remote control clients such as the device lock screen. Media players can also expose
-information about the media currently playing for display on the remote control, such as track
-information and album art.</p>
-
-<p>To enable remote control clients for your media player, instantiate a {@link
-android.media.RemoteControlClient} with its constructor, passing it a {@link
-android.app.PendingIntent} that broadcasts {@link
-android.content.Intent#ACTION_MEDIA_BUTTON}. The intent must also declare the explicit {@link
-android.content.BroadcastReceiver} component in your app that handles the {@link
-android.content.Intent#ACTION_MEDIA_BUTTON} event.</p>
-
-<p>To declare which media control inputs your player can handle, you must call {@link
-android.media.RemoteControlClient#setTransportControlFlags setTransportControlFlags()} on your
-{@link android.media.RemoteControlClient}, passing a set of {@code FLAG_KEY_MEDIA_*} flags, such as
-{@link android.media.RemoteControlClient#FLAG_KEY_MEDIA_PREVIOUS} and {@link
-android.media.RemoteControlClient#FLAG_KEY_MEDIA_NEXT}.</p>
-
-<p>You must then register your {@link android.media.RemoteControlClient} by passing it to {@link
-android.media.AudioManager#registerRemoteControlClient MediaManager.registerRemoteControlClient()}.
-Once registered, the broadcast receiver you declared when you instantiated the {@link
-android.media.RemoteControlClient} will receive {@link android.content.Intent#ACTION_MEDIA_BUTTON}
-events when a button is pressed from a remote control. The intent you receive includes the {@link
-android.view.KeyEvent} for the media key pressed, which you can retrieve from the intent with {@link
-android.content.Intent#getParcelableExtra getParcelableExtra(Intent.EXTRA_KEY_EVENT)}.</p>
-
-<p>To display information on the remote control about the media playing, call {@link
-android.media.RemoteControlClient#editMetadata editMetaData()} and add metadata to the returned
-{@link android.media.RemoteControlClient.MetadataEditor}. You can supply a bitmap for media artwork,
-numerical information such as elapsed time, and text information such as the track title. For
-information on available keys see the {@code METADATA_KEY_*} flags in {@link
-android.media.MediaMetadataRetriever}.</p>
-
-<p>For a sample implementation, see the <a
-href="{@docRoot}resources/samples/RandomMusicPlayer/index.html">Random Music Player</a>, which
-provides compatibility logic such that it enables the remote control client on Android 4.0
-devices while continuing to support devices back to Android 2.1.</p>
-
-
-<h4>Media Effects</h4>
-
-<p>A new media effects framework allows you to apply a variety of visual effects to images and
-videos. For example, image effects allow you to easily fix red-eye, convert an image to grayscale,
-adjust brightness, adjust saturation, rotate an image, apply a fisheye effect, and much more. The
-system performs all effects processing on the GPU to obtain maximum performance.</p>
-
-<p>For maximum performance, effects are applied directly to OpenGL textures, so your application
-must have a valid OpenGL context before it can use the effects APIs. The textures to which you apply
-effects may be from bitmaps, videos or even the camera. However, there are certain restrictions that
-textures must meet:</p>
-<ol>
-<li>They must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture image</li>
-<li>They must contain at least one mipmap level</li>
-</ol>
-
-<p>An {@link android.media.effect.Effect} object defines a single media effect that you can apply to
-an image frame. The basic workflow to create an {@link android.media.effect.Effect} is:</p>
-
-<ol>
-<li>Call {@link android.media.effect.EffectContext#createWithCurrentGlContext
-EffectContext.createWithCurrentGlContext()} from your OpenGL ES 2.0 context.</li>
-<li>Use the returned {@link android.media.effect.EffectContext} to call {@link
-android.media.effect.EffectContext#getFactory EffectContext.getFactory()}, which returns an instance
-of {@link android.media.effect.EffectFactory}.</li>
-<li>Call {@link android.media.effect.EffectFactory#createEffect createEffect()}, passing it an
-effect name from @link android.media.effect.EffectFactory}, such as {@link
-android.media.effect.EffectFactory#EFFECT_FISHEYE} or {@link
-android.media.effect.EffectFactory#EFFECT_VIGNETTE}.</li>
-</ol>
-
-<p>Not all devices support all effects, so you must first check if the desired effect is supported
-by calling {@link android.media.effect.EffectFactory#isEffectSupported isEffectSupported()}.</p>
-
-<p>You can adjust an effect’s parameters by calling {@link android.media.effect.Effect#setParameter
-setParameter()} and passing a parameter name and parameter value. Each type of effect accepts
-different parameters, which are documented with the effect name. For example, {@link
-android.media.effect.EffectFactory#EFFECT_FISHEYE} has one parameter for the {@code scale} of the
-distortion.</p>
-
-<p>To apply an effect on a texture, call {@link android.media.effect.Effect#apply apply()} on the
-{@link
-android.media.effect.Effect} and pass in the input texture, it’s width and height, and the output
-texture. The input texture  must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture
-image (usually done by calling the {@link android.opengl.GLES20#glTexImage2D glTexImage2D()}
-function). You may provide multiple mipmap levels. If the output texture has not been bound to a
-texture image, it will be automatically bound by the effect as a {@link
-android.opengl.GLES20#GL_TEXTURE_2D} and with one mipmap level (0), which will have the same
-size as the input.</p> 
-
-
-
-
-
-
-
-<h3 id="Bluetooth">Bluetooth</h3>
-
-<p>Android now supports Bluetooth Health Profile devices, so you can create applications that use
-Bluetooth to communicate with health devices that support Bluetooth, such as heart-rate monitors,
-blood meters, thermometers, and scales.</p>
-
-<p>Similar to regular headset and A2DP profile devices, you must call {@link
-android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with a {@link
-android.bluetooth.BluetoothProfile.ServiceListener} and the {@link
-android.bluetooth.BluetoothProfile#HEALTH} profile type to establish a connection with the profile
-proxy object.</p>
-
-<p>Once you’ve acquired the Health Profile proxy (the {@link android.bluetooth.BluetoothHealth}
-object), connecting to and communicating with paired health devices involves the following new
-Bluetooth classes:</p>
-<ul>
-<li>{@link android.bluetooth.BluetoothHealthCallback}: You must extend this class and implement the
-callback methods to receive updates about changes in the application’s registration state and
-Bluetooth channel state.</li>
-<li>{@link android.bluetooth.BluetoothHealthAppConfiguration}: During callbacks to your {@link
-android.bluetooth.BluetoothHealthCallback}, you’ll receive an instance of this object, which
-provides configuration information about the available Bluetooth health device, which you must use
-to perform various operations such as initiate and terminate connections with the {@link
-android.bluetooth.BluetoothHealth} APIs.</li>
-</ul>
-
-<p>For more information about using the Bluetooth Health Profile, see the documentation for {@link
-android.bluetooth.BluetoothHealth}.</p>
 
 
 
@@ -670,9 +648,12 @@ Android application record that identifies your application. If the receiving de
 application installed, the system launches it; if it’s not installed, Android Market opens and takes
 the user to your application in order to install it.</p>
 
-<p>For some example code, see the <a
+<p>You can read more about Android Beam and other NFC features in the <a
+href="{@docRoot}guide/topics/nfc/nfc.html">NFC Basics</a> developer guide. For some example code
+using Android Beam, see the <a
 href="{@docRoot}resources/samples/AndroidBeamDemo/src/com/example/android/beam/Beam.html">Android
-Beam Demo</a> sample app.</p>
+Beam Demo</a>.</p>
+
 
 
 
@@ -763,85 +744,34 @@ sample application.</p>
 
 
 
-<h3 id="NetworkUsage">Network Usage</h3>
+<h3 id="Bluetooth">Bluetooth Health Devices</h3>
 
-<p>Android 4.0 gives users precise visibility of how much network data their applications are using.
-The Settings app provides controls that allow users to manage set limits for network data usage and
-even disable the use of background data for individual apps. In order to avoid users disabling your
-app’s access to data from the background, you should develop strategies to use use the data
-connection efficiently and adjust your usage depending on the type of connection available.</p>
+<p>Android now supports Bluetooth Health Profile devices, so you can create applications that use
+Bluetooth to communicate with health devices that support Bluetooth, such as heart-rate monitors,
+blood meters, thermometers, and scales.</p>
 
-<p>If your application performs a lot of network transactions, you should provide user settings that
-allow users to control your app’s data habits, such as how often your app syncs data, whether to
-perform uploads/downloads only when on Wi-Fi, whether to use data while roaming, etc. With these
-controls available to them, users are much less likely to disable your app’s access to data when
-they approach their limits, because they can instead precisely control how much data your app uses.
-If you provide a preference activity with these settings, you should include in its manifest
-declaration an intent filter for the {@link android.content.Intent#ACTION_MANAGE_NETWORK_USAGE}
-action. For example:</p>
+<p>Similar to regular headset and A2DP profile devices, you must call {@link
+android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with a {@link
+android.bluetooth.BluetoothProfile.ServiceListener} and the {@link
+android.bluetooth.BluetoothProfile#HEALTH} profile type to establish a connection with the profile
+proxy object.</p>
 
-<pre>
-&lt;activity android:name="DataPreferences" android:label="@string/title_preferences">
-    &lt;intent-filter>
-       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
-       &lt;category android:name="android.intent.category.DEFAULT" />
-    &lt;/intent-filter>
-&lt;/activity>
-</pre>
-
-<p>This intent filter indicates to the system that this is the activity that controls your
-application’s data usage. Thus, when the user inspects how much data your app is using from the
-Settings app, a “View application settings" button is available that launches your
-preference activity so the user can refine how much data your app uses.</p>
-
-<p>Also beware that {@link android.net.ConnectivityManager#getBackgroundDataSetting()} is now
-deprecated and always returns true&mdash;use  {@link
-android.net.ConnectivityManager#getActiveNetworkInfo()} instead. Before you attempt any network
-transactions, you should always call {@link android.net.ConnectivityManager#getActiveNetworkInfo()}
-to get the {@link android.net.NetworkInfo} that represents the current network and query {@link
-android.net.NetworkInfo#isConnected()} to check whether the device has a
-connection. You can then check other connection properties, such as whether the device is
-roaming or connected to Wi-Fi.</p>
-
-
-
-
-
-
-
-
-<h3 id="RenderScript">RenderScript</h3>
-
-<p>Three major features have been added to RenderScript:</p>
-
+<p>Once you’ve acquired the Health Profile proxy (the {@link android.bluetooth.BluetoothHealth}
+object), connecting to and communicating with paired health devices involves the following new
+Bluetooth classes:</p>
 <ul>
-  <li>Off-screen rendering to a framebuffer object</li>
-  <li>Rendering inside a view</li>
-  <li>RS for each from the framework APIs</li>
+<li>{@link android.bluetooth.BluetoothHealthCallback}: You must extend this class and implement the
+callback methods to receive updates about changes in the application’s registration state and
+Bluetooth channel state.</li>
+<li>{@link android.bluetooth.BluetoothHealthAppConfiguration}: During callbacks to your {@link
+android.bluetooth.BluetoothHealthCallback}, you’ll receive an instance of this object, which
+provides configuration information about the available Bluetooth health device, which you must use
+to perform various operations such as initiate and terminate connections with the {@link
+android.bluetooth.BluetoothHealth} APIs.</li>
 </ul>
 
-<p>The {@link android.renderscript.Allocation} class now supports a {@link
-android.renderscript.Allocation#USAGE_GRAPHICS_RENDER_TARGET} memory space, which allows you to
-render things directly into the {@link android.renderscript.Allocation} and use it as a framebuffer
-object.</p>
-
-<p>{@link android.renderscript.RSTextureView} provides a means to display RenderScript graphics
-inside of a {@link android.view.View},  unlike {@link android.renderscript.RSSurfaceView}, which
-creates a separate window. This key difference allows you to do things such as move, transform, or
-animate an {@link android.renderscript.RSTextureView} as well as draw RenderScript graphics inside
-a view that lies within an activity layout.</p>
-
-<p>The {@link android.renderscript.Script#forEach Script.forEach()} method allows you to call
-RenderScript compute scripts from the VM level and have them automatically delegated to available
-cores on the device. You do not use this method directly, but any compute RenderScript that you
-write will have a {@link android.renderscript.Script#forEach forEach()}  method that you can call in
-the reflected RenderScript class. You can call the reflected {@link
-android.renderscript.Script#forEach forEach()} method by passing in an input {@link
-android.renderscript.Allocation} to process, an output {@link android.renderscript.Allocation} to
-write the result to, and a {@link android.renderscript.FieldPacker} data structure in case the
-RenderScript needs more information. Only one of the {@link android.renderscript.Allocation}s is
-necessary and the data structure is optional.</p>
-
+<p>For more information about using the Bluetooth Health Profile, see the documentation for {@link
+android.bluetooth.BluetoothHealth}.</p>
 
 
 
@@ -939,6 +869,7 @@ design.</p>
 
 
 
+
 <h4>Accessibility services</h4>
 
 <p>If you're developing an accessibility service, the information about various accessibility events
@@ -1000,78 +931,29 @@ disabled.</li>
 
 
 
-<h3 id="Enterprise">Enterprise</h3>
-
-<p>Android 4.0 expands the capabilities for enterprise application with the following features.</p>
-
-<h4>VPN services</h4>
-
-<p>The new {@link android.net.VpnService} allows applications to build their own VPN (Virtual
-Private Network), running as a {@link android.app.Service}. A VPN service creates an interface for a
-virtual network with its own address and routing rules and performs all reading and writing with a
-file descriptor.</p>
-
-<p>To create a VPN service, use {@link android.net.VpnService.Builder}, which allows you to specify
-the network address, DNS server, network route, and more. When complete, you can establish the
-interface by calling {@link android.net.VpnService.Builder#establish()}, which returns a {@link
-android.os.ParcelFileDescriptor}. </p>
-
-<p>Because  a VPN service can intercept packets, there are security implications.  As such, if you
-implement {@link android.net.VpnService}, then your service must require the {@link
-android.Manifest.permission#BIND_VPN_SERVICE} to ensure that only the system can bind to it (only
-the system is granted this permission&mdash;apps cannot request it). To then use your VPN service,
-users must manually enable it in the system settings.</p>
-
-
-<h4>Device restrictions</h4>
-
-<p>Applications that manage the device restrictions can now disable the camera using {@link
-android.app.admin.DevicePolicyManager#setCameraDisabled setCameraDisabled()} and the {@link
-android.app.admin.DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} property (applied with a {@code
-&lt;disable-camera /&gt;} element in the policy configuration file).</p>
-
-
-<h4>Certificate management</h4>
-
-<p>The new {@link android.security.KeyChain} class provides APIs that allow you to import and access
-certificates in the system key store. Certificates streamline the installation of both client
-certificates (to validate the identity of the user) and certificate authority certificates (to
-verify server identity). Applications such as web browsers or email clients can access the installed
-certificates to authenticate users to servers. See the {@link android.security.KeyChain}
-documentation for more information.</p>
 
 
 
+<h3 id="SpellChecker">Spell Checker Services</h3>
 
+<p>A new spell checker framework allows apps to create spell checkers in a manner similar to the
+input method framework (for IMEs). To create a new spell checker, you must implement a service that
+extends
+{@link android.service.textservice.SpellCheckerService} and extend the {@link
+android.service.textservice.SpellCheckerService.Session} class to provide spelling suggestions based
+on text provided by the interface's callback methods. In the {@link
+android.service.textservice.SpellCheckerService.Session} callback methods, you must return the
+spelling suggestions as {@link android.view.textservice.SuggestionsInfo} objects. </p>
 
+<p>Applications with a spell checker service must declare the {@link
+android.Manifest.permission#BIND_TEXT_SERVICE} permission as required by the service.
+The service must also declare an intent filter with {@code &lt;action
+android:name="android.service.textservice.SpellCheckerService" />} as the intent’s action and should
+include a {@code &lt;meta-data&gt;} element that declares configuration information for the spell
+checker. </p>
 
-
-<h3 id="Sensors">Device Sensors</h3>
-
-<p>Two new sensor types have been added in Android 4.0:</p>
-
-<ul>
-  <li>{@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE}: A temperature sensor that provides
-the ambient (room) temperature in degrees Celsius.</li>
-  <li>{@link android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY}: A humidity sensor that provides the
-relative ambient (room) humidity as a percentage.</li>
-</ul>
-
-<p>If a device has both {@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} and  {@link
-android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY} sensors, you can use them to calculate the dew point
-and the absolute humidity.</p>
-
-<p>The previous temperature sensor, {@link android.hardware.Sensor#TYPE_TEMPERATURE}, has been
-deprecated. You should use the {@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} sensor
-instead.</p>
-
-<p>Additionally, Android’s three synthetic sensors have been improved so they now have lower latency
-and smoother output. These sensors include the gravity sensor ({@link
-android.hardware.Sensor#TYPE_GRAVITY}), rotation vector sensor ({@link
-android.hardware.Sensor#TYPE_ROTATION_VECTOR}), and linear acceleration sensor ({@link
-android.hardware.Sensor#TYPE_LINEAR_ACCELERATION}). The improved sensors rely on the gyroscope
-sensor to improve their output, so the sensors appear only on devices that have a gyroscope.</p>
-
+<p>See the <a href="{@docRoot}resources/samples/SampleSpellCheckerService/index.html">Spell
+Checker</a> sample app for example code.</p>
 
 
 
@@ -1133,27 +1015,164 @@ href="{@docRoot}resources/samples/TtsEngine/index.html">Text To Speech Engine</a
 
 
 
-<h3 id="SpellChecker">Spell Checker Services</h3>
+<h3 id="NetworkUsage">Network Usage</h3>
 
-<p>A new spell checker framework allows apps to create spell checkers in a manner similar to the
-input method framework. To create a new spell checker, you must implement a service that extends
-{@link android.service.textservice.SpellCheckerService} and extend the {@link
-android.service.textservice.SpellCheckerService.Session} class to provide spelling suggestions based
-on text provided by interface callback methods. In the {@link
-android.service.textservice.SpellCheckerService.Session} callback methods, you must return the
-spelling suggestions as {@link android.view.textservice.SuggestionsInfo} objects. </p>
+<p>Android 4.0 gives users precise visibility of how much network data their applications are using.
+The Settings app provides controls that allow users to manage set limits for network data usage and
+even disable the use of background data for individual apps. In order to avoid users disabling your
+app’s access to data from the background, you should develop strategies to use use the data
+connection efficiently and adjust your usage depending on the type of connection available.</p>
 
-<p>Applications with a spell checker service must declare the {@link
-android.Manifest.permission#BIND_TEXT_SERVICE} permission as required by the service, such that
-other services must have this permission in order for them to bind with the spell checker service.
-The service must also declare an intent filter with {@code &lt;action
-android:name="android.service.textservice.SpellCheckerService" />} as the intent’s action and should
-include a {@code &lt;meta-data&gt;} element that declares configuration information for the spell
-checker. </p>
+<p>If your application performs a lot of network transactions, you should provide user settings that
+allow users to control your app’s data habits, such as how often your app syncs data, whether to
+perform uploads/downloads only when on Wi-Fi, whether to use data while roaming, etc. With these
+controls available to them, users are much less likely to disable your app’s access to data when
+they approach their limits, because they can instead precisely control how much data your app uses.
+If you provide a preference activity with these settings, you should include in its manifest
+declaration an intent filter for the {@link android.content.Intent#ACTION_MANAGE_NETWORK_USAGE}
+action. For example:</p>
+
+<pre>
+&lt;activity android:name="DataPreferences" android:label="@string/title_preferences">
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>This intent filter indicates to the system that this is the activity that controls your
+application’s data usage. Thus, when the user inspects how much data your app is using from the
+Settings app, a “View application settings" button is available that launches your
+preference activity so the user can refine how much data your app uses.</p>
+
+<p>Also beware that {@link android.net.ConnectivityManager#getBackgroundDataSetting()} is now
+deprecated and always returns true&mdash;use  {@link
+android.net.ConnectivityManager#getActiveNetworkInfo()} instead. Before you attempt any network
+transactions, you should always call {@link android.net.ConnectivityManager#getActiveNetworkInfo()}
+to get the {@link android.net.NetworkInfo} that represents the current network and query {@link
+android.net.NetworkInfo#isConnected()} to check whether the device has a
+connection. You can then check other connection properties, such as whether the device is
+roaming or connected to Wi-Fi.</p>
 
 
 
 
+
+
+
+
+<h3 id="RenderScript">RenderScript</h3>
+
+<p>Three major features have been added to RenderScript:</p>
+
+<ul>
+  <li>Off-screen rendering to a framebuffer object</li>
+  <li>Rendering inside a view</li>
+  <li>RS for each from the framework APIs</li>
+</ul>
+
+<p>The {@link android.renderscript.Allocation} class now supports a {@link
+android.renderscript.Allocation#USAGE_GRAPHICS_RENDER_TARGET} memory space, which allows you to
+render things directly into the {@link android.renderscript.Allocation} and use it as a framebuffer
+object.</p>
+
+<p>{@link android.renderscript.RSTextureView} provides a means to display RenderScript graphics
+inside of a {@link android.view.View},  unlike {@link android.renderscript.RSSurfaceView}, which
+creates a separate window. This key difference allows you to do things such as move, transform, or
+animate an {@link android.renderscript.RSTextureView} as well as draw RenderScript graphics inside
+a view that lies within an activity layout.</p>
+
+<p>The {@link android.renderscript.Script#forEach Script.forEach()} method allows you to call
+RenderScript compute scripts from the VM level and have them automatically delegated to available
+cores on the device. You do not use this method directly, but any compute RenderScript that you
+write will have a {@link android.renderscript.Script#forEach forEach()}  method that you can call in
+the reflected RenderScript class. You can call the reflected {@link
+android.renderscript.Script#forEach forEach()} method by passing in an input {@link
+android.renderscript.Allocation} to process, an output {@link android.renderscript.Allocation} to
+write the result to, and a {@link android.renderscript.FieldPacker} data structure in case the
+RenderScript needs more information. Only one of the {@link android.renderscript.Allocation}s is
+necessary and the data structure is optional.</p>
+
+
+
+
+
+
+
+
+
+<h3 id="Enterprise">Enterprise</h3>
+
+<p>Android 4.0 expands the capabilities for enterprise application with the following features.</p>
+
+<h4>VPN services</h4>
+
+<p>The new {@link android.net.VpnService} allows applications to build their own VPN (Virtual
+Private Network), running as a {@link android.app.Service}. A VPN service creates an interface for a
+virtual network with its own address and routing rules and performs all reading and writing with a
+file descriptor.</p>
+
+<p>To create a VPN service, use {@link android.net.VpnService.Builder}, which allows you to specify
+the network address, DNS server, network route, and more. When complete, you can establish the
+interface by calling {@link android.net.VpnService.Builder#establish()}, which returns a {@link
+android.os.ParcelFileDescriptor}. </p>
+
+<p>Because  a VPN service can intercept packets, there are security implications.  As such, if you
+implement {@link android.net.VpnService}, then your service must require the {@link
+android.Manifest.permission#BIND_VPN_SERVICE} to ensure that only the system can bind to it (only
+the system is granted this permission&mdash;apps cannot request it). To then use your VPN service,
+users must manually enable it in the system settings.</p>
+
+
+<h4>Device policies</h4>
+
+<p>Applications that manage the device restrictions can now disable the camera using {@link
+android.app.admin.DevicePolicyManager#setCameraDisabled setCameraDisabled()} and the {@link
+android.app.admin.DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} property (applied with a {@code
+&lt;disable-camera /&gt;} element in the policy configuration file).</p>
+
+
+<h4>Certificate management</h4>
+
+<p>The new {@link android.security.KeyChain} class provides APIs that allow you to import and access
+certificates in the system key store. Certificates streamline the installation of both client
+certificates (to validate the identity of the user) and certificate authority certificates (to
+verify server identity). Applications such as web browsers or email clients can access the installed
+certificates to authenticate users to servers. See the {@link android.security.KeyChain}
+documentation for more information.</p>
+
+
+
+
+
+
+
+<h3 id="Sensors">Device Sensors</h3>
+
+<p>Two new sensor types have been added in Android 4.0:</p>
+
+<ul>
+  <li>{@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE}: A temperature sensor that provides
+the ambient (room) temperature in degrees Celsius.</li>
+  <li>{@link android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY}: A humidity sensor that provides the
+relative ambient (room) humidity as a percentage.</li>
+</ul>
+
+<p>If a device has both {@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} and  {@link
+android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY} sensors, you can use them to calculate the dew point
+and the absolute humidity.</p>
+
+<p>The previous temperature sensor, {@link android.hardware.Sensor#TYPE_TEMPERATURE}, has been
+deprecated. You should use the {@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE} sensor
+instead.</p>
+
+<p>Additionally, Android’s three synthetic sensors have been greatly improved so they now have lower
+latency and smoother output. These sensors include the gravity sensor ({@link
+android.hardware.Sensor#TYPE_GRAVITY}), rotation vector sensor ({@link
+android.hardware.Sensor#TYPE_ROTATION_VECTOR}), and linear acceleration sensor ({@link
+android.hardware.Sensor#TYPE_LINEAR_ACCELERATION}). The improved sensors rely on the gyroscope
+sensor to improve their output, so the sensors appear only on devices that have a gyroscope.</p>
 
 
 
@@ -1313,56 +1332,6 @@ in which using the equivalent method from {@link android.app.Activity} might not
 <p>Android 4.0 introduces a variety of new views and other UI components.</p>
 
 
-<h4>System UI</h4>
-
-<p>Since the early days of Android, the system has managed a UI component known as the <em>status
-bar</em>, which resides at the top of handset devices to deliver information such as the carrier
-signal, time, notifications, and so on. Android 3.0 added the <em>system bar</em> for tablet
-devices, which resides at the bottom of the screen to provide system navigation controls (Home,
-Back, and so forth) and also an interface for elements traditionally provided by the status bar.  In
-Android 4.0, the system provides a new type of system UI called the <em>navigation bar</em>. The
-navigation bar shares some qualities with the system bar, because it provides navigation controls
-for devices that don’t have hardware counterparts for navigating the system, but the navigation
-controls is all that the navigation bar offers (a device with the navigation bar, thus, also
-includes the status bar at the top of the screen).</p>
-
-<p>To this day, you can hide the status bar on handsets using the {@link
-android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN} flag. In Android 4.0, the APIs that control
-the system bar’s visibility have been updated to better reflect the behavior of both the system bar
-and navigation bar:</p>
-<ul>
-<li>The {@link android.view.View#SYSTEM_UI_FLAG_LOW_PROFILE} flag replaces View.STATUS_BAR_HIDDEN
-flag. When set, this flag enables “low profile" mode for the system bar or
-navigation bar. Navigation buttons dim and other elements in the system bar also hide.</li>
-
-<li>The {@link android.view.View#SYSTEM_UI_FLAG_VISIBLE} flag replaces the {@code
-STATUS_BAR_VISIBLE} flag to request the system bar or navigation bar be visible.</li>
-
-<li>The {@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} is a new flag that requests that
-the navigation bar hide completely. Take note that this works only for the <em>navigation bar</em>
-used by some handsets (it does <strong>not</strong> hide the system bar on tablets). The navigation
-bar returns as soon as the system receives user input. As such, this mode is generally used for
-video playback or other cases in which the whole screen is needed but user input is not
-required.</li>
-</ul>
-
-<p>You can set each of these flags for the system bar and navigation bar by calling {@link
-android.view.View#setSystemUiVisibility setSystemUiVisibility()} on any view in your activity. The
-window manager will combine (OR-together) all flags from all views in your window and
-apply them to the system UI as long as your window has input focus. When your window loses input
-focus (the user navigates away from your app, or a dialog appears), your flags cease to have effect.
-Similarly, if you remove those views from the view hierarchy their flags no longer apply.</p>
-
-<p>To synchronize other events in your activity with visibility changes to the system UI (for
-example, hide the action bar or other UI controls when the system UI hides), you should register a
-{@link android.view.View.OnSystemUiVisibilityChangeListener} to be notified when the visibility
-of the system bar or navigation bar changes.</p>
-
-<p>See the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/OverscanActivity.html">
-OverscanActivity</a> class for a demonstration of different system UI options.</p>
-
-
 <h4>GridLayout</h4>
 
 <p>{@link android.widget.GridLayout} is a new view group that places child views in a rectangular
@@ -1436,6 +1405,102 @@ preference view to allow users to toggle a setting on or off without the need to
 preference screen or dialog. For example, the Settings application uses a {@link
 android.preference.SwitchPreference} for the Wi-Fi and Bluetooth settings.</p>
 
+
+
+<h4>System themes</h4>
+
+<p>The default theme for all applications that target Android 4.0 (by setting either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> or
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> to
+{@code “14"} or higher) is now the
+"device default" theme: {@link android.R.style#Theme_DeviceDefault Theme.DeviceDefault}. This may be
+the dark Holo theme or a different dark theme defined by the specific device.</p>
+
+<p>The {@link android.R.style#Theme_Holo Theme.Holo} family of themes are guaranteed to not change
+from one device to another when running the same version of Android. If you explicitly
+apply any of the {@link android.R.style#Theme_Holo Theme.Holo} themes to your activities, you can
+rest assured that these themes will not change character on different devices within the same
+platform version.</p>
+
+<p>If you wish for your app to blend in with the overall device theme (such as when different OEMs
+provide different default themes for the system), you should explicitly apply themes from the {@link
+android.R.style#Theme_DeviceDefault Theme.DeviceDefault} family.</p>
+
+
+<h4>Options menu button</h4>
+
+<p>Beginning with Android 4.0, you'll notice that handsets no longer require a Menu hardware button.
+However, there's no need for you to worry about this if your existing application provides an <a
+href="{@docRoot}guide/topics/ui/menus.html#options-menu">options menu</a> and expects there to be a
+Menu button. To ensure that existing apps continue to work as they expect, the system provides an
+on-screen Menu button for apps that were designed for older versions of Android.</p>
+
+<p>For the best user experience, new and updated apps should instead use the {@link
+android.app.ActionBar} to provide access to menu items and set <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+{@code "14"} to take advantage of the latest framework default behaviors.</p>
+
+
+
+<h4>Controls for system UI visibility</h4>
+
+<p>Since the early days of Android, the system has managed a UI component known as the <em>status
+bar</em>, which resides at the top of handset devices to deliver information such as the carrier
+signal, time, notifications, and so on. Android 3.0 added the <em>system bar</em> for tablet
+devices, which resides at the bottom of the screen to provide system navigation controls (Home,
+Back, and so forth) and also an interface for elements traditionally provided by the status bar.  In
+Android 4.0, the system provides a new type of system UI called the <em>navigation bar</em>. You
+might consider the navigation bar a re-tuned version of the system bar designed for
+handsets&mdash;it provides navigation controls
+for devices that don’t have hardware counterparts for navigating the system, but it leaves out the
+system bar's notification UI and setting controls. As such, a device that provides the navigation
+bar also has the status bar at the top.</p>
+
+<p>To this day, you can hide the status bar on handsets using the {@link
+android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN} flag. In Android 4.0, the APIs that control
+the system bar’s visibility have been updated to better reflect the behavior of both the system bar
+and navigation bar:</p>
+<ul>
+<li>The {@link android.view.View#SYSTEM_UI_FLAG_LOW_PROFILE} flag replaces the {@code
+STATUS_BAR_HIDDEN} flag. When set, this flag enables “low profile" mode for the system bar or
+navigation bar. Navigation buttons dim and other elements in the system bar also hide. Enabling
+this is useful for creating more immersive games without distraction for the system navigation
+buttons.</li>
+
+<li>The {@link android.view.View#SYSTEM_UI_FLAG_VISIBLE} flag replaces the {@code
+STATUS_BAR_VISIBLE} flag to request the system bar or navigation bar be visible.</li>
+
+<li>The {@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} is a new flag that requests
+the navigation bar hide completely. Be aware that this works only for the <em>navigation bar</em>
+used by some handsets (it does <strong>not</strong> hide the system bar on tablets). The navigation
+bar returns to view as soon as the system receives user input. As such, this mode is useful
+primarily for video playback or other cases in which the whole screen is needed but user input is
+not required.</li>
+</ul>
+
+<p>You can set each of these flags for the system bar and navigation bar by calling {@link
+android.view.View#setSystemUiVisibility setSystemUiVisibility()} on any view in your activity. The
+window manager combines (OR-together) all flags from all views in your window and
+apply them to the system UI as long as your window has input focus. When your window loses input
+focus (the user navigates away from your app, or a dialog appears), your flags cease to have effect.
+Similarly, if you remove those views from the view hierarchy their flags no longer apply.</p>
+
+<p>To synchronize other events in your activity with visibility changes to the system UI (for
+example, hide the action bar or other UI controls when the system UI hides), you should register a
+{@link android.view.View.OnSystemUiVisibilityChangeListener} to be notified when the visibility
+of the system bar or navigation bar changes.</p>
+
+<p>See the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/OverscanActivity.html">
+OverscanActivity</a> class for a demonstration of different system UI options.</p>
+
+
+
+
+
+<h3 id="Input">Input Framework</h3>
+
+<p>Android 4.0 adds support for cursor hover events and new stylus and mouse button events.</p>
 
 <h4>Hover events</h4>
 
@@ -1666,11 +1731,17 @@ Wi-Fi for peer-to-peer communications.</li>
 </ul>
 
 
+<div class="special" style="margin-top:3em">
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
+</div>
+
 
 <h2 id="Honeycomb">Previous APIs</h2>
 
 <p>In addition to everything above, Android 4.0 naturally supports all APIs from previous releases.
-Because the Android 3.x (Honeycomb) platform is available only for large-screen devices, if you've
+Because the Android 3.x platform is available only for large-screen devices, if you've
 been developing primarily for handsets, then you might not be aware of all the APIs added to Android
 in these recent releases.</p>
 
@@ -1688,7 +1759,7 @@ elements of an activity into self-contained modules that define their own UI and
 the activity window. It includes the application logo in the left corner and provides a new
 interface for menu items. See the
 <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.</li>
-      <li>{@link android.content.Loader}: A framework component that facilitates asynchronour
+      <li>{@link android.content.Loader}: A framework component that facilitates asynchronous
 loading of data in combination with UI components to dynamically load data without blocking the
 main thread. See the
 <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</li>
@@ -1777,16 +1848,6 @@ notes for other new APIs.</li>
 
 </dl>
 
-
-
-
-
-
-<h2 id="api-diff">API Differences Report</h2>
-
-<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API Level
-{@sdkPlatformApiLevel}), see the <a
-href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
 
 
 
