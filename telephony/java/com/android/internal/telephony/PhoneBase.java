@@ -832,6 +832,22 @@ public abstract class PhoneBase extends Handler implements Phone {
         mNotifier.notifyOtaspChanged(this, otaspMode);
     }
 
+    /**
+     * @return true if a mobile originating emergency call is active
+     */
+    public boolean isInEmergencyCall() {
+        return false;
+    }
+
+    /**
+     * @return true if we are in the emergency call back mode. This is a period where
+     * the phone should be using as little power as possible and be ready to receive an
+     * incoming call from the emergency operator.
+     */
+    public boolean isInEcm() {
+        return false;
+    }
+
     public abstract String getPhoneName();
 
     public abstract int getPhoneType();
