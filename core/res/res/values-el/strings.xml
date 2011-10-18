@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Η κάρτα SIM απενεργοποιήθηκε οριστικά."\n" Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε νέα κάρτα SIM."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Κουμπί προηγούμενου κομματιού"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Κουμπί επόμενου κομματιού"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Κουμπί παύσης"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Κουμπί αναπαραγωγής"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Κουμπί διακοπής"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Μόνο κλήσεις έκτακτης ανάγκης"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Το δίκτυο κλειδώθηκε"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ξεκλείδωμα"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ενεργοποίηση ήχου"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Απενεργοποίηση ήχου"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ξεκίνησε η δημιουργία μοτίβου"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Το μοτίβο απαλείφθηκε"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Προστέθηκε κελί"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Το μοτίβο ολοκληρώθηκε"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ΑΒΓ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"Αποκοπή"</string>
     <string name="copy" msgid="2681946229533511987">"Αντιγραφή"</string>
     <string name="paste" msgid="5629880836805036433">"Επικόλληση"</string>
-    <string name="replace" msgid="5781686059063148930">"Αντικατάσταση???"</string>
+    <string name="replace" msgid="5781686059063148930">"Αντικατάσταση..."</string>
     <string name="delete" msgid="6098684844021697789">"Διαγραφή"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Αντιγραφή διεύθυνσης URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Επιλογή κειμένου..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Φωτογραφική μηχανή"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Αθόρυβο"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ενεργοποίηση ήχου"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Πλήκτρο. Για να ακούσετε τον ήχο του πατήματος των πλήκτρων απαιτούνται ακουστικά."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Συνδέστε ένα σετ ακουστικών για να ακούσετε τα πλήκτρα του κωδικού πρόσβασης να εκφωνούνται δυνατά."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Τελεία."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Πλοήγηση στην αρχική σελίδα"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Πλοήγηση προς τα επάνω"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Περισσότερες επιλογές"</string>

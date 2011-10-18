@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Insérez une carte SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Aucune carte SIM ou carte SIM illisible. Veuillez insérer une carte SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Votre carte SIM est définitivement désactivée."\n" Veuillez contacter votre opérateur pour obtenir une autre carte SIM."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Bouton du titre précédent"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Bouton du titre suivant"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Bouton de pause"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Bouton de lecture"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Bouton d\'arrêt"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Appels d\'urgence uniquement"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La carte SIM est verrouillée par clé PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Déverrouiller"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Son activé"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Son désactivé"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Schéma commencé."</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Schéma effacé."</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cellule ajoutée."</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Schéma terminé."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -905,7 +914,7 @@
     <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
     <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
     <string name="android_upgrading_title" msgid="378740715658358071">"Mise à jour d\'Android..."</string>
-    <string name="android_upgrading_apk" msgid="274409861603566003">"Optimisation de l\'application <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_apk" msgid="274409861603566003">"Optimisation de l\'application (<xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>)..."</string>
     <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Lancement des applications"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalisation de la mise à jour."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Appareil photo"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Mode silencieux"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Son activé"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Touche : casque nécessaire pour entendre le son des touches lorsque vous saisissez un mot de passe."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Branchez des écouteurs pour entendre l\'énoncé à haute voix des touches du mot de passe."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Point."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Retour à l\'accueil"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Parcourir vers le haut"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Plus d\'options"</string>

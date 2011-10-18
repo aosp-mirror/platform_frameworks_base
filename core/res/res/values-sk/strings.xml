@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Vložte kartu SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Karta SIM chýba alebo sa z nej nedá čítať. Vložte kartu SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Vaša karta SIM je natrvalo zakázaná."\n"Ak chcete získať inú kartu SIM, kontaktujte poskytovateľa bezdrôtových služieb."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Tlačidlo Predchádzajúca stopa"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Tlačidlo Ďalšia stopa"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Tlačidlo Pozastaviť"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Tlačidlo Prehrať"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Tlačidlo Zastaviť"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Len tiesňové volania"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Sieť je zablokovaná"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Karta SIM je uzamknutá pomocou kódu PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odomknúť"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnúť zvuk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Vypnúť zvuk"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Bezpečnostný vzor bol začatý"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Bezpečnostný vzor bol vymazaný"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Bunka bola pridaná"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Bezpečnostný vzor bol dokončený"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"Vystrihnúť"</string>
     <string name="copy" msgid="2681946229533511987">"Kopírovať"</string>
     <string name="paste" msgid="5629880836805036433">"Prilepiť"</string>
-    <string name="replace" msgid="5781686059063148930">"Nahradiť???"</string>
+    <string name="replace" msgid="5781686059063148930">"Nahradiť•"</string>
     <string name="delete" msgid="6098684844021697789">"Odstrániť"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Skopírovať adresu URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Vybrať text..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Fotoaparát"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tichý"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Zapnúť zvuk"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Kláves. Pri zadávaní hesla je potrebné použiť náhlavnú súpravu."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Ak si chcete vypočuť nahlas vyslovené klávesy hesla, pripojte náhlavnú súpravu."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Bodka."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Prejsť na plochu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Prejsť na"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Viac možností"</string>

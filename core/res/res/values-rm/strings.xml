@@ -746,6 +746,16 @@
     <skip />
     <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
     <skip />
+    <!-- no translation found for lockscreen_transport_prev_description (201594905152746886) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_next_description (6089297650481292363) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_pause_description (7659088786780128001) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_play_description (5888422938351019426) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_stop_description (4562318378766987601) -->
+    <skip />
     <string name="emergency_calls_only" msgid="6733978304386365407">"Mo cloms d\'urgenza"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rait bloccada"</string>
     <!-- no translation found for lockscreen_sim_puk_locked_message (7441797339976230) -->
@@ -782,6 +792,14 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Debloccar"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Tun activà"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Tun deactivà"</string>
+    <!-- no translation found for lockscreen_access_pattern_start (3941045502933142847) -->
+    <skip />
+    <!-- no translation found for lockscreen_access_pattern_cleared (5583479721001639579) -->
+    <skip />
+    <!-- no translation found for lockscreen_access_pattern_cell_added (6756031208359292487) -->
+    <skip />
+    <!-- no translation found for lockscreen_access_pattern_detected (4988730895554057058) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
