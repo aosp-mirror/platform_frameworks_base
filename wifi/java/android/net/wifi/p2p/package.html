@@ -1,0 +1,68 @@
+<HTML>
+<BODY>
+<p>Provides classes to create peer-to-peer (P2P) connections with Wi-Fi Direct.</p>
+
+<p>Using these APIs, you can discover and connect to other devices when each
+device supports Wi-Fi Direct, then communicate over a speedy connection across distances much longer
+than a Bluetooth connection. The primary class you need to work with is {@link
+android.net.wifi.p2p.WifiP2pManager}, which you can acquire by calling {@link
+android.app.Activity#getSystemService getSystemService(WIFI_P2P_SERVICE)}. The {@link
+android.net.wifi.p2p.WifiP2pManager} includes APIs that allow you to:</p>
+<ul>
+<li>Initialize your application for P2P connections by calling {@link
+android.net.wifi.p2p.WifiP2pManager#initialize initialize()}</li>
+
+<li>Discover nearby devices by calling {@link android.net.wifi.p2p.WifiP2pManager#discoverPeers
+discoverPeers()}</li>
+
+<li>Start a P2P connection by calling {@link android.net.wifi.p2p.WifiP2pManager#connect
+connect()}</li>
+<li>And more</li>
+</ul>
+
+<p>Several other interfaces and classes are necessary as well, such as:</p>
+<ul>
+<li>The {@link android.net.wifi.p2p.WifiP2pManager.ActionListener} interface allows you to receive
+callbacks when an operation such as discovering peers or connecting to them succeeds or fails.</li>
+
+<li>{@link android.net.wifi.p2p.WifiP2pManager.PeerListListener} interface allows you to receive
+information about discovered peers. The callback provides a {@link
+android.net.wifi.p2p.WifiP2pDeviceList}, from which you can retrieve a {@link
+android.net.wifi.p2p.WifiP2pDevice} object for each device within range and get information such as
+the device name, address, device type, the WPS configurations the device supports, and more.</li>
+
+<li>The {@link android.net.wifi.p2p.WifiP2pManager.GroupInfoListener} interface allows you to
+receive information about a P2P group. The callback provides a {@link
+android.net.wifi.p2p.WifiP2pGroup} object, which provides group information such as the owner, the
+network name, and passphrase.</li>
+
+<li>{@link android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener} interface allows you to
+receive information about the current connection. The callback provides a {@link
+android.net.wifi.p2p.WifiP2pInfo} object, which has information such as whether a group has been
+formed and who is the group owner.</li>
+</ul>
+
+<p>In order to use the Wi-Fi P2P APIs, your app must request the following user permissions:</p>
+<ul>
+<li>{@link android.Manifest.permission#ACCESS_WIFI_STATE}</li>
+<li>{@link android.Manifest.permission#CHANGE_WIFI_STATE}</li>
+<li>{@link android.Manifest.permission#INTERNET} (although your app doesn’t technically connect
+to the Internet, communicating to Wi-Fi Direct peers with standard java sockets requires Internet
+permission).</li>
+</ul>
+
+<p>For example code, see the <a href="{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi
+Direct Demo</a> sample application.</p>
+
+<p class="note"><strong>Note:</strong> Not all Android-powered devices support Wi-Fi
+Direct. If your application uses Wi-Fi Direct, declare so with a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element in the manifest file:</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-feature android:name="android.hardware.wifi.direct" />
+    ...
+&lt;/manifest>
+</pre>
+</BODY>
+</HTML>
