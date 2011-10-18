@@ -87,7 +87,9 @@ parcelable_decl:
                                                         b->name = $2.buffer;
                                                         b->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
                                                         b->semicolon_token = $3.buffer;
-                                                        b->flattening_methods = PARCELABLE_DATA;
+                                                        // TODO: Since we're having problems with funbundling, make all parcelables also flattenables.
+                                                        // b->flattening_methods = PARCELABLE_DATA;
+                                                        b->flattening_methods = PARCELABLE_DATA | RPC_DATA;
                                                         $$.user_data = b;
                                                     }
     |   PARCELABLE ';'                              {
