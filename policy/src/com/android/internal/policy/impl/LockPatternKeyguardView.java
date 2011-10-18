@@ -421,16 +421,20 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                         Slog.i(TAG, "Too many unlock attempts; device will be wiped!");
                         showWipeDialog(failedAttempts);
                     }
-                } else if (usingPattern && mEnableFallback) {
-                    if (failedAttempts == failedAttemptWarning) {
-                        showAlmostAtAccountLoginDialog();
-                    } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
-                        mLockPatternUtils.setPermanentlyLocked(true);
-                        updateScreen(mMode, false);
-                    }
                 } else {
-                    final boolean showTimeout =
+                    boolean showTimeout =
                         (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
+                    if (usingPattern && mEnableFallback) {
+                        if (failedAttempts == failedAttemptWarning) {
+                            showAlmostAtAccountLoginDialog();
+                            showTimeout = false; // don't show both dialogs
+                        } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
+                            mLockPatternUtils.setPermanentlyLocked(true);
+                            updateScreen(mMode, false);
+                            // don't show timeout dialog because we show account unlock screen next
+                            showTimeout = false;
+                        }
+                    }
                     if (showTimeout) {
                         showTimeoutDialog();
                     }
