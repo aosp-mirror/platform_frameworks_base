@@ -1917,6 +1917,7 @@ public class WebView extends AbsoluteLayout
             mLoadedPicture = ViewStateSerializer.deserializeViewState(stream, this);
             mBlockWebkitViewMessages = true;
             setNewPicture(mLoadedPicture, true);
+            mLoadedPicture.mViewState = null;
             return true;
         } catch (IOException e) {
             Log.w(LOGTAG, "Failed to loadViewState", e);
@@ -4355,7 +4356,9 @@ public class WebView extends AbsoluteLayout
             selectionDone();
         }
         mOrientation = newConfig.orientation;
-        mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
+        if (mWebViewCore != null && !mBlockWebkitViewMessages) {
+            mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
+        }
     }
 
     /**
