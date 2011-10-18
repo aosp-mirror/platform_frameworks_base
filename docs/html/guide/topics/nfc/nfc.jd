@@ -12,6 +12,7 @@ page.title=NFC Basics
         <li><a href="#dispatching">How NFC Tags are Dispatched to Applications</a></li>
       </ol>
     </li>
+    <li><a href="#manifest">Requesting NFC Access in the Android Manifest</a></li>
     <li><a href="#filtering-intents">Filtering for Intents</a>
       <ol>
         <li><a href="#ndef-disc">ACTION_NDEF_DISCOVERED</a></li>
