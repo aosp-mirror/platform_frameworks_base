@@ -208,6 +208,24 @@ public class GsmAlphabet {
      * Converts a String into a byte array containing the 7-bit packed
      * GSM Alphabet representation of the string. If a header is provided,
      * this is included in the returned byte array and padded to a septet
+     * boundary. This method is used by OEM code.
+     *
+     * @param data The text string to encode.
+     * @param header Optional header (including length byte) that precedes
+     * the encoded data, padded to septet boundary.
+     * @return Byte array containing header and encoded data.
+     * @throws EncodeException if String is too large to encode
+     * @see #stringToGsm7BitPackedWithHeader(String, byte[], int, int)
+     */
+    public static byte[] stringToGsm7BitPackedWithHeader(String data, byte[] header)
+            throws EncodeException {
+        return stringToGsm7BitPackedWithHeader(data, header, 0, 0);
+    }
+
+    /**
+     * Converts a String into a byte array containing the 7-bit packed
+     * GSM Alphabet representation of the string. If a header is provided,
+     * this is included in the returned byte array and padded to a septet
      * boundary.
      *
      * Unencodable chars are encoded as spaces
