@@ -1,4 +1,4 @@
-page.title=Compatibility Package
+page.title=Support Package
 
 @jd:body
 
@@ -8,7 +8,7 @@ page.title=Compatibility Package
 <h2>In this document</h2>
 <ol>
   <li><a href="#Notes">Revisions</a></li>
-  <li><a href="#Downloading">Downloading the Compatibility Package</a></li>
+  <li><a href="#Downloading">Downloading the Support Package</a></li>
   <li><a href="#SettingUp">Setting Up a Project to Use a Library</a></li>
   <li><a href="#Using">Using the v4 Library APIs</a></li>
   <li><a href="#Docs">Reference Docs</a></li>
@@ -27,28 +27,118 @@ href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for And
 
 <p><em>Minimum API level supported:</em> <b>4</b></p>
 
-<p>The Compatibility Package includes static "support libraries" that you can add to your Android
+<p>The Support Package includes static "support libraries" that you can add to your Android
 application in order to use APIs that are either not available for older platform versions or that
 offer "utility" APIs that aren't a part of the framework APIs. The goal is to simplify your
 development by offering more APIs that you can bundle with your application so you can
 worry less about platform versions.</p>
 
-<p class="note"><strong>Note:</strong> The Compatibility Package includes more than one support
+<p class="note"><strong>Note:</strong> The Support Package includes more than one support
 library. Each one has a different <em>minimum API level</em>. For example, one library requires API
-level 4 or higher, while another requires API level 13 or higher. The minimum version is indicated
+level 4 or higher, while another requires API level 13 or higher (v13 is a superset of v4 and includes additional
+support classes to work with v13 APIs). The minimum version is indicated
 by the directory name, such as {@code v4/} and {@code v13/}.</p>
 
 
 <h2 id="Notes">Revisions</h2>
 
 <p>The sections below provide notes about successive releases of
-the Compatibility Package, as denoted by revision number.</p>
+the Support Package, as denoted by revision number.</p>
+
 
 
 <div class="toggle-content open">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" />
+    Support Package, revision 4 (October 2011)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Support for Accessiblity APIs:
+            <ul>
+              <li>Added <code>AccessibilityDelegateCompat</code> to support
+              {@link android.view.View.AccessibilityDelegate}.</li>
+
+              <li>Added <code>AccessibilityEventCompat</code> to support
+              {@link android.view.accessibility.AccessibilityEvent}.</li>
+
+              <li>Added <code>AccessibilityManagerCompat</code> to support
+              {@link android.view.accessibility.AccessibilityManager}.</li>
+
+              <li>Added <code>AccessibilityNodeInfoCompat</code> to support
+              {@link android.view.accessibility.AccessibilityNodeInfo}.</li>
+
+              <li>Added <code>AccessibilityRecordCompat</code> to support
+              {@link android.view.accessibility.AccessibilityRecord}.</li>
+
+              <li>Added <code>AccessibilityServiceInfoCompat</code> to support
+              {@link android.accessibilityservice.AccessibilityServiceInfo}.</li>
+
+              <li>Added <code>ViewGroupCompat</code>
+              to support accessibility features in {@link android.view.ViewGroup}.
+              </li>
+
+              <li>Modified <code>ViewCompat</code>
+              to support accessibility features in {@link android.view.View}.</li>
+            </ul>
+          </li>
+
+          <li>Added <code>EdgeEffectCompat</code> to
+          support {@link android.widget.EdgeEffect}.</li>
+          
+          <li>Added <code>LocalBroadcastManager</code> to allow applications to easily
+            register for and receive intents within a single application without
+            broadcasting them globally.</li>
+
+          <li>Added support in <code>ViewCompat</code> to check for and set overscroll
+          modes for {@link android.view.View}s on Android 2.3 and later.</li>
+          <li>Changes to Fragment APIs:
+            <ul>
+              <li>Added new APIs to control the visibility of new menus.</li>
+              <li>Added custom animation APIs.</li>
+              <li>Added APIs in <code>FragmentActivity</code> to retain custom,
+              non-configuration instance data.</li>
+              <li>Various bug fixes.</li>
+            </ul>
+          </li>
+          <li>Changes to <code>ViewPager</code>:
+            <ul>
+              <li>Added support for margins between pages.
+              An optional {@link android.graphics.drawable.Drawable} can be provided
+              to fill the margins.</li>
+              <li>Added support for {@link android.widget.EdgeEffect}.</li>
+              <li>Added support for keyboard navigation</li>
+              <li>Added support to control how many pages are kept to either side
+              of the current page.</li>
+              <li>Improved touch physics.</li>
+            </ul>
+          </li>
+
+          <li>Fixed a {@link android.content.Loader} bug that caused issues in
+          canceling {@link android.os.AsyncTask}s when running on Froyo and older
+          versions of the platform. The support
+          code now uses its own version of {@link android.os.AsyncTask} to keep the same
+          behavior on all platform versions.</li>
+
+        </ul>
+      </dd>
+    </dl>
+  </div>
+
+
+
+</div>
+
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" />
     Compatibility Package, revision 3 (July 2011)
   </a></p>
 
@@ -136,9 +226,9 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 
 
 
-<h2 id="Downloading">Downloading the Compatibility Package</h2>
+<h2 id="Downloading">Downloading the Support Package</h2>
 
-<p>The Compatibility Package is provided as a downloadable package from the Android SDK and AVD
+<p>The Support Package is provided as a downloadable package from the Android SDK and AVD
 Manager. To install:</p>
 
 <ol>
@@ -147,13 +237,13 @@ Manager. To install:</p>
 &gt; <strong>Android SDK and AVD Manager</strong>. Or, launch {@code SDK Manager.exe} from
 the {@code &lt;sdk&gt;/} directory (on Windows only) or {@code android} from the {@code
 &lt;sdk&gt;/tools/} directory.</p></li>
-  <li>Expand the Android Repository, check <strong>Android Compatibility package</strong>
+  <li>Expand the Android Repository, check <strong>Android Support package</strong>
 and click <strong>Install selected</strong>.</li>
   <li>Proceed to install the package.</li>
 </ol>
 
 <p>When done, all files (including source code, samples, and the {@code .jar} files) are saved
-into the <code>&lt;sdk&gt;/extras/android/compatibility/</code> directory. This directory contains
+into the <code>&lt;sdk&gt;/extras/android/support/</code> directory. This directory contains
 each of the different support libraries, such as the library for API level 4 and up and the library
 for API level 13 and up, each named with the respective version (such as {@code v4/}).</p>
 
@@ -167,7 +257,7 @@ project (next to {@code src/}, {@code res/}, etc.)</li>
   <li>Locate the JAR file for the library you want to use and copy it into the {@code
 libs/} directory.
     <p>For example, the library that supports API level 4 and up is located at {@code
-&lt;sdk&gt;/extras/android/compatibility/v4/android-support-v4.jar}.</p>
+&lt;sdk&gt;/extras/android/support/v4/android-support-v4.jar}.</p>
   </li>
   <li>Add the JAR to your project build path. 
     <p>In Eclipse, right-click the JAR file in the Package Explorer, select <strong>Build
@@ -181,7 +271,7 @@ provided APIs are available in the {@code android.support} package (for
 example, {@code android.support.v4}).</p>
 
 <p class="note"><strong>Tip:</strong> To see the library APIs in action, take a look at the sample
-apps in {@code extras/android/compatibility/&lt;version&gt;/samples/}.</p>
+apps in {@code extras/android/support/&lt;version&gt;/samples/}.</p>
 
 <p class="warning"><strong>Warning:</strong> Be certain that you not confuse the standard
 {@code android} packages with those in {@code android.support} library. Some code completion tools
@@ -265,7 +355,7 @@ for the library version you're using). In this example, documentation is generat
 library:</p>
 
 <pre class="no-pretty-print">
-cd &lt;sdk&gt;/extras/android/compatibility/v4/
+cd &lt;sdk&gt;/extras/android/support/v4/
 mkdir docs
 javadoc -sourcepath src/java/ -subpackages android.support.v4 -d docs
 </pre>
@@ -275,8 +365,8 @@ javadoc -sourcepath src/java/ -subpackages android.support.v4 -d docs
 <h2 id="Samples">Samples</h2>
 
 <p>If you want to see some code that uses the support libraries, samples are included with the
-Compatibility Package, inside each support library directory. For example, at {@code
-extras/android/compatibility/v4/samples/}.</p>
+Support Package, inside each support library directory. For example, at {@code
+extras/android/support/v4/samples/}.</p>
 
 <p>Additionally, the <a href="http://code.google.com/p/iosched/">Google I/O App</a> is a complete
 application that uses the v4 support library to provide a single APK for both handsets and tablets
