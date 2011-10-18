@@ -87,6 +87,8 @@ final class ActivityStack {
     static final boolean DEBUG_TASKS = ActivityManagerService.DEBUG_TASKS;
     
     static final boolean DEBUG_STATES = false;
+    static final boolean DEBUG_ADD_REMOVE = false;
+    static final boolean DEBUG_SAVED_STATE = false;
 
     static final boolean VALIDATE_TOKENS = ActivityManagerService.VALIDATE_TOKENS;
     
@@ -653,6 +655,9 @@ final class ActivityStack {
             }
             completeResumeLocked(r);
             checkReadyForSleepLocked();
+            if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
+            r.icicle = null;
+            r.haveState = false;
         } else {
             // This activity is not starting in the resumed state... which
             // should look like we asked it to pause+stop (but remain visible),
@@ -663,9 +668,6 @@ final class ActivityStack {
             r.state = ActivityState.STOPPED;
             r.stopped = true;
         }
-
-        r.icicle = null;
-        r.haveState = false;
 
         // Launch the new version setup screen if needed.  We do this -after-
         // launching the initial activity (that is, home), so that it can have
@@ -936,6 +938,7 @@ final class ActivityStack {
 
     final void activityStoppedLocked(ActivityRecord r, Bundle icicle, Bitmap thumbnail,
             CharSequence description) {
+        if (DEBUG_SAVED_STATE) Slog.i(TAG, "Saving icicle of " + r + ": " + icicle);
         r.icicle = icicle;
         r.haveState = true;
         r.updateThumbnail(thumbnail, description);
@@ -1544,6 +1547,7 @@ final class ActivityStack {
             }
 
             // Didn't need to use the icicle, and it is now out of date.
+            if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; didn't need icicle of: " + next);
             next.icicle = null;
             next.haveState = false;
             next.stopped = false;
@@ -1590,6 +1594,12 @@ final class ActivityStack {
                     // get started when the user navigates back to it.
                     addPos = i+1;
                     if (!startIt) {
+                        if (DEBUG_ADD_REMOVE) {
+                            RuntimeException here = new RuntimeException("here");
+                            here.fillInStackTrace();
+                            Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos,
+                                    here);
+                        }
                         mHistory.add(addPos, r);
                         r.putInHistory();
                         mService.mWindowManager.addAppToken(addPos, r, r.task.taskId,
@@ -1622,6 +1632,11 @@ final class ActivityStack {
         }
         
         // Slot the activity into the history stack and proceed
+        if (DEBUG_ADD_REMOVE) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos, here);
+        }
         mHistory.add(addPos, r);
         r.putInHistory();
         r.frontOfTask = newTask;
@@ -1818,6 +1833,12 @@ final class ActivityStack {
                                     + " out to target's task " + target.task);
                             p.setTask(target.task, curThumbHolder, false);
                             curThumbHolder = p.thumbHolder;
+                            if (DEBUG_ADD_REMOVE) {
+                                RuntimeException here = new RuntimeException("here");
+                                here.fillInStackTrace();
+                                Slog.i(TAG, "Removing and adding activity " + p + " to stack at "
+                                        + dstPos, here);
+                            }
                             mHistory.remove(srcPos);
                             mHistory.add(dstPos, p);
                             mService.mWindowManager.moveAppToken(dstPos, p);
@@ -1944,6 +1965,12 @@ final class ActivityStack {
                             taskTop = p;
                         } else {
                             lastReparentPos--;
+                        }
+                        if (DEBUG_ADD_REMOVE) {
+                            RuntimeException here = new RuntimeException("here");
+                            here.fillInStackTrace();
+                            Slog.i(TAG, "Removing and adding activity " + p + " to stack at "
+                                    + lastReparentPos, here);
                         }
                         mHistory.remove(srcPos);
                         p.setTask(task, null, false);
@@ -2143,6 +2170,12 @@ final class ActivityStack {
         ActivityRecord newTop = mHistory.remove(where);
         int top = mHistory.size();
         ActivityRecord oldTop = mHistory.get(top-1);
+        if (DEBUG_ADD_REMOVE) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "Removing and adding activity " + newTop + " to stack at "
+                    + top, here);
+        }
         mHistory.add(top, newTop);
         oldTop.frontOfTask = false;
         newTop.frontOfTask = true;
@@ -2183,7 +2216,7 @@ final class ActivityStack {
         if (resultTo != null) {
             int index = indexOfTokenLocked(resultTo);
             if (DEBUG_RESULTS) Slog.v(
-                TAG, "Sending result to " + resultTo + " (index " + index + ")");
+                TAG, "Will send result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
                 sourceRecord = mHistory.get(index);
                 if (requestCode >= 0 && !sourceRecord.finishing) {
@@ -3279,34 +3312,15 @@ final class ActivityStack {
      */
     final boolean requestFinishActivityLocked(IBinder token, int resultCode,
             Intent resultData, String reason) {
-        if (DEBUG_RESULTS) Slog.v(
-            TAG, "Finishing activity: token=" + token
-            + ", result=" + resultCode + ", data=" + resultData);
-
         int index = indexOfTokenLocked(token);
+        if (DEBUG_RESULTS) Slog.v(
+                TAG, "Finishing activity @" + index + ": token=" + token
+                + ", result=" + resultCode + ", data=" + resultData);
         if (index < 0) {
             return false;
         }
         ActivityRecord r = mHistory.get(index);
 
-        // Is this the last activity left?
-        boolean lastActivity = true;
-        for (int i=mHistory.size()-1; i>=0; i--) {
-            ActivityRecord p = mHistory.get(i);
-            if (!p.finishing && p != r) {
-                lastActivity = false;
-                break;
-            }
-        }
-        
-        // If this is the last activity, but it is the home activity, then
-        // just don't finish it.
-        if (lastActivity) {
-            if (r.intent.hasCategory(Intent.CATEGORY_HOME)) {
-                return false;
-            }
-        }
-        
         finishActivityLocked(r, index, resultCode, resultData, reason);
         return true;
     }
@@ -3538,6 +3552,11 @@ final class ActivityStack {
     private final void removeActivityFromHistoryLocked(ActivityRecord r) {
         if (r.state != ActivityState.DESTROYED) {
             r.makeFinishing();
+            if (DEBUG_ADD_REMOVE) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.i(TAG, "Removing activity " + r + " from stack");
+            }
             mHistory.remove(r);
             r.takeFromHistory();
             if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
@@ -3769,6 +3788,11 @@ final class ActivityStack {
                 TAG, "At " + pos + " ckp " + r.task + ": " + r);
             if (r.task.taskId == task) {
                 if (localLOGV) Slog.v(TAG, "Removing and adding at " + top);
+                if (DEBUG_ADD_REMOVE) {
+                    RuntimeException here = new RuntimeException("here");
+                    here.fillInStackTrace();
+                    Slog.i(TAG, "Removing and adding activity " + r + " to stack at " + top, here);
+                }
                 mHistory.remove(pos);
                 mHistory.add(top, r);
                 moved.add(0, r);
@@ -3858,6 +3882,12 @@ final class ActivityStack {
                 TAG, "At " + pos + " ckp " + r.task + ": " + r);
             if (r.task.taskId == task) {
                 if (localLOGV) Slog.v(TAG, "Removing and adding at " + (N-1));
+                if (DEBUG_ADD_REMOVE) {
+                    RuntimeException here = new RuntimeException("here");
+                    here.fillInStackTrace();
+                    Slog.i(TAG, "Removing and adding activity " + r + " to stack at "
+                            + bottom, here);
+                }
                 mHistory.remove(pos);
                 mHistory.add(bottom, r);
                 moved.add(r);
