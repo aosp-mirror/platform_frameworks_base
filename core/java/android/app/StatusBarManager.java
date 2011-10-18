@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- 
+
 package android.app;
 
 import android.content.Context;
@@ -71,7 +71,9 @@ public class StatusBarManager {
      */
     public void disable(int what) {
         try {
-            mService.disable(what, mToken, mContext.getPackageName());
+            if (mService != null) {
+                mService.disable(what, mToken, mContext.getPackageName());
+            }
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);

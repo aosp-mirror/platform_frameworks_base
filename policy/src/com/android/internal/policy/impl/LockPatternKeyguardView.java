@@ -709,8 +709,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {}
     @Override
     public void onRingerModeChanged(int state) {}
+
     @Override
-    public void onClockVisibilityChanged() {}
+    public void onClockVisibilityChanged() {
+        int visFlags = getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK;
+        setSystemUiVisibility(visFlags
+                | (mUpdateMonitor.isClockVisible() ? View.STATUS_BAR_DISABLE_CLOCK : 0));
+    }
+
     @Override
     public void onDeviceProvisioned() {}
 
