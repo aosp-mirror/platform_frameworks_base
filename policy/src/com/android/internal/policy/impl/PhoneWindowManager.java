@@ -2622,6 +2622,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             }
                         };
                         msg.replyTo = new Messenger(h);
+                        msg.arg1 = msg.arg2 = 0;
+                        if (mStatusBar != null && mStatusBar.isVisibleLw())
+                            msg.arg1 = 1;
+                        if (mNavigationBar != null && mNavigationBar.isVisibleLw())
+                            msg.arg2 = 1;
                         try {
                             messenger.send(msg);
                         } catch (RemoteException e) {
