@@ -85,8 +85,8 @@
     <color name="darker_gray">#aaa</color>
 
     <!-- For security permissions -->
-    <color name="perms_dangerous_grp_color">#dd6826</color>
-    <color name="perms_dangerous_perm_color">#dd6826</color>
+    <color name="perms_dangerous_grp_color">#33b5e5</color>
+    <color name="perms_dangerous_perm_color">#33b5e5</color>
     <color name="shadow">#cc222222</color>
 
     <!-- For search-related UIs -->
