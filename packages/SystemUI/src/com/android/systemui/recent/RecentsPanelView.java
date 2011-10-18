@@ -230,7 +230,7 @@ public class RecentsPanelView extends RelativeLayout
 
     public void handleShowBackground(boolean show) {
         if (show) {
-            mRecentsScrim.setBackgroundResource(R.drawable.status_bar_recents_background);
+            mRecentsScrim.setBackgroundResource(R.drawable.status_bar_recents_background_solid);
         } else {
             mRecentsScrim.setBackgroundDrawable(null);
         }
