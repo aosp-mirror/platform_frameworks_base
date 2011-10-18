@@ -25,6 +25,8 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Ripristina i miei dati"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Non ripristinare"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Inserisci la tua password di backup corrente di seguito:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Inserisci la tua password di crittografia dispositivo di seguito."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Inserisci la tua password di crittografia dispositivo di seguito. Verrà utilizzata anche per crittografare l\'archivio di backup."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Inserisci una password da utilizzare per la crittografia dei dati di backup completi. Se non ne inserisci una, verrà utilizzata la tua password di backup corrente:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se desideri crittografare tutti i dati di backup, inserisci una password qui di seguito:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se i dati di ripristino sono crittografati, inserisci la password qui di seguito:"</string>

@@ -25,6 +25,8 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Adatok visszaállítása"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Ne állítsa vissza"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Kérjük, adja meg a jelenlegi biztonsági jelszót alább:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Kérjük, adja meg az eszköz titkosítási jelszavát."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Kérjük, adja meg az eszköz titkosítási jelszavát. Ezt használjuk a biztonsági mentések archívumának titkosításához is."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Kérjük, írjon be egy jelszót a teljes biztonsági mentés adatainak titkosításához. Ha üresen hagyja, jelenlegi biztonsági jelszavát fogjuk használni:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ha minden mentett adatot szeretne titkosítani, adjon meg egy jelszót alább:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ha a visszaállítási adatok titkosítva vannak, kérjük, adja meg a jelszót alább:"</string>

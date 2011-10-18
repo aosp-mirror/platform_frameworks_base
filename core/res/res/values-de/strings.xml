@@ -160,14 +160,14 @@
     <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Ermöglicht Anwendungen die Ausführung eventuell kostenpflichtiger Aktionen"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ihre Nachrichten"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Lesen und schreiben Sie Ihre SMS, E-Mails und anderen Nachrichten."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Ihre persönlichen Informationen"</string>
+    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Meine persönlichen Informationen"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Tablets"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Telefons"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Meinen Standort"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Ihren physischen Standort überwachen"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netzwerkkommunikation"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Ermöglicht Anwendungen den Zugriff auf verschiedene Netzwerkfunktionen"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ihre Konten"</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Meine Konten"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Zugriff auf verfügbare Konten"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardware-Steuerelemente"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Direkter Zugriff auf Hardware über Headset"</string>
@@ -345,7 +345,7 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Zugriff auf zusätzliche Dienstanbieterbefehle für Standort. Schädliche Anwendungen könnten so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Erstellt falsche Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
-    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"genauer (GPS-) Standort"</string>
+    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Zugriff auf genaue Standortquellen wie GPS auf dem Tablet (falls verfügbar). Schädliche Anwendungen können damit bestimmen, wo Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Anwendungen können damit bestimmen, so Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"ungefährer (netzwerkbasierter) Standort"</string>
@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Bitte legen Sie eine SIM-Karte ein."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"SIM-Karte fehlt oder ist nicht lesbar. Bitte legen Sie eine SIM-Karte ein."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Ihre SIM-Karte wurde dauerhaft deaktiviert."\n" Bitte wenden Sie sich an Ihren Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Schaltfläche für vorherigen Track"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Schaltfläche für nächsten Track"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Schaltfläche für Pause"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Schaltfläche für Wiedergabe"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Schaltfläche für Stopp"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Nur Notrufe"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"PUK-Sperre auf SIM"</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Entsperren"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ton ein"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Ton aus"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Muster gestartet"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Muster gelöscht"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Zelle hinzugefügt"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Muster abgeschlossen"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -709,7 +718,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tipp: Zum Heranzoomen und Vergrößern zweimal tippen"</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"AutoFill"</string>
-    <string name="setup_autofill" msgid="8154593408885654044">"AutoFill-Setup"</string>
+    <string name="setup_autofill" msgid="8154593408885654044">"AutoFill-Einrichtung"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -877,7 +886,7 @@
     <string name="no" msgid="5141531044935541497">"Abbrechen"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Achtung"</string>
     <string name="loading" msgid="1760724998928255250">"Wird geladen..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"EIN"</string>
+    <string name="capital_on" msgid="1544682755514494298">"AN"</string>
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden"</string>
@@ -1100,7 +1109,7 @@
     <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Der USB-Speicher wird zurzeit von einem Computer verwendet."</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"Die SD-Karte wird zurzeit von einem Computer verwendet."</string>
     <string name="media_unknown_state" msgid="729192782197290385">"Unbekannter Status des externen Speichermediums"</string>
-    <string name="share" msgid="1778686618230011964">"Weitergeben"</string>
+    <string name="share" msgid="1778686618230011964">"Teilen"</string>
     <string name="find" msgid="4808270900322985960">"Suchen"</string>
     <string name="websearch" msgid="4337157977400211589">"Websuche"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1137,7 +1146,7 @@
     <string name="checkbox_not_checked" msgid="5174639551134444056">"Nicht aktiviert"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"Ausgewählt"</string>
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"Nicht ausgewählt"</string>
-    <string name="switch_on" msgid="551417728476977311">"Ein"</string>
+    <string name="switch_on" msgid="551417728476977311">"An"</string>
     <string name="switch_off" msgid="7249798614327155088">"Aus"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"Gedrückt"</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"Nicht gedrückt"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Lautlos"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ton ein"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Zum Hören der Tasten bei der Eingabe eines Passworts ist ein Headset erforderlich."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Schließen Sie ein Headset an, um das Passwort gesprochen zu hören."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Zur Startseite navigieren"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Nach oben navigieren"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Weitere Optionen"</string>

@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inserisci una SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Scheda SIM mancante o non leggibile. Inserisci una scheda SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"La scheda SIM è stata disattivata definitivamente."\n" Contatta il fornitore del tuo servizio wireless per ricevere un\'altra scheda SIM."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Pulsante traccia precedente"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Pulsante traccia successiva"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pulsante Pausa"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Pulsante Riproduci"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Pulsante di arresto"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Solo chiamate di emergenza"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rete bloccata"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La SIM è bloccata tramite PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Sblocca"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Audio attivato"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Audio disattivato"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Sequenza iniziata"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Sequenza cancellata"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cella aggiunta"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Sequenza completata"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -886,8 +895,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Seleziona un\'applicazione per il dispositivo USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Nessuna applicazione è in grado di svolgere questa azione."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Purtroppo l\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> si è bloccata in modo anomalo."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Purtroppo il processo <xliff:g id="PROCESS">%1$s</xliff:g> si è interrotto."</string>
+    <string name="aerr_application" msgid="932628488013092776">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> si è bloccata in modo anomalo."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> si è interrotto."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> non risponde."\n\n"Vuoi chiuderla?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"L\'attività <xliff:g id="ACTIVITY">%1$s</xliff:g> non risponde."\n\n"Vuoi chiuderla?"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Fotocamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silenzioso"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Audio attivato"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tasto. Set auricolari richiesto per udire i tasti durante la digitazione di una password."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Collega gli auricolari per ascoltare la pronuncia dei tasti premuti per la password."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punto."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Vai alla home page"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Vai in alto"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Altre opzioni"</string>

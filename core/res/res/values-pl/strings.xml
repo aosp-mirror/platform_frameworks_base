@@ -331,9 +331,9 @@
     <string name="permlab_writeProfile" msgid="4679878325177177400">"zapis danych w Twoim profilu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Umożliwia aplikacji zmienianie lub dodawanie danych do osobistych informacji w profilu, przechowywanych w urządzeniu – np. imienia, nazwiska czy danych kontaktowych. Oznacza to, że inne aplikacje mogą Cię zidentyfikować i wysyłać do innych osób informacje o Twoim profilu."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"odczyt sieci społecznościowych"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Zezwala aplikacji na dostęp do aktualizacji społecznościowych od Ciebie i znajomych oraz na ich synchronizowanie. Złośliwe aplikacje mogą dzięki temu odczytywać prywatne informacje wymienianie przez Ciebie ze znajomymi w sieciach społecznościowych."</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Zezwala aplikacji na dostęp do aktualności społecznościowych od Ciebie i znajomych oraz na ich synchronizowanie. Złośliwe aplikacje mogą dzięki temu odczytywać prywatne informacje wymienianie przez Ciebie ze znajomymi w sieciach społecznościowych."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zapis sieci społecznościowych"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Zezwala aplikacji na wyświetlanie aktualizacji społecznościowych od znajomych. Złośliwe aplikacje mogą dzięki temu udawać znajomych i wyłudzać hasła lub inne poufne informacje."</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Zezwala aplikacji na wyświetlanie aktualności społecznościowych od znajomych. Złośliwe aplikacje mogą dzięki temu udawać znajomych i wyłudzać hasła lub inne poufne informacje."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"odczyt wydarzeń w kalendarzu wraz z informacjami poufnymi"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Zezwala aplikacji na odczyt wszystkich wydarzeń w kalendarzu zapisanych w tablecie, w tym dotyczących znajomych lub współpracowników. Złośliwa aplikacja z tym uprawnieniem może bez wiedzy właściciela pobierać z kalendarza informacje osobiste."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Zezwala aplikacji na odczyt wszystkich wydarzeń w kalendarzu zapisanych w telefonie, w tym dotyczących znajomych lub współpracowników. Złośliwa aplikacja z tym uprawnieniem może bez wiedzy właściciela pobierać z kalendarza informacje osobiste."</string>
@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Włóż kartę SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Brak karty SIM lub nie można jej odczytać. Włóż kartę SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Karta SIM jest trwale wyłączona."\n" Skontaktuj się z dostawcą usług bezprzewodowych, aby uzyskać inną kartę SIM."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Przycisk poprzedniego utworu"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Przycisk następnego utworu"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Przycisk wstrzymania"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Przycisk odtwarzania"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Przycisk zatrzymania"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Tylko połączenia alarmowe"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Sieć zablokowana"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Karta SIM jest zablokowana kodem PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odblokuj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Włącz dźwięk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Wyłącz dźwięk"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Wzór rozpoczęty"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Wzór wyczyszczony"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Dodano komórkę."</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Wzór ukończony"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Aparat"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Wyciszenie"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Włącz dźwięk"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Klawisz. Wymagany jest zestaw słuchawkowy, aby słyszeć klawisze podczas wpisywania hasła."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Podłącz zestaw słuchawkowy, aby usłyszeć znaki hasła wypowiadane na głos."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Kropka"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Przejdź do strony głównej"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Przejdź wyżej"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Więcej opcji"</string>

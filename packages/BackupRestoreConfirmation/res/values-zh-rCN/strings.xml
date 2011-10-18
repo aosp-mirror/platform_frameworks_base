@@ -25,6 +25,8 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"恢复我的数据"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"不恢复"</string>
     <string name="current_password_text" msgid="8268189555578298067">"请在下方输入您的当前备份密码："</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"请在下方输入您的设备加密密码。"</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"请在下方输入您的设备加密密码。此密码还会用于加密备份存档。"</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"请输入用于加密完整备份数据的密码。如果留空，系统将会使用您当前的备份密码："</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"如果您想为整个备份数据加密，请在下方输入密码："</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"如果恢复数据已加密，请在下方输入密码："</string>

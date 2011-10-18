@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"الرجاء إدخال بطاقة SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"بطاقة SIM مفقودة أو غير قابلة للقراءة. الرجاء إدراج بطاقة SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"بطاقة SIM معطلة دومًا."\n" يرجى الاتصال بمقدم الخدمة اللاسلكية للحصول على بطاقة SIM أخرى."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"زر المقطع الصوتي السابق"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"زر المقطع الصوتي التالي"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"زر الإيقاف المؤقت"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"زر التشغيل"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"زر الإيقاف"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"مكالمات الطوارئ فقط"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"الشبكة مؤمّنة"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"بطاقة SIM مؤمّنة بكود PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"إلغاء تأمين"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"تشغيل الصوت"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"الصوت متوقف"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"بدأ النمط"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"تم محو النمط"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"تمت إضافة الخلية"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"اكتمل النمط"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ب ت ث"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"قص"</string>
     <string name="copy" msgid="2681946229533511987">"نسخ"</string>
     <string name="paste" msgid="5629880836805036433">"لصق"</string>
-    <string name="replace" msgid="5781686059063148930">"استبدال???"</string>
+    <string name="replace" msgid="5781686059063148930">"استبدال..."</string>
     <string name="delete" msgid="6098684844021697789">"حذف"</string>
     <string name="copyUrl" msgid="2538211579596067402">"نسخ عنوان URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"تحديد نص..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"الكاميرا"</string>
     <string name="description_target_silent" msgid="893551287746522182">"صامت"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"تشغيل الصوت"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"سماعة رأس مطلوبة لسماع المفاتيح أثناء كتابة كلمة مرور."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"يمكنك توصيل سماعة رأس لسماع مفاتيح كلمة المرور منطوقة بصوت عالٍ."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"نقطة"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"التنقل إلى الشاشة الرئيسية"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"التنقل إلى أعلى"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
