@@ -178,7 +178,6 @@ public class KeyguardViewManager implements KeyguardWindowController {
         int visFlags =
                 ( View.STATUS_BAR_DISABLE_BACK
                 | View.STATUS_BAR_DISABLE_HOME
-                | View.STATUS_BAR_DISABLE_CLOCK
                 );
         mKeyguardHost.setSystemUiVisibility(visFlags);
 
