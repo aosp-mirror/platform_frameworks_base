@@ -1111,7 +1111,7 @@ pixels.</p>
 <img src="{@docRoot}images/screens_support/scale-test.png" alt="" />
 <p class="img-caption"><strong>Figure 5.</strong> Comparison of pre-scaled and auto-scaled
 bitmaps, from <a
-href="resources/samples/ApiDemos/src/com/example/android/apis/graphics/DensityActivity.html">
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/DensityActivity.html">
 ApiDemos</a>.
 </p>
 </div>
@@ -1150,7 +1150,7 @@ subtle, because all of the bitmaps are being scaled to match the current screen 
 scaled bitmaps have slightly different appearances depending on whether they are pre-scaled or
 auto-scaled at draw time. You can find the source code for this sample application, which
 demonstrates using pre-scaled and auto-scaled bitmaps, in <a
-href="resources/samples/ApiDemos/src/com/example/android/apis/graphics/DensityActivity.html">
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/DensityActivity.html">
 ApiDemos</a>.</p>
 
 <p class="note"><strong>Note:</strong> In Android 3.0 and above, there should be no perceivable

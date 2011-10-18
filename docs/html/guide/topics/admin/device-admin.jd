@@ -619,8 +619,8 @@ long pwExpiration;
 mDPM.setPasswordExpirationTimeout(mDeviceAdminSample, pwExpiration);
 </pre>
 
-<p>From the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/
-DeviceAdminSample.html"> Device Administration API sample</a>, here is the code
+<p>From the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html"
+>Device Administration API sample</a>, here is the code
 that updates the password expiration status:</p>
 
 <pre>

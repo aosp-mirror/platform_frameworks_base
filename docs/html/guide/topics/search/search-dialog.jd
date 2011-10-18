@@ -807,8 +807,8 @@ the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
 Bar</a> developer guide.</p>
 
 <p>Also see the <a
-href="{@docRoot}resources/samples/SearchableDictionary/src/com/example/android/searchabledict/
-SearchableDictionary.html">Searchable Dictionary</a> for an example implementation using
+href="{@docRoot}resources/samples/SearchableDictionary/src/com/example/android/searchabledict/SearchableDictionary.html"
+>Searchable Dictionary</a> for an example implementation using
 both the dialog and the widget.</p>
 
 

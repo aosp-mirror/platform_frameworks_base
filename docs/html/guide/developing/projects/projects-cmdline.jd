@@ -114,7 +114,7 @@ android create project \
   <p class="caution"><strong>Caution:</strong> You should refrain from moving the location of the
   SDK directory, because this will break the SDK location property located in <code>local.properties</code>.
   If you need to update the SDK location, use the <code>android update project</code> command.
-  See <a href="UpdatingAProject">Updating a Project</a> for more information.</p>
+  See <a href="#UpdatingAProject">Updating a Project</a> for more information.</p>
 
   <h2 id="UpdatingAProject">Updating a Project</h2>
 
