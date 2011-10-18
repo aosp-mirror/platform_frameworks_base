@@ -22,8 +22,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.AssetManager;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -60,6 +58,14 @@ public class DigitalClock extends RelativeLayout {
     /* called by system on minute ticks */
     private final Handler mHandler = new Handler();
     private BroadcastReceiver mIntentReceiver;
+
+    private static final Typeface sBackgroundFont;
+    private static final Typeface sForegroundFont;
+
+    static {
+        sBackgroundFont = Typeface.createFromFile(SYSTEM_FONT_TIME_BACKGROUND);
+        sForegroundFont = Typeface.createFromFile(SYSTEM_FONT_TIME_FOREGROUND);
+    }
 
     private static class TimeChangedReceiver extends BroadcastReceiver {
         private WeakReference<DigitalClock> mClock;
@@ -159,13 +165,11 @@ public class DigitalClock extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        AssetManager assets = mContext.getAssets();
-
         /* The time display consists of two tones. That's why we have two overlapping text views. */
         mTimeDisplayBackground = (TextView) findViewById(R.id.timeDisplayBackground);
-        mTimeDisplayBackground.setTypeface(Typeface.createFromFile(SYSTEM_FONT_TIME_BACKGROUND));
+        mTimeDisplayBackground.setTypeface(sBackgroundFont);
         mTimeDisplayForeground = (TextView) findViewById(R.id.timeDisplayForeground);
-        mTimeDisplayForeground.setTypeface(Typeface.createFromFile(SYSTEM_FONT_TIME_FOREGROUND));
+        mTimeDisplayForeground.setTypeface(sForegroundFont);
         mAmPm = new AmPm(this, null);
         mCalendar = Calendar.getInstance();
 
