@@ -254,9 +254,6 @@ public abstract class DataConnectionTracker extends Handler {
     /** CID of active data connection */
     protected int mCidActive;
 
-    /** indication of our availability (preconditions to trysetupData are met) **/
-    protected boolean mAvailability = false;
-
     // When false we will not auto attach and manually attaching is required.
     protected boolean mAutoAttachOnCreation = false;
 
@@ -755,7 +752,7 @@ public abstract class DataConnectionTracker extends Handler {
                 mPhone.notifyDataConnection(reason, apnIdToType(id));
             }
         }
-        notifyDataAvailability(reason);
+        notifyOffApnsOfAvailability(reason);
     }
 
     // a new APN has gone active and needs to send events to catch up with the
@@ -783,27 +780,13 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     // disabled apn's still need avail/unavail notificiations - send them out
-    protected void notifyOffApnsOfAvailability(String reason, boolean availability) {
-        if (mAvailability == availability) {
-            if (DBG) {
-                log("notifyOffApnsOfAvailability: no change in availability, " +
-                     "not nofitying about reason='" + reason + "' availability=" + availability);
-            }
-            return;
-        }
-        mAvailability = availability;
+    protected void notifyOffApnsOfAvailability(String reason) {
+        if (DBG) log("notifyOffApnsOfAvailability - reason= " + reason);
         for (int id = 0; id < APN_NUM_TYPES; id++) {
             if (!isApnIdEnabled(id)) {
                 notifyApnIdDisconnected(reason, id);
             }
         }
-    }
-
-    // we had an availability change - tell the listeners
-    protected void notifyDataAvailability(String reason) {
-        // note that we either just turned all off because we lost availability
-        // or all were off and could now go on, so only have off apns to worry about
-        notifyOffApnsOfAvailability(reason, isDataPossible(Phone.APN_TYPE_DEFAULT));
     }
 
     public boolean isApnTypeEnabled(String apnType) {
