@@ -279,6 +279,8 @@ void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {
 void NuCachedSource2::fetchInternal() {
     LOGV("fetchInternal");
 
+    bool reconnect = false;
+
     {
         Mutex::Autolock autoLock(mLock);
         CHECK(mFinalStatus == OK || mNumRetriesLeft > 0);
@@ -286,18 +288,24 @@ void NuCachedSource2::fetchInternal() {
         if (mFinalStatus != OK) {
             --mNumRetriesLeft;
 
-            status_t err =
-                mSource->reconnectAtOffset(mCacheOffset + mCache->totalSize());
+            reconnect = true;
+        }
+    }
 
-            if (err == ERROR_UNSUPPORTED) {
-                mNumRetriesLeft = 0;
-                return;
-            } else if (err != OK) {
-                LOGI("The attempt to reconnect failed, %d retries remaining",
-                     mNumRetriesLeft);
+    if (reconnect) {
+        status_t err =
+            mSource->reconnectAtOffset(mCacheOffset + mCache->totalSize());
 
-                return;
-            }
+        Mutex::Autolock autoLock(mLock);
+
+        if (err == ERROR_UNSUPPORTED) {
+            mNumRetriesLeft = 0;
+            return;
+        } else if (err != OK) {
+            LOGI("The attempt to reconnect failed, %d retries remaining",
+                 mNumRetriesLeft);
+
+            return;
         }
     }
 
