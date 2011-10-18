@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -29,7 +28,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -58,6 +56,10 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
     HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
+
+    // Flag set during notification removal animation to avoid causing too much work until
+    // animation is done
+    boolean mRemoveViews = true;
 
     public NotificationRowLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -117,7 +119,7 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
 
     public void onChildDismissed(View v) {
         final View veto = v.findViewById(R.id.veto);
-        if (veto != null && veto.getVisibility() != View.GONE) {
+        if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {
             veto.performClick();
         }
     }
@@ -170,7 +172,6 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
         final View childF = child;
 
         if (mAnimateBounds) {
-            child.setPivotY(0);
             final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f, 1f);
             alphaFade.setDuration(APPEAR_ANIM_LEN);
             alphaFade.addListener(new AnimatorListenerAdapter() {
@@ -189,6 +190,16 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
         }
     }
 
+    /**
+     * Sets a flag to tell us whether to actually remove views. Removal is delayed by setting this
+     * to false during some animations to smooth out performance. Callers should restore the
+     * flag to true after the animation is done, and then they should make sure that the views
+     * get removed properly.
+     */
+    public void setViewRemoval(boolean removeViews) {
+        mRemoveViews = removeViews;
+    }
+
     public void dismissRowAnimated(View child) {
         dismissRowAnimated(child, 0);
     }
@@ -199,16 +210,34 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
 
     @Override
     public void removeView(View child) {
-        final View childF = child;
+        if (!mRemoveViews) {
+            // This flag is cleared during an animation that removes all notifications. There
+            // should be a call to remove all notifications when the animation is done, at which
+            // time the view will be removed.
+            return;
+        }
         if (mAnimateBounds) {
             if (mAppearingViews.containsKey(child)) {
                 mAppearingViews.remove(child);
             }
-            child.setPivotY(0);
 
-            final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f);
-            alphaFade.setDuration(DISAPPEAR_ANIM_LEN);
-            alphaFade.addListener(new AnimatorListenerAdapter() {
+            // Don't fade it out if it already has a low alpha value, but run a non-visual
+            // animation which is used by onLayout() to animate shrinking the gap that it left
+            // in the list
+            ValueAnimator anim;
+            float currentAlpha = child.getAlpha();
+            if (currentAlpha > .1) {
+                anim = ObjectAnimator.ofFloat(child, "alpha", currentAlpha, 0);
+            } else {
+                if (currentAlpha > 0) {
+                    // Just make it go away - no need to render it anymore
+                    child.setAlpha(0);
+                }
+                anim = ValueAnimator.ofFloat(0, 1);
+            }
+            anim.setDuration(DISAPPEAR_ANIM_LEN);
+            final View childF = child;
+            anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     if (DEBUG) Slog.d(TAG, "actually removing child: " + childF);
@@ -218,9 +247,8 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
                 }
             });
 
-            alphaFade.start();
-
-            mDisappearingViews.put(child, alphaFade);
+            anim.start();
+            mDisappearingViews.put(child, anim);
 
             requestLayout(); // start the container animation
         } else {
