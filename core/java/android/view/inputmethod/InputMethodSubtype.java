@@ -35,6 +35,13 @@ import java.util.Locale;
  * Subtype can describe locale (e.g. en_US, fr_FR...) and mode (e.g. voice, keyboard...), and is
  * used for IME switch and settings. The input method subtype allows the system to bring up the
  * specified subtype of the designated input method directly.
+ *
+ * <p>It should be defined in an XML resource file of the input method
+ * with the <code>&lt;subtype></code> element.
+ * For more information, see the guide to
+ * <a href="{@docRoot}resources/articles/creating-input-method.html">
+ * Creating an Input Method</a>.</p>
+ *
  */
 public final class InputMethodSubtype implements Parcelable {
     private static final String TAG = InputMethodSubtype.class.getSimpleName();
