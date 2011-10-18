@@ -16,11 +16,11 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/find_prev"
-        android:icon="@drawable/ic_btn_find_prev"
+        android:icon="@drawable/ic_find_previous_holo_dark"
         android:showAsAction="always"
         />
     <item android:id="@+id/find_next"
-        android:icon="@drawable/ic_btn_find_next"
+        android:icon="@drawable/ic_find_next_holo_dark"
         android:showAsAction="always"
         />
 </menu>
