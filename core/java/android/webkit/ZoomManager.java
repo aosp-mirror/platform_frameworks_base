@@ -314,7 +314,10 @@ class ZoomManager {
      * Returns the zoom scale used for reading text on a double-tap.
      */
     public final float getReadingLevelScale() {
-        return mDisplayDensity * mWebView.getSettings().getDoubleTapZoom() / 100.0f;
+        WebSettings settings = mWebView.getSettings();
+        final float doubleTapZoomFactor = settings != null
+            ? settings.getDoubleTapZoom() / 100.f : 1.0f;
+        return mDisplayDensity * doubleTapZoomFactor;
     }
 
     public final float getInvDefaultScale() {
