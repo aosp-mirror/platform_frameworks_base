@@ -49,7 +49,8 @@ void LayerDim::onDraw(const Region& clip) const
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const GLfloat alpha = s.alpha/255.0f;
         const uint32_t fbHeight = hw.getHeight();
-        glDisable(GL_DITHER);
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+        glDisable(GL_TEXTURE_2D);
 
         if (s.alpha == 0xFF) {
             glDisable(GL_BLEND);
@@ -60,11 +61,6 @@ void LayerDim::onDraw(const Region& clip) const
 
         glColor4f(0, 0, 0, alpha);
 
-#if defined(GL_OES_EGL_image_external)
-        if (GLExtensions::getInstance().haveTextureExternal()) {
-            glDisable(GL_TEXTURE_EXTERNAL_OES);
-        }
-#endif
         glVertexPointer(2, GL_FLOAT, 0, mVertices);
 
         while (it != end) {
@@ -73,8 +69,9 @@ void LayerDim::onDraw(const Region& clip) const
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
         }
+        glDisable(GL_BLEND);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 // ---------------------------------------------------------------------------

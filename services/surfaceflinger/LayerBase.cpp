@@ -388,14 +388,9 @@ void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
     const uint32_t fbHeight = hw.getHeight();
     glColor4f(red,green,blue,alpha);
 
-#if defined(GL_OES_EGL_image_external)
-        if (GLExtensions::getInstance().haveTextureExternal()) {
-            glDisable(GL_TEXTURE_EXTERNAL_OES);
-        }
-#endif
+    glDisable(GL_TEXTURE_EXTERNAL_OES);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
-    glDisable(GL_DITHER);
 
     Region::const_iterator it = clip.begin();
     Region::const_iterator const end = clip.end();
@@ -457,12 +452,6 @@ void LayerBase::drawWithOpenGL(const Region& clip) const
     texCoords[3].u = 1;
     texCoords[3].v = 1;
 
-    if (needsDithering()) {
-        glEnable(GL_DITHER);
-    } else {
-        glDisable(GL_DITHER);
-    }
-
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glVertexPointer(2, GL_FLOAT, 0, mVertices);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
@@ -476,6 +465,7 @@ void LayerBase::drawWithOpenGL(const Region& clip) const
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_BLEND);
 }
 
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const

@@ -280,33 +280,33 @@ void Layer::onDraw(const Region& clip) const
         return;
     }
 
-    GLenum target = GL_TEXTURE_EXTERNAL_OES;
     if (!isProtected()) {
-        glBindTexture(target, mTextureName);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureName);
+        GLenum filter = GL_NEAREST;
         if (getFiltering() || needsFiltering() || isFixedSize() || isCropped()) {
             // TODO: we could be more subtle with isFixedSize()
-            glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameterx(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        } else {
-            glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameterx(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            filter = GL_LINEAR;
         }
-        glEnable(target);
+        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, filter);
+        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, filter);
         glMatrixMode(GL_TEXTURE);
         glLoadMatrixf(mTextureMatrix);
         glMatrixMode(GL_MODELVIEW);
+        glEnable(GL_TEXTURE_EXTERNAL_OES);
+        glDisable(GL_TEXTURE_2D);
     } else {
-        target = GL_TEXTURE_2D;
-        glBindTexture(target, mFlinger->getProtectedTexName());
-        glEnable(target);
+        glBindTexture(GL_TEXTURE_2D, mFlinger->getProtectedTexName());
         glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+        glEnable(GL_TEXTURE_2D);
     }
 
     drawWithOpenGL(clip);
 
-    glDisable(target);
+    glDisable(GL_TEXTURE_EXTERNAL_OES);
+    glDisable(GL_TEXTURE_2D);
 }
 
 // As documented in libhardware header, formats in the range
