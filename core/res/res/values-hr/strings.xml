@@ -665,6 +665,16 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Umetnite SIM karticu."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Nedostaje SIM kartica ili nije čitljiva. Umetnite SIM karticu."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Vaša SIM kartica trajno je onemogućena."\n"Obratite se svom pružatelju bežičnih usluga za dobivanje druge SIM kartice."</string>
+    <!-- no translation found for lockscreen_transport_prev_description (201594905152746886) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_next_description (6089297650481292363) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_pause_description (7659088786780128001) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_play_description (5888422938351019426) -->
+    <skip />
+    <!-- no translation found for lockscreen_transport_stop_description (4562318378766987601) -->
+    <skip />
     <string name="emergency_calls_only" msgid="6733978304386365407">"Samo hitni pozivi"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Mreža je zaključana"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM kartica je zaključana PUK-om."</string>
@@ -694,6 +704,14 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Otključaj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zvuk je uključen"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Zvuk isključen"</string>
+    <!-- no translation found for lockscreen_access_pattern_start (3941045502933142847) -->
+    <skip />
+    <!-- no translation found for lockscreen_access_pattern_cleared (5583479721001639579) -->
+    <skip />
+    <!-- no translation found for lockscreen_access_pattern_cell_added (6756031208359292487) -->
+    <skip />
+    <!-- no translation found for lockscreen_access_pattern_detected (4988730895554057058) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1160,9 +1178,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Fotoaparat"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Bešumno"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Zvuk je uključen"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Tipka. Da bi se pri upisivanju zaporke čule tipke, potrebne su slušalice."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Priključite slušalice da biste čuli tipke zaporke izgovorene naglas."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Točka."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Kreni na početnu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Kreni gore"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Više opcija"</string>

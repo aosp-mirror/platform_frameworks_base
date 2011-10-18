@@ -62,8 +62,20 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"호환성 확대/축소"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"앱이 작은 화면에 맞도록 설계된 경우 시계 옆에 확대/축소 컨트롤이 표시됩니다."</string>
-    <string name="screenshot_saving_toast" msgid="8592630119048713208">"캡쳐화면이 갤러리에 저장되었습니다."</string>
-    <string name="screenshot_failed_toast" msgid="1990979819772906912">"캡쳐 화면을 저장할 수 없습니다. 외부 저장소를 사용 중인 것 같습니다."</string>
+    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"미디어 플레이어로 마운트(MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"카메라로 마운트(PTP)"</string>
@@ -116,6 +128,8 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"전신 타자기(TTY)가 사용 설정되었습니다."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"벨소리가 진동입니다."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"벨소리가 무음입니다."</string>
+    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 데이터 사용중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 데이터 사용중지됨"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"모바일 데이터 사용중지됨"</string>

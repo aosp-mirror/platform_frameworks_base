@@ -62,8 +62,20 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"بزرگنمایی سازگاری"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"اگر یک برنامه برای صفحه کوچک تری طراحی شده باشد، یک کنترل بزرگنمایی توسط ساعت نشان داده می شود."</string>
-    <string name="screenshot_saving_toast" msgid="8592630119048713208">"تصویر از صفحه در گالری ذخیره شد"</string>
-    <string name="screenshot_failed_toast" msgid="1990979819772906912">"نمی‌تواند عکس صفحه را ذخیره کند. ممکن است محل ذخیره خارجی در حال استفاده باشد."</string>
+    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"گزینه های انتقال فایل USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"نصب به عنوان دستگاه پخش رسانه (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"تصب به عنوان دوربین (PTP)"</string>
@@ -116,6 +128,8 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"زنگ لرزشی."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"زنگ بیصدا."</string>
+    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"داده 2G-3G غیرفعال شد"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"داده 4G غیر فعال شد"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"داده‌های تلفن همراه غیرفعال است"</string>

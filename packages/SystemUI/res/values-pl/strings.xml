@@ -62,8 +62,20 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Rozciągnij, aby wypełnić ekran"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Powiększenie w trybie zgodności"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Jeśli aplikacja została przystosowana do mniejszego ekranu, obok zegara zostanie wyświetlony element sterujący powiększeniem."</string>
-    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Zrzut ekranu został zapisany w galerii."</string>
-    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Nie można zapisać zrzutu ekranu. Pamięć zewnętrzna może być używana."</string>
+    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB – opcje przesyłania plików"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Podłącz jako odtwarzacz multimedialny (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Podłącz jako aparat (PTP)"</string>
@@ -116,6 +128,8 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Dalekopis (TTY) włączony."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Dzwonek z wibracjami."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Dzwonek wyciszony."</string>
+    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Wyłączono transmisję danych 2G/3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Wyłączono transmisję danych 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Wyłączono komórkową transmisję danych"</string>

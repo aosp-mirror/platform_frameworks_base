@@ -665,6 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inserta una tarjeta SIM"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Falta la tarjeta SIM o no es legible. Introduce una tarjeta SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Tu tarjeta SIM se ha inhabilitado de forma permanente."\n" Ponte en contacto con tu proveedor de servicios inalámbricos para obtener otra tarjeta SIM."</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Botón de canción anterior"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Botón de siguiente canción"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Botón de pausa"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Botón de reproducción"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Botón para detener la reproducción"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Solo llamadas de emergencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Bloqueada para la red"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La tarjeta SIM está bloqueada con el código PUK."</string>
@@ -694,6 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloquear"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Activar sonido"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Desactivar sonido"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Patrón iniciado"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Patrón borrado"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Se ha añadido una celda."</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Patrón completado"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -859,7 +868,7 @@
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
-    <string name="replace" msgid="5781686059063148930">"Sustituir???"</string>
+    <string name="replace" msgid="5781686059063148930">"Sustituir..."</string>
     <string name="delete" msgid="6098684844021697789">"Eliminar"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
@@ -1160,9 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Cámara"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencio"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Sonido activado"</string>
-    <!-- outdated translation 4407722573911224960 -->     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Se necesitan auriculares para escuchar las teclas mientras se escribe una contraseña."</string>
-    <!-- no translation found for keyboard_password_character_no_headset (2859873770886153678) -->
-    <skip />
+    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Conecta un auricular para escuchar las contraseñas en voz alta."</string>
+    <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punto"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Ir al escritorio"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>

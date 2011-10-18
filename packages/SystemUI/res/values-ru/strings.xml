@@ -23,8 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Не беспокоить"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показать уведомления"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удаление приложения из списка"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Сведения о приложении"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удаление из списка"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Нет данных"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
   <plurals name="status_bar_accessibility_recent_apps">
@@ -62,8 +62,20 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Масштаб и совместимость"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Если приложение рассчитано на экран меньших размеров, рядом с часами появятся средства масштабирования."</string>
-    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Скриншот сохранен в галерее"</string>
-    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Не удается сохранить скриншот. Возможно, внешние накопители используются."</string>
+    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <skip />
+    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"Параметры передачи через USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Подключить как мультимедийный проигрыватель (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Установить как камеру (PTP)"</string>
@@ -118,6 +130,8 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Телетайп включен."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибровызов."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Беззвучный режим."</string>
+    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Передача данных по каналам 2G и 3G отключена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Передача данных по каналу 4G отключена"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобильный Интернет отключен"</string>
