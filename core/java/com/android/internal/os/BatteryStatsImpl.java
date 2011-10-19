@@ -98,6 +98,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     // in to one common name.
     private static final int MAX_WAKELOCKS_PER_UID = 30;
 
+    // The system process gets more.  It is special.  Oh so special.
+    // With, you know, special needs.  Like this.
+    private static final int MAX_WAKELOCKS_PER_UID_IN_SYSTEM = 50;
+
     private static final String BATCHED_WAKELOCK_NAME = "*overflow*";
 
     private static int sNumSpeedSteps;
@@ -2895,12 +2899,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 String wakelockName = in.readString();
                 Uid.Wakelock wakelock = new Wakelock();
                 wakelock.readFromParcelLocked(unpluggables, in);
-                if (mWakelockStats.size() < MAX_WAKELOCKS_PER_UID) {
-                    // We will just drop some random set of wakelocks if
-                    // the previous run of the system was an older version
-                    // that didn't impose a limit.
-                    mWakelockStats.put(wakelockName, wakelock);
-                }
+                // We will just drop some random set of wakelocks if
+                // the previous run of the system was an older version
+                // that didn't impose a limit.
+                mWakelockStats.put(wakelockName, wakelock);
             }
 
             int numSensors = in.readInt();
@@ -3904,7 +3906,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         public StopwatchTimer getWakeTimerLocked(String name, int type) {
             Wakelock wl = mWakelockStats.get(name);
             if (wl == null) {
-                if (mWakelockStats.size() > MAX_WAKELOCKS_PER_UID) {
+                final int N = mWakelockStats.size();
+                if (N > MAX_WAKELOCKS_PER_UID && (mUid != Process.SYSTEM_UID
+                        || N > MAX_WAKELOCKS_PER_UID_IN_SYSTEM)) {
                     name = BATCHED_WAKELOCK_NAME;
                     wl = mWakelockStats.get(name);
                 }
