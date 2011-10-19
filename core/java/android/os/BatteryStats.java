@@ -1095,6 +1095,16 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    private static long computeWakeLock(Timer timer, long batteryRealtime, int which) {
+        if (timer != null) {
+            // Convert from microseconds to milliseconds with rounding
+            long totalTimeMicros = timer.getTotalTimeLocked(batteryRealtime, which);
+            long totalTimeMillis = (totalTimeMicros + 500) / 1000;
+            return totalTimeMillis;
+        }
+        return 0;
+    }
+
     /**
      *
      * @param sb a StringBuilder object.
@@ -1109,9 +1119,7 @@ public abstract class BatteryStats implements Parcelable {
             long batteryRealtime, String name, int which, String linePrefix) {
         
         if (timer != null) {
-            // Convert from microseconds to milliseconds with rounding
-            long totalTimeMicros = timer.getTotalTimeLocked(batteryRealtime, which);
-            long totalTimeMillis = (totalTimeMicros + 500) / 1000;
+            long totalTimeMillis = computeWakeLock(timer, batteryRealtime, which);
             
             int count = timer.getCountLocked(which);
             if (totalTimeMillis != 0) {
@@ -1735,6 +1743,8 @@ public abstract class BatteryStats implements Parcelable {
 
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
             if (wakelocks.size() > 0) {
+                long totalFull = 0, totalPartial = 0, totalWindow = 0;
+                int count = 0;
                 for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent
                     : wakelocks.entrySet()) {
                     Uid.Wakelock wl = ent.getValue();
@@ -1754,6 +1764,44 @@ public abstract class BatteryStats implements Parcelable {
                         // Only print out wake locks that were held
                         pw.println(sb.toString());
                         uidActivity = true;
+                        count++;
+                    }
+                    totalFull += computeWakeLock(wl.getWakeTime(WAKE_TYPE_FULL),
+                            batteryRealtime, which);
+                    totalPartial += computeWakeLock(wl.getWakeTime(WAKE_TYPE_PARTIAL),
+                            batteryRealtime, which);
+                    totalWindow += computeWakeLock(wl.getWakeTime(WAKE_TYPE_WINDOW),
+                            batteryRealtime, which);
+                }
+                if (count > 1) {
+                    if (totalFull != 0 || totalPartial != 0 || totalWindow != 0) {
+                        sb.setLength(0);
+                        sb.append(prefix);
+                        sb.append("    TOTAL wake: ");
+                        boolean needComma = false;
+                        if (totalFull != 0) {
+                            needComma = true;
+                            formatTimeMs(sb, totalFull);
+                            sb.append("full");
+                        }
+                        if (totalPartial != 0) {
+                            if (needComma) {
+                                sb.append(", ");
+                            }
+                            needComma = true;
+                            formatTimeMs(sb, totalPartial);
+                            sb.append("partial");
+                        }
+                        if (totalWindow != 0) {
+                            if (needComma) {
+                                sb.append(", ");
+                            }
+                            needComma = true;
+                            formatTimeMs(sb, totalWindow);
+                            sb.append("window");
+                        }
+                        sb.append(" realtime");
+                        pw.println(sb.toString());
                     }
                 }
             }
