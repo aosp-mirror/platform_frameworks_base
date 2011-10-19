@@ -1025,10 +1025,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * Handles changes to the APN database.
      */
     private void onApnChanged() {
-        // TODO: How to handle when multiple APNs are active?
-
-        ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
-        boolean defaultApnIsDisconnected = defaultApnContext.isDisconnected();
+        State overallState = getOverallState();
+        boolean isDisconnected = (overallState == State.IDLE || overallState == State.FAILED);
 
         if (mPhone instanceof GSMPhone) {
             // The "current" may no longer be valid.  MMS depends on this to send properly. TBD
@@ -1039,8 +1037,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // match the current operator.
         if (DBG) log("onApnChanged: createAllApnList and cleanUpAllConnections");
         createAllApnList();
-        cleanUpAllConnections(!defaultApnIsDisconnected, Phone.REASON_APN_CHANGED);
-        if (defaultApnIsDisconnected) {
+        cleanUpAllConnections(!isDisconnected, Phone.REASON_APN_CHANGED);
+        if (isDisconnected) {
             setupDataOnReadyApns(Phone.REASON_APN_CHANGED);
         }
     }
