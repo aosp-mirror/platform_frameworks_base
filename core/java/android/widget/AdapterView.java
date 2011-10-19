@@ -925,7 +925,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         event.setCurrentItemIndex(getSelectedItemPosition());
         event.setFromIndex(getFirstVisiblePosition());
         event.setToIndex(getLastVisiblePosition());
-        event.setItemCount(getAdapter().getCount());
+        event.setItemCount(getCount());
     }
 
     private boolean isScrollableForAccessibility() {
