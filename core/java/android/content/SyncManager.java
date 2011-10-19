@@ -990,8 +990,8 @@ public class SyncManager implements OnAccountsUpdateListener {
                 mBound = false;
                 mContext.unbindService(this);
             }
-            mSyncWakeLock.setWorkSource(null);
             mSyncWakeLock.release();
+            mSyncWakeLock.setWorkSource(null);
         }
 
         @Override
