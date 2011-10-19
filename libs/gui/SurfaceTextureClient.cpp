@@ -409,9 +409,9 @@ int SurfaceTextureClient::connect(int api) {
 int SurfaceTextureClient::disconnect(int api) {
     LOGV("SurfaceTextureClient::disconnect");
     Mutex::Autolock lock(mMutex);
+    freeAllBuffers();
     int err = mSurfaceTexture->disconnect(api);
     if (!err) {
-        freeAllBuffers();
         mReqFormat = 0;
         mReqWidth = 0;
         mReqHeight = 0;
