@@ -281,7 +281,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     final AccessibilityManager mAccessibilityManager;
 
-    AccessibilityInteractionController mAccessibilityInteractionContrtoller;
+    AccessibilityInteractionController mAccessibilityInteractionController;
 
     AccessibilityInteractionConnectionManager mAccessibilityInteractionConnectionManager;
 
@@ -3490,10 +3490,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             throw new IllegalStateException("getAccessibilityInteractionController"
                     + " called when there is no mView");
         }
-        if (mAccessibilityInteractionContrtoller == null) {
-            mAccessibilityInteractionContrtoller = new AccessibilityInteractionController();
+        if (mAccessibilityInteractionController == null) {
+            mAccessibilityInteractionController = new AccessibilityInteractionController();
         }
-        return mAccessibilityInteractionContrtoller;
+        return mAccessibilityInteractionController;
     }
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
