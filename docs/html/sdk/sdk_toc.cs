@@ -79,7 +79,7 @@ class="new">new!</span></li>
         <div><a href="<?cs var:toroot ?>sdk/android-4.0.html">
         <span class="en">Android 4.0 Platform</span></a> <span class="new">new!</span></div>
         <ul>
-          <!-- <li><a href="<?cs var:toroot ?>sdk/android-4.0-highlights.html">Platform Highlights</a></li> -->
+          <li><a href="<?cs var:toroot ?>sdk/android-4.0-highlights.html">Platform Highlights</a></li>
           <li><a href="<?cs var:toroot ?>sdk/api_diff/14/changes.html">API Differences Report &raquo;</a></li>
         </ul>
       </li>
