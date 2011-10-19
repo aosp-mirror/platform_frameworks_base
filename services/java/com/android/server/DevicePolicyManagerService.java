@@ -44,6 +44,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
@@ -1656,8 +1657,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private boolean isExtStorageEncrypted() {
+        String state = SystemProperties.get("vold.decrypt");
+        return !"".equals(state);
+    }
+
     void wipeDataLocked(int flags) {
-        if ((flags&DevicePolicyManager.WIPE_EXTERNAL_STORAGE) != 0) {
+        // If the SD card is encrypted and non-removable, we have to force a wipe.
+        boolean forceExtWipe = !Environment.isExternalStorageRemovable() && isExtStorageEncrypted();
+        boolean wipeExtRequested = (flags&DevicePolicyManager.WIPE_EXTERNAL_STORAGE) != 0;
+
+        // Note: we can only do the wipe via ExternalStorageFormatter if the volume is not emulated.
+        if ((forceExtWipe || wipeExtRequested) && !Environment.isExternalStorageEmulated()) {
             Intent intent = new Intent(ExternalStorageFormatter.FORMAT_AND_FACTORY_RESET);
             intent.setComponent(ExternalStorageFormatter.COMPONENT_NAME);
             mWakeLock.acquire(10000);
