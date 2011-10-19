@@ -169,7 +169,7 @@
     <string name="compat_mode_help_body">When an app was designed for a smaller screen, a zoom control will appear by the clock.</string>
 
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
-    <string name="screenshot_saving_ticker">Saving\u2026</string>
+    <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
     <string name="screenshot_saving_title">Saving screenshot\u2026</string>
     <!-- Notification text displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=100] -->
@@ -181,7 +181,7 @@
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
     <string name="screenshot_failed_title">Couldn\'t capture screenshot.</string>
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
-    <string name="screenshot_failed_text">Couldn\'t save screenshot. External storage may be in use.</string>
+    <string name="screenshot_failed_text">Couldn\'t save screenshot. Storage may be in use.</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>
