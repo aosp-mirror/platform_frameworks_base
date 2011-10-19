@@ -411,6 +411,11 @@ bool SurfaceFlinger::threadLoop()
     // post surfaces (if needed)
     handlePageFlip();
 
+    if (mDirtyRegion.isEmpty()) {
+        // nothing new to do.
+        return true;
+    }
+
     if (UNLIKELY(mHwWorkListDirty)) {
         // build the h/w work list
         handleWorkList();
@@ -444,6 +449,9 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
+    // this should never happen. we do the flip anyways so we don't
+    // risk to cause a deadlock with hwc
+    LOGW_IF(mSwapRegion.isEmpty(), "mSwapRegion is empty");
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const nsecs_t now = systemTime();
     mDebugInSwapBuffers = now;
@@ -892,7 +900,7 @@ void SurfaceFlinger::setupHardwareComposer(Region& dirtyInOut)
         // data.
         //
         // Also we want to make sure to not clear areas that belong to
-        // layers above that won't redraw (we would just erasing them),
+        // layers above that won't redraw (we would just be erasing them),
         // that is, we can't erase anything outside the dirty region.
 
         Region transparent;
@@ -1687,7 +1695,7 @@ status_t SurfaceFlinger::onTransact(
 void SurfaceFlinger::repaintEverything() {
     Mutex::Autolock _l(mStateLock);
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    mDirtyRegion.set(hw.bounds()); // careful that's not thread-safe
+    mDirtyRegion.set(hw.bounds());
     signalEvent();
 }
 
