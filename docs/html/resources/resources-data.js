@@ -599,7 +599,7 @@ var ANDROID_RESOURCES = [
   },
   {
     tags: ['sample', 'input', 'new'],
-    path: 'samples/SampleSpellCheckerService/index.html',
+    path: 'samples/SpellChecker/SampleSpellCheckerService/index.html',
     title: {
       en: 'Spell Checker'
     },
