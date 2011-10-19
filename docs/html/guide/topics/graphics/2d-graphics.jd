@@ -188,7 +188,7 @@ browse the source in the <a href="{@docRoot}guide/samples/index.html">Sample Cod
 
 <p>This document discusses the basics of using Drawable objects to draw graphics and how to use a
 couple subclasses of the Drawable class. For information on using Drawables to do frame-by-frame
-animation, see <a href="{@docRoot}guide/topics/animation/frame-animation.html">Frame-by-Frame
+animation, see <a href="{@docRoot}guide/topics/animation/drawable-animation.html">Drawable
 Animation</a>.</p>
 
 <p>A {@link android.graphics.drawable.Drawable} is a general abstraction for "something that can be

@@ -42,8 +42,8 @@ page.title=USB Host and Accessory
   dependant on the device's hardware, regardless of platform level. You can filter for devices that
   support USB host and accessory through a <a href=
   "{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a> element. See
-  the USB <a href="{@docRoot}guide/topics/USB/accessory.html">accessory</a> and <a href=
-  "{@docRoot}guide/topics/USB/host.html">host</a> documentation for more details.</p>
+  the USB <a href="{@docRoot}guide/topics/usb/accessory.html">accessory</a> and <a href=
+  "{@docRoot}guide/topics/usb/host.html">host</a> documentation for more details.</p>
 
   <h2>Debugging considerations</h2>
 

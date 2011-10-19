@@ -411,8 +411,8 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/Acti
 >Action Bar</a>: Samples that demonstrate various Action Bar features, such as tabs, logos, and
 action items.</li>
   <li><a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.
-html">Clipboard</a>: An example of how to use the clipboard for copy and paste operations.</li>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.html"
+>Clipboard</a>: An example of how to use the clipboard for copy and paste operations.</li>
   <li><a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/DragAndDropDemo.html">
 Drag and Drop</a>: An example of how to perform drag and drop with new View events.</li>
@@ -427,11 +427,11 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animatio
 Property Animation</a>: Several samples using the new animation APIs to animate object
 properties.</li>
   <li><a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SearchViewActionBar.
-html">Search View Widget</a>: Example using the new search widget in the Action Bar (as an
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SearchViewActionBar.html">
+Search View Widget</a>: Example using the new search widget in the Action Bar (as an
 "action view").</li>
   <li><a
-href="{@docRoot}resources/samples/Renderscript/index.html">Renderscript</a>: Contains several
+href="{@docRoot}resources/samples/RenderScript/index.html">Renderscript</a>: Contains several
 different applications that demonstrate using renderscript APIs for computations and 3D
 graphics.</li>
 </ul>

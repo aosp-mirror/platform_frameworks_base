@@ -396,7 +396,7 @@ page.title=Android Open Accessory Development Kit
 
     <li>Connect the ADK board (USB-A) to your Android-powered device (micro-USB). Ensure that the
     power cable to the accessory is plugged in or that the micro-USB port on the accesory is
-    connected to your computer for power (this also allows you to <a href="monitoring">monitor the
+    connected to your computer for power (this also allows you to <a href="#monitoring">monitor the
     ADK board</a>). When connected, accept the prompt that asks for whether or not to open the
     DemoKit application to connect to the accessory. If the prompt does not show up, connect and
     reconnect the accessory.</li>
@@ -625,8 +625,8 @@ void loop()
   <code>AndroidAccessory::isAccessoryDevice()</code>. This method checks the vendor and product ID
   of the device descriptor. A device in accessory mode has a vendor ID of 0x18D1 and a product ID
   of 0x2D00 or 0x2D01. If the device is in accessory mode, then the ADK board can <a href=
-  "#establish-a">establish communication with the device</a>. If not, the board <a href=
-  "start-a">attempts to start the device in accessory mode</a>.</p>
+  "#establish">establish communication with the device</a>. If not, the board <a href=
+  "#start">attempts to start the device in accessory mode</a>.</p>
   <pre>
 bool AndroidAccessory::isConnected(void)
 {
@@ -699,7 +699,7 @@ bool AndroidAccessory::switchDevice(byte addr)
 </pre>If this method returns false, the board waits until a new device is connected. If it is
 successful, the device displays itself on the USB bus as being in accessory mode when the ADK board
 re-enumerates the bus. When the device is in accessory mode, the accessory then <a href=
-"establish-a">establishes communication with the device</a>.
+"establish-adk">establishes communication with the device</a>.
 
   <h3 id="establish-adk">Establish communication with the device</h3>
 

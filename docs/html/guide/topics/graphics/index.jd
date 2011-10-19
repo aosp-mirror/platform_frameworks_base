@@ -5,7 +5,7 @@ page.title=Graphics
   <div id="qv">
   <h2>Topics</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/graphics/canvas.html">Canvas and Drawables</a></li>
+    <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and Drawables</a></li>
     <li><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
     <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
   </ol>
