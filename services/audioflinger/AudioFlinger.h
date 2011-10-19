@@ -492,10 +492,12 @@ private:
                                             int sessionId = AUDIO_SESSION_OUTPUT_MIX);
                     // check if some effects must be suspended/restored when an effect is enabled
                     // or disabled
-        virtual     void checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
+                    void checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
                                                      bool enabled,
                                                      int sessionId = AUDIO_SESSION_OUTPUT_MIX);
-
+                    void checkSuspendOnEffectEnabled_l(const sp<EffectModule>& effect,
+                                                       bool enabled,
+                                                       int sessionId = AUDIO_SESSION_OUTPUT_MIX);
         mutable     Mutex                   mLock;
 
     protected:
@@ -1299,7 +1301,7 @@ private:
         // suspend all eligible effects
         void setEffectSuspendedAll_l(bool suspend);
         // check if effects should be suspend or restored when a given effect is enable or disabled
-        virtual void checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
+        void checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
                                               bool enabled);
 
         status_t dump(int fd, const Vector<String16>& args);
