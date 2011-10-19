@@ -334,7 +334,7 @@ protected:
 
 class SurfaceTextureGLTest : public GLTest {
 protected:
-    static const GLint TEX_ID = 123;
+    enum { TEX_ID = 123 };
 
     virtual void SetUp() {
         GLTest::SetUp();
@@ -1436,6 +1436,88 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedSwapBuffersWhileDequeueStalled
         mST->updateTexImage();
         LOGV("-updateTexImage");
     }
+}
+
+TEST_F(SurfaceTextureGLTest, EglDestroySurfaceUnrefsBuffers) {
+    EGLSurface stcEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
+            mANW.get(), NULL);
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    ASSERT_NE(EGL_NO_SURFACE, stcEglSurface);
+
+    sp<GraphicBuffer> buffers[3];
+
+    for (int i = 0; i < 3; i++) {
+        // Produce a frame
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, stcEglSurface, stcEglSurface,
+                mEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        glClear(GL_COLOR_BUFFER_BIT);
+        eglSwapBuffers(mEglDisplay, stcEglSurface);
+
+        // Consume a frame
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
+                mEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        mST->updateTexImage();
+        buffers[i] = mST->getCurrentBuffer();
+    }
+
+    // Destroy the GL texture object to release its ref on buffers[2].
+    GLuint texID = TEX_ID;
+    glDeleteTextures(1, &texID);
+
+    // Destroy the EGLSurface
+    EXPECT_TRUE(eglDestroySurface(mEglDisplay, stcEglSurface));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+    // Release the ref that the SurfaceTexture has on buffers[2].
+    mST->abandon();
+
+    EXPECT_EQ(1, buffers[0]->getStrongCount());
+    EXPECT_EQ(1, buffers[1]->getStrongCount());
+    EXPECT_EQ(1, buffers[2]->getStrongCount());
+}
+
+TEST_F(SurfaceTextureGLTest, EglDestroySurfaceAfterAbandonUnrefsBuffers) {
+    EGLSurface stcEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
+            mANW.get(), NULL);
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    ASSERT_NE(EGL_NO_SURFACE, stcEglSurface);
+
+    sp<GraphicBuffer> buffers[3];
+
+    for (int i = 0; i < 3; i++) {
+        // Produce a frame
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, stcEglSurface, stcEglSurface,
+                mEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        glClear(GL_COLOR_BUFFER_BIT);
+        EXPECT_TRUE(eglSwapBuffers(mEglDisplay, stcEglSurface));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        // Consume a frame
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
+                mEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_EQ(NO_ERROR, mST->updateTexImage());
+        buffers[i] = mST->getCurrentBuffer();
+    }
+
+    // Abandon the SurfaceTexture, releasing the ref that the SurfaceTexture has
+    // on buffers[2].
+    mST->abandon();
+
+    // Destroy the GL texture object to release its ref on buffers[2].
+    GLuint texID = TEX_ID;
+    glDeleteTextures(1, &texID);
+
+    // Destroy the EGLSurface.
+    EXPECT_TRUE(eglDestroySurface(mEglDisplay, stcEglSurface));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+    EXPECT_EQ(1, buffers[0]->getStrongCount());
+    EXPECT_EQ(1, buffers[1]->getStrongCount());
+    EXPECT_EQ(1, buffers[2]->getStrongCount());
 }
 
 } // namespace android
