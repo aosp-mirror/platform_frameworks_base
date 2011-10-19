@@ -27,6 +27,7 @@ import android.widget.ImageView;
 public class ComputePerf extends Activity {
 
     private LaunchTest mLT;
+    private Mandelbrot mMandel;
     private RenderScript mRS;
 
     @Override
@@ -38,6 +39,10 @@ public class ComputePerf extends Activity {
         mLT = new LaunchTest(mRS, getResources());
         mLT.run();
         mLT.run();
+
+        mMandel = new Mandelbrot(mRS, getResources());
+        mMandel.run();
+
     }
 
 }
