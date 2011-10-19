@@ -158,7 +158,7 @@ contacts in this table are then aggregated into the single user-visible profile 
 <p>Adding a new raw contact for the profile requires the {@link
 android.Manifest.permission#WRITE_PROFILE} permission. Likewise, in order to read from the profile
 table, you must request the {@link android.Manifest.permission#READ_PROFILE} permission. However,
-most apps should need to read the user profile, even when contributing data to the
+most apps should not need to read the user profile, even when contributing data to the
 profile. Reading the user profile is a sensitive permission and you should expect users to be
 skeptical of apps that request it.</p>
 
