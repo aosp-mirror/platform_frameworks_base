@@ -983,8 +983,9 @@ void SurfaceFlinger::debugFlashRegions()
         composeSurfaces(repaint);
     }
 
+    glDisable(GL_TEXTURE_EXTERNAL_OES);
+    glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
-    glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
 
     static int toggle = 0;
@@ -1027,9 +1028,6 @@ void SurfaceFlinger::drawWormhole() const
     const int32_t width = hw.getWidth();
     const int32_t height = hw.getHeight();
 
-    glDisable(GL_BLEND);
-    glDisable(GL_DITHER);
-
     if (LIKELY(!mDebugBackground)) {
         glClearColor(0,0,0,0);
         Region::const_iterator it = region.begin();
@@ -1044,19 +1042,20 @@ void SurfaceFlinger::drawWormhole() const
         const GLshort vertices[][2] = { { 0, 0 }, { width, 0 },
                 { width, height }, { 0, height }  };
         const GLshort tcoords[][2] = { { 0, 0 }, { 1, 0 },  { 1, 1 }, { 0, 1 } };
+
         glVertexPointer(2, GL_SHORT, 0, vertices);
         glTexCoordPointer(2, GL_SHORT, 0, tcoords);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-#if defined(GL_OES_EGL_image_external)
-        if (GLExtensions::getInstance().haveTextureExternal()) {
-            glDisable(GL_TEXTURE_EXTERNAL_OES);
-        }
-#endif
+
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mWormholeTexName);
         glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
+
+        glDisable(GL_BLEND);
+
         glScalef(width*(1.0f/32.0f), height*(1.0f/32.0f), 1);
         Region::const_iterator it = region.begin();
         Region::const_iterator const end = region.end();
@@ -1731,6 +1730,8 @@ status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
             GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tname, 0);
 
     // redraw the screen entirely...
+    glDisable(GL_TEXTURE_EXTERNAL_OES);
+    glDisable(GL_TEXTURE_2D);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -1922,6 +1923,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDeleteTextures(1, &tname);
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
     return NO_ERROR;
 }
 
@@ -2066,6 +2068,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDeleteTextures(1, &tname);
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
 
     return NO_ERROR;
 }
