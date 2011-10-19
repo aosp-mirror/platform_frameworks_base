@@ -1196,8 +1196,10 @@ a narrow screen, so the system will place more of them into the overflow menu. H
 allows you to enable “split action bar" so that more action items can appear on the screen in a
 separate bar at the bottom of the screen. To enable split action bar, add {@link
 android.R.attr#uiOptions android:uiOptions} with {@code "splitActionBarWhenNarrow"} to either your
-<a href="guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> tag or
-individual <a href="guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> tags
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+tag or
+individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> tags
 in your manifest file. When enabled, the system will add an additional bar at the bottom of the
 screen for all action items when the screen is narrow (no action items will appear in the primary
 action bar).</p>
@@ -1267,9 +1269,8 @@ public boolean onCreateOptionsMenu(Menu menu) {
 </pre>
 
 <p>For an example using the {@link android.widget.ShareActionProvider}, see the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/
-ActionBarActionProviderActivity.html">ActionBarActionProviderActivity</a>
-class in ApiDemos.</p>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarActionProviderActivity.html"
+>ActionBarActionProviderActivity</a> class in ApiDemos.</p>
 
 
 <h4>Collapsible action views</h4>
@@ -1530,7 +1531,7 @@ href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">state l
 provide a different background drawable when a cursor hovers over the view.</p>
 
 <p>For a demonstration of the new hover events, see the <a
-href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/view/Hover.html">Hover</a> class in
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/Hover.html">Hover</a> class in
 ApiDemos.</p>
 
 
@@ -1571,7 +1572,7 @@ android.view.MotionEvent#AXIS_DISTANCE}, {@link android.view.MotionEvent#AXIS_TI
 android.view.MotionEvent#AXIS_ORIENTATION}.</p>
 
 <p>For a demonstration of tool types, button states and the new axis codes, see the <a
-href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/graphics/TouchPaint.html">TouchPaint
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchPaint.html">TouchPaint
 </a> class in ApiDemos.</p>
 
 
@@ -1773,7 +1774,7 @@ operations. See the
 object (View, Drawable, Fragment, Object, or anything else) and define animation aspects such
 as duration, interpolation, repeat and more. The new framework makes Animations in Android
 simpler than ever. See the
-<a href="{@docRoot}guide/topics/graphics/property-animation.html">Property Animation</a> developer
+<a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> developer
 guide.</li>
       <li>RenderScript graphics and compute engine: RenderScript offers a high performance 3D
 graphics rendering and compute API at the native level, which you write in the C (C99 standard),

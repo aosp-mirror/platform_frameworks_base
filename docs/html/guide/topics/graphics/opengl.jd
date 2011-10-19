@@ -40,14 +40,11 @@ parent.link=index.html
     </ol>
     <h2>Related samples</h2>
     <ol>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
-GLSurfaceViewActivity.html">GLSurfaceViewActivity</a></li>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
-GLES20Activity.html">GLES20Activity</a></li>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
-TouchRotateActivity.html">TouchRotateActivity</a></li>
-      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
-CompressedTextureActivity.html">Compressed Textures</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">GLSurfaceViewActivity</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/GLES20Activity.html">GLES20Activity</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity.html">TouchRotateActivity</a></li>
+      <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/CompressedTextureActivity.html">Compressed Textures</a></li>
     </ol>
     <h2>See also</h2>
     <ol>
@@ -94,8 +91,8 @@ understanding how to implement these classes in an activity should be your first
     implement the touch listeners, as shown in OpenGL Tutorials for
     <a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html#touch">ES 1.0</a>,
     <a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html#touch">ES 2.0</a> and the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity
-.html">TouchRotateActivity</a> sample.</dd>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity.html"
+>TouchRotateActivity</a> sample.</dd>
 
   <dt><strong>{@link android.opengl.GLSurfaceView.Renderer}</strong></dt>
   <dd>This interface defines the methods required for drawing graphics in an OpenGL {@link
@@ -410,9 +407,8 @@ framework provides support for the ETC1 compression format as a standard feature
 android.opengl.ETC1Util} utility class and the {@code etc1tool} compression tool (located in the
 Android SDK at {@code &lt;sdk&gt;/tools/}). For an example of an Android application that uses
 texture compression, see the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
-CompressedTextureActivity.html">CompressedTextureActivity</a> code sample.
-</p>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/CompressedTextureActivity.html"
+>CompressedTextureActivity</a> code sample.</p>
 
 <p>To check if the ETC1 format is supported on a device, call the {@link
 android.opengl.ETC1Util#isETC1Supported() ETC1Util.isETC1Supported()} method.</p>

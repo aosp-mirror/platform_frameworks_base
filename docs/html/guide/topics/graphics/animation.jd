@@ -6,7 +6,8 @@ page.title=Animation
 
       <h2>See also</h2>
       <ol>
-        <li><a href="{@docRoot}guide/topics/graphics/property-animation.html">Property Animation</a></li>
+        <li><a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property
+Animation</a></li>
         <li><a href="{@docRoot}guide/topics/graphics/view-animation.html">View Animation</a></li>
         <li><a href="{@docRoot}guide/topics/graphics/drawable-animation.html">Drawable Animation</a></li>
       <ol>

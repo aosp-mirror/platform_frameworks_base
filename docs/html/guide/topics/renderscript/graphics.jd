@@ -22,13 +22,13 @@ parent.link=index.html
       <ol>
         <li><a href="{@docRoot}resources/samples/RenderScript/Balls/index.html">Balls</a></li>
 
-        <li><a href=
-        "{@docRoot}resources/samples/Renderscript/Fountain/index.html">Fountain</a></li>
+        <li><a href="{@docRoot}resources/samples/RenderScript/Fountain/index.html">Fountain</a></li>
 
         <li><a href="{@docRoot}resources/samples/RenderScript/HelloWorld/index.html">Hello
         World</a></li>
 
-        <li><a href="{@docRoot}resources/samples/RenderScript/Samples/index.html">Samples</a></li>
+        <li><a
+href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samples</a></li>
       </ol>
     </div>
   </div>
