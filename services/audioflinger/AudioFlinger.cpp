@@ -1402,7 +1402,13 @@ void AudioFlinger::ThreadBase::checkSuspendOnEffectEnabled(const sp<EffectModule
                                                             int sessionId)
 {
     Mutex::Autolock _l(mLock);
+    checkSuspendOnEffectEnabled_l(effect, enabled, sessionId);
+}
 
+void AudioFlinger::ThreadBase::checkSuspendOnEffectEnabled_l(const sp<EffectModule>& effect,
+                                                            bool enabled,
+                                                            int sessionId)
+{
     if (mType != RECORD) {
         // suspend all effects in AUDIO_SESSION_OUTPUT_MIX when enabling any effect on
         // another session. This gives the priority to well behaved effect control panels
@@ -5770,6 +5776,9 @@ void AudioFlinger::purgeStaleEffects_l() {
                     sp<EffectHandle> handle = effect->mHandles[j].promote();
                     if (handle != 0) {
                         handle->mEffect.clear();
+                        if (handle->mHasControl && handle->mEnabled) {
+                            t->checkSuspendOnEffectEnabled_l(effect, false, effect->sessionId());
+                        }
                     }
                 }
                 AudioSystem::unregisterEffect(effect->id());
@@ -7390,7 +7399,7 @@ void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
     }
     mEffect->disconnect(this, unpiniflast);
 
-    if (mEnabled) {
+    if (mHasControl && mEnabled) {
         sp<ThreadBase> thread = mEffect->thread().promote();
         if (thread != 0) {
             thread->checkSuspendOnEffectEnabled(mEffect, false, mEffect->sessionId());
