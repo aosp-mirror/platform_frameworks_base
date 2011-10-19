@@ -194,6 +194,9 @@ public class Surface implements Parcelable {
      */
     public static final int FX_SURFACE_DIM     = 0x00020000;
 
+    /** @hide */
+    public static final int FX_SURFACE_SCREENSHOT   = 0x00030000;
+
     /** Mask used for FX values above @hide */
     public static final int FX_SURFACE_MASK     = 0x000F0000;
 

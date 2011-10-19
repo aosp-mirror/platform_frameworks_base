@@ -48,6 +48,7 @@ class Client;
 class DisplayHardware;
 class Layer;
 class LayerDim;
+class LayerScreenshot;
 struct surface_flinger_cblk_t;
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
@@ -183,6 +184,15 @@ public:
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
 
+            status_t renderScreenToTexture(DisplayID dpy,
+                    GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
+
+            status_t postMessageAsync(const sp<MessageBase>& msg,
+                    nsecs_t reltime=0, uint32_t flags = 0);
+
+            status_t postMessageSync(const sp<MessageBase>& msg,
+                    nsecs_t reltime=0, uint32_t flags = 0);
+
     status_t removeLayer(const sp<LayerBase>& layer);
     status_t addLayer(const sp<LayerBase>& layer);
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
@@ -191,6 +201,18 @@ public:
     sp<Layer> getLayer(const sp<ISurface>& sur) const;
 
     GLuint getProtectedTexName() const { return mProtectedTexName; }
+
+
+    class MessageDestroyGLTexture : public MessageBase {
+        GLuint texture;
+    public:
+        MessageDestroyGLTexture(GLuint texture) : texture(texture) { }
+        virtual bool handler() {
+            glDeleteTextures(1, &texture);
+            return true;
+        }
+    };
+
 
 private:
     // DeathRecipient interface
@@ -201,7 +223,6 @@ private:
     friend class LayerBase;
     friend class LayerBaseClient;
     friend class Layer;
-    friend class LayerDim;
 
     sp<ISurface> createSurface(
             ISurfaceComposerClient::surface_data_t* params,
@@ -216,6 +237,10 @@ private:
             PixelFormat& format);
 
     sp<LayerDim> createDimSurface(
+            const sp<Client>& client, DisplayID display,
+            uint32_t w, uint32_t h, uint32_t flags);
+
+    sp<LayerScreenshot> createScreenshotSurface(
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags);
 
@@ -309,12 +334,6 @@ private:
            
 
     mutable     MessageQueue    mEventQueue;
-
-    status_t postMessageAsync(const sp<MessageBase>& msg,
-            nsecs_t reltime=0, uint32_t flags = 0);
-
-    status_t postMessageSync(const sp<MessageBase>& msg,
-            nsecs_t reltime=0, uint32_t flags = 0);
 
                 // access must be protected by mStateLock
     mutable     Mutex                   mStateLock;
