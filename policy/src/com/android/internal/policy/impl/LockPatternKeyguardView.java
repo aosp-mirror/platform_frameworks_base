@@ -42,8 +42,10 @@ import android.content.res.Resources;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -241,6 +243,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
             // TODO: examine all widgets to derive clock status
             mUpdateMonitor.reportClockVisible(false);
+
+            // TODO: We should disable the wallpaper instead
+            setBackgroundColor(0xff000000);
         }
 
         public void requestHide(View view) {
@@ -249,6 +254,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
             // TODO: examine all widgets to derive clock status
             mUpdateMonitor.reportClockVisible(true);
+            setBackgroundDrawable(null);
         }
 
         public boolean isVisible(View self) {
