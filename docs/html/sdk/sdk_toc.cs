@@ -150,11 +150,11 @@ class="new">new!</span></li>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r14</a> <span
-class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r14</a>
+      <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Package,
-r3</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Support Package, r4</a>
+      <span class="new">new!</span></li>
     </ul>
   </li>
   <li>
