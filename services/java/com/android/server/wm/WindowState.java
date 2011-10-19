@@ -1120,7 +1120,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // window's center).
                 final float w = frame.width();
                 final float h = frame.height();
-                tmpMatrix.setScale(1 + 2/w, 1 + 2/h, w/2, h/2);
+                if (w>=1 && h>=1) {
+                    tmpMatrix.setScale(1 + 2/w, 1 + 2/h, w/2, h/2);
+                } else {
+                    tmpMatrix.reset();
+                }
             } else {
                 tmpMatrix.reset();
             }
