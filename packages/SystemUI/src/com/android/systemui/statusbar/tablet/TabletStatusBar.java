@@ -587,6 +587,7 @@ public class TabletStatusBar extends StatusBar implements
 
         // Add the windows
         addPanelWindows();
+        mRecentButton.setOnTouchListener(mRecentsPanel);
 
         mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
         mPile.removeAllViews();
@@ -1805,8 +1806,8 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     public void toggleRecentApps() {
-        int msg = (mRecentsPanel.getVisibility() == View.GONE)
-                ? MSG_OPEN_RECENTS_PANEL : MSG_CLOSE_RECENTS_PANEL;
+        int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
+                ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }

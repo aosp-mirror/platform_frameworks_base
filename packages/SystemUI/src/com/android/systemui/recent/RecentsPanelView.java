@@ -37,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
@@ -57,8 +58,8 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
-public class RecentsPanelView extends RelativeLayout
-        implements OnItemClickListener, RecentsCallback, StatusBarPanel, Animator.AnimatorListener {
+public class RecentsPanelView extends RelativeLayout implements OnItemClickListener, RecentsCallback,
+        StatusBarPanel, Animator.AnimatorListener, View.OnTouchListener {
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private Context mContext;
@@ -74,6 +75,7 @@ public class RecentsPanelView extends RelativeLayout
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
+    private boolean mRecentTasksDirty = true;
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
 
@@ -94,6 +96,7 @@ public class RecentsPanelView extends RelativeLayout
     /* package */ final static class ViewHolder {
         View thumbnailView;
         ImageView thumbnailViewImage;
+        Bitmap thumbnailViewImageBitmap;
         ImageView iconView;
         TextView labelView;
         TextView descriptionView;
@@ -127,6 +130,10 @@ public class RecentsPanelView extends RelativeLayout
                 holder.thumbnailView = convertView.findViewById(R.id.app_thumbnail);
                 holder.thumbnailViewImage = (ImageView) convertView.findViewById(
                         R.id.app_thumbnail_image);
+                // If we set the default thumbnail now, we avoid an onLayout when we update
+                // the thumbnail later (if they both have the same dimensions)
+                updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
+
                 holder.iconView = (ImageView) convertView.findViewById(R.id.app_icon);
                 holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
                 holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
@@ -139,12 +146,15 @@ public class RecentsPanelView extends RelativeLayout
             // index is reverse since most recent appears at the bottom...
             final int index = mRecentTaskDescriptions.size() - position - 1;
 
-            final TaskDescription taskDescription = mRecentTaskDescriptions.get(index);
-            applyTaskDescription(holder, taskDescription, false);
+            final TaskDescription td = mRecentTaskDescriptions.get(index);
+            holder.iconView.setImageDrawable(td.getIcon());
+            holder.labelView.setText(td.getLabel());
+            holder.thumbnailView.setContentDescription(td.getLabel());
+            updateThumbnail(holder, td.getThumbnail(), true, false);
 
-            holder.thumbnailView.setTag(taskDescription);
+            holder.thumbnailView.setTag(td);
             holder.thumbnailView.setOnLongClickListener(new OnLongClickDelegate(convertView));
-            holder.taskDescription = taskDescription;
+            holder.taskDescription = td;
 
             return convertView;
         }
@@ -193,6 +203,7 @@ public class RecentsPanelView extends RelativeLayout
             }
         } else {
             mRecentTasksLoader.cancelLoadingThumbnails();
+            mRecentTasksDirty = true;
         }
         if (animate) {
             if (mShowing != show) {
@@ -250,9 +261,7 @@ public class RecentsPanelView extends RelativeLayout
             createCustomAnimations(transitioner);
         } else {
             ((ViewGroup)mRecentsContainer).setLayoutTransition(null);
-            // Clear memory used by screenshots
-            mRecentTaskDescriptions.clear();
-            mListAdapter.notifyDataSetInvalidated();
+            clearRecentTasksList();
         }
     }
 
@@ -374,47 +383,33 @@ public class RecentsPanelView extends RelativeLayout
         }
     }
 
-
-    void applyTaskDescription(ViewHolder h, TaskDescription td, boolean anim) {
-        h.iconView.setImageDrawable(td.getIcon());
-        if (h.iconView.getVisibility() != View.VISIBLE) {
-            if (anim) {
-                h.iconView.setAnimation(AnimationUtils.loadAnimation(
-                        mContext, R.anim.recent_appear));
-            }
-            h.iconView.setVisibility(View.VISIBLE);
-        }
-        h.labelView.setText(td.getLabel());
-        h.thumbnailView.setContentDescription(td.getLabel());
-        if (h.labelView.getVisibility() != View.VISIBLE) {
-            if (anim) {
-                h.labelView.setAnimation(AnimationUtils.loadAnimation(
-                        mContext, R.anim.recent_appear));
-            }
-            h.labelView.setVisibility(View.VISIBLE);
-        }
-        Bitmap thumbnail = td.getThumbnail();
+    private void updateThumbnail(ViewHolder h, Bitmap thumbnail, boolean show, boolean anim) {
         if (thumbnail != null) {
             // Should remove the default image in the frame
             // that this now covers, to improve scrolling speed.
             // That can't be done until the anim is complete though.
             h.thumbnailViewImage.setImageBitmap(thumbnail);
-            // scale to fill up the full width
-            Matrix scaleMatrix = new Matrix();
-            float scale = mThumbnailWidth / (float) thumbnail.getWidth();
-            scaleMatrix.setScale(scale, scale);
-            h.thumbnailViewImage.setScaleType(ScaleType.MATRIX);
-            h.thumbnailViewImage.setImageMatrix(scaleMatrix);
-            if (h.thumbnailViewImage.getVisibility() != View.VISIBLE) {
-                if (anim) {
-                    h.thumbnailViewImage.setAnimation(
-                            AnimationUtils.loadAnimation(
-                                    mContext, R.anim.recent_appear));
-                }
-                h.thumbnailViewImage.setVisibility(View.VISIBLE);
+
+            // scale the image to fill the full width of the ImageView. do this only if
+            // we haven't set a bitmap before, or if the bitmap size has changed
+            if (h.thumbnailViewImageBitmap == null ||
+                h.thumbnailViewImageBitmap.getWidth() != thumbnail.getWidth() ||
+                h.thumbnailViewImageBitmap.getHeight() != thumbnail.getHeight()) {
+                Matrix scaleMatrix = new Matrix();
+                float scale = mThumbnailWidth / (float) thumbnail.getWidth();
+                scaleMatrix.setScale(scale, scale);
+                h.thumbnailViewImage.setScaleType(ScaleType.MATRIX);
+                h.thumbnailViewImage.setImageMatrix(scaleMatrix);
             }
+            if (show && h.thumbnailView.getVisibility() != View.VISIBLE) {
+                if (anim) {
+                    h.thumbnailView.setAnimation(
+                            AnimationUtils.loadAnimation(mContext, R.anim.recent_appear));
+                }
+                h.thumbnailView.setVisibility(View.VISIBLE);
+            }
+            h.thumbnailViewImageBitmap = thumbnail;
         }
-        //h.descriptionView.setText(ad.description);
     }
 
     void onTaskThumbnailLoaded(TaskDescription ad) {
@@ -432,7 +427,11 @@ public class RecentsPanelView extends RelativeLayout
                     if (v.getTag() instanceof ViewHolder) {
                         ViewHolder h = (ViewHolder)v.getTag();
                         if (h.taskDescription == ad) {
-                            applyTaskDescription(h, ad, true);
+                            // only fade in the thumbnail if recents is already visible-- we
+                            // show it immediately otherwise
+                            boolean animateShow = mShowing &&
+                                mRecentsGlowView.getAlpha() > ViewConfiguration.ALPHA_THRESHOLD;
+                            updateThumbnail(h, ad.getThumbnail(), true, animateShow);
                         }
                     }
                 }
@@ -440,14 +439,55 @@ public class RecentsPanelView extends RelativeLayout
         }
     }
 
-    private void refreshRecentTasksList(ArrayList<TaskDescription> recentTasksList) {
-        if (recentTasksList != null) {
-            mRecentTaskDescriptions = recentTasksList;
-        } else {
-            mRecentTaskDescriptions = mRecentTasksLoader.getRecentTasks();
+    // additional optimization when we have sofware system buttons - start loading the recent
+    // tasks on touch down
+    @Override
+    public boolean onTouch(View v, MotionEvent ev) {
+        if (!mShowing) {
+            int action = ev.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_DOWN) {
+                // If we set our visibility to INVISIBLE here, we avoid an extra call to onLayout
+                // later when we become visible
+                setVisibility(INVISIBLE);
+                refreshRecentTasksList();
+            } else if (action == MotionEvent.ACTION_CANCEL) {
+                setVisibility(GONE);
+                clearRecentTasksList();
+            } else if (action == MotionEvent.ACTION_UP) {
+                if (!v.isPressed()) {
+                    setVisibility(GONE);
+                    clearRecentTasksList();
+                }
+            }
         }
-        mListAdapter.notifyDataSetInvalidated();
-        updateUiElements(getResources().getConfiguration());
+        return false;
+    }
+
+    public void clearRecentTasksList() {
+        // Clear memory used by screenshots
+        if (mRecentTaskDescriptions != null) {
+            mRecentTasksLoader.cancelLoadingThumbnails();
+            mRecentTaskDescriptions.clear();
+            mListAdapter.notifyDataSetInvalidated();
+            mRecentTasksDirty = true;
+        }
+    }
+
+    public void refreshRecentTasksList() {
+        refreshRecentTasksList(null);
+    }
+
+    private void refreshRecentTasksList(ArrayList<TaskDescription> recentTasksList) {
+        if (mRecentTasksDirty) {
+            if (recentTasksList != null) {
+                mRecentTaskDescriptions = recentTasksList;
+            } else {
+                mRecentTaskDescriptions = mRecentTasksLoader.getRecentTasks();
+            }
+            mListAdapter.notifyDataSetInvalidated();
+            updateUiElements(getResources().getConfiguration());
+            mRecentTasksDirty = false;
+        }
     }
 
     public ArrayList<TaskDescription> getRecentTasksList() {
