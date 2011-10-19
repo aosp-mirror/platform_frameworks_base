@@ -26782,6 +26782,7 @@ package android.widget {
     method public void setChar(int, java.lang.String, char);
     method public void setCharSequence(int, java.lang.String, java.lang.CharSequence);
     method public void setChronometer(int, long, java.lang.String, boolean);
+    method public void setContentDescription(int, java.lang.CharSequence);
     method public void setDisplayedChild(int, int);
     method public void setDouble(int, java.lang.String, double);
     method public void setEmptyView(int, int);
