@@ -520,16 +520,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         return false;
     }
 
-    /**
-     * Returns OTASP_NOT_NEEDED as its not needed for LTE
-     */
-    @Override
-    int getOtasp() {
-        int provisioningState = OTASP_NOT_NEEDED;
-        if (DBG) log("getOtasp: state=" + provisioningState);
-        return provisioningState;
-    }
-
     @Override
     protected void log(String s) {
         Log.d(LOG_TAG, "[CdmaLteSST] " + s);
