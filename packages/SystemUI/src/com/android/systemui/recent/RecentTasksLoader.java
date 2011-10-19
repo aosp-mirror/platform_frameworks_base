@@ -86,8 +86,8 @@ public class RecentTasksLoader {
         mIconDpi = isTablet ? DisplayMetrics.DENSITY_HIGH : res.getDisplayMetrics().densityDpi;
 
         // Render the default thumbnail background
-        int width = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_width);
-        int height = (int) res.getDimension(R.dimen.status_bar_recents_thumbnail_height);
+        int width = (int) res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+        int height = (int) res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
         int color = res.getColor(R.drawable.status_bar_recents_app_thumbnail_background);
 
         mDefaultThumbnailBackground = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -104,6 +104,10 @@ public class RecentTasksLoader {
 
     public void setRecentsPanel(RecentsPanelView recentsPanel) {
         mRecentsPanel = recentsPanel;
+    }
+
+    public Bitmap getDefaultThumbnail() {
+        return mDefaultThumbnailBackground;
     }
 
     // Create an TaskDescription, returning null if the title or icon is null, or if it's the
@@ -278,7 +282,7 @@ public class RecentTasksLoader {
                             TaskDescription td = descriptions.get(i);
                             loadThumbnail(td);
                             long now = SystemClock.uptimeMillis();
-                            nextTime += 150;
+                            nextTime += 0;
                             if (nextTime > now) {
                                 try {
                                     Thread.sleep(nextTime-now);

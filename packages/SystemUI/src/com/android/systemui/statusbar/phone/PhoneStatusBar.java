@@ -435,13 +435,18 @@ public class PhoneStatusBar extends StatusBar {
         }
     };
 
+    private void prepareNavigationBarView() {
+        mNavigationBarView.reorient();
+
+        mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
+        mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPanel);
+    }
+
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
         if (mNavigationBarView == null) return;
 
-        mNavigationBarView.reorient();
-
-        mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
+        prepareNavigationBarView();
 
         WindowManagerImpl.getDefault().addView(
                 mNavigationBarView, getNavigationBarLayoutParams());
@@ -450,9 +455,7 @@ public class PhoneStatusBar extends StatusBar {
     private void repositionNavigationBar() {
         if (mNavigationBarView == null) return;
 
-        mNavigationBarView.reorient();
-
-        mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
+        prepareNavigationBarView();
 
         WindowManagerImpl.getDefault().updateViewLayout(
                 mNavigationBarView, getNavigationBarLayoutParams());
@@ -2007,8 +2010,8 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     public void toggleRecentApps() {
-        int msg = (mRecentsPanel.getVisibility() == View.GONE)
-                ? MSG_OPEN_RECENTS_PANEL : MSG_CLOSE_RECENTS_PANEL;
+        int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
+                ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
