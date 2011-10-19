@@ -52,6 +52,13 @@ namespace android {
 // buffers after 3 seconds.
 const static int64_t kBufferFilledEventTimeOutNs = 3000000000LL;
 
+// OMX Spec defines less than 50 color formats. If the query for
+// color format is executed for more than kMaxColorFormatSupported,
+// the query will fail to avoid looping forever.
+// 1000 is more than enough for us to tell whether the omx
+// component in question is buggy or not.
+const static uint32_t kMaxColorFormatSupported = 1000;
+
 struct CodecInfo {
     const char *mime;
     const char *codec;
@@ -818,6 +825,11 @@ status_t OMXCodec::setVideoPortFormatType(
         }
 
         ++index;
+        if (index >= kMaxColorFormatSupported) {
+            CODEC_LOGE("color format %d or compression format %d is not supported",
+                colorFormat, compressionFormat);
+            return UNKNOWN_ERROR;
+        }
     }
 
     if (!found) {
@@ -901,22 +913,19 @@ status_t OMXCodec::isColorFormatSupported(
         // the incremented index (bug 2897413).
         CHECK_EQ(index, portFormat.nIndex);
         if (portFormat.eColorFormat == colorFormat) {
-            LOGV("Found supported color format: %d", portFormat.eColorFormat);
+            CODEC_LOGV("Found supported color format: %d", portFormat.eColorFormat);
             return OK;  // colorFormat is supported!
         }
         ++index;
         portFormat.nIndex = index;
 
-        // OMX Spec defines less than 50 color formats
-        // 1000 is more than enough for us to tell whether the omx
-        // component in question is buggy or not.
-        if (index >= 1000) {
-            LOGE("More than %ld color formats are supported???", index);
+        if (index >= kMaxColorFormatSupported) {
+            CODEC_LOGE("More than %ld color formats are supported???", index);
             break;
         }
     }
 
-    LOGE("color format %d is not supported", colorFormat);
+    CODEC_LOGE("color format %d is not supported", colorFormat);
     return UNKNOWN_ERROR;
 }
 
