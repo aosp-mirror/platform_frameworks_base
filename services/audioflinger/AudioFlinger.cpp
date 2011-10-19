@@ -1909,7 +1909,9 @@ bool AudioFlinger::MixerThread::threadLoop()
     size_t mixBufferSize = mFrameCount * mFrameSize;
     // FIXME: Relaxed timing because of a certain device that can't meet latency
     // Should be reduced to 2x after the vendor fixes the driver issue
-    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
+    // increase threshold again due to low power audio mode. The way this warning threshold is
+    // calculated and its usefulness should be reconsidered anyway.
+    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
     nsecs_t lastWarning = 0;
     bool longStandbyExit = false;
     uint32_t activeSleepTime = activeSleepTimeUs();
@@ -1967,7 +1969,9 @@ bool AudioFlinger::MixerThread::threadLoop()
                 mixBufferSize = mFrameCount * mFrameSize;
                 // FIXME: Relaxed timing because of a certain device that can't meet latency
                 // Should be reduced to 2x after the vendor fixes the driver issue
-                maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
+                // increase threshold again due to low power audio mode. The way this warning
+                // threshold is calculated and its usefulness should be reconsidered anyway.
+                maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
                 activeSleepTime = activeSleepTimeUs();
                 idleSleepTime = idleSleepTimeUs();
             }
@@ -2077,7 +2081,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             mInWrite = false;
             nsecs_t now = systemTime();
             nsecs_t delta = now - mLastWriteTime;
-            if (delta > maxPeriod) {
+            if (!mStandby && delta > maxPeriod) {
                 mNumDelayedWrites++;
                 if ((now - lastWarning) > kWarningThrottle) {
                     LOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
