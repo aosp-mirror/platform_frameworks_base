@@ -9,10 +9,26 @@ parent.link=index.html
 
       <ol>
         <li>
-          <a href="#developing">Developing a RenderScript application</a>
-
+          <a href="#creating-graphics-rs">Creating a Graphics Renderscript</a>
           <ol>
-            <li><a href="#hello-graphics">The Hello Graphics application</a></li>
+            <li><a href="#creating-native">Creating the native Renderscript file</a></li>
+            <li><a href="#creating-entry">Creating the Renderscript entry point class</a></li>
+            <li><a href="#creating-view">Creating the surface view</a></li>
+            <li><a href="#creating-activity">Creating the activity</a></li>
+          </ol>
+        </li>
+        <li>
+          <a href="#drawing">Drawing</a>
+          <ol>
+            <li><a href="#drawing-rsg">Drawing using the rsgDraw functions</a></li>
+            <li><a href="#drawing-mesh">Drawing with a mesh</a></li>
+          </ol>
+        </li>
+        <li>
+          <a href="#shaders">Shaders</a>
+          <ol>
+            <li><a href="#shader-bindings">Shader bindings</a></li>
+            <li><a href="#shader-sampler">Defining a sampler</a></li>
           </ol>
         </li>
       </ol>
@@ -40,7 +56,7 @@ href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samp
   will need to be familiar with APIs to appropriately render 3D graphics on an Android-powered
   device.</p>
 
-  <h2>Creating a Graphics RenderScript</h2>
+  <h2 id="creating-graphics-rs">Creating a Graphics RenderScript</h2>
 
   <p>Because of the various layers of code when writing a RenderScript application, it is useful to
   create the following files for a scene that you want to render:</p>
@@ -73,7 +89,7 @@ href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samp
   RenderScript sample that is provided in the SDK as a guide (some code has been modified from its
   original form for simplicity).</p>
 
-  <h3>Creating the native RenderScript file</h3>
+  <h3 id="creating-native">Creating the native RenderScript file</h3>
 
   <p>Your native RenderScript code resides in a <code>.rs</code> file in the
   <code>&lt;project_root&gt;/src/</code> directory. You can also define <code>.rsh</code> header
@@ -102,8 +118,8 @@ href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samp
       enough or more resources to do so, and renders as fast as it can if it does not.</p>
       
       <p>For more
-      information on using the RenderScript graphics functions, see <a href=
-      "using-graphics-api">Using the Graphics APIs</a>.</p>
+      information on using the RenderScript graphics functions, see the <a href=
+      "#drawing">Drawing</a> section.</p>
     </li>
 
     <li>An <code>init()</code> function. This allows you to do any initialization of your
@@ -153,7 +169,7 @@ int root(int launchID) {
 }
 </pre>
 
-  <h3>Creating the RenderScript entry point class</h3>
+  <h3 id="creating-entry">Creating the RenderScript entry point class</h3>
 
   <p>When you create a RenderScript (<code>.rs</code>) file, it is helpful to create a
   corresponding Android framework class that is an entry point into the <code>.rs</code> file. In
@@ -218,7 +234,7 @@ public class HelloWorldRS {
 
 </pre>
 
-  <h3>Creating the surface view</h3>
+  <h3 id="creating-view">Creating the surface view</h3>
 
   <p>To create a surface view to render graphics on, create a class that extends {@link
   android.renderscript.RSSurfaceView}. This class also creates a RenderScript context object
@@ -293,7 +309,7 @@ public class HelloWorldView extends RSSurfaceView {
 
 </pre>
 
-  <h3>Creating the Activity</h3>
+  <h3 id="creating-activity">Creating the Activity</h3>
 
   <p>Applications that use RenderScript still adhere to activity lifecyle, and are part of the same
   view hierarchy as traditional Android applications, which is handled by the Android VM. This
@@ -329,9 +345,9 @@ public class HelloWorldActivity extends Activity {
 }
 </pre>
 
-  <h2>Drawing</h2>
-
-  <h3>Drawing using the rsgDraw functions</h3>
+  <h2 id="drawing">Drawing</h2>
+  <p>The following sections describe how to use the graphics functions to draw with Renderscript.</p>
+  <h3 id="drawing-rsg">Drawing using the rsgDraw functions</h3>
 
   <p>The native RenderScript APIs provide a few convenient functions to easily draw a polygon to
   the screen. You call these in your <code>root()</code> function to have them render to the
@@ -348,7 +364,7 @@ public class HelloWorldActivity extends Activity {
     the screen.</li>
   </ul>
 
-  <h3>Drawing with a mesh</h3>
+  <h3 id="drawing-mesh">Drawing with a mesh</h3>
 
   <p>When you want to draw complex shapes and textures to the screen, instantiate a {@link
   android.renderscript.Mesh} and draw it to the screen with <code>rsgDrawMesh()</code>. A {@link
@@ -559,7 +575,7 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
   "{@docRoot}resources/samples/RenderScript/MiscSamples/src/com/example/android/rs/miscsamples/RsRenderStatesRS.html">
   RsRenderStatesRS</a> sample has many examples on how to create a shader without writing GLSL.</p>
 
-  <h3>Shader bindings</h3>
+  <h3 id="shader-bindings">Shader bindings</h3>
 
   <p>You can also set four pragmas that control the shaders' default bindings to the {@link
   android.renderscript.RenderScriptGL} context when the script is executing:</p>
@@ -599,7 +615,7 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
 #pragma stateStore(parent)
 </pre>
 
-  <h3>Defining a sampler</h3>
+  <h3 id="shader-sampler">Defining a sampler</h3>
 
   <p>A {@link android.renderscript.Sampler} object defines how data is extracted from textures.
   Samplers are bound to Program objects (currently only a Fragment Program) alongside the texture
