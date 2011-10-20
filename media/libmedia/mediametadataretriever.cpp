@@ -58,7 +58,7 @@ const sp<IMediaPlayerService>& MediaMetadataRetriever::getService()
 
 MediaMetadataRetriever::MediaMetadataRetriever()
 {
-    LOGV("constructor");
+    ALOGV("constructor");
     const sp<IMediaPlayerService>& service(getService());
     if (service == 0) {
         LOGE("failed to obtain MediaMetadataRetrieverService");
@@ -73,14 +73,14 @@ MediaMetadataRetriever::MediaMetadataRetriever()
 
 MediaMetadataRetriever::~MediaMetadataRetriever()
 {
-    LOGV("destructor");
+    ALOGV("destructor");
     disconnect();
     IPCThreadState::self()->flushCommands();
 }
 
 void MediaMetadataRetriever::disconnect()
 {
-    LOGV("disconnect");
+    ALOGV("disconnect");
     sp<IMediaMetadataRetriever> retriever;
     {
         Mutex::Autolock _l(mLock);
@@ -95,7 +95,7 @@ void MediaMetadataRetriever::disconnect()
 status_t MediaMetadataRetriever::setDataSource(
         const char *srcUrl, const KeyedVector<String8, String8> *headers)
 {
-    LOGV("setDataSource");
+    ALOGV("setDataSource");
     Mutex::Autolock _l(mLock);
     if (mRetriever == 0) {
         LOGE("retriever is not initialized");
@@ -105,13 +105,13 @@ status_t MediaMetadataRetriever::setDataSource(
         LOGE("data source is a null pointer");
         return UNKNOWN_ERROR;
     }
-    LOGV("data source (%s)", srcUrl);
+    ALOGV("data source (%s)", srcUrl);
     return mRetriever->setDataSource(srcUrl, headers);
 }
 
 status_t MediaMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t length)
 {
-    LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
+    ALOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
     Mutex::Autolock _l(mLock);
     if (mRetriever == 0) {
         LOGE("retriever is not initialized");
@@ -126,7 +126,7 @@ status_t MediaMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t l
 
 sp<IMemory> MediaMetadataRetriever::getFrameAtTime(int64_t timeUs, int option)
 {
-    LOGV("getFrameAtTime: time(%lld us) option(%d)", timeUs, option);
+    ALOGV("getFrameAtTime: time(%lld us) option(%d)", timeUs, option);
     Mutex::Autolock _l(mLock);
     if (mRetriever == 0) {
         LOGE("retriever is not initialized");
@@ -137,7 +137,7 @@ sp<IMemory> MediaMetadataRetriever::getFrameAtTime(int64_t timeUs, int option)
 
 const char* MediaMetadataRetriever::extractMetadata(int keyCode)
 {
-    LOGV("extractMetadata(%d)", keyCode);
+    ALOGV("extractMetadata(%d)", keyCode);
     Mutex::Autolock _l(mLock);
     if (mRetriever == 0) {
         LOGE("retriever is not initialized");
@@ -148,7 +148,7 @@ const char* MediaMetadataRetriever::extractMetadata(int keyCode)
 
 sp<IMemory> MediaMetadataRetriever::extractAlbumArt()
 {
-    LOGV("extractAlbumArt");
+    ALOGV("extractAlbumArt");
     Mutex::Autolock _l(mLock);
     if (mRetriever == 0) {
         LOGE("retriever is not initialized");

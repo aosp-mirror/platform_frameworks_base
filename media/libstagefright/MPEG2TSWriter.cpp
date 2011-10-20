@@ -644,7 +644,7 @@ void MPEG2TSWriter::onMessageReceived(const sp<AMessage> &msg) {
                 CHECK(source->lastAccessUnit() == NULL);
                 source->setLastAccessUnit(buffer);
 
-                LOGV("lastAccessUnitTimeUs[%d] = %.2f secs",
+                ALOGV("lastAccessUnitTimeUs[%d] = %.2f secs",
                      sourceIndex, source->lastAccessUnitTimeUs() / 1E6);
 
                 int64_t minTimeUs = -1;
@@ -668,11 +668,11 @@ void MPEG2TSWriter::onMessageReceived(const sp<AMessage> &msg) {
                 }
 
                 if (minTimeUs < 0) {
-                    LOGV("not a all tracks have valid data.");
+                    ALOGV("not a all tracks have valid data.");
                     break;
                 }
 
-                LOGV("writing access unit at time %.2f secs (index %d)",
+                ALOGV("writing access unit at time %.2f secs (index %d)",
                      minTimeUs / 1E6, minIndex);
 
                 source = mSources.editItemAt(minIndex);

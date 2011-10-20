@@ -454,7 +454,7 @@ FLACParser::FLACParser(
       mWriteBuffer(NULL),
       mErrorStatus((FLAC__StreamDecoderErrorStatus) -1)
 {
-    LOGV("FLACParser::FLACParser");
+    ALOGV("FLACParser::FLACParser");
     memset(&mStreamInfo, 0, sizeof(mStreamInfo));
     memset(&mWriteHeader, 0, sizeof(mWriteHeader));
     mInitCheck = init();
@@ -462,7 +462,7 @@ FLACParser::FLACParser(
 
 FLACParser::~FLACParser()
 {
-    LOGV("FLACParser::~FLACParser");
+    ALOGV("FLACParser::~FLACParser");
     if (mDecoder != NULL) {
         FLAC__stream_decoder_delete(mDecoder);
         mDecoder = NULL;
@@ -606,7 +606,7 @@ MediaBuffer *FLACParser::readBuffer(bool doSeek, FLAC__uint64 sample)
             LOGE("FLACParser::readBuffer seek to sample %llu failed", sample);
             return NULL;
         }
-        LOGV("FLACParser::readBuffer seek to sample %llu succeeded", sample);
+        ALOGV("FLACParser::readBuffer seek to sample %llu succeeded", sample);
     } else {
         if (!FLAC__stream_decoder_process_single(mDecoder)) {
             LOGE("FLACParser::readBuffer process_single failed");
@@ -614,7 +614,7 @@ MediaBuffer *FLACParser::readBuffer(bool doSeek, FLAC__uint64 sample)
         }
     }
     if (!mWriteCompleted) {
-        LOGV("FLACParser::readBuffer write did not complete");
+        ALOGV("FLACParser::readBuffer write did not complete");
         return NULL;
     }
     // verify that block header keeps the promises made by STREAMINFO
@@ -661,13 +661,13 @@ FLACSource::FLACSource(
       mInitCheck(false),
       mStarted(false)
 {
-    LOGV("FLACSource::FLACSource");
+    ALOGV("FLACSource::FLACSource");
     mInitCheck = init();
 }
 
 FLACSource::~FLACSource()
 {
-    LOGV("~FLACSource::FLACSource");
+    ALOGV("~FLACSource::FLACSource");
     if (mStarted) {
         stop();
     }
@@ -675,7 +675,7 @@ FLACSource::~FLACSource()
 
 status_t FLACSource::start(MetaData *params)
 {
-    LOGV("FLACSource::start");
+    ALOGV("FLACSource::start");
 
     CHECK(!mStarted);
     mParser->allocateBuffers();
@@ -686,7 +686,7 @@ status_t FLACSource::start(MetaData *params)
 
 status_t FLACSource::stop()
 {
-    LOGV("FLACSource::stop");
+    ALOGV("FLACSource::stop");
 
     CHECK(mStarted);
     mParser->releaseBuffers();
@@ -729,7 +729,7 @@ status_t FLACSource::read(
 
 status_t FLACSource::init()
 {
-    LOGV("FLACSource::init");
+    ALOGV("FLACSource::init");
     // re-use the same track metadata passed into constructor from FLACExtractor
     mParser = new FLACParser(mDataSource);
     return mParser->initCheck();
@@ -742,13 +742,13 @@ FLACExtractor::FLACExtractor(
     : mDataSource(dataSource),
       mInitCheck(false)
 {
-    LOGV("FLACExtractor::FLACExtractor");
+    ALOGV("FLACExtractor::FLACExtractor");
     mInitCheck = init();
 }
 
 FLACExtractor::~FLACExtractor()
 {
-    LOGV("~FLACExtractor::FLACExtractor");
+    ALOGV("~FLACExtractor::FLACExtractor");
 }
 
 size_t FLACExtractor::countTracks()

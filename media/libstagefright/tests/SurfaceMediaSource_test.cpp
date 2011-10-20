@@ -58,7 +58,7 @@ protected:
     }
 
     virtual void SetUp() {
-        LOGV("GLTest::SetUp()");
+        ALOGV("GLTest::SetUp()");
         mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
         ASSERT_NE(EGL_NO_DISPLAY, mEglDisplay);
@@ -106,7 +106,7 @@ protected:
             mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
                     window.get(), NULL);
         } else {
-            LOGV("No actual display. Choosing EGLSurface based on SurfaceMediaSource");
+            ALOGV("No actual display. Choosing EGLSurface based on SurfaceMediaSource");
             sp<SurfaceMediaSource> sms = new SurfaceMediaSource(
                     getSurfaceWidth(), getSurfaceHeight());
             sp<SurfaceTextureClient> stc = new SurfaceTextureClient(sms);
@@ -162,7 +162,7 @@ protected:
     }
 
     virtual EGLint const* getConfigAttribs() {
-        LOGV("GLTest getConfigAttribs");
+        ALOGV("GLTest getConfigAttribs");
         static EGLint sDefaultConfigAttribs[] = {
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -392,7 +392,7 @@ public:
 protected:
 
     virtual void SetUp() {
-        LOGV("SMS-GLTest::SetUp()");
+        ALOGV("SMS-GLTest::SetUp()");
         android::ProcessState::self()->startThreadPool();
         mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
         mSTC = new SurfaceTextureClient(mSMS);
@@ -423,7 +423,7 @@ protected:
 // Methods in SurfaceMediaSourceGLTest
 /////////////////////////////////////////////////////////////////////
 EGLint const* SurfaceMediaSourceGLTest::getConfigAttribs() {
-        LOGV("SurfaceMediaSourceGLTest getConfigAttribs");
+        ALOGV("SurfaceMediaSourceGLTest getConfigAttribs");
     static EGLint sDefaultConfigAttribs[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -474,7 +474,7 @@ sp<MediaRecorder> SurfaceMediaSourceGLTest::setUpMediaRecorder(int fd, int video
     mr->setVideoSize(width, height);
     mr->setVideoFrameRate(fps);
     mr->prepare();
-    LOGV("Starting MediaRecorder...");
+    ALOGV("Starting MediaRecorder...");
     CHECK_EQ(OK, mr->start());
     return mr;
 }
@@ -624,8 +624,8 @@ struct SimpleDummyRecorder {
 // Dummy Encoder
 static int testId = 1;
 TEST_F(SurfaceMediaSourceTest, DISABLED_DummyEncodingFromCpuFilledYV12BufferNpotOneBufferPass) {
-    LOGV("Test # %d", testId++);
-    LOGV("Testing OneBufferPass ******************************");
+    ALOGV("Test # %d", testId++);
+    ALOGV("Testing OneBufferPass ******************************");
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
             HAL_PIXEL_FORMAT_YV12));
@@ -635,8 +635,8 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_DummyEncodingFromCpuFilledYV12BufferNpot
 // Pass the buffer with the wrong height and weight and should not be accepted
 // Dummy Encoder
 TEST_F(SurfaceMediaSourceTest, DISABLED_DummyEncodingFromCpuFilledYV12BufferNpotWrongSizeBufferPass) {
-    LOGV("Test # %d", testId++);
-    LOGV("Testing Wrong size BufferPass ******************************");
+    ALOGV("Test # %d", testId++);
+    ALOGV("Testing Wrong size BufferPass ******************************");
 
     // setting the client side buffer size different than the server size
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_dimensions(mANW.get(),
@@ -653,8 +653,8 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_DummyEncodingFromCpuFilledYV12BufferNpot
 // pass multiple buffers from the native_window the SurfaceMediaSource
 // Dummy Encoder
 TEST_F(SurfaceMediaSourceTest,  DISABLED_DummyEncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
-    LOGV("Test # %d", testId++);
-    LOGV("Testing MultiBufferPass, Dummy Recorder *********************");
+    ALOGV("Test # %d", testId++);
+    ALOGV("Testing MultiBufferPass, Dummy Recorder *********************");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
             HAL_PIXEL_FORMAT_YV12));
 
@@ -675,8 +675,8 @@ TEST_F(SurfaceMediaSourceTest,  DISABLED_DummyEncodingFromCpuFilledYV12BufferNpo
 // Delayed pass of multiple buffers from the native_window the SurfaceMediaSource
 // Dummy Encoder
 TEST_F(SurfaceMediaSourceTest,  DISABLED_DummyLagEncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
-    LOGV("Test # %d", testId++);
-    LOGV("Testing MultiBufferPass, Dummy Recorder Lagging **************");
+    ALOGV("Test # %d", testId++);
+    ALOGV("Testing MultiBufferPass, Dummy Recorder Lagging **************");
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
             HAL_PIXEL_FORMAT_YV12));
@@ -700,8 +700,8 @@ TEST_F(SurfaceMediaSourceTest,  DISABLED_DummyLagEncodingFromCpuFilledYV12Buffer
 // pass multiple buffers from the native_window the SurfaceMediaSource
 // A dummy writer (MULTITHREADED) is used to simulate actual MPEG4Writer
 TEST_F(SurfaceMediaSourceTest, DISABLED_DummyThreadedEncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
-    LOGV("Test # %d", testId++);
-    LOGV("Testing MultiBufferPass, Dummy Recorder Multi-Threaded **********");
+    ALOGV("Test # %d", testId++);
+    ALOGV("Testing MultiBufferPass, Dummy Recorder Multi-Threaded **********");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
             HAL_PIXEL_FORMAT_YV12));
 
@@ -724,9 +724,9 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_DummyThreadedEncodingFromCpuFilledYV12Bu
 // Very close to the actual camera, except that the
 // buffers are filled and queueud by the CPU instead of GL.
 TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaServer) {
-    LOGV("Test # %d", testId++);
-    LOGV("************** Testing the whole pipeline with actual MediaRecorder ***********");
-    LOGV("************** SurfaceMediaSource is same process as mediaserver    ***********");
+    ALOGV("Test # %d", testId++);
+    ALOGV("************** Testing the whole pipeline with actual MediaRecorder ***********");
+    ALOGV("************** SurfaceMediaSource is same process as mediaserver    ***********");
 
     const char *fileName = "/sdcard/outputSurfEncMSource.mp4";
     int fd = open(fileName, O_RDWR | O_CREAT, 0744);
@@ -752,11 +752,11 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaS
     while (nFramesCount <= 300) {
         oneBufferPassNoFill(mYuvTexWidth, mYuvTexHeight);
         nFramesCount++;
-        LOGV("framesCount = %d", nFramesCount);
+        ALOGV("framesCount = %d", nFramesCount);
     }
 
     ASSERT_EQ(NO_ERROR, native_window_api_disconnect(mANW.get(), NATIVE_WINDOW_API_CPU));
-    LOGV("Stopping MediaRecorder...");
+    ALOGV("Stopping MediaRecorder...");
     CHECK_EQ(OK, mr->stop());
     mr.clear();
     close(fd);
@@ -769,8 +769,8 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaS
 // Test to examine whether we can choose the Recordable Android GLConfig
 // DummyRecorder used- no real encoding here
 TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
-    LOGV("Test # %d", testId++);
-    LOGV("Verify creating a surface w/ right config + dummy writer*********");
+    ALOGV("Test # %d", testId++);
+    ALOGV("Verify creating a surface w/ right config + dummy writer*********");
 
     mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
     mSTC = new SurfaceTextureClient(mSMS);
@@ -792,7 +792,7 @@ TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
     while (nFramesCount <= 300) {
         oneBufferPassGL();
         nFramesCount++;
-        LOGV("framesCount = %d", nFramesCount);
+        ALOGV("framesCount = %d", nFramesCount);
     }
 
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -806,8 +806,8 @@ TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
 // Test to examine whether we can render GL buffers in to the surface
 // created with the native window handle
 TEST_F(SurfaceMediaSourceGLTest, RenderingToRecordableEGLSurfaceWorks) {
-    LOGV("Test # %d", testId++);
-    LOGV("RenderingToRecordableEGLSurfaceWorks *********************");
+    ALOGV("Test # %d", testId++);
+    ALOGV("RenderingToRecordableEGLSurfaceWorks *********************");
     // Do the producer side of things
     glClearColor(0.6, 0.6, 0.6, 0.6);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -852,9 +852,9 @@ TEST_F(SurfaceMediaSourceGLTest, RenderingToRecordableEGLSurfaceWorks) {
 // Actual encoder, Actual GL Buffers Filled SurfaceMediaSource
 // The same pattern is rendered every frame
 TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
-    LOGV("Test # %d", testId++);
-    LOGV("************** Testing the whole pipeline with actual Recorder ***********");
-    LOGV("************** GL Filling the buffers ***********");
+    ALOGV("Test # %d", testId++);
+    ALOGV("************** Testing the whole pipeline with actual Recorder ***********");
+    ALOGV("************** GL Filling the buffers ***********");
     // Note: No need to set the colorformat for the buffers. The colorformat is
     // in the GRAlloc buffers itself.
 
@@ -876,7 +876,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
     while (nFramesCount <= 300) {
         oneBufferPassGL();
         nFramesCount++;
-        LOGV("framesCount = %d", nFramesCount);
+        ALOGV("framesCount = %d", nFramesCount);
     }
 
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -885,7 +885,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
     eglDestroySurface(mEglDisplay, mEglSurface);
     mEglSurface = EGL_NO_SURFACE;
 
-    LOGV("Stopping MediaRecorder...");
+    ALOGV("Stopping MediaRecorder...");
     CHECK_EQ(OK, mr->stop());
     mr.clear();
     close(fd);
@@ -895,9 +895,9 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
 // Actual encoder, Actual GL Buffers Filled SurfaceMediaSource
 // A different pattern is rendered every frame
 TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
-    LOGV("Test # %d", testId++);
-    LOGV("************** Testing the whole pipeline with actual Recorder ***********");
-    LOGV("************** Diff GL Filling the buffers ***********");
+    ALOGV("Test # %d", testId++);
+    ALOGV("************** Testing the whole pipeline with actual Recorder ***********");
+    ALOGV("************** Diff GL Filling the buffers ***********");
     // Note: No need to set the colorformat for the buffers. The colorformat is
     // in the GRAlloc buffers itself.
 
@@ -919,7 +919,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
     while (nFramesCount <= 300) {
         oneBufferPassGL(nFramesCount);
         nFramesCount++;
-        LOGV("framesCount = %d", nFramesCount);
+        ALOGV("framesCount = %d", nFramesCount);
     }
 
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -928,7 +928,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
     eglDestroySurface(mEglDisplay, mEglSurface);
     mEglSurface = EGL_NO_SURFACE;
 
-    LOGV("Stopping MediaRecorder...");
+    ALOGV("Stopping MediaRecorder...");
     CHECK_EQ(OK, mr->stop());
     mr.clear();
     close(fd);

@@ -88,9 +88,9 @@ void MtpDeviceInfo::read(MtpDataPacket& packet) {
 }
 
 void MtpDeviceInfo::print() {
-    LOGV("Device Info:\n\tmStandardVersion: %d\n\tmVendorExtensionID: %d\n\tmVendorExtensionVersiony: %d\n",
+    ALOGV("Device Info:\n\tmStandardVersion: %d\n\tmVendorExtensionID: %d\n\tmVendorExtensionVersiony: %d\n",
             mStandardVersion, mVendorExtensionID, mVendorExtensionVersion);
-    LOGV("\tmVendorExtensionDesc: %s\n\tmFunctionalCode: %d\n\tmManufacturer: %s\n\tmModel: %s\n\tmVersion: %s\n\tmSerial: %s\n",
+    ALOGV("\tmVendorExtensionDesc: %s\n\tmFunctionalCode: %d\n\tmManufacturer: %s\n\tmModel: %s\n\tmVersion: %s\n\tmSerial: %s\n",
             mVendorExtensionDesc, mFunctionalCode, mManufacturer, mModel, mVersion, mSerial);
 }
 

@@ -95,7 +95,7 @@ using namespace android;
         if (zstream.avail_in == 0) {
             getSize = (compRemaining > kReadBufSize) ?
                         kReadBufSize : compRemaining;
-            LOGV("+++ reading %ld bytes (%ld left)\n",
+            ALOGV("+++ reading %ld bytes (%ld left)\n",
                 getSize, compRemaining);
 
             int cc = read(fd, readBuf, getSize);
@@ -207,7 +207,7 @@ bail:
         if (zstream.avail_in == 0) {
             getSize = (compRemaining > kReadBufSize) ?
                         kReadBufSize : compRemaining;
-            LOGV("+++ reading %ld bytes (%ld left)\n",
+            ALOGV("+++ reading %ld bytes (%ld left)\n",
                 getSize, compRemaining);
 
             int cc = fread(readBuf, 1, getSize, fp);

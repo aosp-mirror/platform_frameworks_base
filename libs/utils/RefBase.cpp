@@ -421,7 +421,7 @@ void RefBase::weakref_type::decWeak(const void* id)
             // destroy the object now.
             delete impl->mBase;
         } else {
-            // LOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
+            // ALOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
             delete impl;
         }
     } else {

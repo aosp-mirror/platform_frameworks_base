@@ -231,7 +231,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes) {
 }
 
 void LocklessCommandFifo::dumpState(const char *s) const {
-    LOGV("%s %p  put %p, get %p,  buf %p,  end %p", s, this, mPut, mGet, mBuffer, mEnd);
+    ALOGV("%s %p  put %p, get %p,  buf %p,  end %p", s, this, mPut, mGet, mBuffer, mEnd);
 }
 
 void LocklessCommandFifo::printDebugData() const {
@@ -244,7 +244,7 @@ void LocklessCommandFifo::printDebugData() const {
 
 
     for (int ct=0; ct < 16; ct++) {
-        LOGV("fifo %p = 0x%08x  0x%08x  0x%08x  0x%08x", pptr, pptr[0], pptr[1], pptr[2], pptr[3]);
+        ALOGV("fifo %p = 0x%08x  0x%08x  0x%08x  0x%08x", pptr, pptr[0], pptr[1], pptr[2], pptr[3]);
         pptr += 4;
     }
 

@@ -191,7 +191,7 @@ void Allocation::dumpLOGV(const char *prefix) const {
         mHal.state.type->dumpLOGV(s.string());
     }
 
-    LOGV("%s allocation ptr=%p  mUsageFlags=0x04%x, mMipmapControl=0x%04x",
+    ALOGV("%s allocation ptr=%p  mUsageFlags=0x04%x, mMipmapControl=0x%04x",
          prefix, getPtr(), mHal.state.usageFlags, mHal.state.mipmapControl);
 }
 

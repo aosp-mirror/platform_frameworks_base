@@ -172,8 +172,8 @@ bool RsdShader::loadShader(const Context *rsc) {
     rsAssert(mShaderID);
 
     if (rsc->props.mLogShaders) {
-        LOGV("Loading shader type %x, ID %i", mType, mShaderID);
-        LOGV("%s", mShader.string());
+        ALOGV("Loading shader type %x, ID %i", mType, mShaderID);
+        ALOGV("%s", mShader.string());
     }
 
     if (mShaderID) {
@@ -202,7 +202,7 @@ bool RsdShader::loadShader(const Context *rsc) {
     }
 
     if (rsc->props.mLogShaders) {
-        LOGV("--Shader load result %x ", glGetError());
+        ALOGV("--Shader load result %x ", glGetError());
     }
     mIsValid = true;
     return true;
@@ -252,36 +252,36 @@ void RsdShader::logUniform(const Element *field, const float *fd, uint32_t array
     uint32_t elementSize = field->getSizeBytes() / sizeof(float);
     for (uint32_t i = 0; i < arraySize; i ++) {
         if (arraySize > 1) {
-            LOGV("Array Element [%u]", i);
+            ALOGV("Array Element [%u]", i);
         }
         if (dataType == RS_TYPE_MATRIX_4X4) {
-            LOGV("Matrix4x4");
-            LOGV("{%f, %f, %f, %f",  fd[0], fd[4], fd[8], fd[12]);
-            LOGV(" %f, %f, %f, %f",  fd[1], fd[5], fd[9], fd[13]);
-            LOGV(" %f, %f, %f, %f",  fd[2], fd[6], fd[10], fd[14]);
-            LOGV(" %f, %f, %f, %f}", fd[3], fd[7], fd[11], fd[15]);
+            ALOGV("Matrix4x4");
+            ALOGV("{%f, %f, %f, %f",  fd[0], fd[4], fd[8], fd[12]);
+            ALOGV(" %f, %f, %f, %f",  fd[1], fd[5], fd[9], fd[13]);
+            ALOGV(" %f, %f, %f, %f",  fd[2], fd[6], fd[10], fd[14]);
+            ALOGV(" %f, %f, %f, %f}", fd[3], fd[7], fd[11], fd[15]);
         } else if (dataType == RS_TYPE_MATRIX_3X3) {
-            LOGV("Matrix3x3");
-            LOGV("{%f, %f, %f",  fd[0], fd[3], fd[6]);
-            LOGV(" %f, %f, %f",  fd[1], fd[4], fd[7]);
-            LOGV(" %f, %f, %f}", fd[2], fd[5], fd[8]);
+            ALOGV("Matrix3x3");
+            ALOGV("{%f, %f, %f",  fd[0], fd[3], fd[6]);
+            ALOGV(" %f, %f, %f",  fd[1], fd[4], fd[7]);
+            ALOGV(" %f, %f, %f}", fd[2], fd[5], fd[8]);
         } else if (dataType == RS_TYPE_MATRIX_2X2) {
-            LOGV("Matrix2x2");
-            LOGV("{%f, %f",  fd[0], fd[2]);
-            LOGV(" %f, %f}", fd[1], fd[3]);
+            ALOGV("Matrix2x2");
+            ALOGV("{%f, %f",  fd[0], fd[2]);
+            ALOGV(" %f, %f}", fd[1], fd[3]);
         } else {
             switch (field->getComponent().getVectorSize()) {
             case 1:
-                LOGV("Uniform 1 = %f", fd[0]);
+                ALOGV("Uniform 1 = %f", fd[0]);
                 break;
             case 2:
-                LOGV("Uniform 2 = %f %f", fd[0], fd[1]);
+                ALOGV("Uniform 2 = %f %f", fd[0], fd[1]);
                 break;
             case 3:
-                LOGV("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
+                ALOGV("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
                 break;
             case 4:
-                LOGV("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
+                ALOGV("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
                 break;
             default:
                 rsAssert(0);
@@ -479,7 +479,7 @@ void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool 
                 arraySize = sc->fragUniformSize(uidx);
             }
             if (rsc->props.mLogShadersUniforms) {
-                LOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s",
+                ALOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s",
                      slot, offset, ct, field, uidx, fieldName);
             }
             uidx ++;

@@ -37,7 +37,7 @@ public:
 
     void dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& imageData)
     {
-        LOGV("dataCallback");
+        ALOGV("dataCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraRecordingProxyListener::getInterfaceDescriptor());
         data.writeInt64(timestamp);
@@ -56,7 +56,7 @@ status_t BnCameraRecordingProxyListener::onTransact(
 {
     switch(code) {
         case DATA_CALLBACK_TIMESTAMP: {
-            LOGV("DATA_CALLBACK_TIMESTAMP");
+            ALOGV("DATA_CALLBACK_TIMESTAMP");
             CHECK_INTERFACE(ICameraRecordingProxyListener, data, reply);
             nsecs_t timestamp = data.readInt64();
             int32_t msgType = data.readInt32();

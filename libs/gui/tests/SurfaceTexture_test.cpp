@@ -1182,12 +1182,12 @@ protected:
         // test.
         void waitForFrame() {
             Mutex::Autolock lock(mMutex);
-            LOGV("+waitForFrame");
+            ALOGV("+waitForFrame");
             while (!mFrameAvailable) {
                 mFrameAvailableCondition.wait(mMutex);
             }
             mFrameAvailable = false;
-            LOGV("-waitForFrame");
+            ALOGV("-waitForFrame");
         }
 
         // Allow the producer to return from its swapBuffers call and continue
@@ -1195,23 +1195,23 @@ protected:
         // thread once for every frame expected by the test.
         void finishFrame() {
             Mutex::Autolock lock(mMutex);
-            LOGV("+finishFrame");
+            ALOGV("+finishFrame");
             mFrameFinished = true;
             mFrameFinishCondition.signal();
-            LOGV("-finishFrame");
+            ALOGV("-finishFrame");
         }
 
         // This should be called by SurfaceTexture on the producer thread.
         virtual void onFrameAvailable() {
             Mutex::Autolock lock(mMutex);
-            LOGV("+onFrameAvailable");
+            ALOGV("+onFrameAvailable");
             mFrameAvailable = true;
             mFrameAvailableCondition.signal();
             while (!mFrameFinished) {
                 mFrameFinishCondition.wait(mMutex);
             }
             mFrameFinished = false;
-            LOGV("-onFrameAvailable");
+            ALOGV("-onFrameAvailable");
         }
 
     protected:
@@ -1324,9 +1324,9 @@ TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageBeforeFrameFinishedComple
             for (int i = 0; i < NUM_ITERATIONS; i++) {
                 glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
-                LOGV("+swapBuffers");
+                ALOGV("+swapBuffers");
                 swapBuffers();
-                LOGV("-swapBuffers");
+                ALOGV("-swapBuffers");
             }
         }
     };
@@ -1335,9 +1335,9 @@ TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageBeforeFrameFinishedComple
 
     for (int i = 0; i < NUM_ITERATIONS; i++) {
         mFC->waitForFrame();
-        LOGV("+updateTexImage");
+        ALOGV("+updateTexImage");
         mST->updateTexImage();
-        LOGV("-updateTexImage");
+        ALOGV("-updateTexImage");
         mFC->finishFrame();
 
         // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
@@ -1352,9 +1352,9 @@ TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageAfterFrameFinishedComplet
             for (int i = 0; i < NUM_ITERATIONS; i++) {
                 glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
-                LOGV("+swapBuffers");
+                ALOGV("+swapBuffers");
                 swapBuffers();
-                LOGV("-swapBuffers");
+                ALOGV("-swapBuffers");
             }
         }
     };
@@ -1364,9 +1364,9 @@ TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageAfterFrameFinishedComplet
     for (int i = 0; i < NUM_ITERATIONS; i++) {
         mFC->waitForFrame();
         mFC->finishFrame();
-        LOGV("+updateTexImage");
+        ALOGV("+updateTexImage");
         mST->updateTexImage();
-        LOGV("-updateTexImage");
+        ALOGV("-updateTexImage");
 
         // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
     }
@@ -1381,9 +1381,9 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedSwapBuffersWhileDequeueStalled
             for (int i = 0; i < NUM_ITERATIONS; i++) {
                 glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
-                LOGV("+swapBuffers");
+                ALOGV("+swapBuffers");
                 swapBuffers();
-                LOGV("-swapBuffers");
+                ALOGV("-swapBuffers");
             }
         }
     };
@@ -1432,9 +1432,9 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedSwapBuffersWhileDequeueStalled
     for (int i = 0; i < NUM_ITERATIONS-3; i++) {
         mFC->waitForFrame();
         mFC->finishFrame();
-        LOGV("+updateTexImage");
+        ALOGV("+updateTexImage");
         mST->updateTexImage();
-        LOGV("-updateTexImage");
+        ALOGV("-updateTexImage");
     }
 }
 

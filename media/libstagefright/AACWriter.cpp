@@ -40,7 +40,7 @@ AACWriter::AACWriter(const char *filename)
       mChannelCount(-1),
       mSampleRate(-1) {
 
-    LOGV("AACWriter Constructor");
+    ALOGV("AACWriter Constructor");
 
     mFd = open(filename, O_CREAT | O_LARGEFILE | O_TRUNC | O_RDWR);
     if (mFd >= 0) {
@@ -209,7 +209,7 @@ static bool getSampleRateTableIndex(int sampleRate, uint8_t* tableIndex) {
     *tableIndex = 0;
     for (int index = 0; index < tableSize; ++index) {
         if (sampleRate == kSampleRateTable[index]) {
-            LOGV("Sample rate: %d and index: %d",
+            ALOGV("Sample rate: %d and index: %d",
                 sampleRate, index);
             *tableIndex = index;
             return true;
@@ -322,7 +322,7 @@ status_t AACWriter::threadFunc() {
 
         int32_t isCodecSpecific = 0;
         if (buffer->meta_data()->findInt32(kKeyIsCodecConfig, &isCodecSpecific) && isCodecSpecific) {
-            LOGV("Drop codec specific info buffer");
+            ALOGV("Drop codec specific info buffer");
             buffer->release();
             buffer = NULL;
             continue;
@@ -338,7 +338,7 @@ status_t AACWriter::threadFunc() {
             mResumed = false;
         }
         timestampUs -= previousPausedDurationUs;
-        LOGV("time stamp: %lld, previous paused duration: %lld",
+        ALOGV("time stamp: %lld, previous paused duration: %lld",
             timestampUs, previousPausedDurationUs);
         if (timestampUs > maxTimestampUs) {
             maxTimestampUs = timestampUs;

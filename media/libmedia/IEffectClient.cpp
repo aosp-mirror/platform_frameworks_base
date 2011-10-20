@@ -40,7 +40,7 @@ public:
 
     void controlStatusChanged(bool controlGranted)
     {
-        LOGV("controlStatusChanged");
+        ALOGV("controlStatusChanged");
         Parcel data, reply;
         data.writeInterfaceToken(IEffectClient::getInterfaceDescriptor());
         data.writeInt32((uint32_t)controlGranted);
@@ -49,7 +49,7 @@ public:
 
     void enableStatusChanged(bool enabled)
     {
-        LOGV("enableStatusChanged");
+        ALOGV("enableStatusChanged");
         Parcel data, reply;
         data.writeInterfaceToken(IEffectClient::getInterfaceDescriptor());
         data.writeInt32((uint32_t)enabled);
@@ -62,7 +62,7 @@ public:
                          uint32_t replySize,
                          void *pReplyData)
     {
-        LOGV("commandExecuted");
+        ALOGV("commandExecuted");
         Parcel data, reply;
         data.writeInterfaceToken(IEffectClient::getInterfaceDescriptor());
         data.writeInt32(cmdCode);
@@ -96,21 +96,21 @@ status_t BnEffectClient::onTransact(
 {
     switch(code) {
         case CONTROL_STATUS_CHANGED: {
-            LOGV("CONTROL_STATUS_CHANGED");
+            ALOGV("CONTROL_STATUS_CHANGED");
             CHECK_INTERFACE(IEffectClient, data, reply);
             bool hasControl = (bool)data.readInt32();
             controlStatusChanged(hasControl);
             return NO_ERROR;
         } break;
         case ENABLE_STATUS_CHANGED: {
-            LOGV("ENABLE_STATUS_CHANGED");
+            ALOGV("ENABLE_STATUS_CHANGED");
             CHECK_INTERFACE(IEffectClient, data, reply);
             bool enabled = (bool)data.readInt32();
             enableStatusChanged(enabled);
             return NO_ERROR;
         } break;
         case COMMAND_EXECUTED: {
-            LOGV("COMMAND_EXECUTED");
+            ALOGV("COMMAND_EXECUTED");
             CHECK_INTERFACE(IEffectClient, data, reply);
             uint32_t cmdCode = data.readInt32();
             uint32_t cmdSize = data.readInt32();

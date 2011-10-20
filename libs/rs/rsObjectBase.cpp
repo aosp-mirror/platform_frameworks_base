@@ -35,11 +35,11 @@ ObjectBase::ObjectBase(Context *rsc) {
 
     rsAssert(rsc);
     add();
-    //LOGV("ObjectBase %p con", this);
+    //ALOGV("ObjectBase %p con", this);
 }
 
 ObjectBase::~ObjectBase() {
-    //LOGV("~ObjectBase %p  ref %i,%i", this, mUserRefCount, mSysRefCount);
+    //ALOGV("~ObjectBase %p  ref %i,%i", this, mUserRefCount, mSysRefCount);
 #if RS_OBJECT_DEBUG
     mStack.dump();
 #endif
@@ -60,22 +60,22 @@ ObjectBase::~ObjectBase() {
 
 void ObjectBase::dumpLOGV(const char *op) const {
     if (mName.size()) {
-        LOGV("%s RSobj %p, name %s, refs %i,%i  links %p,%p,%p",
+        ALOGV("%s RSobj %p, name %s, refs %i,%i  links %p,%p,%p",
              op, this, mName.string(), mUserRefCount, mSysRefCount, mNext, mPrev, mRSC);
     } else {
-        LOGV("%s RSobj %p, no-name, refs %i,%i  links %p,%p,%p",
+        ALOGV("%s RSobj %p, no-name, refs %i,%i  links %p,%p,%p",
              op, this, mUserRefCount, mSysRefCount, mNext, mPrev, mRSC);
     }
 }
 
 void ObjectBase::incUserRef() const {
     android_atomic_inc(&mUserRefCount);
-    //LOGV("ObjectBase %p incU ref %i, %i", this, mUserRefCount, mSysRefCount);
+    //ALOGV("ObjectBase %p incU ref %i, %i", this, mUserRefCount, mSysRefCount);
 }
 
 void ObjectBase::incSysRef() const {
     android_atomic_inc(&mSysRefCount);
-    //LOGV("ObjectBase %p incS ref %i, %i", this, mUserRefCount, mSysRefCount);
+    //ALOGV("ObjectBase %p incS ref %i, %i", this, mUserRefCount, mSysRefCount);
 }
 
 void ObjectBase::preDestroy() const {
@@ -111,7 +111,7 @@ bool ObjectBase::checkDelete(const ObjectBase *ref) {
 bool ObjectBase::decUserRef() const {
     rsAssert(mUserRefCount > 0);
 #if RS_OBJECT_DEBUG
-    LOGV("ObjectBase %p decU ref %i, %i", this, mUserRefCount, mSysRefCount);
+    ALOGV("ObjectBase %p decU ref %i, %i", this, mUserRefCount, mSysRefCount);
     if (mUserRefCount <= 0) {
         mStack.dump();
     }
@@ -126,7 +126,7 @@ bool ObjectBase::decUserRef() const {
 }
 
 bool ObjectBase::zeroUserRef() const {
-    //LOGV("ObjectBase %p zeroU ref %i, %i", this, mUserRefCount, mSysRefCount);
+    //ALOGV("ObjectBase %p zeroU ref %i, %i", this, mUserRefCount, mSysRefCount);
     android_atomic_acquire_store(0, &mUserRefCount);
     if (android_atomic_acquire_load(&mSysRefCount) <= 0) {
         return checkDelete(this);
@@ -135,7 +135,7 @@ bool ObjectBase::zeroUserRef() const {
 }
 
 bool ObjectBase::decSysRef() const {
-    //LOGV("ObjectBase %p decS ref %i, %i", this, mUserRefCount, mSysRefCount);
+    //ALOGV("ObjectBase %p decS ref %i, %i", this, mUserRefCount, mSysRefCount);
     rsAssert(mSysRefCount > 0);
     if ((android_atomic_dec(&mSysRefCount) <= 1) &&
         (android_atomic_acquire_load(&mUserRefCount) <= 0)) {
@@ -165,7 +165,7 @@ void ObjectBase::add() const {
 
     rsAssert(!mNext);
     rsAssert(!mPrev);
-    //LOGV("calling add  rsc %p", mRSC);
+    //ALOGV("calling add  rsc %p", mRSC);
     mNext = mRSC->mObjHead;
     if (mRSC->mObjHead) {
         mRSC->mObjHead->mPrev = this;
@@ -176,7 +176,7 @@ void ObjectBase::add() const {
 }
 
 void ObjectBase::remove() const {
-    //LOGV("calling remove  rsc %p", mRSC);
+    //ALOGV("calling remove  rsc %p", mRSC);
     if (!mRSC) {
         rsAssert(!mPrev);
         rsAssert(!mNext);
@@ -198,7 +198,7 @@ void ObjectBase::remove() const {
 
 void ObjectBase::zeroAllUserRef(Context *rsc) {
     if (rsc->props.mLogObjects) {
-        LOGV("Forcing release of all outstanding user refs.");
+        ALOGV("Forcing release of all outstanding user refs.");
     }
 
     // This operation can be slow, only to be called during context cleanup.
@@ -216,14 +216,14 @@ void ObjectBase::zeroAllUserRef(Context *rsc) {
     }
 
     if (rsc->props.mLogObjects) {
-        LOGV("Objects remaining.");
+        ALOGV("Objects remaining.");
         dumpAll(rsc);
     }
 }
 
 void ObjectBase::freeAllChildren(Context *rsc) {
     if (rsc->props.mLogObjects) {
-        LOGV("Forcing release of all child objects.");
+        ALOGV("Forcing release of all child objects.");
     }
 
     // This operation can be slow, only to be called during context cleanup.
@@ -238,7 +238,7 @@ void ObjectBase::freeAllChildren(Context *rsc) {
     }
 
     if (rsc->props.mLogObjects) {
-        LOGV("Objects remaining.");
+        ALOGV("Objects remaining.");
         dumpAll(rsc);
     }
 }
@@ -246,10 +246,10 @@ void ObjectBase::freeAllChildren(Context *rsc) {
 void ObjectBase::dumpAll(Context *rsc) {
     asyncLock();
 
-    LOGV("Dumping all objects");
+    ALOGV("Dumping all objects");
     const ObjectBase * o = rsc->mObjHead;
     while (o) {
-        LOGV(" Object %p", o);
+        ALOGV(" Object %p", o);
         o->dumpLOGV("  ");
         o = o->mNext;
     }

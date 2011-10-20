@@ -419,7 +419,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
             pContext->mIsUpdateOverlay = true;
             pCurrEditInfo = (VideoEditorCurretEditInfo*)argc;
             overlayEffectIndex = pCurrEditInfo->overlaySettingsIndex;
-            LOGV("MSG_TYPE_OVERLAY_UPDATE");
+            ALOGV("MSG_TYPE_OVERLAY_UPDATE");
 
             if (pContext->mOverlayFileName != NULL) {
                 free(pContext->mOverlayFileName);
@@ -445,12 +445,12 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
                 }
 
                 strcat(pContext->mOverlayFileName, ".png");
-                LOGV("Conv string is %s", pContext->mOverlayFileName);
-                LOGV("Current Clip index = %d", pCurrEditInfo->clipIndex);
+                ALOGV("Conv string is %s", pContext->mOverlayFileName);
+                ALOGV("Current Clip index = %d", pCurrEditInfo->clipIndex);
 
                 pContext->mOverlayRenderingMode = pContext->pEditSettings->\
                          pClipList[pCurrEditInfo->clipIndex]->xVSS.MediaRendering;
-                LOGV("rendering mode %d ", pContext->mOverlayRenderingMode);
+                ALOGV("rendering mode %d ", pContext->mOverlayRenderingMode);
 
             }
 
@@ -464,7 +464,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
                 pContext->mOverlayFileName = NULL;
             }
 
-            LOGV("MSG_TYPE_OVERLAY_CLEAR");
+            ALOGV("MSG_TYPE_OVERLAY_CLEAR");
             //argc is not used
             pContext->mIsUpdateOverlay = true;
             break;
@@ -499,7 +499,7 @@ static M4OSA_ERR checkClipVideoProfileAndLevel(M4DECODER_VideoDecoders *pDecoder
     M4OSA_Bool foundCodec = M4OSA_FALSE;
     M4OSA_ERR  result = M4VSS3GPP_ERR_EDITING_UNSUPPORTED_VIDEO_PROFILE;
     M4OSA_Bool foundProfile = M4OSA_FALSE;
-    LOGV("checkClipVideoProfileAndLevel format %d profile;%d level:0x%x",
+    ALOGV("checkClipVideoProfileAndLevel format %d profile;%d level:0x%x",
        format, profile, level);
 
     switch (format) {
@@ -1431,7 +1431,7 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     M4OSA_UInt8 curProgress = 0;
     int         lastProgress = 0;
 
-    LOGV("LVME_generateAudio Current progress is =%d", curProgress);
+    ALOGV("LVME_generateAudio Current progress is =%d", curProgress);
     pEnv->CallVoidMethod(pContext->engine,
             pContext->onProgressUpdateMethodId, 1/*task status*/,
             curProgress/*progress*/);
@@ -1439,17 +1439,17 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
         result = M4MCS_step(mcsContext, &curProgress);
 
         if (result != M4NO_ERROR) {
-            LOGV("LVME_generateAudio M4MCS_step returned 0x%x",result);
+            ALOGV("LVME_generateAudio M4MCS_step returned 0x%x",result);
 
             if (result == M4MCS_WAR_TRANSCODING_DONE) {
-                LOGV("LVME_generateAudio MCS process ended");
+                ALOGV("LVME_generateAudio MCS process ended");
 
                 // Send a progress notification.
                 curProgress = 100;
                 pEnv->CallVoidMethod(pContext->engine,
                     pContext->onProgressUpdateMethodId, 1/*task status*/,
                     curProgress);
-                LOGV("LVME_generateAudio Current progress is =%d", curProgress);
+                ALOGV("LVME_generateAudio Current progress is =%d", curProgress);
             }
         } else {
             // Send a progress notification if needed
@@ -1458,7 +1458,7 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
                 pEnv->CallVoidMethod(pContext->engine,
                     pContext->onProgressUpdateMethodId, 0/*task status*/,
                     curProgress/*progress*/);
-                LOGV("LVME_generateAudio Current progress is =%d",curProgress);
+                ALOGV("LVME_generateAudio Current progress is =%d",curProgress);
             }
         }
     } while (result == M4NO_ERROR);
@@ -1506,7 +1506,7 @@ static int removeAlphafromRGB8888 (
     M4OSA_Context lImageFileFp  = M4OSA_NULL;
     M4OSA_ERR err = M4NO_ERROR;
 
-    LOGV("removeAlphafromRGB8888: width %d", pFramingCtx->width);
+    ALOGV("removeAlphafromRGB8888: width %d", pFramingCtx->width);
 
     M4OSA_UInt8 *pTmpData = (M4OSA_UInt8*) M4OSA_32bitAlignedMalloc(frameSize_argb, M4VS, (M4OSA_Char*)"Image argb data");
     if (pTmpData == M4OSA_NULL) {
@@ -2786,9 +2786,9 @@ M4OSA_ERR videoEditor_processClip(
     }
 
     // Send the command.
-    LOGV("videoEditor_processClip ITEM %d Calling M4xVSS_SendCommand()", unuseditemID);
+    ALOGV("videoEditor_processClip ITEM %d Calling M4xVSS_SendCommand()", unuseditemID);
     result = M4xVSS_SendCommand(pContext->engineContext, pContext->pEditSettings);
-    LOGV("videoEditor_processClip ITEM %d M4xVSS_SendCommand() returned 0x%x",
+    ALOGV("videoEditor_processClip ITEM %d M4xVSS_SendCommand() returned 0x%x",
         unuseditemID, (unsigned int) result);
 
     // Remove warnings indications (we only care about errors here)
@@ -2798,21 +2798,21 @@ M4OSA_ERR videoEditor_processClip(
     }
 
     // Send the first progress indication (=0)
-    LOGV("VERY FIRST PROGRESS videoEditor_processClip ITEM %d Progress indication %d",
+    ALOGV("VERY FIRST PROGRESS videoEditor_processClip ITEM %d Progress indication %d",
         unuseditemID, progress);
     pEnv->CallVoidMethod(pContext->engine, pContext->onProgressUpdateMethodId,
         unuseditemID, progress);
 
     // Check if a task is being performed.
     // ??? ADD STOPPING MECHANISM
-    LOGV("videoEditor_processClip Entering processing loop");
+    ALOGV("videoEditor_processClip Entering processing loop");
     M4OSA_UInt8 prevReportedProgress = 0;
     while((result == M4NO_ERROR)
         &&(pContext->state!=ManualEditState_SAVED)
         &&(pContext->state!=ManualEditState_STOPPING)) {
 
             // Perform the next processing step.
-            //LOGV("LVME_processClip Entering M4xVSS_Step()");
+            //ALOGV("LVME_processClip Entering M4xVSS_Step()");
             result = M4xVSS_Step(pContext->engineContext, &progress);
 
             if (progress != prevReportedProgress) {
@@ -2836,7 +2836,7 @@ M4OSA_ERR videoEditor_processClip(
                 if (progress > lastProgress)
                 {
                     // Send a progress notification.
-                    LOGV("videoEditor_processClip ITEM %d Progress indication %d",
+                    ALOGV("videoEditor_processClip ITEM %d Progress indication %d",
                         unuseditemID, progress);
                     pEnv->CallVoidMethod(pContext->engine,
                         pContext->onProgressUpdateMethodId,
@@ -2850,7 +2850,7 @@ M4OSA_ERR videoEditor_processClip(
             {
                 // Set the state to the completions state.
                 pContext->state = completionState;
-                LOGV("videoEditor_processClip ITEM %d STATE changed to %d",
+                ALOGV("videoEditor_processClip ITEM %d STATE changed to %d",
                     unuseditemID, pContext->state);
 
                 // Reset progress indication, as we switch to next state
@@ -2862,11 +2862,11 @@ M4OSA_ERR videoEditor_processClip(
                 // Check if we are analyzing input
                 if (pContext->state == ManualEditState_OPENED) {
                     // File is opened, we must start saving it
-                    LOGV("videoEditor_processClip Calling M4xVSS_SaveStart()");
+                    ALOGV("videoEditor_processClip Calling M4xVSS_SaveStart()");
                     result = M4xVSS_SaveStart(pContext->engineContext,
                         (M4OSA_Char*)pContext->pEditSettings->pOutputFile,
                         (M4OSA_UInt32)pContext->pEditSettings->uiOutputPathSize);
-                    LOGV("videoEditor_processClip ITEM %d SaveStart() returned 0x%x",
+                    ALOGV("videoEditor_processClip ITEM %d SaveStart() returned 0x%x",
                         unuseditemID, (unsigned int) result);
 
                     // Set the state to saving.
@@ -2889,7 +2889,7 @@ M4OSA_ERR videoEditor_processClip(
 
                     // Send a progress notification.
                     progress = 100;
-                    LOGV("videoEditor_processClip ITEM %d Last progress indication %d",
+                    ALOGV("videoEditor_processClip ITEM %d Last progress indication %d",
                         unuseditemID, progress);
                     pEnv->CallVoidMethod(pContext->engine,
                         pContext->onProgressUpdateMethodId,
@@ -2897,9 +2897,9 @@ M4OSA_ERR videoEditor_processClip(
 
 
                     // Stop the encoding.
-                    LOGV("videoEditor_processClip Calling M4xVSS_SaveStop()");
+                    ALOGV("videoEditor_processClip Calling M4xVSS_SaveStop()");
                     result = M4xVSS_SaveStop(pContext->engineContext);
-                    LOGV("videoEditor_processClip M4xVSS_SaveStop() returned 0x%x", result);
+                    ALOGV("videoEditor_processClip M4xVSS_SaveStop() returned 0x%x", result);
                 }
                 // Other states are unexpected
                 else {
@@ -2936,7 +2936,7 @@ videoEditor_generateClip(
     ManualEditContext* pContext = M4OSA_NULL;
     M4OSA_ERR          result   = M4NO_ERROR;
 
-    LOGV("videoEditor_generateClip START");
+    ALOGV("videoEditor_generateClip START");
 
     // Get the context.
     pContext = (ManualEditContext*)videoEditClasses_getContext(&loaded, pEnv, thiz);
@@ -2954,21 +2954,21 @@ videoEditor_generateClip(
                                              "not initialized");
 
     // Load the clip settings
-    LOGV("videoEditor_generateClip Calling videoEditor_loadSettings");
+    ALOGV("videoEditor_generateClip Calling videoEditor_loadSettings");
     videoEditor_loadSettings(pEnv, thiz, settings);
-    LOGV("videoEditor_generateClip videoEditor_loadSettings returned");
+    ALOGV("videoEditor_generateClip videoEditor_loadSettings returned");
 
     // Generate the clip
-    LOGV("videoEditor_generateClip Calling LVME_processClip");
+    ALOGV("videoEditor_generateClip Calling LVME_processClip");
     result = videoEditor_processClip(pEnv, thiz, 0 /*item id is unused*/);
-    LOGV("videoEditor_generateClip videoEditor_processClip returned 0x%x", result);
+    ALOGV("videoEditor_generateClip videoEditor_processClip returned 0x%x", result);
 
     if (pContext->state != ManualEditState_INITIALIZED) {
         // Free up memory (whatever the result)
         videoEditor_unloadSettings(pEnv, thiz);
     }
 
-    LOGV("videoEditor_generateClip END 0x%x", (unsigned int) result);
+    ALOGV("videoEditor_generateClip END 0x%x", (unsigned int) result);
     return result;
 }
 
@@ -3024,7 +3024,7 @@ videoEditor_loadSettings(
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR", "inside load settings");
         VIDEOEDIT_LOG_EDIT_SETTINGS(pContext->pEditSettings);
     }
-    LOGV("videoEditor_loadSettings END");
+    ALOGV("videoEditor_loadSettings END");
 }
 
 
@@ -3051,7 +3051,7 @@ videoEditor_unloadSettings(
     // Check if the context is valid (required because the context is dereferenced).
     if (needToBeUnLoaded)
     {
-        LOGV("videoEditor_unloadSettings state %d", pContext->state);
+        ALOGV("videoEditor_unloadSettings state %d", pContext->state);
         // Make sure that we are in a correct state.
         videoEditJava_checkAndThrowIllegalStateException(&needToBeUnLoaded, pEnv,
                      ((pContext->state != ManualEditState_ANALYZING      ) &&
@@ -3070,9 +3070,9 @@ videoEditor_unloadSettings(
         if (needToBeUnLoaded)
         {
             // Close the command.
-            LOGV("videoEditor_unloadSettings Calling M4xVSS_CloseCommand()");
+            ALOGV("videoEditor_unloadSettings Calling M4xVSS_CloseCommand()");
             result = M4xVSS_CloseCommand(pContext->engineContext);
-            LOGV("videoEditor_unloadSettings M4xVSS_CloseCommand() returned 0x%x",
+            ALOGV("videoEditor_unloadSettings M4xVSS_CloseCommand() returned 0x%x",
                 (unsigned int)result);
 
             // Check if the command could be closed.
@@ -3107,7 +3107,7 @@ videoEditor_stopEncoding(
     ManualEditContext* pContext = M4OSA_NULL;
     M4OSA_ERR          result   = M4NO_ERROR;
 
-    LOGV("videoEditor_stopEncoding START");
+    ALOGV("videoEditor_stopEncoding START");
 
     // Get the context.
     pContext = (ManualEditContext*)videoEditClasses_getContext(&stopped, pEnv, thiz);
@@ -3128,9 +3128,9 @@ videoEditor_stopEncoding(
         if (pContext->state != ManualEditState_INITIALIZED)
         {
             // Close the command.
-            LOGV("videoEditor_stopEncoding Calling M4xVSS_CloseCommand()");
+            ALOGV("videoEditor_stopEncoding Calling M4xVSS_CloseCommand()");
             result = M4xVSS_CloseCommand(pContext->engineContext);
-            LOGV("videoEditor_stopEncoding M4xVSS_CloseCommand() returned 0x%x",
+            ALOGV("videoEditor_stopEncoding M4xVSS_CloseCommand() returned 0x%x",
                 (unsigned int)result);
         }
 
@@ -3166,7 +3166,7 @@ videoEditor_release(
 
     // If context is not set, return (we consider release already happened)
     if (pContext == NULL) {
-        LOGV("videoEditor_release Nothing to do, context is aleady NULL");
+        ALOGV("videoEditor_release Nothing to do, context is aleady NULL");
         return;
     }
 
@@ -3189,10 +3189,10 @@ videoEditor_release(
         if (pContext->state != ManualEditState_INITIALIZED)
         {
             // Close the command.
-            LOGV("videoEditor_release Calling M4xVSS_CloseCommand() state =%d",
+            ALOGV("videoEditor_release Calling M4xVSS_CloseCommand() state =%d",
                 pContext->state);
             result = M4xVSS_CloseCommand(pContext->engineContext);
-            LOGV("videoEditor_release M4xVSS_CloseCommand() returned 0x%x",
+            ALOGV("videoEditor_release M4xVSS_CloseCommand() returned 0x%x",
                 (unsigned int)result);
 
             // Check if the command could be closed.
@@ -3201,9 +3201,9 @@ videoEditor_release(
         }
 
         // Cleanup the engine.
-        LOGV("videoEditor_release Calling M4xVSS_CleanUp()");
+        ALOGV("videoEditor_release Calling M4xVSS_CleanUp()");
         result = M4xVSS_CleanUp(pContext->engineContext);
-        LOGV("videoEditor_release M4xVSS_CleanUp() returned 0x%x", (unsigned int)result);
+        ALOGV("videoEditor_release M4xVSS_CleanUp() returned 0x%x", (unsigned int)result);
 
         // Check if the cleanup succeeded.
         videoEditJava_checkAndThrowRuntimeException(&released, pEnv,
@@ -3245,17 +3245,17 @@ videoEditor_release(
                 pDecoder = pContext->decoders->decoder;
                 for (int32_t k = 0; k < decoderNumber; k++) {
                     // free each component
-                    LOGV("decoder index :%d",k);
+                    ALOGV("decoder index :%d",k);
                     if (pDecoder != NULL &&
                         pDecoder->component != NULL &&
                         pDecoder->componentNumber > 0) {
-                        LOGV("component number %d",pDecoder->componentNumber);
+                        ALOGV("component number %d",pDecoder->componentNumber);
                         int32_t componentNumber =
                            pDecoder->componentNumber;
 
                         pComponents = pDecoder->component;
                         for (int32_t i = 0; i< componentNumber; i++) {
-                            LOGV("component index :%d",i);
+                            ALOGV("component index :%d",i);
                             if (pComponents != NULL &&
                                 pComponents->profileLevel != NULL) {
                                 free(pComponents->profileLevel);

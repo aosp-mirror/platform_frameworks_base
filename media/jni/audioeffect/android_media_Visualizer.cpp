@@ -107,7 +107,7 @@ static void captureCallback(void* user,
     visualizer_callback_cookie *callbackInfo = (visualizer_callback_cookie *)user;
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
-    LOGV("captureCallback: callbackInfo %p, visualizer_ref %p visualizer_class %p",
+    ALOGV("captureCallback: callbackInfo %p, visualizer_ref %p visualizer_class %p",
             callbackInfo,
             callbackInfo->visualizer_ref,
             callbackInfo->visualizer_class);
@@ -178,7 +178,7 @@ static void
 android_media_visualizer_native_init(JNIEnv *env)
 {
 
-    LOGV("android_media_visualizer_native_init");
+    ALOGV("android_media_visualizer_native_init");
 
     fields.clazzEffect = NULL;
 
@@ -225,7 +225,7 @@ static jint
 android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jint sessionId, jintArray jId)
 {
-    LOGV("android_media_visualizer_native_setup");
+    ALOGV("android_media_visualizer_native_setup");
     visualizerJniStorage* lpJniStorage = NULL;
     int lStatus = VISUALIZER_ERROR_NO_MEMORY;
     Visualizer* lpVisualizer = NULL;
@@ -241,7 +241,7 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // we use a weak reference so the Visualizer object can be garbage collected.
     lpJniStorage->mCallbackData.visualizer_ref = env->NewGlobalRef(weak_this);
 
-    LOGV("setup: lpJniStorage: %p visualizer_ref %p visualizer_class %p, &mCallbackData %p",
+    ALOGV("setup: lpJniStorage: %p visualizer_ref %p visualizer_class %p, &mCallbackData %p",
             lpJniStorage,
             lpJniStorage->mCallbackData.visualizer_ref,
             lpJniStorage->mCallbackData.visualizer_class,
@@ -307,13 +307,13 @@ setup_failure:
 
 // ----------------------------------------------------------------------------
 static void android_media_visualizer_native_finalize(JNIEnv *env,  jobject thiz) {
-    LOGV("android_media_visualizer_native_finalize jobject: %x\n", (int)thiz);
+    ALOGV("android_media_visualizer_native_finalize jobject: %x\n", (int)thiz);
 
     // delete the Visualizer object
     Visualizer* lpVisualizer = (Visualizer *)env->GetIntField(
         thiz, fields.fidNativeVisualizer);
     if (lpVisualizer) {
-        LOGV("deleting Visualizer: %x\n", (int)lpVisualizer);
+        ALOGV("deleting Visualizer: %x\n", (int)lpVisualizer);
         delete lpVisualizer;
     }
 
@@ -321,7 +321,7 @@ static void android_media_visualizer_native_finalize(JNIEnv *env,  jobject thiz)
     visualizerJniStorage* lpJniStorage = (visualizerJniStorage *)env->GetIntField(
         thiz, fields.fidJniData);
     if (lpJniStorage) {
-        LOGV("deleting pJniStorage: %x\n", (int)lpJniStorage);
+        ALOGV("deleting pJniStorage: %x\n", (int)lpJniStorage);
         delete lpJniStorage;
     }
 }
@@ -366,7 +366,7 @@ android_media_visualizer_native_getCaptureSizeRange(JNIEnv *env, jobject thiz)
     jint *nRange = env->GetIntArrayElements(jRange, NULL);
     nRange[0] = Visualizer::getMinCaptureSize();
     nRange[1] = Visualizer::getMaxCaptureSize();
-    LOGV("getCaptureSizeRange() min %d max %d", nRange[0], nRange[1]);
+    ALOGV("getCaptureSizeRange() min %d max %d", nRange[0], nRange[1]);
     env->ReleaseIntArrayElements(jRange, nRange, 0);
     return jRange;
 }
@@ -458,7 +458,7 @@ android_media_setPeriodicCapture(JNIEnv *env, jobject thiz, jint rate, jboolean 
         return VISUALIZER_ERROR_NO_INIT;
     }
 
-    LOGV("setPeriodicCapture: rate %d, jWaveform %d jFft %d",
+    ALOGV("setPeriodicCapture: rate %d, jWaveform %d jFft %d",
             rate,
             jWaveform,
             jFft);

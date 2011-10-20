@@ -42,7 +42,7 @@ status_t ZipEntry::initFromCDE(FILE* fp)
     long posn;
     bool hasDD;
 
-    //LOGV("initFromCDE ---\n");
+    //ALOGV("initFromCDE ---\n");
 
     /* read the CDE */
     result = mCDE.read(fp);
@@ -280,50 +280,50 @@ void ZipEntry::setDataInfo(long uncompLen, long compLen, unsigned long crc32,
 bool ZipEntry::compareHeaders(void) const
 {
     if (mCDE.mVersionToExtract != mLFH.mVersionToExtract) {
-        LOGV("cmp: VersionToExtract\n");
+        ALOGV("cmp: VersionToExtract\n");
         return false;
     }
     if (mCDE.mGPBitFlag != mLFH.mGPBitFlag) {
-        LOGV("cmp: GPBitFlag\n");
+        ALOGV("cmp: GPBitFlag\n");
         return false;
     }
     if (mCDE.mCompressionMethod != mLFH.mCompressionMethod) {
-        LOGV("cmp: CompressionMethod\n");
+        ALOGV("cmp: CompressionMethod\n");
         return false;
     }
     if (mCDE.mLastModFileTime != mLFH.mLastModFileTime) {
-        LOGV("cmp: LastModFileTime\n");
+        ALOGV("cmp: LastModFileTime\n");
         return false;
     }
     if (mCDE.mLastModFileDate != mLFH.mLastModFileDate) {
-        LOGV("cmp: LastModFileDate\n");
+        ALOGV("cmp: LastModFileDate\n");
         return false;
     }
     if (mCDE.mCRC32 != mLFH.mCRC32) {
-        LOGV("cmp: CRC32\n");
+        ALOGV("cmp: CRC32\n");
         return false;
     }
     if (mCDE.mCompressedSize != mLFH.mCompressedSize) {
-        LOGV("cmp: CompressedSize\n");
+        ALOGV("cmp: CompressedSize\n");
         return false;
     }
     if (mCDE.mUncompressedSize != mLFH.mUncompressedSize) {
-        LOGV("cmp: UncompressedSize\n");
+        ALOGV("cmp: UncompressedSize\n");
         return false;
     }
     if (mCDE.mFileNameLength != mLFH.mFileNameLength) {
-        LOGV("cmp: FileNameLength\n");
+        ALOGV("cmp: FileNameLength\n");
         return false;
     }
 #if 0       // this seems to be used for padding, not real data
     if (mCDE.mExtraFieldLength != mLFH.mExtraFieldLength) {
-        LOGV("cmp: ExtraFieldLength\n");
+        ALOGV("cmp: ExtraFieldLength\n");
         return false;
     }
 #endif
     if (mCDE.mFileName != NULL) {
         if (strcmp((char*) mCDE.mFileName, (char*) mLFH.mFileName) != 0) {
-            LOGV("cmp: FileName\n");
+            ALOGV("cmp: FileName\n");
             return false;
         }
     }

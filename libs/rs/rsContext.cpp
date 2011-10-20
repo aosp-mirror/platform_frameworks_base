@@ -152,7 +152,7 @@ void Context::timerPrint() {
 
 
     if (props.mLogTimes) {
-        LOGV("RS: Frame (%i),   Script %2.1f%% (%i),  Swap %2.1f%% (%i),  Idle %2.1f%% (%lli),  Internal %2.1f%% (%lli), Avg fps: %u",
+        ALOGV("RS: Frame (%i),   Script %2.1f%% (%i),  Swap %2.1f%% (%i),  Idle %2.1f%% (%lli),  Internal %2.1f%% (%lli), Avg fps: %u",
              mTimeMSLastFrame,
              100.0 * mTimers[RS_TIMER_SCRIPT] / total, mTimeMSLastScript,
              100.0 * mTimers[RS_TIMER_CLEAR_SWAP] / total, mTimeMSLastSwap,
@@ -282,7 +282,7 @@ void * Context::threadProc(void *vrsc) {
         }
     }
 
-    LOGV("%p RS Thread exiting", rsc);
+    ALOGV("%p RS Thread exiting", rsc);
 
     if (rsc->mIsGraphicsContext) {
         pthread_mutex_lock(&gInitMutex);
@@ -290,12 +290,12 @@ void * Context::threadProc(void *vrsc) {
         pthread_mutex_unlock(&gInitMutex);
     }
 
-    LOGV("%p RS Thread exited", rsc);
+    ALOGV("%p RS Thread exited", rsc);
     return NULL;
 }
 
 void Context::destroyWorkerThreadResources() {
-    //LOGV("destroyWorkerThreadResources 1");
+    //ALOGV("destroyWorkerThreadResources 1");
     ObjectBase::zeroAllUserRef(this);
     if (mIsGraphicsContext) {
          mRaster.clear();
@@ -313,7 +313,7 @@ void Context::destroyWorkerThreadResources() {
          mFBOCache.deinit(this);
     }
     ObjectBase::freeAllChildren(this);
-    //LOGV("destroyWorkerThreadResources 2");
+    //ALOGV("destroyWorkerThreadResources 2");
     mExit = true;
 }
 
@@ -428,7 +428,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
 }
 
 Context::~Context() {
-    LOGV("%p Context::~Context", this);
+    ALOGV("%p Context::~Context", this);
 
     if (!mIsContextLite) {
         mIO.coreFlush();
@@ -452,7 +452,7 @@ Context::~Context() {
         }
         pthread_mutex_unlock(&gInitMutex);
     }
-    LOGV("%p Context::~Context done", this);
+    ALOGV("%p Context::~Context done", this);
 }
 
 void Context::setSurface(uint32_t w, uint32_t h, RsNativeWindow sur) {
@@ -669,10 +669,10 @@ void rsi_ContextDestroyWorker(Context *rsc) {
 }
 
 void rsi_ContextDestroy(Context *rsc) {
-    LOGV("%p rsContextDestroy", rsc);
+    ALOGV("%p rsContextDestroy", rsc);
     rsContextDestroyWorker(rsc);
     delete rsc;
-    LOGV("%p rsContextDestroy done", rsc);
+    ALOGV("%p rsContextDestroy done", rsc);
 }
 
 
@@ -703,7 +703,7 @@ void rsi_ContextDeinitToClient(Context *rsc) {
 
 RsContext rsContextCreate(RsDevice vdev, uint32_t version,
                           uint32_t sdkVersion) {
-    LOGV("rsContextCreate dev=%p", vdev);
+    ALOGV("rsContextCreate dev=%p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, NULL);
     if (rsc) {
@@ -715,14 +715,14 @@ RsContext rsContextCreate(RsDevice vdev, uint32_t version,
 RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
                             uint32_t sdkVersion, RsSurfaceConfig sc,
                             uint32_t dpi) {
-    LOGV("rsContextCreateGL dev=%p", vdev);
+    ALOGV("rsContextCreateGL dev=%p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, &sc);
     if (rsc) {
         rsc->setTargetSdkVersion(sdkVersion);
         rsc->setDPI(dpi);
     }
-    LOGV("%p rsContextCreateGL ret", rsc);
+    ALOGV("%p rsContextCreateGL ret", rsc);
     return rsc;
 }
 

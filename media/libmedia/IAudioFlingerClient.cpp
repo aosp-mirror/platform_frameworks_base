@@ -47,7 +47,7 @@ public:
         data.writeInt32(ioHandle);
         if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
             uint32_t stream = *(uint32_t *)param2;
-            LOGV("ioConfigChanged stream %d", stream);
+            ALOGV("ioConfigChanged stream %d", stream);
             data.writeInt32(stream);
         } else if (event != AudioSystem::OUTPUT_CLOSED && event != AudioSystem::INPUT_CLOSED) {
             AudioSystem::OutputDescriptor *desc = (AudioSystem::OutputDescriptor *)param2;
@@ -79,7 +79,7 @@ status_t BnAudioFlingerClient::onTransact(
             if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
                 stream = data.readInt32();
                 param2 = &stream;
-                LOGV("STREAM_CONFIG_CHANGED stream %d", stream);
+                ALOGV("STREAM_CONFIG_CHANGED stream %d", stream);
             } else if (event != AudioSystem::OUTPUT_CLOSED && event != AudioSystem::INPUT_CLOSED) {
                 desc.samplingRate = data.readInt32();
                 desc.format = data.readInt32();

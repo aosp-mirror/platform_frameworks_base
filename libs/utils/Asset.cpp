@@ -585,7 +585,7 @@ const void* _FileAsset::getBuffer(bool wordAligned)
             return NULL;
         }
 
-        LOGV("Asset %p allocating buffer size %d (smaller than threshold)", this, (int)allocLen);
+        ALOGV("Asset %p allocating buffer size %d (smaller than threshold)", this, (int)allocLen);
         if (mLength > 0) {
             long oldPosn = ftell(mFp);
             fseek(mFp, mStart, SEEK_SET);
@@ -597,7 +597,7 @@ const void* _FileAsset::getBuffer(bool wordAligned)
             fseek(mFp, oldPosn, SEEK_SET);
         }
 
-        LOGV(" getBuffer: loaded into buffer\n");
+        ALOGV(" getBuffer: loaded into buffer\n");
 
         mBuf = buf;
         return mBuf;
@@ -610,7 +610,7 @@ const void* _FileAsset::getBuffer(bool wordAligned)
             return NULL;
         }
 
-        LOGV(" getBuffer: mapped\n");
+        ALOGV(" getBuffer: mapped\n");
 
         mMap = map;
         if (!wordAligned) {
@@ -648,13 +648,13 @@ const void* _FileAsset::ensureAlignment(FileMap* map)
     if ((((size_t)data)&0x3) == 0) {
         // We can return this directly if it is aligned on a word
         // boundary.
-        LOGV("Returning aligned FileAsset %p (%s).", this,
+        ALOGV("Returning aligned FileAsset %p (%s).", this,
                 getAssetSource());
         return data;
     }
     // If not aligned on a word boundary, then we need to copy it into
     // our own buffer.
-    LOGV("Copying FileAsset %p (%s) to buffer size %d to make it aligned.", this,
+    ALOGV("Copying FileAsset %p (%s) to buffer size %d to make it aligned.", this,
             getAssetSource(), (int)mLength);
     unsigned char* buf = new unsigned char[mLength];
     if (buf == NULL) {

@@ -103,7 +103,7 @@ static MediaScanResult HandleMIDI(
 MediaScanResult StagefrightMediaScanner::processFile(
         const char *path, const char *mimeType,
         MediaScannerClient &client) {
-    LOGV("processFile '%s'.", path);
+    ALOGV("processFile '%s'.", path);
 
     client.setLocale(locale());
     client.beginFile();
@@ -188,7 +188,7 @@ MediaScanResult StagefrightMediaScanner::processFileInternal(
 }
 
 char *StagefrightMediaScanner::extractAlbumArt(int fd) {
-    LOGV("extractAlbumArt %d", fd);
+    ALOGV("extractAlbumArt %d", fd);
 
     off64_t size = lseek64(fd, 0, SEEK_END);
     if (size < 0) {

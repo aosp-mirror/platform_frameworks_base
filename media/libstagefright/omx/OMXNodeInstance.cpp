@@ -142,7 +142,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
     switch (state) {
         case OMX_StateExecuting:
         {
-            LOGV("forcing Executing->Idle");
+            ALOGV("forcing Executing->Idle");
             sendCommand(OMX_CommandStateSet, OMX_StateIdle);
             OMX_ERRORTYPE err;
             int32_t iteration = 0;
@@ -168,7 +168,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
 
         case OMX_StateIdle:
         {
-            LOGV("forcing Idle->Loaded");
+            ALOGV("forcing Idle->Loaded");
             sendCommand(OMX_CommandStateSet, OMX_StateLoaded);
 
             freeActiveBuffers();
@@ -184,7 +184,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
                     break;
                 }
 
-                LOGV("waiting for Loaded state...");
+                ALOGV("waiting for Loaded state...");
                 usleep(100000);
             }
             CHECK_EQ(err, OMX_ErrorNone);
@@ -201,10 +201,10 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
             break;
     }
 
-    LOGV("calling destroyComponentInstance");
+    ALOGV("calling destroyComponentInstance");
     OMX_ERRORTYPE err = master->destroyComponentInstance(
             static_cast<OMX_COMPONENTTYPE *>(mHandle));
-    LOGV("destroyComponentInstance returned err %d", err);
+    ALOGV("destroyComponentInstance returned err %d", err);
 
     mHandle = NULL;
 
@@ -215,7 +215,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
     mOwner->invalidateNodeID(mNodeID);
     mNodeID = NULL;
 
-    LOGV("OMXNodeInstance going away.");
+    ALOGV("OMXNodeInstance going away.");
     delete this;
 
     return StatusFromOMXError(err);

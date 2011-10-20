@@ -277,7 +277,7 @@ void ARTPWriter::onRead(const sp<AMessage> &msg) {
     }
 
     if (mediaBuf->range_length() > 0) {
-        LOGV("read buffer of size %d", mediaBuf->range_length());
+        ALOGV("read buffer of size %d", mediaBuf->range_length());
 
         if (mMode == H264) {
             StripStartcode(mediaBuf);

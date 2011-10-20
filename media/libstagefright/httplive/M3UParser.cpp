@@ -101,7 +101,7 @@ static bool MakeURL(const char *baseURL, const char *url, AString *out) {
         // "url" is already an absolute URL, ignore base URL.
         out->setTo(url);
 
-        LOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());
+        ALOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());
 
         return true;
     }
@@ -140,7 +140,7 @@ static bool MakeURL(const char *baseURL, const char *url, AString *out) {
         }
     }
 
-    LOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());
+    ALOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());
 
     return true;
 }
@@ -332,7 +332,7 @@ status_t M3UParser::parseStreamInf(
         AString val(attr, equalPos + 1, attr.size() - equalPos - 1);
         val.trim();
 
-        LOGV("key=%s value=%s", key.c_str(), val.c_str());
+        ALOGV("key=%s value=%s", key.c_str(), val.c_str());
 
         if (!strcasecmp("bandwidth", key.c_str())) {
             const char *s = val.c_str();
@@ -410,7 +410,7 @@ status_t M3UParser::parseCipherInfo(
         AString val(attr, equalPos + 1, attr.size() - equalPos - 1);
         val.trim();
 
-        LOGV("key=%s value=%s", key.c_str(), val.c_str());
+        ALOGV("key=%s value=%s", key.c_str(), val.c_str());
 
         key.tolower();
 

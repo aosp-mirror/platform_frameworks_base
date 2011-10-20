@@ -240,7 +240,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     }
 
     if (mUser.size() > 0) {
-        LOGV("user = '%s', pass = '%s'", mUser.c_str(), mPass.c_str());
+        ALOGV("user = '%s', pass = '%s'", mUser.c_str(), mPass.c_str());
     }
 
     struct hostent *ent = gethostbyname(host.c_str());
@@ -419,7 +419,7 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
 
     request.insert(cseqHeader, i + 2);
 
-    LOGV("request: '%s'", request.c_str());
+    ALOGV("request: '%s'", request.c_str());
 
     size_t numBytesSent = 0;
     while (numBytesSent < request.size()) {
@@ -649,7 +649,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
             break;
         }
 
-        LOGV("line: %s", line.c_str());
+        ALOGV("line: %s", line.c_str());
 
         ssize_t colonPos = line.find(":");
         if (colonPos < 0) {

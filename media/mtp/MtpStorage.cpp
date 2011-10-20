@@ -43,7 +43,7 @@ MtpStorage::MtpStorage(MtpStorageID id, const char* filePath,
         mReserveSpace(reserveSpace),
         mRemovable(removable)
 {
-    LOGV("MtpStorage id: %d path: %s\n", id, filePath);
+    ALOGV("MtpStorage id: %d path: %s\n", id, filePath);
 }
 
 MtpStorage::~MtpStorage() {

@@ -246,7 +246,7 @@ void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
 }
 
 void AwesomePlayer::setUID(uid_t uid) {
-    LOGV("AwesomePlayer running on behalf of uid %d", uid);
+    ALOGV("AwesomePlayer running on behalf of uid %d", uid);
 
     mUID = uid;
     mUIDValid = true;
@@ -359,7 +359,7 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         if (!meta->findInt32(kKeyBitRate, &bitrate)) {
             const char *mime;
             CHECK(meta->findCString(kKeyMIMEType, &mime));
-            LOGV("track of type '%s' does not publish bitrate", mime);
+            ALOGV("track of type '%s' does not publish bitrate", mime);
 
             totalBitRate = -1;
             break;
@@ -370,7 +370,7 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
 
     mBitrate = totalBitRate;
 
-    LOGV("mBitrate = %lld bits/sec", mBitrate);
+    ALOGV("mBitrate = %lld bits/sec", mBitrate);
 
     {
         Mutex::Autolock autoLock(mStatsLock);
@@ -634,7 +634,7 @@ void AwesomePlayer::onVideoLagUpdate() {
     int64_t videoLateByUs = audioTimeUs - mVideoTimeUs;
 
     if (!(mFlags & VIDEO_AT_EOS) && videoLateByUs > 300000ll) {
-        LOGV("video late by %lld ms.", videoLateByUs / 1000ll);
+        ALOGV("video late by %lld ms.", videoLateByUs / 1000ll);
 
         notifyListener_l(
                 MEDIA_INFO,
@@ -662,7 +662,7 @@ void AwesomePlayer::onBufferingUpdate() {
                 notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
             }
             if (mFlags & PREPARING) {
-                LOGV("cache has reached EOS, prepare is done.");
+                ALOGV("cache has reached EOS, prepare is done.");
                 finishAsyncPrepare_l();
             }
         } else {
@@ -698,7 +698,7 @@ void AwesomePlayer::onBufferingUpdate() {
                         play_l();
                         notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
                     } else if (mFlags & PREPARING) {
-                        LOGV("cache has filled up (> %d), prepare is done",
+                        ALOGV("cache has filled up (> %d), prepare is done",
                              kHighWaterMarkBytes);
                         finishAsyncPrepare_l();
                     }
@@ -718,7 +718,7 @@ void AwesomePlayer::onBufferingUpdate() {
                 notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
             }
             if (mFlags & PREPARING) {
-                LOGV("cache has reached EOS, prepare is done.");
+                ALOGV("cache has reached EOS, prepare is done.");
                 finishAsyncPrepare_l();
             }
         } else {
@@ -734,7 +734,7 @@ void AwesomePlayer::onBufferingUpdate() {
     int64_t cachedDurationUs;
     bool eos;
     if (getCachedDuration_l(&cachedDurationUs, &eos)) {
-        LOGV("cachedDurationUs = %.2f secs, eos=%d",
+        ALOGV("cachedDurationUs = %.2f secs, eos=%d",
              cachedDurationUs / 1E6, eos);
 
         if ((mFlags & PLAYING) && !eos
@@ -754,7 +754,7 @@ void AwesomePlayer::onBufferingUpdate() {
                 play_l();
                 notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
             } else if (mFlags & PREPARING) {
-                LOGV("cache has filled up (%.2f secs), prepare is done",
+                ALOGV("cache has filled up (%.2f secs), prepare is done",
                      cachedDurationUs / 1E6);
                 finishAsyncPrepare_l();
             }
@@ -786,7 +786,7 @@ void AwesomePlayer::onStreamDone() {
     mStreamDoneEventPending = false;
 
     if (mStreamDoneStatus != ERROR_END_OF_STREAM) {
-        LOGV("MEDIA_ERROR %d", mStreamDoneStatus);
+        ALOGV("MEDIA_ERROR %d", mStreamDoneStatus);
 
         notifyListener_l(
                 MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, mStreamDoneStatus);
@@ -817,7 +817,7 @@ void AwesomePlayer::onStreamDone() {
             postVideoEvent_l();
         }
     } else {
-        LOGV("MEDIA_PLAYBACK_COMPLETE");
+        ALOGV("MEDIA_PLAYBACK_COMPLETE");
         notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
 
         pause_l(true /* at eos */);
@@ -988,20 +988,20 @@ void AwesomePlayer::notifyVideoSize_l() {
         cropRight = width - 1;
         cropBottom = height - 1;
 
-        LOGV("got dimensions only %d x %d", width, height);
+        ALOGV("got dimensions only %d x %d", width, height);
     } else {
-        LOGV("got crop rect %d, %d, %d, %d",
+        ALOGV("got crop rect %d, %d, %d, %d",
              cropLeft, cropTop, cropRight, cropBottom);
     }
 
     int32_t displayWidth;
     if (meta->findInt32(kKeyDisplayWidth, &displayWidth)) {
-        LOGV("Display width changed (%d=>%d)", mDisplayWidth, displayWidth);
+        ALOGV("Display width changed (%d=>%d)", mDisplayWidth, displayWidth);
         mDisplayWidth = displayWidth;
     }
     int32_t displayHeight;
     if (meta->findInt32(kKeyDisplayHeight, &displayHeight)) {
-        LOGV("Display height changed (%d=>%d)", mDisplayHeight, displayHeight);
+        ALOGV("Display height changed (%d=>%d)", mDisplayHeight, displayHeight);
         mDisplayHeight = displayHeight;
     }
 
@@ -1176,7 +1176,7 @@ void AwesomePlayer::shutdownVideoDecoder_l() {
         usleep(1000);
     }
     IPCThreadState::self()->flushCommands();
-    LOGV("video decoder shutdown completed");
+    ALOGV("video decoder shutdown completed");
 }
 
 status_t AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
@@ -1186,7 +1186,7 @@ status_t AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
         return OK;
     }
 
-    LOGV("attempting to reconfigure to use new surface");
+    ALOGV("attempting to reconfigure to use new surface");
 
     bool wasPlaying = (mFlags & PLAYING) != 0;
 
@@ -1323,7 +1323,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     }
 
     if (!(mFlags & PLAYING)) {
-        LOGV("seeking while paused, sending SEEK_COMPLETE notification"
+        ALOGV("seeking while paused, sending SEEK_COMPLETE notification"
              " immediately.");
 
         notifyListener_l(MEDIA_SEEK_COMPLETE);
@@ -1476,7 +1476,7 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
         flags |= OMXCodec::kEnableGrallocUsageProtected;
     }
 #endif
-    LOGV("initVideoDecoder flags=0x%x", flags);
+    ALOGV("initVideoDecoder flags=0x%x", flags);
     mVideoSource = OMXCodec::Create(
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
@@ -1540,7 +1540,7 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
     }
 
     if (mAudioPlayer != NULL) {
-        LOGV("seeking audio to %lld us (%.2f secs).", videoTimeUs, videoTimeUs / 1E6);
+        ALOGV("seeking audio to %lld us (%.2f secs).", videoTimeUs, videoTimeUs / 1E6);
 
         // If we don't have a video time, seek audio to the originally
         // requested seek time instead.
@@ -1603,7 +1603,7 @@ void AwesomePlayer::onVideoEvent() {
     if (!mVideoBuffer) {
         MediaSource::ReadOptions options;
         if (mSeeking != NO_SEEK) {
-            LOGV("seeking to %lld us (%.2f secs)", mSeekTimeUs, mSeekTimeUs / 1E6);
+            ALOGV("seeking to %lld us (%.2f secs)", mSeekTimeUs, mSeekTimeUs / 1E6);
 
             options.setSeekTo(
                     mSeekTimeUs,
@@ -1619,7 +1619,7 @@ void AwesomePlayer::onVideoEvent() {
                 CHECK(mVideoBuffer == NULL);
 
                 if (err == INFO_FORMAT_CHANGED) {
-                    LOGV("VideoSource signalled format change.");
+                    ALOGV("VideoSource signalled format change.");
 
                     notifyVideoSize_l();
 
@@ -1634,7 +1634,7 @@ void AwesomePlayer::onVideoEvent() {
                 // a seek request pending that needs to be applied
                 // to the audio track.
                 if (mSeeking != NO_SEEK) {
-                    LOGV("video stream ended while seeking!");
+                    ALOGV("video stream ended while seeking!");
                 }
                 finishSeekIfNecessary(-1);
 
@@ -1751,13 +1751,13 @@ void AwesomePlayer::onVideoEvent() {
 
         if (latenessUs > 40000) {
             // We're more than 40ms late.
-            LOGV("we're late by %lld us (%.2f secs)",
+            ALOGV("we're late by %lld us (%.2f secs)",
                  latenessUs, latenessUs / 1E6);
 
             if (!(mFlags & SLOW_DECODER_HACK)
                     || mSinceLastDropped > FRAME_DROP_FREQ)
             {
-                LOGV("we're late by %lld us (%.2f secs) dropping "
+                ALOGV("we're late by %lld us (%.2f secs) dropping "
                      "one after %d frames",
                      latenessUs, latenessUs / 1E6, mSinceLastDropped);
 

@@ -58,7 +58,7 @@ OMX_ERRORTYPE SoftOMXPlugin::makeComponentInstance(
         const OMX_CALLBACKTYPE *callbacks,
         OMX_PTR appData,
         OMX_COMPONENTTYPE **component) {
-    LOGV("makeComponentInstance '%s'", name);
+    ALOGV("makeComponentInstance '%s'", name);
 
     for (size_t i = 0; i < kNumComponents; ++i) {
         if (strcmp(name, kComponents[i].mName)) {

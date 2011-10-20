@@ -81,7 +81,7 @@ static bool Resync(
 
             *inout_pos += len;
 
-            LOGV("skipped ID3 tag, new starting offset is %lld (0x%016llx)",
+            ALOGV("skipped ID3 tag, new starting offset is %lld (0x%016llx)",
                  *inout_pos, *inout_pos);
         }
 
@@ -105,7 +105,7 @@ static bool Resync(
     do {
         if (pos >= *inout_pos + kMaxBytesChecked) {
             // Don't scan forever.
-            LOGV("giving up at offset %lld", pos);
+            ALOGV("giving up at offset %lld", pos);
             break;
         }
 
@@ -155,7 +155,7 @@ static bool Resync(
             continue;
         }
 
-        LOGV("found possible 1st frame at %lld (header = 0x%08x)", pos, header);
+        ALOGV("found possible 1st frame at %lld (header = 0x%08x)", pos, header);
 
         // We found what looks like a valid frame,
         // now find its successors.
@@ -172,7 +172,7 @@ static bool Resync(
 
             uint32_t test_header = U32_AT(tmp);
 
-            LOGV("subsequent header is %08x", test_header);
+            ALOGV("subsequent header is %08x", test_header);
 
             if ((test_header & kMask) != (header & kMask)) {
                 valid = false;
@@ -186,7 +186,7 @@ static bool Resync(
                 break;
             }
 
-            LOGV("found subsequent frame #%d at %lld", j + 2, test_pos);
+            ALOGV("found subsequent frame #%d at %lld", j + 2, test_pos);
 
             test_pos += test_frame_size;
         }
@@ -198,7 +198,7 @@ static bool Resync(
                 *out_header = header;
             }
         } else {
-            LOGV("no dice, no valid sequence of frames found.");
+            ALOGV("no dice, no valid sequence of frames found.");
         }
 
         ++pos;
@@ -483,7 +483,7 @@ status_t MP3Source::read(
         }
 
         // Lost sync.
-        LOGV("lost sync! header = 0x%08x, old header = 0x%08x\n", header, mFixedHeader);
+        ALOGV("lost sync! header = 0x%08x, old header = 0x%08x\n", header, mFixedHeader);
 
         off64_t pos = mCurrentPos;
         if (!Resync(mDataSource, mFixedHeader, &pos, NULL, NULL)) {

@@ -251,7 +251,7 @@ static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, 
     // Establishes the calling thread as illegal to put into the background.
     // Typically used only for the system process's main looper.
 #if GUARD_THREAD_PRIORITY
-    LOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, androidGetTid());
+    ALOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, androidGetTid());
     {
         Mutex::Autolock _l(gKeyCreateMutex);
         if (gBgKey == -1) {

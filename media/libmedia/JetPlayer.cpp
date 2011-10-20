@@ -42,7 +42,7 @@ JetPlayer::JetPlayer(jobject javaJetPlayer, int maxTracks, int trackBufferSize) 
         mAudioTrack(NULL),
         mTrackBufferSize(trackBufferSize)
 {
-    LOGV("JetPlayer constructor");
+    ALOGV("JetPlayer constructor");
     mPreviousJetStatus.currentUserID = -1;
     mPreviousJetStatus.segmentRepeatCount = -1;
     mPreviousJetStatus.numQueuedSegments = -1;
@@ -52,7 +52,7 @@ JetPlayer::JetPlayer(jobject javaJetPlayer, int maxTracks, int trackBufferSize) 
 //-------------------------------------------------------------------------------------------------
 JetPlayer::~JetPlayer()
 {
-    LOGV("~JetPlayer");
+    ALOGV("~JetPlayer");
     release();
 
 }
@@ -99,13 +99,13 @@ int JetPlayer::init()
     // create render and playback thread
     {
         Mutex::Autolock l(mMutex);
-        LOGV("JetPlayer::init(): trying to start render thread");
+        ALOGV("JetPlayer::init(): trying to start render thread");
         createThreadEtc(renderThread, this, "jetRenderThread", ANDROID_PRIORITY_AUDIO);
         mCondition.wait(mMutex);
     }
     if (mTid > 0) {
         // render thread started, we're ready
-        LOGV("JetPlayer::init(): render thread(%d) successfully started.", mTid);
+        ALOGV("JetPlayer::init(): render thread(%d) successfully started.", mTid);
         mState = EAS_STATE_READY;
     } else {
         LOGE("JetPlayer::init(): failed to start render thread.");
@@ -125,7 +125,7 @@ void JetPlayer::setEventCallback(jetevent_callback eventCallback)
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::release()
 {
-    LOGV("JetPlayer::release()");
+    ALOGV("JetPlayer::release()");
     Mutex::Autolock lock(mMutex);
     mPaused = true;
     mRender = false;
@@ -168,7 +168,7 @@ int JetPlayer::render() {
     int temp;
     bool audioStarted = false;
 
-    LOGV("JetPlayer::render(): entering");
+    ALOGV("JetPlayer::render(): entering");
 
     // allocate render buffer
     mAudioBuffer = 
@@ -182,7 +182,7 @@ int JetPlayer::render() {
     {
         Mutex::Autolock l(mMutex);
         mTid = gettid();
-        LOGV("JetPlayer::render(): render thread(%d) signal", mTid);
+        ALOGV("JetPlayer::render(): render thread(%d) signal", mTid);
         mCondition.signal();
     }
 
@@ -192,21 +192,21 @@ int JetPlayer::render() {
 
         if (mEasData == NULL) {
             mMutex.unlock();
-            LOGV("JetPlayer::render(): NULL EAS data, exiting render.");
+            ALOGV("JetPlayer::render(): NULL EAS data, exiting render.");
             goto threadExit;
         }
             
         // nothing to render, wait for client thread to wake us up
         while (!mRender)
         {
-            LOGV("JetPlayer::render(): signal wait");
+            ALOGV("JetPlayer::render(): signal wait");
             if (audioStarted) { 
                 mAudioTrack->pause(); 
                 // we have to restart the playback once we start rendering again
                 audioStarted = false;
             }
             mCondition.wait(mMutex);
-            LOGV("JetPlayer::render(): signal rx'd");
+            ALOGV("JetPlayer::render(): signal rx'd");
         }
         
         // render midi data into the input buffer
@@ -225,7 +225,7 @@ int JetPlayer::render() {
         }
 
         // update playback state
-        //LOGV("JetPlayer::render(): updating state");
+        //ALOGV("JetPlayer::render(): updating state");
         JET_Status(mEasData, &mJetStatus);
         fireUpdateOnStatusChange();
         mPaused = mJetStatus.paused;
@@ -239,7 +239,7 @@ int JetPlayer::render() {
         }
 
         // Write data to the audio hardware
-        //LOGV("JetPlayer::render(): writing to audio output");
+        //ALOGV("JetPlayer::render(): writing to audio output");
         if ((temp = mAudioTrack->write(mAudioBuffer, num_output)) < 0) {
             LOGE("JetPlayer::render(): Error in writing:%d",temp);
             return temp;
@@ -247,7 +247,7 @@ int JetPlayer::render() {
 
         // start audio output if necessary
         if (!audioStarted) {
-            LOGV("JetPlayer::render(): starting audio playback");
+            ALOGV("JetPlayer::render(): starting audio playback");
             mAudioTrack->start();
             audioStarted = true;
         }
@@ -338,7 +338,7 @@ void JetPlayer::fireEventsFromJetQueue()
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::loadFromFile(const char* path)
 {
-    LOGV("JetPlayer::loadFromFile(): path=%s", path);
+    ALOGV("JetPlayer::loadFromFile(): path=%s", path);
 
     Mutex::Autolock lock(mMutex);
 
@@ -363,7 +363,7 @@ int JetPlayer::loadFromFile(const char* path)
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::loadFromFD(const int fd, const long long offset, const long long length)
 {
-    LOGV("JetPlayer::loadFromFD(): fd=%d offset=%lld length=%lld", fd, offset, length);
+    ALOGV("JetPlayer::loadFromFD(): fd=%d offset=%lld length=%lld", fd, offset, length);
     
     Mutex::Autolock lock(mMutex);
 
@@ -393,7 +393,7 @@ int JetPlayer::closeFile()
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::play()
 {
-    LOGV("JetPlayer::play(): entering");
+    ALOGV("JetPlayer::play(): entering");
     Mutex::Autolock lock(mMutex);
 
     EAS_RESULT result = JET_Play(mEasData);
@@ -407,7 +407,7 @@ int JetPlayer::play()
     fireUpdateOnStatusChange();
 
     // wake up render thread
-    LOGV("JetPlayer::play(): wakeup render thread");
+    ALOGV("JetPlayer::play(): wakeup render thread");
     mCondition.signal();
 
     return result;
@@ -435,7 +435,7 @@ int JetPlayer::pause()
 int JetPlayer::queueSegment(int segmentNum, int libNum, int repeatCount, int transpose,
         EAS_U32 muteFlags, EAS_U8 userID)
 {
-    LOGV("JetPlayer::queueSegment segmentNum=%d, libNum=%d, repeatCount=%d, transpose=%d",
+    ALOGV("JetPlayer::queueSegment segmentNum=%d, libNum=%d, repeatCount=%d, transpose=%d",
         segmentNum, libNum, repeatCount, transpose);
     Mutex::Autolock lock(mMutex);
     return JET_QueueSegment(mEasData, segmentNum, libNum, repeatCount, transpose, muteFlags, userID);
@@ -458,7 +458,7 @@ int JetPlayer::setMuteFlag(int trackNum, bool muteFlag, bool sync)
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::triggerClip(int clipId)
 {
-    LOGV("JetPlayer::triggerClip clipId=%d", clipId);
+    ALOGV("JetPlayer::triggerClip clipId=%d", clipId);
     Mutex::Autolock lock(mMutex);
     return JET_TriggerClip(mEasData, clipId);
 }
@@ -466,7 +466,7 @@ int JetPlayer::triggerClip(int clipId)
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::clearQueue()
 {
-    LOGV("JetPlayer::clearQueue");
+    ALOGV("JetPlayer::clearQueue");
     Mutex::Autolock lock(mMutex);
     return JET_Clear_Queue(mEasData);
 }
@@ -480,7 +480,7 @@ void JetPlayer::dump()
 void JetPlayer::dumpJetStatus(S_JET_STATUS* pJetStatus)
 {
     if(pJetStatus!=NULL)
-        LOGV(">> current JET player status: userID=%d segmentRepeatCount=%d numQueuedSegments=%d paused=%d",
+        ALOGV(">> current JET player status: userID=%d segmentRepeatCount=%d numQueuedSegments=%d paused=%d",
                 pJetStatus->currentUserID, pJetStatus->segmentRepeatCount,
                 pJetStatus->numQueuedSegments, pJetStatus->paused);
     else

@@ -132,7 +132,7 @@ status_t AudioRecord::set(
         int sessionId)
 {
 
-    LOGV("set(): sampleRate %d, channelMask %d, frameCount %d",sampleRate, channelMask, frameCount);
+    ALOGV("set(): sampleRate %d, channelMask %d, frameCount %d",sampleRate, channelMask, frameCount);
 
     AutoMutex lock(mLock);
 
@@ -168,7 +168,7 @@ status_t AudioRecord::set(
     } else {
         mSessionId = sessionId;
     }
-    LOGV("set(): mSessionId %d", mSessionId);
+    ALOGV("set(): mSessionId %d", mSessionId);
 
     audio_io_handle_t input = AudioSystem::getInput(inputSource,
                                                     sampleRate,
@@ -187,7 +187,7 @@ status_t AudioRecord::set(
     if (status != NO_ERROR) {
         return status;
     }
-    LOGV("AudioRecord::set() minFrameCount = %d", minFrameCount);
+    ALOGV("AudioRecord::set() minFrameCount = %d", minFrameCount);
 
     if (frameCount == 0) {
         frameCount = minFrameCount;
@@ -287,7 +287,7 @@ status_t AudioRecord::start()
     status_t ret = NO_ERROR;
     sp<ClientRecordThread> t = mClientRecordThread;
 
-    LOGV("start");
+    ALOGV("start");
 
     if (t != 0) {
         if (t->exitPending()) {
@@ -346,7 +346,7 @@ status_t AudioRecord::stop()
 {
     sp<ClientRecordThread> t = mClientRecordThread;
 
-    LOGV("stop");
+    ALOGV("stop");
 
     if (t != 0) {
         t->mLock.lock();
@@ -739,7 +739,7 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
     // Manage overrun callback
     if (mActive && (cblk->framesAvailable() == 0)) {
-        LOGV("Overrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
+        ALOGV("Overrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
         if (!(android_atomic_or(CBLK_UNDERRUN_ON, &cblk->flags) & CBLK_UNDERRUN_MSK)) {
             mCbf(EVENT_OVERRUN, mUserData, 0);
         }
@@ -798,7 +798,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
             result = status_t(STOPPED);
         }
     }
-    LOGV("restoreRecord_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
+    ALOGV("restoreRecord_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
          result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
 
     if (result == NO_ERROR) {

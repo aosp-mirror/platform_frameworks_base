@@ -68,7 +68,7 @@ void FileA3D::parseHeader(IStream *headerStream) {
     for (uint32_t i = 0; i < numIndexEntries; i ++) {
         A3DIndexEntry *entry = new A3DIndexEntry();
         headerStream->loadString(&entry->mObjectName);
-        //LOGV("Header data, entry name = %s", entry->mObjectName.string());
+        //ALOGV("Header data, entry name = %s", entry->mObjectName.string());
         entry->mType = (RsA3DClassID)headerStream->loadU32();
         if (mUse64BitOffsets){
             entry->mOffset = headerStream->loadOffset();
@@ -145,7 +145,7 @@ bool FileA3D::load(FILE *f) {
     char magicString[12];
     size_t len;
 
-    LOGV("file open 1");
+    ALOGV("file open 1");
     len = fread(magicString, 1, 12, f);
     if ((len != 12) ||
         memcmp(magicString, "Android3D_ff", 12)) {
@@ -181,7 +181,7 @@ bool FileA3D::load(FILE *f) {
         return false;
     }
 
-    LOGV("file open size = %lli", mDataSize);
+    ALOGV("file open size = %lli", mDataSize);
 
     // We should know enough to read the file in at this point.
     mAlloc = malloc(mDataSize);
@@ -196,7 +196,7 @@ bool FileA3D::load(FILE *f) {
 
     mReadStream = new IStream(mData, mUse64BitOffsets);
 
-    LOGV("Header is read an stream initialized");
+    ALOGV("Header is read an stream initialized");
     return true;
 }
 
@@ -369,7 +369,7 @@ RsObjectBase rsaFileA3DGetEntryByIndex(RsContext con, uint32_t index, RsFile fil
     }
 
     ObjectBase *obj = fa3d->initializeFromEntry(index);
-    //LOGV("Returning object with name %s", obj->getName());
+    //ALOGV("Returning object with name %s", obj->getName());
 
     return obj;
 }

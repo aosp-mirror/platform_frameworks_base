@@ -145,7 +145,7 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand, uint64_t time
             con->timerSet(Context::RS_TIMER_INTERNAL);
         }
         waitForCommand = false;
-        //LOGV("playCoreCommands 3 %i %i", cmdID, cmdSize);
+        //ALOGV("playCoreCommands 3 %i %i", cmdID, cmdSize);
 
         if (cmdID >= (sizeof(gPlaybackFuncs) / sizeof(void *))) {
             rsAssert(cmdID < (sizeof(gPlaybackFuncs) / sizeof(void *)));

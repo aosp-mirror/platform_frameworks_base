@@ -377,7 +377,7 @@ public:
         data.writeInt32(flags);
         remote()->transact(OPEN_OUTPUT, data, &reply);
         int  output = reply.readInt32();
-        LOGV("openOutput() returned output, %p", output);
+        ALOGV("openOutput() returned output, %p", output);
         devices = reply.readInt32();
         if (pDevices) *pDevices = devices;
         samplingRate = reply.readInt32();
@@ -844,7 +844,7 @@ status_t BnAudioFlinger::onTransact(
                                      &channels,
                                      &latency,
                                      flags);
-            LOGV("OPEN_OUTPUT output, %p", output);
+            ALOGV("OPEN_OUTPUT output, %p", output);
             reply->writeInt32(output);
             reply->writeInt32(devices);
             reply->writeInt32(samplingRate);
