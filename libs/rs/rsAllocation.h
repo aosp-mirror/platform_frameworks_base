@@ -41,7 +41,7 @@ public:
         void * drv;
 
         struct State {
-            ObjectBaseRef<const Type> type;
+            const Type * type;
 
             uint32_t usageFlags;
             RsAllocationMipmapControl mipmapControl;
@@ -71,7 +71,7 @@ public:
     void updateCache();
 
     void * getPtr() const {return mHal.drvState.mallocPtr;}
-    const Type * getType() const {return mHal.state.type.get();}
+    const Type * getType() const {return mHal.state.type;}
 
     void syncAll(Context *rsc, RsAllocationUsageType src);
 
@@ -126,6 +126,11 @@ public:
 
 protected:
     Vector<const Program *> mToDirtyList;
+    ObjectBaseRef<const Type> mType;
+    void setType(const Type *t) {
+        mType.set(t);
+        mHal.state.type = t;
+    }
 
 private:
     void freeChildrenUnlocked();
