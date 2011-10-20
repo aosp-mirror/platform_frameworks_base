@@ -281,9 +281,9 @@ extends Layout
         }
 
         reflowed.generate(text, where, where + after,
-                getPaint(), getWidth(), getAlignment(), getTextDirectionHeuristic(),
-                getSpacingMultiplier(), getSpacingAdd(),
-                false, true, mEllipsizedWidth, mEllipsizeAt);
+                getPaint(), getWidth(), getTextDirectionHeuristic(), getSpacingMultiplier(),
+                getSpacingAdd(), false,
+                true, mEllipsizedWidth, mEllipsizeAt);
         int n = reflowed.getLineCount();
 
         // If the new layout has a blank line at the end, but it is not
