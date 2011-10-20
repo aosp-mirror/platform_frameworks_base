@@ -14,7 +14,6 @@ page.title=Android 4.0 Platform Highlights
 }
 #jd-content div.video {
   float:right;
-  padding:0 60px 40px;
   margin-top:-15px;
 }
 #jd-content table.columns {
@@ -37,18 +36,12 @@ page.title=Android 4.0 Platform Highlights
   font-weight:bold;
 }
 </style>
-<!--
-<div class="video" style="border:1px solid gray;width:250px;height:180px;margin:1.5em">
-<object width="278" height="180">
-<xparam name="movie" value="http://www.youtube.com/v/Jx3pdWBlZ34?hl=en&fs=1"></param>
-<xparam name="allowFullScreen" value="true"></param><param name="allowscriptaccess"
-value="always"></param>
-ICS CONSUMER VIDEO [ziwang]
-<embed xsrc="http://www.youtube.com/v/Jx3pdWBlZ34?hl=en&fs=1" type="application/x-shockwave-flash"
-allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
-</object>
+
+<div class="video" style="margin:1.5em 0 1.5em 1.5em">
+<iframe width="380" height="223" src="http://www.youtube.com/embed/-F_ke3rxopc?hd=1" frameborder="0"
+allowfullscreen></iframe>
 </div>
--->
+
 <p>Welcome to Android 4.0!</p>
 
 <p>Android 4.0 delivers a refined, unified UI for phones and tablets and introduces innovative features for users and developers. This document provides a glimpse of the many new features and technologies that make Android 4.0 simple, beautiful, and beyond smart. <!--For technical details about
@@ -178,9 +171,9 @@ responses and manage the list from the Settings app.</p>
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Swipe to dismiss
 notifications, tasks, and browser tabs</strong></p>
 
-<p>Android 4.0 makes managing notifications, recent apps, and browoser tabs even
+<p>Android 4.0 makes managing notifications, recent apps, and brwoser tabs even
 easier. Users can now dismiss individual notifications, apps from the Recent
-Apps list, and browser tabs lists with a simple swipe of a finger. </p>
+Apps list, and browser tabs with a simple swipe of a finger. </p>
 
 <div  style="padding-top:0em;">
 <div style="margin-right:1em;float:right;margin-left:1em;margin-top:1.5em;margin-bottom:0;padding-bottom:0;width:200px">
@@ -300,15 +293,15 @@ profiles</strong></p>
 linked together and integrated for easy accessibility. At the center is a new
 <strong>People app</strong> that offers richer profile information, including a
 large profile picture, phone numbers, addresses and accounts, status updates,
-and a new button for connecting on integrated social networks. </p>
+events, and a new button for connecting on integrated social networks. </p>
 
 <p>The user's own contact information is stored in a new <strong>"Me"
 profile</strong>, allowing easier sharing with apps and people. All of the
 user's integrated contacts are displayed in an easy to manage list, including
 controls over which contacts are shown from any integrated account or social
 network. Wherever the user navigates across the system, tapping a profile photo
-displays Quick Contacts, with shortcuts to phone numbers, text messaging, and
-more. </p>
+displays Quick Contacts, with large profile pictures, shortcuts to phone numbers,
+text messaging, and more. </p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Unified calendar, visual
@@ -343,7 +336,7 @@ inbox. </p>
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Rich and versatile camera
 capabilities</strong></p>
 
-<p>The Camera app includes many new features let users capture special moments
+<p>The Camera app includes many new features that let users capture special moments
 with great photos and videos. After capturing images, they can edit and share
 them easily with friemds. </p>
 
@@ -405,7 +398,15 @@ to locate the image they want, then tap to load it in Gallery. </p>
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Live Effects for transforming video</strong></p>
 
-<p>Live Effects is a collection of graphical transformations that add interest and fun to videos captured in the Camera app. For example, users can change the background behind them to any stock or custom image, for just the right setting when shooting video or using Google Talk video chat. Also available is Silly Faces, a set of morphing effects that use state-of-the-art face recognition and GPU filters to add great effects facial features during video capture. For example, you can use effects such as small eyes, big mouth, big nose, face squeeze, and more. Outside of the Camera app, Live Effects is available during video chat in the Google Talk app.</p>
+<p>Live Effects is a collection of graphical transformations that add interest
+and fun to videos captured in the Camera app. For example, users can change the
+background behind them to any stock or custom image, for just the right setting
+when shooting video or using Google Talk video chat. Also available is Silly
+Faces, a set of morphing effects that use state-of-the-art face recognition and
+GPU filters to add great effects to facial features during video capture. For
+example, you can use effects such as small eyes, big mouth, big nose, face
+squeeze, and more. Outside of the Camera app, Live Effects is available during
+video chat in the Google Talk app.</p>
 
 <div  style="padding-top:0em;">
 <div style="margsin-right:.8em;float:left;width:186px;padding-top:1em;">
@@ -418,7 +419,10 @@ to locate the image they want, then tap to load it in Gallery. </p>
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Sharing with screenshots</strong></p>
 
-<p>Users can now share what's on their screens more easily by taking screenshots. Hardware buttons let them snap a <strong>screenshot</strong> and store it locally. Afterward, they can view, edit, and share the screen shot in Gallery or a similar app.</p>
+<p>Users can now share what's on their screens more easily by taking
+screenshots. Hardware buttons let them snap a <strong>screenshot</strong> and
+store it locally. Afterward, they can view, edit, and share the screen shot in
+Gallery or a similar app.</p>
 
 
 <h3 id="cloud" style="color:#172861">Cloud-connected experience</h3>
@@ -435,14 +439,18 @@ to locate the image they want, then tap to load it in Gallery. </p>
 </div>
 </div>
 
-<p>Android has always been cloud-connected, letting users browse the web and sync photos, apps, games, email, and contacts &mdash; wherever they are and across all of their devices. Android 4.0 adds new browsing and email capabilities to let users take even more with them and keep communication organized.</p>
+<p>Android has always been cloud-connected, letting users browse the web and
+sync photos, apps, games, email, and contacts &mdash; wherever they are and
+across all of their devices. Android 4.0 adds new browsing and email
+capabilities to let users take even more with them and keep communication
+organized.</p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Powerful web
 browsing</strong></p>
 
 <p>The Android Browser offers an experience that’s as rich and convenient as a
-desktop browser. It lets users instantly and manage <strong>sync Google Chrome
+desktop browser. It lets users instantly sync and manage <strong>Google Chrome
 bookmarks</strong> from all of their accounts, jump to their favorite content
 faster, and even save it for reading later in case there's no network
 available.</p>
@@ -641,7 +649,7 @@ auto-complete, to keep the most relevant contacts ranked closest to the top.</p>
 
 <p>Applications can also let users set up a social connection to a contact from
 the People app. When the user touches Add Connection in a contact, the app
-broadcasts a public intent that other apps can handle, displaying any UI needed
+sends a public intent that other apps can handle, displaying any UI needed
 to create the social connection.</p>
 
 <p>Building on the social API, developers can add powerful new interactions that
@@ -659,7 +667,7 @@ entries from the database, including events contributed by other applications,
 and handle the display of event alerts and reminders. Using the calendar
 provider, applications can take advantage of event data sourced from a variety
 of apps and protocols, to offer innovative ways of viewing and managing a user’s
-events. Apps can also use of calendar data to improve the relevance of their
+events. Apps can also use calendar data to improve the relevance of their
 other content.</p>
 
 <p>For lighter-weight access to calendar services, the Calendar app defines a
