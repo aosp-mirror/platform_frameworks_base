@@ -493,11 +493,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    class MethodCallback extends IInputMethodCallback.Stub {
-        final IInputMethod mMethod;
+    private static class MethodCallback extends IInputMethodCallback.Stub {
+        private final IInputMethod mMethod;
+        private final InputMethodManagerService mParentIMMS;
 
-        MethodCallback(IInputMethod method) {
+        MethodCallback(final IInputMethod method, final InputMethodManagerService imms) {
             mMethod = method;
+            mParentIMMS = imms;
         }
 
         @Override
@@ -506,7 +508,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void sessionCreated(IInputMethodSession session) throws RemoteException {
-            onSessionCreated(mMethod, session);
+            mParentIMMS.onSessionCreated(mMethod, session);
         }
     }
 
@@ -837,7 +839,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (DEBUG) Slog.v(TAG, "Creating new session for client " + cs);
                         executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                                 MSG_CREATE_SESSION, mCurMethod,
-                                new MethodCallback(mCurMethod)));
+                                new MethodCallback(mCurMethod, this)));
                     }
                     // Return to client, and we will get back with it when
                     // we have had a session made for it.
@@ -943,7 +945,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + mCurClient);
                     executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                             MSG_CREATE_SESSION, mCurMethod,
-                            new MethodCallback(mCurMethod)));
+                            new MethodCallback(mCurMethod, this)));
                 }
             }
         }
