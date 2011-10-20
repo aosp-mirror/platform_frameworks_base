@@ -331,14 +331,8 @@ void CameraService::playSound(sound_kind kind) {
     Mutex::Autolock lock(mSoundLock);
     sp<MediaPlayer> player = mSoundPlayer[kind];
     if (player != 0) {
-        // do not play the sound if stream volume is 0
-        // (typically because ringer mode is silent).
-        int index;
-        AudioSystem::getStreamVolumeIndex(mAudioStreamType, &index);
-        if (index != 0) {
-            player->seekTo(0);
-            player->start();
-        }
+        player->seekTo(0);
+        player->start();
     }
 }
 
