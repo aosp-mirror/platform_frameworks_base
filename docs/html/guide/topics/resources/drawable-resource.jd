@@ -1458,7 +1458,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:gradientRadius="<em>integer</em>"
         android:startColor="<em>color</em>"
         android:type=["linear" | "radial" | "sweep"]
-        android:usesLevel=["true" | "false"] /&gt;
+        android:useLevel=["true" | "false"] /&gt;
     &lt;<a href="#padding-element">padding</a>
         android:left="<em>integer</em>"
         android:top="<em>integer</em>"
