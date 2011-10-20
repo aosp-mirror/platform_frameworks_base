@@ -306,7 +306,15 @@ final class Session extends IWindowSession.Stub
         synchronized (mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (mService.mDragState == null || mService.mDragState.mToken != token) {
+                if (mService.mDragState == null) {
+                    // Most likely the drop recipient ANRed and we ended the drag
+                    // out from under it.  Log the issue and move on.
+                    Slog.w(WindowManagerService.TAG, "Drop result given but no drag in progress");
+                    return;
+                }
+
+                if (mService.mDragState.mToken != token) {
+                    // We're in a drag, but the wrong window has responded.
                     Slog.w(WindowManagerService.TAG, "Invalid drop-result claim by " + window);
                     throw new IllegalStateException("reportDropResult() by non-recipient");
                 }
