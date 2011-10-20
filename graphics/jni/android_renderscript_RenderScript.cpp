@@ -371,23 +371,29 @@ nElementGetNativeData(JNIEnv *_env, jobject _this, RsContext con, jint id, jintA
 
 
 static void
-nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArray _IDs, jobjectArray _names)
+nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id,
+                       jintArray _IDs,
+                       jobjectArray _names,
+                       jintArray _arraySizes)
 {
     int dataSize = _env->GetArrayLength(_IDs);
     LOG_API("nElementGetSubElements, con(%p)", con);
 
     uint32_t *ids = (uint32_t *)malloc((uint32_t)dataSize * sizeof(uint32_t));
     const char **names = (const char **)malloc((uint32_t)dataSize * sizeof(const char *));
+    uint32_t *arraySizes = (uint32_t *)malloc((uint32_t)dataSize * sizeof(uint32_t));
 
-    rsaElementGetSubElements(con, (RsElement)id, ids, names, (uint32_t)dataSize);
+    rsaElementGetSubElements(con, (RsElement)id, ids, names, arraySizes, (uint32_t)dataSize);
 
     for(jint i = 0; i < dataSize; i++) {
         _env->SetObjectArrayElement(_names, i, _env->NewStringUTF(names[i]));
         _env->SetIntArrayRegion(_IDs, i, 1, (const jint*)&ids[i]);
+        _env->SetIntArrayRegion(_arraySizes, i, 1, (const jint*)&arraySizes[i]);
     }
 
     free(ids);
     free(names);
+    free(arraySizes);
 }
 
 // -----------------------------------
@@ -1239,7 +1245,7 @@ static JNINativeMethod methods[] = {
 {"rsnElementCreate",                 "(IIIZI)I",                              (void*)nElementCreate },
 {"rsnElementCreate2",                "(I[I[Ljava/lang/String;[I)I",           (void*)nElementCreate2 },
 {"rsnElementGetNativeData",          "(II[I)V",                               (void*)nElementGetNativeData },
-{"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;)V",            (void*)nElementGetSubElements },
+{"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;[I)V",          (void*)nElementGetSubElements },
 
 {"rsnTypeCreate",                    "(IIIIIZZ)I",                            (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },

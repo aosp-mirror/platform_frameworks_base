@@ -135,9 +135,90 @@ public class ProgramStore extends BaseObj {
         }
     }
 
+    DepthFunc mDepthFunc;
+    boolean mDepthMask;
+    boolean mColorMaskR;
+    boolean mColorMaskG;
+    boolean mColorMaskB;
+    boolean mColorMaskA;
+    BlendSrcFunc mBlendSrc;
+    BlendDstFunc mBlendDst;
+    boolean mDither;
 
     ProgramStore(int id, RenderScript rs) {
         super(id, rs);
+    }
+
+    /**
+    * @hide
+    * @return depth function
+    */
+    public DepthFunc getDepthFunc() {
+        return mDepthFunc;
+    }
+
+    /**
+    * @hide
+    * @return whether depth writes are enabled
+    */
+    public boolean getDepthMaskEnabled() {
+        return mDepthMask;
+    }
+
+    /**
+    * @hide
+    * @return red color channel mask
+    */
+    public boolean getColorMaskREnabled() {
+        return mColorMaskR;
+    }
+
+    /**
+    * @hide
+    * @return green color channel mask
+    */
+    public boolean getColorMaskGEnabled() {
+        return mColorMaskG;
+    }
+
+    /**
+    * @hide
+    * @return blue color channel mask
+    */
+    public boolean getColorMaskBEnabled() {
+        return mColorMaskB;
+    }
+
+    /**
+    * @hide
+    * @return alpha channel mask
+    */
+    public boolean getColorMaskAEnabled() {
+        return mColorMaskA;
+    }
+
+    /**
+    * @hide
+    * @return source blend function
+    */
+    public BlendSrcFunc getBlendSrcFunc() {
+        return mBlendSrc;
+    }
+
+    /**
+    * @hide
+    * @return destination blend function
+    */
+    public BlendDstFunc getBlendDstFunc() {
+        return mBlendDst;
+    }
+
+    /**
+    * @hide
+    * @return whether dither is enabled
+    */
+    public boolean getDitherEnabled() {
+        return mDither;
     }
 
     /**
@@ -340,7 +421,17 @@ public class ProgramStore extends BaseObj {
             int id = mRS.nProgramStoreCreate(mColorMaskR, mColorMaskG, mColorMaskB, mColorMaskA,
                                              mDepthMask, mDither,
                                              mBlendSrc.mID, mBlendDst.mID, mDepthFunc.mID);
-            return new ProgramStore(id, mRS);
+            ProgramStore programStore = new ProgramStore(id, mRS);
+            programStore.mDepthFunc = mDepthFunc;
+            programStore.mDepthMask = mDepthMask;
+            programStore.mColorMaskR = mColorMaskR;
+            programStore.mColorMaskG = mColorMaskG;
+            programStore.mColorMaskB = mColorMaskB;
+            programStore.mColorMaskA = mColorMaskA;
+            programStore.mBlendSrc = mBlendSrc;
+            programStore.mBlendDst = mBlendDst;
+            programStore.mDither = mDither;
+            return programStore;
         }
     }
 

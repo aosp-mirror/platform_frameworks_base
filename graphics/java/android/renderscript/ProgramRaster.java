@@ -37,21 +37,30 @@ public class ProgramRaster extends BaseObj {
         }
     }
 
-    boolean mPointSmooth;
-    boolean mLineSmooth;
     boolean mPointSprite;
-    float mLineWidth;
     CullMode mCullMode;
 
     ProgramRaster(int id, RenderScript rs) {
         super(id, rs);
 
-        mLineWidth = 1.0f;
-        mPointSmooth = false;
-        mLineSmooth = false;
         mPointSprite = false;
-
         mCullMode = CullMode.BACK;
+    }
+
+    /**
+     * @hide
+     * @return whether point sprites are enabled
+     */
+    public boolean getPointSpriteEnabled() {
+        return mPointSprite;
+    }
+
+    /**
+     * @hide
+     * @return cull mode
+     */
+    public CullMode getCullMode() {
+        return mCullMode;
     }
 
     public static ProgramRaster CULL_BACK(RenderScript rs) {
@@ -105,7 +114,10 @@ public class ProgramRaster extends BaseObj {
         public ProgramRaster create() {
             mRS.validate();
             int id = mRS.nProgramRasterCreate(mPointSprite, mCullMode.mID);
-            return new ProgramRaster(id, mRS);
+            ProgramRaster programRaster = new ProgramRaster(id, mRS);
+            programRaster.mPointSprite = mPointSprite;
+            programRaster.mCullMode = mCullMode;
+            return programRaster;
         }
     }
 

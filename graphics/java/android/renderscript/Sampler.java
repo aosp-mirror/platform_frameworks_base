@@ -47,8 +47,55 @@ public class Sampler extends BaseObj {
         }
     }
 
+    Value mMin;
+    Value mMag;
+    Value mWrapS;
+    Value mWrapT;
+    Value mWrapR;
+    float mAniso;
+
     Sampler(int id, RenderScript rs) {
         super(id, rs);
+    }
+
+    /**
+     * @hide
+     * @return minification setting for the sampler
+     */
+    public Value getMinification() {
+        return mMin;
+    }
+
+    /**
+     * @hide
+     * @return magnification setting for the sampler
+     */
+    public Value getMagnification() {
+        return mMag;
+    }
+
+    /**
+     * @hide
+     * @return S wrapping mode for the sampler
+     */
+    public Value getWrapS() {
+        return mWrapS;
+    }
+
+    /**
+     * @hide
+     * @return T wrapping mode for the sampler
+     */
+    public Value getWrapT() {
+        return mWrapT;
+    }
+
+    /**
+     * @hide
+     * @return anisotropy setting for the sampler
+     */
+    public float getAnisotropy() {
+        return mAniso;
     }
 
     /**
@@ -241,8 +288,16 @@ public class Sampler extends BaseObj {
 
         public Sampler create() {
             mRS.validate();
-            int id = mRS.nSamplerCreate(mMag.mID, mMin.mID, mWrapS.mID, mWrapT.mID, mWrapR.mID, mAniso);
-            return new Sampler(id, mRS);
+            int id = mRS.nSamplerCreate(mMag.mID, mMin.mID, 
+                                        mWrapS.mID, mWrapT.mID, mWrapR.mID, mAniso);
+            Sampler sampler = new Sampler(id, mRS);
+            sampler.mMin = mMin;
+            sampler.mMag = mMag;
+            sampler.mWrapS = mWrapS;
+            sampler.mWrapT = mWrapT;
+            sampler.mWrapR = mWrapR;
+            sampler.mAniso = mAniso;
+            return sampler;
         }
     }
 
