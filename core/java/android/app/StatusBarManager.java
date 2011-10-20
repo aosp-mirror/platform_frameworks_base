@@ -22,6 +22,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.util.Slog;
 import android.view.View;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -61,8 +62,17 @@ public class StatusBarManager {
 
     StatusBarManager(Context context) {
         mContext = context;
-        mService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+    }
+
+    private synchronized IStatusBarService getService() {
+        if (mService == null) {
+            mService = IStatusBarService.Stub.asInterface(
+                    ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+            if (mService == null) {
+                Slog.w("StatusBarManager", "warning: no STATUS_BAR_SERVICE");
+            }
+        }
+        return mService;
     }
 
     /**
@@ -71,8 +81,9 @@ public class StatusBarManager {
      */
     public void disable(int what) {
         try {
-            if (mService != null) {
-                mService.disable(what, mToken, mContext.getPackageName());
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.disable(what, mToken, mContext.getPackageName());
             }
         } catch (RemoteException ex) {
             // system process is dead anyway.
@@ -85,7 +96,10 @@ public class StatusBarManager {
      */
     public void expand() {
         try {
-            mService.expand();
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.expand();
+            }
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
@@ -97,7 +111,10 @@ public class StatusBarManager {
      */
     public void collapse() {
         try {
-            mService.collapse();
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.collapse();
+            }
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
@@ -106,8 +123,11 @@ public class StatusBarManager {
 
     public void setIcon(String slot, int iconId, int iconLevel, String contentDescription) {
         try {
-            mService.setIcon(slot, mContext.getPackageName(), iconId, iconLevel,
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.setIcon(slot, mContext.getPackageName(), iconId, iconLevel,
                     contentDescription);
+            }
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
@@ -116,7 +136,10 @@ public class StatusBarManager {
 
     public void removeIcon(String slot) {
         try {
-            mService.removeIcon(slot);
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.removeIcon(slot);
+            }
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
@@ -125,7 +148,10 @@ public class StatusBarManager {
 
     public void setIconVisibility(String slot, boolean visible) {
         try {
-            mService.setIconVisibility(slot, visible);
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.setIconVisibility(slot, visible);
+            }
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
