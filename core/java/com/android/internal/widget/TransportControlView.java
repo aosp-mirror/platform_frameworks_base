@@ -86,11 +86,6 @@ public class TransportControlView extends FrameLayout implements OnClickListener
      */
     private Bundle mPopulateMetadataWhenAttached = null;
 
-    /**
-     * Whether to clear the interface next time it is shown (i.e. the generation id changed)
-     */
-    private boolean mClearOnNextShow;
-
     // This handler is required to ensure messages from IRCD are handled in sequence and on
     // the UI thread.
     private Handler mHandler = new Handler() {
@@ -121,7 +116,10 @@ public class TransportControlView extends FrameLayout implements OnClickListener
 
             case MSG_SET_GENERATION_ID:
                 if (msg.arg2 != 0) {
-                    mClearOnNextShow = true; // TODO: handle this
+                    // This means nobody is currently registered. Hide the view.
+                    if (mWidgetCallbacks != null) {
+                        mWidgetCallbacks.requestHide(TransportControlView.this);
+                    }
                 }
                 if (DEBUG) Log.v(TAG, "New genId = " + msg.arg1 + ", clearing = " + msg.arg2);
                 mClientGeneration = msg.arg1;
@@ -412,7 +410,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         if (DEBUG) Log.v(TAG, "onSaveInstanceState()");
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        ss.wasShowing = mWidgetCallbacks.isVisible(this);
+        ss.wasShowing = mWidgetCallbacks != null && mWidgetCallbacks.isVisible(this);
         return ss;
     }
 
@@ -425,7 +423,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         }
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-        if (ss.wasShowing) {
+        if (ss.wasShowing && mWidgetCallbacks != null) {
             mWidgetCallbacks.requestShow(this);
         }
     }
@@ -449,6 +447,11 @@ public class TransportControlView extends FrameLayout implements OnClickListener
     }
 
     private void sendMediaButtonClick(int keyCode) {
+        if (mClientIntent == null) {
+            // Shouldn't be possible because this view should be hidden in this case.
+            Log.e(TAG, "sendMediaButtonClick(): No client is currently registered");
+            return;
+        }
         // use the registered PendingIntent that will be processed by the registered
         //    media button event receiver, which is the component of mClientIntent
         KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
