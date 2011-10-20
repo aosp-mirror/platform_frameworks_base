@@ -137,7 +137,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
             .setContentText(r.getString(R.string.screenshot_saving_text))
-            .setSmallIcon(android.R.drawable.ic_menu_gallery)
+            .setSmallIcon(R.drawable.stat_notify_image)
             .setWhen(System.currentTimeMillis());
         Notification n = mNotificationBuilder.getNotification();
         n.flags |= Notification.FLAG_NO_CLEAR;
@@ -544,7 +544,7 @@ class GlobalScreenshot {
             .setTicker(r.getString(R.string.screenshot_failed_title))
             .setContentTitle(r.getString(R.string.screenshot_failed_title))
             .setContentText(r.getString(R.string.screenshot_failed_text))
-            .setSmallIcon(android.R.drawable.ic_menu_report_image)
+            .setSmallIcon(R.drawable.stat_notify_image_error)
             .setWhen(System.currentTimeMillis())
             .setAutoCancel(true)
             .getNotification();
