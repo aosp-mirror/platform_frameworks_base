@@ -4219,6 +4219,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @attr ref android.R.styleable#View_contentDescription
      */
+    @RemotableViewMethod
     public void setContentDescription(CharSequence contentDescription) {
         mContentDescription = contentDescription;
     }
