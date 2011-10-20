@@ -304,7 +304,8 @@ public final class CalendarContract {
          * or an empty string are reserved for indicating that the calendar does
          * not use an index for looking up the color. The provider will update
          * {@link #CALENDAR_COLOR} automatically when a valid index is written
-         * to this column. @see Colors
+         * to this column. The index must reference an existing row of the
+         * {@link Colors} table. @see Colors
          * <P>
          * Type: TEXT
          * </P>
@@ -852,8 +853,11 @@ public final class CalendarContract {
          * string are reserved for indicating that the event does not use an
          * index for looking up the color. The provider will update
          * {@link #EVENT_COLOR} automatically when a valid index is written to
-         * this column. @see Colors
-         * <P>Type: TEXT</P>
+         * this column. The index must reference an existing row of the
+         * {@link Colors} table. @see Colors
+         * <P>
+         * Type: TEXT
+         * </P>
          * TODO UNHIDE
          *
          * @hide
@@ -2329,7 +2333,7 @@ public final class CalendarContract {
         /**
          * The index used to reference this color. This can be any non-empty
          * string, but must be unique for a given {@link #ACCOUNT_TYPE} and
-         * {@link #ACCOUNT_NAME} . Column name.
+         * {@link #ACCOUNT_NAME}. Column name.
          * <P>
          * Type: TEXT
          * </P>
@@ -2354,7 +2358,9 @@ public final class CalendarContract {
      * Fields for accessing colors available for a given account. Colors are
      * referenced by {@link #COLOR_INDEX} which must be unique for a given
      * account name/type. These values should only be updated by the sync
-     * adapter.
+     * adapter. Only {@link #COLOR} may be updated after the initial insert. In
+     * addition, a row can only be deleted once all references to that color
+     * have been removed from the {@link Calendars} or {@link Events} tables.
      * TODO UNHIDE
      *
      * @hide
