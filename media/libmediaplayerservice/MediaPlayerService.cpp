@@ -379,11 +379,13 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
         } else {
             for (int i = 0, n = mMediaRecorderClients.size(); i < n; ++i) {
                 sp<MediaRecorderClient> c = mMediaRecorderClients[i].promote();
-                snprintf(buffer, 255, " MediaRecorderClient pid(%d)\n", c->mPid);
-                result.append(buffer);
-                write(fd, result.string(), result.size());
-                result = "\n";
-                c->dump(fd, args);
+                if (c != 0) {
+                    snprintf(buffer, 255, " MediaRecorderClient pid(%d)\n", c->mPid);
+                    result.append(buffer);
+                    write(fd, result.string(), result.size());
+                    result = "\n";
+                    c->dump(fd, args);
+                }
             }
         }
 
