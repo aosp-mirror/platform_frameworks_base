@@ -27,8 +27,8 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.NumberPicker.OnValueChangeListener;
 
 import com.android.internal.R;
@@ -78,6 +78,12 @@ public class TimePicker extends FrameLayout {
     private final NumberPicker mMinuteSpinner;
 
     private final NumberPicker mAmPmSpinner;
+
+    private final EditText mHourSpinnerInput;
+
+    private final EditText mMinuteSpinnerInput;
+
+    private final EditText mAmPmSpinnerInput;
 
     private final TextView mDivider;
 
@@ -140,6 +146,7 @@ public class TimePicker extends FrameLayout {
         mHourSpinner = (NumberPicker) findViewById(R.id.hour);
         mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
+                updateInputState();
                 if (!is24HourView()) {
                     if ((oldVal == HOURS_IN_HALF_DAY - 1 && newVal == HOURS_IN_HALF_DAY)
                             || (oldVal == HOURS_IN_HALF_DAY && newVal == HOURS_IN_HALF_DAY - 1)) {
@@ -150,8 +157,8 @@ public class TimePicker extends FrameLayout {
                 onTimeChanged();
             }
         });
-        EditText hourInput = (EditText) mHourSpinner.findViewById(R.id.numberpicker_input);
-        hourInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        mHourSpinnerInput = (EditText) mHourSpinner.findViewById(R.id.numberpicker_input);
+        mHourSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         // divider (only for the new widget style)
         mDivider = (TextView) findViewById(R.id.divider);
@@ -167,6 +174,7 @@ public class TimePicker extends FrameLayout {
         mMinuteSpinner.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
         mMinuteSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
+                updateInputState();
                 int minValue = mMinuteSpinner.getMinValue();
                 int maxValue = mMinuteSpinner.getMaxValue();
                 if (oldVal == maxValue && newVal == minValue) {
@@ -187,8 +195,8 @@ public class TimePicker extends FrameLayout {
                 onTimeChanged();
             }
         });
-        EditText minuteInput = (EditText) mMinuteSpinner.findViewById(R.id.numberpicker_input);
-        minuteInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        mMinuteSpinnerInput = (EditText) mMinuteSpinner.findViewById(R.id.numberpicker_input);
+        mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         /* Get the localized am/pm strings and use them in the spinner */
         mAmPmStrings = new DateFormatSymbols().getAmPmStrings();
@@ -197,6 +205,7 @@ public class TimePicker extends FrameLayout {
         View amPmView = findViewById(R.id.amPm);
         if (amPmView instanceof Button) {
             mAmPmSpinner = null;
+            mAmPmSpinnerInput = null;
             mAmPmButton = (Button) amPmView;
             mAmPmButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View button) {
@@ -213,13 +222,14 @@ public class TimePicker extends FrameLayout {
             mAmPmSpinner.setDisplayedValues(mAmPmStrings);
             mAmPmSpinner.setOnValueChangedListener(new OnValueChangeListener() {
                 public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                    updateInputState();
                     picker.requestFocus();
                     mIsAm = !mIsAm;
                     updateAmPmControl();
                 }
             });
-            EditText amPmInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
-            amPmInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            mAmPmSpinnerInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
+            mAmPmSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
         }
 
         // update controls to initial state
@@ -319,7 +329,7 @@ public class TimePicker extends FrameLayout {
             dest.writeInt(mMinute);
         }
 
-        @SuppressWarnings("unused")
+        @SuppressWarnings({"unused", "hiding"})
         public static final Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
@@ -522,6 +532,27 @@ public class TimePicker extends FrameLayout {
             mAmPmSpinner.findViewById(R.id.increment).setContentDescription(text);
             text = mContext.getString(R.string.time_picker_decrement_set_am_button);
             mAmPmSpinner.findViewById(R.id.decrement).setContentDescription(text);
+        }
+    }
+
+    private void updateInputState() {
+        // Make sure that if the user changes the value and the IME is active
+        // for one of the inputs if this widget, the IME is closed. If the user
+        // changed the value via the IME and there is a next input the IME will
+        // be shown, otherwise the user chose another means of changing the
+        // value and having the IME up makes no sense.
+        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        if (inputMethodManager != null) {
+            if (inputMethodManager.isActive(mHourSpinnerInput)) {
+                mHourSpinnerInput.clearFocus();
+                inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            } else if (inputMethodManager.isActive(mMinuteSpinnerInput)) {
+                mMinuteSpinnerInput.clearFocus();
+                inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            } else if (inputMethodManager.isActive(mAmPmSpinnerInput)) {
+                mAmPmSpinnerInput.clearFocus();
+                inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            }
         }
     }
 }
