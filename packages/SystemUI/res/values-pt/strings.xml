@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Ampliar p/ preencher tela"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom em modo de compatibilidade"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Quando um aplicativo é desenvolvido para uma tela menor, um controle de zoom é exibido perto do relógio."</string>
-    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvar captura de tela..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Salvar captura de tela..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"A captura de tela está sendo salva."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de tela obtida."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Toque para visualizar a captura de tela."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Não foi possível obter a captura de tela."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Não foi possível salvar a captura de tela. O armazenamento pode estar em uso."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções transf. arq. por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Conectar como media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montar como uma câmera (PTP)"</string>

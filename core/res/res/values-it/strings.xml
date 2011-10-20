@@ -990,7 +990,7 @@
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Problema di utilizzo dell\'archivio USB come archivio di massa USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Problema di utilizzo della scheda SD come archivio di massa USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB collegata"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Seleziona per copiare file sul/dal tuo computer."</string>
+    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Seleziona per copiare file sul/dal computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Disattiva archivio USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Seleziona per disattivare l\'archivio USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Archivio USB in uso"</string>

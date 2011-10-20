@@ -902,7 +902,7 @@
     <string name="anr_activity_process" msgid="7018289416670457797">"La actividad <xliff:g id="ACTIVITY">%1$s</xliff:g> no responde."\n\n"¿Quieres cerrarla?"</string>
     <string name="anr_application_process" msgid="7208175830253210526">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> no responde. ¿Quieres cerrarla?"</string>
     <string name="anr_process" msgid="306819947562555821">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> no responde."\n\n"¿Quieres cerrarlo?"</string>
-    <string name="force_close" msgid="8346072094521265605">"ACEPTAR"</string>
+    <string name="force_close" msgid="8346072094521265605">"Aceptar"</string>
     <string name="report" msgid="4060218260984795706">"Informar"</string>
     <string name="wait" msgid="7147118217226317732">"Esperar"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplicación redireccionada"</string>
@@ -1206,7 +1206,7 @@
     <string name="fingerprints" msgid="4516019619850763049">"Huellas digitales:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Huella digital SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Huella digital SHA-1:"</string>
-    <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Ver todas..."</string>
+    <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Ver todo..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Seleccionar actividad"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Compartir con..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloqueado"</string>
