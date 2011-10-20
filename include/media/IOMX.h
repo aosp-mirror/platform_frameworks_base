@@ -78,6 +78,9 @@ public:
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size) = 0;
 
+    virtual status_t getState(
+            node_id node, OMX_STATETYPE* state) = 0;
+
     virtual status_t storeMetaDataInBuffers(
             node_id node, OMX_U32 port_index, OMX_BOOL enable) = 0;
 

@@ -38,6 +38,7 @@ enum {
     SET_PARAMETER,
     GET_CONFIG,
     SET_CONFIG,
+    GET_STATE,
     ENABLE_GRAPHIC_BUFFERS,
     USE_BUFFER,
     USE_GRAPHIC_BUFFER,
@@ -195,6 +196,17 @@ public:
         data.write(params, size);
         remote()->transact(SET_CONFIG, data, &reply);
 
+        return reply.readInt32();
+    }
+
+    virtual status_t getState(
+            node_id node, OMX_STATETYPE* state) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        data.writeIntPtr((intptr_t)node);
+        remote()->transact(GET_STATE, data, &reply);
+
+        *state = static_cast<OMX_STATETYPE>(reply.readInt32());
         return reply.readInt32();
     }
 
@@ -520,6 +532,20 @@ status_t BnOMX::onTransact(
 
             free(params);
             params = NULL;
+
+            return NO_ERROR;
+        }
+
+        case GET_STATE:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+
+            node_id node = (void*)data.readIntPtr();
+            OMX_STATETYPE state = OMX_StateInvalid;
+
+            status_t err = getState(node, &state);
+            reply->writeInt32(state);
+            reply->writeInt32(err);
 
             return NO_ERROR;
         }

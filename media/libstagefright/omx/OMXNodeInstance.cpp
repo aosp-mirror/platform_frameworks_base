@@ -266,6 +266,14 @@ status_t OMXNodeInstance::setConfig(
     return StatusFromOMXError(err);
 }
 
+status_t OMXNodeInstance::getState(OMX_STATETYPE* state) {
+    Mutex::Autolock autoLock(mLock);
+
+    OMX_ERRORTYPE err = OMX_GetState(mHandle, state);
+
+    return StatusFromOMXError(err);
+}
+
 status_t OMXNodeInstance::enableGraphicBuffers(
         OMX_U32 portIndex, OMX_BOOL enable) {
     Mutex::Autolock autoLock(mLock);
