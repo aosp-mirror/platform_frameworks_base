@@ -669,7 +669,7 @@
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Кнопка перехода к следующему треку"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Кнопка паузы"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Кнопка воспроизведения"</string>
-    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Кнопка остановки"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Кнопка выключения"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренные вызовы"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
@@ -699,7 +699,7 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Разблокировать"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Вкл. звук"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Откл. звук"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ввод графического ключа начался"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ввод графического ключа"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Графический ключ сброшен"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ячейка добавлена"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Графический ключ введен"</string>

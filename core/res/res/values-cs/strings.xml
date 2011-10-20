@@ -320,10 +320,10 @@
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"odeslání trvalého vysílání"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou tablet zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
-    <string name="permlab_readContacts" msgid="6219652189510218240">"čtení dat kontaktů"</string>
+    <string name="permlab_readContacts" msgid="6219652189510218240">"číst data kontaktů"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a odeslat vaše data dalším lidem."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat vaše data."</string>
-    <string name="permlab_writeContacts" msgid="644616215860933284">"zápis dat kontaktů"</string>
+    <string name="permlab_writeContacts" msgid="644616215860933284">"zapisovat data kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a vymazat či pozměnit kontaktní údaje."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"číst údaje o vašem profilu"</string>
@@ -700,7 +700,7 @@
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnout zvuk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Vypnout zvuk"</string>
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Bezpečnostní gesto zahájeno"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Bzpečnostní gesto vymazáno"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Bezpečnostní gesto vymazáno"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Buňka přidána"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Bezpečnostní gesto dokončeno"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>

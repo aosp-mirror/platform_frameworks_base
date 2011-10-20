@@ -62,19 +62,19 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Разпъване – запълва екрана"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Промяна на мащаба за съвместимост"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Когато дадено приложение е създадено за по-малък екран, до часовника ще се покаже управление за промяна на мащаба."</string>
-    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
+    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
     <skip />
-    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
+    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
     <skip />
-    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
+    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
     <skip />
-    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
+    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
     <skip />
-    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
+    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
     <skip />
-    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
+    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
     <skip />
-    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
+    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
     <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"Опции за пренос на файлове чрез USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Свързване като медиен плейър (MTP)"</string>

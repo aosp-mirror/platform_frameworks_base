@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Estendi per riemp. schermo"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom compatibilità"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Se un\'applicazione è stata progettata per uno schermo più piccolo, accanto all\'orologio viene visualizzato un controllo dello zoom."</string>
-    <!-- no translation found for screenshot_saving_ticker (3808900131607378535) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (7158814134399651627) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (7138808001579871654) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (1656379291643543172) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (5040360894749163221) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (1140968728869009679) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (9163506496592455352) -->
-    <skip />
+    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvataggio..."</string>
+    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Salvataggio screenshot..."</string>
+    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Attendi il salvataggio dello screenshot"</string>
+    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot acquisito"</string>
+    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Tocca per visualizzare il tuo screenshot"</string>
+    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot non riuscito"</string>
+    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Salvataggio screenshot non riuscito. L\'archivio esterno potrebbe essere in uso."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opzioni trasferimento file USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Monta come lettore multimediale (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Monta come videocamera (PTP)"</string>
@@ -130,8 +123,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Telescrivente abilitata."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Suoneria vibrazione."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Suoneria silenziosa."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> eliminata."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dati 2G-3G disattivati"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dati 4G disattivati"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dati mobili disattivati"</string>
