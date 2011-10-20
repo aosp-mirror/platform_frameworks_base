@@ -3618,10 +3618,23 @@ status_t OMXCodec::stop() {
         mAsyncCompletion.wait(mLock);
     }
 
+    bool isError = false;
     switch (mState) {
         case LOADED:
-        case ERROR:
             break;
+
+        case ERROR:
+        {
+            OMX_STATETYPE state = OMX_StateInvalid;
+            status_t err = mOMX->getState(mNode, &state);
+            CHECK_EQ(err, (status_t)OK);
+
+            if (state != OMX_StateExecuting) {
+                break;
+            }
+            // else fall through to the idling code
+            isError = true;
+        }
 
         case EXECUTING:
         {
@@ -3655,6 +3668,12 @@ status_t OMXCodec::stop() {
 
             while (mState != LOADED && mState != ERROR) {
                 mAsyncCompletion.wait(mLock);
+            }
+
+            if (isError) {
+                // We were in the ERROR state coming in, so restore that now
+                // that we've idled the OMX component.
+                setState(ERROR);
             }
 
             break;
