@@ -810,6 +810,13 @@ public final class SimulatedCommands extends BaseCommands
     /**
      * {@inheritDoc}
      */
+    public void sendEnvelopeWithStatus(String contents, Message response) {
+        resultSuccess(response, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void handleCallSetupRequestFromSim(
             boolean accept, Message response) {
         resultSuccess(response, null);
@@ -1034,6 +1041,11 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     public void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message result) {
+        unimplemented(result);
+    }
+
+    public void acknowledgeIncomingGsmSmsWithPdu(boolean success, String ackPdu,
+            Message result) {
         unimplemented(result);
     }
 

@@ -292,7 +292,7 @@ public interface CommandsInterface {
     void setOnNewGsmBroadcastSms(Handler h, int what, Object obj);
     void unSetOnNewGsmBroadcastSms(Handler h);
 
-   /**
+    /**
      * Register for NEW_SMS_ON_SIM unsolicited message
      *
      * AsyncResult.result is an int array containing the index of new SMS
@@ -1116,9 +1116,20 @@ public interface CommandsInterface {
     void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message response);
 
     /**
+     * Acknowledge successful or failed receipt of last incoming SMS,
+     * including acknowledgement TPDU to send as the RP-User-Data element
+     * of the RP-ACK or RP-ERROR PDU.
+     *
+     * @param success true to send RP-ACK, false to send RP-ERROR
+     * @param ackPdu the acknowledgement TPDU in hexadecimal format
+     * @param response sent when operation completes.
+     */
+    void acknowledgeIncomingGsmSmsWithPdu(boolean success, String ackPdu, Message response);
+
+    /**
      * parameters equivalent to 27.007 AT+CRSM command
      * response.obj will be an AsyncResult
-     * response.obj.userObj will be a IccIoResult on success
+     * response.obj.result will be an IccIoResult on success
      */
     void iccIO (int command, int fileid, String path, int p1, int p2, int p3,
             String data, String pin2, Message response);
@@ -1384,6 +1395,22 @@ public interface CommandsInterface {
      * @param response  Callback message
      */
     public void sendEnvelope(String contents, Message response);
+
+    /**
+     * Send ENVELOPE to the SIM, such as an SMS-PP data download envelope
+     * for a SIM data download message. This method has one difference
+     * from {@link #sendEnvelope}: The SW1 and SW2 status bytes from the UICC response
+     * are returned along with the response data.
+     *
+     * response.obj will be an AsyncResult
+     * response.obj.result will be an IccIoResult on success
+     *
+     * @param contents  String containing SAT/USAT response in hexadecimal
+     *                  format starting with command tag. See TS 102 223 for
+     *                  details.
+     * @param response  Callback message
+     */
+    public void sendEnvelopeWithStatus(String contents, Message response);
 
     /**
      * Accept or reject the call setup request from SIM.
