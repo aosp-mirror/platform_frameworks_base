@@ -71,6 +71,10 @@ LOCAL_CFLAGS += -DMB_CUR_MAX=1
 endif
 endif
 
+ifeq ($(TARGET_OS),linux)
+LOCAL_LDLIBS += -lrt -ldl
+endif
+
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 

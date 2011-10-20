@@ -23,7 +23,7 @@ LOCAL_STATIC_LIBRARIES := \
 	libcutils
 
 ifeq ($(HOST_OS),linux)
-LOCAL_LDLIBS += -lpthread
+LOCAL_LDLIBS += -ldl -lpthread
 endif
 
 LOCAL_MODULE := validatekeymaps
