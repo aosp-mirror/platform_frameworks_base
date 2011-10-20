@@ -536,6 +536,10 @@ public class NumberPicker extends LinearLayout {
 
         OnClickListener onClickListener = new OnClickListener() {
             public void onClick(View v) {
+                InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+                if (inputMethodManager != null && inputMethodManager.isActive(mInputText)) {
+                    inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+                }
                 mInputText.clearFocus();
                 if (v.getId() == R.id.increment) {
                     changeCurrentByOne(true);
@@ -571,17 +575,14 @@ public class NumberPicker extends LinearLayout {
         mInputText = (EditText) findViewById(R.id.numberpicker_input);
         mInputText.setOnFocusChangeListener(new OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
-                InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
                 if (hasFocus) {
                     mInputText.selectAll();
+                    InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
                     if (inputMethodManager != null) {
                         inputMethodManager.showSoftInput(mInputText, 0);
                     }
                 } else {
                     mInputText.setSelection(0, 0);
-                    if (inputMethodManager != null) {
-                        inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
-                    }
                     validateInputTextView(v);
                 }
             }
@@ -996,17 +997,14 @@ public class NumberPicker extends LinearLayout {
      * enabled.
      * </p>
      *
-     * @param wrapSelector Whether to wrap.
+     * @param wrapSelectorWheel Whether to wrap.
      */
-    public void setWrapSelectorWheel(boolean wrapSelector) {
-        if (wrapSelector && (mMaxValue - mMinValue) < mSelectorIndices.length) {
+    public void setWrapSelectorWheel(boolean wrapSelectorWheel) {
+        if (wrapSelectorWheel && (mMaxValue - mMinValue) < mSelectorIndices.length) {
             throw new IllegalStateException("Range less than selector items count.");
         }
-        if (wrapSelector != mWrapSelectorWheel) {
-            // force the selector indices array to be reinitialized
-            mSelectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] = Integer.MAX_VALUE;
-            mWrapSelectorWheel = wrapSelector;
-            // force redraw since we might look different
+        if (wrapSelectorWheel != mWrapSelectorWheel) {
+            mWrapSelectorWheel = wrapSelectorWheel;
             updateIncrementAndDecrementButtonsVisibilityState();
         }
     }
@@ -1206,7 +1204,13 @@ public class NumberPicker extends LinearLayout {
         for (int i = 0; i < selectorIndices.length; i++) {
             int selectorIndex = selectorIndices[i];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
-            canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
+            // Do not draw the middle item if input is visible since the input is shown only
+            // if the wheel is static and it covers the middle item. Otherwise, if the user
+            // starts editing the text via the IME he may see a dimmed version of the old
+            // value intermixed with the new one.
+            if (i != SELECTOR_MIDDLE_ITEM_INDEX || mInputText.getVisibility() != VISIBLE) {
+                canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
+            }
             y += mSelectorElementHeight;
         }
 
