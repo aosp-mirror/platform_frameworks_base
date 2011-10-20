@@ -72,7 +72,7 @@ import android.util.Log;
  * {@link Calendars#MAX_REMINDERS} which is set by the Sync Adapter that owns
  * the given calendar. Reminders are specified in minutes before the event and
  * have a type.</li>
- * <li>The {@link ExtendedProperties} table hold opaque data fields used by the
+ * <li>The {@link ExtendedProperties} table holds opaque data fields used by the
  * sync adapter. The provider takes no action with items in this table except to
  * delete them when their related events are deleted.</li>
  * </ul>
@@ -2400,7 +2400,7 @@ public final class CalendarContract {
 
     /**
      * Fields for accessing the Extended Properties. This is a generic set of
-     * name/value pairs for use by sync adapters or apps to add extra
+     * name/value pairs for use by sync adapters to add extra
      * information to events. There are three writable columns and all three
      * must be present when inserting a new value. They are:
      * <ul>
