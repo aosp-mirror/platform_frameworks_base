@@ -439,8 +439,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/NFCDemo "NFC Demo" \
 		-samplecode $(sample_dir)/NotePad \
 		            resources/samples/NotePad "Note Pad" \
-		-samplecode $(sample_dir)/SampleSpellCheckerService \
-		            resources/samples/SampleSpellCheckerService "Spell Checker" \
+		-samplecode $(sample_dir)/SpellChecker/SampleSpellCheckerService \
+		            resources/samples/SpellChecker/SampleSpellCheckerService "Spell Checker" \
 		-samplecode $(sample_dir)/SampleSyncAdapter \
 		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/RandomMusicPlayer \
