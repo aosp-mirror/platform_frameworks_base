@@ -123,7 +123,7 @@ public class SpellCheckerSession {
         }
         mSpellCheckerInfo = info;
         mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(mHandler);
-        mInternalListener = new InternalListener();
+        mInternalListener = new InternalListener(mSpellCheckerSessionListenerImpl);
         mTextServicesManager = tsm;
         mIsUsed = true;
         mSpellCheckerSessionListener = listener;
@@ -316,13 +316,19 @@ public class SpellCheckerSession {
         public void onGetSuggestions(SuggestionsInfo[] results);
     }
 
-    private class InternalListener extends ITextServicesSessionListener.Stub {
+    private static class InternalListener extends ITextServicesSessionListener.Stub {
+        private final SpellCheckerSessionListenerImpl mParentSpellCheckerSessionListenerImpl;
+
+        public InternalListener(SpellCheckerSessionListenerImpl spellCheckerSessionListenerImpl) {
+            mParentSpellCheckerSessionListenerImpl = spellCheckerSessionListenerImpl;
+        }
+
         @Override
         public void onServiceConnected(ISpellCheckerSession session) {
             if (DBG) {
                 Log.w(TAG, "SpellCheckerSession connected.");
             }
-            mSpellCheckerSessionListenerImpl.onServiceConnected(session);
+            mParentSpellCheckerSessionListenerImpl.onServiceConnected(session);
         }
     }
 
