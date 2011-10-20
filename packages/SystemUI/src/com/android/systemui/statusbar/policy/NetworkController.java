@@ -95,7 +95,7 @@ public class NetworkController extends BroadcastReceiver {
     final WifiManager mWifiManager;
     AsyncChannel mWifiChannel;
     boolean mWifiEnabled, mWifiConnected;
-    int mWifiLevel;
+    int mWifiRssi, mWifiLevel;
     String mWifiSsid;
     int mWifiIconId = 0;
     int mWifiActivityIconId = 0; // overlay arrows for wifi direction
@@ -654,24 +654,29 @@ public class NetworkController extends BroadcastReceiver {
             mWifiConnected = networkInfo != null && networkInfo.isConnected();
             // If we just connected, grab the inintial signal strength and ssid
             if (mWifiConnected && !wasConnected) {
-                WifiInfo info = mWifiManager.getConnectionInfo();
+                // try getting it out of the intent first
+                WifiInfo info = (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
+                if (info == null) {
+                    info = mWifiManager.getConnectionInfo();
+                }
                 if (info != null) {
-                    mWifiLevel = WifiManager.calculateSignalLevel(info.getRssi(),
-                            WifiIcons.WIFI_LEVEL_COUNT);
                     mWifiSsid = huntForSsid(info);
                 } else {
-                    mWifiLevel = 0;
                     mWifiSsid = null;
                 }
             } else if (!mWifiConnected) {
-                mWifiLevel = 0;
                 mWifiSsid = null;
             }
-
+            // Apparently the wifi level is not stable at this point even if we've just connected to
+            // the network; we need to wait for an RSSI_CHANGED_ACTION for that. So let's just set
+            // it to 0 for now
+            mWifiLevel = 0;
+            mWifiRssi = -200;
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             if (mWifiConnected) {
-                final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-                mWifiLevel = WifiManager.calculateSignalLevel(newRssi, WifiIcons.WIFI_LEVEL_COUNT);
+                mWifiRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
+                mWifiLevel = WifiManager.calculateSignalLevel(
+                        mWifiRssi, WifiIcons.WIFI_LEVEL_COUNT);
             }
         }
 
@@ -1031,6 +1036,8 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(mWifiEnabled);
         pw.print("  mWifiConnected=");
         pw.println(mWifiConnected);
+        pw.print("  mWifiRssi=");
+        pw.println(mWifiRssi);
         pw.print("  mWifiLevel=");
         pw.println(mWifiLevel);
         pw.print("  mWifiSsid=");
