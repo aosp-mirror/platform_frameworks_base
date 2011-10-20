@@ -1546,6 +1546,16 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling View.setContentDescription
+     *
+     * @param viewId The id of the view whose content description should change
+     * @param contentDescription The new content description for the view
+     */
+    public void setContentDescription(int viewId, CharSequence contentDescription) {
+        setCharSequence(viewId, "setContentDescription", contentDescription);
+    }
+
+    /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.
      * 
