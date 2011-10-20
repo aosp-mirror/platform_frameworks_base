@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.NumberPicker.OnValueChangeListener;
 
 import com.android.internal.R;
@@ -89,6 +90,12 @@ public class DatePicker extends FrameLayout {
     private final NumberPicker mMonthSpinner;
 
     private final NumberPicker mYearSpinner;
+
+    private final EditText mDaySpinnerInput;
+
+    private final EditText mMonthSpinnerInput;
+
+    private final EditText mYearSpinnerInput;
 
     private final CalendarView mCalendarView;
 
@@ -164,6 +171,7 @@ public class DatePicker extends FrameLayout {
 
         OnValueChangeListener onChangeListener = new OnValueChangeListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                updateInputState();
                 mTempDate.setTimeInMillis(mCurrentDate.getTimeInMillis());
                 // take care of wrapping of days and months to update greater fields
                 if (picker == mDaySpinner) {
@@ -214,6 +222,7 @@ public class DatePicker extends FrameLayout {
         mDaySpinner.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
         mDaySpinner.setOnLongPressUpdateInterval(100);
         mDaySpinner.setOnValueChangedListener(onChangeListener);
+        mDaySpinnerInput = (EditText) mDaySpinner.findViewById(R.id.numberpicker_input);
 
         // month
         mMonthSpinner = (NumberPicker) findViewById(R.id.month);
@@ -222,11 +231,13 @@ public class DatePicker extends FrameLayout {
         mMonthSpinner.setDisplayedValues(mShortMonths);
         mMonthSpinner.setOnLongPressUpdateInterval(200);
         mMonthSpinner.setOnValueChangedListener(onChangeListener);
+        mMonthSpinnerInput = (EditText) mMonthSpinner.findViewById(R.id.numberpicker_input);
 
         // year
         mYearSpinner = (NumberPicker) findViewById(R.id.year);
         mYearSpinner.setOnLongPressUpdateInterval(100);
         mYearSpinner.setOnValueChangedListener(onChangeListener);
+        mYearSpinnerInput = (EditText) mYearSpinner.findViewById(R.id.numberpicker_input);
 
         // show only what the user required but make sure we
         // show something and the spinners have higher priority
@@ -707,6 +718,27 @@ public class DatePicker extends FrameLayout {
         mYearSpinner.findViewById(R.id.increment).setContentDescription(text);
         text = mContext.getString(R.string.date_picker_decrement_year_button);
         mYearSpinner.findViewById(R.id.decrement).setContentDescription(text);
+    }
+
+    private void updateInputState() {
+        // Make sure that if the user changes the value and the IME is active
+        // for one of the inputs if this widget, the IME is closed. If the user
+        // changed the value via the IME and there is a next input the IME will
+        // be shown, otherwise the user chose another means of changing the
+        // value and having the IME up makes no sense.
+        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        if (inputMethodManager != null) {
+            if (inputMethodManager.isActive(mYearSpinnerInput)) {
+                mYearSpinnerInput.clearFocus();
+                inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            } else if (inputMethodManager.isActive(mMonthSpinnerInput)) {
+                mMonthSpinnerInput.clearFocus();
+                inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            } else if (inputMethodManager.isActive(mDaySpinnerInput)) {
+                mDaySpinnerInput.clearFocus();
+                inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            }
+        }
     }
 
     /**
