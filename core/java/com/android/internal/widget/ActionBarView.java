@@ -285,6 +285,10 @@ public class ActionBarView extends AbsActionBarView {
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         removeCallbacks(mTabSelector);
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.hideOverflowMenu();
+            mActionMenuPresenter.hideSubMenus();
+        }
     }
 
     @Override
