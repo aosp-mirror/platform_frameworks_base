@@ -44,7 +44,7 @@ LOCAL_STATIC_LIBRARIES := \
 	libpng
 
 ifeq ($(HOST_OS),linux)
-LOCAL_LDLIBS += -lrt -lpthread
+LOCAL_LDLIBS += -lrt -ldl -lpthread
 endif
 
 # Statically link libz for MinGW (Win SDK under Linux),
