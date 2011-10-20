@@ -30,6 +30,33 @@ namespace renderscript {
 
 class Program : public ProgramBase {
 public:
+    struct Hal {
+        mutable void *drv;
+
+        struct State {
+            // The difference between Textures and Constants is how they are accessed
+            // Texture lookups go though a sampler which in effect converts normalized
+            // coordinates into type specific.  Multiple samples may also be taken
+            // and filtered.
+            //
+            // Constants are strictly accessed by the shader code
+            Allocation **textures;
+            RsTextureTarget *textureTargets;
+            uint32_t texturesCount;
+
+            Sampler **samplers;
+            uint32_t samplersCount;
+
+            Allocation **constants;
+            Type **constantTypes;
+            uint32_t constantsCount;
+
+            Element **inputElements;
+            uint32_t inputElementsCount;
+        };
+        State state;
+    };
+    Hal mHal;
 
     Program(Context *, const char * shaderText, uint32_t shaderLength,
                        const uint32_t * params, uint32_t paramLength);
@@ -43,35 +70,13 @@ public:
     void bindTexture(Context *, uint32_t slot, Allocation *);
     void bindSampler(Context *, uint32_t slot, Sampler *);
 
-    struct Hal {
-        mutable void *drv;
-
-        struct State {
-            // The difference between Textures and Constants is how they are accessed
-            // Texture lookups go though a sampler which in effect converts normalized
-            // coordinates into type specific.  Multiple samples may also be taken
-            // and filtered.
-            //
-            // Constants are strictly accessed by the shader code
-            ObjectBaseRef<Allocation> *textures;
-            RsTextureTarget *textureTargets;
-            uint32_t texturesCount;
-
-            ObjectBaseRef<Sampler> *samplers;
-            uint32_t samplersCount;
-
-            ObjectBaseRef<Allocation> *constants;
-            ObjectBaseRef<Type> *constantTypes;
-            uint32_t constantsCount;
-
-            ObjectBaseRef<Element> *inputElements;
-            uint32_t inputElementsCount;
-        };
-        State state;
-    };
-    Hal mHal;
-
 protected:
+    ObjectBaseRef<Allocation> *mTextures;
+    ObjectBaseRef<Sampler> *mSamplers;
+    ObjectBaseRef<Allocation> *mConstants;
+    ObjectBaseRef<Type> *mConstantTypes;
+    ObjectBaseRef<Element> *mInputElements;
+
     bool mIsInternal;
     String8 mUserShader;
     void initMemberVars();

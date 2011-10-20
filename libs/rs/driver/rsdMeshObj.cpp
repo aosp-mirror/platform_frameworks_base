@@ -138,7 +138,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
     }
 
     for (uint32_t ct=0; ct < mRSMesh->mHal.state.vertexBuffersCount; ct++) {
-        const Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[ct].get();
+        const Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[ct];
         DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
         if (drv->uploadDeferred) {
             rsdAllocationSyncAll(rsc, alloc, RS_ALLOCATION_USAGE_SCRIPT);
@@ -148,7 +148,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
     // update attributes with either buffer information or data ptr based on their current state
     for (uint32_t ct=0; ct < mAttribCount; ct++) {
         uint32_t allocIndex = mAttribAllocationIndex[ct];
-        Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[allocIndex].get();
+        Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[allocIndex];
         DrvAllocation *drvAlloc = (DrvAllocation *)alloc->mHal.drv;
 
         if (drvAlloc->bufferID) {
@@ -163,8 +163,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
     RsdVertexArray va(mAttribs, mAttribCount);
     va.setup(rsc);
 
-    Mesh::Primitive_t *prim = mRSMesh->mHal.state.primitives[primIndex];
-    const Allocation *idxAlloc = prim->mIndexBuffer.get();
+    const Allocation *idxAlloc = mRSMesh->mHal.state.indexBuffers[primIndex];
     if (idxAlloc) {
         DrvAllocation *drvAlloc = (DrvAllocation *)idxAlloc->mHal.drv;
         if (drvAlloc->uploadDeferred) {
@@ -190,7 +189,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
 void RsdMeshObj::updateGLPrimitives() {
     mGLPrimitives = new uint32_t[mRSMesh->mHal.state.primitivesCount];
     for (uint32_t i = 0; i < mRSMesh->mHal.state.primitivesCount; i ++) {
-        switch (mRSMesh->mHal.state.primitives[i]->mPrimitive) {
+        switch (mRSMesh->mHal.state.primitives[i]) {
             case RS_PRIMITIVE_POINT:          mGLPrimitives[i] = GL_POINTS; break;
             case RS_PRIMITIVE_LINE:           mGLPrimitives[i] = GL_LINES; break;
             case RS_PRIMITIVE_LINE_STRIP:     mGLPrimitives[i] = GL_LINE_STRIP; break;

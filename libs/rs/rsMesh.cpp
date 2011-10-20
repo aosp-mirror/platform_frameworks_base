@@ -23,9 +23,14 @@ Mesh::Mesh(Context *rsc) : ObjectBase(rsc) {
     mHal.drv = NULL;
     mHal.state.primitives = NULL;
     mHal.state.primitivesCount = 0;
+    mHal.state.indexBuffers = NULL;
+    mHal.state.indexBuffersCount = 0;
     mHal.state.vertexBuffers = NULL;
     mHal.state.vertexBuffersCount = 0;
     mInitialized = false;
+
+    mVertexBuffers = NULL;
+    mIndexBuffers = NULL;
 }
 
 Mesh::Mesh(Context *rsc,
@@ -33,12 +38,23 @@ Mesh::Mesh(Context *rsc,
            uint32_t primitivesCount) : ObjectBase(rsc) {
     mHal.drv = NULL;
     mHal.state.primitivesCount = primitivesCount;
-    mHal.state.primitives = new Primitive_t *[mHal.state.primitivesCount];
+    mHal.state.indexBuffersCount = primitivesCount;
+    mHal.state.primitives = new RsPrimitive[mHal.state.primitivesCount];
+    mHal.state.indexBuffers = new Allocation *[mHal.state.indexBuffersCount];
     for (uint32_t i = 0; i < mHal.state.primitivesCount; i ++) {
-        mHal.state.primitives[i] = new Primitive_t;
+        mHal.state.primitives[i] = RS_PRIMITIVE_POINT;
+    }
+    for (uint32_t i = 0; i < mHal.state.indexBuffersCount; i ++) {
+        mHal.state.indexBuffers[i] = NULL;
     }
     mHal.state.vertexBuffersCount = vertexBuffersCount;
-    mHal.state.vertexBuffers = new ObjectBaseRef<Allocation>[mHal.state.vertexBuffersCount];
+    mHal.state.vertexBuffers = new Allocation *[mHal.state.vertexBuffersCount];
+    for (uint32_t i = 0; i < mHal.state.vertexBuffersCount; i ++) {
+        mHal.state.vertexBuffers[i] = NULL;
+    }
+
+    mVertexBuffers = new ObjectBaseRef<Allocation>[mHal.state.vertexBuffersCount];
+    mIndexBuffers = new ObjectBaseRef<Allocation>[mHal.state.primitivesCount];
 }
 
 Mesh::~Mesh() {
@@ -46,17 +62,12 @@ Mesh::~Mesh() {
     mRSC->mHal.funcs.mesh.destroy(mRSC, this);
 #endif
 
-    if (mHal.state.vertexBuffers) {
-        delete[] mHal.state.vertexBuffers;
-    }
+    delete[] mHal.state.vertexBuffers;
+    delete[] mHal.state.primitives;
+    delete[] mHal.state.indexBuffers;
 
-    if (mHal.state.primitives) {
-        for (uint32_t i = 0; i < mHal.state.primitivesCount; i ++) {
-            mHal.state.primitives[i]->mIndexBuffer.clear();
-            delete mHal.state.primitives[i];
-        }
-        delete[] mHal.state.primitives;
-    }
+    delete[] mVertexBuffers;
+    delete[] mIndexBuffers;
 }
 
 void Mesh::init() {
@@ -81,13 +92,11 @@ void Mesh::serialize(OStream *stream) const {
     stream->addU32(mHal.state.primitivesCount);
     // Store the primitives
     for (uint32_t pCount = 0; pCount < mHal.state.primitivesCount; pCount ++) {
-        Primitive_t * prim = mHal.state.primitives[pCount];
+        stream->addU8((uint8_t)mHal.state.primitives[pCount]);
 
-        stream->addU8((uint8_t)prim->mPrimitive);
-
-        if (prim->mIndexBuffer.get()) {
+        if (mHal.state.indexBuffers[pCount]) {
             stream->addU32(1);
-            prim->mIndexBuffer->serialize(stream);
+            mHal.state.indexBuffers[pCount]->serialize(stream);
         } else {
             stream->addU32(0);
         }
@@ -173,10 +182,8 @@ void Mesh::renderPrimitive(Context *rsc, uint32_t primIndex) const {
         return;
     }
 
-    Primitive_t *prim = mHal.state.primitives[primIndex];
-
-    if (prim->mIndexBuffer.get()) {
-        renderPrimitiveRange(rsc, primIndex, 0, prim->mIndexBuffer->getType()->getDimX());
+    if (mHal.state.indexBuffers[primIndex]) {
+        renderPrimitiveRange(rsc, primIndex, 0, mHal.state.indexBuffers[primIndex]->getType()->getDimX());
         return;
     }
 
@@ -194,14 +201,14 @@ void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start
 
 void Mesh::uploadAll(Context *rsc) {
     for (uint32_t ct = 0; ct < mHal.state.vertexBuffersCount; ct ++) {
-        if (mHal.state.vertexBuffers[ct].get()) {
-            rsc->mHal.funcs.allocation.markDirty(rsc, mHal.state.vertexBuffers[ct].get());
+        if (mHal.state.vertexBuffers[ct]) {
+            rsc->mHal.funcs.allocation.markDirty(rsc, mHal.state.vertexBuffers[ct]);
         }
     }
 
     for (uint32_t ct = 0; ct < mHal.state.primitivesCount; ct ++) {
-        if (mHal.state.primitives[ct]->mIndexBuffer.get()) {
-            rsc->mHal.funcs.allocation.markDirty(rsc, mHal.state.primitives[ct]->mIndexBuffer.get());
+        if (mHal.state.indexBuffers[ct]) {
+            rsc->mHal.funcs.allocation.markDirty(rsc, mHal.state.indexBuffers[ct]);
         }
     }
 }
@@ -290,7 +297,7 @@ void rsaMeshGetVertices(RsContext con, RsMesh mv, RsAllocation *vtxData, uint32_
     rsAssert(vtxDataCount == sm->mHal.state.vertexBuffersCount);
 
     for (uint32_t ct = 0; ct < vtxDataCount; ct ++) {
-        vtxData[ct] = sm->mHal.state.vertexBuffers[ct].get();
+        vtxData[ct] = sm->mHal.state.vertexBuffers[ct];
         sm->mHal.state.vertexBuffers[ct]->incUserRef();
     }
 }
@@ -300,10 +307,10 @@ void rsaMeshGetIndices(RsContext con, RsMesh mv, RsAllocation *va, uint32_t *pri
     rsAssert(idxDataCount == sm->mHal.state.primitivesCount);
 
     for (uint32_t ct = 0; ct < idxDataCount; ct ++) {
-        va[ct] = sm->mHal.state.primitives[ct]->mIndexBuffer.get();
-        primType[ct] = sm->mHal.state.primitives[ct]->mPrimitive;
-        if (sm->mHal.state.primitives[ct]->mIndexBuffer.get()) {
-            sm->mHal.state.primitives[ct]->mIndexBuffer->incUserRef();
+        va[ct] = sm->mHal.state.indexBuffers[ct];
+        primType[ct] = sm->mHal.state.primitives[ct];
+        if (sm->mHal.state.indexBuffers[ct]) {
+            sm->mHal.state.indexBuffers[ct]->incUserRef();
         }
     }
 }

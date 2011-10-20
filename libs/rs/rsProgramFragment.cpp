@@ -42,7 +42,7 @@ void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, 
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot  set fixed function emulation color on user program");
         return;
     }
-    if (mHal.state.constants[0].get() == NULL) {
+    if (mHal.state.constants[0] == NULL) {
         LOGE("Unable to set fixed function emulation color because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Unable to set fixed function emulation color because allocation is missing");
         return;
@@ -62,7 +62,7 @@ void ProgramFragment::setup(Context *rsc, ProgramFragmentState *state) {
     state->mLast.set(this);
 
     for (uint32_t ct=0; ct < mHal.state.texturesCount; ct++) {
-        if (!mHal.state.textures[ct].get()) {
+        if (!mHal.state.textures[ct]) {
             LOGE("No texture bound for shader id %u, texture unit %u", (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "No texture bound");
             continue;

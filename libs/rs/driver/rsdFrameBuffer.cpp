@@ -33,11 +33,11 @@ void setDepthAttachment(const Context *rsc, const FBOCache *fb) {
     RsdFrameBufferObj *fbo = (RsdFrameBufferObj*)fb->mHal.drv;
 
     DrvAllocation *depth = NULL;
-    if (fb->mHal.state.depthTarget.get() != NULL) {
+    if (fb->mHal.state.depthTarget != NULL) {
         depth = (DrvAllocation *)fb->mHal.state.depthTarget->mHal.drv;
 
         if (depth->uploadDeferred) {
-            rsdAllocationSyncAll(rsc, fb->mHal.state.depthTarget.get(),
+            rsdAllocationSyncAll(rsc, fb->mHal.state.depthTarget,
                                  RS_ALLOCATION_USAGE_SCRIPT);
         }
     }
@@ -49,11 +49,11 @@ void setColorAttachment(const Context *rsc, const FBOCache *fb) {
     // Now attach color targets
     for (uint32_t i = 0; i < fb->mHal.state.colorTargetsCount; i ++) {
         DrvAllocation *color = NULL;
-        if (fb->mHal.state.colorTargets[i].get() != NULL) {
+        if (fb->mHal.state.colorTargets[i] != NULL) {
             color = (DrvAllocation *)fb->mHal.state.colorTargets[i]->mHal.drv;
 
             if (color->uploadDeferred) {
-                rsdAllocationSyncAll(rsc, fb->mHal.state.colorTargets[i].get(),
+                rsdAllocationSyncAll(rsc, fb->mHal.state.colorTargets[i],
                                      RS_ALLOCATION_USAGE_SCRIPT);
             }
         }
@@ -79,10 +79,10 @@ void rsdFrameBufferSetActive(const Context *rsc, const FBOCache *fb) {
     setColorAttachment(rsc, fb);
 
     RsdFrameBufferObj *fbo = (RsdFrameBufferObj *)fb->mHal.drv;
-    if (fb->mHal.state.colorTargets[0].get()) {
+    if (fb->mHal.state.colorTargets[0]) {
         fbo->setDimensions(fb->mHal.state.colorTargets[0]->getType()->getDimX(),
                            fb->mHal.state.colorTargets[0]->getType()->getDimY());
-    } else if (fb->mHal.state.depthTarget.get()) {
+    } else if (fb->mHal.state.depthTarget) {
         fbo->setDimensions(fb->mHal.state.depthTarget->getType()->getDimX(),
                            fb->mHal.state.depthTarget->getType()->getDimY());
     }

@@ -38,7 +38,7 @@ void ProgramVertex::setup(Context *rsc, ProgramVertexState *state) {
     }
 
     if (!isUserProgram()) {
-        if (mHal.state.constants[0].get() == NULL) {
+        if (mHal.state.constants[0] == NULL) {
             rsc->setError(RS_ERROR_FATAL_UNKNOWN,
                           "Unable to set fixed function emulation matrices because allocation is missing");
             return;
@@ -65,7 +65,7 @@ void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const
                       "Attempting to set fixed function emulation matrix projection on user program");
         return;
     }
-    if (mHal.state.constants[0].get() == NULL) {
+    if (mHal.state.constants[0] == NULL) {
         rsc->setError(RS_ERROR_FATAL_UNKNOWN,
                       "Unable to set fixed function emulation matrix projection because allocation is missing");
         return;
@@ -81,7 +81,7 @@ void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const 
                       "Attempting to set fixed function emulation matrix modelview on user program");
         return;
     }
-    if (mHal.state.constants[0].get() == NULL) {
+    if (mHal.state.constants[0] == NULL) {
         rsc->setError(RS_ERROR_FATAL_UNKNOWN,
                       "Unable to set fixed function emulation matrix modelview because allocation is missing");
         return;
@@ -97,7 +97,7 @@ void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const {
                       "Attempting to set fixed function emulation matrix texture on user program");
         return;
     }
-    if (mHal.state.constants[0].get() == NULL) {
+    if (mHal.state.constants[0] == NULL) {
         rsc->setError(RS_ERROR_FATAL_UNKNOWN,
                       "Unable to set fixed function emulation matrix texture because allocation is missing");
         return;
@@ -113,7 +113,7 @@ void ProgramVertex::getProjectionMatrix(Context *rsc, rsc_Matrix *m) const {
                       "Attempting to get fixed function emulation matrix projection on user program");
         return;
     }
-    if (mHal.state.constants[0].get() == NULL) {
+    if (mHal.state.constants[0] == NULL) {
         rsc->setError(RS_ERROR_FATAL_UNKNOWN,
                       "Unable to get fixed function emulation matrix projection because allocation is missing");
         return;
