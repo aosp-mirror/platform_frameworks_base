@@ -303,6 +303,12 @@ status_t OMX::setConfig(
             index, params, size);
 }
 
+status_t OMX::getState(
+        node_id node, OMX_STATETYPE* state) {
+    return findInstance(node)->getState(
+            state);
+}
+
 status_t OMX::enableGraphicBuffers(
         node_id node, OMX_U32 port_index, OMX_BOOL enable) {
     return findInstance(node)->enableGraphicBuffers(port_index, enable);
