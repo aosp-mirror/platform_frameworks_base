@@ -359,7 +359,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private SpellChecker mSpellChecker;
 
-    private boolean mShowSoftInputOnFocus = true;
+    private boolean mSoftInputShownOnFocus = true;
 
     // The alignment to pass to Layout, or null if not resolved.
     private Layout.Alignment mLayoutAlignment;
@@ -2381,23 +2381,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets whether the soft input method will be made visible when this
      * TextView gets focused. The default is true.
      *
-     * @attr ref android.R.styleable#TextView_showSoftInputOnFocus
+     * @attr ref android.R.styleable#TextView_softInputShownOnFocus
      * @hide
      */
     @android.view.RemotableViewMethod
-    public final void setShowSoftInputOnFocus(boolean show) {
-        mShowSoftInputOnFocus = show;
+    public final void setSoftInputShownOnFocus(boolean show) {
+        mSoftInputShownOnFocus = show;
     }
 
     /**
      * Returns whether the soft input method will be made visible when this
      * TextView gets focused. The default is true.
      *
-     * @attr ref android.R.styleable#TextView_showSoftInputOnFocus
+     * @attr ref android.R.styleable#TextView_softInputShownOnFocus
      * @hide
      */
-    public final boolean getShowSoftInputOnFocus() {
-        return mShowSoftInputOnFocus;
+    public final boolean getSoftInputShownOnFocus() {
+        return mSoftInputShownOnFocus;
     }
 
     /**
@@ -5502,7 +5502,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 && mLayout != null && onCheckIsTextEditor()) {
                             InputMethodManager imm = InputMethodManager.peekInstance();
                             viewClicked(imm);
-                            if (imm != null && mShowSoftInputOnFocus) {
+                            if (imm != null && mSoftInputShownOnFocus) {
                                 imm.showSoftInput(this, 0);
                             }
                         }
@@ -8344,7 +8344,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 viewClicked(imm);
-                if (!mTextIsSelectable && mShowSoftInputOnFocus) {
+                if (!mTextIsSelectable && mSoftInputShownOnFocus) {
                     handled |= imm != null && imm.showSoftInput(this, 0);
                 }
 
@@ -10202,7 +10202,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean selectionStarted = mSelectionActionMode != null ||
                 extractedTextModeWillBeStartedFullScreen;
 
-        if (selectionStarted && !mTextIsSelectable && imm != null && mShowSoftInputOnFocus) {
+        if (selectionStarted && !mTextIsSelectable && imm != null && mSoftInputShownOnFocus) {
             // Show the IME to be able to replace text, except when selecting non editable text.
             imm.showSoftInput(this, 0, null);
         }
