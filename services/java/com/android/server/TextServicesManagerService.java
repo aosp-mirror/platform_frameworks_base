@@ -691,7 +691,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 }
                 ISpellCheckerService spellChecker = ISpellCheckerService.Stub.asInterface(service);
                 final SpellCheckerBindGroup group = mSpellCheckerBindGroups.get(mSciId);
-                if (this == group.mInternalConnection) {
+                if (group != null && this == group.mInternalConnection) {
                     group.onServiceConnected(spellChecker);
                 }
             }
