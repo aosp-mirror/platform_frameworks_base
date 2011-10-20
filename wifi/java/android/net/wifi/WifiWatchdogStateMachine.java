@@ -92,6 +92,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final String DEFAULT_WALLED_GARDEN_URL =
             "http://clients3.google.com/generate_204";
     private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
+
+    /* Some carrier apps might have support captive portal handling. Add some delay to allow
+        app authentication to be done before our test.
+       TODO: This should go away once we provide an API to apps to disable walled garden test
+       for certain SSIDs
+     */
+    private static final int WALLED_GARDEN_START_DELAY_MS = 3000;
+
     private static final int DNS_INTRATEST_PING_INTERVAL_MS = 200;
     /* With some router setups, it takes a few hunder milli-seconds before connection is active */
     private static final int DNS_START_DELAY_MS = 1000;
@@ -101,29 +109,30 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /**
      * Indicates the enable setting of WWS may have changed
      */
-    private static final int EVENT_WATCHDOG_TOGGLED = BASE + 1;
+    private static final int EVENT_WATCHDOG_TOGGLED                 = BASE + 1;
 
     /**
      * Indicates the wifi network state has changed. Passed w/ original intent
      * which has a non-null networkInfo object
      */
-    private static final int EVENT_NETWORK_STATE_CHANGE = BASE + 2;
+    private static final int EVENT_NETWORK_STATE_CHANGE             = BASE + 2;
     /**
      * Indicates the signal has changed. Passed with arg1
      * {@link #mNetEventCounter} and arg2 [raw signal strength]
      */
-    private static final int EVENT_RSSI_CHANGE = BASE + 3;
-    private static final int EVENT_SCAN_RESULTS_AVAILABLE = BASE + 4;
-    private static final int EVENT_WIFI_RADIO_STATE_CHANGE = BASE + 5;
-    private static final int EVENT_WATCHDOG_SETTINGS_CHANGE = BASE + 6;
+    private static final int EVENT_RSSI_CHANGE                      = BASE + 3;
+    private static final int EVENT_SCAN_RESULTS_AVAILABLE           = BASE + 4;
+    private static final int EVENT_WIFI_RADIO_STATE_CHANGE          = BASE + 5;
+    private static final int EVENT_WATCHDOG_SETTINGS_CHANGE         = BASE + 6;
 
-    private static final int MESSAGE_HANDLE_WALLED_GARDEN = BASE + 100;
-    private static final int MESSAGE_HANDLE_BAD_AP = BASE + 101;
+    private static final int MESSAGE_HANDLE_WALLED_GARDEN           = BASE + 100;
+    private static final int MESSAGE_HANDLE_BAD_AP                  = BASE + 101;
     /**
      * arg1 == mOnlineWatchState.checkCount
      */
-    private static final int MESSAGE_SINGLE_DNS_CHECK = BASE + 103;
-    private static final int MESSAGE_NETWORK_FOLLOWUP = BASE + 104;
+    private static final int MESSAGE_SINGLE_DNS_CHECK               = BASE + 102;
+    private static final int MESSAGE_NETWORK_FOLLOWUP               = BASE + 103;
+    private static final int MESSAGE_DELAYED_WALLED_GARDEN_CHECK    = BASE + 104;
 
     private Context mContext;
     private ContentResolver mContentResolver;
@@ -140,6 +149,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private DnsCheckingState mDnsCheckingState = new DnsCheckingState();
     private OnlineWatchState mOnlineWatchState = new OnlineWatchState();
     private DnsCheckFailureState mDnsCheckFailureState = new DnsCheckFailureState();
+    private DelayWalledGardenState mDelayWalledGardenState = new DelayWalledGardenState();
     private WalledGardenState mWalledGardenState = new WalledGardenState();
     private BlacklistedApState mBlacklistedApState = new BlacklistedApState();
 
@@ -209,6 +219,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 addState(mConnectedState, mWatchdogEnabledState);
                     addState(mDnsCheckingState, mConnectedState);
                     addState(mDnsCheckFailureState, mConnectedState);
+                    addState(mDelayWalledGardenState, mConnectedState);
                     addState(mWalledGardenState, mConnectedState);
                     addState(mBlacklistedApState, mConnectedState);
                     addState(mOnlineWatchState, mConnectedState);
@@ -727,14 +738,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     return HANDLED;
                 }
 
-                mLastWalledGardenCheckTime = SystemClock.elapsedRealtime();
-                if (isWalledGardenConnection()) {
-                    if (DBG) log("Walled garden test complete - walled garden detected");
-                    transitionTo(mWalledGardenState);
-                } else {
-                    if (DBG) log("Walled garden test complete - online");
-                    transitionTo(mOnlineWatchState);
-                }
+                transitionTo(mDelayWalledGardenState);
                 return HANDLED;
             }
 
@@ -777,6 +781,31 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return false;
             }
             return true;
+        }
+    }
+
+    class DelayWalledGardenState extends State {
+        @Override
+        public void enter() {
+            sendMessageDelayed(MESSAGE_DELAYED_WALLED_GARDEN_CHECK, WALLED_GARDEN_START_DELAY_MS);
+        }
+
+        @Override
+        public boolean processMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_DELAYED_WALLED_GARDEN_CHECK:
+                    mLastWalledGardenCheckTime = SystemClock.elapsedRealtime();
+                    if (isWalledGardenConnection()) {
+                        if (DBG) log("Walled garden test complete - walled garden detected");
+                        transitionTo(mWalledGardenState);
+                    } else {
+                        if (DBG) log("Walled garden test complete - online");
+                        transitionTo(mOnlineWatchState);
+                    }
+                    return HANDLED;
+                default:
+                    return NOT_HANDLED;
+            }
         }
     }
 
