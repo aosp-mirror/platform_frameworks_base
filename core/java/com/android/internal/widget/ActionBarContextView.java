@@ -94,6 +94,15 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     }
 
     @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.hideOverflowMenu();
+            mActionMenuPresenter.hideSubMenus();
+        }
+    }
+
+    @Override
     public void setSplitActionBar(boolean split) {
         if (mSplitActionBar != split) {
             if (mActionMenuPresenter != null) {
