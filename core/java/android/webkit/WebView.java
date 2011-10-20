@@ -3317,6 +3317,7 @@ public class WebView extends AbsoluteLayout
             }
 
             cancelSelectDialog();
+            WebCoreThreadWatchdog.pause();
         }
     }
 
@@ -3349,6 +3350,15 @@ public class WebView extends AbsoluteLayout
                 nativeSetPauseDrawing(mNativeClass, false);
             }
         }
+        // Ensure that the watchdog has a currently valid Context to be able to display
+        // a prompt dialog. For example, if the Activity was finished whilst the WebCore
+        // thread was blocked and the Activity is started again, we may reuse the blocked
+        // thread, but we'll have a new Activity.
+        WebCoreThreadWatchdog.updateContext(mContext);
+        // We get a call to onResume for new WebViews (i.e. mIsPaused will be false). We need
+        // to ensure that the Watchdog thread is running for the new WebView, so call
+        // it outside the if block above.
+        WebCoreThreadWatchdog.resume();
     }
 
     /**
