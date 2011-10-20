@@ -384,14 +384,18 @@ public final class InputMethodManager {
         }
     }
     
-    class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
-        public ControlledInputConnectionWrapper(Looper mainLooper, InputConnection conn) {
+    private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
+        private final InputMethodManager mParentInputMethodManager;
+
+        public ControlledInputConnectionWrapper(final Looper mainLooper, final InputConnection conn,
+                final InputMethodManager inputMethodManager) {
             super(mainLooper, conn);
+            mParentInputMethodManager = inputMethodManager;
         }
 
         @Override
         public boolean isActive() {
-            return mActive;
+            return mParentInputMethodManager.mActive;
         }
     }
     
@@ -439,7 +443,7 @@ public final class InputMethodManager {
         mMainLooper = looper;
         mH = new H(looper);
         mIInputContext = new ControlledInputConnectionWrapper(looper,
-                mDummyInputConnection);
+                mDummyInputConnection, this);
         
         if (mInstance == null) {
             mInstance = this;
@@ -1016,7 +1020,7 @@ public final class InputMethodManager {
                 mCursorCandStart = -1;
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
-                servedContext = new ControlledInputConnectionWrapper(vh.getLooper(), ic);
+                servedContext = new ControlledInputConnectionWrapper(vh.getLooper(), ic, this);
             } else {
                 servedContext = null;
             }
