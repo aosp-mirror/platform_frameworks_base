@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <utils/String8.h>
+#include <corkscrew/backtrace.h>
 
 // ---------------------------------------------------------------------------
 
@@ -61,11 +62,8 @@ public:
     size_t size() const { return mCount; }
 
 private:
-    // Internal helper function
-    String8 toStringSingleLevel(const char* prefix, int32_t level) const;
-
-    size_t      mCount;
-    const void* mStack[MAX_DEPTH];
+    size_t mCount;
+    backtrace_frame_t mStack[MAX_DEPTH];
 };
 
 }; // namespace android
