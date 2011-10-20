@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 75;
+    private static final int DATABASE_VERSION = 76;
 
     private Context mContext;
 
@@ -1005,6 +1005,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 75;
+        }
+        if (upgradeVersion == 75) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            Cursor c = null;
+            try {
+                c = db.query("secure", new String[] {"_id", "value"},
+                        "name='lockscreen.disabled'",
+                        null, null, null, null);
+                // only set default if it has not yet been set
+                if (c == null || c.getCount() == 0) {
+                    stmt = db.compileStatement("INSERT INTO system(name,value)"
+                            + " VALUES(?,?);");
+                    loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
+                            R.bool.def_lockscreen_disabled);
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (c != null) c.close();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 76;
         }
 
         // *** Remember to update DATABASE_VERSION above!
