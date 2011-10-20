@@ -3043,9 +3043,14 @@ public class WifiStateMachine extends StateMachine {
                         deferMessage(message);
                     }
                     break;
-                    /* Handle in  DisconnectedState */
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                    /* If we get a SUPPLICANT_STATE_CHANGE_EVENT before NETWORK_DISCONNECTION_EVENT
+                     * we have missed the network disconnection, transition to mDisconnectedState
+                     * and handle the rest of the events there
+                     */
                     deferMessage(message);
+                    handleNetworkDisconnect();
+                    transitionTo(mDisconnectedState);
                     break;
                 default:
                     return NOT_HANDLED;
