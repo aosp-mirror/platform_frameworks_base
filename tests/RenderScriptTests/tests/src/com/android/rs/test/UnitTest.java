@@ -16,6 +16,7 @@
 
 package com.android.rs.test;
 import android.content.Context;
+import android.util.Log;
 import android.renderscript.RenderScript.RSMessageHandler;
 
 public class UnitTest extends Thread {
@@ -55,6 +56,28 @@ public class UnitTest extends Thread {
         this (null, ctx);
     }
 
+    protected void _RS_ASSERT(String message, boolean b) {
+        if(b == false) {
+            result = -1;
+            Log.e(name, message + " FAILED");
+        }
+    }
+
+    protected void updateUI() {
+        if (mItem != null) {
+            mItem.result = result;
+            msgHandled = true;
+            try {
+                mRSTC.refreshTestResults();
+            }
+            catch (IllegalStateException e) {
+                /* Ignore the case where our message receiver has been
+                   disconnected. This happens when we leave the application
+                   before it finishes running all of the unit tests. */
+            }
+        }
+    }
+
     protected RSMessageHandler mRsMessage = new RSMessageHandler() {
         public void run() {
             if (result == 0) {
@@ -71,18 +94,7 @@ public class UnitTest extends Thread {
                 }
             }
 
-            if (mItem != null) {
-                mItem.result = result;
-                msgHandled = true;
-                try {
-                    mRSTC.refreshTestResults();
-                }
-                catch (IllegalStateException e) {
-                    /* Ignore the case where our message receiver has been
-                       disconnected. This happens when we leave the application
-                       before it finishes running all of the unit tests. */
-                }
-            }
+            updateUI();
         }
     };
 

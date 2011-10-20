@@ -364,7 +364,7 @@ void rsaElementGetNativeData(RsContext con, RsElement elem,
 }
 
 void rsaElementGetSubElements(RsContext con, RsElement elem, uint32_t *ids,
-                              const char **names, uint32_t dataSize) {
+                              const char **names, uint32_t *arraySizes, uint32_t dataSize) {
     Element *e = static_cast<Element *>(elem);
     rsAssert(e->getFieldCount() == dataSize);
 
@@ -372,5 +372,6 @@ void rsaElementGetSubElements(RsContext con, RsElement elem, uint32_t *ids,
         e->getField(i)->incUserRef();
         ids[i] = (uint32_t)e->getField(i);
         names[i] = e->getFieldName(i);
+        arraySizes[i] = e->getFieldArraySize(i);
     }
 }

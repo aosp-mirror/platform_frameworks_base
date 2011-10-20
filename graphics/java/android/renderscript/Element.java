@@ -46,13 +46,18 @@ public class Element extends BaseObj {
     Element[] mElements;
     String[] mElementNames;
     int[] mArraySizes;
+    int[] mOffsetInBytes;
 
     DataType mType;
     DataKind mKind;
     boolean mNormalized;
     int mVectorSize;
 
-    int getSizeBytes() {return mSize;}
+    /**
+    * @hide
+    * @return element size in bytes
+    */
+    public int getSizeBytes() {return mSize;}
 
 
     /**
@@ -149,6 +154,77 @@ public class Element extends BaseObj {
             }
         }
         return false;
+    }
+
+    /**
+    * @hide
+    * @return number of sub-elements in this element
+    */
+    public int getSubElementCount() {
+        if (mElements == null) {
+            return 0;
+        }
+        return mElements.length;
+    }
+
+    /**
+    * @hide
+    * @param index index of the sub-element to return
+    * @return sub-element in this element at given index
+    */
+    public Element getSubElement(int index) {
+        if (mElements == null) {
+            throw new RSIllegalArgumentException("Element contains no sub-elements");
+        }
+        if (index < 0 || index >= mElements.length) {
+            throw new RSIllegalArgumentException("Illegal sub-element index");
+        }
+        return mElements[index];
+    }
+
+    /**
+    * @hide
+    * @param index index of the sub-element
+    * @return sub-element in this element at given index
+    */
+    public String getSubElementName(int index) {
+        if (mElements == null) {
+            throw new RSIllegalArgumentException("Element contains no sub-elements");
+        }
+        if (index < 0 || index >= mElements.length) {
+            throw new RSIllegalArgumentException("Illegal sub-element index");
+        }
+        return mElementNames[index];
+    }
+
+    /**
+    * @hide
+    * @param index index of the sub-element
+    * @return array size of sub-element in this element at given index
+    */
+    public int getSubElementArraySize(int index) {
+        if (mElements == null) {
+            throw new RSIllegalArgumentException("Element contains no sub-elements");
+        }
+        if (index < 0 || index >= mElements.length) {
+            throw new RSIllegalArgumentException("Illegal sub-element index");
+        }
+        return mArraySizes[index];
+    }
+
+    /**
+    * @hide
+    * @param index index of the sub-element
+    * @return offset in bytes of sub-element in this element at given index
+    */
+    public int getSubElementOffsetBytes(int index) {
+        if (mElements == null) {
+            throw new RSIllegalArgumentException("Element contains no sub-elements");
+        }
+        if (index < 0 || index >= mElements.length) {
+            throw new RSIllegalArgumentException("Illegal sub-element index");
+        }
+        return mOffsetInBytes[index];
     }
 
     /**
@@ -602,7 +678,9 @@ public class Element extends BaseObj {
         mElements = e;
         mElementNames = n;
         mArraySizes = as;
+        mOffsetInBytes = new int[mElements.length];
         for (int ct = 0; ct < mElements.length; ct++ ) {
+            mOffsetInBytes[ct] = mSize;
             mSize += mElements[ct].mSize * mArraySizes[ct];
         }
     }
@@ -653,13 +731,16 @@ public class Element extends BaseObj {
         if(numSubElements > 0) {
             mElements = new Element[numSubElements];
             mElementNames = new String[numSubElements];
+            mArraySizes = new int[numSubElements];
+            mOffsetInBytes = new int[numSubElements];
 
             int[] subElementIds = new int[numSubElements];
-            mRS.nElementGetSubElements(getID(), subElementIds, mElementNames);
+            mRS.nElementGetSubElements(getID(), subElementIds, mElementNames, mArraySizes);
             for(int i = 0; i < numSubElements; i ++) {
                 mElements[i] = new Element(subElementIds[i], mRS);
                 mElements[i].updateFromNative();
-                mSize += mElements[i].mSize;
+                mOffsetInBytes[i] = mSize;
+                mSize += mElements[i].mSize * mArraySizes[i];
             }
         }
 

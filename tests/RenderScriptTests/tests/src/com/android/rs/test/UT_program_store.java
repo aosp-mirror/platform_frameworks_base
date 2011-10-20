@@ -27,6 +27,16 @@ import android.renderscript.ProgramStore.DepthFunc;
 public class UT_program_store extends UnitTest {
     private Resources mRes;
 
+    ProgramStore ditherEnable;
+    ProgramStore colorRWriteEnable;
+    ProgramStore colorGWriteEnable;
+    ProgramStore colorBWriteEnable;
+    ProgramStore colorAWriteEnable;
+    ProgramStore blendSrc;
+    ProgramStore blendDst;
+    ProgramStore depthWriteEnable;
+    ProgramStore depthFunc;
+
     protected UT_program_store(RSTestCore rstc, Resources res, Context ctx) {
         super(rstc, "ProgramStore", ctx);
         mRes = res;
@@ -44,44 +54,122 @@ public class UT_program_store extends UnitTest {
 
     private void initializeGlobals(RenderScript RS, ScriptC_program_store s) {
         ProgramStore.Builder b = getDefaultBuilder(RS);
-        s.set_ditherEnable(b.setDitherEnabled(true).create());
+        ditherEnable = b.setDitherEnabled(true).create();
 
         b = getDefaultBuilder(RS);
-        s.set_colorRWriteEnable(b.setColorMaskEnabled(true,  false, false, false).create());
+        colorRWriteEnable = b.setColorMaskEnabled(true,  false, false, false).create();
 
         b = getDefaultBuilder(RS);
-        s.set_colorGWriteEnable(b.setColorMaskEnabled(false, true,  false, false).create());
+        colorGWriteEnable = b.setColorMaskEnabled(false, true,  false, false).create();
 
         b = getDefaultBuilder(RS);
-        s.set_colorBWriteEnable(b.setColorMaskEnabled(false, false, true,  false).create());
+        colorBWriteEnable = b.setColorMaskEnabled(false, false, true,  false).create();
 
         b = getDefaultBuilder(RS);
-        s.set_colorAWriteEnable(b.setColorMaskEnabled(false, false, false, true).create());
+        colorAWriteEnable = b.setColorMaskEnabled(false, false, false, true).create();
 
         b = getDefaultBuilder(RS);
-        s.set_blendSrc(b.setBlendFunc(ProgramStore.BlendSrcFunc.DST_COLOR,
-                                      ProgramStore.BlendDstFunc.ZERO).create());
+        blendSrc = b.setBlendFunc(ProgramStore.BlendSrcFunc.DST_COLOR,
+                                  ProgramStore.BlendDstFunc.ZERO).create();
 
         b = getDefaultBuilder(RS);
-        s.set_blendDst(b.setBlendFunc(ProgramStore.BlendSrcFunc.ZERO,
-                                      ProgramStore.BlendDstFunc.DST_ALPHA).create());
+        blendDst = b.setBlendFunc(ProgramStore.BlendSrcFunc.ZERO,
+                                  ProgramStore.BlendDstFunc.DST_ALPHA).create();
 
         b = getDefaultBuilder(RS);
-        s.set_depthWriteEnable(b.setDepthMaskEnabled(true).create());
+        depthWriteEnable = b.setDepthMaskEnabled(true).create();
 
         b = getDefaultBuilder(RS);
-        s.set_depthFunc(b.setDepthFunc(ProgramStore.DepthFunc.GREATER).create());
-        return;
+        depthFunc = b.setDepthFunc(ProgramStore.DepthFunc.GREATER).create();
+
+        s.set_ditherEnable(ditherEnable);
+        s.set_colorRWriteEnable(colorRWriteEnable);
+        s.set_colorGWriteEnable(colorGWriteEnable);
+        s.set_colorBWriteEnable(colorBWriteEnable);
+        s.set_colorAWriteEnable(colorAWriteEnable);
+        s.set_blendSrc(blendSrc);
+        s.set_blendDst(blendDst);
+        s.set_depthWriteEnable(depthWriteEnable);
+        s.set_depthFunc(depthFunc);
     }
 
-    public void run() {
-        RenderScript pRS = RenderScript.create(mCtx);
+    private void testScriptSide(RenderScript pRS) {
         ScriptC_program_store s = new ScriptC_program_store(pRS, mRes, R.raw.program_store);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.invoke_program_store_test();
         pRS.finish();
         waitForMessage();
+    }
+
+    void checkObject(ProgramStore ps,
+                     boolean depthMask,
+                     DepthFunc df,
+                     BlendSrcFunc bsf,
+                     BlendDstFunc bdf,
+                     boolean R,
+                     boolean G,
+                     boolean B,
+                     boolean A,
+                     boolean dither) {
+        _RS_ASSERT("ps.getDepthMaskEnabled() == depthMask", ps.getDepthMaskEnabled() == depthMask);
+        _RS_ASSERT("ps.getDepthFunc() == df", ps.getDepthFunc() == df);
+        _RS_ASSERT("ps.getBlendSrcFunc() == bsf", ps.getBlendSrcFunc() == bsf);
+        _RS_ASSERT("ps.getBlendDstFunc() == bdf", ps.getBlendDstFunc() == bdf);
+        _RS_ASSERT("ps.getColorMaskREnabled() == R", ps.getColorMaskREnabled() == R);
+        _RS_ASSERT("ps.getColorMaskGEnabled() == G", ps.getColorMaskGEnabled() == G);
+        _RS_ASSERT("ps.getColorMaskBEnabled() == B", ps.getColorMaskBEnabled() == B);
+        _RS_ASSERT("ps.getColorMaskAEnabled() == A", ps.getColorMaskAEnabled() == A);
+        _RS_ASSERT("ps.getDitherEnabled() == dither", ps.getDitherEnabled() == dither);
+    }
+
+    void varyBuilderColorAndDither(ProgramStore.Builder pb,
+                                   boolean depthMask,
+                                   DepthFunc df,
+                                   BlendSrcFunc bsf,
+                                   BlendDstFunc bdf) {
+        for (int r = 0; r <= 1; r++) {
+            boolean isR = (r == 1);
+            for (int g = 0; g <= 1; g++) {
+                boolean isG = (g == 1);
+                for (int b = 0; b <= 1; b++) {
+                    boolean isB = (b == 1);
+                    for (int a = 0; a <= 1; a++) {
+                        boolean isA = (a == 1);
+                        for (int dither = 0; dither <= 1; dither++) {
+                            boolean isDither = (dither == 1);
+                            pb.setDitherEnabled(isDither);
+                            pb.setColorMaskEnabled(isR, isG, isB, isA);
+                            ProgramStore ps = pb.create();
+                            checkObject(ps, depthMask, df, bsf, bdf, isR, isG, isB, isA, isDither);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void testJavaSide(RenderScript RS) {
+        for (int depth = 0; depth <= 1; depth++) {
+            boolean depthMask = (depth == 1);
+            for (DepthFunc df : DepthFunc.values()) {
+                for (BlendSrcFunc bsf : BlendSrcFunc.values()) {
+                    for (BlendDstFunc bdf : BlendDstFunc.values()) {
+                        ProgramStore.Builder b = new ProgramStore.Builder(RS);
+                        b.setDepthFunc(df);
+                        b.setDepthMaskEnabled(depthMask);
+                        b.setBlendFunc(bsf, bdf);
+                        varyBuilderColorAndDither(b, depthMask, df, bsf, bdf);
+                    }
+                }
+            }
+        }
+    }
+
+    public void run() {
+        RenderScript pRS = RenderScript.create(mCtx);
+        testJavaSide(pRS);
+        testScriptSide(pRS);
         pRS.destroy();
     }
 }
