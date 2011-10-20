@@ -67,7 +67,7 @@ document.</p>
 the ADT Plugin, as denoted by revision number. </p>
 
 <p>For a summary of all known issues in ADT, see <a
-href="http://tools.android.com/release/knownissues">http://tools.android.com/release/knownissues</a>.</p>
+href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
 <script type="text/javascript">
 function toggleDiv(link) {
