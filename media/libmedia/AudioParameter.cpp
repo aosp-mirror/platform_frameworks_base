@@ -53,7 +53,7 @@ AudioParameter::AudioParameter(const String8& keyValuePairs)
                 mParameters.replaceValueFor(key, value);
             }
         } else {
-            LOGV("AudioParameter() cstor empty key value pair");
+            ALOGV("AudioParameter() cstor empty key value pair");
         }
         pair = strtok(NULL, ";");
     }

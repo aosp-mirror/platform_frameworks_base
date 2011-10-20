@@ -173,7 +173,7 @@ void TimedEventQueue::cancelEvents(
             mQueueHeadChangedCondition.signal();
         }
 
-        LOGV("cancelling event %d", (*it).event->eventID());
+        ALOGV("cancelling event %d", (*it).event->eventID());
 
         (*it).event->setEventID(0);
         it = mQueue.erase(it);

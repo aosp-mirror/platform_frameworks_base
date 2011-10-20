@@ -336,7 +336,7 @@ void ARTPConnection::onPollStreams() {
             }
 
             if (buffer->size() > 0) {
-                LOGV("Sending RR...");
+                ALOGV("Sending RR...");
 
                 ssize_t n;
                 do {
@@ -369,7 +369,7 @@ void ARTPConnection::onPollStreams() {
 }
 
 status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
-    LOGV("receiving %s", receiveRTP ? "RTP" : "RTCP");
+    ALOGV("receiving %s", receiveRTP ? "RTP" : "RTCP");
 
     CHECK(!s->mIsInjected);
 

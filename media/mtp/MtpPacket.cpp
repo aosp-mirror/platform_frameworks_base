@@ -73,15 +73,15 @@ void MtpPacket::dump() {
         sprintf(bufptr, "%02X ", mBuffer[i]);
         bufptr += strlen(bufptr);
         if (i % DUMP_BYTES_PER_ROW == (DUMP_BYTES_PER_ROW - 1)) {
-            LOGV("%s", buffer);
+            ALOGV("%s", buffer);
             bufptr = buffer;
         }
     }
     if (bufptr != buffer) {
         // print last line
-        LOGV("%s", buffer);
+        ALOGV("%s", buffer);
     }
-    LOGV("\n");
+    ALOGV("\n");
 }
 
 void MtpPacket::copyFrom(const MtpPacket& src) {

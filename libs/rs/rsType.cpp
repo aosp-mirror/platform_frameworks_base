@@ -141,7 +141,7 @@ uint32_t Type::getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face, uint
 void Type::dumpLOGV(const char *prefix) const {
     char buf[1024];
     ObjectBase::dumpLOGV(prefix);
-    LOGV("%s   Type: x=%zu y=%zu z=%zu mip=%i face=%i", prefix, mDimX, mDimY, mDimZ, mDimLOD, mFaces);
+    ALOGV("%s   Type: x=%zu y=%zu z=%zu mip=%i face=%i", prefix, mDimX, mDimY, mDimZ, mDimLOD, mFaces);
     snprintf(buf, sizeof(buf), "%s element: ", prefix);
     mElement->dumpLOGV(buf);
 }

@@ -31,14 +31,14 @@ static status_t ERROR_ALLOCATE_FAILED = -4;
 
 void MidiMetadataRetriever::clearMetadataValues()
 {
-    LOGV("clearMetadataValues");
+    ALOGV("clearMetadataValues");
     mMetadataValues[0][0] = '\0';
 }
 
 status_t MidiMetadataRetriever::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers)
 {
-    LOGV("setDataSource: %s", url? url: "NULL pointer");
+    ALOGV("setDataSource: %s", url? url: "NULL pointer");
     Mutex::Autolock lock(mLock);
     clearMetadataValues();
     if (mMidiPlayer == 0) {
@@ -49,7 +49,7 @@ status_t MidiMetadataRetriever::setDataSource(
 
 status_t MidiMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t length)
 {
-    LOGV("setDataSource: fd(%d), offset(%lld), and length(%lld)", fd, offset, length);
+    ALOGV("setDataSource: fd(%d), offset(%lld), and length(%lld)", fd, offset, length);
     Mutex::Autolock lock(mLock);
     clearMetadataValues();
     if (mMidiPlayer == 0) {
@@ -60,7 +60,7 @@ status_t MidiMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t le
 
 const char* MidiMetadataRetriever::extractMetadata(int keyCode)
 {
-    LOGV("extractMetdata: key(%d)", keyCode);
+    ALOGV("extractMetdata: key(%d)", keyCode);
     Mutex::Autolock lock(mLock);
     if (mMidiPlayer == 0 || mMidiPlayer->initCheck() != NO_ERROR) {
         LOGE("Midi player is not initialized yet");
@@ -78,7 +78,7 @@ const char* MidiMetadataRetriever::extractMetadata(int keyCode)
                 snprintf(mMetadataValues[0], MAX_METADATA_STRING_LENGTH, "%d", duration);
             }
 
-            LOGV("duration: %s ms", mMetadataValues[0]);
+            ALOGV("duration: %s ms", mMetadataValues[0]);
             return mMetadataValues[0];
         }
     default:

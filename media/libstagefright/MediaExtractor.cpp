@@ -58,13 +58,13 @@ sp<MediaExtractor> MediaExtractor::Create(
     if (mime == NULL) {
         float confidence;
         if (!source->sniff(&tmp, &confidence, &meta)) {
-            LOGV("FAILED to autodetect media content.");
+            ALOGV("FAILED to autodetect media content.");
 
             return NULL;
         }
 
         mime = tmp.string();
-        LOGV("Autodetected media content as '%s' with confidence %.2f",
+        ALOGV("Autodetected media content as '%s' with confidence %.2f",
              mime, confidence);
     }
 

@@ -69,13 +69,13 @@ sp<VBRISeeker> VBRISeeker::CreateFromSource(
     int64_t durationUs =
         numFrames * 1000000ll * (sampleRate >= 32000 ? 1152 : 576) / sampleRate;
 
-    LOGV("duration = %.2f secs", durationUs / 1E6);
+    ALOGV("duration = %.2f secs", durationUs / 1E6);
 
     size_t numEntries = U16_AT(&vbriHeader[18]);
     size_t entrySize = U16_AT(&vbriHeader[22]);
     size_t scale = U16_AT(&vbriHeader[20]);
 
-    LOGV("%d entries, scale=%d, size_per_entry=%d",
+    ALOGV("%d entries, scale=%d, size_per_entry=%d",
          numEntries,
          scale,
          entrySize);
@@ -113,7 +113,7 @@ sp<VBRISeeker> VBRISeeker::CreateFromSource(
 
         seeker->mSegments.push(numBytes);
 
-        LOGV("entry #%d: %d offset 0x%08lx", i, numBytes, offset);
+        ALOGV("entry #%d: %d offset 0x%08lx", i, numBytes, offset);
         offset += numBytes;
     }
 
@@ -154,7 +154,7 @@ bool VBRISeeker::getOffsetForTime(int64_t *timeUs, off64_t *pos) {
         *pos += mSegments.itemAt(segmentIndex++);
     }
 
-    LOGV("getOffsetForTime %lld us => 0x%08lx", *timeUs, *pos);
+    ALOGV("getOffsetForTime %lld us => 0x%08lx", *timeUs, *pos);
 
     *timeUs = nowUs;
 

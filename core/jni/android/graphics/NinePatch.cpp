@@ -82,7 +82,7 @@ public:
 
             if (destDensity == srcDensity || destDensity == 0
                     || srcDensity == 0) {
-                LOGV("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)",
+                ALOGV("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)",
                         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
                         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom));
                 NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
@@ -97,7 +97,7 @@ public:
                 bounds.fBottom = SkScalarDiv(bounds.fBottom-bounds.fTop, scale);
                 bounds.fLeft = bounds.fTop = 0;
 
-                LOGV("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d",
+                ALOGV("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d",
                         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
                         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom),
                         srcDensity, destDensity);

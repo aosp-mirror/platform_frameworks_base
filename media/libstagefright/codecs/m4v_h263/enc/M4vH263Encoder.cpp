@@ -37,7 +37,7 @@ static status_t ConvertOmxProfileLevel(
         int32_t omxProfile,
         int32_t omxLevel,
         ProfileLevelType* pvProfileLevel) {
-    LOGV("ConvertOmxProfileLevel: %d/%d/%d", mode, omxProfile, omxLevel);
+    ALOGV("ConvertOmxProfileLevel: %d/%d/%d", mode, omxProfile, omxLevel);
     ProfileLevelType profileLevel;
     if (mode == H263_MODE) {
         switch (omxProfile) {
@@ -187,7 +187,7 @@ M4vH263Encoder::M4vH263Encoder(
 }
 
 M4vH263Encoder::~M4vH263Encoder() {
-    LOGV("Destruct software M4vH263Encoder");
+    ALOGV("Destruct software M4vH263Encoder");
     if (mStarted) {
         stop();
     }
@@ -197,7 +197,7 @@ M4vH263Encoder::~M4vH263Encoder() {
 }
 
 status_t M4vH263Encoder::initCheck(const sp<MetaData>& meta) {
-    LOGV("initCheck");
+    ALOGV("initCheck");
     CHECK(meta->findInt32(kKeyWidth, &mVideoWidth));
     CHECK(meta->findInt32(kKeyHeight, &mVideoHeight));
     CHECK(meta->findInt32(kKeyFrameRate, &mVideoFrameRate));
@@ -308,7 +308,7 @@ status_t M4vH263Encoder::initCheck(const sp<MetaData>& meta) {
 }
 
 status_t M4vH263Encoder::start(MetaData *params) {
-    LOGV("start");
+    ALOGV("start");
     if (mInitCheck != OK) {
         return mInitCheck;
     }
@@ -328,7 +328,7 @@ status_t M4vH263Encoder::start(MetaData *params) {
     if (!PVGetMaxVideoFrameSize(mHandle, &maxSize)) {
         maxSize = 256 * 1024;  // Magic #
     }
-    LOGV("Max output buffer size: %d", maxSize);
+    ALOGV("Max output buffer size: %d", maxSize);
     mGroup->add_buffer(new MediaBuffer(maxSize));
 
     mSource->start(params);
@@ -339,7 +339,7 @@ status_t M4vH263Encoder::start(MetaData *params) {
 }
 
 status_t M4vH263Encoder::stop() {
-    LOGV("stop");
+    ALOGV("stop");
     if (!mStarted) {
         LOGW("Call stop() when encoder has not started");
         return OK;
@@ -369,7 +369,7 @@ status_t M4vH263Encoder::stop() {
 }
 
 sp<MetaData> M4vH263Encoder::getFormat() {
-    LOGV("getFormat");
+    ALOGV("getFormat");
     return mFormat;
 }
 
@@ -389,7 +389,7 @@ status_t M4vH263Encoder::read(
             LOGE("Failed to get VOL header");
             return UNKNOWN_ERROR;
         }
-        LOGV("Output VOL header: %d bytes", dataLength);
+        ALOGV("Output VOL header: %d bytes", dataLength);
         outputBuffer->meta_data()->setInt32(kKeyIsCodecConfig, 1);
         outputBuffer->set_range(0, dataLength);
         *out = outputBuffer;

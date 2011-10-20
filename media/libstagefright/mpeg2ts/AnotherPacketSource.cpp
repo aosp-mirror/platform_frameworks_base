@@ -143,7 +143,7 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
 
     int64_t timeUs;
     CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
-    LOGV("queueAccessUnit timeUs=%lld us (%.2f secs)", timeUs, timeUs / 1E6);
+    ALOGV("queueAccessUnit timeUs=%lld us (%.2f secs)", timeUs, timeUs / 1E6);
 
     Mutex::Autolock autoLock(mLock);
     mBuffers.push_back(buffer);

@@ -683,7 +683,7 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
         case FOURCC('i', 'l', 's', 't'):
         {
             if (chunk_type == FOURCC('s', 't', 'b', 'l')) {
-                LOGV("sampleTable chunk is %d bytes long.", (size_t)chunk_size);
+                ALOGV("sampleTable chunk is %d bytes long.", (size_t)chunk_size);
 
                 if (mDataSource->flags()
                         & (DataSource::kWantsPrefetching
@@ -1417,7 +1417,7 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
         case FOURCC('c', 'o', 'v', 'r'):
         {
             if (mFileMetaData != NULL) {
-                LOGV("chunk_data_size = %lld and data_offset = %lld",
+                ALOGV("chunk_data_size = %lld and data_offset = %lld",
                         chunk_data_size, data_offset);
                 uint8_t *buffer = new uint8_t[chunk_data_size + 1];
                 if (mDataSource->readAt(
@@ -1820,7 +1820,7 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     CHECK(mLastTrack->meta->findInt32(kKeySampleRate, &prevSampleRate));
 
     if (prevSampleRate != sampleRate) {
-        LOGV("mpeg4 audio sample rate different from previous setting. "
+        ALOGV("mpeg4 audio sample rate different from previous setting. "
              "was: %d, now: %d", prevSampleRate, sampleRate);
     }
 
@@ -1830,7 +1830,7 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     CHECK(mLastTrack->meta->findInt32(kKeyChannelCount, &prevChannelCount));
 
     if (prevChannelCount != numChannels) {
-        LOGV("mpeg4 audio channel count different from previous setting. "
+        ALOGV("mpeg4 audio channel count different from previous setting. "
              "was: %d, now: %d", prevChannelCount, numChannels);
     }
 
@@ -2407,7 +2407,7 @@ static bool BetterSniffMPEG4(
         *meta = new AMessage;
         (*meta)->setInt64("meta-data-size", moovAtomEndOffset);
 
-        LOGV("found metadata size: %lld", moovAtomEndOffset);
+        ALOGV("found metadata size: %lld", moovAtomEndOffset);
     }
 
     return true;

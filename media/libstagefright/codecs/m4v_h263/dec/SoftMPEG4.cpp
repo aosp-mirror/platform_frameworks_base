@@ -489,7 +489,7 @@ bool SoftMPEG4::portSettingsChanged() {
     CHECK_LE(disp_width, buf_width);
     CHECK_LE(disp_height, buf_height);
 
-    LOGV("disp_width = %d, disp_height = %d, buf_width = %d, buf_height = %d",
+    ALOGV("disp_width = %d, disp_height = %d, buf_width = %d, buf_height = %d",
             disp_width, disp_height, buf_width, buf_height);
 
     if (mCropRight != disp_width - 1

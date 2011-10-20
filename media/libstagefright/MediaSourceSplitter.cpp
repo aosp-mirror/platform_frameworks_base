@@ -51,7 +51,7 @@ sp<MediaSource> MediaSourceSplitter::createClient() {
 status_t MediaSourceSplitter::start(int clientId, MetaData *params) {
     Mutex::Autolock autoLock(mLock);
 
-    LOGV("start client (%d)", clientId);
+    ALOGV("start client (%d)", clientId);
     if (mClientsStarted[clientId]) {
         return OK;
     }
@@ -59,7 +59,7 @@ status_t MediaSourceSplitter::start(int clientId, MetaData *params) {
     mNumberOfClientsStarted++;
 
     if (!mSourceStarted) {
-        LOGV("Starting real source from client (%d)", clientId);
+        ALOGV("Starting real source from client (%d)", clientId);
         status_t err = mSource->start(params);
 
         if (err == OK) {
@@ -85,12 +85,12 @@ status_t MediaSourceSplitter::start(int clientId, MetaData *params) {
 status_t MediaSourceSplitter::stop(int clientId) {
     Mutex::Autolock autoLock(mLock);
 
-    LOGV("stop client (%d)", clientId);
+    ALOGV("stop client (%d)", clientId);
     CHECK(clientId >= 0 && clientId < mNumberOfClients);
     CHECK(mClientsStarted[clientId]);
 
     if (--mNumberOfClientsStarted == 0) {
-        LOGV("Stopping real source from client (%d)", clientId);
+        ALOGV("Stopping real source from client (%d)", clientId);
         status_t err = mSource->stop();
         mSourceStarted = false;
         mClientsStarted.editItemAt(clientId) = false;
@@ -114,7 +114,7 @@ status_t MediaSourceSplitter::stop(int clientId) {
 sp<MetaData> MediaSourceSplitter::getFormat(int clientId) {
     Mutex::Autolock autoLock(mLock);
 
-    LOGV("getFormat client (%d)", clientId);
+    ALOGV("getFormat client (%d)", clientId);
     return mSource->getFormat();
 }
 
@@ -124,7 +124,7 @@ status_t MediaSourceSplitter::read(int clientId,
 
     CHECK(clientId >= 0 && clientId < mNumberOfClients);
 
-    LOGV("read client (%d)", clientId);
+    ALOGV("read client (%d)", clientId);
     *buffer = NULL;
 
     if (!mClientsStarted[clientId]) {

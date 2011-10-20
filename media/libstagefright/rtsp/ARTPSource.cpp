@@ -207,7 +207,7 @@ void ARTPSource::addFIR(const sp<ABuffer> &buffer) {
 
     buffer->setRange(buffer->offset(), buffer->size() + 20);
 
-    LOGV("Added FIR request.");
+    ALOGV("Added FIR request.");
 }
 
 void ARTPSource::addReceiverReport(const sp<ABuffer> &buffer) {

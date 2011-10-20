@@ -65,9 +65,9 @@ void RsdVertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride,
 
 void RsdVertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
     if (idx == 0) {
-        LOGV("Starting vertex attribute binding");
+        ALOGV("Starting vertex attribute binding");
     }
-    LOGV("va %i: slot=%i name=%s buf=%i ptr=%p size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x",
+    ALOGV("va %i: slot=%i name=%s buf=%i ptr=%p size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x",
          idx, slot,
          mAttribs[idx].name.string(),
          mAttribs[idx].buffer,
