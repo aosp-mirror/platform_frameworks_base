@@ -24,7 +24,7 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 and AVD Manager. </p>
 
 <p>For a summary of all known issues in SDK Tools, see <a
-href="http://tools.android.com/release/knownissues">http://tools.android.com/release/knownissues</a>.</p>
+href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
 <script type="text/javascript">
 function toggleDiv(link) {
