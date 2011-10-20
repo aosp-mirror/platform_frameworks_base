@@ -297,15 +297,15 @@ public class PhoneStatusBar extends StatusBar {
         mStatusBarView = sb;
 
         try {
-            boolean showNav = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
+            boolean showNav = mWindowManager.hasNavigationBar();
             if (showNav) {
                 mNavigationBarView = 
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
             }
-        } catch (Resources.NotFoundException ex) {
-            // no nav bar for you
+        } catch (RemoteException ex) {
+            // no window manager? good luck with that
         }
 
         // figure out which pixel-format to use for the status bar.

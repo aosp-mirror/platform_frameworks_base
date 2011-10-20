@@ -9263,6 +9263,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public boolean hasNavigationBar() {
+        return mPolicy.hasNavigationBar();
+    }
+
     void dumpInput(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER INPUT (dumpsys window input)");
         mInputManager.dump(pw);

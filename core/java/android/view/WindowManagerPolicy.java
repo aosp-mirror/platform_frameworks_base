@@ -1010,6 +1010,11 @@ public interface WindowManagerPolicy {
     public int adjustSystemUiVisibilityLw(int visibility);
 
     /**
+     * Specifies whether there is an on-screen navigation bar separate from the status bar.
+     */
+    public boolean hasNavigationBar();
+
+    /**
      * Print the WindowManagerPolicy's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.

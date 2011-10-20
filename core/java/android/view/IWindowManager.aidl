@@ -224,4 +224,9 @@ interface IWindowManager
      * Block until the given window has been drawn to the screen.
      */
     void waitForWindowDrawn(IBinder token, in IRemoteCallback callback);
+
+    /**
+     * Device has a software navigation bar (separate from the status bar).
+     */
+    boolean hasNavigationBar();
 }
