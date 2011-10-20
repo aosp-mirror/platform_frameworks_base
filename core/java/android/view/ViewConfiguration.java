@@ -292,8 +292,7 @@ public class ViewConfiguration {
         if (!sHasPermanentMenuKeySet) {
             IWindowManager wm = Display.getWindowManager();
             try {
-                sHasPermanentMenuKey = wm.canStatusBarHide() && !res.getBoolean(
-                        com.android.internal.R.bool.config_showNavigationBar);
+                sHasPermanentMenuKey = wm.canStatusBarHide() && !wm.hasNavigationBar();
                 sHasPermanentMenuKeySet = true;
             } catch (RemoteException ex) {
                 sHasPermanentMenuKey = false;

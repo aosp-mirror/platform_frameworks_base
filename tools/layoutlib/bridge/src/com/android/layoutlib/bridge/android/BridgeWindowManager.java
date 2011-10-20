@@ -467,4 +467,8 @@ public class BridgeWindowManager implements IWindowManager {
 
     public void dismissKeyguard() {
     }
+
+    public boolean hasNavigationBar() {
+        return false; // should this return something else?
+    }
 }
