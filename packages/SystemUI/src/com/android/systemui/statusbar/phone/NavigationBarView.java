@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.ServiceManager;
+import android.util.DisplayMetrics;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.animation.AccelerateInterpolator;
@@ -48,11 +49,11 @@ public class NavigationBarView extends LinearLayout {
 
     protected IStatusBarService mBarService;
     final Display mDisplay;
+    private boolean mNaturallyPortrait = true;
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
 
     int mBarSize;
-    boolean mVertical;
 
     boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
@@ -83,9 +84,12 @@ public class NavigationBarView extends LinearLayout {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        mDisplay.getMetrics(metrics);
+        mNaturallyPortrait = metrics.heightPixels >= metrics.widthPixels;
+
         final Resources res = mContext.getResources();
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
-        mVertical = false;
         mShowMenu = false;
     }
 
@@ -216,13 +220,15 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void reorient() {
-        final int rot = mDisplay.getRotation();
+        int rot = mDisplay.getRotation();
+        // cycle all views around 90 degrees if this is a landscape-natural device
+        if (!mNaturallyPortrait) rot = (rot+1)%4;
+
         for (int i=0; i<4; i++) {
             mRotatedViews[i].setVisibility(View.GONE);
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
-        mVertical = (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270);
 
         // force the low profile & disabled states into compliance
         setLowProfile(mLowProfile, false, true /* force */);
