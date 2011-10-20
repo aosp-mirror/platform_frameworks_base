@@ -206,6 +206,9 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
             Message result) {
     }
 
+    public void acknowledgeIncomingGsmSmsWithPdu(boolean success, String ackPdu,
+            Message result) {
+    }
 
     public void iccIO (int command, int fileid, String path, int p1, int p2,
             int p3, String data, String pin2, Message result) {
@@ -296,6 +299,9 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     }
 
     public void sendEnvelope(String contents, Message response) {
+    }
+
+    public void sendEnvelopeWithStatus(String contents, Message response) {
     }
 
     public void handleCallSetupRequestFromSim(
