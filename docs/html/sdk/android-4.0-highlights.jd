@@ -14,7 +14,8 @@ page.title=Android 4.0 Platform Highlights
 }
 #jd-content div.video {
   float:right;
-  margin-top:-15px;
+  padding:0 0 40px 60px;
+  margin-top:-30px;
 }
 #jd-content table.columns {
   margin:0 0 1em 0;
@@ -37,16 +38,20 @@ page.title=Android 4.0 Platform Highlights
 }
 </style>
 
-<div class="video" style="margin:1.5em 0 1.5em 1.5em">
+<div class="video">
 <iframe width="380" height="223" src="http://www.youtube.com/embed/-F_ke3rxopc?hd=1" frameborder="0"
 allowfullscreen></iframe>
 </div>
 
 <p>Welcome to Android 4.0!</p>
 
-<p>Android 4.0 delivers a refined, unified UI for phones and tablets and introduces innovative features for users and developers. This document provides a glimpse of the many new features and technologies that make Android 4.0 simple, beautiful, and beyond smart. <!--For technical details about
+<p>Android 4.0 delivers a refined, unified UI for phones and tablets and
+introduces innovative features for users and developers. This document provides
+a glimpse of the many new features and technologies that make Android 4.0
+simple, beautiful, and beyond smart. <!--For technical details about
 new developer APIs described below, see the <a
-href="{@docRoot}sdk/android-4.0.html">Android 4.0 API Overview</a> document.--></p>
+href="{@docRoot}sdk/android-4.0.html">Android 4.0 API Overview</a>
+document.--></p>
 
 <ul>
   <li><a href="#UserFeatures">Android 4.0 for Users</a></li>
@@ -126,10 +131,10 @@ Bar.</p>
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Home screen folders and
 favorites tray</strong></p>
 
-<p>New <strong>home screen folders</strong> offer a new way for users to group
-their apps and shortcuts logically, just by dragging one onto another. From the
-All Apps launcher, users can now simply drag an app to get information about it
-or immediately uninstall it, or disable a pre-installed app.</p>
+<p>New home screen <strong>folders</strong> offer a new way for users to group
+their apps and shortcuts logically, just by dragging one onto another. Also, 
+in All Apps launcher, users can now simply <strong>drag an app</strong> to get
+information about it or immediately uninstall it, or disable a pre-installed app.</p>
 
 <p>On smaller-screen devices, the home screen now includes a customizable
 <strong>favorites tray</strong> visible from all home screens. Users can drag
@@ -192,17 +197,17 @@ spell-checking</strong></p>
 <p>The soft keyboard in Android 4.0 makes text input even faster and more
 accurate. Error correction and word suggestion are improved through a new set of
 default dictionaries and more accurate heuristics for handling cases such as
-double-typed characters, skipped letters, and omitted spaces. Word suggestion is
-also improved and the suggestion strip is simplified to show only three words at
-a time.</p>
+double-typed characters, skipped letters, and omitted spaces. Word suggestion
+is also improved and the suggestion strip is simplified to show only three
+words at a time.</p>
 
-<p>To fix misspelled words more easily, Android 4.0 adds a spell-checker that
-locates and underlines errors and suggests replacement words. With one tap,
-users can choose from multiple spelling suggestions, delete a word, or add it to
-the dictionary. Users can even tap to see replacement suggestions for words that
-are spelled correctly. For specialized features or additional languages, users
-can now download and install third-party dictionaries, spell-checkers, and other
-text services.</p>
+<p>To fix misspelled words more easily, Android 4.0 adds a
+<strong>spell-checker</strong> that locates and underlines errors and suggests
+replacement words. With one tap, users can choose from multiple spelling
+suggestions, delete a word, or add it to the dictionary. Users can even tap to
+see replacement suggestions for words that are spelled correctly. For
+specialized features or additional languages, users can now download and install
+third-party dictionaries, spell-checkers, and other text services.</p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Powerful voice input
@@ -211,7 +216,7 @@ engine</strong></p>
 <p>Android 4.0 introduces a powerful new voice input engine that offers a
 continuous "open microphone" experience and streaming voice recognition. The new
 voice input engine lets users dictate the text they want, for as long as they
-want, using the language they want. Users can speak continously for a prolonged
+want, using the language they want. Users can <strong>speak continously</strong> for a prolonged
 time, even pausing for intervals if needed, and dictate punctuation to create
 correct sentences. As the voice input engine enters text, it underlines possible
 dictation errors in gray. After dictating, users can tap the underlined words to
@@ -399,14 +404,14 @@ to locate the image they want, then tap to load it in Gallery. </p>
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Live Effects for transforming video</strong></p>
 
 <p>Live Effects is a collection of graphical transformations that add interest
-and fun to videos captured in the Camera app. For example, users can change the
-background behind them to any stock or custom image, for just the right setting
-when shooting video or using Google Talk video chat. Also available is Silly
-Faces, a set of morphing effects that use state-of-the-art face recognition and
-GPU filters to add great effects to facial features during video capture. For
-example, you can use effects such as small eyes, big mouth, big nose, face
-squeeze, and more. Outside of the Camera app, Live Effects is available during
-video chat in the Google Talk app.</p>
+and fun to videos captured in the Camera app. For example, users can
+<strong>change the background</strong> behind them to any stock or custom image,
+for just the right setting when shooting videeo. Also available for video is
+Silly Faces, a set of morphing effects that use state-of-the-art face
+recognition and GPU filters to transform facial features. For example, you can
+use effects such as small eyes, big mouth, big nose, face squeeze, and more.
+Outside of the Camera app, Live Effects is available during video chat in the
+Google Talk app.</p>
 
 <div  style="padding-top:0em;">
 <div style="margsin-right:.8em;float:left;width:186px;padding-top:1em;">
@@ -540,11 +545,12 @@ initiating a multiplayer game or chat, and more.</p>
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Face Unlock</strong></p>
 
 <p>Android 4.0 introduces a completely new approach to securing a device, making
-it even more personal &mdash; Face Unlock is a new screen-lock option that lets
-users unlock their devices with their faces. It takes advantage of
-state-of-the-art facial recognition technology to register a face and to
-recognize it later when unlocking the device. Users just hold their devices in
-front of their faces to unlock, or use a backup PIN or pattern. </p>
+each person's device even more personal &mdash; Face Unlock is a new screen-lock
+option that lets users unlock their devices with their faces. It takes advantage
+of the device front-facing camera and state-of-the-art facial recognition
+technology to register a face during setup and then to recognize it again when
+unlocking the device. Users just hold their devices in front of their faces to
+unlock, or use a backup PIN or pattern. </p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi Direct and Bluetooth HDP</strong></p>
