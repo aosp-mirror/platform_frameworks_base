@@ -1560,8 +1560,15 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
         snprintf(buffer, SIZE,
                 "  last eglSwapBuffers() time: %f us\n"
-                "  last transaction time     : %f us\n",
-                mLastSwapBufferTime/1000.0, mLastTransactionTime/1000.0);
+                "  last transaction time     : %f us\n"
+                "  refresh-rate              : %f fps\n"
+                "  x-dpi                     : %f\n"
+                "  y-dpi                     : %f\n",
+                mLastSwapBufferTime/1000.0,
+                mLastTransactionTime/1000.0,
+                hw.getRefreshRate(),
+                hw.getDpiX(),
+                hw.getDpiY());
         result.append(buffer);
 
         if (inSwapBuffersDuration || !locked) {
