@@ -303,6 +303,9 @@ private:
             void        composeSurfaces(const Region& dirty);
 
 
+            void        setInvalidateRegion(const Region& reg);
+            Region      getAndClearInvalidateRegion();
+
             ssize_t     addClientLayer(const sp<Client>& client,
                     const sp<LayerBaseClient>& lbc);
             status_t    addLayer_l(const sp<LayerBase>& layer);
@@ -347,6 +350,10 @@ private:
                 GraphicPlane                mGraphicPlanes[1];
                 bool                        mLayersRemoved;
                 DefaultKeyedVector< wp<IBinder>, wp<Layer> > mLayerMap;
+
+                // access must be protected by mInvalidateLock
+    mutable     Mutex                       mInvalidateLock;
+                Region                      mInvalidateRegion;
 
                 // constant members (no synchronization needed for access)
                 sp<IMemoryHeap>             mServerHeap;
