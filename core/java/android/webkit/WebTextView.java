@@ -1090,6 +1090,7 @@ import junit.framework.Assert;
         setMaxLength(maxLength);
         setHorizontallyScrolling(single);
         setInputType(inputType);
+        clearComposingText();
         setImeOptions(imeOptions);
         setVisibility(VISIBLE);
         if (!autoComplete) {
