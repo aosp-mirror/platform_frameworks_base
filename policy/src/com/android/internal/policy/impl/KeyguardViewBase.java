@@ -47,29 +47,34 @@ public abstract class KeyguardViewBase extends FrameLayout {
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
 
+    // This is a faster way to draw the background on devices without hardware acceleration
+    Drawable mBackgroundDrawable = new Drawable() {
+        @Override
+        public void draw(Canvas canvas) {
+            canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter cf) {
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+    };
+
     public KeyguardViewBase(Context context) {
         super(context);
+        resetBackground();
+    }
 
-        // This is a faster way to draw the background on devices without hardware acceleration
-        setBackgroundDrawable(new Drawable() {
-            @Override
-            public void draw(Canvas canvas) {
-                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC);
-            }
-
-            @Override
-            public void setAlpha(int alpha) {
-            }
-
-            @Override
-            public void setColorFilter(ColorFilter cf) {
-            }
-
-            @Override
-            public int getOpacity() {
-                return PixelFormat.TRANSLUCENT;
-            }
-        });
+    public void resetBackground() {
+        setBackgroundDrawable(mBackgroundDrawable);
     }
 
     // used to inject callback

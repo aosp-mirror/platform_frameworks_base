@@ -254,7 +254,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
             // TODO: examine all widgets to derive clock status
             mUpdateMonitor.reportClockVisible(true);
-            setBackgroundDrawable(null);
+            resetBackground();
         }
 
         public boolean isVisible(View self) {
