@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Giãn ra để lấp đầy m.hình"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Thu phóng tương thích"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Khi ứng dụng được thiết kế cho một màn hình nhỏ hơn, điều khiển thu phóng sẽ xuất hiện bên cạnh đồng hồ."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Đang lưu..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Đang lưu ảnh chụp màn hình..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Vui lòng đợi lưu ảnh chụp màn hình"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Đã chụp được ảnh màn hình"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Chạm để xem ảnh chụp màn hình của bạn"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Chụp ảnh màn hình không thành công"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Không thể lưu ảnh chụp màn hình. Bộ nhớ ngoài có thể đang được sử dụng."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Đang lưu ảnh chụp màn hình..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Đang lưu ảnh chụp màn hình..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Ảnh chụp màn hình đang được lưu."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Đã chụp ảnh màn hình."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Chạm để xem ảnh chụp màn hình của bạn."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Không thể chụp ảnh màn hình."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Không thể lưu ảnh chụp màn hình. Bộ lưu trữ có thể đang được sử dụng."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Tùy chọn truyền tệp USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Gắn như một trình phát đa phương tiện (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Gắn như một máy ảnh (PTP)"</string>

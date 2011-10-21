@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Dra för att fylla skärmen"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom i kompatibilitetsläge"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"När en app är anpassad för en mindre skärm visas ett zoomreglage vid klockan."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Sparar ..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Skärmdumpen sparas ..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Vänta medan skärmdumpen sparas"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skärmdumpen har tagits"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Tryck här om du vill visa skärmdumpen"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Det gick inte att ta en skärmdump"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Det gick inte att spara skärmdumpen. Extern lagring kanske används."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Skärmdumpen sparas ..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Skärmdumpen sparas ..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Skärmdumpen sparas."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skärmdumpen har tagits."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Tryck här om du vill visa skärmdumpen."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Det gick inte att ta någon skärmdump."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Det gick inte att spara skärmdumpen. Extern lagring kanske används."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Överföringsalternativ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montera som mediaspelare (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montera som kamera (PTP)"</string>

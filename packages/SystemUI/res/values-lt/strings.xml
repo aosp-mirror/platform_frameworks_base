@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Ištempti, kad atit. ekr."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Suderinamumo mastelio keitimas"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Kai programa bus pritaikyta mažesniam ekranui, mastelio keitimo valdiklis bus parodytas šalia laikrodžio."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Išsaugoma..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Išsaugoma ekrano kopija..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Palaukite, kol bus išsaugota ekrano kopija"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrano kopija užfiksuota"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Palieskite, kad peržiūrėtumėte ekrano kopiją"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Nepavyko padaryti ekrano kopijos"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Nepavyko išsaugoti ekrano kopijos. Gali būti naudojama išorinė atmintinė."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Išsaugoma ekrano kopija..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Išsaugoma ekrano kopija..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Išsaugoma ekrano kopija."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrano kopija užfiksuota."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Palieskite, kad peržiūrėtumėte ekrano kopiją."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Nepavyko užfiksuoti ekrano kopijos."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Nepavyko išsaugoti ekrano kopijos. Gali būti naudojama atmintis."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB failo perdavimo parinktys"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Įmontuoti kaip medijos grotuvą (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Įmontuoti kaip fotoaparatą (PTP)"</string>

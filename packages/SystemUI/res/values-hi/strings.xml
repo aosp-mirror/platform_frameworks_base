@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन को भरने के लिए खींचें"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"संगतता ज़ूम"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"जब किसी छोटी स्‍क्रीन के लिए एप्‍लिकेशन को डिज़ाइन किया जाता है, तो ज़ूम नियंत्रण क्लॉक के पास दिखाई देगा."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"सहेजा जा रहा है..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"स्‍क्रीनशॉट सहेजे जाने की प्रतीक्षा करें"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्‍क्रीनशॉट कैप्‍चर किया गया"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"अपना स्‍क्रीनशॉट देखने के लिए स्‍पर्श करें"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"स्‍क्रीनशॉट विफल"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"स्‍क्रीनशॉट सहेजने में विफल. संभवत: बाह्य संग्रहण उपयोग में है."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रीनशॉट सहेजा जा रहा है."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"स्‍क्रीनशॉट कैप्‍चर किया गया."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"अपना स्‍क्रीनशॉट देखने के लिए स्‍पर्श करें."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट को कैप्चर नहीं किया जा सका."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"स्‍क्रीनशॉट को सहेजा नहीं जा सका. संभवत: संग्रहण उपयोग में है."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेयर के रूप में माउंट करें (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"कैमरे के रूप में माउंट करें (PTP)"</string>

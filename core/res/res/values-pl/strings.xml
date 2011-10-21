@@ -886,8 +886,8 @@
     <string name="no" msgid="5141531044935541497">"Anuluj"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Uwaga"</string>
     <string name="loading" msgid="1760724998928255250">"Wczytywanie..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"Włącz"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Wyłącz"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Wł."</string>
+    <string name="capital_off" msgid="6815870386972805832">"Wył."</string>
     <string name="whichApplication" msgid="4533185947064773386">"Zakończ czynność korzystając z"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Używaj domyślnie dla tej czynności."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Wyczyść domyślne w: Ustawienia strony głównej &gt; Aplikacje &gt; Zarządzaj aplikacjami."</string>

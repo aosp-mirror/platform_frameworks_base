@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Étirer pour remplir l\'écran"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilité"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Si une application a été conçue pour un écran plus petit, une commande de zoom s\'affiche à côté de l\'horloge."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Enregistrement en cours…"</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Enregistrement de la capture d\'écran en cours…"</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Veuillez patienter pendant l\'enregistrement de la capture d\'écran."</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Capture d\'écran réussie"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Appuyez pour afficher votre capture d\'écran."</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Échec de la capture d\'écran"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Échec enreg. capture d\'écran. Périphérique de stockage externe peut-être en cours d\'utilisation."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Enregistrement capture écran…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Enregistrement de la capture d\'écran…"</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Enregistrement de la capture d\'écran en cours…"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Capture d\'écran réussie"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Appuyez pour afficher votre capture d\'écran."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Impossible de réaliser une capture d\'écran"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Impossible enregistrer capture d\'écran. Périphérique de stockage peut-être en cours d\'utilisation."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Options transfert fichiers USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Installer en tant que lecteur multimédia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Installer en tant qu\'appareil photo (PTP)"</string>

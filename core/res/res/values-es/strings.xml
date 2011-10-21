@@ -1080,8 +1080,8 @@
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche."</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecciona esta opción para salir del modo coche."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red activo o zona Wi-Fi"</string>
-    <string name="tethered_notification_message" msgid="3067108323903048927">"Toca para iniciar la configuración."</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red/Zona Wi-Fi activo"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Toca para configurar"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Saltar"</string>

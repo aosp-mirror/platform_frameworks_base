@@ -123,8 +123,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter (TTY) 已啟用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"鈴聲震動。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"鈴聲靜音。"</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"「<xliff:g id="APP">%s</xliff:g>」已關閉。"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"已停用 2G-3G 數據"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"已停用 4G 數據"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"已停用行動數據"</string>

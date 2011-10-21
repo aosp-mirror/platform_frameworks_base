@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Auf Bildschirmgröße anpassen"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilitätszoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Wenn eine App für einen kleineren Bildschirm ausgelegt ist, wird ein Zoom-Steuerelement neben der Uhr angezeigt."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Speichern..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Screenshot wird gespeichert..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Warten Sie, bis der Screenshot gespeichert wurde."</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot aufgenommen"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Zum Anzeigen Ihres Screenshots berühren"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot fehlgeschlagen"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Screenshot konnte nicht gespeichert werden. Eventuell wird der externe Speicher gerade verwendet."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot wird gespeichert..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Screenshot wird gespeichert..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot wird gespeichert."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot aufgenommen"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Zum Anzeigen Ihres Screenshots berühren"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot konnte nicht aufgenommen werden."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Screenshot konnte nicht gespeichert werden. Eventuell wird der Speicher gerade verwendet."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Als Medienplayer (MTP) bereitstellen"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Als Kamera (PTP) bereitstellen"</string>
