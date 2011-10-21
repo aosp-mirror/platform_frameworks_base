@@ -4804,16 +4804,7 @@ public class WebView extends AbsoluteLayout
             mTextGeneration = 0;
         }
         mWebTextView.updateTextSize();
-        Rect visibleRect = new Rect();
-        calcOurContentVisibleRect(visibleRect);
-        // Note that sendOurVisibleRect calls viewToContent, so the coordinates
-        // should be in content coordinates.
-        Rect bounds = nativeFocusCandidateNodeBounds();
-        Rect vBox = contentToViewRect(bounds);
-        mWebTextView.setRect(vBox.left, vBox.top, vBox.width(), vBox.height());
-        if (!Rect.intersects(bounds, visibleRect)) {
-            revealSelection();
-        }
+        updateWebTextViewPosition();
         String text = nativeFocusCandidateText();
         int nodePointer = nativeFocusCandidatePointer();
         // This needs to be called before setType, which may call
@@ -4822,7 +4813,6 @@ public class WebView extends AbsoluteLayout
         mWebTextView.setType(nativeFocusCandidateType());
         // Gravity needs to be set after setType
         mWebTextView.setGravityForRtl(nativeFocusCandidateIsRtlText());
-        updateWebTextViewPadding();
         if (null == text) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "rebuildWebTextView null == text");
@@ -4833,10 +4823,25 @@ public class WebView extends AbsoluteLayout
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null && imm.isActive(mWebTextView)) {
             imm.restartInput(mWebTextView);
+            mWebTextView.clearComposingText();
         }
         if (isFocused()) {
             mWebTextView.requestFocus();
         }
+    }
+
+    private void updateWebTextViewPosition() {
+        Rect visibleRect = new Rect();
+        calcOurContentVisibleRect(visibleRect);
+        // Note that sendOurVisibleRect calls viewToContent, so the coordinates
+        // should be in content coordinates.
+        Rect bounds = nativeFocusCandidateNodeBounds();
+        Rect vBox = contentToViewRect(bounds);
+        mWebTextView.setRect(vBox.left, vBox.top, vBox.width(), vBox.height());
+        if (!Rect.intersects(bounds, visibleRect)) {
+            revealSelection();
+        }
+        updateWebTextViewPadding();
     }
 
     /**
@@ -8453,7 +8458,7 @@ public class WebView extends AbsoluteLayout
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
                     if (inEditingMode() && nativeCursorIsTextInput()) {
-                        rebuildWebTextView();
+                        updateWebTextViewPosition();
                     }
                     break;
                 case CLEAR_TEXT_ENTRY:
