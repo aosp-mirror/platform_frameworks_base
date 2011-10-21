@@ -448,8 +448,7 @@ public class TabletStatusBar extends StatusBar implements
             // Sanity-check that someone hasn't set up the config wrong and asked for a navigation
             // bar on a tablet that has only the system bar
             if (mWindowManager.hasNavigationBar()) {
-                throw new RuntimeException(
-                        "Tablet device cannot show navigation bar and system bar");
+                Slog.e(TAG, "Tablet device cannot show navigation bar and system bar");
             }
         } catch (RemoteException ex) {
         }
