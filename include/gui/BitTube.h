@@ -28,14 +28,15 @@ namespace android {
 // ----------------------------------------------------------------------------
 class Parcel;
 
-class SensorChannel : public RefBase
+class BitTube : public RefBase
 {
 public:
 
-            SensorChannel();
-            SensorChannel(const Parcel& data);
-    virtual ~SensorChannel();
+            BitTube();
+            BitTube(const Parcel& data);
+    virtual ~BitTube();
 
+    status_t initCheck() const;
     int getFd() const;
     ssize_t write(void const* vaddr, size_t size);
     ssize_t read(void* vaddr, size_t size);

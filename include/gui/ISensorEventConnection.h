@@ -28,14 +28,14 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-class SensorChannel;
+class BitTube;
 
 class ISensorEventConnection : public IInterface
 {
 public:
     DECLARE_META_INTERFACE(SensorEventConnection);
 
-    virtual sp<SensorChannel> getSensorChannel() const = 0;
+    virtual sp<BitTube> getSensorChannel() const = 0;
     virtual status_t enableDisable(int handle, bool enabled) = 0;
     virtual status_t setEventRate(int handle, nsecs_t ns) = 0;
 };

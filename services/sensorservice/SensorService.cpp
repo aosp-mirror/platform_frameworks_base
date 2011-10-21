@@ -514,7 +514,7 @@ bool SensorService::SensorRecord::removeConnection(
 
 SensorService::SensorEventConnection::SensorEventConnection(
         const sp<SensorService>& service)
-    : mService(service), mChannel(new SensorChannel())
+    : mService(service), mChannel(new BitTube())
 {
 }
 
@@ -596,7 +596,7 @@ status_t SensorService::SensorEventConnection::sendEvents(
     return size < 0 ? status_t(size) : status_t(NO_ERROR);
 }
 
-sp<SensorChannel> SensorService::SensorEventConnection::getSensorChannel() const
+sp<BitTube> SensorService::SensorEventConnection::getSensorChannel() const
 {
     return mChannel;
 }

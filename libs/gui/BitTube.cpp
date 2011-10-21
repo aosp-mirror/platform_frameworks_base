@@ -24,12 +24,12 @@
 
 #include <binder/Parcel.h>
 
-#include <gui/SensorChannel.h>
+#include <gui/BitTube.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
 
-SensorChannel::SensorChannel()
+BitTube::BitTube()
     : mSendFd(-1), mReceiveFd(-1)
 {
     int fds[2];
@@ -38,17 +38,26 @@ SensorChannel::SensorChannel()
         mSendFd = fds[1];
         fcntl(mReceiveFd, F_SETFL, O_NONBLOCK);
         fcntl(mSendFd, F_SETFL, O_NONBLOCK);
+    } else {
+        mReceiveFd = -errno;
+        LOGE("BitTube: pipe creation failed (%s)", strerror(-mReceiveFd));
     }
 }
 
-SensorChannel::SensorChannel(const Parcel& data)
+BitTube::BitTube(const Parcel& data)
     : mSendFd(-1), mReceiveFd(-1)
 {
     mReceiveFd = dup(data.readFileDescriptor());
-    fcntl(mReceiveFd, F_SETFL, O_NONBLOCK);
+    if (mReceiveFd >= 0) {
+        fcntl(mReceiveFd, F_SETFL, O_NONBLOCK);
+    } else {
+        mReceiveFd = -errno;
+        LOGE("BitTube(Parcel): can't dup filedescriptor (%s)",
+                strerror(-mReceiveFd));
+    }
 }
 
-SensorChannel::~SensorChannel()
+BitTube::~BitTube()
 {
     if (mSendFd >= 0)
         close(mSendFd);
@@ -57,28 +66,41 @@ SensorChannel::~SensorChannel()
         close(mReceiveFd);
 }
 
-int SensorChannel::getFd() const
+status_t BitTube::initCheck() const
+{
+    if (mReceiveFd < 0) {
+        return status_t(mReceiveFd);
+    }
+    return NO_ERROR;
+}
+
+int BitTube::getFd() const
 {
     return mReceiveFd;
 }
 
-ssize_t SensorChannel::write(void const* vaddr, size_t size)
+ssize_t BitTube::write(void const* vaddr, size_t size)
 {
-    ssize_t len = ::write(mSendFd, vaddr, size);
-    if (len < 0)
-        return -errno;
-    return len;
+    ssize_t err, len;
+    do {
+        len = ::write(mSendFd, vaddr, size);
+        err = len < 0 ? errno : 0;
+    } while (err == EINTR);
+    return err == 0 ? len : -err;
+
 }
 
-ssize_t SensorChannel::read(void* vaddr, size_t size)
+ssize_t BitTube::read(void* vaddr, size_t size)
 {
-    ssize_t len = ::read(mReceiveFd, vaddr, size);
-    if (len < 0)
-        return -errno;
-    return len;
+    ssize_t err, len;
+    do {
+        len = ::read(mReceiveFd, vaddr, size);
+        err = len < 0 ? errno : 0;
+    } while (err == EINTR);
+    return err == 0 ? len : -err;
 }
 
-status_t SensorChannel::writeToParcel(Parcel* reply) const
+status_t BitTube::writeToParcel(Parcel* reply) const
 {
     if (mReceiveFd < 0)
         return -EINVAL;
