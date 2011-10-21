@@ -44,7 +44,7 @@ public class ThinPatchesActivity extends Activity {
     }
 
     private class PatchView extends View {
-        private Drawable mPatch1, mPatch2;
+        private Drawable mPatch1, mPatch2, mPatch3;
         private Bitmap mTexture;
 
         public PatchView(Activity activity) {
@@ -53,6 +53,7 @@ public class ThinPatchesActivity extends Activity {
             final Resources resources = activity.getResources();
             mPatch1 = resources.getDrawable(R.drawable.patch);
             mPatch2 = resources.getDrawable(R.drawable.btn_toggle_on);
+            mPatch3 = resources.getDrawable(R.drawable.patch2);
 
             mTexture = Bitmap.createBitmap(4, 3, Bitmap.Config.ARGB_8888);
             mTexture.setPixel(0, 0, 0xffff0000);
@@ -77,6 +78,14 @@ public class ThinPatchesActivity extends Activity {
             final int left = (getWidth() - width) / 2;
             final int top  = (getHeight() - height) / 2;
 
+            canvas.save();
+            canvas.translate(0.0f, -height * 2 - 20.0f);
+
+            mPatch3.setBounds(left, top, left + height, top + width);
+            mPatch3.draw(canvas);
+            
+            canvas.restore();
+            
             mPatch1.setBounds(left, top, left + width, top + height);
             mPatch1.draw(canvas);
 
