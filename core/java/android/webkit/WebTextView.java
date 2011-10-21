@@ -607,23 +607,31 @@ import junit.framework.Assert;
         // character or the existing selection, so it will not get cleared
         // above.
         mGotDelete = false;
+        // Prefer sending javascript events, so when adding one character,
+        // don't replace the unchanged text.
+        if (count > 1 && before == count - 1) {
+            String replaceButOne =  s.subSequence(start,
+                    start + before).toString();
+            String replacedString = getText().subSequence(start,
+                    start + before).toString();
+            if (replaceButOne.equals(replacedString)) {
+                // we're just adding one character
+                start += before;
+                before = 0;
+                count = 1;
+            }
+        }
         // Find the last character being replaced.  If it can be represented by
-        // events, we will pass them to native (after replacing the beginning
-        // of the changed text), so we can see javascript events.
-        // Otherwise, replace the text being changed (including the last
-        // character) in the textfield.
-        TextUtils.getChars(s, start + count - 1, start + count, mCharacter, 0);
-        KeyCharacterMap kmap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
-        KeyEvent[] events = kmap.getEvents(mCharacter);
-        boolean cannotUseKeyEvents = null == events;
-        int charactersFromKeyEvents = cannotUseKeyEvents ? 0 : 1;
-        if (count > 1 || cannotUseKeyEvents) {
-            String replace = s.subSequence(start,
-                    start + count - charactersFromKeyEvents).toString();
-            mWebView.replaceTextfieldText(start, start + before, replace,
-                    start + count - charactersFromKeyEvents,
-                    start + count - charactersFromKeyEvents);
-        } else {
+        // events, we will pass them to native so we can see javascript events.
+        // Otherwise, replace the text being changed in the textfield.
+        KeyEvent[] events = null;
+        if (count == 1) {
+            TextUtils.getChars(s, start + count - 1, start + count, mCharacter, 0);
+            KeyCharacterMap kmap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+            events = kmap.getEvents(mCharacter);
+        }
+        boolean useKeyEvents = (events != null);
+        if (useKeyEvents) {
             // This corrects the selection which may have been affected by the
             // trackball or auto-correct.
             if (DebugFlags.WEB_TEXT_VIEW) {
@@ -633,8 +641,6 @@ import junit.framework.Assert;
             if (!mInSetTextAndKeepSelection) {
                 mWebView.setSelection(start, start + before);
             }
-        }
-        if (!cannotUseKeyEvents) {
             int length = events.length;
             for (int i = 0; i < length; i++) {
                 // We never send modifier keys to native code so don't send them
@@ -643,6 +649,12 @@ import junit.framework.Assert;
                     sendDomEvent(events[i]);
                 }
             }
+        } else {
+            String replace = s.subSequence(start,
+                    start + count).toString();
+            mWebView.replaceTextfieldText(start, start + before, replace,
+                    start + count,
+                    start + count);
         }
         updateCachedTextfield();
     }
@@ -966,8 +978,11 @@ import junit.framework.Assert;
      * @param   text    The new text to place in the textfield.
      */
     /* package */ void setTextAndKeepSelection(String text) {
-        mPreChange = text.toString();
         Editable edit = getText();
+        mPreChange = text;
+        if (edit.toString().equals(text)) {
+            return;
+        }
         int selStart = Selection.getSelectionStart(edit);
         int selEnd = Selection.getSelectionEnd(edit);
         mInSetTextAndKeepSelection = true;
