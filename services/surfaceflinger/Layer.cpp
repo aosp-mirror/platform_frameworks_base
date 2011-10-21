@@ -284,8 +284,8 @@ void Layer::onDraw(const Region& clip) const
         glMatrixMode(GL_TEXTURE);
         glLoadMatrixf(mTextureMatrix);
         glMatrixMode(GL_MODELVIEW);
-        glEnable(GL_TEXTURE_EXTERNAL_OES);
         glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_EXTERNAL_OES);
     } else {
         glBindTexture(GL_TEXTURE_2D, mFlinger->getProtectedTexName());
         glMatrixMode(GL_TEXTURE);
