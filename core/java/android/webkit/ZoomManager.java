@@ -152,6 +152,12 @@ class ZoomManager {
     private float mDisplayDensity;
 
     /*
+     * The factor that is used to tweak the zoom scale on a double-tap,
+     * and can be changed via WebSettings. Range is from 0.75f to 1.25f.
+     */
+    private float mDoubleTapZoomFactor = 1.0f;
+
+    /*
      * The scale factor that is used as the minimum increment when going from
      * overview to reading level on a double tap.
      */
@@ -314,10 +320,7 @@ class ZoomManager {
      * Returns the zoom scale used for reading text on a double-tap.
      */
     public final float getReadingLevelScale() {
-        WebSettings settings = mWebView.getSettings();
-        final float doubleTapZoomFactor = settings != null
-            ? settings.getDoubleTapZoom() / 100.f : 1.0f;
-        return mDisplayDensity * doubleTapZoomFactor;
+        return mDisplayDensity * mDoubleTapZoomFactor;
     }
 
     public final float getInvDefaultScale() {
@@ -516,8 +519,9 @@ class ZoomManager {
         return mZoomScale != 0 || mInHWAcceleratedZoom;
     }
 
-    public void updateDoubleTapZoom() {
+    public void updateDoubleTapZoom(int doubleTapZoom) {
         if (mInZoomOverview) {
+            mDoubleTapZoomFactor = doubleTapZoom / 100.0f;
             mTextWrapScale = getReadingLevelScale();
             refreshZoomScale(true);
         }
