@@ -2995,8 +2995,8 @@ public class WebView extends AbsoluteLayout
     /**
      * Update the double-tap zoom.
      */
-    /* package */ void updateDoubleTapZoom() {
-        mZoomManager.updateDoubleTapZoom();
+    /* package */ void updateDoubleTapZoom(int doubleTapZoom) {
+        mZoomManager.updateDoubleTapZoom(doubleTapZoom);
     }
 
     private int computeRealHorizontalScrollRange() {

@@ -777,7 +777,7 @@ public class WebSettings {
     public void setDoubleTapZoom(int doubleTapZoom) {
         if (mDoubleTapZoom != doubleTapZoom) {
             mDoubleTapZoom = doubleTapZoom;
-            mWebView.updateDoubleTapZoom();
+            mWebView.updateDoubleTapZoom(doubleTapZoom);
         }
     }
 
