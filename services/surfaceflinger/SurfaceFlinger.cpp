@@ -742,6 +742,8 @@ void SurfaceFlinger::handlePageFlip()
         }
 
     unlockPageFlip(currentLayers);
+
+    mDirtyRegion.orSelf(getAndClearInvalidateRegion());
     mDirtyRegion.andSelf(screenRegion);
 }
 
@@ -1716,10 +1718,22 @@ status_t SurfaceFlinger::onTransact(
 }
 
 void SurfaceFlinger::repaintEverything() {
-    Mutex::Autolock _l(mStateLock);
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    mDirtyRegion.set(hw.bounds());
+    const Rect bounds(hw.getBounds());
+    setInvalidateRegion(Region(bounds));
     signalEvent();
+}
+
+void SurfaceFlinger::setInvalidateRegion(const Region& reg) {
+    Mutex::Autolock _l(mInvalidateLock);
+    mInvalidateRegion = reg;
+}
+
+Region SurfaceFlinger::getAndClearInvalidateRegion() {
+    Mutex::Autolock _l(mInvalidateLock);
+    Region reg(mInvalidateRegion);
+    mInvalidateRegion.clear();
+    return reg;
 }
 
 // ---------------------------------------------------------------------------
