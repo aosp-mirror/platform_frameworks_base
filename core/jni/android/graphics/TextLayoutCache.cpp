@@ -534,7 +534,7 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(HB_ShaperItem& shaperIte
 #if DEBUG_GLYPHS
     LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
             shaperItem.kerning_applied);
-    LOGD("         -- string= '%s'", String8(chars + start, count).string());
+    LOGD("         -- string= '%s'", String8(shaperItem.string + start, count).string());
     LOGD("         -- isDevKernText=%d", paint->isDevKernText());
 
     logGlyphs(shaperItem);
