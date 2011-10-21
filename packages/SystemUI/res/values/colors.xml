@@ -29,5 +29,5 @@
     <drawable name="notification_header_bg">#d8000000</drawable>
     <drawable name="notification_tracking_bg">#d8000000</drawable>
     <color name="notification_list_shadow_top">#80000000</color>
-    <drawable name="recents_callout_line">#66ffffff</drawable>
+    <drawable name="recents_callout_line">#99ffffff</drawable>
 </resources>
