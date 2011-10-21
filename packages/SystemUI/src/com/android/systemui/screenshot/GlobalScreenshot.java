@@ -34,7 +34,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -52,6 +51,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -229,15 +229,18 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 class GlobalScreenshot {
     private static final String TAG = "GlobalScreenshot";
     private static final int SCREENSHOT_NOTIFICATION_ID = 789;
-    private static final int SCREENSHOT_FADE_IN_DURATION = 250;
-    private static final int SCREENSHOT_FADE_OUT_DELAY = 750;
-    private static final int SCREENSHOT_FADE_OUT_DURATION = 500;
-    private static final int SCREENSHOT_FAST_FADE_OUT_DURATION = 350;
-    private static final float BACKGROUND_ALPHA = 0.65f;
-    private static final float SCREENSHOT_SCALE_FUDGE = 0.075f; // To account for the border padding
-    private static final float SCREENSHOT_SCALE = 0.55f;
-    private static final float SCREENSHOT_FADE_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.975f;
-    private static final float SCREENSHOT_FADE_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.925f;
+    private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
+    private static final int SCREENSHOT_DROP_IN_DURATION = 430;
+    private static final int SCREENSHOT_DROP_OUT_DELAY = 500;
+    private static final int SCREENSHOT_DROP_OUT_DURATION = 430;
+    private static final int SCREENSHOT_DROP_OUT_SCALE_DURATION = 370;
+    private static final int SCREENSHOT_FAST_DROP_OUT_DURATION = 320;
+    private static final float BACKGROUND_ALPHA = 0.5f;
+    private static final float SCREENSHOT_SCALE = 1f;
+    private static final float SCREENSHOT_DROP_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.725f;
+    private static final float SCREENSHOT_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.45f;
+    private static final float SCREENSHOT_FAST_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.6f;
+    private static final float SCREENSHOT_DROP_OUT_MIN_SCALE_OFFSET = 0f;
 
     private Context mContext;
     private LayoutInflater mLayoutInflater;
@@ -254,13 +257,11 @@ class GlobalScreenshot {
     private ImageView mBackgroundView;
     private FrameLayout mScreenshotContainerView;
     private ImageView mScreenshotView;
+    private ImageView mScreenshotFlash;
 
     private AnimatorSet mScreenshotAnimation;
 
-    private int mStatusBarIconSize;
     private int mNotificationIconSize;
-    private float mDropOffsetX;
-    private float mDropOffsetY;
     private float mBgPadding;
     private float mBgPaddingScale;
 
@@ -280,6 +281,7 @@ class GlobalScreenshot {
         mBackgroundView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_background);
         mScreenshotContainerView = (FrameLayout) mScreenshotLayout.findViewById(R.id.global_screenshot_container);
         mScreenshotView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot);
+        mScreenshotFlash = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotLayout.setFocusable(true);
         mScreenshotLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -309,16 +311,12 @@ class GlobalScreenshot {
         mDisplay.getRealMetrics(mDisplayMetrics);
 
         // Get the various target sizes
-        mStatusBarIconSize =
-            r.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
         mNotificationIconSize =
             r.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
-        mDropOffsetX = r.getDimensionPixelSize(R.dimen.global_screenshot_drop_offset_x);
-        mDropOffsetY = r.getDimensionPixelSize(R.dimen.global_screenshot_drop_offset_y);
 
         // Scale has to account for both sides of the bg
         mBgPadding = (float) r.getDimensionPixelSize(R.dimen.global_screenshot_bg_padding);
-        mBgPaddingScale = (2f * mBgPadding) /  mDisplayMetrics.widthPixels;
+        mBgPaddingScale = mBgPadding /  mDisplayMetrics.widthPixels;
     }
 
     /**
@@ -413,11 +411,11 @@ class GlobalScreenshot {
         }
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
-        ValueAnimator screenshotFadeInAnim = createScreenshotFadeInAnimation();
-        ValueAnimator screenshotFadeOutAnim = createScreenshotFadeOutAnimation(w, h,
+        ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
+        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h,
                 statusBarVisible, navBarVisible);
         mScreenshotAnimation = new AnimatorSet();
-        mScreenshotAnimation.play(screenshotFadeInAnim).before(screenshotFadeOutAnim);
+        mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -435,42 +433,71 @@ class GlobalScreenshot {
             }
         });
     }
-    private ValueAnimator createScreenshotFadeInAnimation() {
+    private ValueAnimator createScreenshotDropInAnimation() {
+        final float flashPeakDurationPct = ((float) (SCREENSHOT_FLASH_TO_PEAK_DURATION)
+                / SCREENSHOT_DROP_IN_DURATION);
+        final float flashDurationPct = 2f * flashPeakDurationPct;
+        final Interpolator flashAlphaInterpolator = new Interpolator() {
+            @Override
+            public float getInterpolation(float x) {
+                // Flash the flash view in and out quickly
+                if (x <= flashDurationPct) {
+                    return (float) Math.sin(Math.PI * (x / flashDurationPct));
+                }
+                return 0;
+            }
+        };
+        final Interpolator scaleInterpolator = new Interpolator() {
+            @Override
+            public float getInterpolation(float x) {
+                // We start scaling when the flash is at it's peak
+                if (x < flashPeakDurationPct) {
+                    return 0;
+                }
+                return (x - flashDurationPct) / (1f - flashDurationPct);
+            }
+        };
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setInterpolator(new AccelerateInterpolator(1.5f));
-        anim.setDuration(SCREENSHOT_FADE_IN_DURATION);
+        anim.setDuration(SCREENSHOT_DROP_IN_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mBackgroundView.setAlpha(0f);
                 mBackgroundView.setVisibility(View.VISIBLE);
+                mScreenshotContainerView.setAlpha(0f);
                 mScreenshotContainerView.setTranslationX(0f);
                 mScreenshotContainerView.setTranslationY(0f);
-                mScreenshotContainerView.setScaleX(SCREENSHOT_FADE_IN_MIN_SCALE);
-                mScreenshotContainerView.setScaleY(SCREENSHOT_FADE_IN_MIN_SCALE);
-                mScreenshotContainerView.setAlpha(0f);
+                mScreenshotContainerView.setScaleX(SCREENSHOT_SCALE + mBgPaddingScale);
+                mScreenshotContainerView.setScaleY(SCREENSHOT_SCALE + mBgPaddingScale);
                 mScreenshotContainerView.setVisibility(View.VISIBLE);
+                mScreenshotFlash.setAlpha(0f);
+                mScreenshotFlash.setVisibility(View.VISIBLE);
+            }
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                mScreenshotFlash.setVisibility(View.GONE);
             }
         });
         anim.addUpdateListener(new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float t = ((Float) animation.getAnimatedValue()).floatValue();
-                float scaleT = (SCREENSHOT_FADE_IN_MIN_SCALE)
-                    + (float) t * (SCREENSHOT_SCALE - SCREENSHOT_FADE_IN_MIN_SCALE);
-                mBackgroundView.setAlpha(t * BACKGROUND_ALPHA);
+                float scaleT = (SCREENSHOT_SCALE + mBgPaddingScale)
+                    - (float) scaleInterpolator.getInterpolation(t)
+                        * (SCREENSHOT_SCALE - SCREENSHOT_DROP_IN_MIN_SCALE);
+                mBackgroundView.setAlpha(scaleInterpolator.getInterpolation(t) * BACKGROUND_ALPHA);
+                mScreenshotContainerView.setAlpha(t);
                 mScreenshotContainerView.setScaleX(scaleT);
                 mScreenshotContainerView.setScaleY(scaleT);
-                mScreenshotContainerView.setAlpha(t);
+                mScreenshotFlash.setAlpha(flashAlphaInterpolator.getInterpolation(t));
             }
         });
         return anim;
     }
-    private ValueAnimator createScreenshotFadeOutAnimation(int w, int h, boolean statusBarVisible,
+    private ValueAnimator createScreenshotDropOutAnimation(int w, int h, boolean statusBarVisible,
             boolean navBarVisible) {
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setInterpolator(new DecelerateInterpolator(0.5f));
-        anim.setStartDelay(SCREENSHOT_FADE_OUT_DELAY);
+        anim.setStartDelay(SCREENSHOT_DROP_OUT_DELAY);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -482,54 +509,58 @@ class GlobalScreenshot {
 
         if (!statusBarVisible || !navBarVisible) {
             // There is no status bar/nav bar, so just fade the screenshot away in place
-            anim.setDuration(SCREENSHOT_FAST_FADE_OUT_DURATION);
+            anim.setDuration(SCREENSHOT_FAST_DROP_OUT_DURATION);
             anim.addUpdateListener(new AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     float t = ((Float) animation.getAnimatedValue()).floatValue();
-                    float scaleT = (SCREENSHOT_FADE_OUT_MIN_SCALE)
-                            + (float) (1f - t) * (SCREENSHOT_SCALE - SCREENSHOT_FADE_OUT_MIN_SCALE);
+                    float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
+                            - (float) t * (SCREENSHOT_DROP_IN_MIN_SCALE
+                                    - SCREENSHOT_FAST_DROP_OUT_MIN_SCALE);
                     mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
-                    mScreenshotContainerView.setAlpha((1f - t) * BACKGROUND_ALPHA);
+                    mScreenshotContainerView.setAlpha(1f - t);
                     mScreenshotContainerView.setScaleX(scaleT);
                     mScreenshotContainerView.setScaleY(scaleT);
                 }
             });
         } else {
+            // In the case where there is a status bar, animate to the origin of the bar (top-left)
+            final float scaleDurationPct = (float) SCREENSHOT_DROP_OUT_SCALE_DURATION
+                    / SCREENSHOT_DROP_OUT_DURATION;
+            final Interpolator scaleInterpolator = new Interpolator() {
+                @Override
+                public float getInterpolation(float x) {
+                    if (x < scaleDurationPct) {
+                        // Decelerate, and scale the input accordingly
+                        return (float) (1f - Math.pow(1f - (x / scaleDurationPct), 2f));
+                    }
+                    return 1f;
+                }
+            };
+
             // Determine the bounds of how to scale
             float halfScreenWidth = (w - 2f * mBgPadding) / 2f;
             float halfScreenHeight = (h - 2f * mBgPadding) / 2f;
-            final RectF finalBounds = new RectF(mDropOffsetX, mDropOffsetY,
-                    mDropOffsetX + mStatusBarIconSize,
-                    mDropOffsetY + mStatusBarIconSize);
-            final PointF currentPos = new PointF(0f, 0f);
-            final PointF finalPos = new PointF(-halfScreenWidth + finalBounds.centerX(),
-                    -halfScreenHeight + finalBounds.centerY());
-            final DecelerateInterpolator d = new DecelerateInterpolator(2f);
-            // Note: since the scale origin is in the center of the view, divide difference by 2
-            float tmpMinScale = 0f;
-            if (w > h) {
-                tmpMinScale = finalBounds.width() / (2f * w);
-            } else {
-                tmpMinScale = finalBounds.height() / (2f * h);
-            }
-            final float minScale = tmpMinScale;
+            final float offsetPct = SCREENSHOT_DROP_OUT_MIN_SCALE_OFFSET;
+            final PointF finalPos = new PointF(
+                -halfScreenWidth + (SCREENSHOT_DROP_OUT_MIN_SCALE + offsetPct) * halfScreenWidth,
+                -halfScreenHeight + (SCREENSHOT_DROP_OUT_MIN_SCALE + offsetPct) * halfScreenHeight);
 
             // Animate the screenshot to the status bar
-            anim.setDuration(SCREENSHOT_FADE_OUT_DURATION);
+            anim.setDuration(SCREENSHOT_DROP_OUT_DURATION);
             anim.addUpdateListener(new AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     float t = ((Float) animation.getAnimatedValue()).floatValue();
-                    float scaleT = minScale
-                            + (float) (1f - t) * (SCREENSHOT_SCALE - minScale - mBgPaddingScale)
-                            + mBgPaddingScale;
-                    mScreenshotContainerView.setAlpha(d.getInterpolation(1f - t));
-                    mScreenshotContainerView.setTranslationX(d.getInterpolation(t) * finalPos.x);
-                    mScreenshotContainerView.setTranslationY(d.getInterpolation(t) * finalPos.y);
+                    float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
+                        - (float) scaleInterpolator.getInterpolation(t)
+                            * (SCREENSHOT_DROP_IN_MIN_SCALE - SCREENSHOT_DROP_OUT_MIN_SCALE);
+                    mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
+                    mScreenshotContainerView.setAlpha(1f - scaleInterpolator.getInterpolation(t));
                     mScreenshotContainerView.setScaleX(scaleT);
                     mScreenshotContainerView.setScaleY(scaleT);
-                    mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
+                    mScreenshotContainerView.setTranslationX(t * finalPos.x);
+                    mScreenshotContainerView.setTranslationY(t * finalPos.y);
                 }
             });
         }
