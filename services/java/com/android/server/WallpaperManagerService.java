@@ -102,7 +102,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
      * everytime the wallpaper is changed.
      */
     private final FileObserver mWallpaperObserver = new FileObserver(
-            WALLPAPER_DIR.getAbsolutePath(), CREATE | CLOSE_WRITE | DELETE | DELETE_SELF) {
+            WALLPAPER_DIR.getAbsolutePath(), CLOSE_WRITE | DELETE | DELETE_SELF) {
                 @Override
                 public void onEvent(int event, String path) {
                     if (path == null) {
@@ -118,8 +118,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                         File changedFile = new File(WALLPAPER_DIR, path);
                         if (WALLPAPER_FILE.equals(changedFile)) {
                             notifyCallbacksLocked();
-                            if (mWallpaperComponent == null || mImageWallpaperPending) {
-                                mImageWallpaperPending = false;
+                            if (mWallpaperComponent == null || event != CLOSE_WRITE
+                                    || mImageWallpaperPending) {
+                                if (event == CLOSE_WRITE) {
+                                    mImageWallpaperPending = false;
+                                }
                                 bindWallpaperComponentLocked(mImageWallpaperComponent,
                                         true, false);
                                 saveSettingsLocked();
