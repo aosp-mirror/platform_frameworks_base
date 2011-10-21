@@ -55,7 +55,6 @@ public class StackView extends AdapterViewAnimator {
      * Default animation parameters
      */
     private static final int DEFAULT_ANIMATION_DURATION = 400;
-    private static final int FADE_IN_ANIMATION_DURATION = 800;
     private static final int MINIMUM_ANIMATION_DURATION = 50;
     private static final int STACK_RELAYOUT_DURATION = 100;
 
@@ -222,8 +221,6 @@ public class StackView extends AdapterViewAnimator {
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
     void transformViewForTransition(int fromIndex, int toIndex, final View view, boolean animate) {
-        ObjectAnimator alphaOa;
-
         if (!animate) {
             ((StackFrame) view).cancelSliderAnimator();
             view.setRotationX(0f);
@@ -233,22 +230,9 @@ public class StackView extends AdapterViewAnimator {
         }
 
         if (fromIndex == -1 && toIndex == getNumActiveViews() -1) {
-            // Fade item in
-            if (view.getAlpha() == 1) {
-                view.setAlpha(0);
-            }
             transformViewAtIndex(toIndex, view, false);
             view.setVisibility(VISIBLE);
-
-            ((StackFrame) view).cancelAlphaAnimator();
-            if (animate) {
-                alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
-                alphaOa.setDuration(FADE_IN_ANIMATION_DURATION);
-                ((StackFrame) view).setAlphaAnimator(alphaOa);
-                alphaOa.start();
-            } else {
-                view.setAlpha(1.0f);
-            }
+            view.setAlpha(1.0f);
         } else if (fromIndex == 0 && toIndex == 1) {
             // Slide item in
             ((StackFrame) view).cancelSliderAnimator();
@@ -306,13 +290,12 @@ public class StackView extends AdapterViewAnimator {
             view.setAlpha(1.0f);
             view.setVisibility(VISIBLE);
         } else if (toIndex == -1) {
-            // Fade item out
-            ((StackFrame) view).cancelAlphaAnimator();
             if (animate) {
-                alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
-                alphaOa.setDuration(STACK_RELAYOUT_DURATION);
-                ((StackFrame) view).setAlphaAnimator(alphaOa);
-                alphaOa.start();
+                postDelayed(new Runnable() {
+                    public void run() {
+                        view.setAlpha(0);
+                    }
+                }, STACK_RELAYOUT_DURATION);
             } else {
                 view.setAlpha(0f);
             }
@@ -485,16 +468,11 @@ public class StackView extends AdapterViewAnimator {
     }
 
     private static class StackFrame extends FrameLayout {
-        WeakReference<ObjectAnimator> alphaAnimator;
         WeakReference<ObjectAnimator> transformAnimator;
         WeakReference<ObjectAnimator> sliderAnimator;
 
         public StackFrame(Context context) {
             super(context);
-        }
-
-        void setAlphaAnimator(ObjectAnimator oa) {
-            alphaAnimator = new WeakReference<ObjectAnimator>(oa);
         }
 
         void setTransformAnimator(ObjectAnimator oa) {
@@ -503,17 +481,6 @@ public class StackView extends AdapterViewAnimator {
 
         void setSliderAnimator(ObjectAnimator oa) {
             sliderAnimator = new WeakReference<ObjectAnimator>(oa);
-        }
-
-        boolean cancelAlphaAnimator() {
-            if (alphaAnimator != null) {
-                ObjectAnimator oa = alphaAnimator.get();
-                if (oa != null) {
-                    oa.cancel();
-                    return true;
-                }
-            }
-            return false;
         }
 
         boolean cancelTransformAnimator() {
