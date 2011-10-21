@@ -4824,7 +4824,7 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    public void updateWebTextViewPosition() {
+    private void updateWebTextViewPosition() {
         Rect visibleRect = new Rect();
         calcOurContentVisibleRect(visibleRect);
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
