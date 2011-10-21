@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Масштаб и совместимость"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Если приложение рассчитано на экран меньших размеров, рядом с часами появятся средства масштабирования."</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сохранение скриншота..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Сохранение скриншота..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Скриншот сохранен."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот создан."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Нажмите, чтобы просмотреть скриншот"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Не удалось создать скриншот."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Не удается сохранить скриншот. Возможно, накопители заняты."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Параметры передачи через USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Подключить как мультимедийный проигрыватель (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Установить как камеру (PTP)"</string>
@@ -122,7 +115,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
-    <string name="accessibility_settings_button" msgid="799583911231893380">"Настройки системы"</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Настройки"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Уведомления"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Удалить уведомление"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"Система GPS включена."</string>
@@ -130,8 +123,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Телетайп включен."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибровызов."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Беззвучный режим."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложение <xliff:g id="APP">%s</xliff:g> убрано."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Передача данных по каналам 2G и 3G отключена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Передача данных по каналу 4G отключена"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобильный Интернет отключен"</string>

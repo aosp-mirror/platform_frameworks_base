@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"호환성 확대/축소"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"앱이 작은 화면에 맞도록 설계된 경우 시계 옆에 확대/축소 컨트롤이 표시됩니다."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"저장 중..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"캡쳐화면 저장 중..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"캡쳐화면이 저장되는 동안 기다려 주시기 바랍니다."</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"캡쳐화면이 저장됨"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"터치하여 캡쳐화면을 봅니다."</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"캡쳐화면이 저장되지 않음"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"캡쳐화면을 저장하지 못했습니다. 외부 저장소를 사용 중인 것 같습니다."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"캡쳐화면 저장 중..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"캡쳐화면 저장 중..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"캡쳐화면을 저장하는 중입니다."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"캡쳐화면 저장됨"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"캡쳐화면을 보려면 터치하세요."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"캡쳐화면을 캡쳐하지 못했습니다."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"캡쳐화면을 저장할 수 없습니다. 저장소를 사용 중인 것 같습니다."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"미디어 플레이어로 마운트(MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"카메라로 마운트(PTP)"</string>

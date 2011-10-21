@@ -695,7 +695,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Accedi"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Password o nome utente non valido."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Hai dimenticato il nome utente o la password?"\n"Visita "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controllo in corso..."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controllo..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Sblocca"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Audio attivato"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Audio disattivato"</string>
@@ -885,7 +885,7 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Annulla"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Attenzione"</string>
-    <string name="loading" msgid="1760724998928255250">"Caricamento in corso..."</string>
+    <string name="loading" msgid="1760724998928255250">"Caricamento..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completa l\'azione con"</string>
@@ -1096,15 +1096,15 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> di <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fine"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Smontaggio dell\'archivio USB in corso..."</string>
-    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Smontaggio scheda SD in corso..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Cancellazione dell\'archivio USB in corso..."</string>
-    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Cancellazione scheda SD in corso..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Smontaggio dell\'archivio USB..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Smontaggio scheda SD..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Cancellazione dell\'archivio USB..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Cancellazione scheda SD..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Cancellazione archivio USB non riuscita."</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"Cancellazione scheda SD non riuscita."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"La scheda SD è stata rimossa prima che fosse smontata."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Controllo dell\'archivio USB in corso."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Controllo della scheda SD in corso."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Controllo dell\'archivio USB..."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"Controllo della scheda SD..."</string>
     <string name="media_removed" msgid="7001526905057952097">"La scheda SD è stata rimossa."</string>
     <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"L\'archivio USB è attualmente utilizzato da un computer."</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"La scheda SD è attualmente utilizzata da un computer."</string>

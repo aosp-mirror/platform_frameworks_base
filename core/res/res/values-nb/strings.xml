@@ -298,7 +298,7 @@
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Lar applikasjonen frigjøre lagringsplass ved å slette filer i applikasjoners hurtigbufferkatalog. Tilgangen er vanligvis sterkt begrenset, til systemprosesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flytter programressurser"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Gir applikasjoner tillatelse til å flytte applikasjonsressurser fra interne til eksterne medier og omvendt."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"les sensitive loggdata"</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"lese sensitive loggdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Lar programmet lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med nettbrettet, og kan inneholde personlig eller privat informasjon."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Lar programmet lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, og kan inneholde personlig eller privat informasjon."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>

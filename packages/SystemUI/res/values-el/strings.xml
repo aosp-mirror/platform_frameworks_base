@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Προβoλή σε πλήρη οθ."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Ζουμ για συμβατότητα"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Όταν μια εφαρμογή έχει σχεδιαστεί για προβολή σε μικρότερη οθόνη, δίπλα από το ρολόι θα εμφανιστεί ένα στοιχείο ελέγχου ζουμ."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Αποθήκευση..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Περιμένετε για την αποθήκευση του στιγμιότυπου οθόνης"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Το στιγμιότυπο οθόνης λήφθηκε"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Αγγίξτε για να δείτε το στιγμιότυπο οθόνης σας"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Το στιγμιότυπο οθόνης απέτυχε"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Αποτυχία αποθήκευσης στιγμιότυπου οθόνης. Ο εξωτερικός χώρος αποθήκευσης μπορεί να χρησιμοποιείται."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Αποθήκ. στιγμιότυπου οθόνης..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Γίνεται αποθήκευση του στιγμιότυπου οθόνης."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Το στιγμιότυπο οθόνης λήφθηκε."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Αγγίξτε για να δείτε το στιγμιότυπο οθόνης σας"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Αδύνατη η αποθήκευση στιγμιότυπου οθόνης. Ο εξωτερικός χώρος αποθήκευσης μπορεί να είναι σε χρήση."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Επιλογές μεταφοράς αρχείων μέσω USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Προσάρτηση ως μονάδας αναπαραγωγής μέσων (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Προσάρτηση ως κάμερας (PTP)"</string>

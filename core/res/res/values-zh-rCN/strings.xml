@@ -1178,7 +1178,7 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 存储器"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"编辑..."</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"数据使用情况警告"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"流量使用警告"</string>
     <string name="data_usage_warning_body" msgid="7217480745540055170">"触摸可查看使用情况和设置"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 数据已停用"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据已停用"</string>

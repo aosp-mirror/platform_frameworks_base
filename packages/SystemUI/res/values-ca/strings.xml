@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilitat"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Quan una aplicació s\'hagi dissenyat per a una pantalla més petita, apareixerà un control de zoom al costat del rellotge."</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"S\'està desant..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"S\'està desant la captura de pantalla..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Espera que es desi la captura de pantalla"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Realització de captura de pantalla"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca per visualitzar la captura de pantalla"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Ha fallat la captura de pantalla"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"No s\'ha pogut desar la captura de pantalla. És possible que l\'emmagatzematge extern estigui en ús."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Desant captura de pantalla..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"S\'està desant la captura de pantalla..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"La captura de pantalla s\'ha desat."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"S\'ha fet una captura de pantalla."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca per veure la captura de pantalla."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"No s\'ha pogut fer una captura de pantalla."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"No s\'ha pogut desar la captura de pantalla. És possible que l\'emmagatzematge estigui en ús."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcions transf. fitxers USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Munta com a reproductor multimèdia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Munta com a càmera (PTP)"</string>

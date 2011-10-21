@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Разпъване – запълва екрана"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Промяна на мащаба за съвместимост"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Когато дадено приложение е създадено за по-малък екран, до часовника ще се покаже управление за промяна на мащаба."</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Екранната снимка се запазва..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Екранната снимка се запазва..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Екранната снимка се запазва."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Екранната снимка е заснета."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Докоснете, за да видите екранната си снимка."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Екранната снимка не можа да бъде заснета."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Екранната снимка не можа да бъде запазена. Възможно е хранилището да се използва."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Опции за пренос на файлове чрез USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Свързване като медиен плейър (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Свързване като камера (PTP)"</string>
