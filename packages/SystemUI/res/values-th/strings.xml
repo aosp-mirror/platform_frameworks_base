@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"ความเข้ากันได้ของการย่อ/ขยาย"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"สำหรับแอปพลิเคชันที่ออกแบบมาสำหรับหน้าจอขนาดเล็ก ตัวควบคุมการย่อ/ขยายจะปรากฏขึ้นข้างนาฬิกา"</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"กำลังบันทึกภาพหน้าจอ..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"กำลังบันทึกภาพหน้าจอ..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"กำลังบันทึกภาพหน้าจอ"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"จับภาพหน้าจอแล้ว"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"แตะเพื่อดูภาพหน้าจอของคุณ"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"ไม่สามารถจับภาพหน้าจอ"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"ไม่สามารถบันทึกภาพหน้าจอ ที่จัดเก็บข้อมูลอาจมีการใช้งานอยู่"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ต่อเชื่อมเป็นโปรแกรมเล่นสื่อ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ต่อเชื่อมเป็นกล้องถ่ายรูป (PTP)"</string>
@@ -128,8 +121,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"เปิดใช้งาน TeleTypewriter อยู่"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"เสียงเรียกเข้าแบบปิดเสียง"</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ถูกนำออกไปแล้ว"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"ปิดใช้งานข้อมูล 2G-3G แล้ว"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"ปิดใช้งานข้อมูล 4G แล้ว"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"ปิดใช้งานข้อมูลมือถือแล้ว"</string>

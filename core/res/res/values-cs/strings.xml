@@ -887,7 +887,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Upozornění"</string>
     <string name="loading" msgid="1760724998928255250">"Načítání..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ZAPNUTO"</string>
-    <string name="capital_off" msgid="6815870386972805832">"VYPNOUT"</string>
+    <string name="capital_off" msgid="6815870386972805832">"VYPNUTO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Vymažte výchozí hodnoty v Nastavení plochy &gt; Aplikace &gt; Správa aplikací."</string>

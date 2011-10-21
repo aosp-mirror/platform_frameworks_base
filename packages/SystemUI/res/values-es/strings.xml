@@ -64,7 +64,7 @@
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Si la aplicación se ha diseñado para una pantalla más pequeña, aparecerá un control de zoom junto al reloj."</string>
     <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Guardando..."</string>
     <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Guardando captura de pantalla..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Espera a que se guarde la captura de pantalla."</string>
+    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Espera mientras se guarda la captura de pantalla."</string>
     <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de pantalla guardada"</string>
     <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Tocar para ver la captura de pantalla"</string>
     <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Error al hacer captura de pantalla"</string>

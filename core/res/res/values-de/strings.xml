@@ -674,7 +674,7 @@
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"PUK-Sperre auf SIM"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Weitere Informationen finden Sie in der Bedienungsanleitung oder wenden Sie sich an den Kundendienst."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Bitte PIN-Code eingeben"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Bitte PIN eingeben"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g> Mal falsch eingegeben. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>

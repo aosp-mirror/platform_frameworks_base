@@ -699,7 +699,7 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解除封鎖"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"開啟音效"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"關閉音效"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"已開始繪畫解鎖圖形"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"已開始繪製解鎖圖形"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"已清除解鎖圖形"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已加入 1 格"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"已畫出解鎖圖形"</string>

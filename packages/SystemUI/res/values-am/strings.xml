@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"የተኳኋኝነት አጉላ"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"ትግበራ ለትንሽ ማያ ሲነደፍ፣ የአጉላ መቆመጣጠሪያ በሰዓት በኩል ብቅ ይላል።"</string>
-    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"በማስቀመጥ ላይ..."</string>
-    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
-    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እስኪቀመጥ እባክህ ጠብቅ"</string>
-    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
-    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"ያንተን ቅጽበታዊ ገጽ እይታ ለማየት ንካ"</string>
-    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ አልተሳካም"</string>
-    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"ቅጽበታዊ ገጽ እይታ ማስቀመጥ አልተቻለም። ውጫዊ ማከማቻ አገልግሎት ላይ ሊሆን ይችላል።"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው::"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"ያንተን ቅጽበታዊ ገጽ እይታ ለማየት ንካ"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"የማያ ፎቶማስቀመጥ አልተቻለም። ማከማቻም አገልግሎት ላይ ሊሆን ይችላል።"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"እንደ ማህደረ አጫዋች (MTP) ሰካ"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"እንደ ካሜራ (PTP) ሰካ"</string>

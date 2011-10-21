@@ -60,20 +60,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Tanua ili kujaza skrini"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kukuza kwa Utangamanifu"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Wakati programu ilibuniwa kwa skrini ndogo, kidhibiti cha kukuza kitaonekana kwa saa."</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Inahifadhi picha"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Inahifadhi picha..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Picha ya kiwamba inahifadhiwa"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Picha imenaswa."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Gusa ili kuona picha"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Haikuweza kupiga picha"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Haikuweza kuhifadhi picha. Hifadhi inaweza kuwa inatumika"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
@@ -126,8 +119,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Kichapishaji cha Tele kimewezeshwa."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Mtetemo wa mlio"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Mlio wa simu uko kimya."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> Ondoa"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Data ya 2G-3G imelemazwa"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Data ya 4G imelemazwa"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Data ya kifaa cha mkononi imelemazwa"</string>

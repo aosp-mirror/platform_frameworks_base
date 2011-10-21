@@ -665,10 +665,10 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Sett inn et SIM-kort."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"SIM-kort mangler eller er uleselig. Sett inn et SIM-kort."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"SIM-kortet er permanent deaktivert."\n" Ta kontakt med mobiltjenesteleverandøren din for å få et annet SIM-kort."</string>
-    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Forrige sang-knappen"</string>
-    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Neste sang-knappen"</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Knapp for forrige sang"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Knapp for neste sang"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pause-knappen"</string>
-    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Avspilling-knappen"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Avspillingsknappen"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Stopp-knappen"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Kun nødanrop"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Nettverk ikke tillatt"</string>
