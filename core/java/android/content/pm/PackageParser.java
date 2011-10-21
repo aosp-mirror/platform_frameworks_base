@@ -2174,6 +2174,7 @@ public class PackageParser {
         info.screenOrientation = target.info.screenOrientation;
         info.taskAffinity = target.info.taskAffinity;
         info.theme = target.info.theme;
+        info.softInputMode = target.info.softInputMode;
         info.uiOptions = target.info.uiOptions;
         
         Activity a = new Activity(mParseActivityAliasArgs, info);
