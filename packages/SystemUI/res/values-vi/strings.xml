@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Giãn ra để lấp đầy m.hình"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Thu phóng tương thích"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Khi ứng dụng được thiết kế cho một màn hình nhỏ hơn, điều khiển thu phóng sẽ xuất hiện bên cạnh đồng hồ."</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <!-- outdated translation 3808900131607378535 -->     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Đang lưu..."</string>
+    <!-- outdated translation 7158814134399651627 -->     <string name="screenshot_saving_title" msgid="8242282144535555697">"Đang lưu ảnh chụp màn hình..."</string>
+    <!-- outdated translation 7138808001579871654 -->     <string name="screenshot_saving_text" msgid="2419718443411738818">"Vui lòng đợi lưu ảnh chụp màn hình"</string>
+    <!-- outdated translation 1656379291643543172 -->     <string name="screenshot_saved_title" msgid="6461865960961414961">"Đã chụp được ảnh màn hình"</string>
+    <!-- outdated translation 5040360894749163221 -->     <string name="screenshot_saved_text" msgid="1152839647677558815">"Chạm để xem ảnh chụp màn hình của bạn"</string>
+    <!-- outdated translation 1140968728869009679 -->     <string name="screenshot_failed_title" msgid="705781116746922771">"Chụp ảnh màn hình không thành công"</string>
+    <!-- outdated translation 9163506496592455352 -->     <string name="screenshot_failed_text" msgid="8134011269572415402">"Không thể lưu ảnh chụp màn hình. Bộ nhớ ngoài có thể đang được sử dụng."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Tùy chọn truyền tệp USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Gắn như một trình phát đa phương tiện (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Gắn như một máy ảnh (PTP)"</string>
@@ -128,8 +121,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Đã bật TeleTypewriter."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Chuông rung."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Chuông im lặng."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> đã bị loại bỏ."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Đã tắt dữ liệu 2G-3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Đã tắt dữ liệu 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dữ liệu di động bị vô hiệu hóa"</string>

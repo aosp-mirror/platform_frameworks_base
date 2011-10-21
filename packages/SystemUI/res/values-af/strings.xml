@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Strek om skerm te vul"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Versoenbaarheid-zoem"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"As \'n program vir \'n kleiner skerm ontwerp is, sal \'n zoemkontrole naby die horlosie verskyn"</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Stoor tans kiekie..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Stoor tans skermkiekie..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Skermkiekie word tans gestoor."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skermkiekie geneem."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak om jou skermkiekie te sien."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Kon nie skermkiekie neem nie"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Kon nie skermkiekie stoor nie. Geheue kan dalk in gebruik wees."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-lêeroordrag-opsies"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Heg as \'n mediaspeler (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Heg as \'n kamera (PTP)"</string>

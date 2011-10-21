@@ -889,7 +889,7 @@
     <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
     <string name="capital_off" msgid="6815870386972805832">"NO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de forma predeterminada para esta acción"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar valores predeterminados en la página de configuración de la pantalla de inicio del teléfono &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Seleccionar una acción"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Seleccionar una aplicación para el dispositivo USB"</string>

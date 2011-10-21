@@ -62,20 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Esticar p. caber em ec. int."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Compatibilidade de zoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Sempre que uma aplicação tiver sido concebida para ecrãs mais pequenos, aparecerá um controlo de zoom junto ao relógio."</string>
-    <!-- no translation found for screenshot_saving_ticker (7403652894056693515) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (8134011269572415402) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"A guardar captura de ecrã..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"A guardar captura de ecrã..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"A guardar captura de ecrã."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de ecrã efetuada"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Toque para ver a captura de ecrã"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Não foi possível obter captura de ecrã."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Não foi possível guardar a captura de ecrã. O armazenamento poderá estar a ser utilizado."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções de transm. de fich. USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montar como leitor de multimédia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montar como câmara (PTP)"</string>
@@ -128,8 +121,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Teletipo ativado."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Campainha em vibração."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Campainha em silêncio."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ignorado."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Os dados 2G-3G estão desativados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Os dados 4G estão desativados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Os dados móveis estão desativados"</string>
