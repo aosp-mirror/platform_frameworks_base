@@ -282,6 +282,9 @@ public final class CdmaLteUiccRecords extends SIMRecords {
                 obtainMessage(EVENT_GET_MSISDN_DONE));
         recordsToLoad++;
 
+        iccFh.loadEFTransparent(EF_SST, obtainMessage(EVENT_GET_SST_DONE));
+        recordsToLoad++;
+
         iccFh.loadEFTransparent(EF_CSIM_LI,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimLiLoaded()));
         recordsToLoad++;
@@ -384,12 +387,12 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     @Override
     protected void log(String s) {
-        if (DBG) Log.d(LOG_TAG, "[CSIM] " + s);
+        Log.d(LOG_TAG, "[CSIM] " + s);
     }
 
     @Override
     protected void loge(String s) {
-        if (DBG) Log.e(LOG_TAG, "[CSIM] " + s);
+        Log.e(LOG_TAG, "[CSIM] " + s);
     }
 
     public String getMdn() {

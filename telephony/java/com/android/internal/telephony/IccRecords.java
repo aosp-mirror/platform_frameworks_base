@@ -57,7 +57,6 @@ public abstract class IccRecords extends Handler implements IccConstants {
     protected int mailboxIndex = 0; // 0 is no mailbox dailing number associated
 
     protected String spn;
-    protected int spnDisplayCondition;
 
     // ***** Constants
 
