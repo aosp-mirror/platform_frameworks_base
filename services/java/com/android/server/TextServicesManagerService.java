@@ -701,7 +701,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public void onServiceDisconnected(ComponentName name) {
             synchronized(mSpellCheckerMap) {
                 final SpellCheckerBindGroup group = mSpellCheckerBindGroups.get(mSciId);
-                if (this == group.mInternalConnection) {
+                if (group != null && this == group.mInternalConnection) {
                     mSpellCheckerBindGroups.remove(mSciId);
                 }
             }
