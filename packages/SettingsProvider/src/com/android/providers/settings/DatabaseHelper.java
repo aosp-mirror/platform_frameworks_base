@@ -1501,6 +1501,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
                     R.bool.def_lockscreen_disabled);
+
+            loadBooleanSetting(stmt, Settings.Secure.DEVICE_PROVISIONED,
+                    R.bool.def_device_provisioned);
         } finally {
             if (stmt != null) stmt.close();
         }
