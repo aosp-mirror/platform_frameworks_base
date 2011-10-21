@@ -33,14 +33,6 @@ extern "C" {
  */
 ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface);
 
-/**
- * Return the ANativeWindow associated with a Java SurfaceTexture object,
- * for interacting with it through native code.  This acquires a reference
- * on the ANativeWindow that is returned; be sure to use ANativeWindow_release()
- * when done with it so that it doesn't leak.
- */
-ANativeWindow* ANativeWindow_fromSurfaceTexture(JNIEnv* env, jobject surfaceTexture);
-
 #ifdef __cplusplus
 };
 #endif

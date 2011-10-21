@@ -32,14 +32,6 @@ ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface) {
     return win.get();
 }
 
-ANativeWindow* ANativeWindow_fromSurfaceTexture(JNIEnv* env, jobject surfaceTexture) {
-    sp<ANativeWindow> win = android_SurfaceTexture_getNativeWindow(env, surfaceTexture);
-    if (win != NULL) {
-        win->incStrong((void*)ANativeWindow_acquire);
-    }
-    return win.get();
-}
-
 void ANativeWindow_acquire(ANativeWindow* window) {
     window->incStrong((void*)ANativeWindow_acquire);
 }
