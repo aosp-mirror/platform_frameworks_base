@@ -21,7 +21,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.view.View;
 
 import java.util.Collections;
@@ -97,6 +97,59 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int PROPERTY_SCROLLABLE = 0x00000200;
 
+    /**
+     * Bits that provide the id of a virtual descendant of a view.
+     */
+    private static final long VIRTUAL_DESCENDANT_ID_MASK = 0xffffffff00000000L;
+
+    /**
+     * Bit shift of {@link #VIRTUAL_DESCENDANT_ID_MASK} to get to the id for a
+     * virtual descendant of a view. Such a descendant does not exist in the view
+     * hierarchy and is only reported via the accessibility APIs.
+     */
+    private static final int VIRTUAL_DESCENDANT_ID_SHIFT = 32;
+
+    /**
+     * Gets the accessibility view id which identifies a View in the view three.
+     *
+     * @param accessibilityNodeId The id of an {@link AccessibilityNodeInfo}.
+     * @return The accessibility view id part of the node id.
+     *
+     * @hide
+     */
+    public static int getAccessibilityViewId(long accessibilityNodeId) {
+        return (int) accessibilityNodeId;
+    }
+
+    /**
+     * Gets the virtual descendant id which identifies an imaginary view in a
+     * containing View.
+     *
+     * @param accessibilityNodeId The id of an {@link AccessibilityNodeInfo}.
+     * @return The virtual view id part of the node id.
+     *
+     * @hide
+     */
+    public static int getVirtualDescendantId(long accessibilityNodeId) {
+        return (int) ((accessibilityNodeId & VIRTUAL_DESCENDANT_ID_MASK)
+                >> VIRTUAL_DESCENDANT_ID_SHIFT);
+    }
+
+    /**
+     * Makes a node id by shifting the <code>virtualDescendantId</code>
+     * by {@link #VIRTUAL_DESCENDANT_ID_SHIFT} and taking
+     * the bitwise or with the <code>accessibilityViewId</code>.
+     *
+     * @param accessibilityViewId A View accessibility id.
+     * @param virtualDescendantId A virtual descendant id.
+     * @return The node id.
+     *
+     * @hide
+     */
+    public static long makeNodeId(int accessibilityViewId, int virtualDescendantId) {
+        return (((long) virtualDescendantId) << VIRTUAL_DESCENDANT_ID_SHIFT) | accessibilityViewId;
+    }
+
     // Housekeeping.
     private static final int MAX_POOL_SIZE = 50;
     private static final Object sPoolLock = new Object();
@@ -107,9 +160,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     private boolean mSealed;
 
     // Data.
-    private int mAccessibilityViewId = View.NO_ID;
-    private int mAccessibilityWindowId = View.NO_ID;
-    private int mParentAccessibilityViewId = View.NO_ID;
+    private long mSourceNodeId = makeNodeId(View.NO_ID, View.NO_ID);
+    private int mWindowId = View.NO_ID;
+    private long mParentNodeId = makeNodeId(View.NO_ID, View.NO_ID);
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
     private final Rect mBoundsInScreen = new Rect();
@@ -119,7 +172,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mText;
     private CharSequence mContentDescription;
 
-    private SparseIntArray mChildAccessibilityIds = new SparseIntArray();
+    private SparseLongArray mChildIds = new SparseLongArray();
     private int mActions;
 
     private IAccessibilityServiceConnection mConnection;
@@ -133,13 +186,43 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Sets the source.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
      *
      * @param source The info source.
      */
     public void setSource(View source) {
+        setSource(source, View.NO_ID);
+    }
+
+    /**
+     * Sets the source to be a virtual descendant of the given <code>root</code>.
+     * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+     * is set as the source.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report them selves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
-        mAccessibilityViewId = source.getAccessibilityViewId();
-        mAccessibilityWindowId = source.getAccessibilityWindowId();
+        mWindowId = (root != null) ? root.getAccessibilityWindowId() : View.NO_ID;
+        final int rootAccessibilityViewId =
+            (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+        mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
     /**
@@ -148,7 +231,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The window id.
      */
     public int getWindowId() {
-        return mAccessibilityWindowId;
+        return mWindowId;
     }
 
     /**
@@ -157,7 +240,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child count.
      */
     public int getChildCount() {
-        return mChildAccessibilityIds.size();
+        return mChildIds.size();
     }
 
     /**
@@ -176,21 +259,20 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getChild(int index) {
         enforceSealed();
-        final int childAccessibilityViewId = mChildAccessibilityIds.get(index);
-        if (!canPerformRequestOverConnection(childAccessibilityViewId)) {
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
         }
+        final long childId = mChildIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection,
-                mAccessibilityWindowId, childAccessibilityViewId);
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection, mWindowId, childId);
     }
 
     /**
      * Adds a child.
      * <p>
-     *   <strong>Note:</strong> Cannot be called from an
-     *   {@link android.accessibilityservice.AccessibilityService}.
-     *   This class is made immutable before being delivered to an AccessibilityService.
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
      * @param child The child.
@@ -198,10 +280,30 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addChild(View child) {
+        addChild(child, View.NO_ID);
+    }
+
+    /**
+     * Adds a virtual child which is a descendant of the given <code>root</code>.
+     * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+     * is added as a child.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report them selves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual child.
+     */
+    public void addChild(View root, int virtualDescendantId) {
         enforceNotSealed();
-        final int childAccessibilityViewId = child.getAccessibilityViewId();
-        final int index = mChildAccessibilityIds.size();
-        mChildAccessibilityIds.put(index, childAccessibilityViewId);
+        final int index = mChildIds.size();
+        final int rootAccessibilityViewId =
+            (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+        final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+        mChildIds.put(index, childNodeId);
     }
 
     /**
@@ -249,12 +351,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public boolean performAction(int action) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.performAccessibilityAction(mConnection, mAccessibilityWindowId,
-                mAccessibilityViewId, action);
+        return client.performAccessibilityAction(mConnection, mWindowId, mSourceNodeId, action);
     }
 
     /**
@@ -273,12 +374,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return Collections.emptyList();
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfosByViewText(mConnection, text,
-                mAccessibilityWindowId, mAccessibilityViewId);
+        return client.findAccessibilityNodeInfosByText(mConnection, text, mWindowId, mSourceNodeId);
     }
 
     /**
@@ -293,12 +393,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnection,
-                mAccessibilityWindowId, mParentAccessibilityViewId);
+                mWindowId, mParentNodeId);
     }
 
     /**
@@ -314,8 +414,33 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setParent(View parent) {
+        setParent(parent, View.NO_ID);
+    }
+
+    /**
+     * Sets the parent to be a virtual descendant of the given <code>root</code>.
+     * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+     * is set as the parent.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report them selves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    public void setParent(View root, int virtualDescendantId) {
         enforceNotSealed();
-        mParentAccessibilityViewId = parent.getAccessibilityViewId();
+        final int rootAccessibilityViewId =
+            (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+        mParentNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
     /**
@@ -827,6 +952,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Returns a cached instance if such is available otherwise a new one
      * and sets the source.
      *
+     * @param source The source view.
      * @return An instance.
      *
      * @see #setSource(View)
@@ -834,6 +960,22 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static AccessibilityNodeInfo obtain(View source) {
         AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
         info.setSource(source);
+        return info;
+    }
+
+    /**
+     * Returns a cached instance if such is available otherwise a new one
+     * and sets the source.
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     * @return An instance.
+     *
+     * @see #setSource(View, int)
+     */
+    public static AccessibilityNodeInfo obtain(View root, int virtualDescendantId) {
+        AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
+        info.setSource(root, virtualDescendantId);
         return info;
     }
 
@@ -907,15 +1049,15 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeStrongBinder(mConnection.asBinder());
         }
         parcel.writeInt(isSealed() ? 1 : 0);
-        parcel.writeInt(mAccessibilityViewId);
-        parcel.writeInt(mAccessibilityWindowId);
-        parcel.writeInt(mParentAccessibilityViewId);
+        parcel.writeLong(mSourceNodeId);
+        parcel.writeInt(mWindowId);
+        parcel.writeLong(mParentNodeId);
 
-        SparseIntArray childIds = mChildAccessibilityIds;
+        SparseLongArray childIds = mChildIds;
         final int childIdsSize = childIds.size();
         parcel.writeInt(childIdsSize);
         for (int i = 0; i < childIdsSize; i++) {
-            parcel.writeInt(childIds.valueAt(i));
+            parcel.writeLong(childIds.valueAt(i));
         }
 
         parcel.writeInt(mBoundsInParent.top);
@@ -950,9 +1092,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     private void init(AccessibilityNodeInfo other) {
         mSealed = other.mSealed;
         mConnection = other.mConnection;
-        mAccessibilityViewId = other.mAccessibilityViewId;
-        mParentAccessibilityViewId = other.mParentAccessibilityViewId;
-        mAccessibilityWindowId = other.mAccessibilityWindowId;
+        mSourceNodeId = other.mSourceNodeId;
+        mParentNodeId = other.mParentNodeId;
+        mWindowId = other.mWindowId;
         mBoundsInParent.set(other.mBoundsInParent);
         mBoundsInScreen.set(other.mBoundsInScreen);
         mPackageName = other.mPackageName;
@@ -961,7 +1103,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = other.mContentDescription;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
-        mChildAccessibilityIds = other.mChildAccessibilityIds.clone();
+        mChildIds = other.mChildIds.clone();
     }
 
     /**
@@ -975,14 +1117,14 @@ public class AccessibilityNodeInfo implements Parcelable {
                     parcel.readStrongBinder());
         }
         mSealed = (parcel.readInt()  == 1);
-        mAccessibilityViewId = parcel.readInt();
-        mAccessibilityWindowId = parcel.readInt();
-        mParentAccessibilityViewId = parcel.readInt();
+        mSourceNodeId = parcel.readLong();
+        mWindowId = parcel.readInt();
+        mParentNodeId = parcel.readLong();
 
-        SparseIntArray childIds = mChildAccessibilityIds;
+        SparseLongArray childIds = mChildIds;
         final int childrenSize = parcel.readInt();
         for (int i = 0; i < childrenSize; i++) {
-            final int childId = parcel.readInt();
+            final long childId = parcel.readLong();
             childIds.put(i, childId);
         }
 
@@ -1012,10 +1154,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     private void clear() {
         mSealed = false;
         mConnection = null;
-        mAccessibilityViewId = View.NO_ID;
-        mParentAccessibilityViewId = View.NO_ID;
-        mAccessibilityWindowId = View.NO_ID;
-        mChildAccessibilityIds.clear();
+        mSourceNodeId = makeNodeId(View.NO_ID, View.NO_ID);
+        mParentNodeId = makeNodeId(View.NO_ID, View.NO_ID);
+        mWindowId = View.NO_ID;
+        mChildIds.clear();
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
@@ -1047,9 +1189,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
-    private boolean canPerformRequestOverConnection(int accessibilityViewId) {
-        return (mAccessibilityWindowId != View.NO_ID
-                && accessibilityViewId != View.NO_ID
+    private boolean canPerformRequestOverConnection(long accessibilityNodeId) {
+        return (mWindowId != View.NO_ID
+                && getAccessibilityViewId(accessibilityNodeId) != View.NO_ID
                 && mConnection != null);
     }
 
@@ -1065,10 +1207,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             return false;
         }
         AccessibilityNodeInfo other = (AccessibilityNodeInfo) object;
-        if (mAccessibilityViewId != other.mAccessibilityViewId) {
+        if (mSourceNodeId != other.mSourceNodeId) {
             return false;
         }
-        if (mAccessibilityWindowId != other.mAccessibilityWindowId) {
+        if (mWindowId != other.mWindowId) {
             return false;
         }
         return true;
@@ -1078,8 +1220,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + mAccessibilityViewId;
-        result = prime * result + mAccessibilityWindowId;
+        result = prime * result + getAccessibilityViewId(mSourceNodeId);
+        result = prime * result + getVirtualDescendantId(mSourceNodeId);
+        result = prime * result + mWindowId;
         return result;
     }
 
@@ -1089,9 +1232,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append(super.toString());
 
         if (DEBUG) {
-            builder.append("; accessibilityId: " + mAccessibilityViewId);
-            builder.append("; parentAccessibilityId: " + mParentAccessibilityViewId);
-            SparseIntArray childIds = mChildAccessibilityIds;
+            builder.append("; accessibilityViewId: " + getAccessibilityViewId(mSourceNodeId));
+            builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
+            builder.append("; mParentNodeId: " + mParentNodeId);
+            SparseLongArray childIds = mChildIds;
             builder.append("; childAccessibilityIds: [");
             for (int i = 0, count = childIds.size(); i < count; i++) {
                 builder.append(childIds.valueAt(i));

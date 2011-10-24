@@ -128,7 +128,7 @@ public class InterrogationActivityTest
 
             // find a view by text
             List<AccessibilityNodeInfo> buttons =  AccessibilityInteractionClient.getInstance()
-                .findAccessibilityNodeInfosByViewTextInActiveWindow(connection, "butto");
+                .findAccessibilityNodeInfosByTextInActiveWindow(connection, "butto");
             assertEquals(9, buttons.size());
         } finally {
             if (DEBUG) {
@@ -151,7 +151,7 @@ public class InterrogationActivityTest
 
             // find a view by text
             List<AccessibilityNodeInfo> buttons =  AccessibilityInteractionClient.getInstance()
-                .findAccessibilityNodeInfosByViewTextInActiveWindow(connection,
+                .findAccessibilityNodeInfosByTextInActiveWindow(connection,
                         "contentDescription");
             assertEquals(1, buttons.size());
         } finally {

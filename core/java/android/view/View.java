@@ -62,6 +62,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
@@ -1967,6 +1968,21 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #findViewsWithText(ArrayList, CharSequence, int)
      */
     public static final int FIND_VIEWS_WITH_CONTENT_DESCRIPTION = 0x00000002;
+
+    /**
+     * Find views that contain {@link AccessibilityNodeProvider}. Such
+     * a View is a root of virtual view hierarchy and may contain the searched
+     * text. If this flag is set Views with providers are automatically
+     * added and it is a responsibility of the client to call the APIs of
+     * the provider to determine whether the virtual tree rooted at this View
+     * contains the text, i.e. getting the list of {@link AccessibilityNodeInfo}s
+     * represeting the virtual views with this text.
+     *
+     * @see #findViewsWithText(ArrayList, CharSequence, int)
+     *
+     * @hide
+     */
+    public static final int FIND_VIEWS_WITH_ACCESSIBILITY_NODE_PROVIDERS = 0x00000004;
 
     /**
      * Controls the over-scroll mode for this view.
@@ -4058,14 +4074,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Note: The client is responsible for recycling the obtained instance by calling
      *       {@link AccessibilityNodeInfo#recycle()} to minimize object creation.
      * </p>
+     *
      * @return A populated {@link AccessibilityNodeInfo}.
      *
      * @see AccessibilityNodeInfo
      */
     public AccessibilityNodeInfo createAccessibilityNodeInfo() {
-        AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain(this);
-        onInitializeAccessibilityNodeInfo(info);
-        return info;
+        AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
+        if (provider != null) {
+            return provider.createAccessibilityNodeInfo(View.NO_ID);
+        } else {
+            AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain(this);
+            onInitializeAccessibilityNodeInfo(info);
+            return info;
+        }
     }
 
     /**
@@ -4165,6 +4187,36 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void setAccessibilityDelegate(AccessibilityDelegate delegate) {
         mAccessibilityDelegate = delegate;
+    }
+
+    /**
+     * Gets the provider for managing a virtual view hierarchy rooted at this View
+     * and reported to {@link android.accessibilityservice.AccessibilityService}s
+     * that explore the window content.
+     * <p>
+     * If this method returns an instance, this instance is responsible for managing
+     * {@link AccessibilityNodeInfo}s describing the virtual sub-tree rooted at this
+     * View including the one representing the View itself. Similarly the returned
+     * instance is responsible for performing accessibility actions on any virtual
+     * view or the root view itself.
+     * </p>
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#getAccessibilityNodeProvider(View)}
+     * is responsible for handling this call.
+     * </p>
+     *
+     * @return The provider.
+     *
+     * @see AccessibilityNodeProvider
+     */
+    public AccessibilityNodeProvider getAccessibilityNodeProvider() {
+        if (mAccessibilityDelegate != null) {
+            return mAccessibilityDelegate.getAccessibilityNodeProvider(this);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -5186,14 +5238,18 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param outViews The output list of matching Views.
      * @param searched The text to match against.
-     * 
+     *
      * @see #FIND_VIEWS_WITH_TEXT
      * @see #FIND_VIEWS_WITH_CONTENT_DESCRIPTION
      * @see #setContentDescription(CharSequence)
      */
     public void findViewsWithText(ArrayList<View> outViews, CharSequence searched, int flags) {
-        if ((flags & FIND_VIEWS_WITH_CONTENT_DESCRIPTION) != 0 && !TextUtils.isEmpty(searched)
-                && !TextUtils.isEmpty(mContentDescription)) {
+        if (getAccessibilityNodeProvider() != null) {
+            if ((flags & FIND_VIEWS_WITH_ACCESSIBILITY_NODE_PROVIDERS) != 0) {
+                outViews.add(this);
+            }
+        } else if ((flags & FIND_VIEWS_WITH_CONTENT_DESCRIPTION) != 0
+                && !TextUtils.isEmpty(searched) && !TextUtils.isEmpty(mContentDescription)) {
             String searchedLowerCase = searched.toString().toLowerCase();
             String contentDescriptionLowerCase = mContentDescription.toString().toLowerCase();
             if (contentDescriptionLowerCase.contains(searchedLowerCase)) {
@@ -14885,6 +14941,24 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
                 AccessibilityEvent event) {
             return host.onRequestSendAccessibilityEventInternal(child, event);
+        }
+
+        /**
+         * Gets the provider for managing a virtual view hierarchy rooted at this View
+         * and reported to {@link android.accessibilityservice.AccessibilityService}s
+         * that explore the window content.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#getAccessibilityNodeProvider() View#getAccessibilityNodeProvider()} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         *
+         * @return The provider.
+         *
+         * @see AccessibilityNodeProvider
+         */
+        public AccessibilityNodeProvider getAccessibilityNodeProvider(View host) {
+            return null;
         }
     }
 }
