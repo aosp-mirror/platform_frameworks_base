@@ -30,14 +30,9 @@ device directly from Eclipse or from the command line with ADB. If
 you don't yet have a device, check with the service providers in your area to determine which
 Android-powered devices are available.</p>
 
-<p>If you want a SIM-unlocked phone, then you might consider either an Android Dev Phone or the
-Google Nexus S. These are SIM-unlocked so that you can use them on any GSM network using a SIM
-card. The Android Dev Phones also feature an unlocked bootloader so you can install custom system
-images (great for developing and installing custom versions of the Android platform). To find a
-a place you can purchase the Nexus S, visit <a
-href="http://www.google.com/phone/detail/nexus-s">google.com/phone</a>. To purchase an Android
-Dev Phone, see the <a href="http://market.android.com/publish">Android Market</a> site
-(requires a developer account).</p>
+<p>If you want a SIM-unlocked phone, then you might consider the Google Nexus S. To find a place
+to purchase the Nexus S and other Android-powered devices, visit <a
+href="http://www.google.com/phone/detail/nexus-s">google.com/phone</a>.</p>
 
 <p class="note"><strong>Note:</strong> When developing on a device, keep in mind that you should
 still use the <a
