@@ -78,7 +78,7 @@ public class AccessibilityRecord {
 
     int mAddedCount= UNDEFINED;
     int mRemovedCount = UNDEFINED;
-    int mSourceViewId = View.NO_ID;
+    long mSourceNodeId = AccessibilityNodeInfo.makeNodeId(View.NO_ID, View.NO_ID);
     int mSourceWindowId = View.NO_ID;
 
     CharSequence mClassName;
@@ -103,14 +103,28 @@ public class AccessibilityRecord {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setSource(View source) {
+        setSource(source, View.NO_ID);
+    }
+
+    /**
+     * Sets the source to be a virtual descendant of the given <code>root</code>.
+     * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+     * is set as the source.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report them selves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
-        if (source != null) {
-            mSourceWindowId = source.getAccessibilityWindowId();
-            mSourceViewId = source.getAccessibilityViewId();
-        } else {
-            mSourceWindowId = View.NO_ID;
-            mSourceViewId = View.NO_ID;
-        }
+        mSourceWindowId = (root != null) ? root.getAccessibilityWindowId() : View.NO_ID;
+        final int rootViewId = (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+        mSourceNodeId = AccessibilityNodeInfo.makeNodeId(rootViewId, virtualDescendantId);
     }
 
     /**
@@ -125,12 +139,13 @@ public class AccessibilityRecord {
      */
     public AccessibilityNodeInfo getSource() {
         enforceSealed();
-        if (mSourceWindowId == View.NO_ID || mSourceViewId == View.NO_ID || mConnection == null) {
+        if (mConnection == null || mSourceWindowId == View.NO_ID
+                || AccessibilityNodeInfo.getAccessibilityViewId(mSourceNodeId) == View.NO_ID) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnection, mSourceWindowId,
-                mSourceViewId);
+                mSourceNodeId);
     }
 
     /**
@@ -395,6 +410,7 @@ public class AccessibilityRecord {
     public int getMaxScrollX() {
         return mMaxScrollX;
     }
+
     /**
      * Sets the max scroll offset of the source left edge in pixels.
      *
@@ -707,7 +723,7 @@ public class AccessibilityRecord {
         mParcelableData = record.mParcelableData;
         mText.addAll(record.mText);
         mSourceWindowId = record.mSourceWindowId;
-        mSourceViewId = record.mSourceViewId;
+        mSourceNodeId = record.mSourceNodeId;
         mConnection = record.mConnection;
     }
 
@@ -732,7 +748,7 @@ public class AccessibilityRecord {
         mBeforeText = null;
         mParcelableData = null;
         mText.clear();
-        mSourceViewId = View.NO_ID;
+        mSourceNodeId = AccessibilityNodeInfo.makeNodeId(View.NO_ID, View.NO_ID);
         mSourceWindowId = View.NO_ID;
     }
 

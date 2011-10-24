@@ -1066,17 +1066,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return getCompatibilityScale(mSecurityPolicy.getRetrievalAllowingWindowLocked());
         }
 
-        public float findAccessibilityNodeInfosByViewTextInActiveWindow(
+        public float findAccessibilityNodeInfosByTextInActiveWindow(
                 String text, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long threadId)
                 throws RemoteException {
-            return findAccessibilityNodeInfosByViewText(text,
+            return findAccessibilityNodeInfosByText(text,
                     mSecurityPolicy.mRetrievalAlowingWindowId, View.NO_ID, interactionId, callback,
                     threadId);
         }
 
-        public float findAccessibilityNodeInfosByViewText(String text,
-                int accessibilityWindowId, int accessibilityViewId, int interactionId,
+        public float findAccessibilityNodeInfosByText(String text,
+                int accessibilityWindowId, long accessibilityNodeId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
@@ -1099,7 +1099,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findAccessibilityNodeInfosByViewText(text, accessibilityViewId,
+                connection.findAccessibilityNodeInfosByText(text, accessibilityNodeId,
                         interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -1112,7 +1112,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
-                int accessibilityViewId, int interactionId,
+                long accessibilityNodeId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
@@ -1136,12 +1136,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityViewId,
+                connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
                         interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error requesting node with accessibilityViewId: "
-                            + accessibilityViewId);
+                    Slog.e(LOG_TAG, "Error requesting node with accessibilityNodeId: "
+                            + accessibilityNodeId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
@@ -1150,7 +1150,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public boolean performAccessibilityAction(int accessibilityWindowId,
-                int accessibilityViewId, int action, int interactionId,
+                long accessibilityNodeId, int action, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid) {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
@@ -1172,12 +1172,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.performAccessibilityAction(accessibilityViewId, action, interactionId,
+                connection.performAccessibilityAction(accessibilityNodeId, action, interactionId,
                         callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error requesting node with accessibilityViewId: "
-                            + accessibilityViewId);
+                    Slog.e(LOG_TAG, "Error requesting node with accessibilityNodeId: "
+                            + accessibilityNodeId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);

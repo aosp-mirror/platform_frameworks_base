@@ -22888,6 +22888,7 @@ package android.view {
     method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
     method public void forceLayout();
+    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
@@ -23288,6 +23289,7 @@ package android.view {
   public static class View.AccessibilityDelegate {
     ctor public View.AccessibilityDelegate();
     method public boolean dispatchPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider(android.view.View);
     method public void onInitializeAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void onInitializeAccessibilityNodeInfo(android.view.View, android.view.accessibility.AccessibilityNodeInfo);
     method public void onPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
@@ -24043,6 +24045,7 @@ package android.view.accessibility {
   public class AccessibilityNodeInfo implements android.os.Parcelable {
     method public void addAction(int);
     method public void addChild(android.view.View);
+    method public void addChild(android.view.View, int);
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
     method public int getActions();
@@ -24067,6 +24070,7 @@ package android.view.accessibility {
     method public boolean isScrollable();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
+    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
@@ -24084,10 +24088,12 @@ package android.view.accessibility {
     method public void setLongClickable(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
+    method public void setParent(android.view.View, int);
     method public void setPassword(boolean);
     method public void setScrollable(boolean);
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
+    method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
@@ -24095,6 +24101,13 @@ package android.view.accessibility {
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public abstract class AccessibilityNodeProvider {
+    ctor public AccessibilityNodeProvider();
+    method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
+    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
+    method public boolean performAccessibilityAction(int, int);
   }
 
   public class AccessibilityRecord {
@@ -24142,6 +24155,7 @@ package android.view.accessibility {
     method public void setScrollY(int);
     method public void setScrollable(boolean);
     method public void setSource(android.view.View);
+    method public void setSource(android.view.View, int);
     method public void setToIndex(int);
   }
 
