@@ -68,7 +68,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Posnetek zaslona je shranjen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dotaknite se, če si želite ogledati posnetek zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Posnetka zaslona ni bilo mogoče shraniti."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Posnetka zaslona ni bilo mogoče shraniti. Shramba je lahko v uporabi."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Posnetka zaslona ni bilo mogoče shraniti. Shramba je morda v uporabi."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosa datotek prek USB-ja"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Vpni kot predvajalnik (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Vpni kot fotoaparat (PTP)"</string>

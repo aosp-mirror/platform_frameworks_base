@@ -121,8 +121,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter מופעל"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"צלצול ורטט."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"צלצול שקט."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> נדחה."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"נתוני 2G-3G מושבתים"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"נתוני 4G מושבתים"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"נתונים לנייד מושבתים"</string>

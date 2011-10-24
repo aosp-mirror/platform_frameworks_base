@@ -65,7 +65,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Αποθήκ. στιγμιότυπου οθόνης..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Γίνεται αποθήκευση του στιγμιότυπου οθόνης."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Το στιγμιότυπο οθόνης λήφθηκε."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Λήφθηκε το στιγμιότυπο οθόνης ."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Αγγίξτε για να δείτε το στιγμιότυπο οθόνης σας"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Αδύνατη η αποθήκευση στιγμιότυπου οθόνης. Ο εξωτερικός χώρος αποθήκευσης μπορεί να είναι σε χρήση."</string>
@@ -110,7 +110,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Δεν υπάρχει SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Πρόσδεση Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Λειτουργία πτήσης."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
