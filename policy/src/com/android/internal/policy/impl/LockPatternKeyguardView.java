@@ -1375,6 +1375,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
         }
 
+        // Removes the black area that covers the backup unlock method
+        @Override
+        public void exposeFallback() {
+            if (DEBUG) Log.d(TAG, "FaceLock exposeFallback()");
+            hideFaceLockArea(); // Expose fallback
+        }
+
         // Allows the Face Unlock service to poke the wake lock to keep the lockscreen alive
         @Override
         public void pokeWakelock() {
