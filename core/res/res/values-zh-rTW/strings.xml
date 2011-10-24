@@ -875,7 +875,7 @@
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"選取文字"</string>
     <string name="addToDictionary" msgid="9090375111134433012">"新增至字典"</string>
     <string name="deleteText" msgid="7070985395199629156">"刪除"</string>
-    <string name="inputMethod" msgid="1653630062304567879">"輸入方式"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字動作"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"儲存空間即將不足"</string>
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"平板電腦的儲存空間即將不足。"</string>
@@ -888,9 +888,9 @@
     <string name="loading" msgid="1760724998928255250">"載入中..."</string>
     <string name="capital_on" msgid="1544682755514494298">"開啟"</string>
     <string name="capital_off" msgid="6815870386972805832">"關閉"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"完成操作需使用"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"以此為本操作預設值。"</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"清除首頁設定 (應用程式) 管理應用程式的預設值。"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"選擇要使用的應用程式"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"設為預設應用程式。"</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"清除主螢幕設定 &gt; 應用程式 &gt; 管理應用程式中的預設選項。"</string>
     <string name="chooseActivity" msgid="1009246475582238425">"選取一項操作"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="1691104391758345586">"沒有應用程式可執行此項操作。"</string>
@@ -1014,8 +1014,8 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 偵錯模式已啟用"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"選取以停用 USB 偵錯。"</string>
-    <string name="select_input_method" msgid="6865512749462072765">"選取輸入方式"</string>
-    <string name="configure_input_methods" msgid="6324843080254191535">"設定輸入方式"</string>
+    <string name="select_input_method" msgid="6865512749462072765">"選擇輸入法"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"設定輸入法"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
@@ -1065,7 +1065,7 @@
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 的"\n"權限要求"</string>
-    <string name="input_method_binding_label" msgid="1283557179944992649">"輸入方式"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>

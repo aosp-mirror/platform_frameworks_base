@@ -46,8 +46,8 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"關閉"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"自動"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"已透過 Bluetooth 進行網路共用"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"設定輸入方式"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"藍牙網路共用已開"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"設定輸入法"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"使用實體鍵盤"</string>
     <string name="usb_device_permission_prompt" msgid="3816016361969816903">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 裝置嗎？"</string>
     <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 配件嗎？"</string>
@@ -110,7 +110,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"沒有 SIM 卡。"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙數據連線"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛行模式。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->

@@ -163,7 +163,7 @@
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Meine persönlichen Informationen"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Tablets"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Telefons"</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Meinen Standort"</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"Ihren Standort"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Ihren physischen Standort überwachen"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netzwerkkommunikation"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Ermöglicht Anwendungen den Zugriff auf verschiedene Netzwerkfunktionen"</string>
@@ -712,7 +712,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Die Aktion FACTORY_TEST wird nur für unter \"/system/app\" gespeicherte Pakete unterstützt."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Es wurden kein Paket mit der Aktion FACTORY_TEST gefunden."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Neustart"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"Die Seite auf \'<xliff:g id="TITLE">%s</xliff:g>\' sagt:"</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"Die Seite <xliff:g id="TITLE">%s</xliff:g> sagt:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Von dieser Seite navigieren?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Wählen Sie \"OK\", um fortzufahren, oder wählen Sie \"Abbrechen\", um auf der aktuellen Seite zu bleiben."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bestätigen"</string>
@@ -1058,7 +1058,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Ausführen"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Nummer"\n"mit <xliff:g id="NUMBER">%s</xliff:g> wählen"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Neuer Kontakt"\n"mit <xliff:g id="NUMBER">%s</xliff:g> erstellen"</string>
-    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Die folgenden Anwendungen benötigen die Berechtigung zum aktuellen und zukünftigen Zugriff auf Ihr Konto."</string>
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Die folgenden Apps benötigen die Berechtigung zum aktuellen und zukünftigen Zugriff auf Ihr Konto."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Möchten Sie diese Anfrage zulassen?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Zugriffsanfrage"</string>
     <string name="allow" msgid="7225948811296386551">"Zulassen"</string>
@@ -1178,7 +1178,7 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"SD-Karte"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-Speicher"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Bearbeiten..."</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Warnung zu Datennutzung"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"Warnung zum Datenverbrauch"</string>
     <string name="data_usage_warning_body" msgid="7217480745540055170">"Für Nutzung/Einstell. berühren"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-/3G-Daten deaktiviert"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-Daten deaktiviert"</string>
