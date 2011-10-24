@@ -19,8 +19,8 @@
 -->
 <resources>
     <!-- keyguard clock -->
-    <color name="lockscreen_clock_background">#b3ffffff</color>
-    <color name="lockscreen_clock_foreground">#7affffff</color>
+    <color name="lockscreen_clock_background">#ffffffff</color>
+    <color name="lockscreen_clock_foreground">#ffffffff</color>
     <color name="lockscreen_clock_am_pm">#ffffffff</color>
     <color name="lockscreen_owner_info">#ff9a9a9a</color>
 
