@@ -832,8 +832,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // See also hasNavigationBar().
         String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
         if (! "".equals(navBarOverride)) {
-            if      (navBarOverride.equals("1")) mHasNavigationBar = true;
-            else if (navBarOverride.equals("0")) mHasNavigationBar = false;
+            if      (navBarOverride.equals("1")) mHasNavigationBar = false;
+            else if (navBarOverride.equals("0")) mHasNavigationBar = true;
         }
 
         mNavigationBarHeight = mHasNavigationBar
