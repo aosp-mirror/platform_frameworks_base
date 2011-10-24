@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -68,7 +69,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
     private static final boolean DBG = false;
     private static final String TAG = "WifiWatchdogStateMachine";
-    private static final String WATCHDOG_NOTIFICATION_ID = "Android.System.WifiWatchdog";
+    private static final String DISABLED_NETWORK_NOTIFICATION_ID = "WifiWatchdog.networkdisabled";
+    private static final String WALLED_GARDEN_NOTIFICATION_ID = "WifiWatchdog.walledgarden";
 
     private static final int WIFI_SIGNAL_LEVELS = 4;
     /**
@@ -185,7 +187,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
      */
     public boolean mDisableAPNextFailure = false;
     private static boolean sWifiOnly = false;
-    private boolean mNotificationShown;
+    private boolean mDisabledNotificationShown;
+    private boolean mWalledGardenNotificationShown;
     public boolean mHasConnectedWifiManager = false;
 
     /**
@@ -477,51 +480,76 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mLastWalledGardenCheckTime = null;
         mNumCheckFailures = 0;
         mBssids.clear();
-        cancelNetworkNotification();
+        setDisabledNetworkNotificationVisible(false);
+        setWalledGardenNotificationVisible(false);
     }
 
-    private void popUpBrowser() {
-        Uri uri = Uri.parse("http://www.google.com");
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
-    }
-
-    private void displayDisabledNetworkNotification(String ssid) {
-        Resources r = Resources.getSystem();
-        CharSequence title =
-                r.getText(com.android.internal.R.string.wifi_watchdog_network_disabled);
-        String msg = ssid +
-                r.getText(com.android.internal.R.string.wifi_watchdog_network_disabled_detailed);
-
-        Notification wifiDisabledWarning = new Notification.Builder(mContext)
-            .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
-            .setDefaults(Notification.DEFAULT_ALL)
-            .setTicker(title)
-            .setContentTitle(title)
-            .setContentText(msg)
-            .setContentIntent(PendingIntent.getActivity(mContext, 0,
-                    new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
-                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0))
-            .setWhen(System.currentTimeMillis())
-            .setAutoCancel(true)
-            .getNotification();
-
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notify(WATCHDOG_NOTIFICATION_ID, 1, wifiDisabledWarning);
-        mNotificationShown = true;
-    }
-
-    public void cancelNetworkNotification() {
-        if (mNotificationShown) {
-            NotificationManager notificationManager = (NotificationManager) mContext
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(WATCHDOG_NOTIFICATION_ID, 1);
-            mNotificationShown = false;
+    private void setWalledGardenNotificationVisible(boolean visible) {
+        // If it should be hidden and it is already hidden, then noop
+        if (!visible && !mWalledGardenNotificationShown) {
+            return;
         }
+
+        Resources r = Resources.getSystem();
+        NotificationManager notificationManager = (NotificationManager) mContext
+            .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (visible) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mWalledGardenUrl));
+            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            CharSequence title = r.getString(R.string.wifi_available_sign_in, 0);
+            CharSequence details = r.getString(R.string.wifi_available_sign_in_detailed,
+                    mConnectionInfo.getSSID());
+
+            Notification notification = new Notification();
+            notification.when = 0;
+            notification.icon = com.android.internal.R.drawable.stat_notify_wifi_in_range;
+            notification.flags = Notification.FLAG_AUTO_CANCEL;
+            notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+            notification.tickerText = title;
+            notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
+
+            notificationManager.notify(WALLED_GARDEN_NOTIFICATION_ID, 1, notification);
+        } else {
+            notificationManager.cancel(WALLED_GARDEN_NOTIFICATION_ID, 1);
+        }
+        mWalledGardenNotificationShown = visible;
+    }
+
+    private void setDisabledNetworkNotificationVisible(boolean visible) {
+        // If it should be hidden and it is already hidden, then noop
+        if (!visible && !mDisabledNotificationShown) {
+            return;
+        }
+
+        Resources r = Resources.getSystem();
+        NotificationManager notificationManager = (NotificationManager) mContext
+            .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (visible) {
+            CharSequence title = r.getText(R.string.wifi_watchdog_network_disabled);
+            String msg = mConnectionInfo.getSSID() +
+                r.getText(R.string.wifi_watchdog_network_disabled_detailed);
+
+            Notification wifiDisabledWarning = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.stat_sys_warning)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setTicker(title)
+                .setContentTitle(title)
+                .setContentText(msg)
+                .setContentIntent(PendingIntent.getActivity(mContext, 0,
+                            new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0))
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true)
+                .getNotification();
+
+            notificationManager.notify(DISABLED_NETWORK_NOTIFICATION_ID, 1, wifiDisabledWarning);
+        } else {
+            notificationManager.cancel(DISABLED_NETWORK_NOTIFICATION_ID, 1);
+        }
+        mDisabledNotificationShown = visible;
     }
 
     class DefaultState extends State {
@@ -576,9 +604,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     NetworkInfo networkInfo = (NetworkInfo)
                             stateChangeIntent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 
+                    setDisabledNetworkNotificationVisible(false);
+                    setWalledGardenNotificationVisible(false);
                     switch (networkInfo.getState()) {
                         case CONNECTED:
-                            cancelNetworkNotification();
                             WifiInfo wifiInfo = (WifiInfo)
                                 stateChangeIntent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                             if (wifiInfo == null) {
@@ -974,7 +1003,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 }
                 mWifiManager.disableNetwork(networkId, WifiConfiguration.DISABLED_DNS_FAILURE);
                 if (mShowDisabledNotification && mConnectionInfo.isExplicitConnect()) {
-                    displayDisabledNetworkNotification(mConnectionInfo.getSSID());
+                    setDisabledNetworkNotificationVisible(true);
                 }
                 transitionTo(mNotConnectedState);
             } else {
@@ -1007,7 +1036,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 }
                 return HANDLED;
             }
-            popUpBrowser();
+            setWalledGardenNotificationVisible(true);
             transitionTo(mOnlineWatchState);
             return HANDLED;
         }
