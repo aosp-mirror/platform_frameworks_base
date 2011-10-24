@@ -246,6 +246,11 @@ public class CDMALTEPhone extends CDMAPhone {
     }
 
     @Override
+    public void getAvailableNetworks(Message response) {
+        mCM.getAvailableNetworks(response);
+    }
+
+    @Override
     public void requestIsimAuthentication(String nonce, Message result) {
         mCM.requestIsimAuthentication(nonce, result);
     }
