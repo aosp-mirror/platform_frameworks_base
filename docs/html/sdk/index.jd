@@ -1,22 +1,22 @@
 page.title=Android SDK
 sdk.redirect=0
 
-sdk.win_installer=installer_r14-windows.exe
-sdk.win_installer_bytes=33853391
-sdk.win_installer_checksum=4f1cb329a41328c2cee2908b31ae6f6b
+sdk.win_installer=installer_r15-windows.exe
+sdk.win_installer_bytes=33902520
+sdk.win_installer_checksum=ee8481cb86a6646a4d963d5142902c5c
 
-sdk.win_download=android-sdk_r14-windows.zip
-sdk.win_bytes=33846273
-sdk.win_checksum=48d44ae4cfcadede68621acb53caee80
+sdk.win_download=android-sdk_r15-windows.zip
+sdk.win_bytes=33895447
+sdk.win_checksum=cc2aadf7120d12b574981461736a96e9
 
-sdk.mac_download=android-sdk_r14-macosx.zip
-sdk.mac_bytes=30428734
-sdk.mac_checksum=812887018435382de8486f3bb26a5db4
+sdk.mac_download=android-sdk_r15-macosx.zip
+sdk.mac_bytes=30469921
+sdk.mac_checksum=03d2cdd3565771e8c7a438f1c40cc8a5
 
-sdk.linux_download=android-sdk_r14-linux.tgz
-sdk.linux_bytes=26075938
-sdk.linux_checksum=35c989ff67184766dc4960813ede8ab5
-
+sdk.linux_download=android-sdk_r15-linux.tgz
+sdk.linux_bytes=26124434
+sdk.linux_checksum=f529681fd1eda11c6e1e1d44b42c1432
+  
 @jd:body
 
 <div class="non-preview">
@@ -44,3 +44,4 @@ then read the guide to <a href="installing.html">Installing the SDK</a>.</p>
 development environment, read the guide to <a href="installing.html">Installing the SDK</a>.</p>
 
 </div>
+

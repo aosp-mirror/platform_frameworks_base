@@ -65,9 +65,57 @@ padding: .25em 1em;
 }
 </style>
 
+
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+    width="9px" />SDK Tools, Revision 15</a> <em>(October 2011)</em>
+
+  <div class="toggleme">
+    <p class="caution"><strong>Important:</strong> To download the new Android
+    4.0 system components from the Android SDK Manager, you must first update the
+    SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+    the Android 4.0 system components will not be available for download.</p>
+  <dl>
+<dt>Dependencies:</dt>
+<dd>
+  <ul><li>Android SDK Platform-tools revision 9 or later.</li>
+  <li>If you are developing in Eclipse with ADT, note that the SDK Tools r15 is designed for use
+  with ADT 15.0.0 and later. If you haven't already, we highly recommend updating your <a
+  href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 15.0.0.</li>
+  <li>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
+  Ant</a> 1.8 or later.</li>
+</ul>
+
+<dt>Bug fixes:</dt>
+<dd>
+  <ul>
+    <li>Fixed emulator crash on Linux due to improper webcam detection
+    (<a href="http://code.google.com/p/android/issues/detail?id=20952">Issue 20952</a>).</li>
+    <li>Fixed emulator issue when using the <code>-wipe-data</code> argument.</li>
+    <li>Fixed build issue when using Renderscript in projects that target API levels 11-13
+    (<a href="http://code.google.com/p/android/issues/detail?id=21006">Issue 21006</a>).</li>
+    <li>Fixed issue when creating an AVD using the GoogleTV addon
+    (<a href="http://code.google.com/p/android/issues/detail?id=20963">Issue 20963</a>).</li>
+    <li>Fixed <code>ant test</code>
+    (<a href="http://code.google.com/p/android/issues/detail?id=20979">Issue 20979</a>).</li>
+    <li>Fixed <code>android update project</code>
+    (<a href="http://code.google.com/p/android/issues/detail?id=20535">Issue 20535</a>).</li>
+    <li>Fixed scrolling issue in the new Logcat panel of DDMS.</li>
+    <li>Fixed issue with MonkeyRunner
+    (<a href="http://code.google.com/p/android/issues/detail?id=20964">Issue 20964</a>).</li>
+    <li>Fixed issues in the SDK Manager
+    (<a href="http://code.google.com/p/android/issues/detail?id=20939">Issue 20939</a>,
+    <a href="http://code.google.com/p/android/issues/detail?id=20607">Issue 20607</a>).</li>
+  </ul>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
     width="9px" />SDK Tools, Revision 14</a> <em>(October 2011)</em>
 
   <div class="toggleme">
