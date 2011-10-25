@@ -89,12 +89,6 @@ status_t NuPlayerDriver::setDataSource(const sp<IStreamSource> &source) {
     return OK;
 }
 
-status_t NuPlayerDriver::setVideoSurface(const sp<Surface> &surface) {
-    mPlayer->setVideoSurface(surface);
-
-    return OK;
-}
-
 status_t NuPlayerDriver::setVideoSurfaceTexture(
         const sp<ISurfaceTexture> &surfaceTexture) {
     mPlayer->setVideoSurfaceTexture(surfaceTexture);

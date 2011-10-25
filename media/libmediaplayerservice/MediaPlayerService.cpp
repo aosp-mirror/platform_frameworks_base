@@ -788,14 +788,6 @@ status_t MediaPlayerService::Client::setDataSource(
     return mStatus;
 }
 
-status_t MediaPlayerService::Client::setVideoSurface(const sp<Surface>& surface)
-{
-    LOGV("[%d] setVideoSurface(%p)", mConnId, surface.get());
-    sp<MediaPlayerBase> p = getPlayer();
-    if (p == 0) return UNKNOWN_ERROR;
-    return p->setVideoSurface(surface);
-}
-
 void MediaPlayerService::Client::disconnectNativeWindow() {
     if (mConnectedWindow != NULL) {
         status_t err = native_window_api_disconnect(mConnectedWindow.get(),

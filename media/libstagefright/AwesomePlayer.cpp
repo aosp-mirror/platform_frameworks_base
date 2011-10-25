@@ -1139,17 +1139,8 @@ bool AwesomePlayer::isPlaying() const {
     return (mFlags & PLAYING) || (mFlags & CACHE_UNDERRUN);
 }
 
-status_t AwesomePlayer::setSurface(const sp<Surface> &surface) {
-    Mutex::Autolock autoLock(mLock);
-
-    mSurface = surface;
-    return setNativeWindow_l(surface);
-}
-
 status_t AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
     Mutex::Autolock autoLock(mLock);
-
-    mSurface.clear();
 
     status_t err;
     if (surfaceTexture != NULL) {

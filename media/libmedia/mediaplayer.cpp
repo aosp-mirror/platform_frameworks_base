@@ -219,14 +219,6 @@ status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *m
     return mPlayer->getMetadata(update_only, apply_filter, metadata);
 }
 
-status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
-{
-    LOGV("setVideoSurface");
-    Mutex::Autolock _l(mLock);
-    if (mPlayer == 0) return NO_INIT;
-    return mPlayer->setVideoSurface(surface);
-}
-
 status_t MediaPlayer::setVideoSurfaceTexture(
         const sp<ISurfaceTexture>& surfaceTexture)
 {
