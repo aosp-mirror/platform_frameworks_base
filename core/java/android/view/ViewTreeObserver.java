@@ -288,6 +288,14 @@ public final class ViewTreeObserver {
             }
         }
 
+        if (observer.mOnScrollChangedListeners != null) {
+            if (mOnScrollChangedListeners != null) {
+                mOnScrollChangedListeners.addAll(observer.mOnScrollChangedListeners);
+            } else {
+                mOnScrollChangedListeners = observer.mOnScrollChangedListeners;
+            }
+        }
+
         observer.kill();
     }
 
