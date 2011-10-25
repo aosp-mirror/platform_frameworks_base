@@ -43,7 +43,18 @@ import java.util.Locale;
  */
 public class SpellChecker implements SpellCheckerSessionListener {
 
-    private final static int MAX_SPELL_BATCH_SIZE = 50;
+    // No more than this number of words will be parsed on each iteration to ensure a minimum
+    // lock of the UI thread
+    public static final int MAX_NUMBER_OF_WORDS = 50;
+
+    // Rough estimate, such that the word iterator interval usually does not need to be shifted
+    public static final int AVERAGE_WORD_LENGTH = 7;
+
+    // When parsing, use a character window of that size. Will be shifted if needed
+    public static final int WORD_ITERATOR_INTERVAL = AVERAGE_WORD_LENGTH * MAX_NUMBER_OF_WORDS;
+
+    // Pause between each spell check to keep the UI smooth
+    private final static int SPELL_PAUSE_DURATION = 400; // milliseconds
 
     private final TextView mTextView;
 
@@ -70,6 +81,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
     private WordIterator mWordIterator;
 
     private TextServicesManager mTextServicesManager;
+
+    private Runnable mSpellRunnable;
 
     public SpellChecker(TextView textView) {
         mTextView = textView;
@@ -140,6 +153,10 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
             mSpellParsers[i].finish();
+        }
+
+        if (mSpellRunnable != null) {
+            mTextView.removeCallbacks(mSpellRunnable);
         }
     }
 
@@ -254,6 +271,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 System.arraycopy(textInfos, 0, textInfosCopy, 0, textInfosCount);
                 textInfos = textInfosCopy;
             }
+
             mSpellCheckerSession.getSuggestions(textInfos, SuggestionSpan.SUGGESTIONS_MAX_SIZE,
                     false /* TODO Set sequentialWords to true for initial spell check */);
         }
@@ -288,13 +306,29 @@ public class SpellChecker implements SpellCheckerSessionListener {
             }
         }
 
-        final int length = mSpellParsers.length;
-        for (int i = 0; i < length; i++) {
-            final SpellParser spellParser = mSpellParsers[i];
-            if (!spellParser.isFinished()) {
-                spellParser.parse();
-            }
+        scheduleNewSpellCheck();
+    }
+
+    private void scheduleNewSpellCheck() {
+        if (mSpellRunnable == null) {
+            mSpellRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    final int length = mSpellParsers.length;
+                    for (int i = 0; i < length; i++) {
+                        final SpellParser spellParser = mSpellParsers[i];
+                        if (!spellParser.isFinished()) {
+                            spellParser.parse();
+                            break; // run one spell parser at a time to bound running time
+                        }
+                    }
+                }
+            };
+        } else {
+            mTextView.removeCallbacks(mSpellRunnable);
         }
+
+        mTextView.postDelayed(mSpellRunnable, SPELL_PAUSE_DURATION);
     }
 
     private void createMisspelledSuggestionSpan(Editable editable, SuggestionsInfo suggestionsInfo,
@@ -383,7 +417,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
             // Iterate over the newly added text and schedule new SpellCheckSpans
             final int start = editable.getSpanStart(mRange);
             final int end = editable.getSpanEnd(mRange);
-            mWordIterator.setCharSequence(editable, start, end);
+
+            int wordIteratorWindowEnd = Math.min(end, start + WORD_ITERATOR_INTERVAL);
+            mWordIterator.setCharSequence(editable, start, wordIteratorWindowEnd);
 
             // Move back to the beginning of the current word, if any
             int wordStart = mWordIterator.preceding(start);
@@ -408,11 +444,16 @@ public class SpellChecker implements SpellCheckerSessionListener {
             SuggestionSpan[] suggestionSpans = editable.getSpans(start - 1, end + 1,
                     SuggestionSpan.class);
 
-            int nbWordsChecked = 0;
+            int wordCount = 0;
             boolean scheduleOtherSpellCheck = false;
 
             while (wordStart <= end) {
                 if (wordEnd >= start && wordEnd > wordStart) {
+                    if (wordCount >= MAX_NUMBER_OF_WORDS) {
+                        scheduleOtherSpellCheck = true;
+                        break;
+                    }
+
                     // A new word has been created across the interval boundaries with this edit.
                     // Previous spans (ended on start / started on end) removed, not valid anymore
                     if (wordStart < start && wordEnd > start) {
@@ -448,17 +489,20 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     }
 
                     if (createSpellCheckSpan) {
-                        if (nbWordsChecked == MAX_SPELL_BATCH_SIZE) {
-                            scheduleOtherSpellCheck = true;
-                            break;
-                        }
                         addSpellCheckSpan(editable, wordStart, wordEnd);
-                        nbWordsChecked++;
                     }
+                    wordCount++;
                 }
 
                 // iterate word by word
+                int originalWordEnd = wordEnd;
                 wordEnd = mWordIterator.following(wordEnd);
+                if ((wordIteratorWindowEnd < end) &&
+                        (wordEnd == BreakIterator.DONE || wordEnd >= wordIteratorWindowEnd)) {
+                    wordIteratorWindowEnd = Math.min(end, originalWordEnd + WORD_ITERATOR_INTERVAL);
+                    mWordIterator.setCharSequence(editable, originalWordEnd, wordIteratorWindowEnd);
+                    wordEnd = mWordIterator.following(originalWordEnd);
+                }
                 if (wordEnd == BreakIterator.DONE) break;
                 wordStart = mWordIterator.getBeginning(wordEnd);
                 if (wordStart == BreakIterator.DONE) {
