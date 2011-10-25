@@ -425,14 +425,10 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
         // Initialize Harfbuzz Shaper
         initShaperItem(shaperItem, &font, &fontData, paint, chars, contextCount);
 
+        bool useSingleRun = false;
+        bool isRTL = forceRTL;
         if (forceLTR || forceRTL) {
-#if DEBUG_GLYPHS
-                    LOGD("computeValuesWithHarfbuzz -- forcing run with LTR=%d RTL=%d",
-                            forceLTR, forceRTL);
-#endif
-            computeRunValuesWithHarfbuzz(shaperItem, paint,
-                    start, count, forceRTL,
-                    outAdvances, outTotalAdvance, outGlyphs);
+            useSingleRun = true;
         } else {
             UBiDi* bidi = ubidi_open();
             if (bidi) {
@@ -443,43 +439,50 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                 ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
                 if (U_SUCCESS(status)) {
                     int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
-                    size_t rc = ubidi_countRuns(bidi, &status);
+                    ssize_t rc = ubidi_countRuns(bidi, &status);
 #if DEBUG_GLYPHS
                     LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d",
                             dirFlags, rc, paraDir);
 #endif
-                    if (rc == 1 || !U_SUCCESS(status)) {
-                        bool isRTL = (paraDir == 1);
-#if DEBUG_GLYPHS
-                        LOGD("computeValuesWithHarfbuzz -- processing SINGLE run "
-                                "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
-#endif
-                        computeRunValuesWithHarfbuzz(shaperItem, paint,
-                                start, count, isRTL,
-                                outAdvances, outTotalAdvance, outGlyphs);
+                    if (!U_SUCCESS(status) || rc <= 1) {
+                        LOGW("computeValuesWithHarfbuzz -- need to force to single run");
+                        isRTL = (paraDir == 1);
+                        useSingleRun = true;
                     } else {
                         int32_t end = start + count;
-                        for (size_t i = 0; i < rc; ++i) {
-                            int32_t startRun;
-                            int32_t lengthRun;
+                        for (size_t i = 0; i < size_t(rc); ++i) {
+                            int32_t startRun = -1;
+                            int32_t lengthRun = -1;
                             UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
+
+                            if (startRun == -1 || lengthRun == -1) {
+                                // Something went wrong when getting the visual run, need to clear
+                                // already computed data before doing a single run pass
+                                LOGW("computeValuesWithHarfbuzz -- visual run is not valid");
+                                outGlyphs->clear();
+                                outAdvances->clear();
+                                *outTotalAdvance = 0;
+                                isRTL = (paraDir == 1);
+                                useSingleRun = true;
+                                break;
+                            }
 
                             if (startRun >= end) {
                                 continue;
                             }
                             int32_t endRun = startRun + lengthRun;
-                            if (endRun <= start) {
+                            if (endRun <= int32_t(start)) {
                                 continue;
                             }
-                            if (startRun < start) {
-                                startRun = start;
+                            if (startRun < int32_t(start)) {
+                                startRun = int32_t(start);
                             }
                             if (endRun > end) {
                                 endRun = end;
                             }
 
                             lengthRun = endRun - startRun;
-                            bool isRTL = (runDir == UBIDI_RTL);
+                            isRTL = (runDir == UBIDI_RTL);
                             jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
                             LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d isRTL=%d",
@@ -492,19 +495,28 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                             *outTotalAdvance += runTotalAdvance;
                         }
                     }
+                } else {
+                    LOGW("computeValuesWithHarfbuzz -- cannot set Para");
+                    useSingleRun = true;
+                    isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
                 }
                 ubidi_close(bidi);
             } else {
-                // Cannot run BiDi, just consider one Run
-                bool isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
-#if DEBUG_GLYPHS
-                LOGD("computeValuesWithHarfbuzz -- cannot run BiDi, considering a SINGLE Run "
-                        "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
-#endif
-                computeRunValuesWithHarfbuzz(shaperItem, paint,
-                        start, count, isRTL,
-                        outAdvances, outTotalAdvance, outGlyphs);
+                LOGW("computeValuesWithHarfbuzz -- cannot ubidi_open()");
+                useSingleRun = true;
+                isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
             }
+        }
+
+        // Default single run case
+        if (useSingleRun){
+#if DEBUG_GLYPHS
+            LOGD("computeValuesWithHarfbuzz -- Using a SINGLE Run "
+                    "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
+#endif
+            computeRunValuesWithHarfbuzz(shaperItem, paint,
+                    start, count, isRTL,
+                    outAdvances, outTotalAdvance, outGlyphs);
         }
 
         // Cleaning
