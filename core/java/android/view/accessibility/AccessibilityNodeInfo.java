@@ -200,12 +200,12 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Sets the source to be a virtual descendant of the given <code>root</code>.
-     * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+     * If <code>virtualDescendantId</code> is {@link View#NO_ID} the root
      * is set as the source.
      * <p>
      * A virtual descendant is an imaginary View that is reported as a part of the view
      * hierarchy for accessibility purposes. This enables custom views that draw complex
-     * content to report them selves as a tree of virtual views, thus conveying their
+     * content to report themselves as a tree of virtual views, thus conveying their
      * logical structure.
      * </p>
      * <p>
@@ -285,7 +285,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Adds a virtual child which is a descendant of the given <code>root</code>.
-     * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+     * If <code>virtualDescendantId</code> is {@link View#NO_ID} the root
      * is added as a child.
      * <p>
      * A virtual descendant is an imaginary View that is reported as a part of the view
