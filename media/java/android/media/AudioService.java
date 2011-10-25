@@ -392,6 +392,15 @@ public class AudioService extends IAudioService.Stub {
         TelephonyManager tmgr = (TelephonyManager)
                 context.getSystemService(Context.TELEPHONY_SERVICE);
         tmgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+
+        if (context.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume)) {
+            float volume = Settings.System.getFloat(mContentResolver,
+                    Settings.System.VOLUME_MASTER, -1.0f);
+            if (volume >= 0.0f) {
+                AudioSystem.setMasterVolume(volume);
+            }
+        }
     }
 
     private void createAudioSystemThread() {
@@ -577,6 +586,9 @@ public class AudioService extends IAudioService.Stub {
                 if (volume < 0.0f) volume = 0.0f;
             }
             AudioSystem.setMasterVolume(volume);
+            long origCallerIdentityToken = Binder.clearCallingIdentity();
+            Settings.System.putFloat(mContentResolver, Settings.System.VOLUME_MASTER, volume);
+            Binder.restoreCallingIdentity(origCallerIdentityToken);
         }
     }
 
