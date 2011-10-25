@@ -600,12 +600,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mSurface == null) {
             mReportDestroySurface = false;
             mSurfacePendingDestroy = false;
+            Slog.i(WindowManagerService.TAG, "createSurface " + this + ": DRAW NOW PENDING");
             mDrawPending = true;
             mCommitDrawPending = false;
             mReadyToShow = false;
             if (mAppToken != null) {
                 mAppToken.allDrawn = false;
             }
+
+            mService.makeWindowFreezingScreenIfNeededLocked(this);
 
             int flags = 0;
 
@@ -771,7 +774,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean finishDrawingLocked() {
         if (mDrawPending) {
             if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
-                WindowManagerService.TAG, "finishDrawingLocked: " + mSurface);
+                WindowManagerService.TAG, "finishDrawingLocked: " + this + " in " + mSurface);
             mCommitDrawPending = true;
             mDrawPending = false;
             return true;
