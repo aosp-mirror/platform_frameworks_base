@@ -253,5 +253,9 @@ public class AudioSystem
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
     public static native int setStreamVolumeIndex(int stream, int index);
     public static native int getStreamVolumeIndex(int stream);
+    public static native int setMasterVolume(float value);
+    public static native float getMasterVolume();
+    public static native int setMasterMute(boolean mute);
+    public static native boolean getMasterMute();
     public static native int getDevicesForStream(int stream);
 }
