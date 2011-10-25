@@ -1469,6 +1469,12 @@ public final class Settings {
         public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
 
         /**
+         * Master volume (float in the range 0.0f to 1.0f).
+         * @hide
+         */
+        public static final String VOLUME_MASTER = "volume_master";
+
+        /**
          * Whether the notifications should use the ring volume (value of 1) or a separate
          * notification volume (value of 0). In most cases, users will have this enabled so the
          * notification and ringer volumes will be the same. However, power users can disable this
