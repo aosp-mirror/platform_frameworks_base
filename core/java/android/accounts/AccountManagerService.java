@@ -499,7 +499,7 @@ public class AccountManagerService
             if (response != null) {
                 try {
                     if (result == null) {
-                        onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
+                        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
                         return;
                     }
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -1541,8 +1541,15 @@ public class AccountManagerService
             mAuthenticator = null;
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
-                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
-                        "disconnected");
+                try {
+                    response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
+                            "disconnected");
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Session.onServiceDisconnected: "
+                                + "caught RemoteException while responding", e);
+                    }
+                }
             }
         }
 
@@ -1551,8 +1558,15 @@ public class AccountManagerService
         public void onTimedOut() {
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
-                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
-                        "timeout");
+                try {
+                    response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
+                            "timeout");
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Session.onTimedOut: caught RemoteException while responding",
+                                e);
+                    }
+                }
             }
         }
 
