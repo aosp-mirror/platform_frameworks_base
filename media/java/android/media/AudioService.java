@@ -127,6 +127,9 @@ public class AudioService extends IAudioService.Stub {
     // Timeout for connection to bluetooth headset service
     private static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
 
+    // Amount to raise/lower master volume
+    // FIXME - this should probably be in a resource
+    private static final float MASTER_VOLUME_INCREMENT = 0.05f;
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -558,6 +561,23 @@ public class AudioService extends IAudioService.Stub {
         }
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
+    }
+
+    /** @see AudioManager#adjustMasterVolume(int) */
+    public void adjustMasterVolume(int direction) {
+        ensureValidDirection(direction);
+
+        float volume = AudioSystem.getMasterVolume();
+        if (volume >= 0.0) {
+            if (direction == AudioManager.ADJUST_RAISE) {
+                volume += MASTER_VOLUME_INCREMENT;
+                if (volume > 1.0f) volume = 1.0f;
+            } else if (direction == AudioManager.ADJUST_LOWER) {
+                volume -= MASTER_VOLUME_INCREMENT;
+                if (volume < 0.0f) volume = 0.0f;
+            }
+            AudioSystem.setMasterVolume(volume);
+        }
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */

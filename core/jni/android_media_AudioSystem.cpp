@@ -198,6 +198,38 @@ android_media_AudioSystem_getStreamVolumeIndex(JNIEnv *env, jobject thiz, jint s
     return index;
 }
 
+static int
+android_media_AudioSystem_setMasterVolume(JNIEnv *env, jobject thiz, jfloat value)
+{
+    return check_AudioSystem_Command(AudioSystem::setMasterVolume(value));
+}
+
+static jfloat
+android_media_AudioSystem_getMasterVolume(JNIEnv *env, jobject thiz)
+{
+    float value;
+    if (AudioSystem::getMasterVolume(&value) != NO_ERROR) {
+        value = -1.0;
+    }
+    return value;
+}
+
+static int
+android_media_AudioSystem_setMasterMute(JNIEnv *env, jobject thiz, jboolean mute)
+{
+    return check_AudioSystem_Command(AudioSystem::setMasterMute(mute));
+}
+
+static jfloat
+android_media_AudioSystem_getMasterMute(JNIEnv *env, jobject thiz)
+{
+    bool mute;
+    if (AudioSystem::getMasterMute(&mute) != NO_ERROR) {
+        mute = false;
+    }
+    return mute;
+}
+
 static jint
 android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
 {
@@ -221,6 +253,10 @@ static JNINativeMethod gMethods[] = {
     {"initStreamVolume",    "(III)I",   (void *)android_media_AudioSystem_initStreamVolume},
     {"setStreamVolumeIndex","(II)I",    (void *)android_media_AudioSystem_setStreamVolumeIndex},
     {"getStreamVolumeIndex","(I)I",     (void *)android_media_AudioSystem_getStreamVolumeIndex},
+    {"setMasterVolume",     "(F)I",     (void *)android_media_AudioSystem_setMasterVolume},
+    {"getMasterVolume",     "()F",      (void *)android_media_AudioSystem_getMasterVolume},
+    {"setMasterMute",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMute},
+    {"getMasterMute",       "()Z",      (void *)android_media_AudioSystem_getMasterMute},
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
 };
 
