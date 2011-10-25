@@ -1014,7 +1014,7 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Dispositivo de depuración USB conectado"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccionar para inhabilitar la depuración USB"</string>
-    <string name="select_input_method" msgid="6865512749462072765">"Seleccionar método de introducción de texto"</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Selecciona un método de introducción de texto"</string>
     <string name="configure_input_methods" msgid="6324843080254191535">"Configurar métodos de introducción"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>

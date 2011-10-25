@@ -131,8 +131,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter бе активиран."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибрира при звънене."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Звънът е заглушен."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложението <xliff:g id="APP">%s</xliff:g> е отхвърлено."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G данните са деактивирани"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G данните са деактивирани"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобилните данни са деактивирани"</string>
