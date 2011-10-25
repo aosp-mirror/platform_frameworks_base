@@ -30,9 +30,11 @@ interface IAudioService {
     void adjustVolume(int direction, int flags);
 
     void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags);
-    
+
     void adjustStreamVolume(int streamType, int direction, int flags);
-    
+
+    void adjustMasterVolume(int direction);
+
     void setStreamVolume(int streamType, int index, int flags);
     
     void setStreamSolo(int streamType, boolean state, IBinder cb);
