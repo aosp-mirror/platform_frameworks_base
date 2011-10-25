@@ -52,6 +52,7 @@ public class AudioManager {
     private final Handler mHandler;
     private long mVolumeKeyUpTime;
     private int  mVolumeControlStream = -1;
+    private final boolean mUseMasterVolume;
     private static String TAG = "AudioManager";
     private static boolean localLOGV = false;
 
@@ -360,6 +361,8 @@ public class AudioManager {
     public AudioManager(Context context) {
         mContext = context;
         mHandler = new Handler(context.getMainLooper());
+        mUseMasterVolume = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
     }
 
     private static IAudioService getService()
@@ -388,8 +391,12 @@ public class AudioManager {
              * The user has hit another key during the delay (e.g., 300ms)
              * since the last volume key up, so cancel any sounds.
              */
-            adjustSuggestedStreamVolume(AudioManager.ADJUST_SAME,
+            if (mUseMasterVolume) {
+                adjustMasterVolume(ADJUST_SAME);
+            } else {
+                adjustSuggestedStreamVolume(ADJUST_SAME,
                         stream, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+            }
         }
     }
 
@@ -405,16 +412,23 @@ public class AudioManager {
                  * responsive to the user.
                  */
                 int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
-                if (mVolumeControlStream != -1) {
-                    stream = mVolumeControlStream;
-                    flags |= FLAG_FORCE_STREAM;
+                if (mUseMasterVolume) {
+                    adjustMasterVolume(
+                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                    ? ADJUST_RAISE
+                                    : ADJUST_LOWER);
+                } else {
+                    if (mVolumeControlStream != -1) {
+                        stream = mVolumeControlStream;
+                        flags |= FLAG_FORCE_STREAM;
+                    }
+                    adjustSuggestedStreamVolume(
+                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                    ? ADJUST_RAISE
+                                    : ADJUST_LOWER,
+                            stream,
+                            flags);
                 }
-                adjustSuggestedStreamVolume(
-                        keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                ? ADJUST_RAISE
-                                : ADJUST_LOWER,
-                        stream,
-                        flags);
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 // TODO: Actually handle MUTE.
@@ -433,15 +447,21 @@ public class AudioManager {
                  * Play a sound. This is done on key up since we don't want the
                  * sound to play when a user holds down volume down to mute.
                  */
-                int flags = FLAG_PLAY_SOUND;
-                if (mVolumeControlStream != -1) {
-                    stream = mVolumeControlStream;
-                    flags |= FLAG_FORCE_STREAM;
+                if (mUseMasterVolume) {
+                    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                        adjustMasterVolume(ADJUST_SAME);
+                    }
+                } else {
+                    int flags = FLAG_PLAY_SOUND;
+                    if (mVolumeControlStream != -1) {
+                        stream = mVolumeControlStream;
+                        flags |= FLAG_FORCE_STREAM;
+                    }
+                    adjustSuggestedStreamVolume(
+                            ADJUST_SAME,
+                            stream,
+                            flags);
                 }
-                adjustSuggestedStreamVolume(
-                        ADJUST_SAME,
-                        stream,
-                        flags);
 
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
                 break;
@@ -524,7 +544,24 @@ public class AudioManager {
         try {
             service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in adjustVolume", e);
+            Log.e(TAG, "Dead object in adjustSuggestedStreamVolume", e);
+        }
+    }
+
+    /**
+     * Adjusts the master volume for the device's audio amplifier.
+     * <p>
+     *
+     * @param direction The direction to adjust the volume. One of
+     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
+     *            {@link #ADJUST_SAME}.
+     */
+    private void adjustMasterVolume(int direction) {
+        IAudioService service = getService();
+        try {
+            service.adjustMasterVolume(direction);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in adjustMasterVolume", e);
         }
     }
 
