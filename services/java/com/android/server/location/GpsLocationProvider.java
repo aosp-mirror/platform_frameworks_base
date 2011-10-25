@@ -554,13 +554,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         long delay;
 
-        // force refresh NTP cache when outdated
-        if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
-            mNtpTime.forceRefresh();
-        }
-
-        // only update when NTP time is fresh
-        if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
+        // GPS requires fresh NTP time
+        if (mNtpTime.forceRefresh()) {
             long time = mNtpTime.getCachedNtpTime();
             long timeReference = mNtpTime.getCachedNtpTimeReference();
             long certainty = mNtpTime.getCacheCertainty();
