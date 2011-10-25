@@ -867,16 +867,18 @@ public class GridLayout extends ViewGroup {
             if (firstPass) {
                 measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, lp.height);
             } else {
-                Spec spec = (orientation == HORIZONTAL) ? lp.columnSpec : lp.rowSpec;
+                boolean horizontal = (orientation == HORIZONTAL);
+                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 if (spec.alignment == FILL) {
                     Interval span = spec.span;
-                    Axis axis = (orientation == HORIZONTAL) ? horizontalAxis : verticalAxis;
+                    Axis axis = horizontal ? horizontalAxis : verticalAxis;
                     int[] locations = axis.getLocations();
-                    int size = locations[span.max] - locations[span.min];
-                    if (orientation == HORIZONTAL) {
-                        measureChildWithMargins2(c, widthSpec, heightSpec, size, lp.height);
+                    int cellSize = locations[span.max] - locations[span.min];
+                    int viewSize = cellSize - getTotalMargin(c, horizontal);
+                    if (horizontal) {
+                        measureChildWithMargins2(c, widthSpec, heightSpec, viewSize, lp.height);
                     } else {
-                        measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, size);
+                        measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, viewSize);
                     }
                 }
             }
