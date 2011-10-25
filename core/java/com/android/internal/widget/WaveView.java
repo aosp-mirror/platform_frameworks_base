@@ -26,10 +26,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
 
@@ -63,6 +66,18 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     private static final long DELAY_INCREMENT = 15; // increment per wave while tracking motion
     private static final long DELAY_INCREMENT2 = 12; // increment per wave while not tracking
     private static final long WAVE_DELAY = WAVE_DURATION / WAVE_COUNT; // initial propagation delay
+
+    /**
+     * The scale by which to multiply the unlock handle width to compute the radius
+     * in which it can be grabbed when accessibility is disabled.
+     */
+    private static final float GRAB_HANDLE_RADIUS_SCALE_ACCESSIBILITY_DISABLED = 0.5f;
+
+    /**
+     * The scale by which to multiply the unlock handle width to compute the radius
+     * in which it can be grabbed when accessibility is enabled (more generous).
+     */
+    private static final float GRAB_HANDLE_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.0f;
 
     private Vibrator mVibrator;
     private OnTriggerListener mOnTriggerListener;
@@ -451,6 +466,27 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     };
 
     @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (AccessibilityManager.getInstance(mContext).isTouchExplorationEnabled()) {
+            final int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    event.setAction(MotionEvent.ACTION_DOWN);
+                    break;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    event.setAction(MotionEvent.ACTION_MOVE);
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    event.setAction(MotionEvent.ACTION_UP);
+                    break;
+            }
+            onTouchEvent(event);
+            event.setAction(action);
+        }
+        return super.onHoverEvent(event);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getAction();
         mMouseX = event.getX();
@@ -460,21 +496,12 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
             case MotionEvent.ACTION_DOWN:
                 removeCallbacks(mLockTimerActions);
                 mFingerDown = true;
-                setGrabbedState(OnTriggerListener.CENTER_HANDLE);
-                {
-                    float x = mMouseX - mUnlockHalo.getX();
-                    float y = mMouseY - mUnlockHalo.getY();
-                    float dist = (float) Math.hypot(x, y);
-                    if (dist < mUnlockHalo.getWidth()*0.5f) {
-                        if (mLockState == STATE_READY) {
-                            mLockState = STATE_START_ATTEMPT;
-                        }
-                    }
-                }
+                tryTransitionToStartAttemptState(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                tryTransitionToStartAttemptState(event);
                 handled = true;
                 break;
 
@@ -499,6 +526,47 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
         }
         invalidate();
         return handled ? true : super.onTouchEvent(event);
+    }
+
+    /**
+     * Tries to transition to start attempt state.
+     *
+     * @param event A motion event.
+     */
+    private void tryTransitionToStartAttemptState(MotionEvent event) {
+        final float dx = event.getX() - mUnlockHalo.getX();
+        final float dy = event.getY() - mUnlockHalo.getY();
+        float dist = (float) Math.hypot(dx, dy);
+        if (dist <= getScaledGrabHandleRadius()) {
+            setGrabbedState(OnTriggerListener.CENTER_HANDLE);
+            if (mLockState == STATE_READY) {
+                mLockState = STATE_START_ATTEMPT;
+                if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                    announceUnlockHandle();
+                }
+            }
+        }
+    }
+
+    /**
+     * @return The radius in which the handle is grabbed scaled based on
+     *     whether accessibility is enabled.
+     */
+    private float getScaledGrabHandleRadius() {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            return GRAB_HANDLE_RADIUS_SCALE_ACCESSIBILITY_ENABLED * mUnlockHalo.getWidth();
+        } else {
+            return GRAB_HANDLE_RADIUS_SCALE_ACCESSIBILITY_DISABLED * mUnlockHalo.getWidth();
+        }
+    }
+
+    /**
+     * Announces the unlock handle if accessibility is enabled.
+     */
+    private void announceUnlockHandle() {
+        setContentDescription(mContext.getString(R.string.description_target_unlock_tablet));
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+        setContentDescription(null);
     }
 
     /**
