@@ -242,7 +242,7 @@
     <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Hiermee kan een app een melding verzenden dat een WAP PUSH-bericht is ontvangen. Schadelijke apps kunnen hiervan gebruik maken om een valse MMS-ontvangst te melden of de inhoud van willekeurige webpagina\'s door schadelijke varianten te vervangen."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"aantal actieve processen beperken"</string>
     <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Hiermee kan een app het maximum aantal processen bepalen dat wordt uitgevoerd. Nooit vereist voor normale apps."</string>
-    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"alle achtergrondtoepassingen sluiten"</string>
+    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"alle achtergrondapplicaties sluiten"</string>
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Hiermee kan een app bepalen of activiteiten altijd worden afgesloten zodra deze naar de achtergrond gaan. Nooit nodig voor normale apps."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"accustatistieken aanpassen"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Hiermee kunnen verzamelde accustatistieken worden gewijzigd. Niet voor gebruik door normale apps."</string>

@@ -34,7 +34,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Brak powiadomień"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Bieżące"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Powiadomienia"</string>
-    <!-- outdated translation 7923774589611311406 -->     <string name="battery_low_title" msgid="2783104807551211639">"Podłącz ładowarkę"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Podłącz ładowarkę"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Bateria wkrótce zostanie rozładowana."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Pozostało: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ładowanie przy użyciu złącza USB nie jest obsługiwane."\n"Należy używać tylko dołączonej ładowarki."</string>
@@ -47,42 +47,32 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTOM."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Powiadomienia"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth – podłączono"</string>
-    <!-- outdated translation 737483394044014246 -->     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfiguruj metody wprowadzania"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfiguruj metody wprowadzania"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Używaj klawiatury fizycznej"</string>
-    <!-- no translation found for usb_device_permission_prompt (834698001271562057) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (5171775411178865750) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Czy otworzyć <xliff:g id="ACTIVITY">%1$s</xliff:g> po podłączeniu tego urządzenia USB?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Czy otworzyć <xliff:g id="ACTIVITY">%1$s</xliff:g> po podłączeniu tego akcesorium USB?"</string>
-    <!-- no translation found for usb_accessory_uri_prompt (513450621413733343) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Zainstalowane aplikacje nie działają z tym akcesorium USB. Więcej informacji: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Akcesorium USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Wyświetl"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Używaj domyślnie dla tego urządzenia USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Używaj domyślnie dla tego akcesorium USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Powiększ, aby wypełnić ekran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rozciągnij, aby wypełnić ekran"</string>
-    <!-- outdated translation 7020175705401506719 -->     <string name="compat_mode_help_header" msgid="7969493989397529910">"Powiększenie w trybie zgodności"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Powiększenie w trybie zgodności"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Jeśli aplikacja została przystosowana do mniejszego ekranu, obok zegara zostanie wyświetlony element sterujący powiększeniem."</string>
-    <!-- no translation found for screenshot_saving_ticker (8847274279171967058) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (5951190902073655147) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Zapisywanie zrzutu ekranu..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Zapisywanie zrzutu ekranu..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Zapisywanie zrzutu ekranu."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Wykonano zrzut ekranu."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Dotknij, aby wyświetlić zrzut ekranu."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Nie udało się wykonać zrzutu ekranu."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Nie udało się zapisać zrzutu ekranu. Pamięć może być w użyciu."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB – opcje przesyłania plików"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Podłącz jako odtwarzacz multimedialny (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Podłącz jako aparat (PTP)"</string>
-    <!-- outdated translation 8485631662288445893 -->     <string name="installer_cd_button_title" msgid="2312667578562201583">"Zainstaluj aplikację Android File Transfer dla Mac OS"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Zainstaluj Android File Transfer dla Maca"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Wróć"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Ekran główny"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
@@ -107,18 +97,18 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dane: dwa paski."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Dane: trzy paski."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Dane: pełna moc sygnału."</string>
-    <!-- outdated translation 4017628918351949575 -->     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Brak sieci Wi-Fi."</string>
-    <!-- outdated translation 1914343229091303434 -->     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Sieć Wi-Fi: jeden pasek."</string>
-    <!-- outdated translation 7869150535859760698 -->     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Sieć Wi-Fi: dwa paski."</string>
-    <!-- outdated translation 2665319332961356254 -->     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Sieć Wi-Fi: trzy paski."</string>
-    <!-- outdated translation 1275764416228473932 -->     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Sieć Wi-Fi: pełna moc sygnału."</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Brak sieci Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi jeden pasek."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi dwa paski."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi trzy paski."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Pełna moc sygnału Wi-Fi."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <!-- outdated translation 1127208787254436420 -->     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Brak karty SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Powiązanie Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Tryb samolotowy."</string>
@@ -131,13 +121,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Dalekopis (TTY) włączony."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Dzwonek z wibracjami."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Dzwonek wyciszony."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g>: zamknięto."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Wyłączono transmisję danych 2G/3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Wyłączono transmisję danych 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Wyłączono komórkową transmisję danych"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Wyłączono transmisję danych"</string>
-    <!-- outdated translation 6524467913290900042 -->     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Osiągnięto określony limit transmisji danych."\n\n"Operator może pobierać opłaty za przesyłanie dodatkowych danych."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Osiągnięto określony limit wykorzystania transmisji danych."\n\n"Jeśli ponownie włączysz przesyłanie danych, operator może naliczyć opłaty."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Włącz transmisję danych"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Brak internetu"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: połączono"</string>

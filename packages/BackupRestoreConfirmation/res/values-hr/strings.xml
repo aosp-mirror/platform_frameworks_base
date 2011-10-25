@@ -25,10 +25,8 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Vrati moje podatke"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Ne vraćaj"</string>
     <string name="current_password_text" msgid="8268189555578298067">"U nastavku unesite trenutačnu zaporku za sigurnosnu kopiju:"</string>
-    <!-- no translation found for device_encryption_restore_text (1570864916855208992) -->
-    <skip />
-    <!-- no translation found for device_encryption_backup_text (5866590762672844664) -->
-    <skip />
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"U nastavku unesite svoju zaporku za enkripciju uređaja."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"U nastavku unesite svoju zaporku enkripcije za uređaj. Ona će se upotrijebiti i za enkripciju te za arhivu sigurnosnih kopija."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Unesite zaporku koju ćete upotrebljavati za kriptiranje podataka potpune sigurnosne kopije. Ako je ostavite praznom, bit će upotrijebljena vaša trenutačna zaporka za sigurnosno kopiranje:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ako želite kriptirati podatke potpune sigurnosne kopije, u nastavku unesite zaporku:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ako su podaci za vraćanje kriptirani, unesite zaporku u nastavku:"</string>
