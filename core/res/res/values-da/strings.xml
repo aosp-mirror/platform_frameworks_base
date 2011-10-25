@@ -215,7 +215,7 @@
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktiver programfejlretning"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillader, at en applikation slår fejlretning af en anden applikation til. Ondsindede applikationer kan bruge dette til at standse andre applikationer."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"skift indstillinger for brugergrænsefladen"</string>
-    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillader, at en applikation ændrer den nuværende konfiguration, f.eks. den lokale eller overordnede skrifttypestørrelse."</string>
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillader, at en applikation ændrer den nuværende konfiguration, f.eks. den lokale eller overordnede skriftstørrelse."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivere biltilstand"</string>
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Tillader en applikation at aktivere biltilstand."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"standse baggrundsprocesser"</string>
@@ -668,7 +668,7 @@
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Knap til forrige nummer"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Knap til næste nummer"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pause-knap"</string>
-    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Afspil-knappen"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Afspil-knap"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Stop-knap"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Kun nødopkald"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netværket er låst"</string>
@@ -986,7 +986,7 @@
     <string name="usb_storage_title" msgid="5901459041398751495">"USB er tilsluttet"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Du har fået forbindelse til din computer via USB. Vælg knappen nedenfor, hvis du vil kopiere filer mellem din computer og din Androids USB-lager."</string>
     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Du har fået forbindelse til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids SD-kort."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Slå USB-lagringen til"</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Slå USB-lagring til"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Der opstod et problem med at bruge USB-lager til USB-masselager."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Der opstod et problem med at bruge dit SD-kort til USB-masselager."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB er tilsluttet"</string>
@@ -999,7 +999,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå USB-lagring fra"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Slå USB-lagring til"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du slår USB-lagring til, vil nogle af de applikationer, som du bruger, stoppe, og de kan være utilgængelige, indtil du slår USB-lagring til igen."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du slår USB-lagring til, vil nogle af de applikationer, du bruger, stoppe, og de kan være utilgængelige, indtil du slår USB-lagring fra igen."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-handlingen mislykkedes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tilsluttet som en medieenhed"</string>
@@ -1009,7 +1009,7 @@
     <string name="usb_notification_message" msgid="4447869605109736382">"Tryk for at se andre valgmuligheder for USB-tilslutning"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formater USB-lager"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formater SD-kort"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vil du formatere USB-lager og slette alle filer, som er gemt der? Handlingen kan ikke fortrydes!"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vil du formatere USB-lageret og slette alle filer, som er gemt der? Handlingen kan ikke fortrydes!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
