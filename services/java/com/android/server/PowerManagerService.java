@@ -3043,6 +3043,11 @@ public class PowerManagerService extends IPowerManager.Stub
         }
         if (mSensorManager != null && mLightSensorEnabled != enable) {
             mLightSensorEnabled = enable;
+            // clear previous values so we will adjust to current brightness when
+            // auto-brightness is reenabled
+            mHighestLightSensorValue = -1;
+            mLightSensorValue = -1;
+
             // clear calling identity so sensor manager battery stats are accurate
             long identity = Binder.clearCallingIdentity();
             try {
