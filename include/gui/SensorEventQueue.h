@@ -24,7 +24,7 @@
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
 
-#include <gui/SensorChannel.h>
+#include <gui/BitTube.h>
 
 // ----------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ public:
 private:
     sp<Looper> getLooper() const;
     sp<ISensorEventConnection> mSensorEventConnection;
-    sp<SensorChannel> mSensorChannel;
+    sp<BitTube> mSensorChannel;
     mutable Mutex mLock;
     mutable sp<Looper> mLooper;
 };

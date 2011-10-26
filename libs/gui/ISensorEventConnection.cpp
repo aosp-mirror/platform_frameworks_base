@@ -25,7 +25,7 @@
 #include <binder/IInterface.h>
 
 #include <gui/ISensorEventConnection.h>
-#include <gui/SensorChannel.h>
+#include <gui/BitTube.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
@@ -44,12 +44,12 @@ public:
     {
     }
 
-    virtual sp<SensorChannel> getSensorChannel() const
+    virtual sp<BitTube> getSensorChannel() const
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISensorEventConnection::getInterfaceDescriptor());
         remote()->transact(GET_SENSOR_CHANNEL, data, &reply);
-        return new SensorChannel(reply);
+        return new BitTube(reply);
     }
 
     virtual status_t enableDisable(int handle, bool enabled)
@@ -83,7 +83,7 @@ status_t BnSensorEventConnection::onTransact(
     switch(code) {
         case GET_SENSOR_CHANNEL: {
             CHECK_INTERFACE(ISensorEventConnection, data, reply);
-            sp<SensorChannel> channel(getSensorChannel());
+            sp<BitTube> channel(getSensorChannel());
             channel->writeToParcel(reply);
             return NO_ERROR;
         } break;

@@ -24,7 +24,7 @@
 #include <utils/Looper.h>
 
 #include <gui/Sensor.h>
-#include <gui/SensorChannel.h>
+#include <gui/BitTube.h>
 #include <gui/SensorEventQueue.h>
 #include <gui/ISensorEventConnection.h>
 
@@ -104,7 +104,7 @@ status_t SensorEventQueue::waitForEvent() const
     do {
         result = looper->pollOnce(-1);
         if (result == ALOOPER_EVENT_ERROR) {
-            LOGE("SensorChannel::waitForEvent error (errno=%d)", errno);
+            LOGE("SensorEventQueue::waitForEvent error (errno=%d)", errno);
             result = -EPIPE; // unknown error, so we make up one
             break;
         }

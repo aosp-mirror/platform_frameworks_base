@@ -29,7 +29,7 @@
 #include <binder/BinderService.h>
 
 #include <gui/Sensor.h>
-#include <gui/SensorChannel.h>
+#include <gui/BitTube.h>
 #include <gui/ISensorServer.h>
 #include <gui/ISensorEventConnection.h>
 
@@ -71,12 +71,12 @@ class SensorService :
     class SensorEventConnection : public BnSensorEventConnection {
         virtual ~SensorEventConnection();
         virtual void onFirstRef();
-        virtual sp<SensorChannel> getSensorChannel() const;
+        virtual sp<BitTube> getSensorChannel() const;
         virtual status_t enableDisable(int handle, bool enabled);
         virtual status_t setEventRate(int handle, nsecs_t ns);
 
         sp<SensorService> const mService;
-        sp<SensorChannel> const mChannel;
+        sp<BitTube> const mChannel;
         mutable Mutex mConnectionLock;
 
         // protected by SensorService::mLock
