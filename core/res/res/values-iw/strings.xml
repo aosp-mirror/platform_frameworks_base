@@ -28,7 +28,7 @@
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;ללא כותרת&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"???"</string>
+    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(אין מספר טלפון)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(לא ידוע)"</string>

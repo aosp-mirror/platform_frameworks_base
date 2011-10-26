@@ -65,9 +65,9 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Снимак екрана се чува."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Снимак екрана је снимљен."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Снимак екрана је направљен."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Додирните да бисте видели снимак екрана."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Није могуће снимити снимак екрана."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Није могуће направити снимак екрана."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Није могуће сачувати снимак екрана. Могуће је да је меморија у употреби."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Опције USB преноса датотека"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Прикључи као медија плејер (MTP)"</string>

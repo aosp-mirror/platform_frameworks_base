@@ -890,7 +890,7 @@
     <string name="capital_off" msgid="6815870386972805832">"NO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar valores predeterminados en la página de configuración de la pantalla de inicio del teléfono &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Puedes borrar las acciones predeterminadas en Ajustes &gt; Aplicaciones."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Seleccionar una acción"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Seleccionar una aplicación para el dispositivo USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Ninguna aplicación puede realizar esta acción."</string>
@@ -916,7 +916,7 @@
     <string name="android_upgrading_title" msgid="378740715658358071">"Actualizando Android..."</string>
     <string name="android_upgrading_apk" msgid="274409861603566003">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Iniciando aplicaciones"</string>
-    <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalizando arranque..."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalizando arranque"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Seleccionar para cambiar a la aplicación"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"¿Cambiar de aplicación?"</string>
