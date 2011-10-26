@@ -54,6 +54,12 @@ import android.view.SurfaceView;
  * <li>Optionally wraps, traces, and/or error-checks the renderer's OpenGL calls.
  * </ul>
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use OpenGL, read the
+ * <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a> developer guide.</p>
+ * </div>
+ *
  * <h3>Using GLSurfaceView</h3>
  * <p>
  * Typically you use GLSurfaceView by subclassing it and overriding one or more of the
@@ -636,6 +642,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * this interface, and then call {@link GLSurfaceView#setRenderer} to
      * register the renderer with the GLSurfaceView.
      * <p>
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about how to use OpenGL, read the
+     * <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a> developer guide.</p>
+     * </div>
+     *
      * <h3>Threading</h3>
      * The renderer will be called on a separate thread, so that rendering
      * performance is decoupled from the UI thread. Clients typically need to

@@ -43,8 +43,6 @@ import java.lang.ref.WeakReference;
  * MediaPlayer class can be used to control playback
  * of audio/video files and streams. An example on how to use the methods in
  * this class can be found in {@link android.widget.VideoView}.
- * Please see <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a>
- * for additional help using MediaPlayer.
  *
  * <p>Topics covered here are:
  * <ol>
@@ -53,6 +51,12 @@ import java.lang.ref.WeakReference;
  * <li><a href="#Permissions">Permissions</a>
  * <li><a href="#Callbacks">Register informational and error callbacks</a>
  * </ol>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use MediaPlayer, read the
+ * <a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a> developer guide.</p>
+ * </div>
  *
  * <a name="StateDiagram"></a>
  * <h3>State Diagram</h3>

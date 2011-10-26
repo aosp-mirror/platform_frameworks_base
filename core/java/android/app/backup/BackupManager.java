@@ -41,9 +41,14 @@ import android.util.Log;
  * of how the operation then proceeds.
  * <p>
  * Several attributes affecting the operation of the backup and restore mechanism
- * can be set on the <code><a
- * href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+ * can be set on the <code>
+ * <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
  * tag in your application's AndroidManifest.xml file.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using BackupManager, read the
+ * <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a> developer guide.</p></div>
  *
  * @attr ref android.R.styleable#AndroidManifestApplication_allowBackup
  * @attr ref android.R.styleable#AndroidManifestApplication_backupAgent

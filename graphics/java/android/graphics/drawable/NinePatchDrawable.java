@@ -31,9 +31,15 @@ import java.io.InputStream;
 /**
  * 
  * A resizeable bitmap, with stretchable areas that you define. This type of image
- * is defined in a .png file with a special format, described in <a link="../../../resources.html#ninepatch">
- * Resources</a>.
+ * is defined in a .png file with a special format.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use a NinePatchDrawable, read the
+ * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">
+ * Canvas and Drawables</a> developer guide. For information about creating a NinePatch image
+ * file using the draw9patch tool, see the
+ * <a href="{@docRoot}guide/developing/tools/draw9patch.html">Draw 9-patch</a> tool guide.</p></div>
  */
 public class NinePatchDrawable extends Drawable {
     // dithering helps a lot, and is pretty cheap, so default is true

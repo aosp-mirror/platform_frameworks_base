@@ -30,6 +30,12 @@ import java.util.Set;
  * <p><em>Note: currently this class does not support use across multiple
  * processes.  This will be added later.</em>
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using SharedPreferences, read the
+ * <a href="{@docRoot}guide/topics/data/data-storage.html#pref">Data Storage</a>
+ * developer guide.</p></div>
+ *
  * @see Context#getSharedPreferences
  */
 public interface SharedPreferences {

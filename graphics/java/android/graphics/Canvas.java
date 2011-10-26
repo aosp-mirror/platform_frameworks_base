@@ -29,6 +29,12 @@ import javax.microedition.khronos.opengles.GL;
  * the draw calls (writing into the bitmap), a drawing primitive (e.g. Rect,
  * Path, text, Bitmap), and a paint (to describe the colors and styles for the
  * drawing).
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use Canvas, read the
+ * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html">
+ * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas {
     // assigned in constructors, freed in finalizer
