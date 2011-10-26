@@ -60,7 +60,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      * Sets this flag if the auto correction is about to be applied to a word/text
      * that the user is typing/composing. This type of suggestion is rendered differently
      * to indicate the auto correction is happening.
-     * @hide
      */
     public static final int FLAG_AUTO_CORRECTION = 0x0004;
 
