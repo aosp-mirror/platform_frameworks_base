@@ -34,7 +34,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ei ilmoituksia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Käynnissä olevat"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ilmoitukset"</string>
-    <!-- outdated translation 7923774589611311406 -->     <string name="battery_low_title" msgid="2783104807551211639">"Kytke laturi"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Kytke laturi"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Akun virta on vähissä."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> jäljellä"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB-latausta ei tueta."\n"Käytä laitteen mukana tullutta laturia."</string>
@@ -47,42 +47,32 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Ilmoitukset"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth yhdistetty"</string>
-    <!-- outdated translation 737483394044014246 -->     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Määritä syöttötavat"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Määritä syöttötavat"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Käytä fyysistä näppäimistöä"</string>
-    <!-- no translation found for usb_device_permission_prompt (834698001271562057) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (5171775411178865750) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Annetaanko sovellukselle <xliff:g id="APPLICATION">%1$s</xliff:g> lupa käyttää USB-laitetta?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Annetaanko sovellukselle <xliff:g id="APPLICATION">%1$s</xliff:g> lupa käyttää USB-lisälaitetta?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Avataanko <xliff:g id="ACTIVITY">%1$s</xliff:g> tämän USB-laitteen ollessa kytkettynä?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Avataanko <xliff:g id="ACTIVITY">%1$s</xliff:g> tämän USB-lisälaitteen ollessa kytkettynä?"</string>
-    <!-- no translation found for usb_accessory_uri_prompt (513450621413733343) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Asennetut sov. eivät toimi tämän USB-laitteen kanssa. Lisätietoja laitteesta: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB-lisälaite"</string>
     <string name="label_view" msgid="6304565553218192990">"Näytä"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Käytä oletuksena tällä USB-laitteella"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Käytä oletuksena tällä USB-lisälaitteella"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomaa koko näyttöön"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Venytä koko näyttöön"</string>
-    <!-- outdated translation 7020175705401506719 -->     <string name="compat_mode_help_header" msgid="7969493989397529910">"Yhteensopivuustilan zoomaus"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Yhteensopivuuszoomaus"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Jos sovellus on suunniteltu pienemmälle näytölle, kellon viereen tulee näkyviin zoomaussäädin."</string>
-    <!-- no translation found for screenshot_saving_ticker (8847274279171967058) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (5951190902073655147) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Tallennetaan kuvakaappausta..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Tallennetaan kuvakaappausta..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Kuvakaappausta tallennetaan."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Kuvakaappaus tallennettu"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Katso kuvakaappaus koskettamalla."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Kuvakaappausta ei voitu tallentaa"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Kuvakaappauksen tallennus epäonnistui. Ulkoinen tallennustila voi olla käytössä."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-tiedostonsiirtoasetukset"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Käytä mediasoittimena (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Käytä kamerana (PTP)"</string>
-    <!-- outdated translation 8485631662288445893 -->     <string name="installer_cd_button_title" msgid="2312667578562201583">"Asenna Android File Transfer -sovellus Macille"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Asenna Android File Transfer -sovellus Macille"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Takaisin"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Aloituspainike"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Valikko"</string>
@@ -107,18 +97,18 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Datasignaali - kaksi palkkia."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Datasignaali - kolme palkkia"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Vahva kuuluvuus."</string>
-    <!-- outdated translation 4017628918351949575 -->     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Ei wifi-yhteyttä."</string>
-    <!-- outdated translation 1914343229091303434 -->     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wifi-signaali - yksi palkki."</string>
-    <!-- outdated translation 7869150535859760698 -->     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wifi-signaali - kaksi palkkia."</string>
-    <!-- outdated translation 2665319332961356254 -->     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wifi-signaali - kolme palkkia."</string>
-    <!-- outdated translation 1275764416228473932 -->     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Vahva wifi-signaali."</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Ei wifi-yhteyttä."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wifi-signaali: yksi palkki."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wifi-signaali: kaksi palkkia."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wifi-signaali: kolme palkkia."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Wifi-signaali: täysi."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <!-- outdated translation 1127208787254436420 -->     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wifi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wifi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ei SIM-korttia."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internetyhteyden jakaminen Bluetoothin kautta."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lentokonetila."</string>
@@ -131,13 +121,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Tekstipuhelin käytössä."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Soittoääni: värinä."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Soittoääni: äänetön."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> hylättiin."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-tiedonsiirto pois käytöstä"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobiilitiedonsiirto pois käytöstä"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Tiedonsiirto pois käytöstä"</string>
-    <!-- outdated translation 6524467913290900042 -->     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Asetettu tiedonsiirtoraja on täynnä."\n\n"Operaattori voi veloittaa lisätiedonsiirrosta."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Tiedonsiirtoraja saavutettu."\n\n"Jos otat tiedonsiirron uudelleen käyttöön, operaattorisi voi veloittaa sinua."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Ota tiedonsiirto käyttöön"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ei internetyhteyttä"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wifi yhdistetty"</string>

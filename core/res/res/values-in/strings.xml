@@ -665,16 +665,11 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Masukkan kartu SIM"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Kartu SIM tidak ada atau tidak dapat dibaca. Masukkan kartu SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Kartu SIM Anda dinonaktifkan secara permanen."\n" Hubungi penyedia layanan nirkabel Anda untuk mendapatkan kartu SIM lainnya."</string>
-    <!-- no translation found for lockscreen_transport_prev_description (201594905152746886) -->
-    <skip />
-    <!-- no translation found for lockscreen_transport_next_description (6089297650481292363) -->
-    <skip />
-    <!-- no translation found for lockscreen_transport_pause_description (7659088786780128001) -->
-    <skip />
-    <!-- no translation found for lockscreen_transport_play_description (5888422938351019426) -->
-    <skip />
-    <!-- no translation found for lockscreen_transport_stop_description (4562318378766987601) -->
-    <skip />
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Tombol trek sebelumnya"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Tombol trek berikutnya"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Tombol jeda"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Tombol putar"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Tombol hentikan"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Panggilan darurat saja"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Jaringan terkunci"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Kartu SIM terkunci PUK."</string>
@@ -704,14 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Buka kunci"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Suara hidup"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Suara mati"</string>
-    <!-- no translation found for lockscreen_access_pattern_start (3941045502933142847) -->
-    <skip />
-    <!-- no translation found for lockscreen_access_pattern_cleared (5583479721001639579) -->
-    <skip />
-    <!-- no translation found for lockscreen_access_pattern_cell_added (6756031208359292487) -->
-    <skip />
-    <!-- no translation found for lockscreen_access_pattern_detected (4988730895554057058) -->
-    <skip />
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Pola dimulai"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Pola dihapus"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Sel ditambahkan"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Pola selesai"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>

@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Hakuna arifa"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Arifa"</string>
-    <!-- outdated translation 7923774589611311406 -->     <string name="battery_low_title" msgid="2783104807551211639">"Tafadhali unganisha chaja"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Unganisha chaja"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Betri inaisha."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> zimebakia"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chaji ya USB haihamiliwi."\n" Tumia chaka iliyopeanwa."</string>
@@ -45,42 +45,32 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"KIOTOMATIKI"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Arifa"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth imefungwa"</string>
-    <!-- outdated translation 737483394044014246 -->     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Sanidi mbinu za uingizaji"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Weka mbinu za ingizo"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Tumia kibodi halisi"</string>
-    <!-- no translation found for usb_device_permission_prompt (834698001271562057) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (5171775411178865750) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Ruhusu programu <xliff:g id="APPLICATION">%1$s</xliff:g> kufikia kifaa cha USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Ruhusu programu <xliff:g id="APPLICATION">%1$s</xliff:g> kufikia kifaa cha ziada cha USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Je, ungetaka kufungua  <xliff:g id="ACTIVITY">%1$s</xliff:g>wakati kifaa cha USB kimeunganishwa?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Je, ungetaka kufungua  <xliff:g id="ACTIVITY">%1$s</xliff:g>wakati kifaa cha USB kimeunganishwa?"</string>
-    <!-- no translation found for usb_accessory_uri_prompt (513450621413733343) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Hakuna programu zilizosakinishwa zinazofanya kazi na kifaa hiki cha USB. Jifunze zaidi kuhusu kifaa hiki kwenye <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Kifaa cha Usb"</string>
     <string name="label_view" msgid="6304565553218192990">"Ona"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Kwa kifaa hiki cha USB tumia chaguo-msingi"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Tumia kama chaguo-msingi ya kifuasi hiki cha USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Kuza ili kujaza skrini"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Tanua ili kujaza skrini"</string>
-    <!-- outdated translation 7020175705401506719 -->     <string name="compat_mode_help_header" msgid="7969493989397529910">"Kukuza kwa Utangamanifu"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Kukuza kwa Utangamanifu"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Wakati programu ilibuniwa kwa skrini ndogo, kidhibiti cha kukuza kitaonekana kwa saa."</string>
-    <!-- no translation found for screenshot_saving_ticker (8847274279171967058) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (5951190902073655147) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Inahifadhi picha"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Inahifadhi picha..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Picha ya kiwamba inahifadhiwa"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Picha imenaswa."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Gusa ili kuona picha"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Haikuweza kupiga picha"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Haikuweza kuhifadhi picha. Hifadhi inaweza kuwa inatumika"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
-    <!-- outdated translation 8485631662288445893 -->     <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nyuma"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Nyumbani"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
@@ -105,18 +95,18 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Miamba miwili ya data."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Fito tatu za habari."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Ishara ya data imejaa."</string>
-    <!-- outdated translation 4017628918351949575 -->     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Hakuna Mtandao hewa"</string>
-    <!-- outdated translation 1914343229091303434 -->     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Mwambaa mmoja wa Mtandao hewa"</string>
-    <!-- outdated translation 7869150535859760698 -->     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Miambaa mbili ya Mtandao hewa"</string>
-    <!-- outdated translation 2665319332961356254 -->     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Miambaa tatu ya Mtandao hewa"</string>
-    <!-- outdated translation 1275764416228473932 -->     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Ishara ya Mtandao hewa imejaa"</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Hakuna Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Mwambaa mmoja wa Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Miambaa miwili ya Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi baa tatu."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Ishara kamili ya Wi-Fi."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ukingo"</string>
-    <!-- outdated translation 1127208787254436420 -->     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WiFi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ufungaji wa Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modi ya ndege."</string>
@@ -129,13 +119,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Kichapishaji cha Tele kimewezeshwa."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Mtetemo wa mlio"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Mlio wa simu uko kimya."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> Ondoa"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Data ya 2G-3G imelemazwa"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Data ya 4G imelemazwa"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Data ya kifaa cha mkononi imelemazwa"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data imelemazwa"</string>
-    <!-- outdated translation 6524467913290900042 -->     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Kikomo cha utumizi wa data kilichobainishwa kimefikiwa. "\n" "\n" Utumizi wa data ya ziada huenda ukagharimu gharama za mbembaji."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Umefika kikomo maalum cha matumizi ya data. "\n" "\n" ukiwezesha data, unaweza kudaiwa na mtoa huduma."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Wezesha upya data"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Hakuna muunganisho wa mtandao"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Mtandao-hewa umeunganishwa"</string>

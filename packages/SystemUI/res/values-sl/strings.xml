@@ -34,7 +34,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ni obvestil"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Trenutno"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obvestila"</string>
-    <!-- outdated translation 7923774589611311406 -->     <string name="battery_low_title" msgid="2783104807551211639">"Priključite napajalnik"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Priključite polnilnik"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Baterija je skoraj prazna."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> preostalo"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Polnjenje po povezavi USB ni podprto."\n"Uporabite priloženi polnilnik."</string>
@@ -47,42 +47,32 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"SAMOD."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Obvestila"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Internetna povezava prek Bluetootha"</string>
-    <!-- outdated translation 737483394044014246 -->     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavitev načinov vnosa"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavi načine vnosa"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Uporabi fizično tipkovn."</string>
-    <!-- no translation found for usb_device_permission_prompt (834698001271562057) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (5171775411178865750) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Želite programu <xliff:g id="APPLICATION">%1$s</xliff:g> dovoliti dostop do naprave USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Želite dovoliti programu <xliff:g id="APPLICATION">%1$s</xliff:g> dostop do dodatka USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Želite, da se odpre <xliff:g id="ACTIVITY">%1$s</xliff:g>, ko priključite to napravo USB?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Želite, da se odpre <xliff:g id="ACTIVITY">%1$s</xliff:g>, ko priključite ta dodatek USB?"</string>
-    <!-- no translation found for usb_accessory_uri_prompt (513450621413733343) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Namešč. prog. ne delujejo s tem dodatkom USB. Več o tem dodatku preberite na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Dodatek USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Prikaži"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Privzeto uporabi za to napravo USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Privzeto uporabi za ta dodatek USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
-    <!-- outdated translation 7020175705401506719 -->     <string name="compat_mode_help_header" msgid="7969493989397529910">"Povečava združljivosti"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Razširitev združljivosti"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Če je program izdelan za manjše zaslone, se ob uri pokaže kontrolnik za povečavo."</string>
-    <!-- no translation found for screenshot_saving_ticker (8847274279171967058) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (5951190902073655147) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Shranjev. posnetka zaslona ..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Shranjevanje posnetka zaslona ..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Shranjevanje posnetka zaslona."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Posnetek zaslona je shranjen."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Dotaknite se, če si želite ogledati posnetek zaslona."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Posnetka zaslona ni bilo mogoče shraniti."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Posnetka zaslona ni bilo mogoče shraniti. Shramba je morda v uporabi."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosa datotek prek USB-ja"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Vpni kot predvajalnik (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Vpni kot fotoaparat (PTP)"</string>
-    <!-- outdated translation 8485631662288445893 -->     <string name="installer_cd_button_title" msgid="2312667578562201583">"Namestite program Android File Transfer za Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Namesti program Android File Transfer za Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nazaj"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Začetni zaslon"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meni"</string>
@@ -107,18 +97,18 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Podatki z dvema črticama."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Podatki s tremi črticami."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Podatkovni signal poln."</string>
-    <!-- outdated translation 4017628918351949575 -->     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Ni povezave Wi-Fi."</string>
-    <!-- outdated translation 1914343229091303434 -->     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"WiFi z eno črtico."</string>
-    <!-- outdated translation 7869150535859760698 -->     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi z dvema črticama."</string>
-    <!-- outdated translation 2665319332961356254 -->     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"WiFi s tremi črticami."</string>
-    <!-- outdated translation 1275764416228473932 -->     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Signal Wi-Fi poln."</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Ni signala Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Ena vrstica signala Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dve črtici signala Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Tri črtice signala Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Poln signal Wi-Fi."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <!-- outdated translation 1127208787254436420 -->     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WiFi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ni kartice SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internet prek Bluetootha."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Način za letalo."</string>
@@ -131,13 +121,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter omogočen."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Zvonjenje z vibriranjem."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Zvonjenje izklopljeno."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Program <xliff:g id="APP">%s</xliff:g> je bil odstranjen."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Podatki 2G-3G so onemogočeni"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Podatki 4G so onemogočeni"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilni podatki so onemogočeni"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podatki onemogočeni"</string>
-    <!-- outdated translation 6524467913290900042 -->     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosežena je določena omejitev porabe podatkov."\n\n"Dodatno porabo podatkov vam lahko operater zaračuna."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosegli ste omejitev količine prenesenih podatkov."\n\n"Če prenos podatkov znova omogočite, vam ga lahko operater zaračuna."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova omogoči podatke"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ni internetne povez."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>

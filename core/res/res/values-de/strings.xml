@@ -674,7 +674,7 @@
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"PUK-Sperre auf SIM"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Weitere Informationen finden Sie in der Bedienungsanleitung oder wenden Sie sich an den Kundendienst."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Bitte PIN-Code eingeben"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Bitte PIN eingeben"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g> Mal falsch eingegeben. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
@@ -881,7 +881,7 @@
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Kaum noch Tablet-Speicher frei"</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Kaum noch Telefonspeicher frei"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
-    <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
+    <string name="cancel" msgid="6442560571259935130">"Abbruch"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Abbrechen"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Achtung"</string>
@@ -1012,7 +1012,7 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"USB-Speicher formatieren und alle darin befindlichen Dateien löschen? Diese Aktion kann nicht rückgängig gemacht werden!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Möchten Sie die SD-Karte wirklich formatieren? Alle Daten auf Ihrer Karte gehen dann verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging verbunden"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USB-Debugging deaktivieren: auswählen"</string>
     <string name="select_input_method" msgid="6865512749462072765">"Eingabemethode auswählen"</string>
     <string name="configure_input_methods" msgid="6324843080254191535">"Eingabemethoden konfigurieren"</string>
@@ -1067,7 +1067,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Berechtigung erforderlich"\n"für Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Eingabehilfen"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Bedienungshilfen"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hintergrund"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Hintergrund ändern"</string>
     <string name="vpn_title" msgid="8219003246858087489">"VPN ist aktiviert."</string>
@@ -1135,7 +1135,7 @@
     <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Stunde vorstellen"</string>
     <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Stunde zurückstellen"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Zeit festlegen"</string>
-    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen (Vormittag)"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen"</string>
     <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Monat vorstellen"</string>
     <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Monat zurückstellen"</string>
     <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Tag vorstellen"</string>
@@ -1191,7 +1191,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"WLAN-Datenlimit überschritten"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> über dem vorgegebenen Limit"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Hintergrunddaten beschränkt"</string>
-    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Beschränk. durch Tippen entfernen"</string>
+    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Beschränkung per Tippen entfernen"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Sicherheitszertifikat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Dies ist ein gültiges Zertifikat."</string>
     <string name="issued_to" msgid="454239480274921032">"Ausgestellt für:"</string>

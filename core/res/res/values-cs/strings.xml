@@ -320,13 +320,13 @@
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"odeslání trvalého vysílání"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou tablet zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
-    <string name="permlab_readContacts" msgid="6219652189510218240">"čtení dat kontaktů"</string>
+    <string name="permlab_readContacts" msgid="6219652189510218240">"číst data kontaktů"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a odeslat vaše data dalším lidem."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat vaše data."</string>
-    <string name="permlab_writeContacts" msgid="644616215860933284">"zápis dat kontaktů"</string>
+    <string name="permlab_writeContacts" msgid="644616215860933284">"zapisovat data kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a vymazat či pozměnit kontaktní údaje."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
-    <string name="permlab_readProfile" msgid="6824681438529842282">"číst údaje o vašem profilu"</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"čtení údajů o vašem profilu"</string>
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Umožňuje aplikaci číst osobní informace o profilu uložené ve vašem zařízení, jako je jméno a kontaktní informace. To znamená, že vás aplikace může identifikovat a odesílat informace o profilu ostatním."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"zapisovat do údajů o profilu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Umožňuje aplikaci měnit a přidávat osobní informace o profilu uložené ve vašem zařízení, jako je jméno a kontaktní informace. To znamená, že vás aplikace může identifikovat a odesílat informace o profilu ostatním."</string>
@@ -486,7 +486,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"zápis do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"upravit/smazat obsah úlož. USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"úprava/mazání obsahu úložiště USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"změna/smazání obsahu karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Umožní zápis do úložiště USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>
@@ -700,7 +700,7 @@
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnout zvuk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Vypnout zvuk"</string>
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Bezpečnostní gesto zahájeno"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Bzpečnostní gesto vymazáno"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Bezpečnostní gesto vymazáno"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Buňka přidána"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Bezpečnostní gesto dokončeno"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
@@ -887,7 +887,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Upozornění"</string>
     <string name="loading" msgid="1760724998928255250">"Načítání..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ZAPNUTO"</string>
-    <string name="capital_off" msgid="6815870386972805832">"VYPNOUT"</string>
+    <string name="capital_off" msgid="6815870386972805832">"VYPNUTO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Vymažte výchozí hodnoty v Nastavení plochy &gt; Aplikace &gt; Správa aplikací."</string>
