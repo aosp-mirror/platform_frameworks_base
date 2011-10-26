@@ -35,6 +35,7 @@ NuPlayerDriver::NuPlayerDriver()
       mNumFramesDropped(0),
       mLooper(new ALooper),
       mState(UNINITIALIZED),
+      mAtEOS(false),
       mStartupSeekTimeUs(-1) {
     mLooper->setName("NuPlayerDriver Looper");
 
@@ -106,7 +107,7 @@ status_t NuPlayerDriver::prepare() {
 }
 
 status_t NuPlayerDriver::prepareAsync() {
-    sendEvent(MEDIA_PREPARED);
+    notifyListener(MEDIA_PREPARED);
 
     return OK;
 }
@@ -117,6 +118,7 @@ status_t NuPlayerDriver::start() {
             return INVALID_OPERATION;
         case STOPPED:
         {
+            mAtEOS = false;
             mPlayer->start();
 
             if (mStartupSeekTimeUs >= 0) {
@@ -173,7 +175,7 @@ status_t NuPlayerDriver::pause() {
 }
 
 bool NuPlayerDriver::isPlaying() {
-    return mState == PLAYING;
+    return mState == PLAYING && !mAtEOS;
 }
 
 status_t NuPlayerDriver::seekTo(int msec) {
@@ -190,6 +192,7 @@ status_t NuPlayerDriver::seekTo(int msec) {
         case PLAYING:
         case PAUSED:
         {
+            mAtEOS = false;
             mPlayer->seekToAsync(seekTimeUs);
             break;
         }
@@ -291,7 +294,7 @@ void NuPlayerDriver::notifyPosition(int64_t positionUs) {
 }
 
 void NuPlayerDriver::notifySeekComplete() {
-    sendEvent(MEDIA_SEEK_COMPLETE);
+    notifyListener(MEDIA_SEEK_COMPLETE);
 }
 
 void NuPlayerDriver::notifyFrameStats(
@@ -318,6 +321,14 @@ status_t NuPlayerDriver::dump(int fd, const Vector<String16> &args) const {
     out = NULL;
 
     return OK;
+}
+
+void NuPlayerDriver::notifyListener(int msg, int ext1, int ext2) {
+    if (msg == MEDIA_PLAYBACK_COMPLETE || msg == MEDIA_ERROR) {
+        mAtEOS = true;
+    }
+
+    sendEvent(msg, ext1, ext2);
 }
 
 }  // namespace android
