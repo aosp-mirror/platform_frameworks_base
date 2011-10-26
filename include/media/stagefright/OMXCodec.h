@@ -277,6 +277,7 @@ private:
     status_t queueBufferToNativeWindow(BufferInfo *info);
     status_t cancelBufferToNativeWindow(BufferInfo *info);
     BufferInfo* dequeueBufferFromNativeWindow();
+    status_t pushBlankBuffersToNativeWindow();
 
     status_t freeBuffersOnPort(
             OMX_U32 portIndex, bool onlyThoseWeOwn = false);
