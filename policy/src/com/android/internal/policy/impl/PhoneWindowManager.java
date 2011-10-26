@@ -572,7 +572,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerKeyHandled) {
             mHandler.removeCallbacks(mPowerLongPress);
         }
-        mPendingPowerKeyUpCanceled = true;
+        if (mPowerKeyTriggered) {
+            mPendingPowerKeyUpCanceled = true;
+        }
     }
 
     private void interceptScreenshotChord() {
