@@ -393,7 +393,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mParentNodeId)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
