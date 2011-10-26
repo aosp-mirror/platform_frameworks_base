@@ -2582,11 +2582,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     (win.mAppToken == null || !win.mAppToken.clientHidden)) {
                 displayed = !win.isVisibleLw();
                 if (win.mExiting) {
-                    win.mExiting = false;
-                    if (win.mAnimation != null) {
-                        win.mAnimation.cancel();
-                        win.mAnimation = null;
-                    }
+                    win.cancelExitAnimationForNextAnimationLocked();
                 }
                 if (win.mDestroying) {
                     win.mDestroying = false;
