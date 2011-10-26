@@ -62,13 +62,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Масштаб и совместимость"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Если приложение рассчитано на экран меньших размеров, рядом с часами появятся средства масштабирования."</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сохранение скриншота..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Сохранение скриншота..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Скриншот сохранен."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот создан."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сохранение..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Сохранение..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Сохранение..."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот сохранен."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Нажмите, чтобы просмотреть скриншот"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Не удалось создать скриншот."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Не удается сохранить скриншот. Возможно, накопители заняты."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Не удалось сохранить скриншот."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Не удалось сохранить скриншот. Возможно, накопители заняты."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Параметры передачи через USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Подключить как мультимедийный проигрыватель (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Установить как камеру (PTP)"</string>

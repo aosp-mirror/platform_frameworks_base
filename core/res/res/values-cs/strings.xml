@@ -326,7 +326,7 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"zapisovat data kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a vymazat či pozměnit kontaktní údaje."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
-    <string name="permlab_readProfile" msgid="6824681438529842282">"číst údaje o vašem profilu"</string>
+    <string name="permlab_readProfile" msgid="6824681438529842282">"čtení údajů o vašem profilu"</string>
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Umožňuje aplikaci číst osobní informace o profilu uložené ve vašem zařízení, jako je jméno a kontaktní informace. To znamená, že vás aplikace může identifikovat a odesílat informace o profilu ostatním."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"zapisovat do údajů o profilu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Umožňuje aplikaci měnit a přidávat osobní informace o profilu uložené ve vašem zařízení, jako je jméno a kontaktní informace. To znamená, že vás aplikace může identifikovat a odesílat informace o profilu ostatním."</string>
@@ -486,7 +486,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"zápis do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"upravit/smazat obsah úlož. USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"úprava/mazání obsahu úložiště USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"změna/smazání obsahu karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Umožní zápis do úložiště USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>

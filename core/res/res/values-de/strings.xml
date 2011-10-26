@@ -881,7 +881,7 @@
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Kaum noch Tablet-Speicher frei"</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Kaum noch Telefonspeicher frei"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
-    <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
+    <string name="cancel" msgid="6442560571259935130">"Abbruch"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Abbrechen"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Achtung"</string>
@@ -1067,7 +1067,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Berechtigung erforderlich"\n"für Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Eingabehilfen"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Bedienungshilfen"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hintergrund"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Hintergrund ändern"</string>
     <string name="vpn_title" msgid="8219003246858087489">"VPN ist aktiviert."</string>
@@ -1135,7 +1135,7 @@
     <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Stunde vorstellen"</string>
     <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Stunde zurückstellen"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Zeit festlegen"</string>
-    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen (Vormittag)"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen"</string>
     <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Monat vorstellen"</string>
     <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Monat zurückstellen"</string>
     <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Tag vorstellen"</string>

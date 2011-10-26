@@ -140,7 +140,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"您的手机会关机。"</string>
-    <string name="shutdown_confirm_question" msgid="6656441286856415014">"要关闭手机吗？"</string>
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"您要关机吗？"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"没有最近的应用程序。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"平板电脑选项"</string>
@@ -341,8 +341,8 @@
     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"允许应用程序以日历所有者的名义发送活动邀请，同时允许其添加、删除和更改您能够在设备上修改的活动（包括朋友或同事的活动）。拥有此权限的恶意应用程序可以假借日历所有者的名义发送垃圾邮件，还可以在所有者不知情的情况下修改活动或添加虚假活动。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"使用模拟地点来源进行测试"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"创建模拟地点来源进行测试。恶意应用程序可能利用此选项覆盖由真实地点来源（如 GPS 或网络提供商）传回的地点和/或状态。"</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"访问额外的位置信息提供程序命令"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"访问额外的位置信息提供程序命令。恶意应用程序可借此干扰 GPS 或其他位置源的正常工作。"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"获取额外的位置信息提供程序命令。恶意应用程序可借此干扰 GPS 或其他位置源的正常工作。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"创建模拟地点来源进行测试。恶意应用程序可能利用此选项覆盖由真实地点来源（如 GPS 或网络提供商）所传回的地点和/或状态，或者监视您的位置并将其提供给外部来源。"</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"精准的(GPS)位置"</string>
