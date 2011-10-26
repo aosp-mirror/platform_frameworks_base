@@ -3572,6 +3572,10 @@
         <attr name="selectionDivider" format="reference" />
         <!-- @hide The height of the selection divider. -->
         <attr name="selectionDividerHeight" format="dimension" />
+        <!-- @hide The max height of the NumberPicker. -->
+        <attr name="maxHeight" />
+        <!-- @hide The max width of the NumberPicker. -->
+        <attr name="maxWidth" />
     </declare-styleable>
 
     <declare-styleable name="TimePicker">
