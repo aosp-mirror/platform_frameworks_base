@@ -42,12 +42,14 @@ public class WebSettings {
      * SINGLE_COLUMN moves all content into one column that is the width of the
      * view.
      * NARROW_COLUMNS makes all columns no wider than the screen if possible.
-     * @deprecated This enum is now obsolete.
      */
     // XXX: These must match LayoutAlgorithm in Settings.h in WebCore.
-    @Deprecated
     public enum LayoutAlgorithm {
         NORMAL,
+        /**
+         * @deprecated This algorithm is now obsolete.
+         */
+        @Deprecated
         SINGLE_COLUMN,
         NARROW_COLUMNS
     }
@@ -936,9 +938,7 @@ public class WebSettings {
      * WebView.
      * @param l A LayoutAlgorithm enum specifying the algorithm to use.
      * @see WebSettings.LayoutAlgorithm
-     * @deprecated This method is now obsolete.
      */
-    @Deprecated
     public synchronized void setLayoutAlgorithm(LayoutAlgorithm l) {
         // XXX: This will only be affective if libwebcore was built with
         // ANDROID_LAYOUT defined.
@@ -953,9 +953,7 @@ public class WebSettings {
      * @return LayoutAlgorithm enum value describing the layout algorithm
      *         being used.
      * @see WebSettings.LayoutAlgorithm
-     * @deprecated This method is now obsolete.
      */
-    @Deprecated
     public synchronized LayoutAlgorithm getLayoutAlgorithm() {
         return mLayoutAlgorithm;
     }

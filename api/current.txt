@@ -25145,7 +25145,7 @@ package android.webkit {
     method public synchronized java.lang.String getFixedFontFamily();
     method public synchronized boolean getJavaScriptCanOpenWindowsAutomatically();
     method public synchronized boolean getJavaScriptEnabled();
-    method public deprecated synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
+    method public synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
     method public boolean getLightTouchEnabled();
     method public boolean getLoadWithOverviewMode();
     method public synchronized boolean getLoadsImagesAutomatically();
@@ -25192,7 +25192,7 @@ package android.webkit {
     method public synchronized void setGeolocationEnabled(boolean);
     method public synchronized void setJavaScriptCanOpenWindowsAutomatically(boolean);
     method public synchronized void setJavaScriptEnabled(boolean);
-    method public deprecated synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
+    method public synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
     method public void setLightTouchEnabled(boolean);
     method public void setLoadWithOverviewMode(boolean);
     method public synchronized void setLoadsImagesAutomatically(boolean);
@@ -25227,12 +25227,12 @@ package android.webkit {
     field public static final int LOAD_NO_CACHE = 2; // 0x2
   }
 
-  public static final deprecated class WebSettings.LayoutAlgorithm extends java.lang.Enum {
+  public static final class WebSettings.LayoutAlgorithm extends java.lang.Enum {
     method public static android.webkit.WebSettings.LayoutAlgorithm valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.LayoutAlgorithm[] values();
     enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NARROW_COLUMNS;
     enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NORMAL;
-    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm SINGLE_COLUMN;
+    enum_constant public static final deprecated android.webkit.WebSettings.LayoutAlgorithm SINGLE_COLUMN;
   }
 
   public static final class WebSettings.PluginState extends java.lang.Enum {
