@@ -95,7 +95,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         if (query.mDatabase == null) {
             throw new IllegalArgumentException("query.mDatabase cannot be null");
         }
-        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
+        if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+            mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
+        } else {
+            mStackTrace = null;
+        }
         mDriver = driver;
         mEditTable = editTable;
         mColumnNameMap = null;
@@ -319,7 +323,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         try {
             // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
-                if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+                if (mStackTrace != null) {
                     int len = mQuery.mSql.length();
                     StrictMode.onSqliteObjectLeaked(
                         "Finalizing a Cursor that has not been deactivated or closed. " +

@@ -49,7 +49,7 @@ import android.util.Log;
 
     /** the following are for debugging purposes */
     private String mSqlStmt = null;
-    private Throwable mStackTrace = null;
+    private final Throwable mStackTrace;
 
     /** when in cache and is in use, this member is set */
     private boolean mInUse = false;
@@ -59,7 +59,11 @@ import android.util.Log;
         db.verifyLockOwner();
         mDatabase = db;
         mSqlStmt = sql;
-        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
+        if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+            mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
+        } else {
+            mStackTrace = null;
+        }
         nHandle = db.mNativeHandle;
         native_compile(sql);
     }
@@ -112,7 +116,7 @@ import android.util.Log;
             // but if the database itself is not closed and is GC'ed, then
             // all sub-objects attached to the database could end up getting GC'ed too.
             // in that case, don't print any warning.
-            if (mInUse && StrictMode.vmSqliteObjectLeaksEnabled()) {
+            if (mInUse && mStackTrace != null) {
                 int len = mSqlStmt.length();
                 StrictMode.onSqliteObjectLeaked(
                     "Releasing statement in a finalizer. Please ensure " +
