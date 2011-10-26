@@ -34,7 +34,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Žiadne upozornenia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Prebiehajúce"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Upozornenia"</string>
-    <!-- outdated translation 7923774589611311406 -->     <string name="battery_low_title" msgid="2783104807551211639">"Pripojte nabíjačku"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Pripojte nabíjačku"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Batéria je skoro vybitá."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Zostáva: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Nabíjanie pomocou rozhrania USB nie je podporované."\n"Používajte iba nabíjačku, ktorá bola dodaná spolu so zariadením."</string>
@@ -47,42 +47,32 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Upozornenia"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Zdieľané dátové pripojenie cez Bluetooth"</string>
-    <!-- outdated translation 737483394044014246 -->     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfigurovať metódy vstupu"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavenie metód vstupu"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Použiť fyzickú klávesnicu"</string>
-    <!-- no translation found for usb_device_permission_prompt (834698001271562057) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (5171775411178865750) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k periférnemu zariadeniu USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Chcete pri pripojení tohto zariadenia USB otvoriť aplikáciu <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Chcete pri pripojení tohto periférneho zariadenia USB otvoriť aplikáciu <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
-    <!-- no translation found for usb_accessory_uri_prompt (513450621413733343) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"S týmto zariad. USB nefunguje žiadna nainštal. aplikácia. Viac informácií na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Periférne zariadenie USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Zobraziť"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Pre toto zariadenie USB použiť ako predvolené"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Pre toto periférne zar. USB použiť ako predvolené"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
-    <!-- outdated translation 7020175705401506719 -->     <string name="compat_mode_help_header" msgid="7969493989397529910">"Kompatibilné priblíženie"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Úprava veľkosti z dôvodu kompatibility"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Ak je aplikácia navrhnutá pre menšiu obrazovku, zobrazí sa vedľa hodín ovládací prvok priblíženia."</string>
-    <!-- no translation found for screenshot_saving_ticker (8847274279171967058) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (5951190902073655147) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Prebieha ukladanie snímky obrazovky..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Prebieha ukladanie snímky obrazovky..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Snímka obrazovky sa ukladá."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Snímka obrazovky bola zaznamenaná."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Snímku obrazovky zobrazíte dotykom."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Snímku obrazovky sa nepodarilo zachytiť."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Snímku obrazovky sa nepodarilo uložiť. Ukladací priestor sa možno práve používa."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosu súborov USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pripojiť ako prehrávač médií (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Pripojiť ako fotoaparát (PTP)"</string>
-    <!-- outdated translation 8485631662288445893 -->     <string name="installer_cd_button_title" msgid="2312667578562201583">"Inštalovať aplikáciu Prenos súborov Android pre systém Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Inštal. aplikáciu Android File Transfer pre Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Späť"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Plocha"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
@@ -107,20 +97,20 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dve čiarky signálu dátovej siete."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tri čiarky signálu dátovej siete."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Plný signál dátovej siete."</string>
-    <!-- outdated translation 4017628918351949575 -->     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Žiadna sieť Wi-Fi."</string>
-    <!-- outdated translation 1914343229091303434 -->     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Jedna čiarka signálu siete Wi-Fi."</string>
-    <!-- outdated translation 7869150535859760698 -->     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dve čiarky signálu siete Wi-Fi."</string>
-    <!-- outdated translation 2665319332961356254 -->     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Tri čiarky signálu siete Wi-Fi."</string>
-    <!-- outdated translation 1275764416228473932 -->     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Plný signál siete Wi-Fi."</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Žiadna sieť Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Jedna čiarka signálu Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dve čiarky signálu Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Tri čiarky signálu Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Plný signál Wi-Fi."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <!-- outdated translation 1127208787254436420 -->     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Žiadna karta SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Zdieľanie dátového pripojenia cez Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pripojenie cez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim V lietadle."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -133,13 +123,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Rozhranie TeleTypewriter je povolené."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibračné zvonenie."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Tiché zvonenie."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Aplikácia <xliff:g id="APP">%s</xliff:g> bola zrušená."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dátové prenosy 2G a 3G sú zakázané"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dátové prenosy 4G sú zakázané"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilné dátové prenosy sú zakázané"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dáta boli zakázané"</string>
-    <!-- outdated translation 6524467913290900042 -->     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosiahli ste zadané obmedzenie dátových prenosov."\n\n"Za ďalšie používanie dátových prenosov vám operátor môže účtovať poplatky."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosiahli ste stanovený limit využitia dát."\n\n"Ak dátové pripojenie znova povolíte, môže vám váš operátor účtovať poplatky."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova povoliť dátové prenosy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>

@@ -753,7 +753,7 @@
     <string name="save_password_message" msgid="767344687139195790">"คุณต้องการให้เบราว์เซอร์จำรหัสผ่านนี้หรือไม่"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ยังไม่ใช้งานขณะนี้"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"จำไว้"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"ไม่เคย"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"ไม่ต้องเลย"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"คุณไม่ได้รับอนุญาตให้เปิดหน้านี้"</string>
     <string name="text_copied" msgid="4985729524670131385">"คัดลอกข้อความไปยังคลิปบอร์ด"</string>
     <string name="more_item_label" msgid="4650918923083320495">"เพิ่มเติม"</string>

@@ -34,7 +34,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нема обавештења"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текуће"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Обавештења"</string>
-    <!-- outdated translation 7923774589611311406 -->     <string name="battery_low_title" msgid="2783104807551211639">"Прикључите пуњач"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Прикључите пуњач"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Батерија ће се ускоро испразнити."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"преостало је <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Пуњење преко USB-а није подржано."\n"Користите само приложени пуњач."</string>
@@ -47,42 +47,32 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АУТОM."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Обавештења"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Веза преко Bluetooth-а"</string>
-    <!-- outdated translation 737483394044014246 -->     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Конфигуриши методе уноса"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Подеси методе уноса"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Користи физичку тастатуру"</string>
-    <!-- no translation found for usb_device_permission_prompt (834698001271562057) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (5171775411178865750) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Желите ли да дозволите апликацији <xliff:g id="APPLICATION">%1$s</xliff:g> да приступа USB уређају?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Желите ли да дозволите апликацији <xliff:g id="APPLICATION">%1$s</xliff:g> да приступа USB помоћном уређају?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Желите ли да се отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> када се прикључи овај USB уређај?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Желите ли да се отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> када се прикључи овај USB додатак?"</string>
-    <!-- no translation found for usb_accessory_uri_prompt (513450621413733343) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Инсталиране апликације не функционишу са овим USB помоћним уређајем. Сазнајте више о њему на адреси <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB помоћни уређај"</string>
     <string name="label_view" msgid="6304565553218192990">"Прикажи"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Користи подразумевано за овај USB уређај"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Користи подразумевано за овај USB додатак"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Зумирај на целом екрану"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Развуци на цео екран"</string>
-    <!-- outdated translation 7020175705401506719 -->     <string name="compat_mode_help_header" msgid="7969493989397529910">"Компатибилно зумирање"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Компатибилно зумирање"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Када је апликација намењена мањем екрану, контрола зумирања приказује се поред сата."</string>
-    <!-- no translation found for screenshot_saving_ticker (8847274279171967058) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_title (8242282144535555697) -->
-    <skip />
-    <!-- no translation found for screenshot_saving_text (2419718443411738818) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (6461865960961414961) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (1152839647677558815) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (705781116746922771) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_text (5951190902073655147) -->
-    <skip />
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Чување снимка екрана..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Чување снимка екрана..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Снимак екрана се чува."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Снимак екрана је направљен."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Додирните да бисте видели снимак екрана."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Није могуће направити снимак екрана."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Није могуће сачувати снимак екрана. Могуће је да је меморија у употреби."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Опције USB преноса датотека"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Прикључи као медија плејер (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Прикључи као камеру (PTP)"</string>
-    <!-- outdated translation 8485631662288445893 -->     <string name="installer_cd_button_title" msgid="2312667578562201583">"Инсталирај апликацију Android File Transfer за Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Инсталирај Android пребацивање датотека за Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Назад"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Почетна"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Мени"</string>
@@ -107,18 +97,18 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Сигнал за податке од две црте."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Сигнал за податке од три црте."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Сигнал за податке је најјачи."</string>
-    <!-- outdated translation 4017628918351949575 -->     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Нема WiFi сигнала."</string>
-    <!-- outdated translation 1914343229091303434 -->     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"WiFi сигнал од једне црте."</string>
-    <!-- outdated translation 7869150535859760698 -->     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"WiFi сигнал од две црте."</string>
-    <!-- outdated translation 2665319332961356254 -->     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"WiFi сигнал од три црте."</string>
-    <!-- outdated translation 1275764416228473932 -->     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"WiFi сигнал је најјачи."</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Нема Wi-Fi сигнала."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi сигнал има једну црту."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi сигнал има две црте."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi сигнал има три црте."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Wi-Fi сигнал је најјачи."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <!-- outdated translation 1127208787254436420 -->     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WiFi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема SIM картице."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth привезивање."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим рада у авиону."</string>
@@ -131,13 +121,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter је омогућен."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибрација звона."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Нечујно звоно."</string>
-    <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
-    <skip />
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Апликација <xliff:g id="APP">%s</xliff:g> је одбачена."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G–3G подаци су онемогућени"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G подаци су онемогућени"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Подаци мобилне мреже су онемогућени"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Подаци су онемогућени"</string>
-    <!-- outdated translation 6524467913290900042 -->     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигнуто је наведено ограничење потрошње података."\n\n"Мобилни оператер може додатно да наплати даљу потрошњу података."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигли сте наведено ограничење за коришћење података."\n\n"Ако поново омогућите податке, мобилни оператер ће вам можда наплатити."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Поново омогући податке"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет везе"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi је повезан"</string>

@@ -699,10 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"잠금해제"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"사운드 켜기"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"사운드 끄기"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"패턴 시작됨"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"패턴 삭제됨"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"패턴 시작"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"패턴 삭제"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"셀 추가됨"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"패턴 완료됨"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"패턴 완료"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
