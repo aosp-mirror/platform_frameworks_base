@@ -110,6 +110,7 @@ public final class BluetoothDeviceProfileState extends StateMachine {
     private BluetoothHeadset  mHeadsetService;
     private BluetoothPbap     mPbapService;
     private boolean mPbapServiceConnected;
+    private boolean mAutoConnectionPending;
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
 
     private BluetoothDevice mDevice;
@@ -272,6 +273,10 @@ public final class BluetoothDeviceProfileState extends StateMachine {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             synchronized(BluetoothDeviceProfileState.this) {
                 mHeadsetService = (BluetoothHeadset) proxy;
+                if (mAutoConnectionPending) {
+                    sendMessage(AUTO_CONNECT_PROFILES);
+                    mAutoConnectionPending = false;
+                }
             }
         }
         public void onServiceDisconnected(int profile) {
@@ -360,8 +365,9 @@ public final class BluetoothDeviceProfileState extends StateMachine {
                         // Don't auto connect to docks.
                         break;
                     } else {
-                        if (mHeadsetService != null &&
-                              mHeadsetService.getPriority(mDevice) ==
+                        if (mHeadsetService == null) {
+                              mAutoConnectionPending = true;
+                        } else if (mHeadsetService.getPriority(mDevice) ==
                               BluetoothHeadset.PRIORITY_AUTO_CONNECT &&
                               mHeadsetService.getDevicesMatchingConnectionStates(
                                   new int[] {BluetoothProfile.STATE_CONNECTED,
