@@ -16,7 +16,7 @@ sdk.mac_checksum=03d2cdd3565771e8c7a438f1c40cc8a5
 sdk.linux_download=android-sdk_r15-linux.tgz
 sdk.linux_bytes=26124434
 sdk.linux_checksum=f529681fd1eda11c6e1e1d44b42c1432
-  
+
 @jd:body
 
 <div class="non-preview">
@@ -44,4 +44,3 @@ then read the guide to <a href="installing.html">Installing the SDK</a>.</p>
 development environment, read the guide to <a href="installing.html">Installing the SDK</a>.</p>
 
 </div>
-
