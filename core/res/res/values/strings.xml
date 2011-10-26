@@ -3248,6 +3248,9 @@
     <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_target_soundon">Sound on</string>
 
+    <!-- Description of the unlock handle in the Slide unlock screen for tablets. [CHAR LIMIT=NONE] -->
+    <string name="description_target_unlock_tablet">Swipe to unlock.</string>
+
     <!-- Announce that a headset is required to hear keyboard keys while typing a password. [CHAR LIMIT=NONE] -->
     <string name="keyboard_headset_required_to_hear_password">Plug in a headset to hear password keys spoken aloud.</string>
     <!-- The value of a keyboard key announced when accessibility is enabled and no headsed is used. [CHAR LIMIT=NONE] -->
