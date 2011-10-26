@@ -596,6 +596,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    // TODO: Fix and call finishExit() instead of cancelExitAnimationForNextAnimationLocked()
+    // for avoiding the code duplication.
+    void cancelExitAnimationForNextAnimationLocked() {
+        if (!mExiting) return;
+        if (mAnimation != null) {
+            mAnimation.cancel();
+            mAnimation = null;
+            destroySurfaceLocked();
+        }
+        mExiting = false;
+    }
+
     Surface createSurfaceLocked() {
         if (mSurface == null) {
             mReportDestroySurface = false;
