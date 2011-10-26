@@ -1,8 +1,8 @@
 page.title=ADT Plugin for Eclipse
-adt.zip.version=14.0.0
-adt.zip.download=ADT-14.0.0.zip
-adt.zip.bytes=6747816
-adt.zip.checksum=3883973cd229dc4336911117af949509
+adt.zip.version=15.0.0
+adt.zip.download=ADT-15.0.0.zip
+adt.zip.bytes=6750682
+adt.zip.checksum=264f40a89a1107b0c422adae4e1ce0d1
 
 @jd:body
 
@@ -112,6 +112,37 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+ADT 15.0.0</a> <em>(October 2011)</em>
+  <div class="toggleme">
+<dl>
+
+<dt>Dependencies:</dt>
+
+<dd>ADT 15.0.0 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r15</a>.
+If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK and AVD Manager to
+do so.</dd>
+
+<dt>Bug fixes:</dt>
+<dd>
+<ul>
+  <li>Fixed build issue when using Renderscript in projects that target API levels 11-13
+    (<a href="http://code.google.com/p/android/issues/detail?id=21006">Issue 21006</a>).</li>
+  <li>Fixed issue when creating projects from existing source code.</li>
+  <li>Fixed issues in the SDK Manager
+    (<a href="http://code.google.com/p/android/issues/detail?id=20939">Issue 20939</a>,
+    <a href="http://code.google.com/p/android/issues/detail?id=20607">Issue 20607</a>).</li>
+  <li>Fixed scrolling issue in the new Logcat panel of DDMS.</li>
+</ul>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
 width="9px" />
 ADT 14.0.0</a> <em>(October 2011)</em>
   <div class="toggleme">
