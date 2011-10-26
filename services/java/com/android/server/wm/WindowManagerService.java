@@ -3969,6 +3969,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (w.mAppFreezing) {
                     w.mAppFreezing = false;
                     if (w.mSurface != null && !w.mOrientationChanging) {
+                        if (DEBUG_ORIENTATION) Slog.v(TAG, "set mOrientationChanging of " + w);
                         w.mOrientationChanging = true;
                     }
                     unfrozeWindows = true;
@@ -5102,7 +5103,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (rawss == null) {
-            Log.w(TAG, "Failure taking screenshot for (" + dw + "x" + dh
+            Slog.w(TAG, "Failure taking screenshot for (" + dw + "x" + dh
                     + ") to layer " + maxLayer);
             return null;
         }
@@ -5308,6 +5309,7 @@ public class WindowManagerService extends IWindowManager.Stub
         for (int i=mWindows.size()-1; i>=0; i--) {
             WindowState w = mWindows.get(i);
             if (w.mSurface != null) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Set mOrientationChanging of " + w);
                 w.mOrientationChanging = true;
             }
         }
@@ -7124,7 +7126,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_LAYERS) {
             RuntimeException here = new RuntimeException("here");
             here.fillInStackTrace();
-            Log.v(TAG, "Assigning layers", here);
+            Slog.v(TAG, "Assigning layers", here);
         }
 
         for (i=0; i<N; i++) {
@@ -7361,6 +7363,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return mPolicy.finishLayoutLw();
+    }
+
+    void makeWindowFreezingScreenIfNeededLocked(WindowState w) {
+        // If the screen is currently frozen or off, then keep
+        // it frozen/off until this window draws at its new
+        // orientation.
+        if (mDisplayFrozen || !mPolicy.isScreenOnFully()) {
+            if (DEBUG_ORIENTATION) Slog.v(TAG,
+                    "Changing surface while display frozen: " + w);
+            w.mOrientationChanging = true;
+            if (!mWindowsFreezingScreen) {
+                mWindowsFreezingScreen = true;
+                // XXX should probably keep timeout from
+                // when we first froze the display.
+                mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
+                mH.sendMessageDelayed(mH.obtainMessage(
+                        H.WINDOW_FREEZE_TIMEOUT), 2000);
+            }
+        }
     }
 
     // "Something has changed!  Let's make it correct now."
@@ -7714,6 +7735,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                         + " drawn=" + wtoken.numDrawnWindows);
                                 wtoken.showAllWindowsLocked();
                                 unsetAppFreezingScreenLocked(wtoken, false, true);
+                                if (DEBUG_ORIENTATION) Slog.i(TAG,
+                                        "Setting orientationChangeComplete=true because wtoken "
+                                        + wtoken + " numInteresting=" + numInteresting
+                                        + " numDrawn=" + wtoken.numDrawnWindows);
                                 orientationChangeComplete = true;
                             }
                         } else if (!wtoken.allDrawn) {
@@ -8221,22 +8246,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                             w.mLastContentInsets.set(w.mContentInsets);
                             w.mLastVisibleInsets.set(w.mVisibleInsets);
-                            // If the screen is currently frozen or off, then keep
-                            // it frozen/off until this window draws at its new
-                            // orientation.
-                            if (mDisplayFrozen || !mPolicy.isScreenOnFully()) {
-                                if (DEBUG_ORIENTATION) Slog.v(TAG,
-                                        "Resizing while display frozen: " + w);
-                                w.mOrientationChanging = true;
-                                if (!mWindowsFreezingScreen) {
-                                    mWindowsFreezingScreen = true;
-                                    // XXX should probably keep timeout from
-                                    // when we first froze the display.
-                                    mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-                                    mH.sendMessageDelayed(mH.obtainMessage(
-                                            H.WINDOW_FREEZE_TIMEOUT), 2000);
-                                }
-                            }
+                            makeWindowFreezingScreenIfNeededLocked(w);
                             // If the orientation is changing, then we need to
                             // hold off on unfreezing the display until this
                             // window has been redrawn; to do that, we need
@@ -8559,6 +8569,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + Integer.toHexString(diff));
                     }
                     win.mConfiguration = mCurConfiguration;
+                    if (DEBUG_ORIENTATION && win.mDrawPending) Slog.i(
+                            TAG, "Resizing " + win + " WITH DRAW PENDING"); 
                     win.mClient.resized((int)win.mSurfaceW, (int)win.mSurfaceH,
                             win.mLastContentInsets, win.mLastVisibleInsets, win.mDrawPending,
                             configChanged ? win.mConfiguration : null);
@@ -9083,6 +9095,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
                 && mScreenRotationAnimation.hasScreenshot()) {
+            if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
                 requestAnimationLocked(0);
