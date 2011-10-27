@@ -15728,6 +15728,7 @@ package android.provider {
     field public static final int TYPE_NONE = 0; // 0x0
     field public static final int TYPE_OPTIONAL = 2; // 0x2
     field public static final int TYPE_REQUIRED = 1; // 0x1
+    field public static final int TYPE_RESOURCE = 3; // 0x3
   }
 
   public static final class CalendarContract.CalendarAlerts implements android.provider.BaseColumns android.provider.CalendarContract.CalendarAlertsColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.EventsColumns {
@@ -15766,9 +15767,12 @@ package android.provider {
   }
 
   protected static abstract interface CalendarContract.CalendarColumns {
+    field public static final java.lang.String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
+    field public static final java.lang.String ALLOWED_AVAILABILITY = "allowedAvailability";
     field public static final java.lang.String ALLOWED_REMINDERS = "allowedReminders";
     field public static final java.lang.String CALENDAR_ACCESS_LEVEL = "calendar_access_level";
     field public static final java.lang.String CALENDAR_COLOR = "calendar_color";
+    field public static final java.lang.String CALENDAR_COLOR_KEY = "calendar_color_index";
     field public static final java.lang.String CALENDAR_DISPLAY_NAME = "calendar_displayName";
     field public static final java.lang.String CALENDAR_TIME_ZONE = "calendar_timezone";
     field public static final int CAL_ACCESS_CONTRIBUTOR = 500; // 0x1f4
@@ -15813,6 +15817,18 @@ package android.provider {
     field public static final java.lang.String NAME = "name";
   }
 
+  public static final class CalendarContract.Colors implements android.provider.CalendarContract.ColorsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+  }
+
+  protected static abstract interface CalendarContract.ColorsColumns implements android.provider.SyncStateContract.Columns {
+    field public static final java.lang.String COLOR = "color";
+    field public static final java.lang.String COLOR_KEY = "color_index";
+    field public static final java.lang.String COLOR_TYPE = "color_type";
+    field public static final int TYPE_CALENDAR = 0; // 0x0
+    field public static final int TYPE_EVENT = 1; // 0x1
+  }
+
   public static final class CalendarContract.EventDays implements android.provider.CalendarContract.EventDaysColumns {
     method public static final android.database.Cursor query(android.content.ContentResolver, int, int, java.lang.String[]);
     field public static final android.net.Uri CONTENT_URI;
@@ -15838,6 +15854,7 @@ package android.provider {
     field public static final java.lang.String AVAILABILITY = "availability";
     field public static final int AVAILABILITY_BUSY = 0; // 0x0
     field public static final int AVAILABILITY_FREE = 1; // 0x1
+    field public static final int AVAILABILITY_TENTATIVE = 2; // 0x2
     field public static final java.lang.String CALENDAR_ID = "calendar_id";
     field public static final java.lang.String CAN_INVITE_OTHERS = "canInviteOthers";
     field public static final java.lang.String DESCRIPTION = "description";
@@ -15845,6 +15862,7 @@ package android.provider {
     field public static final java.lang.String DTSTART = "dtstart";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String EVENT_COLOR = "eventColor";
+    field public static final java.lang.String EVENT_COLOR_KEY = "eventColor_index";
     field public static final java.lang.String EVENT_END_TIMEZONE = "eventEndTimezone";
     field public static final java.lang.String EVENT_LOCATION = "eventLocation";
     field public static final java.lang.String EVENT_TIMEZONE = "eventTimezone";
