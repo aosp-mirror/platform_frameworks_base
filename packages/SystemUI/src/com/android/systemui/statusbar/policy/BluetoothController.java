@@ -35,6 +35,7 @@ public class BluetoothController extends BroadcastReceiver {
     private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
 
     private int mIconId = R.drawable.stat_sys_data_bluetooth;
+    private int mContentDescriptionId = 0;
     private boolean mEnabled;
 
     public BluetoothController(Context context) {
@@ -44,6 +45,11 @@ public class BluetoothController extends BroadcastReceiver {
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         context.registerReceiver(this, filter);
+
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        handleAdapterStateChange(adapter.getState());
+        handleConnectionStateChange(adapter.getConnectionState());
+        refreshViews();
     }
 
     public void addIconView(ImageView v) {
@@ -52,24 +58,43 @@ public class BluetoothController extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
-                BluetoothAdapter.STATE_DISCONNECTED);
-        int contentDescriptionResId = 0;
+        final String action = intent.getAction();
 
-        if (state == BluetoothAdapter.STATE_CONNECTED) {
+        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+            handleAdapterStateChange(
+                    intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR));
+        } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+            handleConnectionStateChange(
+                    intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                        BluetoothAdapter.STATE_DISCONNECTED));
+        }
+        refreshViews();
+    }
+
+    public void handleAdapterStateChange(int adapterState) {
+        mEnabled = (adapterState == BluetoothAdapter.STATE_ON);
+    }
+
+    public void handleConnectionStateChange(int connectionState) {
+        final boolean connected = (connectionState == BluetoothAdapter.STATE_CONNECTED);
+        if (connected) {
             mIconId = R.drawable.stat_sys_data_bluetooth_connected;
-            contentDescriptionResId = R.string.accessibility_bluetooth_connected;
+            mContentDescriptionId = R.string.accessibility_bluetooth_connected;
         } else {
             mIconId = R.drawable.stat_sys_data_bluetooth;
-            contentDescriptionResId = R.string.accessibility_bluetooth_disconnected;
+            mContentDescriptionId = R.string.accessibility_bluetooth_disconnected;
         }
+    }
 
+    public void refreshViews() {
         int N = mIconViews.size();
         for (int i=0; i<N; i++) {
             ImageView v = mIconViews.get(i);
             v.setImageResource(mIconId);
             v.setVisibility(mEnabled ? View.VISIBLE : View.GONE);
-            v.setContentDescription(mContext.getString(contentDescriptionResId));
+            v.setContentDescription((mContentDescriptionId == 0)
+                    ? null
+                    : mContext.getString(mContentDescriptionId));
         }
     }
 }
