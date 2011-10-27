@@ -11,58 +11,55 @@ page.title=Introduction
   will sometimes have to call command line tools manually, but you will have access to the same
   number of features that you would have in Eclipse.</p>
 
-  <p class="note"><strong>Note:</strong> Before you begin developing Android applications, make
-    sure you have gone through all of the steps outlined in <a
-href="{@docRoot}sdk/installing.html">Installing the SDK</a>.</p>
+<div class="figure" style="width:461px">
+  <img src="{@docRoot}images/developing/developing_overview.png"
+       alt="Development process for Android applications"
+       height="738" />
+  <p class="img-caption">
+    <strong>Figure 1.</strong> The development process for Android applications.
+  </p>
+</div>
 
-  <p>The basic steps for developing applications with or without Eclipse are the same:</p>
+<p>The basic steps for developing applications (with or without Eclipse) are shown in figure 1. The
+development steps encompass four development phases, which include:</p>
 
-  <ol>
-
-    <li>Set up Android Virtual Devices or hardware devices.
-
-      <p>You need to create Android Virtual Devices (AVD) or connect hardware devices on which
-      you will install your applications.</p>
-
-      <p>See <a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>
+<ul>
+  <li><strong>Setup</strong>
+    <p>During this phase you install and set up your development environment. You also create
+      Android Virtual Devices (AVDs) and connect hardware devices on which you can install your
+      applications.</p>
+    <p>See <a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>
       and <a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> for more
-information.
-    </li>
+      information.
+  </li>
+  <li><strong>Development</strong>
+    <p>During this phase you set up and develop your Android project, which contains all of the
+    source code and resource files for your application. For more informations, see
+    <a href="{@docRoot}guide/developing/projects/index.html">Create an Android project</a>.</p>
+  </li>
+  <li><strong>Debugging and Testing</strong>
+    <p>During this phase you build your project into a debuggable <code>.apk</code> package that you
+    can install and run on the emulator or an Android-powered device. If you are using Eclipse,
+    builds are generated each time you project is saved. If you're using another IDE,
+    you can build your project using Ant and install it on a device using
+    <a href="{@docRoot}guide/developing/tools/adb.html">adb</a>. For more information, see
+    <a href="{@docRoot}guide/developing/building/index.html">Build and run your application</a>.</p>
+    <p>Next, you debug your application using a JDWP-compliant debugger along with the debugging
+    and logging tools that are provided with the Android SDK. Eclipse already comes packaged with
+    a compatible debugger. For more information see,
+    <a href="{@docRoot}guide/developing/debugging/index.html">Debug your application with the
+      SDK debugging and logging tools</a>.</p>
+    <p>Last, you test your application using various Android SDK testing tools. For more
+    information, see <a href="{@docRoot}guide/developing/testing/index.html">Test your application
+    with the Testing and Instrumentation framework</a>.</p>
+  </li>
+  <li><strong>Publishing</strong>
+    <p>During this phase you configure and build your application for release and distribute your
+      application to users. For more information, see
+      <a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a>.</p>
+  </li>
+</ul>
 
-    <li>
-      <a href="{@docRoot}guide/developing/projects/index.html">Create an Android project</a>.
-
-      <p>An Android project contains all source code and resource files for your application. It is
-      built into an <code>.apk</code> package that you can install on Android devices.</p>
-    </li>
-
-    <li>
-      <a href="{@docRoot}guide/developing/building/index.html">Build and run your
-      application</a>.
-
-      <p>If you are using Eclipse, builds are generated each time you save changes and you can install
-      your application on a device by clicking <strong>Run</strong>. If you're using another IDE, you can build your
-      project using Ant and install it on a device using <code>adb</code>.</p>
-    </li>
-
-    <li>
-      <a href="{@docRoot}guide/developing/debugging/index.html">Debug your application with the
-      SDK debugging and logging tools</a>.
-
-      <p>Debugging your application involves using a JDWP-compliant debugger along with the
-      debugging and logging tools that are provided with the Android SDK. Eclipse already
-      comes packaged with a compatible debugger.</p>
-    </li>
-
-    <li>
-      <a href="{@docRoot}guide/developing/testing/index.html">Test your application with the
-      Testing and Instrumentation framework</a>.
-
-      <p>The Android SDK provides a testing and instrumnetation framework to help you set up and
-      run tests within an emulator or device.</p>
-    </li>
-  </ol>
- 
 <h2 id="EssentialTools">Essential command line tools</h2>
 
   <p>When developing in IDEs or editors other than Eclipse, be familiar with
@@ -101,7 +98,7 @@ information.
     <dd>To sign your .apk file with a private key generated by Keytool. Jarsigner is part of the
     JDK.</dd>
   </dl>
-  
+
   <p>If you are using Eclipse and ADT, tools such as <code>adb</code> and <code>android</code>
   are automatically called by Eclipse and ADT so you don't have to manually invoke these tools.
   You need to be familiar with <code>adb</code>, however, because certain functions are not
@@ -109,19 +106,20 @@ accessible from
   Eclipse, such as the <code>adb</code> shell commands. You might also need to call Keytool and
 Jarsigner to
   sign your applications, but you can set up Eclipse to do this automatically as well.</p>
-  
+
 <p>For more information on the tools provided with the Android SDK, see the
   <a href="{@docRoot}guide/developing/tools/index.html">Tools</a> section of the documentation.</p>
-  
+
 <h2 id="ThirdParty">Other Third-Party Development Tools</h2>
 <p>
 	The tools described in this section are not developed by the Android SDK team. The Android Dev Guide
 	    does not provide documentation for these tools. Please refer to the linked documents in each
 	    section for documentation.
-</p>  
+</p>
 <h3 id="IntelliJ">Developing in IntelliJ IDEA</h3>
 <div style="float: right">
-<img alt="The IntelliJ graphical user interface" height="500px" src="{@docRoot}images/developing/intellijidea_android_ide.png"/>
+<img alt="The IntelliJ graphical user interface" height="500px"
+src="{@docRoot}images/developing/intellijidea_android_ide.png"/>
 </div>
 <p>
 	IntelliJ IDEA is a powerful Java IDE from JetBrains that provides
@@ -148,5 +146,5 @@ Jarsigner to
 	<li>
     	<a href="http://wiki.jetbrains.net/intellij/Android">IntelliJ IDEA Android Tutorials</a>
 	</li>
-</ul> 
+</ul>
 
