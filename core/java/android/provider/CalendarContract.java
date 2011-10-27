@@ -1545,6 +1545,8 @@ public final class CalendarContract {
                 CAL_SYNC9,
                 CAL_SYNC10,
                 ALLOWED_REMINDERS,
+                ALLOWED_ATTENDEE_TYPES,
+                ALLOWED_AVAILABILITY,
                 CALENDAR_ACCESS_LEVEL,
                 CALENDAR_COLOR,
                 CALENDAR_TIME_ZONE,
