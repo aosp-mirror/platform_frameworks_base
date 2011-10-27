@@ -4472,10 +4472,12 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothSocket createInsecureRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket createRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public int describeContents();
+    method public boolean fetchUuidsWithSdp();
     method public java.lang.String getAddress();
     method public android.bluetooth.BluetoothClass getBluetoothClass();
     method public int getBondState();
     method public java.lang.String getName();
+    method public android.os.ParcelUuid[] getUuids();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
     field public static final java.lang.String ACTION_ACL_DISCONNECTED = "android.bluetooth.device.action.ACL_DISCONNECTED";
@@ -4484,6 +4486,7 @@ package android.bluetooth {
     field public static final java.lang.String ACTION_CLASS_CHANGED = "android.bluetooth.device.action.CLASS_CHANGED";
     field public static final java.lang.String ACTION_FOUND = "android.bluetooth.device.action.FOUND";
     field public static final java.lang.String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
+    field public static final java.lang.String ACTION_UUID = "android.bleutooth.device.action.UUID";
     field public static final int BOND_BONDED = 12; // 0xc
     field public static final int BOND_BONDING = 11; // 0xb
     field public static final int BOND_NONE = 10; // 0xa
