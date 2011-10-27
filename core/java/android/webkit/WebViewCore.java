@@ -124,6 +124,7 @@ public final class WebViewCore {
      */
     private int mViewportDensityDpi = -1;
 
+    private boolean mIsRestored = false;
     private float mRestoredScale = 0;
     private float mRestoredTextWrapScale = 0;
     private int mRestoredX = 0;
@@ -2254,7 +2255,7 @@ public final class WebViewCore {
 
         if (mWebView == null) return;
 
-        boolean updateViewState = standardLoad || mRestoredScale > 0;
+        boolean updateViewState = standardLoad || mIsRestored;
         setupViewport(updateViewState);
         // if updateRestoreState is true, ViewManager.postReadyToDrawAll() will
         // be called after the WebView updates its state. If updateRestoreState
@@ -2271,6 +2272,7 @@ public final class WebViewCore {
 
         // reset the scroll position, the restored offset and scales
         mRestoredX = mRestoredY = 0;
+        mIsRestored = false;
         mRestoredScale = mRestoredTextWrapScale = 0;
     }
 
@@ -2399,14 +2401,10 @@ public final class WebViewCore {
         mInitialViewState.mScrollX = mRestoredX;
         mInitialViewState.mScrollY = mRestoredY;
         mInitialViewState.mMobileSite = (0 == mViewportWidth);
-        if (mRestoredScale > 0) {
+        if (mIsRestored) {
             mInitialViewState.mIsRestored = true;
             mInitialViewState.mViewScale = mRestoredScale;
-            if (mRestoredTextWrapScale > 0) {
-                mInitialViewState.mTextWrapScale = mRestoredTextWrapScale;
-            } else {
-                mInitialViewState.mTextWrapScale = mInitialViewState.mViewScale;
-            }
+            mInitialViewState.mTextWrapScale = mRestoredTextWrapScale;
         } else {
             if (mViewportInitialScale > 0) {
                 mInitialViewState.mViewScale = mInitialViewState.mTextWrapScale =
@@ -2525,14 +2523,9 @@ public final class WebViewCore {
     // called by JNI
     private void restoreScale(float scale, float textWrapScale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
-            // If restored scale and textWrapScale are 0, set them to
-            // overview and reading level scale respectively.
-            mRestoredScale = (scale <= 0.0)
-                ? mWebView.getZoomOverviewScale() : scale;
-            if (mSettings.getUseWideViewPort()) {
-                mRestoredTextWrapScale = (textWrapScale <= 0.0)
-                    ? mWebView.getReadingLevelScale() : textWrapScale;
-            }
+            mIsRestored = true;
+            mRestoredScale = scale;
+            mRestoredTextWrapScale = textWrapScale;
         }
     }
 
