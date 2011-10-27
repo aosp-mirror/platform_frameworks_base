@@ -59,10 +59,12 @@ private:
 #ifdef ASM_ARM_RESAMP1  // asm optimisation for ResamplerOrder1
     void AsmMono16Loop(int16_t *in, int32_t* maxOutPt, int32_t maxInIdx,
             size_t &outputIndex, int32_t* out, size_t &inputIndex, int32_t vl, int32_t vr,
-            uint32_t &phaseFraction, uint32_t phaseIncrement);
+            uint32_t &phaseFraction, uint32_t phaseIncrement)
+        __attribute__((noinline));
     void AsmStereo16Loop(int16_t *in, int32_t* maxOutPt, int32_t maxInIdx,
             size_t &outputIndex, int32_t* out, size_t &inputIndex, int32_t vl, int32_t vr,
-            uint32_t &phaseFraction, uint32_t phaseIncrement);
+            uint32_t &phaseFraction, uint32_t phaseIncrement)
+        __attribute__((noinline));
 #endif  // ASM_ARM_RESAMP1
 
     static inline int32_t Interp(int32_t x0, int32_t x1, uint32_t f) {
