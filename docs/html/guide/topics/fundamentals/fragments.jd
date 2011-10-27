@@ -11,7 +11,7 @@ parent.link=activities.html
     <li>Fragments decompose application functionality and UI into reusable modules</li>
     <li>Add multiple fragments to a screen to avoid switching activities</li>
     <li>Fragments have their own lifecycle, state, and back stack</li>
-    <li>Fragments require API Level "Honeycomb" or greater</li>
+    <li>Fragments require API Level 11 or greater</li>
   </ul>
 
   <h2>In this document</h2>
@@ -49,7 +49,15 @@ parent.link=activities.html
   <h2>Related samples</h2>
   <ol>
     <li><a
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a></li>
+    <li><a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">ApiDemos</a></li>
+  </ol>
+  
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets
+and Handsets</a></li>
   </ol>
 </div>
 </div>
@@ -58,7 +66,8 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/inde
 {@link android.app.Activity}. You can combine multiple fragments in a single activity to build a
 multi-pane UI and reuse a fragment in multiple activities. You can think of a fragment as a
 modular section of an activity, which has its own lifecycle, receives its own input events, and
-which you can add or remove while the activity is running.</p>
+which you can add or remove while the activity is running (sort of like a "sub activity" that
+you can reuse in different activities).</p>
 
 <p>A fragment must always be embedded in an activity and the fragment's lifecycle is directly
 affected by the host activity's lifecycle. For example, when the activity is paused, so are all
@@ -69,14 +78,16 @@ manipulate each fragment independently, such as add or remove them. When you per
 fragment transaction, you can also add it to a back stack that's managed by the
 activity&mdash;each back stack entry in the activity is a record of the fragment transaction that
 occurred. The back stack allows the user to reverse a fragment transaction (navigate backwards),
-by pressing the BACK key.</p>
+by pressing the BACK button.</p>
 
 <p>When you add a fragment as a part of your activity layout, it lives in a {@link
-android.view.ViewGroup} inside the activity's view hierarchy and defines its own layout of views.
+android.view.ViewGroup} inside the activity's view hierarchy and the fragment defines its own view
+layout.
 You can insert a fragment into your activity layout by declaring the fragment in the activity's
 layout file, as a {@code &lt;fragment&gt;} element, or from your application code by adding it to an
 existing {@link android.view.ViewGroup}. However, a fragment is not required to be a part of the
-activity layout; you may also use a fragment as an invisible worker for the activity.</p>
+activity layout; you may also use a fragment without its own UI as an invisible worker for the
+activity.</p>
 
 <p>This document describes how to build your application to use fragments, including
 how fragments can maintain their state when added to the activity's back stack, share
@@ -86,9 +97,9 @@ bar, and more.</p>
 
 <h2 id="Design">Design Philosophy</h2>
 
-<p>Android introduced fragments in Android 3.0 (API Level "Honeycomb"), primarily to support more
+<p>Android introduced fragments in Android 3.0 (API level 11), primarily to support more
 dynamic and flexible UI designs on large screens, such as tablets. Because a
-tablet's screen is much larger than that of a mobile phone, there's more room to combine and
+tablet's screen is much larger than that of a handset, there's more room to combine and
 interchange UI components. Fragments allow such designs without the need for you to manage complex
 changes to the view hierarchy. By dividing the layout of an activity into fragments, you become able
 to modify the activity's appearance at runtime and preserve those changes in a back stack
@@ -99,28 +110,34 @@ left and another fragment to display an article on the right&mdash;both fragment
 activity, side by side, and each fragment has its own set of lifecycle callback methods and handle
 their own user input events. Thus, instead of using one activity to select an article and another
 activity to read the article, the user can select an article and read it all within the same
-activity, as illustrated in figure 1.</p>
+activity, as illustrated in the tablet layout in figure 1.</p>
+
+<p>You should design each fragment as a modular and reusable activity component. That is, because
+each fragment defines its own layout and its own behavior with its own lifecycle callbacks, you can
+include one fragment in multiple activities, so you should design for reuse and avoid directly
+manipulating one fragment from another fragment. This is especially important because a modular
+fragment allows you to change your fragment combinations for different screen sizes. When designing
+your application to support both tablets and handsets, you can reuse your fragments in different
+layout configurations to optimize the user experience based on the available screen space. For
+example, on a handset, it might be necessary to separate fragments to provide a single-pane UI when
+more than one cannot fit within the same activity.</p>
 
 <img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> An example of how two UI modules that are
-typically separated into two activities can be combined into one activity, using fragments.</p>
-
-
-<p>A fragment should be a modular and reusable component in your application. That is, because the
-fragment defines its own layout and its own behavior using its own lifecycle callbacks, you
-can include one fragment in multiple activities. This is especially important because it allows you
-to adapt your user experience to different screen sizes. For instance, you might include multiple
-fragments in an activity only when the screen size is sufficiently large, and, when it is not,
-launch separate activities that use different fragments.</p>
+<p class="img-caption"><strong>Figure 1.</strong> An example of how two UI modules defined by
+fragments can be combined into one activity for a tablet design, but separated for a
+handset design.</p>
 
 <p>For example&mdash;to continue with the news application example&mdash;the application can embed
-two
-fragments in <em>Activity A</em>, when running on an extra large screen (a tablet, for example).
-However, on a normal-sized screen (a phone, for example),
-there would not be enough room for both fragments, so <em>Activity A</em> includes only the fragment for
-the list of articles, and when the user selects an article, it starts <em>Activity B</em>, which
-includes the fragment to read the article. Thus, the application supports both design patterns
-suggested in figure 1.</p>
+two fragments in <em>Activity A</em>, when running on a tablet-sized device. However, on a
+handset-sized screen, there's not be enough room for both fragments, so <em>Activity A</em> includes
+only the fragment for the list of articles, and when the user selects an article, it starts
+<em>Activity B</em>, which includes the second fragment to read the article. Thus, the application
+supports both tablets and handsets by reusing fragments in different combinations, as illustrated in
+figure 1.</p>
+
+<p>For more information about designing your application with different fragment combinations for
+different screen configurations, see the guide to <a
+href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a>.</p>
 
 
 
