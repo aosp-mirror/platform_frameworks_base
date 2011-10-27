@@ -160,13 +160,24 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             mDhcpRange = DHCP_DEFAULT_RANGE;
         }
 
-        mTetherableUsbRegexs = context.getResources().getStringArray(
+        // load device config info
+        updateConfiguration();
+
+        // TODO - remove and rely on real notifications of the current iface
+        mDnsServers = new String[2];
+        mDnsServers[0] = DNS_DEFAULT_SERVER1;
+        mDnsServers[1] = DNS_DEFAULT_SERVER2;
+    }
+
+    void updateConfiguration() {
+        mTetherableUsbRegexs = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_usb_regexs);
-        mTetherableWifiRegexs = context.getResources().getStringArray(
+        mTetherableWifiRegexs = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_wifi_regexs);
-        mTetherableBluetoothRegexs = context.getResources().getStringArray(
+        mTetherableBluetoothRegexs = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_bluetooth_regexs);
-        int ifaceTypes[] = context.getResources().getIntArray(
+
+        int ifaceTypes[] = mContext.getResources().getIntArray(
                 com.android.internal.R.array.config_tether_upstream_types);
         mUpstreamIfaceTypes = new ArrayList();
         for (int i : ifaceTypes) {
@@ -175,11 +186,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         // check if the upstream type list needs to be modified due to secure-settings
         checkDunRequired();
-
-        // TODO - remove and rely on real notifications of the current iface
-        mDnsServers = new String[2];
-        mDnsServers[0] = DNS_DEFAULT_SERVER1;
-        mDnsServers[1] = DNS_DEFAULT_SERVER2;
     }
 
     public void interfaceStatusChanged(String iface, boolean up) {
@@ -575,6 +581,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public int[] getUpstreamIfaceTypes() {
+        updateConfiguration();
         int values[] = new int[mUpstreamIfaceTypes.size()];
         Iterator<Integer> iterator = mUpstreamIfaceTypes.iterator();
         for (int i=0; i < mUpstreamIfaceTypes.size(); i++) {
@@ -584,11 +591,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public void checkDunRequired() {
-        int requiredApn = ((Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.TETHER_DUN_REQUIRED, 0) == 1) ?
-                ConnectivityManager.TYPE_MOBILE_DUN :
-                ConnectivityManager.TYPE_MOBILE_HIPRI);
-        if (mPreferredUpstreamMobileApn != requiredApn) {
+        int secureSetting = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.TETHER_DUN_REQUIRED, 2);
+        // 2 = not set, 0 = DUN not required, 1 = DUN required
+        if (secureSetting != 2) {
+            int requiredApn = (secureSetting == 1 ?
+                    ConnectivityManager.TYPE_MOBILE_DUN :
+                    ConnectivityManager.TYPE_MOBILE_HIPRI);
             if (requiredApn == ConnectivityManager.TYPE_MOBILE_DUN) {
                 while (mUpstreamIfaceTypes.contains(MOBILE_TYPE)) {
                     mUpstreamIfaceTypes.remove(MOBILE_TYPE);
@@ -610,7 +619,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     mUpstreamIfaceTypes.add(HIPRI_TYPE);
                 }
             }
-            mPreferredUpstreamMobileApn = requiredApn;
+        }
+        if (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
+            mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_DUN;
+        } else {
+            mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_HIPRI;
         }
     }
 
@@ -1251,6 +1264,15 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 int upType = ConnectivityManager.TYPE_NONE;
                 String iface = null;
 
+                updateConfiguration();
+
+                if (VDBG) {
+                    Log.d(TAG, "chooseUpstreamType has upstream iface types:");
+                    for (Integer netType : mUpstreamIfaceTypes) {
+                        Log.d(TAG, " " + netType);
+                    }
+                }
+
                 for (Integer netType : mUpstreamIfaceTypes) {
                     NetworkInfo info = null;
                     try {
@@ -1314,7 +1336,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
-                        checkDunRequired();
                         TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who.toString());
                         mNotifyList.add(who);
@@ -1485,6 +1506,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     "from from pid=" + Binder.getCallingPid() + ", uid=" +
                     Binder.getCallingUid());
                     return;
+        }
+
+        pw.println("mUpstreamIfaceTypes: ");
+        for (Integer netType : mUpstreamIfaceTypes) {
+            pw.println(" " + netType);
         }
 
         pw.println();
