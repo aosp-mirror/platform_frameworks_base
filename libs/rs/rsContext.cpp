@@ -279,6 +279,8 @@ void * Context::threadProc(void *vrsc) {
             rsc->timerSet(RS_TIMER_INTERNAL);
             rsc->timerPrint();
             rsc->timerReset();
+        } else {
+            doWait = true;
         }
     }
 
