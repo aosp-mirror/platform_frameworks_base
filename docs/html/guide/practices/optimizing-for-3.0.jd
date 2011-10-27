@@ -1,6 +1,31 @@
 page.title=Optimizing Apps for Android 3.0
 @jd:body
 
+
+<div id="deprecatedSticker">
+  <a href="#" 
+     onclick="$('#naMessage').show();$('#deprecatedSticker').hide();return false">
+    <strong>This doc is deprecated</strong></a>
+</div>
+
+
+<div id="naMessage" style="display:block">
+<div><p><strong>This document has been deprecated.</strong></p>
+ <p>To learn about how you can  optimize your app for both tablets and handsets, please
+read the guide to <a href="tablets-and-handsets.html">Supporting Tablets and
+Handsets</a>.</p>
+
+ <input style="margin-top:1em;padding:5px" type="button"
+        value="That's nice, but I still want to read this document"
+onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
+</div>
+</div>
+
+
+
+
+
+
 <div id="qv-wrapper">
 <div id="qv">
 <h2>In this document</h2>
@@ -25,6 +50,8 @@ page.title=Optimizing Apps for Android 3.0
 <h2>See also</h2>
 
 <ol>
+  <li><a href="tablets-and-handsets.html">Supporting Tablets
+and Handsets</a></li>
   <li><a
 href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a></li>
   <li><a href="http://code.google.com/p/iosched/">Google I/O App source code</a></li>
