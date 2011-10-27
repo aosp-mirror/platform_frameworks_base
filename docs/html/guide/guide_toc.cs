@@ -715,9 +715,9 @@
           </a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/practices/optimizing-for-3.0.html">
-            <span class="en">Optimizing Apps for Android 3.0</span>
-          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/practices/tablets-and-handsets.html">
+            <span class="en">Supporting Tablets and Handsets</span>
+          </a> <span class="new">new!</span></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>
