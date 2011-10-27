@@ -983,13 +983,13 @@
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Almacenamiento masivo USB"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"conectado al USB"</string>
+    <string name="usb_storage_title" msgid="5901459041398751495">"Conectado al USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Has conectado tu teléfono a tu computadora mediante USB. Selecciona el botón a continuación si deseas copiar los archivos entre tu computadora y el almacenamiento USB de Android."</string>
     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Has conectado tu teléfono a tu computadora mediante USB. Selecciona el botón a continuación si deseas copiar los archivos entre tu computadora y la tarjeta SD de Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar el almacenamiento USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Hay un problema para utilizar el almacenamiento USB en el almacenamiento masivo USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Hay un problema para utilizar tu tarjeta SD en el almacenamiento masivo USB."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"conectado al USB"</string>
+    <string name="usb_storage_notification_title" msgid="8175892554757216525">"Conectado al USB"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Seleccionar para copiar archivos desde o hacia tu computadora."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Desactivar el almacenamiento USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Seleccionar para desactivar el almacenamiento USB."</string>

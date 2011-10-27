@@ -895,8 +895,8 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"USBデバイス用アプリケーションを選択"</string>
     <string name="noApplications" msgid="1691104391758345586">"この操作を実行できるアプリケーションはありません。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"申し訳ありませんが、<xliff:g id="APPLICATION">%1$s</xliff:g>は停止しました。"</string>
-    <string name="aerr_process" msgid="4507058997035697579">"申し訳ありませんが、プロセス「<xliff:g id="PROCESS">%1$s</xliff:g>」が停止しました。"</string>
+    <string name="aerr_application" msgid="932628488013092776">"問題が発生したため、<xliff:g id="APPLICATION">%1$s</xliff:g>を終了します。"</string>
+    <string name="aerr_process" msgid="4507058997035697579">"問題が発生したため、プロセス「<xliff:g id="PROCESS">%1$s</xliff:g>」を終了します。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g>は応答していません。"\n\n"このアプリケーションを終了しますか？"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"操作「<xliff:g id="ACTIVITY">%1$s</xliff:g>」は応答していません。"\n\n"この操作を終了しますか？"</string>
