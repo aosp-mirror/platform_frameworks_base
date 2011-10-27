@@ -40,6 +40,7 @@
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
+#include <gui/SurfaceTextureClient.h>
 #include <utils/Errors.h>  // for status_t
 #include <utils/String8.h>
 #include <utils/SystemClock.h>
@@ -528,6 +529,8 @@ void MediaPlayerService::Client::disconnect()
         p->reset();
     }
 
+    disconnectNativeWindow();
+
     IPCThreadState::self()->flushCommands();
 }
 
@@ -789,13 +792,67 @@ status_t MediaPlayerService::Client::setVideoSurface(const sp<Surface>& surface)
     return p->setVideoSurface(surface);
 }
 
+void MediaPlayerService::Client::disconnectNativeWindow() {
+    if (mConnectedWindow != NULL) {
+        status_t err = native_window_api_disconnect(mConnectedWindow.get(),
+                NATIVE_WINDOW_API_MEDIA);
+
+        if (err != OK) {
+            LOGW("native_window_api_disconnect returned an error: %s (%d)",
+                    strerror(-err), err);
+        }
+    }
+    mConnectedWindow.clear();
+}
+
 status_t MediaPlayerService::Client::setVideoSurfaceTexture(
         const sp<ISurfaceTexture>& surfaceTexture)
 {
     LOGV("[%d] setVideoSurfaceTexture(%p)", mConnId, surfaceTexture.get());
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
-    return p->setVideoSurfaceTexture(surfaceTexture);
+
+    sp<IBinder> binder(surfaceTexture == NULL ? NULL :
+            surfaceTexture->asBinder());
+    if (mConnectedWindowBinder == binder) {
+        return OK;
+    }
+
+    sp<ANativeWindow> anw;
+    if (surfaceTexture != NULL) {
+        anw = new SurfaceTextureClient(surfaceTexture);
+        status_t err = native_window_api_connect(anw.get(),
+                NATIVE_WINDOW_API_MEDIA);
+
+        if (err != OK) {
+            LOGE("setVideoSurfaceTexture failed: %d", err);
+            // Note that we must do the reset before disconnecting from the ANW.
+            // Otherwise queue/dequeue calls could be made on the disconnected
+            // ANW, which may result in errors.
+            reset();
+
+            disconnectNativeWindow();
+
+            return err;
+        }
+    }
+
+    // Note that we must set the player's new SurfaceTexture before
+    // disconnecting the old one.  Otherwise queue/dequeue calls could be made
+    // on the disconnected ANW, which may result in errors.
+    status_t err = p->setVideoSurfaceTexture(surfaceTexture);
+
+    disconnectNativeWindow();
+
+    mConnectedWindow = anw;
+
+    if (err == OK) {
+        mConnectedWindowBinder = binder;
+    } else {
+        disconnectNativeWindow();
+    }
+
+    return err;
 }
 
 status_t MediaPlayerService::Client::invoke(const Parcel& request,
