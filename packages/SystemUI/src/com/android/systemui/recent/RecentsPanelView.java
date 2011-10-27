@@ -75,6 +75,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
+    private Runnable mPreloadTasksRunnable;
     private boolean mRecentTasksDirty = true;
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
@@ -198,10 +199,16 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
             } else {
                 if (noApps) {
                     if (DEBUG) Log.v(TAG, "Nothing to show");
+                    // Need to set recent tasks to dirty so that next time we load, we
+                    // refresh the list of tasks
+                    mRecentTasksLoader.cancelLoadingThumbnails();
+                    mRecentTasksDirty = true;
                     return;
                 }
             }
         } else {
+            // Need to set recent tasks to dirty so that next time we load, we
+            // refresh the list of tasks
             mRecentTasksLoader.cancelLoadingThumbnails();
             mRecentTasksDirty = true;
         }
@@ -361,6 +368,13 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         if (mRecentsScrim != null && mRecentsScrim.getBackground() instanceof BitmapDrawable) {
             ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
         }
+
+        mPreloadTasksRunnable = new Runnable() {
+            public void run() {
+                setVisibility(INVISIBLE);
+                refreshRecentTasksList();
+            }
+        };
     }
 
     private void createCustomAnimations(LayoutTransition transitioner) {
@@ -446,14 +460,18 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         if (!mShowing) {
             int action = ev.getAction() & MotionEvent.ACTION_MASK;
             if (action == MotionEvent.ACTION_DOWN) {
-                // If we set our visibility to INVISIBLE here, we avoid an extra call to onLayout
-                // later when we become visible
-                setVisibility(INVISIBLE);
-                refreshRecentTasksList();
+                // If we set our visibility to INVISIBLE here, we avoid an extra call to
+                // onLayout later when we become visible (because onLayout is always called
+                // when going from GONE)
+                post(mPreloadTasksRunnable);
             } else if (action == MotionEvent.ACTION_CANCEL) {
                 setVisibility(GONE);
                 clearRecentTasksList();
+                // Remove the preloader if we haven't called it yet
+                removeCallbacks(mPreloadTasksRunnable);
             } else if (action == MotionEvent.ACTION_UP) {
+                // Remove the preloader if we haven't called it yet
+                removeCallbacks(mPreloadTasksRunnable);
                 if (!v.isPressed()) {
                     setVisibility(GONE);
                     clearRecentTasksList();
