@@ -641,6 +641,7 @@ public class WebView extends AbsoluteLayout
     private boolean mAccessibilityScriptInjected;
 
     static final boolean USE_JAVA_TEXT_SELECTION = true;
+    static final boolean DEBUG_TEXT_HANDLES = false;
     private Region mTextSelectionRegion = new Region();
     private Paint mTextSelectionPaint;
     private Drawable mSelectHandleLeft;
@@ -4537,7 +4538,7 @@ public class WebView extends AbsoluteLayout
         int extras = DRAW_EXTRAS_NONE;
         if (mFindIsUp) {
             extras = DRAW_EXTRAS_FIND;
-        } else if (mSelectingText && !USE_JAVA_TEXT_SELECTION) {
+        } else if (mSelectingText && (!USE_JAVA_TEXT_SELECTION || DEBUG_TEXT_HANDLES)) {
             extras = DRAW_EXTRAS_SELECTION;
             nativeSetSelectionPointer(mNativeClass,
                     mDrawSelectionPointer,
@@ -4609,33 +4610,29 @@ public class WebView extends AbsoluteLayout
             mTextSelectionPaint.setColor(HIGHLIGHT_COLOR);
         }
         mTextSelectionRegion.setEmpty();
-        nativeGetTextSelectionRegion(mTextSelectionRegion);
+        nativeGetTextSelectionRegion(mNativeClass, mTextSelectionRegion);
         Rect r = new Rect();
         RegionIterator iter = new RegionIterator(mTextSelectionRegion);
-        int start_x = -1;
-        int start_y = -1;
-        int end_x = -1;
-        int end_y = -1;
+        Rect clip = canvas.getClipBounds();
         while (iter.next(r)) {
-            r = new Rect(
-                    contentToViewDimension(r.left),
+            r.set(contentToViewDimension(r.left),
                     contentToViewDimension(r.top),
                     contentToViewDimension(r.right),
                     contentToViewDimension(r.bottom));
-            // Regions are in order. First one is where selection starts,
-            // last one is where it ends
-            if (start_x < 0 || start_y < 0) {
-                start_x = r.left;
-                start_y = r.bottom;
+            if (r.intersect(clip)) {
+                canvas.drawRect(r, mTextSelectionPaint);
             }
-            end_x = r.right;
-            end_y = r.bottom;
-            canvas.drawRect(r, mTextSelectionPaint);
         }
         if (mSelectHandleLeft == null) {
             mSelectHandleLeft = mContext.getResources().getDrawable(
                     com.android.internal.R.drawable.text_select_handle_left);
         }
+        int[] handles = new int[4];
+        nativeGetSelectionHandles(mNativeClass, handles);
+        int start_x = contentToViewDimension(handles[0]);
+        int start_y = contentToViewDimension(handles[1]);
+        int end_x = contentToViewDimension(handles[2]);
+        int end_y = contentToViewDimension(handles[3]);
         // Magic formula copied from TextView
         start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
         mSelectHandleLeft.setBounds(start_x, start_y,
@@ -4649,6 +4646,10 @@ public class WebView extends AbsoluteLayout
         mSelectHandleRight.setBounds(end_x, end_y,
                 end_x + mSelectHandleRight.getIntrinsicWidth(),
                 end_y + mSelectHandleRight.getIntrinsicHeight());
+        if (DEBUG_TEXT_HANDLES) {
+            mSelectHandleLeft.setAlpha(125);
+            mSelectHandleRight.setAlpha(125);
+        }
         mSelectHandleLeft.draw(canvas);
         mSelectHandleRight.draw(canvas);
     }
@@ -5409,6 +5410,10 @@ public class WebView extends AbsoluteLayout
         }
         mExtendSelection = false;
         mSelectingText = mDrawSelectionPointer = true;
+        if (DEBUG_TEXT_HANDLES) {
+            // Debugging text handles requires running in software mode
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
         // don't let the picture change during text selection
         WebViewCore.pauseUpdatePicture(mWebViewCore);
         if (nativeHasCursorNode()) {
@@ -5487,6 +5492,11 @@ public class WebView extends AbsoluteLayout
     void selectionDone() {
         if (mSelectingText) {
             mSelectingText = false;
+            if (DEBUG_TEXT_HANDLES) {
+                // Debugging text handles required running in software mode, set
+                // back to default now
+                setLayerType(LAYER_TYPE_NONE, null);
+            }
             // finish is idempotent, so this is fine even if selectionDone was
             // called by mSelectCallback.onDestroyActionMode
             mSelectCallback.finish();
@@ -9608,7 +9618,8 @@ public class WebView extends AbsoluteLayout
     private native int      nativeGetBackgroundColor();
     native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
-    private native void     nativeGetTextSelectionRegion(Region region);
+    private native void     nativeGetTextSelectionRegion(int instance, Region region);
+    private native void     nativeGetSelectionHandles(int instance, int[] handles);
     /**
      * See {@link ComponentCallbacks2} for the trim levels and descriptions
      */
