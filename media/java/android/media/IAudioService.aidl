@@ -33,7 +33,7 @@ interface IAudioService {
 
     void adjustStreamVolume(int streamType, int direction, int flags);
 
-    void adjustMasterVolume(int direction);
+    void adjustMasterVolume(int direction, int flags);
 
     void setStreamVolume(int streamType, int index, int flags);
     
@@ -44,7 +44,9 @@ interface IAudioService {
     boolean isStreamMute(int streamType);
 
     int getStreamVolume(int streamType);
-    
+
+    float getMasterVolume();
+
     int getStreamMaxVolume(int streamType);
     
     int getLastAudibleStreamVolume(int streamType);
