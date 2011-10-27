@@ -318,6 +318,9 @@ private:
         // @param type Of the metadata to be recorded.
         void addNewMetadataUpdate(media::Metadata::Type type);
 
+        // Disconnect from the currently connected ANativeWindow.
+        void disconnectNativeWindow();
+
         mutable     Mutex                       mLock;
                     sp<MediaPlayerBase>         mPlayer;
                     sp<MediaPlayerService>      mService;
@@ -329,6 +332,8 @@ private:
                     int32_t                     mConnId;
                     int                         mAudioSessionId;
                     uid_t                       mUID;
+                    sp<ANativeWindow>           mConnectedWindow;
+                    sp<IBinder>                 mConnectedWindowBinder;
 
         // Metadata filters.
         media::Metadata::Filter mMetadataAllow;  // protected by mLock
