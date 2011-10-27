@@ -264,10 +264,11 @@ the {@link android.Manifest.permission#READ_CALENDAR} permission (for read acces
 
 <h4>Event intent</h4>
 
-<p>If all you want to do is add an event to the user’s calendar, you can use an
-{@link android.content.Intent#ACTION_INSERT} intent with a {@code "vnd.android.cursor.item/event"}
-MIME type to start an activity in the Calendar app that creates new events. Using the intent does
-not require any permission and you can specify event details with the following extras:</p>
+<p>If all you want to do is add an event to the user’s calendar, you can use an {@link
+android.content.Intent#ACTION_INSERT} intent with the data defined by {@link
+android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} in order to start an
+activity in the Calendar app that creates new events. Using the intent does not require any
+permission and you can specify event details with the following extras:</p>
 
 <ul>
   <li>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}: Name for the
