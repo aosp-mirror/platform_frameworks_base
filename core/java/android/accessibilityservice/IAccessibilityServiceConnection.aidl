@@ -33,7 +33,7 @@ interface IAccessibilityServiceConnection {
      * Finds an {@link AccessibilityNodeInfo} by accessibility id.
      *
      * @param accessibilityWindowId A unique window id.
-     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
+     * @param accessibilityNodeId A unique view id or virtual descendant id.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
@@ -51,7 +51,7 @@ interface IAccessibilityServiceConnection {
      *
      * @param text The searched text.
      * @param accessibilityWindowId A unique window id.
-     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id) from
+     * @param accessibilityNodeId A unique view id or virtual descendant id from
      *        where to start the search. Use {@link android.view.View#NO_ID} to start from the root.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
@@ -96,7 +96,7 @@ interface IAccessibilityServiceConnection {
      * Performs an accessibility action on an {@link AccessibilityNodeInfo}.
      *
      * @param accessibilityWindowId The id of the window.
-     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
+     * @param accessibilityNodeId A unique view id or virtual descendant id.
      * @param action The action to perform.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
