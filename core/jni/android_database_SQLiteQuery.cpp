@@ -35,8 +35,110 @@
 
 namespace android {
 
-static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
-        jint statementPtr, jint windowPtr, jint startPos, jint offsetParam) {
+enum CopyRowResult {
+    CPR_OK,
+    CPR_FULL,
+    CPR_ERROR,
+};
+
+static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
+        sqlite3_stmt* statement, int numColumns, int startPos, int addedRows) {
+    // Allocate a new field directory for the row. This pointer is not reused
+    // since it may be possible for it to be relocated on a call to alloc() when
+    // the field data is being allocated.
+    status_t status = window->allocRow();
+    if (status) {
+        LOG_WINDOW("Failed allocating fieldDir at startPos %d row %d, error=%d",
+                startPos, addedRows, status);
+        return CPR_FULL;
+    }
+
+    // Pack the row into the window.
+    CopyRowResult result = CPR_OK;
+    for (int i = 0; i < numColumns; i++) {
+        int type = sqlite3_column_type(statement, i);
+        if (type == SQLITE_TEXT) {
+            // TEXT data
+            const char* text = reinterpret_cast<const char*>(
+                    sqlite3_column_text(statement, i));
+            // SQLite does not include the NULL terminator in size, but does
+            // ensure all strings are NULL terminated, so increase size by
+            // one to make sure we store the terminator.
+            size_t sizeIncludingNull = sqlite3_column_bytes(statement, i) + 1;
+            status = window->putString(addedRows, i, text, sizeIncludingNull);
+            if (status) {
+                LOG_WINDOW("Failed allocating %u bytes for text at %d,%d, error=%d",
+                        sizeIncludingNull, startPos + addedRows, i, status);
+                result = CPR_FULL;
+                break;
+            }
+            LOG_WINDOW("%d,%d is TEXT with %u bytes",
+                    startPos + addedRows, i, sizeIncludingNull);
+        } else if (type == SQLITE_INTEGER) {
+            // INTEGER data
+            int64_t value = sqlite3_column_int64(statement, i);
+            status = window->putLong(addedRows, i, value);
+            if (status) {
+                LOG_WINDOW("Failed allocating space for a long in column %d, error=%d",
+                        i, status);
+                result = CPR_FULL;
+                break;
+            }
+            LOG_WINDOW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
+        } else if (type == SQLITE_FLOAT) {
+            // FLOAT data
+            double value = sqlite3_column_double(statement, i);
+            status = window->putDouble(addedRows, i, value);
+            if (status) {
+                LOG_WINDOW("Failed allocating space for a double in column %d, error=%d",
+                        i, status);
+                result = CPR_FULL;
+                break;
+            }
+            LOG_WINDOW("%d,%d is FLOAT %lf", startPos + addedRows, i, value);
+        } else if (type == SQLITE_BLOB) {
+            // BLOB data
+            const void* blob = sqlite3_column_blob(statement, i);
+            size_t size = sqlite3_column_bytes(statement, i);
+            status = window->putBlob(addedRows, i, blob, size);
+            if (status) {
+                LOG_WINDOW("Failed allocating %u bytes for blob at %d,%d, error=%d",
+                        size, startPos + addedRows, i, status);
+                result = CPR_FULL;
+                break;
+            }
+            LOG_WINDOW("%d,%d is Blob with %u bytes",
+                    startPos + addedRows, i, size);
+        } else if (type == SQLITE_NULL) {
+            // NULL field
+            status = window->putNull(addedRows, i);
+            if (status) {
+                LOG_WINDOW("Failed allocating space for a null in column %d, error=%d",
+                        i, status);
+                result = CPR_FULL;
+                break;
+            }
+
+            LOG_WINDOW("%d,%d is NULL", startPos + addedRows, i);
+        } else {
+            // Unknown data
+            LOGE("Unknown column type when filling database window");
+            throw_sqlite3_exception(env, "Unknown column type when filling window");
+            result = CPR_ERROR;
+            break;
+        }
+    }
+
+    // Free the last row if if was not successfully copied.
+    if (result != CPR_OK) {
+        window->freeLastRow();
+    }
+    return result;
+}
+
+static jlong nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
+        jint statementPtr, jint windowPtr, jint offsetParam,
+        jint startPos, jint requiredPos, jboolean countAllRows) {
     sqlite3* database = reinterpret_cast<sqlite3*>(databasePtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
     CursorWindow* window = reinterpret_cast<CursorWindow*>(windowPtr);
@@ -45,15 +147,17 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
     // offsetParam will be set to 0, an invalid value.
     if (offsetParam > 0) {
         // Bind the offset parameter, telling the program which row to start with
+        // If an offset parameter is used, we cannot simply clear the window if it
+        // turns out that the requiredPos won't fit because the result set may
+        // depend on startPos, so we set startPos to requiredPos.
+        startPos = requiredPos;
         int err = sqlite3_bind_int(statement, offsetParam, startPos);
         if (err != SQLITE_OK) {
             LOGE("Unable to bind offset position, offsetParam = %d", offsetParam);
             throw_sqlite3_exception(env, database);
             return 0;
         }
-        LOG_WINDOW("Bound to startPos %d", startPos);
-    } else {
-        LOG_WINDOW("Not binding to startPos %d", startPos);
+        LOG_WINDOW("Bound offset position to startPos %d", startPos);
     }
 
     // We assume numRows is initially 0.
@@ -73,7 +177,6 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
     int addedRows = 0;
     bool windowFull = false;
     bool gotException = false;
-    const bool countAllRows = (startPos == 0); // when startPos is 0, we count all rows
     while (!gotException && (!windowFull || countAllRows)) {
         int err = sqlite3_step(statement);
         if (err == SQLITE_ROW) {
@@ -86,97 +189,24 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
                 continue;
             }
 
-            // Allocate a new field directory for the row. This pointer is not reused
-            // since it may be possible for it to be relocated on a call to alloc() when
-            // the field data is being allocated.
-            status = window->allocRow();
-            if (status) {
-                LOG_WINDOW("Failed allocating fieldDir at startPos %d row %d, error=%d",
-                        startPos, addedRows, status);
-                windowFull = true;
-                continue;
+            CopyRowResult cpr = copyRow(env, window, statement, numColumns, startPos, addedRows);
+            if (cpr == CPR_FULL && addedRows && startPos + addedRows < requiredPos) {
+                // We filled the window before we got to the one row that we really wanted.
+                // Clear the window and start filling it again from here.
+                // TODO: Would be nicer if we could progressively replace earlier rows.
+                window->clear();
+                window->setNumColumns(numColumns);
+                startPos += addedRows;
+                addedRows = 0;
+                cpr = copyRow(env, window, statement, numColumns, startPos, addedRows);
             }
 
-            // Pack the row into the window.
-            for (int i = 0; i < numColumns; i++) {
-                int type = sqlite3_column_type(statement, i);
-                if (type == SQLITE_TEXT) {
-                    // TEXT data
-                    const char* text = reinterpret_cast<const char*>(
-                            sqlite3_column_text(statement, i));
-                    // SQLite does not include the NULL terminator in size, but does
-                    // ensure all strings are NULL terminated, so increase size by
-                    // one to make sure we store the terminator.
-                    size_t sizeIncludingNull = sqlite3_column_bytes(statement, i) + 1;
-                    status = window->putString(addedRows, i, text, sizeIncludingNull);
-                    if (status) {
-                        LOG_WINDOW("Failed allocating %u bytes for text at %d,%d, error=%d",
-                                sizeIncludingNull, startPos + addedRows, i, status);
-                        windowFull = true;
-                        break;
-                    }
-                    LOG_WINDOW("%d,%d is TEXT with %u bytes",
-                            startPos + addedRows, i, sizeIncludingNull);
-                } else if (type == SQLITE_INTEGER) {
-                    // INTEGER data
-                    int64_t value = sqlite3_column_int64(statement, i);
-                    status = window->putLong(addedRows, i, value);
-                    if (status) {
-                        LOG_WINDOW("Failed allocating space for a long in column %d, error=%d",
-                                i, status);
-                        windowFull = true;
-                        break;
-                    }
-                    LOG_WINDOW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
-                } else if (type == SQLITE_FLOAT) {
-                    // FLOAT data
-                    double value = sqlite3_column_double(statement, i);
-                    status = window->putDouble(addedRows, i, value);
-                    if (status) {
-                        LOG_WINDOW("Failed allocating space for a double in column %d, error=%d",
-                                i, status);
-                        windowFull = true;
-                        break;
-                    }
-                    LOG_WINDOW("%d,%d is FLOAT %lf", startPos + addedRows, i, value);
-                } else if (type == SQLITE_BLOB) {
-                    // BLOB data
-                    const void* blob = sqlite3_column_blob(statement, i);
-                    size_t size = sqlite3_column_bytes(statement, i);
-                    status = window->putBlob(addedRows, i, blob, size);
-                    if (status) {
-                        LOG_WINDOW("Failed allocating %u bytes for blob at %d,%d, error=%d",
-                                size, startPos + addedRows, i, status);
-                        windowFull = true;
-                        break;
-                    }
-                    LOG_WINDOW("%d,%d is Blob with %u bytes",
-                            startPos + addedRows, i, size);
-                } else if (type == SQLITE_NULL) {
-                    // NULL field
-                    status = window->putNull(addedRows, i);
-                    if (status) {
-                        LOG_WINDOW("Failed allocating space for a null in column %d, error=%d",
-                                i, status);
-                        windowFull = true;
-                        break;
-                    }
-
-                    LOG_WINDOW("%d,%d is NULL", startPos + addedRows, i);
-                } else {
-                    // Unknown data
-                    LOGE("Unknown column type when filling database window");
-                    throw_sqlite3_exception(env, "Unknown column type when filling window");
-                    gotException = true;
-                    break;
-                }
-            }
-
-            // Update the final row tally.
-            if (windowFull || gotException) {
-                window->freeLastRow();
-            } else {
+            if (cpr == CPR_OK) {
                 addedRows += 1;
+            } else if (cpr == CPR_FULL) {
+                windowFull = true;
+            } else {
+                gotException = true;
             }
         } else if (err == SQLITE_DONE) {
             // All rows processed, bail
@@ -209,7 +239,8 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
     if (startPos > totalRows) {
         LOGE("startPos %d > actual rows %d", startPos, totalRows);
     }
-    return countAllRows ? totalRows : 0;
+    jlong result = jlong(startPos) << 32 | jlong(totalRows);
+    return result;
 }
 
 static jint nativeColumnCount(JNIEnv* env, jclass clazz, jint statementPtr) {
@@ -228,7 +259,7 @@ static jstring nativeColumnName(JNIEnv* env, jclass clazz, jint statementPtr,
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    { "nativeFillWindow", "(IIIII)I",
+    { "nativeFillWindow", "(IIIIIIZ)J",
             (void*)nativeFillWindow },
     { "nativeColumnCount", "(I)I",
             (void*)nativeColumnCount},

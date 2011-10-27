@@ -132,11 +132,11 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
     }
 
     @Override
-    public CursorWindow getWindow(int startPos) {
+    public CursorWindow getWindow(int position) {
         synchronized (mLock) {
             throwIfCursorIsClosed();
 
-            if (!mCursor.moveToPosition(startPos)) {
+            if (!mCursor.moveToPosition(position)) {
                 closeFilledWindowLocked();
                 return null;
             }
@@ -149,12 +149,11 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                 if (window == null) {
                     mFilledWindow = new CursorWindow(mProviderName);
                     window = mFilledWindow;
-                    mCursor.fillWindow(startPos, window);
-                } else if (startPos < window.getStartPosition()
-                        || startPos >= window.getStartPosition() + window.getNumRows()) {
+                } else if (position < window.getStartPosition()
+                        || position >= window.getStartPosition() + window.getNumRows()) {
                     window.clear();
-                    mCursor.fillWindow(startPos, window);
                 }
+                mCursor.fillWindow(position, window);
             }
 
             // Acquire a reference before returning from this RPC.

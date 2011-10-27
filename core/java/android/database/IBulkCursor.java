@@ -30,11 +30,17 @@ import android.os.RemoteException;
  */
 public interface IBulkCursor extends IInterface  {
     /**
-     * Returns a BulkCursorWindow, which either has a reference to a shared
-     * memory segment with the rows, or an array of JSON strings.
+     * Gets a cursor window that contains the specified position.
+     * The window will contain a range of rows around the specified position.
      */
-    public CursorWindow getWindow(int startPos) throws RemoteException;
+    public CursorWindow getWindow(int position) throws RemoteException;
 
+    /**
+     * Notifies the cursor that the position has changed.
+     * Only called when {@link #getWantsAllOnMoveCalls()} returns true.
+     *
+     * @param position The new position
+     */
     public void onMove(int position) throws RemoteException;
 
     /**

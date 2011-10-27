@@ -30,8 +30,10 @@ import android.util.Log;
 public class SQLiteQuery extends SQLiteProgram {
     private static final String TAG = "SQLiteQuery";
 
-    private static native int nativeFillWindow(int databasePtr, int statementPtr, int windowPtr,
-            int startPos, int offsetParam);
+    private static final boolean DEBUG_FILL_WINDOW_PERFORMANCE = false;
+
+    private static native long nativeFillWindow(int databasePtr, int statementPtr, int windowPtr,
+            int offsetParam, int startPos, int requiredPos, boolean countAllRows);
     private static native int nativeColumnCount(int statementPtr);
     private static native String nativeColumnName(int statementPtr, int columnIndex);
 
@@ -71,19 +73,39 @@ public class SQLiteQuery extends SQLiteProgram {
      * Reads rows into a buffer. This method acquires the database lock.
      *
      * @param window The window to fill into
-     * @return number of total rows in the query
+     * @param startPos The start position for filling the window.
+     * @param requiredPos The position of a row that MUST be in the window.
+     * If it won't fit, then the query should discard part of what it filled.
+     * @param countAllRows True to count all rows that the query would
+     * return regardless of whether they fit in the window.
+     * @return Number of rows that were enumerated.  Might not be all rows
+     * unless countAllRows is true.
      */
-    /* package */ int fillWindow(CursorWindow window) {
+    /* package */ int fillWindow(CursorWindow window,
+            int startPos, int requiredPos, boolean countAllRows) {
         mDatabase.lock(mSql);
         long timeStart = SystemClock.uptimeMillis();
         try {
             acquireReference();
             try {
                 window.acquireReference();
-                int numRows = nativeFillWindow(nHandle, nStatement, window.mWindowPtr,
-                        window.getStartPosition(), mOffsetIndex);
+                long result = nativeFillWindow(nHandle, nStatement, window.mWindowPtr,
+                        mOffsetIndex, startPos, requiredPos, countAllRows);
+                int actualPos = (int)(result >> 32);
+                int countedRows = (int)result;
+                window.setStartPosition(actualPos);
+                if (DEBUG_FILL_WINDOW_PERFORMANCE) {
+                    Log.d(TAG, "fillWindow: window=\"" + window
+                            + "\", startPos=" + startPos + ", requiredPos=" + requiredPos
+                            + ", countAllRows=" + countAllRows
+                            + ", offset=" + mOffsetIndex
+                            + ", actualPos=" + actualPos + ", filledRows=" + window.getNumRows()
+                            + ", countedRows=" + countedRows
+                            + ", took " + (SystemClock.uptimeMillis() - timeStart)
+                            + " ms, query=\"" + mSql + "\"");
+                }
                 mDatabase.logTimeStat(mSql, timeStart);
-                return numRows;
+                return countedRows;
             } catch (IllegalStateException e){
                 // simply ignore it
                 return 0;
