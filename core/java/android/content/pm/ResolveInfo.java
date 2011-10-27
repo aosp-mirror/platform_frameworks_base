@@ -34,8 +34,8 @@ import java.util.Comparator;
  */
 public class ResolveInfo implements Parcelable {
     /**
-     * The activity that corresponds to this resolution match, if this
-     * resolution is for an activity.  One and only one of this and
+     * The activity or broadcast receiver that corresponds to this resolution match,
+     * if this resolution is for an activity or broadcast receiver. One and only one of this and
      * serviceInfo must be non-null.
      */
     public ActivityInfo activityInfo;
