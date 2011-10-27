@@ -147,7 +147,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoptionen"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Display-Sperre"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Ausschalten"</string>
-    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lautlos"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lautlos-Modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist AUS."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ton ist AN."</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flugmodus"</string>
@@ -256,7 +256,7 @@
     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Ermöglicht einer App, Fenster mit Systemwarnungen anzuzeigen. Schädliche Anwendungen können so die Kontrolle über das gesamte Display übernehmen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"Allgemeine Animationsgeschwindigkeit einstellen"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Ermöglicht einer App, die allgemeine Animationsgeschwindigkeit (schnellere oder langsamere Animationen) jederzeit anzupassen"</string>
-    <string name="permlab_manageAppTokens" msgid="17124341698093865">"Anwendungs-Tokens verwalten"</string>
+    <string name="permlab_manageAppTokens" msgid="17124341698093865">"App-Tokens verwalten"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Ermöglicht Anwendungen, Ihre eigenen Tokens zu erstellen und zu verwalten. Hierbei wird die normale Z-Reihenfolge umgangen. Dies sollte nicht für normale Anwendungen benötigt werden."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"Tasten und Steuerungstasten drücken"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Ermöglicht einer App, ihre eigenen Eingabeaktionen (Drücken von Tasten usw.) an andere Anwendungen zu liefern. Schädliche Anwendungen können so die Kontrolle über Ihr Tablet übernehmen."</string>
@@ -1169,6 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Lautlos"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ton ein"</string>
+    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Schließen Sie ein Headset an, um das Passwort gesprochen zu hören."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Zur Startseite navigieren"</string>

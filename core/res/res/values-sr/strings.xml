@@ -1169,6 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Нечујно"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Укључи звук"</string>
+    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Укључите слушалице да бисте чули наглас изговорене тастере за лозинку."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Тачка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Кретање до Почетне"</string>

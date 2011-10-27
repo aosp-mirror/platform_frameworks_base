@@ -452,8 +452,8 @@
     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"允许应用程序更改网络设置、拦截和检查所有网络流量，例如，更改任何 APN 的代理和端口。恶意应用程序可以监视、重定向，或在您不知情的情况下修改网络数据包。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"更改网络连接性"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"允许应用程序更改网络连接的状态。"</string>
-    <string name="permlab_changeTetherState" msgid="2702121155761140799">"更改绑定的连接"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"允许应用程序更改绑定网络连接的状态。"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"更改网络共享连接"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"允许应用程序更改共享网络时所用连接的状态。"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台数据使用设置"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"允许应用程序更改后台数据使用设置。"</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"查看 Wi-Fi 状态"</string>
@@ -888,8 +888,8 @@
     <string name="loading" msgid="1760724998928255250">"正在载入..."</string>
     <string name="capital_on" msgid="1544682755514494298">"打开"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"使用以下方式发送"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"默认使用此方式发送。"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用程序："</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"设为默认选项。"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"通过主屏幕上的“设置”&gt;“应用程序”&gt;“管理应用程序”清除默认设置。"</string>
     <string name="chooseActivity" msgid="1009246475582238425">"选择一项操作"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"选择适用于 USB 设备的应用程序"</string>
@@ -1080,7 +1080,7 @@
     <string name="submit" msgid="1602335572089911941">"提交"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已启用车载模式"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"选择退出车载模式"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"USB 绑定或热点已启用"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"网络共享或热点已启用"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"触摸可进行配置"</string>
     <string name="back_button_label" msgid="2300470004503343439">"上一步"</string>
     <string name="next_button_label" msgid="1080555104677992408">"下一步"</string>
@@ -1169,6 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"相机"</string>
     <string name="description_target_silent" msgid="893551287746522182">"静音"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"打开声音"</string>
+    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"需要插入耳机才能听到密码的按键声。"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"点。"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"导航首页"</string>
