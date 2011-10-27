@@ -1121,9 +1121,11 @@ class ZoomManager {
             if (mInitialScale > 0) {
                 scale = mInitialScale;
                 mTextWrapScale = scale;
-            } else if (viewState.mViewScale > 0) {
-                mTextWrapScale = viewState.mTextWrapScale;
-                scale = viewState.mViewScale;
+            } else if (viewState.mIsRestored) {
+                scale = (viewState.mViewScale > 0)
+                    ? viewState.mViewScale : overviewScale;
+                mTextWrapScale = (viewState.mTextWrapScale > 0)
+                    ? viewState.mTextWrapScale : getReadingLevelScale();
             } else {
                 scale = overviewScale;
                 if (!settings.getUseWideViewPort()
