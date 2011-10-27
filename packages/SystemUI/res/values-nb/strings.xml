@@ -65,14 +65,14 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Lagrer skjermdumpen …"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Lagrer skjermdumpen …"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skjermdumpen lagres."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skjermdumpen lagret."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skjermdumpen er lagret."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Trykk for å se skjermdumpen."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Kan ikke avbilde skjermdumpen."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Kan ikke lagre skjermdumpen."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Kan ikke ikke lagre skjermdumpen. Det er mulig ekstern lagring er i bruk."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Altern. for USB-filoverføring"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Sett inn som mediespiller (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Sett inn som kamera (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Installer Android File Transfer-app for Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Installer Android File Transfer-appen for Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Tilbake"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Startside"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meny"</string>
@@ -101,7 +101,7 @@
     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Dekningssignal for Wi-Fi med én stolpe."</string>
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dekningssignal for Wi-Fi med to stolper."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Dekningssignal for Wi-Fi med tre stolper."</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Fullstendig Wi-Fi-signal"</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Fullt Wi-Fi-signal"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
@@ -126,7 +126,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-data er deaktivert"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobildata er deaktivert"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data deaktivert"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Du har nådd den angitte databruksgrensen."\n\n"Hvis du aktiverer data på nytt, kan du bli belastet med kostnader av operatøren."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Du har nådd den angitte databruksgrensen."\n\n"Hvis du slår på igjen databruk, kan du bli belastet med kostnader av operatøren."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Aktiver data på nytt"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen Internett-forbindelse"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tilkoblet"</string>

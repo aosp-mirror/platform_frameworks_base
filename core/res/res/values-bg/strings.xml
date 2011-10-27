@@ -1169,6 +1169,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Тих режим"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Включване на звука"</string>
+    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Включете слушалки, за да чуете клавишите за паролата на висок глас."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Точка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Придвижване към „Начало“"</string>
