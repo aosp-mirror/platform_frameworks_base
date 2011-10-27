@@ -45,6 +45,7 @@ public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
 
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
+    final float BUTTON_QUIESCENT_ALPHA = 0.6f;
 
     IWindowManager mWindowManager;
     long mDownTime;
@@ -86,7 +87,7 @@ public class KeyButtonView extends ImageView {
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
         if (mGlowBG != null) {
-            mDrawingAlpha = 0.5f;
+            mDrawingAlpha = BUTTON_QUIESCENT_ALPHA;
         }
         
         a.recycle();
@@ -175,8 +176,10 @@ public class KeyButtonView extends ImageView {
             if (pressed != isPressed()) {
                 AnimatorSet as = new AnimatorSet();
                 if (pressed) {
-                    if (mGlowScale < 1.7f) mGlowScale = 1.7f;
-                    if (mGlowAlpha < 0.5f) mGlowAlpha = 0.5f;
+                    if (mGlowScale < GLOW_MAX_SCALE_FACTOR) 
+                        mGlowScale = GLOW_MAX_SCALE_FACTOR;
+                    if (mGlowAlpha < BUTTON_QUIESCENT_ALPHA)
+                        mGlowAlpha = BUTTON_QUIESCENT_ALPHA;
                     setDrawingAlpha(1f);
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
@@ -187,7 +190,7 @@ public class KeyButtonView extends ImageView {
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 0f),
                         ObjectAnimator.ofFloat(this, "glowScale", 1f),
-                        ObjectAnimator.ofFloat(this, "drawingAlpha", 0.5f)
+                        ObjectAnimator.ofFloat(this, "drawingAlpha", BUTTON_QUIESCENT_ALPHA)
                     );
                     as.setDuration(500);
                 }
