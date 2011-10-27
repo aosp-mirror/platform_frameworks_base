@@ -35,22 +35,30 @@ public class Touch {
      * Y position.
      */
     public static void scrollTo(TextView widget, Layout layout, int x, int y) {
-        final int verticalPadding = widget.getTotalPaddingTop() + widget.getTotalPaddingBottom();
-        final int top = layout.getLineForVertical(y);
-        final int bottom = layout.getLineForVertical(y + widget.getHeight() - verticalPadding);
+        final int horizontalPadding = widget.getTotalPaddingLeft() + widget.getTotalPaddingRight();
+        final int availableWidth = widget.getWidth() - horizontalPadding;
 
-        int left = Integer.MAX_VALUE;
-        int right = 0;
+        final int top = layout.getLineForVertical(y);
         Alignment a = layout.getParagraphAlignment(top);
         boolean ltr = layout.getParagraphDirection(top) > 0;
 
-        for (int i = top; i <= bottom; i++) {
-            left = (int) Math.min(left, layout.getLineLeft(i));
-            right = (int) Math.max(right, layout.getLineRight(i));
+        int left, right;
+        if (widget.getHorizontallyScrolling()) {
+            final int verticalPadding = widget.getTotalPaddingTop() + widget.getTotalPaddingBottom();
+            final int bottom = layout.getLineForVertical(y + widget.getHeight() - verticalPadding);
+
+            left = Integer.MAX_VALUE;
+            right = 0;
+
+            for (int i = top; i <= bottom; i++) {
+                left = (int) Math.min(left, layout.getLineLeft(i));
+                right = (int) Math.max(right, layout.getLineRight(i));
+            }
+        } else {
+            left = 0;
+            right = availableWidth;
         }
 
-        final int hoizontalPadding = widget.getTotalPaddingLeft() + widget.getTotalPaddingRight();
-        final int availableWidth = widget.getWidth() - hoizontalPadding;
         final int actualWidth = right - left;
 
         if (actualWidth < availableWidth) {
@@ -166,16 +174,24 @@ public class Touch {
         return false;
     }
 
+    /**
+     * @param widget The text view.
+     * @param buffer The text buffer.
+     */
     public static int getInitialScrollX(TextView widget, Spannable buffer) {
         DragState[] ds = buffer.getSpans(0, buffer.length(), DragState.class);
         return ds.length > 0 ? ds[0].mScrollX : -1;
     }
-    
+
+    /**
+     * @param widget The text view.
+     * @param buffer The text buffer.
+     */
     public static int getInitialScrollY(TextView widget, Spannable buffer) {
         DragState[] ds = buffer.getSpans(0, buffer.length(), DragState.class);
         return ds.length > 0 ? ds[0].mScrollY : -1;
     }
-    
+
     private static class DragState implements NoCopySpan {
         public float mX;
         public float mY;
