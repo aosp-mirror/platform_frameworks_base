@@ -32,8 +32,8 @@ page.title=Versioning Your Applications
 </div>
 </div>
 
-<p>Versioning is a critical component of your application upgrade/maintenance
-strategy. </p>
+<p>Versioning is a critical component of your application upgrade and maintenance
+strategy. Versioning is important because:</p>
 
 <ul>
 <li>Users need to have specific information about the application version that
@@ -48,15 +48,14 @@ users. A publishing service may also need to check the application version to
 determine compatibility and establish upgrade/downgrade relationships.</li>
 </ul>
 
-<p>The Android system itself <em>does not ever</em> check the application version
-information for an application, such as to enforce restrictions on upgrades,
-compatibility, and so on. Instead, only users or applications themselves are
-responsible for enforcing any version restrictions for applications themselves. </p>
-
-<p>The Android system <em>does</em> check any system version compatibility expressed 
-by an application in its manifest, in the <code>minSdkVersion</code> attribute. This
-allows an application to specify the minimum system API with which is compatible. 
-For more information see <a href="#minsdkversion">Specifying Minimum System API Version</a>.
+<p>The Android system does not use app version information to enforce
+restrictions on upgrades, downgrades, or compatibility of third-party apps. Instead, you (the
+developer) are responsible for enforcing version restrictions within your application or by
+informing users of the version restrictions and limitations. The Android system does, however,
+enforce system version compatibility as expressed by the <code>minSdkVersion</code> attribute in the
+manifest. This attribute allows an application to specify the minimum system API with which it is
+compatible. For more information see <a href="#minsdkversion">Specifying Minimum System API
+Version</a>.</p>
 
 <h2 id="appversioning">Setting Application Version</h2>
 <p>To define the version information for your application, you set attributes in
@@ -65,7 +64,7 @@ always define values for both of them: </p>
 
 <ul>
 <li><code>android:versionCode</code> &mdash; An integer value that represents
-the version of the application code, relative to other versions. 
+the version of the application code, relative to other versions.
 
 <p>The value is an integer so that other applications can programmatically
 evaluate it, for example to check an upgrade or downgrade relationship. You can
@@ -83,7 +82,7 @@ user (see <code>android:versionName</code>, below). Applications and publishing
 services should not display this version value to users.</p>
 </li>
 <li><code>android:versionName</code> &mdash; A string value that represents the
-release version of the application code, as it should be shown to users. 
+release version of the application code, as it should be shown to users.
 <p>The value is a string so that you can describe the application version as a
 &lt;major&gt;.&lt;minor&gt;.&lt;point&gt; string, or as any other type of
 absolute or relative version identifier. </p>
@@ -121,20 +120,20 @@ corresponds to a minor follow-on release, as shown by the
 
 <p>The Android framework provides an API to let applications query the system
 for version information about your application. To obtain version information,
-applications use the 
-{@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)} 
+applications use the
+{@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)}
 method of {@link android.content.pm.PackageManager PackageManager}. </p>
 
 <h2 id="minsdkversion">Specifying Your Application's System API Requirements</h2>
 
 <p>If your application requires a specific minimum version of the Android
 platform, or is designed only to support a certain range of Android platform
-versions, you can specify those version requirements as API Level identifiers 
-in the application's manifest file. Doing so ensures that your 
+versions, you can specify those version requirements as API Level identifiers
+in the application's manifest file. Doing so ensures that your
 application can only be installed on devices that
 are running a compatible version of the Android system. </p>
 
-<p>To specify API Level requirements, add a <code>&lt;uses-sdk&gt;</code> 
+<p>To specify API Level requirements, add a <code>&lt;uses-sdk&gt;</code>
 element in the application's manifest, with one or more of these attributes: </p>
 
 <ul>
@@ -144,10 +143,10 @@ by the platform's API Level identifier. </li>
 <li><code>android:targetSdkVersion</code> &mdash; Specifies the API Level
 on which the application is designed to run. In some cases, this allows the
 application to use manifest elements or behaviors defined in the target
-API Level, rather than being restricted to using only those defined 
+API Level, rather than being restricted to using only those defined
 for the minimum API Level.</li>
 <li><code>android:maxSdkVersion</code> &mdash; The maximum version
-of the Android platform on which the application is designed to run, 
+of the Android platform on which the application is designed to run,
 specified by the platform's API Level identifier. <strong>Important:</strong> Please read the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
 documentation before using this attribute. </li>
