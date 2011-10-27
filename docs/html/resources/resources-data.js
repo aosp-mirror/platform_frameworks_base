@@ -601,10 +601,20 @@ var ANDROID_RESOURCES = [
     tags: ['sample', 'input', 'new'],
     path: 'samples/SpellChecker/SampleSpellCheckerService/index.html',
     title: {
-      en: 'Spell Checker'
+      en: 'Spell Checker Service'
     },
     description: {
-      en: 'An example spell checker service, using the <a href="'+toRoot+'reference/android/service/textservice/SpellCheckerService.html"><code>SpellCheckerservice</code></a>.'
+      en: 'An example spell checker service, using the <a href="'+toRoot+'reference/android/service/textservice/SpellCheckerService.html"><code>SpellCheckerService</code></a>.'
+    }
+  },
+  {
+    tags: ['sample', 'input', 'new'],
+    path: 'samples/SpellChecker/HelloSpellChecker/index.html',
+    title: {
+      en: 'Spell Checker Client'
+    },
+    description: {
+        en: 'An example spell checker client, using the <a href="'+toRoot+'reference/android/view/textservice/TextServicesManager.html"><code>TextServicesManager</code></a> and <a href="'+toRoot+'reference/android/view/textservice/SpellCheckerSession.html"><code>SpellCheckerSession</code></a>.'
     }
   },
   {

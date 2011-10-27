@@ -957,8 +957,10 @@ android:name="android.service.textservice.SpellCheckerService" />} as the intent
 include a {@code &lt;meta-data&gt;} element that declares configuration information for the spell
 checker. </p>
 
-<p>See the <a href="{@docRoot}resources/samples/SpellChecker/SampleSpellCheckerService/index.html">
-Spell Checker</a> sample app for example code.</p>
+<p>See the sample <a href="{@docRoot}resources/samples/SpellChecker/SampleSpellCheckerService/index.html">
+Spell Checker Service</a> app and
+sample <a href="{@docRoot}resources/samples/SpellChecker/HelloSpellChecker/index.html">
+Spell Checker Client</a> app for example code.</p>
 
 
 
