@@ -46,7 +46,7 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"静音"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"自动"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"蓝牙已绑定"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"已通过蓝牙共享网络"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"配置输入法"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"使用物理键盘"</string>
     <string name="usb_device_permission_prompt" msgid="3816016361969816903">"允许应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>访问 USB 设备吗？"</string>
@@ -110,7 +110,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙共享网络。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
