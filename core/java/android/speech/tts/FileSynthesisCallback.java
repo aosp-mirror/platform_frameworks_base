@@ -16,10 +16,10 @@
 package android.speech.tts;
 
 import android.media.AudioFormat;
+import android.os.FileUtils;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -63,7 +63,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
      * Must be called while holding the monitor on {@link #mStateLock}.
      */
     private void cleanUp() {
-        closeFile();
+        closeFileAndWidenPermissions();
         if (mFile != null) {
             mFileName.delete();
         }
@@ -72,7 +72,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
     /**
      * Must be called while holding the monitor on {@link #mStateLock}.
      */
-    private void closeFile() {
+    private void closeFileAndWidenPermissions() {
         try {
             if (mFile != null) {
                 mFile.close();
@@ -80,6 +80,18 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             }
         } catch (IOException ex) {
             Log.e(TAG, "Failed to close " + mFileName + ": " + ex);
+        }
+
+        try {
+            // Make the written file readable and writeable by everyone.
+            // This allows the app that requested synthesis to read the file.
+            //
+            // Note that the directory this file was written must have already
+            // been world writeable in order it to have been
+            // written to in the first place.
+            FileUtils.setPermissions(mFileName.getAbsolutePath(), 0666, -1, -1); //-rw-rw-rw
+        } catch (SecurityException se) {
+            Log.e(TAG, "Security exception setting rw permissions on : " + mFileName);
         }
     }
 
@@ -168,7 +180,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
                 int dataLength = (int) (mFile.length() - WAV_HEADER_LENGTH);
                 mFile.write(
                         makeWavHeader(mSampleRateInHz, mAudioFormat, mChannelCount, dataLength));
-                closeFile();
+                closeFileAndWidenPermissions();
                 mDone = true;
                 return TextToSpeech.SUCCESS;
             } catch (IOException ex) {
