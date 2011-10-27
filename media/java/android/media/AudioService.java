@@ -573,7 +573,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#adjustMasterVolume(int) */
-    public void adjustMasterVolume(int direction) {
+    public void adjustMasterVolume(int direction, int flags) {
         ensureValidDirection(direction);
 
         float volume = AudioSystem.getMasterVolume();
@@ -589,6 +589,7 @@ public class AudioService extends IAudioService.Stub {
             long origCallerIdentityToken = Binder.clearCallingIdentity();
             Settings.System.putFloat(mContentResolver, Settings.System.VOLUME_MASTER, volume);
             Binder.restoreCallingIdentity(origCallerIdentityToken);
+            mVolumePanel.postMasterVolumeChanged(flags);
         }
     }
 
@@ -698,6 +699,14 @@ public class AudioService extends IAudioService.Stub {
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
         return (mStreamStates[streamType].mIndex + 5) / 10;
+    }
+
+    public float getMasterVolume() {
+        return AudioSystem.getMasterVolume();
+    }
+
+    public void setMasterVolume(float volume) {
+        AudioSystem.setMasterVolume(volume);
     }
 
     /** @see AudioManager#getStreamMaxVolume(int) */

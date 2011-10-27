@@ -92,6 +92,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private static final int MSG_TIMEOUT = 5;
     private static final int MSG_RINGER_MODE_CHANGED = 6;
 
+    // Pseudo stream type for master volume
+    private static final int STREAM_MASTER = -1;
+
     protected Context mContext;
     private AudioManager mAudioManager;
     protected AudioService mAudioService;
@@ -148,7 +151,13 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 R.string.volume_icon_description_notification,
                 R.drawable.ic_audio_notification,
                 R.drawable.ic_audio_notification_mute,
-                true);
+                true),
+        // for now, use media resources for master volume
+        MasterStream(STREAM_MASTER,
+                R.string.volume_icon_description_media,
+                R.drawable.ic_audio_vol,
+                R.drawable.ic_audio_vol_mute,
+                false);
 
         int streamType;
         int descRes;
@@ -173,7 +182,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         StreamResources.VoiceStream,
         StreamResources.MediaStream,
         StreamResources.NotificationStream,
-        StreamResources.AlarmStream
+        StreamResources.AlarmStream,
+        StreamResources.MasterStream
     };
 
     /** Object that contains data for each slider */
@@ -194,6 +204,16 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mContext = context;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mAudioService = volumeService;
+
+        // For now, only show master volume if master volume is supported
+        boolean useMasterVolume = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
+        if (useMasterVolume) {
+            for (int i = 0; i < STREAMS.length; i++) {
+                StreamResources streamRes = STREAMS[i];
+                streamRes.show = (streamRes.streamType == STREAM_MASTER);
+            }
+        }
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -245,7 +265,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mVibrator = new Vibrator();
 
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
-        mShowCombinedVolumes = !mVoiceCapable;
+        mShowCombinedVolumes = !mVoiceCapable && !useMasterVolume;
         // If we don't want to show multiple volumes, hide the settings button and divider
         if (!mShowCombinedVolumes) {
             mMoreButton.setVisibility(View.GONE);
@@ -274,7 +294,49 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     private boolean isMuted(int streamType) {
-        return mAudioManager.isStreamMute(streamType);
+        if (streamType == STREAM_MASTER) {
+            // master volume mute not yet supported
+            return false;
+        } else {
+            return mAudioService.isStreamMute(streamType);
+        }
+    }
+
+    private int getStreamMaxVolume(int streamType) {
+        // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
+        if (streamType == STREAM_MASTER) {
+            return 100;
+        } else {
+            return mAudioService.getStreamMaxVolume(streamType);
+        }
+    }
+
+    private int getStreamVolume(int streamType) {
+         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
+        if (streamType == STREAM_MASTER) {
+            return Math.round(mAudioService.getMasterVolume() * 100);
+        } else {
+            return mAudioService.getStreamVolume(streamType);
+        }
+    }
+
+    private void setStreamVolume(int streamType, int index, int flags) {
+         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
+        if (streamType == STREAM_MASTER) {
+            mAudioService.setMasterVolume((float)index / 100.0f);
+        } else {
+            mAudioService.setStreamVolume(streamType, index, flags);
+        }
+    }
+
+    private int getLastAudibleStreamVolume(int streamType) {
+         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
+        if (streamType == STREAM_MASTER) {
+            // master volume mute not yet supported
+            return getStreamVolume(STREAM_MASTER);
+        } else {
+            return mAudioService.getLastAudibleStreamVolume(streamType);
+        }
     }
 
     private void createSliders() {
@@ -308,7 +370,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             sc.seekbarView = (SeekBar) sc.group.findViewById(R.id.seekbar);
             int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
                     streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
-            sc.seekbarView.setMax(mAudioManager.getStreamMaxVolume(streamType) + plusOne);
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
             sc.seekbarView.setOnSeekBarChangeListener(this);
             sc.seekbarView.setTag(sc);
             mStreamControls.put(streamType, sc);
@@ -349,7 +411,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     /** Update the mute and progress state of a slider */
     private void updateSlider(StreamControl sc) {
-        sc.seekbarView.setProgress(mAudioManager.getLastAudibleStreamVolume(sc.streamType));
+        sc.seekbarView.setProgress(getLastAudibleStreamVolume(sc.streamType));
         final boolean muted = isMuted(sc.streamType);
         sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
         sc.seekbarView.setEnabled(!muted);
@@ -394,6 +456,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         obtainMessage(MSG_VOLUME_CHANGED, streamType, flags).sendToTarget();
     }
 
+    public void postMasterVolumeChanged(int flags) {
+        postVolumeChanged(STREAM_MASTER, flags);
+    }
+
     /**
      * Override this if you have other work to do when the volume changes (for
      * example, vibrating, playing a sound, etc.). Make sure to call through to
@@ -428,9 +494,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     protected void onShowVolumeChanged(int streamType, int flags) {
-        int index = mAudioService.isStreamMute(streamType) ?
-                mAudioService.getLastAudibleStreamVolume(streamType)
-                : mAudioService.getStreamVolume(streamType);
+        int index = isMuted(streamType) ?
+                getLastAudibleStreamVolume(streamType)
+                : getStreamVolume(streamType);
 
 //        int message = UNKNOWN_VOLUME_TEXT;
 //        int additionalMessage = 0;
@@ -443,7 +509,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
         // get max volume for progress bar
 
-        int max = mAudioService.getStreamMaxVolume(streamType);
+        int max = getStreamMaxVolume(streamType);
 
         switch (streamType) {
 
@@ -577,6 +643,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
      * Lock on this VolumePanel instance as long as you use the returned ToneGenerator.
      */
     private ToneGenerator getOrCreateToneGenerator(int streamType) {
+        if (streamType == STREAM_MASTER) return null;
         synchronized (this) {
             if (mToneGenerators[streamType] == null) {
                 try {
@@ -677,8 +744,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         final Object tag = seekBar.getTag();
         if (fromUser && tag instanceof StreamControl) {
             StreamControl sc = (StreamControl) tag;
-            if (mAudioManager.getStreamVolume(sc.streamType) != progress) {
-                mAudioManager.setStreamVolume(sc.streamType, progress, 0);
+            if (getStreamVolume(sc.streamType) != progress) {
+                setStreamVolume(sc.streamType, progress, 0);
             }
         }
         resetTimeout();
