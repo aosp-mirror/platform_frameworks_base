@@ -385,10 +385,12 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
     for (size_t i = 0; i < extractor->countTracks(); ++i) {
         sp<MetaData> meta = extractor->getTrackMetaData(i);
 
-        const char *mime;
-        CHECK(meta->findCString(kKeyMIMEType, &mime));
+        const char *_mime;
+        CHECK(meta->findCString(kKeyMIMEType, &_mime));
 
-        if (!haveVideo && !strncasecmp(mime, "video/", 6)) {
+        String8 mime = String8(_mime);
+
+        if (!haveVideo && !strncasecmp(mime.string(), "video/", 6)) {
             setVideoSource(extractor->getTrack(i));
             haveVideo = true;
 
@@ -409,9 +411,9 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
                 mStats.mTracks.push();
                 TrackStat *stat =
                     &mStats.mTracks.editItemAt(mStats.mVideoTrackIndex);
-                stat->mMIME = mime;
+                stat->mMIME = mime.string();
             }
-        } else if (!haveAudio && !strncasecmp(mime, "audio/", 6)) {
+        } else if (!haveAudio && !strncasecmp(mime.string(), "audio/", 6)) {
             setAudioSource(extractor->getTrack(i));
             haveAudio = true;
 
@@ -421,10 +423,10 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
                 mStats.mTracks.push();
                 TrackStat *stat =
                     &mStats.mTracks.editItemAt(mStats.mAudioTrackIndex);
-                stat->mMIME = mime;
+                stat->mMIME = mime.string();
             }
 
-            if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_VORBIS)) {
+            if (!strcasecmp(mime.string(), MEDIA_MIMETYPE_AUDIO_VORBIS)) {
                 // Only do this for vorbis audio, none of the other audio
                 // formats even support this ringtone specific hack and
                 // retrieving the metadata on some extractors may turn out
@@ -436,7 +438,7 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
                     modifyFlags(AUTO_LOOPING, SET);
                 }
             }
-        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP)) {
+        } else if (!strcasecmp(mime.string(), MEDIA_MIMETYPE_TEXT_3GPP)) {
             addTextSource(extractor->getTrack(i));
         }
     }
