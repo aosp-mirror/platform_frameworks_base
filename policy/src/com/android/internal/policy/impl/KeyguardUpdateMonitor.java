@@ -21,11 +21,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
-import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
+import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
+import static android.os.BatteryManager.EXTRA_STATUS;
+import static android.os.BatteryManager.EXTRA_PLUGGED;
+import static android.os.BatteryManager.EXTRA_LEVEL;
+import static android.os.BatteryManager.EXTRA_HEALTH;
 import android.media.AudioManager;
-import android.media.IRemoteControlClient;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
@@ -72,9 +75,7 @@ public class KeyguardUpdateMonitor {
 
     private boolean mDeviceProvisioned;
 
-    private int mBatteryLevel;
-
-    private int mBatteryStatus;
+    private BatteryStatus mBatteryStatus;
 
     private CharSequence mTelephonyPlmn;
     private CharSequence mTelephonySpn;
@@ -151,6 +152,20 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    private static class BatteryStatus {
+        public final int status;
+        public final int level;
+        public final int plugged;
+        public final int health;
+        public BatteryStatus(int status, int level, int plugged, int health) {
+            this.status = status;
+            this.level = level;
+            this.plugged = plugged;
+            this.health = health;
+        }
+
+    }
+
     public KeyguardUpdateMonitor(Context context) {
         mContext = context;
 
@@ -162,7 +177,7 @@ public class KeyguardUpdateMonitor {
                         handleTimeUpdate();
                         break;
                     case MSG_BATTERY_UPDATE:
-                        handleBatteryUpdate(msg.arg1,  msg.arg2);
+                        handleBatteryUpdate((BatteryStatus) msg.obj);
                         break;
                     case MSG_CARRIER_INFO_UPDATE:
                         handleCarrierInfoUpdate();
@@ -226,8 +241,7 @@ public class KeyguardUpdateMonitor {
 
         // take a guess to start
         mSimState = IccCard.State.READY;
-        mBatteryStatus = BATTERY_STATUS_UNKNOWN;
-        mBatteryLevel = 100;
+        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0);
 
         mTelephonyPlmn = getDefaultPlmn();
 
@@ -256,13 +270,12 @@ public class KeyguardUpdateMonitor {
                     mTelephonySpn = getTelephonySpnFrom(intent);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_CARRIER_INFO_UPDATE));
                 } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-                    final int pluggedInStatus = intent
-                            .getIntExtra("status", BATTERY_STATUS_UNKNOWN);
-                    int batteryLevel = intent.getIntExtra("level", 0);
+                    final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
+                    final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
+                    final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
+                    final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
                     final Message msg = mHandler.obtainMessage(
-                            MSG_BATTERY_UPDATE,
-                            pluggedInStatus,
-                            batteryLevel);
+                            MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health));
                     mHandler.sendMessage(msg);
                 } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                     mHandler.sendMessage(mHandler.obtainMessage(
@@ -325,15 +338,16 @@ public class KeyguardUpdateMonitor {
     /**
      * Handle {@link #MSG_BATTERY_UPDATE}
      */
-    private void handleBatteryUpdate(int batteryStatus, int batteryLevel) {
+    private void handleBatteryUpdate(BatteryStatus batteryStatus) {
         if (DEBUG) Log.d(TAG, "handleBatteryUpdate");
-        if (isBatteryUpdateInteresting(batteryStatus, batteryLevel)) {
-            mBatteryStatus = batteryStatus;
-            mBatteryLevel = batteryLevel;
-            final boolean pluggedIn = isPluggedIn(batteryStatus);;
+        final boolean batteryUpdateInteresting =
+                isBatteryUpdateInteresting(mBatteryStatus, batteryStatus);
+        mBatteryStatus = batteryStatus;
+        if (batteryUpdateInteresting) {
             for (int i = 0; i < mInfoCallbacks.size(); i++) {
+                // TODO: pass BatteryStatus object to onRefreshBatteryInfo() instead...
                 mInfoCallbacks.get(i).onRefreshBatteryInfo(
-                        shouldShowBatteryInfo(), pluggedIn, batteryLevel);
+                    shouldShowBatteryInfo(),isPluggedIn(batteryStatus), batteryStatus.level);
             }
         }
     }
@@ -377,39 +391,40 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * @param status One of the statuses of {@link android.os.BatteryManager}
-     * @return Whether the status maps to a status for being plugged in.
+     * @param pluggedIn state from {@link android.os.BatteryManager#EXTRA_PLUGGED}
+     * @return Whether the device is considered "plugged in."
      */
-    private boolean isPluggedIn(int status) {
-        return status == BATTERY_STATUS_CHARGING || status == BATTERY_STATUS_FULL;
+    private static boolean isPluggedIn(BatteryStatus status) {
+        return status.plugged == BatteryManager.BATTERY_PLUGGED_AC
+                || status.plugged == BatteryManager.BATTERY_PLUGGED_USB;
     }
 
-    private boolean isBatteryUpdateInteresting(int batteryStatus, int batteryLevel) {
-        // change in plug is always interesting
-        final boolean isPluggedIn = isPluggedIn(batteryStatus);
-        final boolean wasPluggedIn = isPluggedIn(mBatteryStatus);
+    private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
+        final boolean nowPluggedIn = isPluggedIn(current);
+        final boolean wasPluggedIn = isPluggedIn(old);
         final boolean stateChangedWhilePluggedIn =
-            wasPluggedIn == true && isPluggedIn == true && (mBatteryStatus != batteryStatus);
-        if (wasPluggedIn != isPluggedIn || stateChangedWhilePluggedIn) {
+            wasPluggedIn == true && nowPluggedIn == true
+            && (old.status != current.status);
+
+        // change in plug state is always interesting
+        if (wasPluggedIn != nowPluggedIn || stateChangedWhilePluggedIn) {
             return true;
         }
 
         // change in battery level while plugged in
-        if (isPluggedIn && mBatteryLevel != batteryLevel) {
+        if (nowPluggedIn && old.level != current.level) {
             return true;
         }
 
-        if (!isPluggedIn) {
-            // not plugged in and below threshold
-            if (isBatteryLow(batteryLevel) && batteryLevel != mBatteryLevel) {
-                return true;
-            }
+        // change where battery needs charging
+        if (!nowPluggedIn && isBatteryLow(current) && current.level != old.level) {
+            return true;
         }
         return false;
     }
 
-    private boolean isBatteryLow(int batteryLevel) {
-        return batteryLevel < LOW_BATTERY_THRESHOLD;
+    private static boolean isBatteryLow(BatteryStatus status) {
+        return status.level < LOW_BATTERY_THRESHOLD;
     }
 
     /**
@@ -518,8 +533,8 @@ public class KeyguardUpdateMonitor {
         if (!mInfoCallbacks.contains(callback)) {
             mInfoCallbacks.add(callback);
             // Notify listener of the current state
-            callback.onRefreshBatteryInfo(shouldShowBatteryInfo(), isPluggedIn(mBatteryStatus),
-                    mBatteryLevel);
+            callback.onRefreshBatteryInfo(shouldShowBatteryInfo(),isPluggedIn(mBatteryStatus),
+                    mBatteryStatus.level);
             callback.onTimeChanged();
             callback.onRingerModeChanged(mRingMode);
             callback.onPhoneStateChanged(mPhoneState);
@@ -573,16 +588,16 @@ public class KeyguardUpdateMonitor {
     }
 
     public boolean isDeviceCharged() {
-        return mBatteryStatus == BatteryManager.BATTERY_STATUS_FULL
-                || mBatteryLevel >= 100; // in case a particular device doesn't flag it
+        return mBatteryStatus.status == BATTERY_STATUS_FULL
+                || mBatteryStatus.level >= 100; // in case particular device doesn't flag it
     }
 
     public int getBatteryLevel() {
-        return mBatteryLevel;
+        return mBatteryStatus.level;
     }
 
     public boolean shouldShowBatteryInfo() {
-        return isPluggedIn(mBatteryStatus) || isBatteryLow(mBatteryLevel);
+        return isPluggedIn(mBatteryStatus) || isBatteryLow(mBatteryStatus);
     }
 
     public CharSequence getTelephonyPlmn() {
