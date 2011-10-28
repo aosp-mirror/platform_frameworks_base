@@ -43,5 +43,11 @@
     <!-- How many icons may be shown at once in the system bar. Includes any
          slots that may be reused for things like IME control. -->
     <integer name="config_maxNotificationIcons">5</integer>
+
+    <!-- Show phone (voice) signal strength instead of data in mobile RSSI. -->
+    <bool name="config_showPhoneRSSIForData">false</bool>
+
+    <!-- When true, show 1/2G networks as 3G. -->
+    <bool name="config_showMin3G">false</bool>
 </resources>
 
