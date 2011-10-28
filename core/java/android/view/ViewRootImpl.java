@@ -4473,19 +4473,20 @@ public final class ViewRootImpl extends Handler implements ViewParent,
      * AccessibilityManagerService to the latter can interact with
      * the view hierarchy in this ViewAncestor.
      */
-    final class AccessibilityInteractionConnection
+    static final class AccessibilityInteractionConnection
             extends IAccessibilityInteractionConnection.Stub {
-        private final WeakReference<ViewRootImpl> mViewAncestor;
+        private final WeakReference<ViewRootImpl> mRootImpl;
 
         AccessibilityInteractionConnection(ViewRootImpl viewAncestor) {
-            mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
+            mRootImpl = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
         public void findAccessibilityNodeInfoByAccessibilityId(int accessibilityId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interrogatingPid, long interrogatingTid) {
-            if (mViewAncestor.get() != null) {
-                getAccessibilityInteractionController()
+            ViewRootImpl viewRootImpl = mRootImpl.get();
+            if (viewRootImpl != null) {
+                viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityId,
                         interactionId, callback, interrogatingPid, interrogatingTid);
             }
@@ -4494,8 +4495,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public void performAccessibilityAction(int accessibilityId, int action,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interogatingPid, long interrogatingTid) {
-            if (mViewAncestor.get() != null) {
-                getAccessibilityInteractionController()
+            ViewRootImpl viewRootImpl = mRootImpl.get();
+            if (viewRootImpl != null) {
+                viewRootImpl.getAccessibilityInteractionController()
                     .performAccessibilityActionClientThread(accessibilityId, action, interactionId,
                             callback, interogatingPid, interrogatingTid);
             }
@@ -4504,8 +4506,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public void findAccessibilityNodeInfoByViewId(int viewId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interrogatingPid, long interrogatingTid) {
-            if (mViewAncestor.get() != null) {
-                getAccessibilityInteractionController()
+            ViewRootImpl viewRootImpl = mRootImpl.get();
+            if (viewRootImpl != null) {
+                viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByViewIdClientThread(viewId, interactionId, callback,
                             interrogatingPid, interrogatingTid);
             }
@@ -4514,8 +4517,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public void findAccessibilityNodeInfosByViewText(String text, int accessibilityId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interrogatingPid, long interrogatingTid) {
-            if (mViewAncestor.get() != null) {
-                getAccessibilityInteractionController()
+            ViewRootImpl viewRootImpl = mRootImpl.get();
+            if (viewRootImpl != null) {
+                viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByViewTextClientThread(text, accessibilityId,
                             interactionId, callback, interrogatingPid, interrogatingTid);
             }
