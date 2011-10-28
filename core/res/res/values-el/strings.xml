@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Φωτογραφική μηχανή"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Αθόρυβο"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Ενεργοποίηση ήχου"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Σύρετε για ξεκλείδωμα."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Συνδέστε ένα σετ ακουστικών για να ακούσετε τα πλήκτρα του κωδικού πρόσβασης να εκφωνούνται δυνατά."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Τελεία."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Πλοήγηση στην αρχική σελίδα"</string>
