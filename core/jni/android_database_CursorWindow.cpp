@@ -147,10 +147,8 @@ static jint nativeGetType(JNIEnv* env, jclass clazz, jint windowPtr,
 
     field_slot_t* fieldSlot = window->getFieldSlotWithCheck(row, column);
     if (!fieldSlot) {
-        // FIXME: This is really broken but we have CTS tests that depend
-        // on this legacy behavior.
-        //throwExceptionWithRowCol(env, row, column);
-        return FIELD_TYPE_NULL;
+        throwExceptionWithRowCol(env, row, column);
+        return NULL;
     }
     return fieldSlot->type;
 }
