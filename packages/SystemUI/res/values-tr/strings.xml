@@ -60,14 +60,14 @@
     <string name="always_use_accessory" msgid="1210954576979621596">"Bu USB aksesuar için varsayılan olarak kullan"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Yakınlaştır (ekranı kaplasın)"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Genişlet (ekran kapansın)"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Uyumluluk zum\'u"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Uyumluluk yakınlaştırması"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Uygulama küçük bir ekran için tasarlanmışsa saatin yanında bir yakınlaştırma denetimi görünür."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ekran görüntüsü kaydediliyor..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Ekran görüntüsü kaydediliyor..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Ekran görüntüsü kaydediliyor."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekran görüntüsü yakalandı."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekran görüntüsü alındı."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Ekran görüntünüzü izlemek için dokunun."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Ekran görüntüsü yakalanamadı."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Ekran görüntüsü alınamadı."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Ekran görüntüsü kaydedilemedi. Depolama birimi kullanımda olabilir."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB dosya aktarım seçenekleri"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Medya oynatıcı olarak ekle (MTP)"</string>
@@ -98,7 +98,7 @@
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Veri sinyali üç çubuk."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Veri sinyali tam."</string>
     <string name="accessibility_no_wifi" msgid="7455607460517331976">"Kablosuz yok."</string>
-    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Kablosuz gücü tek çubuk."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Kablosuz gücü tek çubukta."</string>
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Kablosuz sinyal gücü iki çubuk."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Kablosuz sinyal gücü üç çubuk."</string>
     <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Kablosuz sinyal gücü tam."</string>
