@@ -35,7 +35,7 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Bieżące"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Powiadomienia"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Podłącz ładowarkę"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Bateria wkrótce zostanie rozładowana."</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"Bateria wkrótce się rozładuje."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Pozostało: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ładowanie przy użyciu złącza USB nie jest obsługiwane."\n"Należy używać tylko dołączonej ładowarki."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Użycie baterii"</string>

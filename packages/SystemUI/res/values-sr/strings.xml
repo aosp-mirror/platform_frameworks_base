@@ -53,7 +53,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Желите ли да дозволите апликацији <xliff:g id="APPLICATION">%1$s</xliff:g> да приступа USB помоћном уређају?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Желите ли да се отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> када се прикључи овај USB уређај?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Желите ли да се отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> када се прикључи овај USB додатак?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Инсталиране апликације не раде са овим USB помоћним уређајем. Сазнајте више о њему на адреси <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Инсталиране апликације не функционишу са овим USB помоћним уређајем. Сазнајте више о њему на адреси <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB помоћни уређај"</string>
     <string name="label_view" msgid="6304565553218192990">"Прикажи"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Користи подразумевано за овај USB уређај"</string>
@@ -65,9 +65,9 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Снимак екрана се чува."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Снимак екрана је снимљен."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Снимак екрана је направљен."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Додирните да бисте видели снимак екрана."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Није могуће снимити снимак екрана."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Није могуће направити снимак екрана."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Није могуће сачувати снимак екрана. Могуће је да је меморија у употреби."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Опције USB преноса датотека"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Прикључи као медија плејер (MTP)"</string>

@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="6071602020171759109">"&lt;uten navn&gt;"</string>
+    <!-- outdated translation 6071602020171759109 -->     <string name="untitled" msgid="4638956954852782576">"&lt;uten navn&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Mangler telefonnummer)"</string>
@@ -43,9 +43,9 @@
     <string name="serviceErased" msgid="1288584695297200972">"Registreringen ble fjernet."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Ugyldig passord."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI utført."</string>
-    <string name="badPin" msgid="5085454289896032547">"Den gamle PIN-koden du skrev inn er feil."</string>
-    <string name="badPuk" msgid="5702522162746042460">"PUK-koden du skrev inn er feil."</string>
-    <string name="mismatchPin" msgid="3695902225843339274">"PIN-kodene stemmer ikke overens."</string>
+    <!-- outdated translation 5085454289896032547 -->     <string name="badPin" msgid="9015277645546710014">"Den gamle PIN-koden du skrev inn er feil."</string>
+    <!-- outdated translation 5702522162746042460 -->     <string name="badPuk" msgid="5487257647081132201">"PUK-koden du skrev inn er feil."</string>
+    <!-- outdated translation 3695902225843339274 -->     <string name="mismatchPin" msgid="609379054496863419">"PIN-kodene stemmer ikke overens."</string>
     <string name="invalidPin" msgid="3850018445187475377">"PIN-koden må være mellom fire og åtte siffer."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Skriv inn en PUK-kode på åtte tall eller mer."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM-kortet ditt er PUK-låst. Skriv inn PUK-koden for å låse det opp."</string>
@@ -68,7 +68,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nummervisning er ikke begrenset som standard. Neste anrop: Begrenset"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nummervisning er ikke begrenset som standard. Neste anrop: Ikke begrenset"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"SIM-kortet er ikke tilrettelagt for tjenesten."</string>
-    <string name="CLIRPermanent" msgid="5460892159398802465">"Kunne ikke endre innstilling for nummervisning."</string>
+    <!-- outdated translation 5460892159398802465 -->     <string name="CLIRPermanent" msgid="3377371145926835671">"Kunne ikke endre innstilling for nummervisning."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Tilgangsbegrensning endret"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datatjenesten er blokkert."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Nødtjenesten er blokkert."</string>
@@ -110,14 +110,14 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="6603022914760066338">"Det oppsto en nettverksfeil."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Kunne ikke finne adressen."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Støtter ikke sidens autentiseringsmetode."</string>
+    <!-- outdated translation 2781440683514730227 -->     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Støtter ikke sidens autentiseringsmetode."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Autentiseringen feilet."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Autentisering via mellomtjeneren feilet."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Kunne ikke koble til tjeneren."</string>
     <string name="httpErrorIO" msgid="4270874999047767599">"Kommunikasjon med tjeneren mislyktes. Prøv på nytt senere."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Det oppsto et tidsavbrudd under tilkobling til tjeneren."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Siden inneholder for mange videresendinger."</string>
-    <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokollen er ikke støttet."</string>
+    <!-- outdated translation 5257172771607996054 -->     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokollen er ikke støttet."</string>
     <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"Kunne ikke opprette en sikker tilkobling."</string>
     <string name="httpErrorBadUrl" msgid="6088183159988619736">"Kunne ikke åpne siden, siden adressen er ugyldig."</string>
     <string name="httpErrorFile" msgid="8250549644091165175">"Kunne ikke åpne filen."</string>
@@ -140,9 +140,9 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutter…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Nettbrettet slås av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonen vil bli slått av."</string>
-    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Vil du slå av?"</string>
+    <!-- outdated translation 6656441286856415014 -->     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vil du slå av?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nylig"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Ingen nylig brukte applikasjoner."</string>
+    <!-- outdated translation 279702952298056674 -->     <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylig brukte applikasjoner."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Innstillinger for nettbrett"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoninnstillinger"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Lås skjermen"</string>
@@ -157,16 +157,16 @@
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Betaltjenester"</string>
-    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Lar applikasjoner utføre operasjoner som kan koste deg penger."</string>
+    <!-- outdated translation 8193824940620517189 -->     <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"Lar applikasjoner utføre operasjoner som kan koste deg penger."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Meldinger"</string>
-    <string name="permgroupdesc_messages" msgid="7045736972019211994">"Lese og skrive SMS, e-post og andre meldinger på telefonen."</string>
+    <!-- outdated translation 7045736972019211994 -->     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Lese og skrive SMS, e-post og andre meldinger på telefonen."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Personlig informasjon"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkte tilgang til dine kontakter og kalender lagret på nettbrettet."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkte tilgang til kontakter og kalendre lagret på telefonen."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Din posisjon"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Overvåking av telefonens fysiske posisjon"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Nettverkstilgang"</string>
-    <string name="permgroupdesc_network" msgid="5035763698958415998">"Gir applikasjoner tilgang til diverse nettverksfunksjoner."</string>
+    <!-- outdated translation 5035763698958415998 -->     <string name="permgroupdesc_network" msgid="4917593670797570584">"Gir applikasjoner tilgang til diverse nettverksfunksjoner."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Google-kontoer"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Tilgang til tilgjengelige Google-kontoer."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Maskinvarekontroll"</string>
@@ -176,337 +176,337 @@
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Systemverktøy"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Lavnivå tilgang og kontroll over systemet."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Utviklingsverktøy"</string>
-    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funksjonalitet kun utviklere trenger."</string>
+    <!-- outdated translation 9056431193893809814 -->     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funksjonalitet kun utviklere trenger."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Tilgang til USB-lagring."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Tilgang til minnekortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
-    <string name="permdesc_statusBar" msgid="1365473595331989732">"Lar applikasjonen deaktivere statusfeltet, samt legge til og fjerne systemikoner."</string>
+    <!-- outdated translation 1365473595331989732 -->     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar applikasjonen deaktivere statusfeltet, samt legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
-    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Tillater programmet å vises i statusfeltet."</string>
+    <!-- outdated translation 4097605867643520920 -->     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tillater appen å vises i statusfeltet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"utvide/slå sammen statusfeltet"</string>
-    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Lar applikasjonen utvide eller slå sammen statusfeltet."</string>
+    <!-- outdated translation 7088604400110768665 -->     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Lar applikasjonen utvide eller slå sammen statusfeltet."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"avskjære utgående anrop"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Lar applikasjonen behandle utgående anrop og endre nummeret som ringes. Ondsinnede applikasjoner kan overvåke, videresende, eller hindre utgående anrop."</string>
+    <!-- outdated translation 2228988201852654461 -->     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Lar applikasjonen behandle utgående anrop og endre nummeret som ringes. Ondsinnede applikasjoner kan overvåke, videresende, eller hindre utgående anrop."</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"motta SMS"</string>
-    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Lar applikasjonen motta og behandle SMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <!-- outdated translation 6298292335965966117 -->     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Lar applikasjonen motta og behandle SMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"motta MMS"</string>
-    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Lar applikasjonen motta og behandle MMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <!-- outdated translation 4563346832000174373 -->     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Lar applikasjonen motta og behandle MMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"motta nødkringkastinger"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Tillater applikasjonen å motta og behandle nødkringkastingsmeldinger. Denne tillatelsen er kun tilgjengelig for systemapplikasjoner."</string>
+    <!-- outdated translation 7118393393716546131 -->     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillater applikasjonen å motta og behandle nødkringkastingsmeldinger. Denne tillatelsen er kun tilgjengelig for systemapplikasjoner."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sende SMS-meldinger"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"Lar applikasjonen sende SMS-meldinger. Ondsinnede applikasjoner kan koste deg penger ved å sende meldinger uten bekreftelse."</string>
+    <!-- outdated translation 1946540351763502120 -->     <string name="permdesc_sendSms" msgid="906546667507626156">"Lar applikasjonen sende SMS-meldinger. Ondsinnede applikasjoner kan koste deg penger ved å sende meldinger uten bekreftelse."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"send tekstmeldinger uten godkjenning"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="4477752891276276168">"Gir applikasjonen tillatelse til å sende tekstmeldinger. Skadelige applikasjoner kan sende meldinger uten din godkjennelse, som du må betale for."</string>
+    <!-- outdated translation 4477752891276276168 -->     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Gir applikasjonen tillatelse til å sende tekstmeldinger. Skadelige applikasjoner kan sende meldinger uten din godkjennelse, som du må betale for."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"lese SMS- og MMS-meldinger"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Lar programmet lese tekstmeldinger lagret på nettbrettet eller SIM-kortet. Skadelige programmer kan få tilgang til å lese dine private meldinger."</string>
-    <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Lar applikasjonen lese SMS-meldinger lagret i telefonen eller på SIM-kortet. Ondsinnede applikasjoner kan lese private meldinger."</string>
+    <!-- outdated translation 5836710350295631545 -->     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Lar appen lese tekstmeldinger lagret på nettbrettet eller SIM-kortet. Skadelige apper kan få tilgang til å lese dine private meldinger."</string>
+    <!-- outdated translation 5836710350295631545 -->     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Lar appen lese tekstmeldinger lagret på nettbrettet eller SIM-kortet. Skadelige apper kan få tilgang til å lese dine private meldinger."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"redigere SMS- og MMS-meldinger"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Lar programmet skrive tekstmeldinger lagret på nettbrettet eller SIM-kortet. Skadelige programmer kan komme til å slette meldingene dine."</string>
-    <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Lar applikasjonen skrive til SMS-meldinger lagret i telefonen eller på SIM-kortet. Ondsinnede applikasjoner kan slette meldinger."</string>
+    <!-- outdated translation 5332124772918835437 -->     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Lar appen skrive tekstmeldinger lagret på nettbrettet eller SIM-kortet. Skadelige apper kan komme til å slette meldingene dine."</string>
+    <!-- outdated translation 5332124772918835437 -->     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Lar appen skrive tekstmeldinger lagret på nettbrettet eller SIM-kortet. Skadelige apper kan komme til å slette meldingene dine."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"motta WAP"</string>
-    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Lar applikasjonen motta og behandle WAP-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"se kjørende applikasjoner"</string>
-    <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillater applikasjonen å hente informasjon om aktive og nylig kjørte programmer. Kan tillate ondsinnede applikasjoner å oppdage privat informasjon om andre applikasjoner."</string>
-    <string name="permlab_reorderTasks" msgid="5669588525059921549">"omordne kjørende applikasjoner"</string>
-    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillater applikasjonen å flytte programmer til forgrunnen eller bakgrunnen. Ondsinnede applikasjoner kan tvinge seg selv til fronten."</string>
-    <string name="permlab_removeTasks" msgid="4802740047161700683">"stopp kjøring av applikasjoner"</string>
-    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Gjør applikasjoner i stand til å fjerne og ødelegge for oppgaver. Skadelige applikasjoner kan forstyrre oppførselen til andre applikasjoner."</string>
-    <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktiver applikasjonsdebugging"</string>
-    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Lar applikasjonen skru på debugging for en annen applikasjon. Ondsinnede applikasjoner kan bruke dette til å drepe andre applikasjoner."</string>
+    <!-- outdated translation 5979623826128082171 -->     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Lar applikasjonen motta og behandle WAP-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <!-- outdated translation 5005277531132573353 -->     <string name="permlab_getTasks" msgid="6466095396623933906">"se kjørende applikasjoner"</string>
+    <!-- outdated translation 7048711358713443341 -->     <string name="permdesc_getTasks" msgid="6608159250520381359">"Tillater applikasjonen å hente informasjon om aktive og nylig kjørte apper. Kan tillate ondsinnede applikasjoner å oppdage privat informasjon om andre applikasjoner."</string>
+    <!-- outdated translation 5669588525059921549 -->     <string name="permlab_reorderTasks" msgid="2018575526934422779">"omordne kjørende applikasjoner"</string>
+    <!-- outdated translation 126252774270522835 -->     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillater applikasjonen å flytte apper til forgrunnen eller bakgrunnen. Ondsinnede applikasjoner kan tvinge seg selv til fronten."</string>
+    <!-- outdated translation 4802740047161700683 -->     <string name="permlab_removeTasks" msgid="6821513401870377403">"stopp kjøring av applikasjoner"</string>
+    <!-- outdated translation 2000332928514575461 -->     <string name="permdesc_removeTasks" msgid="1000226123143185094">"Gjør applikasjoner i stand til å fjerne og ødelegge for oppgaver. Skadelige applikasjoner kan forstyrre oppførselen til andre applikasjoner."</string>
+    <!-- outdated translation 4339730312925176742 -->     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiver applikasjonsdebugging"</string>
+    <!-- outdated translation 5584310661711990702 -->     <string name="permdesc_setDebugApp" msgid="6215654419903651172">"Lar applikasjonen skru på debugging for en annen applikasjon. Ondsinnede applikasjoner kan bruke dette til å drepe andre applikasjoner."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"endre innstillingene for brukergrensesnitt"</string>
-    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillater applikasjonen å endre gjeldende innstillinger, slik som språk eller skriftstørrelse."</string>
+    <!-- outdated translation 3465121501528064399 -->     <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"Tillater applikasjonen å endre gjeldende innstillinger, slik som språk eller skriftstørrelse."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktiver bilmodus"</string>
-    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Tillater applikasjoner å aktivere bilmodus."</string>
+    <!-- outdated translation 5673461159384850628 -->     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Tillater applikasjoner å aktivere bilmodus."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"avslutt bakgrunnsprosesser"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Tillater applikasjoner å avslutte bakgrunnsprosesser for andre applikasjoner, selv om det er nok minne."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"fremtving stopp av andre programmer"</string>
-    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Tillater applikasjoner å tvinge andre applikasjoner til å stoppe."</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"tvinge applikasjoner til å lukkes"</string>
-    <string name="permdesc_forceBack" msgid="6534109744159919013">"Lar applikasjonen tvinge enhver aktivitet som er i forgrunnen til å lukkes og gå tilbake. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <!-- outdated translation 2908829602869383753 -->     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Tillater applikasjoner å avslutte bakgrunnsprosesser for andre applikasjoner, selv om det er nok minne."</string>
+    <!-- outdated translation 1447830113260156236 -->     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"fremtving stopp av andre apper"</string>
+    <!-- outdated translation 7263036616161367402 -->     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Tillater applikasjoner å tvinge andre applikasjoner til å stoppe."</string>
+    <!-- outdated translation 1804196839880393631 -->     <string name="permlab_forceBack" msgid="652935204072584616">"tvinge applikasjoner til å lukkes"</string>
+    <!-- outdated translation 6534109744159919013 -->     <string name="permdesc_forceBack" msgid="3892295830419513623">"Lar applikasjonen tvinge enhver aktivitet som er i forgrunnen til å lukkes og gå tilbake. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"hente intern systemtilstand"</string>
-    <string name="permdesc_dump" msgid="2198776174276275220">"Lar applikasjonen hente intern tilstand fra systemet. Ondsinnede applikasjoner kan hente et bredt spekter av privat og sikker informasjon som de vanligvis aldri burde ha behov for."</string>
+    <!-- outdated translation 2198776174276275220 -->     <string name="permdesc_dump" msgid="1778299088692290329">"Lar applikasjonen hente intern tilstand fra systemet. Ondsinnede applikasjoner kan hente et bredt spekter av privat og sikker informasjon som de vanligvis aldri burde ha behov for."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"hent av skjerminnhold"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3390962289797156152">"Tillater applikasjonen å hente innholdet i det aktive vinduet. Skadelige applikasjoner kan hente hele vindusinnholdet og gå gjennom all teksten, unntatt passord."</string>
+    <!-- outdated translation 3390962289797156152 -->     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Tillater applikasjonen å hente innholdet i det aktive vinduet. Skadelige applikasjoner kan hente hele vindusinnholdet og gå gjennom all teksten, unntatt passord."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"delvis avslutning"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lar applikasjonen sette aktivitetshåndtereren i avslutningstilstand. Slår ikke systemet helt av."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"forhindre applikasjonsbytte"</string>
-    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Lar applikasjonen forhindre brukeren fra å bytte til en annen applikasjon."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"overvåke og kontrollere all applikasjonsoppstart"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Lar programmet overvåke og kontrollere hvordan systemet starter opp aktiviteter. Skadelig programvare kan gjøre hele systemet usikkert. Denne tillatelsen er kun nødvendig for utviklere, aldri for vanlig bruk."</string>
+    <!-- outdated translation 3857886086919033794 -->     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Lar applikasjonen forhindre brukeren fra å bytte til en annen applikasjon."</string>
+    <!-- outdated translation 7811586187574696296 -->     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"overvåke og kontrollere all applikasjonsoppstart"</string>
+    <!-- outdated translation 2149363027173451218 -->     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Lar appen overvåke og kontrollere hvordan systemet starter opp aktiviteter. Skadelig programvare kan gjøre hele systemet usikkert. Denne tillatelsen er kun nødvendig for utviklere, aldri for vanlig bruk."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kringkaste melding om fjernet pakke"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Lar applikasjonen kringkaste en melding om at en applikasjonspakke er blitt fjernet. Ondsinnede applikasjoner kan bruke dette til å drepe vilkårlige andre kjørende applikasjoner."</string>
+    <!-- outdated translation 3453286591439891260 -->     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Lar applikasjonen kringkaste en melding om at en applikasjonspakke er blitt fjernet. Ondsinnede applikasjoner kan bruke dette til å drepe vilkårlige andre kjørende applikasjoner."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"kringkaste melding om mottatt SMS"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Lar applikasjonen kringkaste en melding om at en SMS-melding er mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske innkommende SMS-meldinger."</string>
+    <!-- outdated translation 9122419277306740155 -->     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Lar applikasjonen kringkaste en melding om at en SMS-melding er mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske innkommende SMS-meldinger."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"kringkaste melding om mottatt WAP-PUSH"</string>
-    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Lar applikasjonen kringkaste en melding om at en WAP-PUSH-melding er blitt mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske MMS-kvitteringer eller i det stille erstatte innholdet av vilkårlige nettsteder med ondsinnede varianter."</string>
+    <!-- outdated translation 3955303669461378091 -->     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Lar applikasjonen kringkaste en melding om at en WAP-PUSH-melding er blitt mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske MMS-kvitteringer eller i det stille erstatte innholdet av vilkårlige nettsteder med ondsinnede varianter."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begrense antallet kjørende prosesser"</string>
-    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Lar applikasjonen kontrollere maksimalt antall kjørende prosesser. Behøves aldri for vanlige applikasjoner."</string>
-    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"få alle bakgrunnsapplikasjoner til å lukkes"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Lar applikasjonen kontrollere om aktiviteter alltid avsluttes når de sendes til bakgrunnen. Behøves aldri for vanlige applikasjoner."</string>
+    <!-- outdated translation 7824786028557379539 -->     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Lar applikasjonen kontrollere maksimalt antall kjørende prosesser. Behøves aldri for vanlige applikasjoner."</string>
+    <!-- outdated translation 5342837862439543783 -->     <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"få alle bakgrunnsapplikasjoner til å lukkes"</string>
+    <!-- outdated translation 8773936403987091620 -->     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Lar applikasjonen kontrollere om aktiviteter alltid avsluttes når de sendes til bakgrunnen. Behøves aldri for vanlige applikasjoner."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"endre batteristatistikk"</string>
-    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Lar applikasjonen endre på innsamlet batteristatistikk. Ikke ment for vanlige applikasjoner."</string>
+    <!-- outdated translation 5847319823772230560 -->     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Lar applikasjonen endre på innsamlet batteristatistikk. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrollere sikkerhetskopiering og gjenoppretting"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"Lar appen kontrollere systemets sikkerhetskopierings- og gjenopprettingsmekanisme. Ikke ment for vanlige apper."</string>
+    <!-- outdated translation 4837493065154256525 -->     <string name="permdesc_backup" msgid="6912230525140589891">"Lar appen kontrollere systemets sikkerhetskopierings- og gjenopprettingsmekanisme. Ikke ment for vanlige apper."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"bekrefte en fullstendig sikkerhetskopi, eller gjenopprette driften"</string>
-    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Lar appen starte det fullst. grensesnittet for bekreftelse av sikkerh.kopi. Må ikke brukes av noen apper."</string>
+    <!-- outdated translation 9005017754175897954 -->     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Lar appen starte det fullst. grensesnittet for bekreftelse av sikkerh.kopi. Må ikke brukes av noen apper."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserte vinduer"</string>
-    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillater at det opprettes vinduer ment for bruk av systemets interne brukergrensesnitt. Ikke ment for vanlige applikasjoner."</string>
+    <!-- outdated translation 5895082268284998469 -->     <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"Tillater at det opprettes vinduer ment for bruk av systemets interne brukergrensesnitt. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"vise advarsler på systemnivå"</string>
-    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Lar programmet vise systemvarslingsvinduer. Skadelige programmer kan ta over hele skjermen."</string>
+    <!-- outdated translation 2884149573672821318 -->     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Lar appen vise systemvarslingsvinduer. Skadelige apper kan ta over hele skjermen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"endre global animasjonshastighet"</string>
-    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Lar applikasjonen endre den globale animasjonshastigheten (raskere eller tregere animasjoner) når som helst."</string>
-    <string name="permlab_manageAppTokens" msgid="17124341698093865">"styre applikasjonssymboler"</string>
-    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Lar applikasjoner lage og vedlikeholde sine egne symboler, noe som lar dem overstyre den vanlige Z-ordningen. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <!-- outdated translation 7181522138912391988 -->     <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Lar applikasjonen endre den globale animasjonshastigheten (raskere eller tregere animasjoner) når som helst."</string>
+    <!-- outdated translation 17124341698093865 -->     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"styre applikasjonssymboler"</string>
+    <!-- outdated translation 977127907524195988 -->     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Lar applikasjoner lage og vedlikeholde sine egne symboler, noe som lar dem overstyre den vanlige Z-ordningen. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"trykke taster og kontrolknapper"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Lar programmet levere sine egne inndatahendelser (tastetrykk osv.) til andre programmer. Skadelige programmer kan bruke dette til å ta over nettbrettet."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Lar applikasjonen levere sine egne inndatahendelser (tastetrykk osv.) til andre applikasjoner. Ondsinnede applikasjoner kan bruke dette til å ta over telefonen."</string>
+    <!-- outdated translation 7200014808195664505 -->     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Lar appen levere sine egne inndatahendelser (tastetrykk osv.) til andre apper. Skadelige apper kan bruke dette til å ta over nettbrettet."</string>
+    <!-- outdated translation 7200014808195664505 -->     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Lar appen levere sine egne inndatahendelser (tastetrykk osv.) til andre apper. Skadelige apper kan bruke dette til å ta over nettbrettet."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"ta opp hva som skrives og gjøres"</string>
-    <string name="permdesc_readInputState" msgid="5132879321450325445">"Lar applikasjoner overvåke tastetrykk selv når interaksjonen er med andre applikasjoner (som å skrive inn et passord). Vanlige applikasjoner bør aldri trenge dette."</string>
+    <!-- outdated translation 5132879321450325445 -->     <string name="permdesc_readInputState" msgid="8387754901688728043">"Lar applikasjoner overvåke tastetrykk selv når interaksjonen er med andre applikasjoner (som å skrive inn et passord). Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"binde til en inndatametode"</string>
-    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Lar applikasjonen binde til toppnivågrensesnittet for en inndatametode. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <!-- outdated translation 3734838321027317228 -->     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lar applikasjonen binde til toppnivågrensesnittet for en inndatametode. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"binde til en teksttjeneste"</string>
-    <string name="permdesc_bindTextService" msgid="172508880651909350">"Gir innehaveren rett til å binde seg til øverste grensesnittnivå for en teksttjeneste (f.eks. SpellCheckerService). Bør aldri være nødvendig for normal bruk."</string>
+    <!-- outdated translation 172508880651909350 -->     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Gir innehaveren rett til å binde seg til øverste grensesnittnivå for en teksttjeneste (f.eks. SpellCheckerService). Bør aldri være nødvendig for normal bruk."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"binde deg til en VPN-tjeneste"</string>
-    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Lar innehaveren binde seg til det øverste nivået av grensesnittet for en VPN-tjeneste. Skal aldri være nødvendig for normale apper."</string>
+    <!-- outdated translation 6011554199384584151 -->     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Lar innehaveren binde seg til det øverste nivået av grensesnittet for en VPN-tjeneste. Skal aldri være nødvendig for normale apper."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind til bakgrunnsbilde"</string>
-    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Lar innehaveren binde det øverste nivået av grensesnittet til en bakgrunnsbilder. Skal ikke være nødvendig for vanlige programmer."</string>
+    <!-- outdated translation 5287754520361915347 -->     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Lar innehaveren binde det øverste nivået av grensesnittet til en bakgrunnsbilder. Skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind til modultjenste"</string>
-    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Lar innehaveren binde til det øverste nivået av grensesnittet for en modultjeneste. Skal aldri være nødvendig for normale programmer."</string>
+    <!-- outdated translation 2930855984822926963 -->     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lar innehaveren binde til det øverste nivået av grensesnittet for en modultjeneste. Skal aldri være nødvendig for normale apper."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommuniser med enhetsadministrator"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillater innehaveren å sende hensikter til enhetsadministrator. Bør aldri være nødvendig for normale programmer."</string>
+    <!-- outdated translation 8714424333082216979 -->     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Tillater innehaveren å sende hensikter til enhetsadministrator. Bør aldri være nødvendig for normale apper."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"snu skjermen"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Lar applikasjonen rotere skjermen når som helst. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <!-- outdated translation 6335814461615851863 -->     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Lar applikasjonen rotere skjermen når som helst. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"endre pekerhastighet"</string>
-    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Tillater at en applikasjon endrer hastigheten til musen eller styreflatepekeren til enhver tid. Skal aldri være nødvendig ved normal bruk."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"sende Linux-signaler til applikasjoner"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Lar applikasjonen spørre om at et gitt signal blir sendt til alle varige prosesser."</string>
-    <string name="permlab_persistentActivity" msgid="8659652042401085862">"forbli kjørende"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Lar applikasjonen gjøre deler av seg selv varig, så systemet ikke kan bruke det til andre applikasjoner."</string>
-    <string name="permlab_deletePackages" msgid="3343439331576348805">"slette applikasjoner"</string>
-    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Lar applikasjonen slette Android-pakker. Ondsinnede applikasjoner kan bruke dette til å slette viktige applikasjoner."</string>
-    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"slette andre applikasjoners data"</string>
-    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Lar applikasjonen fjerne brukerdata."</string>
-    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"slette andre applikasjoners hurtigbuffer"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Lar applikasjonen to slette hurtigbufferfiler."</string>
-    <string name="permlab_getPackageSize" msgid="4799785352306641460">"måle lagringsplass for applikasjon"</string>
-    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Lar applikasjonen hente kode-, data- og hurtigbufferstørrelser"</string>
-    <string name="permlab_installPackages" msgid="335800214119051089">"installere applikasjoner direkte"</string>
-    <string name="permdesc_installPackages" msgid="526669220850066132">"Lar applikasjonen installere nye eller oppdaterte Android-pakker. Ondsinnede applikasjoner kan bruke dette til å legge til nye applikasjoner med vilkårlig kraftige rettigheter."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"slette hurtigbufferdata for alle applikasjoner"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Lar programmet frigjøre lagringsplass på nettbrettet ved å slette filer fra programmets buffermappe. Tilgangen er svært begrenset, vanligvis til systemprosessen."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Lar applikasjonen frigjøre lagringsplass ved å slette filer i applikasjoners hurtigbufferkatalog. Tilgangen er vanligvis sterkt begrenset, til systemprosesser."</string>
-    <string name="permlab_movePackage" msgid="728454979946503926">"Flytter programressurser"</string>
-    <string name="permdesc_movePackage" msgid="6323049291923925277">"Gir applikasjoner tillatelse til å flytte applikasjonsressurser fra interne til eksterne medier og omvendt."</string>
+    <!-- outdated translation 137436038503379864 -->     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Tillater at en applikasjon endrer hastigheten til musen eller styreflatepekeren til enhver tid. Skal aldri være nødvendig ved normal bruk."</string>
+    <!-- outdated translation 4255467255488653854 -->     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"sende Linux-signaler til applikasjoner"</string>
+    <!-- outdated translation 3565530463215015289 -->     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Lar applikasjonen spørre om at et gitt signal blir sendt til alle varige prosesser."</string>
+    <!-- outdated translation 8659652042401085862 -->     <string name="permlab_persistentActivity" msgid="8841113627955563938">"forbli kjørende"</string>
+    <!-- outdated translation 5037199778265006008 -->     <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Lar applikasjonen gjøre deler av seg selv varig, så systemet ikke kan bruke det til andre applikasjoner."</string>
+    <!-- outdated translation 3343439331576348805 -->     <string name="permlab_deletePackages" msgid="184385129537705938">"slette applikasjoner"</string>
+    <!-- outdated translation 3634943677518723314 -->     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Lar applikasjonen slette Android-pakker. Ondsinnede applikasjoner kan bruke dette til å slette viktige applikasjoner."</string>
+    <!-- outdated translation 2192134353540277878 -->     <string name="permlab_clearAppUserData" msgid="274109191845842756">"slette andre applikasjoners data"</string>
+    <!-- outdated translation 7546345080434325456 -->     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Lar applikasjonen fjerne brukerdata."</string>
+    <!-- outdated translation 1518556602634276725 -->     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"slette andre applikasjoners hurtigbuffer"</string>
+    <!-- outdated translation 2283074077168165971 -->     <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Lar applikasjonen to slette hurtigbufferfiler."</string>
+    <!-- outdated translation 4799785352306641460 -->     <string name="permlab_getPackageSize" msgid="7472921768357981986">"måle lagringsplass for applikasjon"</string>
+    <!-- outdated translation 5557253039670753437 -->     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Lar applikasjonen hente kode-, data- og hurtigbufferstørrelser"</string>
+    <!-- outdated translation 335800214119051089 -->     <string name="permlab_installPackages" msgid="2199128482820306924">"installere applikasjoner direkte"</string>
+    <!-- outdated translation 526669220850066132 -->     <string name="permdesc_installPackages" msgid="5628530972548071284">"Lar applikasjonen installere nye eller oppdaterte Android-pakker. Ondsinnede applikasjoner kan bruke dette til å legge til nye applikasjoner med vilkårlig kraftige rettigheter."</string>
+    <!-- outdated translation 4747698311163766540 -->     <string name="permlab_clearAppCache" msgid="7487279391723526815">"slette hurtigbufferdata for alle applikasjoner"</string>
+    <!-- outdated translation 3097119797652477973 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"Lar appen frigjøre lagringsplass på nettbrettet ved å slette filer fra appens buffermappe. Tilgangen er svært begrenset, vanligvis til systemprosessen."</string>
+    <!-- outdated translation 3097119797652477973 -->     <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"Lar appen frigjøre lagringsplass på nettbrettet ved å slette filer fra appens buffermappe. Tilgangen er svært begrenset, vanligvis til systemprosessen."</string>
+    <!-- outdated translation 728454979946503926 -->     <string name="permlab_movePackage" msgid="3289890271645921411">"Flytter programressurser"</string>
+    <!-- outdated translation 6323049291923925277 -->     <string name="permdesc_movePackage" msgid="319562217778244524">"Gir applikasjoner tillatelse til å flytte applikasjonsressurser fra interne til eksterne medier og omvendt."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lese sensitive loggdata"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Lar programmet lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med nettbrettet, og kan inneholde personlig eller privat informasjon."</string>
-    <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Lar programmet lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, og kan inneholde personlig eller privat informasjon."</string>
+    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Lar appen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med nettbrettet, og kan inneholde personlig eller privat informasjon."</string>
+    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Lar appen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med nettbrettet, og kan inneholde personlig eller privat informasjon."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
-    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lar applikasjonen lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
-    <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivere eller deaktigere applikasjonskomponenter"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Lar applikasjoner endre på hvorvidt komponenter i andre applikasjoner er aktivert eller ikke. Skadelige applikasjoner kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få applikasjonskomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Lar applikasjoner endre på hvorvidt en komponent i andre applikasjoner er aktivert eller ikke. Skadelige applikasjoner kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få applikasjonskomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
-    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"velge foretrukne applikasjoner"</string>
-    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Lar applikasjonen endre valgene for foretrukne applikasjoner. Dette kan gi ondsinnede applikasjoner tilgang til i det stille å endre hvilke applikasjoner som kjøres, og slik gi seg ut til å være en eksisterende applikasjon og samle private data."</string>
+    <!-- outdated translation 3121238373951637049 -->     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lar applikasjonen lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
+    <!-- outdated translation 79425198834329406 -->     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktigere applikasjonskomponenter"</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Lar applikasjoner endre på hvorvidt komponenter i andre applikasjoner er aktivert eller ikke. Skadelige applikasjoner kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få applikasjonskomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Lar applikasjoner endre på hvorvidt komponenter i andre applikasjoner er aktivert eller ikke. Skadelige applikasjoner kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få applikasjonskomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
+    <!-- outdated translation 3393305202145172005 -->     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"velge foretrukne applikasjoner"</string>
+    <!-- outdated translation 760008293501937546 -->     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Lar applikasjonen endre valgene for foretrukne applikasjoner. Dette kan gi ondsinnede applikasjoner tilgang til i det stille å endre hvilke applikasjoner som kjøres, og slik gi seg ut til å være en eksisterende applikasjon og samle private data."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"endre globale systeminnstillinger"</string>
-    <string name="permdesc_writeSettings" msgid="838789419871034696">"Lar applikasjonen endre systemets innstillingsdata. Ondsinnede applikasjoner kan skade systemets innstillinger."</string>
+    <!-- outdated translation 838789419871034696 -->     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Lar applikasjonen endre systemets innstillingsdata. Ondsinnede applikasjoner kan skade systemets innstillinger."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"endre sikre systeminnstillinger"</string>
-    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Gir programmet tillatelse til å endre systemets data for sikkerhetsinnstilling. Ikke ment for vanlige programmer."</string>
+    <!-- outdated translation 5497873143539034724 -->     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Gir appen tillatelse til å endre systemets data for sikkerhetsinnstilling. Ikke ment for vanlige apper."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"redigere Google-tjenestekartet"</string>
-    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Lar applikasjonen redigere Google-tjenestekartet. Ikke ment for bruk av vanlige applikasjoner."</string>
+    <!-- outdated translation 6602362746516676175 -->     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Lar applikasjonen redigere Google-tjenestekartet. Ikke ment for bruk av vanlige applikasjoner."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"starte automatisk sammen med systemet"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Lar programmet starte seg selv så snart systemet er ferdig med oppstarten. Dette kan føre til lenger oppstartstid for nettbrettet, i tillegg til at enheten kan bli tregere generelt av at programmet alltid kjører."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Lar applikasjonen sette opp at den selv skal starte så fort systemet er ferdig med å slå seg på. Dette kan gjøre at det tar lengre tid å starte telefonen, og at den kan bli tregere fordi applikasjonen alltid kjører."</string>
+    <!-- outdated translation 7530977064379338199 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Lar appen starte seg selv så snart systemet er ferdig med oppstarten. Dette kan føre til lenger oppstartstid for nettbrettet, i tillegg til at enheten kan bli tregere generelt av at appen alltid kjører."</string>
+    <!-- outdated translation 7530977064379338199 -->     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Lar appen starte seg selv så snart systemet er ferdig med oppstarten. Dette kan føre til lenger oppstartstid for nettbrettet, i tillegg til at enheten kan bli tregere generelt av at appen alltid kjører."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sende varige kringkastinger"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Lar programmet sende hengende kringkastinger (sticky broadcasts) som blir værende etter at kringkastingen er over. Skadelige programmer kan gjøre nettbrettet tregt eller ustabilt ved å bruke for mye minne."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Lar applikasjonen sende varige kringkastinger, som forblir på systemet etter at kringkastingen er avsluttet. Ondsinnede applikasjoner kan gjøre telefonen treg eller ustabil ved å få den til å bruke for mye minne."</string>
+    <!-- outdated translation 6322249605930062595 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Lar appen sende hengende kringkastinger (sticky broadcasts) som blir værende etter at kringkastingen er over. Skadelige apper kan gjøre nettbrettet tregt eller ustabilt ved å bruke for mye minne."</string>
+    <!-- outdated translation 6322249605930062595 -->     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Lar appen sende hengende kringkastinger (sticky broadcasts) som blir værende etter at kringkastingen er over. Skadelige apper kan gjøre nettbrettet tregt eller ustabilt ved å bruke for mye minne."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lese kontaktinformasjon"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Lar programmet lese all kontaktinformasjon (adresser) lagret på telefonen. Skadelige programmet kan bruke dette til å sende personlige data til andre."</string>
-    <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Lar applikasjonen lese all kontakt- og adresseinformasjon lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å sende personlige data til andre."</string>
+    <!-- outdated translation 7596158687301157686 -->     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Lar appen lese all kontaktinformasjon (adresser) lagret på telefonen. Skadelige appen kan bruke dette til å sende personlige data til andre."</string>
+    <!-- outdated translation 7596158687301157686 -->     <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Lar appen lese all kontaktinformasjon (adresser) lagret på telefonen. Skadelige appen kan bruke dette til å sende personlige data til andre."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skrive kontaktinformasjon"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Lar programmet endre kontaktinformasjon (adresser) lagret på nettbrettet. Skadelige programmet kan bruke dette til å slette eller endre kontaktinformasjonen."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Lar applikasjonen endre kontakt- og adresseinformasjon lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å redigere eller endre kontaktinformasjonen."</string>
+    <!-- outdated translation 7782689510038568495 -->     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Lar appen endre kontaktinformasjon (adresser) lagret på nettbrettet. Skadelige appen kan bruke dette til å slette eller endre kontaktinformasjonen."</string>
+    <!-- outdated translation 7782689510038568495 -->     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Lar appen endre kontaktinformasjon (adresser) lagret på nettbrettet. Skadelige appen kan bruke dette til å slette eller endre kontaktinformasjonen."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"lese profildataene dine"</string>
-    <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Gir applikasjonen tillatelse til å lese personlig profilinformasjon lagret på enheten, for eksempel navn og kontaktinformasjon. Dette betyr at applikasjonen kan identifisere deg og sende din profilinformasjon til andre."</string>
+    <!-- outdated translation 6335739730324727203 -->     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Gir applikasjonen tillatelse til å lese personlig profilinformasjon lagret på enheten, for eksempel navn og kontaktinformasjon. Dette betyr at applikasjonen kan identifisere deg og sende din profilinformasjon til andre."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"skriv til profildataene dine"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Gir applikasjonen tillatelse til å endre eller legge til personlig profilinformasjon lagret på enheten, for eksempel navn og kontaktinformasjon. Dette betyr at andre applikasjoner kan identifisere deg og sende din profilinformasjon til andre."</string>
+    <!-- outdated translation 6431297330378229453 -->     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Gir applikasjonen tillatelse til å endre eller legge til personlig profilinformasjon lagret på enheten, for eksempel navn og kontaktinformasjon. Dette betyr at andre applikasjoner kan identifisere deg og sende din profilinformasjon til andre."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lese din sosiale strøm"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Gir tillatelse til at appen får tilgang til og kan synkronisere oppdateringer fra deg og vennene dine. Apper med skadelig programvare kan utnytte denne tillatelsen til å lese privat kommunikasjon som du har med vennene dine i sosiale nettverk."</string>
+    <!-- outdated translation 1300659548047580769 -->     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Gir tillatelse til at appen får tilgang til og kan synkronisere oppdateringer fra vennene dine. Apper med skadelig programvare kan utnytte denne tillatelsen til å få tilgang til privat kommunikasjon som du har med vennene dine i sosiale nettverk."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skrive i din sosiale strøm"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Gir tillatelse til at appen kan vise sosiale oppdateringer fra vennene dine. Apper med skadelig programvare kan utnytte denne tillatelsen gjennom å opptre som en venn og således lure deg til å oppgi passord eller annen konfidensiell informasjon."</string>
+    <!-- outdated translation 8649864102944627446 -->     <string name="permdesc_writeSocialStream" product="default" msgid="3496277176955721451">"Gir tillatelse til appen kan levere sosiale oppdateringer fra vennene dine. Apper med skadelig programvare kan utnytte denne tillatelsen til å lage forfalskede oppdateringer fra vennene dine for ulovlig å tilegne seg konfidensiell informasjon fra deg."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"les kalenderhendelser og konfidensiell informasjon"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Lar en applikasjon lese alle kalenderhendelser lagret på nettbrettet, herunder de som tilhører venner eller kollegaer. En skadelig applikasjon med denne tillatelsen kan trekke ut personlige opplysninger fra disse kalenderne uten eiernes viten."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Lar applikasjoner lese alle kalenderhendelser lagret på telefonen, herunder de som tilhører venner eller kollegaer. Skadelige applikasjon med denne tillatelsen kan trekke ut personlige opplysninger fra disse kalenderne uten eiernes viten."</string>
+    <!-- outdated translation 5665520896961671949 -->     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Lar en applikasjon lese alle kalenderhendelser lagret på nettbrettet, herunder de som tilhører venner eller kollegaer. En skadelig applikasjon med denne tillatelsen kan trekke ut personlige opplysninger fra disse kalenderne uten eiernes viten."</string>
+    <!-- outdated translation 5665520896961671949 -->     <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Lar en applikasjon lese alle kalenderhendelser lagret på nettbrettet, herunder de som tilhører venner eller kollegaer. En skadelig applikasjon med denne tillatelsen kan trekke ut personlige opplysninger fra disse kalenderne uten eiernes viten."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"legge til eller endre kalenderhendelser og sende e-post til gjester uten eiernes viten"</string>
-    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Lar en applikasjon sende hendelsesinvitasjoner som kalendereier, og legge til, fjerne og endre hendelser som du kan endre på enheten, herunder de som tilhører venner eller kollegaer. En skadelig applikasjon med denne tillatelsen kan sende nettsøppel-e-post som synes å komme fra kalendereieren, endre hendelser uten eiernes viten, eller legge til falske hendelser."</string>
+    <!-- outdated translation 5368129321997977226 -->     <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Lar en applikasjon sende hendelsesinvitasjoner som kalendereier, og legge til, fjerne og endre hendelser som du kan endre på enheten, herunder de som tilhører venner eller kollegaer. En skadelig applikasjon med denne tillatelsen kan sende nettsøppel-e-post som synes å komme fra kalendereieren, endre hendelser uten eiernes viten, eller legge til falske hendelser."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"lage simulerte posisjonskilder for testing"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Lage simulerte posisjonskilder for testing. Ondsinnede applikasjoner kan bruke dette til å overstyre posisjonen og/eller statusen som rapporteres av ekte posisjonskilder slik som GPS eller nettverksoperatører."</string>
+    <!-- outdated translation 7648286063459727252 -->     <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Lage simulerte posisjonskilder for testing. Ondsinnede applikasjoner kan bruke dette til å overstyre posisjonen og/eller statusen som rapporteres av ekte posisjonskilder slik som GPS eller nettverksoperatører."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få tilgang til ekstra posisjonskommandoer"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Få tilgang til ekstra kommandoer for posisjonskilder. Ondsinnede applikasjoner kan bruke dette til å forstyrre GPS eller andre posisjonskilder."</string>
+    <!-- outdated translation 1948144701382451721 -->     <string name="permdesc_accessLocationExtraCommands" msgid="6737736970602176133">"Få tilgang til ekstra kommandoer for posisjonskilder. Ondsinnede applikasjoner kan bruke dette til å forstyrre GPS eller andre posisjonskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"installere posisjonskilder"</string>
-    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Lar applikasjonen lage manuelle plasseringskilder for testing. Ondsinnede applikasjoner kan bruke dette til å overstyre plasseringen og/eller statusen rapportert av ekte plasseringskilder slik som GPS eller nettverksoperatører, eller overvåke og rapportere plasseringen din til en tredjepart."</string>
+    <!-- outdated translation 5449175116732002106 -->     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Lar applikasjonen lage manuelle plasseringskilder for testing. Ondsinnede applikasjoner kan bruke dette til å overstyre plasseringen og/eller statusen rapportert av ekte plasseringskilder slik som GPS eller nettverksoperatører, eller overvåke og rapportere plasseringen din til en tredjepart."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"nøyaktig (GPS-) posisjon"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Få tilgang til nøyaktige posisjonskilder, som for eksempel Global Positioning System (GPS) på nettbrettet der dette er tilgjengelig. Skadelige programmer kan bruke dette til å finne ut hvor du er, og kan også bruke mer batteri."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Få tilgang til nøyaktige posisjonskilder som Global Positioning System (GPS) på telefonen, når det er tilgjengelig. Ondsinnede applikasjoner kan bruke dette til å finne ut hvor du er, og kan bruke mer batteri."</string>
+    <!-- outdated translation 243973693233359681 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Få tilgang til nøyaktige posisjonskilder, som for eksempel Global Positioning System (GPS) på nettbrettet der dette er tilgjengelig. Skadelige apper kan bruke dette til å finne ut hvor du er, og kan også bruke mer batteri."</string>
+    <!-- outdated translation 243973693233359681 -->     <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Få tilgang til nøyaktige posisjonskilder, som for eksempel Global Positioning System (GPS) på nettbrettet der dette er tilgjengelig. Skadelige apper kan bruke dette til å finne ut hvor du er, og kan også bruke mer batteri."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"grov (nettverksbasert) posisjon"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Få tilgang til grovinnstilte posisjonskilder, som for eksempel databasen over basestasjoner, for å finne nettbrettets omtrentlige posisjon der dette er tilgjengelig. Skadelige programmer kan bruke dette til å finne ut omtrent hvor du er."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Få tilgang til grove posisjonskilder som databasen over basestasjoner til å finne ut omtrent hvor telefonen er, når det er tilgjengelig. Ondsinnede applikasjoner kan bruke dette til å finne ut omtrent hvor du er."</string>
+    <!-- outdated translation 3704633168985466045 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Få tilgang til grovinnstilte posisjonskilder, som for eksempel databasen over basestasjoner, for å finne nettbrettets omtrentlige posisjon der dette er tilgjengelig. Skadelige apper kan bruke dette til å finne ut omtrent hvor du er."</string>
+    <!-- outdated translation 3704633168985466045 -->     <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Få tilgang til grovinnstilte posisjonskilder, som for eksempel databasen over basestasjoner, for å finne nettbrettets omtrentlige posisjon der dette er tilgjengelig. Skadelige apper kan bruke dette til å finne ut omtrent hvor du er."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"få tilgang til SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Lar applikasjonen bruke lavnivåfunksjonalitet i SurfaceFlinger."</string>
+    <!-- outdated translation 6805241830020733025 -->     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Lar applikasjonen bruke lavnivåfunksjonalitet i SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lese skjermbufferet"</string>
-    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Tillater at programmet leser innholdet av rammebufferen."</string>
+    <!-- outdated translation 5777679658669057819 -->     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Lar applikasjonen lese innholdet i skjermbufferet."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Lar applikasjonen endre globale lydinnstillinger som volum og ruting."</string>
+    <!-- outdated translation 5793461287365991922 -->     <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"Lar applikasjonen endre globale lydinnstillinger som volum og ruting."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Gir applikasjonen tilgang til opptaksstien for lyd."</string>
+    <!-- outdated translation 6493228261176552356 -->     <string name="permdesc_recordAudio" msgid="2387462233976248635">"Gir applikasjonen tilgang til opptaksstien for lyd."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder og videoer"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"Tillat programmet å ta bilder og videoer med kameraet. Programmet kan dermed til enhver tid samle inn bilder som kameraet fanger inn."</string>
+    <!-- outdated translation 6004878235852154239 -->     <string name="permdesc_camera" msgid="1507407407002492176">"Tillat programmet å ta bilder og videoer med kameraet. Appen kan dermed til enhver tid samle inn bilder som kameraet fanger inn."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"deaktiver nettbrett permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"deaktivere telefonen permanent"</string>
-    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Lar programmet deaktivere hele nettbrettet permanent. Dette er veldig farlig."</string>
-    <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Lar applikasjonen deaktivere hele telefonen permanent. Dette er svært farlig."</string>
+    <!-- outdated translation 7379164636920817963 -->     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Lar appen deaktivere hele nettbrettet permanent. Dette er veldig farlig."</string>
+    <!-- outdated translation 7379164636920817963 -->     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Lar appen deaktivere hele nettbrettet permanent. Dette er veldig farlig."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"tvungen omstart av nettbrettet"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"tvinge omstart av telefon"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Lar programmet tvinge omstart av nettbrettet."</string>
-    <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Lar applikasjonen tvinge telefonen til å starte på nytt."</string>
+    <!-- outdated translation 4555793623560701557 -->     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Lar appen tvinge omstart av nettbrettet."</string>
+    <!-- outdated translation 4555793623560701557 -->     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Lar appen tvinge omstart av nettbrettet."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"montere og avmontere filsystemer"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Lar applikasjonen montere og avmontere filsystemer for uttagbar lagring."</string>
+    <!-- outdated translation 6253263792535859767 -->     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Lar applikasjonen montere og avmontere filsystemer for uttagbar lagring."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formatere ekstern lagringsplass"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Lar applikasjonen formatere ekstern lagringsplass."</string>
+    <!-- outdated translation 574060044906047386 -->     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Lar applikasjonen formatere ekstern lagringsplass."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"få informasjon om intern lagring"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"Tillater programmet å innhente informasjon om intern lagring."</string>
+    <!-- outdated translation 8820326551687285439 -->     <string name="permdesc_asec_access" msgid="3094563844593878548">"Tillater appen å innhente informasjon om intern lagring."</string>
     <string name="permlab_asec_create" msgid="6414757234789336327">"opprett intern lagring"</string>
-    <string name="permdesc_asec_create" msgid="2621346764995731250">"Tillater programmet å opprette intern lagring."</string>
+    <!-- outdated translation 2621346764995731250 -->     <string name="permdesc_asec_create" msgid="4558869273585856876">"Tillater appen å opprette intern lagring."</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"slett intern lagring"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Tillater programmet å stenge intern lagring."</string>
-    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"koble til eller fra intern lagring"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillater programmet å koble intern lagring til eller fra."</string>
+    <!-- outdated translation 2746706889208066256 -->     <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Tillater appen å stenge intern lagring."</string>
+    <!-- outdated translation 2456287623689029744 -->     <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"koble til eller fra intern lagring"</string>
+    <!-- outdated translation 5934375590189368200 -->     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Tillater appen å koble intern lagring til eller fra."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"gi nytt navn til intern lagring"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillater programmet å gi nytt navn til intern lagring."</string>
+    <!-- outdated translation 2152829985238876790 -->     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Tillater appen å gi nytt navn til intern lagring."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontrollere vibratoren"</string>
-    <string name="permdesc_vibrate" msgid="2886677177257789187">"Lar applikasjonen kontrollere vibratoren."</string>
+    <!-- outdated translation 2886677177257789187 -->     <string name="permdesc_vibrate" msgid="6284989245902300945">"Lar applikasjonen kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontrollere lommelykten"</string>
-    <string name="permdesc_flashlight" msgid="6433045942283802309">"Lar applikasjonen kontrollere lommelykten."</string>
+    <!-- outdated translation 6433045942283802309 -->     <string name="permdesc_flashlight" msgid="6522284794568368310">"Lar applikasjonen kontrollere lommelykten."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"administrere innstillinger og tillatelser for USB-enheter"</string>
-    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Tillater at programmet administrerer innstillinger og tillatelser for USB-enheter."</string>
+    <!-- outdated translation 6148489202092166164 -->     <string name="permdesc_manageUsb" msgid="7776155430218239833">"Tillater at appen administrerer innstillinger og tillatelser for USB-enheter."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementer MTP-protokoll"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Tillater tilgang til kjerne-MTP-driver for implementering av MTP USB-protokollen."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"teste maskinvare"</string>
-    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Lar applikasjonen styre diverse enheter med det formål å teste maskinvaren."</string>
+    <!-- outdated translation 3668894686500081699 -->     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Lar applikasjonen styre diverse enheter med det formål å teste maskinvaren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe telefonnummer direkte"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"Lar applikasjonen ringe telefonnummer uten inngripen fra brukeren. Ondsinnede applikasjoner kan forårsake uventede oppringinger på telefonregningen. Merk at dette ikke gir applikasjonen lov til å ringe nødnummer."</string>
+    <!-- outdated translation 3369867353692722456 -->     <string name="permdesc_callPhone" msgid="6396463004110544744">"Lar applikasjonen ringe telefonnummer uten inngripen fra brukeren. Ondsinnede applikasjoner kan forårsake uventede oppringinger på telefonregningen. Merk at dette ikke gir applikasjonen lov til å ringe nødnummer."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ringe vilkårlige telefonnummer direkte"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Lar applikasjonen ringe hvilket som helst telefonnummer, inkludert nødnummer, uten inngripen fra brukeren. Ondsinnede applikasjoner kan forårsake unødvendige og ulovlige samtaler til nødtjenester."</string>
+    <!-- outdated translation 244405067160028452 -->     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Lar applikasjonen ringe hvilket som helst telefonnummer, inkludert nødnummer, uten inngripen fra brukeren. Ondsinnede applikasjoner kan forårsake unødvendige og ulovlige samtaler til nødtjenester."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"start CDMA-nettbrettoppsett direkte"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"begynne CDMA-telefonoppsett direkte"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Lar applikasjonen begynne CDMA-oppsett. Ondsinnede applikasjoner kan bruke dette til å starte CDMA-oppsett uten grunn."</string>
+    <!-- outdated translation 6457447676108355905 -->     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Lar applikasjonen begynne CDMA-oppsett. Ondsinnede applikasjoner kan bruke dette til å starte CDMA-oppsett uten grunn."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontrollere varsling for plasseringsendring"</string>
-    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Lar applikasjonen slå av/på varsling om plasseringsendringer fra radioen. Ikke ment for vanlige applikasjoner."</string>
+    <!-- outdated translation 2300018303720930256 -->     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Lar applikasjonen slå av/på varsling om plasseringsendringer fra radioen. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"få tilgang til egenskaper for innsjekking"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Gir lese- og skrivetilgang til egenskaper lastet opp av innsjekkingstjenesten. Ikke ment for vanlige applikasjoner."</string>
+    <!-- outdated translation 7150307006141883832 -->     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Gir lese- og skrivetilgang til egenskaper lastet opp av innsjekkingstjenesten. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"velg gadgeter"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Lar applikasjonen fortelle systemet hvilke gadgeter som kan brukes av hvilke applikasjoner. Med denne rettigheten kan applikasjoner andre applikasjoner tilgang til personlig data. Ikke ment for vanlige applikasjoner."</string>
+    <!-- outdated translation 2098697834497452046 -->     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Lar applikasjonen fortelle systemet hvilke gadgeter som kan brukes av hvilke applikasjoner. Med denne rettigheten kan applikasjoner andre applikasjoner tilgang til personlig data. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"endre telefontilstand"</string>
-    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Lar applikasjonen kontrollere telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan endre nettverk, slå telefonens radio av eller på og lignende uten noensinne å varsle brukeren."</string>
+    <!-- outdated translation 3302284561346956587 -->     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Lar applikasjonen kontrollere telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan endre nettverk, slå telefonens radio av eller på og lignende uten noensinne å varsle brukeren."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"lese telefontilstand og -identitet"</string>
-    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Gir applikasjonen tilgang til telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan finne telefonens telefonnummer og seriellnummer, om en samtale er aktiv, nummeret det ringes til og lignende."</string>
+    <!-- outdated translation 8987653603298258459 -->     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Lar applikasjonen få tilgang til telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan få vite enhetens telefonnummer, om en samtale pågår, nummeret samtalen er koblet til og lignende."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Lar programmet hindre nettbrettet fra å gå over til sovemodus."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Lar applikasjonen forhindre telefonen fra å gå i hvilemodus."</string>
+    <!-- outdated translation 4032181488045338551 -->     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Lar appen hindre nettbrettet fra å gå over til sovemodus."</string>
+    <!-- outdated translation 4032181488045338551 -->     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Lar appen hindre nettbrettet fra å gå over til sovemodus."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"slå på eller av nettbrettet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"slå telefonen av eller på"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Lar programmet slå på eller av nettbrettet."</string>
-    <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Lar applikasjonen skru telefonen av eller på."</string>
+    <!-- outdated translation 3853773100100451905 -->     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Lar appen slå på eller av nettbrettet."</string>
+    <!-- outdated translation 3853773100100451905 -->     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Lar appen slå på eller av nettbrettet."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"kjøre i fabrikktestmodus"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Kjør en produsenttest på lavt nivå, noe som gir fullstendig tilgang til nettbrettets maskinvare. Kun tilgjengelig når nettbrettet kjøres i produsenttestmodus."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Kjøre som en lavnivås produsenttest, med full tilgang til telefonens maskinvare. Kun tilgjengelig når telefonen kjører i produsenttestmodus."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"endre bakgrunnsbilde"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Lar applikasjonen sette systemets bakgrunnsbilde."</string>
+    <!-- outdated translation 6417041752170585837 -->     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Lar applikasjonen sette systemets bakgrunnsbilde."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"sette størrelseshint for bakgrunn"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Lar applikasjonen sette størrelseshint for systemets bakgrunnsbilde."</string>
+    <!-- outdated translation 6019479164008079626 -->     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Lar applikasjonen sette størrelseshint for systemets bakgrunnsbilde."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"tilbakestille systemet til fabrikkinnstillinger"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"Lar applikasjonen tilbakestille systemet til fabrikkinnstillinger, noe som vil fjerne alle data, alt oppsett, og alle installerte applikasjoner."</string>
+    <!-- outdated translation 5033465107545174514 -->     <string name="permdesc_masterClear" msgid="3665380492633910226">"Lar applikasjonen tilbakestille systemet til fabrikkinnstillinger, noe som vil fjerne alle data, alt oppsett, og alle installerte applikasjoner."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"stille klokken"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Lar programmet stille klokken på nettbrettet."</string>
-    <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Tillater applikasjoner å stille klokken på telefonen."</string>
+    <!-- outdated translation 209693136361006073 -->     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Lar appen stille klokken på nettbrettet."</string>
+    <!-- outdated translation 209693136361006073 -->     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Lar appen stille klokken på nettbrettet."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"endre tidssone"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Lar programmet endre nettbrettets tidssone."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Lar applikasjonen endre telefonens tidssone."</string>
+    <!-- outdated translation 2522877107613885139 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Lar appen endre nettbrettets tidssone."</string>
+    <!-- outdated translation 2522877107613885139 -->     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Lar appen endre nettbrettets tidssone."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungere som kontoadministrasjonstjenesten"</string>
-    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Lar applikasjoner foreta anrop til kontogodkjennere"</string>
+    <!-- outdated translation 6056903274106394752 -->     <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Lar applikasjoner foreta anrop til kontogodkjennere"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"oppdage kjente kontoer"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Lar programmet få tilgang til listen over kontoer nettbrettet kjenner til."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Lar applikasjonen hente listen over kontoer telefonen kjenner til."</string>
+    <!-- outdated translation 857622793935544694 -->     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Lar appen få tilgang til listen over kontoer nettbrettet kjenner til."</string>
+    <!-- outdated translation 857622793935544694 -->     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Lar appen få tilgang til listen over kontoer nettbrettet kjenner til."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"fungere som en kontogodkjenner"</string>
-    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Lar applikasjoner bruke kontoadministratorens rettigheter til kontoautentisering, herunder opprette kontoer og få og angi passord."</string>
+    <!-- outdated translation 4006839406474208874 -->     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Lar applikasjoner bruke kontoadministratorens rettigheter til kontoautentisering, herunder opprette kontoer og få og angi passord."</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"administrere kontolisten"</string>
-    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Lar applikasjoner utføre handlinger som å legge til og fjerne kontoer samt slette passord."</string>
+    <!-- outdated translation 8804114016661104517 -->     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Lar applikasjoner utføre handlinger som å legge til og fjerne kontoer samt slette passord."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"bruke godkjenningsopplysningene for en konto"</string>
-    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Lar applikasjoner be om godkjenningsinformasjon"</string>
+    <!-- outdated translation 7416570544619546974 -->     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Lar applikasjoner be om godkjenningsinformasjon"</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"se nettverkstilstand"</string>
-    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Lar applikasjonen se tilstanden til alle nettverk."</string>
+    <!-- outdated translation 558721128707712766 -->     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Lar applikasjonen se tilstanden til alle nettverk."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"full internett-tilgang"</string>
-    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Lar applikasjonen opprette vilkårlige nettverkstilkoblinger."</string>
+    <!-- outdated translation 4593339106921772192 -->     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Lar applikasjonen opprette vilkårlige nettverkstilkoblinger."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"endre eller avskjær nettverksinnstillinger og -trafikk"</string>
-    <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Tillater en applikasjon å endre nettverksinnstillingene og fange opp og inspisere all nettverkstrafikk, for eksempel for å endre mellomtjeneren og porten for en APN. Skadelige applikasjoner kan overvåke, omdirigere, eller endre nettverkspakker uten din viten."</string>
+    <!-- outdated translation 2369786339323021771 -->     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Tillater en applikasjon å endre nettverksinnstillingene og fange opp og inspisere all nettverkstrafikk, for eksempel for å endre mellomtjeneren og porten for en APN. Skadelige applikasjoner kan overvåke, omdirigere, eller endre nettverkspakker uten din viten."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"endre nettverkskonnektivitet"</string>
-    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Tillater applikasjoner å endre innstillingene for nettverkstilkoblingen."</string>
-    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Endre tilknytningsoppsett"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Tillater applikasjoner å endre innstillingene for nettverkstilknytningen."</string>
+    <!-- outdated translation 4199958910396387075 -->     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Tillater applikasjoner å endre innstillingene for nettverkstilkoblingen."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"endre tilknytningsoppsett"</string>
+    <!-- outdated translation 8905815579146349568 -->     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Tillater applikasjoner å endre innstillingene for nettverkstilknytningen."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"endre innstilling for bakgrunnsdata"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Lar applikasjonen endre innstillingen for bakgrunnsdata."</string>
+    <!-- outdated translation 1001482853266638864 -->     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Lar applikasjonen endre innstillingen for bakgrunnsdata."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"se tilstand for trådløse nettverk"</string>
-    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Lar applikasjonen få se informasjon om tilstanden til de trådløse nettene."</string>
+    <!-- outdated translation 485796529139236346 -->     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Lar applikasjonen få se informasjon om tilstanden til de trådløse nettene."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"endre tilstand for trådløse nettverk"</string>
-    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Lar applikasjonen koble til og fra trådløse aksesspunkt, og å gjøre endringer i konfigurerte trådløse nettverk."</string>
+    <!-- outdated translation 2950383153656873267 -->     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Lar applikasjonen koble til og fra trådløse aksesspunkt, og å gjøre endringer i konfigurerte trådløse nettverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillat multicast for trådløse nettverk"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Lar applikasjonen motta pakker som ikke er adressert til enheten selv. Dette kan være nyttig ved leting etter nærliggende tjenester, men bruker mer strøm enn ikke-multicast-modus."</string>
-    <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth-administrasjon"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Lar programmet konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Lar applikasjonen konfigurere den lokale Bluetooth-telefonen, og å oppdage og pare med andre enheter."</string>
+    <!-- outdated translation 8199464507656067553 -->     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Lar applikasjonen motta pakker som ikke er adressert til enheten selv. Dette kan være nyttig ved leting etter nærliggende tjenester, men bruker mer strøm enn ikke-multicast-modus."</string>
+    <!-- outdated translation 1092209628459341292 -->     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-administrasjon"</string>
+    <!-- outdated translation 3511795757324345837 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
+    <!-- outdated translation 3511795757324345837 -->     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opprette Bluetooth-tilkoblinger"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Lar programmet vise konfigurasjonen av det lokale Bluetooth-nettbrettet, samt opprette og akseptere tilkoblinger med sammenkoblede enheter."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Lar applikasjonen se konfigurasjonen til den lokale Bluetooth-telefonen, og å opprette og godta tilkoblinger med parede enheter."</string>
+    <!-- outdated translation 4191941825910543803 -->     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Lar appen vise konfigurasjonen av det lokale Bluetooth-nettbrettet, samt opprette og akseptere tilkoblinger med sammenkoblede enheter."</string>
+    <!-- outdated translation 4191941825910543803 -->     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Lar appen vise konfigurasjonen av det lokale Bluetooth-nettbrettet, samt opprette og akseptere tilkoblinger med sammenkoblede enheter."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontroller overføring av data med NFC-teknologi"</string>
-    <string name="permdesc_nfc" msgid="9171401851954407226">"Tillater programmet å kommunisere data via koder, kort og lesere for NFC-teknologi."</string>
+    <!-- outdated translation 9171401851954407226 -->     <string name="permdesc_nfc" msgid="7120611819401789907">"Tillater appen å kommunisere data via koder, kort og lesere for NFC-teknologi."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"slå av tastaturlås"</string>
-    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Lar applikasjonen slå av tastaturlåsen og enhver tilknyttet passordsikkerhet. Et legitimt eksempel på dette er at telefonen slår av tastaturlåsen når den mottar et innkommende anrop, og så slår den på igjen når samtalen er over."</string>
+    <!-- outdated translation 3189763479326302017 -->     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Lar applikasjonen slå av tastaturlåsen og enhver tilknyttet passordsikkerhet. Et legitimt eksempel på dette er at telefonen slår av tastaturlåsen når den mottar et innkommende anrop, og så slår den på igjen når samtalen er over."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
-    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Lar applikasjonen lese synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
+    <!-- outdated translation 5315925706353341823 -->     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Lar applikasjonen lese synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"skrive synkroniseringsinnstillinger"</string>
-    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Lar applikasjonen to endre på synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
+    <!-- outdated translation 2498201614431360044 -->     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Lar applikasjonen to endre på synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lese synkroniseringsstatistikk"</string>
-    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Lar applikasjonen lese synkroniseringsstatistikk, som for eksempel loggen over alle synkroniseringer utført."</string>
+    <!-- outdated translation 7511448343374465000 -->     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Lar applikasjonen lese synkroniseringsstatistikk, som for eksempel loggen over alle synkroniseringer utført."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lese abonnement på nyhetskilder"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Lar applikasjonen hente detaljer om hvilke nyhetskilder som synkroniseres."</string>
+    <!-- outdated translation 3622200625634207660 -->     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lar applikasjonen hente detaljer om hvilke nyhetskilder som synkroniseres."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"endre abonnement på nyhetskilder"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Lar applikasjonen redigere hvilke nyhetskilder som synkroniseres. Dette kan gi en ondsinnet applikasjon tilgang til å endre hvilke nyhetskilder som synkroniseres."</string>
-    <string name="permlab_readDictionary" msgid="432535716804748781">"lese brukerdefinert ordliste"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Lar applikasjonen lese private ord, navn og uttrykk som brukeren har lagret i den brukerdefinerte ordlisten."</string>
-    <string name="permlab_writeDictionary" msgid="6703109511836343341">"skrive til brukerdefinert ordliste"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Lar applikasjonen skrive nye ord til den brukerdefinerte ordlisten."</string>
+    <!-- outdated translation 8121607099326533878 -->     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Lar applikasjonen redigere hvilke nyhetskilder som synkroniseres. Dette kan gi en ondsinnet applikasjon tilgang til å endre hvilke nyhetskilder som synkroniseres."</string>
+    <!-- outdated translation 432535716804748781 -->     <string name="permlab_readDictionary" msgid="8410247960433376352">"lese brukerdefinert ordliste"</string>
+    <!-- outdated translation 1082972603576360690 -->     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Lar applikasjonen lese private ord, navn og uttrykk som brukeren har lagret i den brukerdefinerte ordlisten."</string>
+    <!-- outdated translation 6703109511836343341 -->     <string name="permlab_writeDictionary" msgid="2296383164914812772">"skrive til brukerdefinert ordliste"</string>
+    <!-- outdated translation 2241256206524082880 -->     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lar applikasjonen skrive nye ord til den brukerdefinerte ordlisten."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"endre/slette innh. i USB-lagr."</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"redigere/slette innhold på minnekort"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Prog. skriver til USB-lagr."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Lar applikasjonen skrive til minnekortet."</string>
+    <!-- outdated translation 6594393334785738252 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Prog. skriver til USB-lagr."</string>
+    <!-- outdated translation 6594393334785738252 -->     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Prog. skriver til USB-lagr."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"endre eller slette innhold på interne medier"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Tillater applikasjoner å endre innholdet i interne medier."</string>
+    <!-- outdated translation 8232008512478316233 -->     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Tillater applikasjoner å endre innholdet i interne medier."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"tilgang til bufrede filer"</string>
-    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillater applikasjoner å lese og skrive til bufrede filer."</string>
+    <!-- outdated translation 1624734528435659906 -->     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Tillater applikasjoner å lese og skrive til bufrede filer."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"foreta/motta Internett-anrop"</string>
-    <string name="permdesc_use_sip" msgid="6320376185606661843">"Tillater applikasjon å bruke SIP-tjenesten til å foreta og motta Internett-anrop."</string>
+    <!-- outdated translation 6320376185606661843 -->     <string name="permdesc_use_sip" msgid="4717632000062674294">"Tillater applikasjon å bruke SIP-tjenesten til å foreta og motta Internett-anrop."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"les tidligere nettverksbruk"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Gir applikasjoner tillatelse til å lese tidligere nettverksbruk for bestemte nettverk og applikasjoner."</string>
+    <!-- outdated translation 6040738474779135653 -->     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Gir applikasjoner tillatelse til å lese tidligere nettverksbruk for bestemte nettverk og applikasjoner."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"administrer retningslinjene for nettverk"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Gir applikasjoner tillatelse til å administrere retningslinjene for nettverket og definere appllikasjonsspesifikke regler."</string>
+    <!-- outdated translation 3723795285132803958 -->     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Gir applikasjoner tillatelse til å administrere retningslinjene for nettverket og definere appllikasjonsspesifikke regler."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Modifisering av regnskapsføring av nettverksbruk"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Gir tillatelse til modifisering av hvordan nettverksbruk blir redegjort for i henhold til applikasjoner. Skal ikke brukes av normale applikasjoner."</string>
+    <!-- outdated translation 8702285686629184404 -->     <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"Gir tillatelse til modifisering av hvordan nettverksbruk blir redegjort for i henhold til applikasjoner. Skal ikke brukes av normale applikasjoner."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontroller tillatt lengde og tegn i passord for opplåsing av skjerm"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Overvåk antall feil passordforsøk ved opplåsing av skjerm. Lås nettbrettet eller slett alle data ved for mange feil passordforsøk"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Overvåk antall feil passordforsøk ved opplåsing av skjerm. Lås telefonen eller slett alle data ved for mange feil passordforsøk"</string>
+    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Overvåk antall feil passordforsøk ved opplåsing av skjerm. Lås nettbrettet eller slett alle data ved for mange feil passordforsøk"</string>
+    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Overvåk antall feil passordforsøk ved opplåsing av skjerm. Lås nettbrettet eller slett alle data ved for mange feil passordforsøk"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Endre passord for opplåsing av skjerm"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Endre passord for opplåsing av skjerm"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
@@ -519,7 +519,7 @@
     <string name="policylab_expirePassword" msgid="885279151847254056">"Angi utløpsdato for skjermlåspassordet"</string>
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Velg hvor lenge det skal gå før passordet til skjermlåsen må byttes"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Angi lagringskryptering"</string>
-    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Krever at lagrede programdata krypteres"</string>
+    <!-- outdated translation 2504984732631479399 -->     <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Krever at lagrede programdata krypteres"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="5680054212889413366">"Hindre bruk av alle kameraer på enheten"</string>
   <string-array name="phoneTypes">
@@ -635,13 +635,13 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Startside"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbeid"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Annen"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Skriv inn PIN-kode:"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="5965173481572346878">"Tast inn PUK-kode og ny PIN-kode"</string>
+    <!-- outdated translation 3731488827218876115 -->     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Skriv inn PIN-kode:"</string>
+    <!-- outdated translation 5965173481572346878 -->     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Tast inn PUK-kode og ny PIN-kode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="2987350144349051286">"Ny PIN-kode"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Trykk og oppgi passord"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Skriv inn passord for å låse opp"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Skriv inn personlig kode for å låse opp"</string>
+    <!-- outdated translation 2987350144349051286 -->     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Ny PIN-kode"</string>
+    <!-- outdated translation 7906561917570259833 -->     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Trykk og oppgi passord"</font></string>
+    <!-- outdated translation 9138158344813213754 -->     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Skriv inn passord for å låse opp"</string>
+    <!-- outdated translation 638347075625491514 -->     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Skriv inn personlig kode for å låse opp"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Gal PIN-kode!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"For å låse opp, trykk på menyknappen og deretter 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
@@ -653,8 +653,8 @@
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Nødanrop"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Tilbake til samtale"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Riktig!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Beklager, prøv igjen:"</string>
-    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Prøv igjen"</string>
+    <!-- outdated translation 4817583279053112312 -->     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Beklager, prøv igjen:"</string>
+    <!-- outdated translation 6237443657358168819 -->     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Prøv igjen"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Lader, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Fullt ladet"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -662,9 +662,9 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Mangler SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nettbrettet mangler SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Ikke noe SIM-kort i telefonen."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Sett inn et SIM-kort."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"SIM-kort mangler eller er uleselig. Sett inn et SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"SIM-kortet er permanent deaktivert."\n" Ta kontakt med mobiltjenesteleverandøren din for å få et annet SIM-kort."</string>
+    <!-- outdated translation 8874620818937719067 -->     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Sett inn et SIM-kort."</string>
+    <!-- outdated translation 7138450788301444298 -->     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kort mangler eller er uleselig. Sett inn et SIM-kort."</string>
+    <!-- outdated translation 1631853574702335453 -->     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kortet er permanent deaktivert."\n" Ta kontakt med mobiltjenesteleverandøren din for å få et annet SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Knapp for forrige sang"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Knapp for neste sang"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pause-knappen"</string>
@@ -673,14 +673,19 @@
     <string name="emergency_calls_only" msgid="6733978304386365407">"Kun nødanrop"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Nettverk ikke tillatt"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kortet er PUK-låst."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Se manualen eller kontakt kundeservice."</string>
+    <!-- outdated translation 635967534992394321 -->     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Se manualen eller kontakt kundeservice."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kortet er låst."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Låser opp SIM-kort…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. "\n\n"Please try again in <xliff:g id="NUMBER_1">%d</xliff:g> seconds."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Du har oppgitt feil passord <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv igjen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Du har oppgitt feil personlig kode <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv igjen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Du har tegnet inn feil opplåsningsmønster <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter <xliff:g id="NUMBER_1">%d</xliff:g> nye forsøk, bes du låse opp nettbrettet ved å logge inn med dine Google-detaljer. "\n\n" Prøv igjen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using your Google sign-in."\n\n" Please try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
+    <!-- no translation found for lockscreen_too_many_failed_attempts_dialog_message (6481623830344107222) -->
+    <skip />
+    <!-- no translation found for lockscreen_too_many_failed_password_attempts_dialog_message (2725973286239344555) -->
+    <skip />
+    <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6216672706545696955) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (9191611984625460820) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (2590227559763762751) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Du har foretatt <xliff:g id="NUMBER_0">%d</xliff:g> mislykkede opplåsinger av nettbrettet. Etter <xliff:g id="NUMBER_1">%d</xliff:g> flere mislykkede forsøk, blir nettbrettet tilbakestilt til fabrikkinnstillingene, og alle brukerdata går tapt."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Du har foretatt <xliff:g id="NUMBER_0">%d</xliff:g> mislykkede opplåsinger av telefonen. Etter <xliff:g id="NUMBER_1">%d</xliff:g> flere mislykkede forsøk, blir telefonen tilbakestilt til fabrikkinnstillingene, og alle brukerdata går tapt."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Du har foretatt <xliff:g id="NUMBER">%d</xliff:g> mislykkede opplåsinger av nettbrettet. Nettbrettet blir nå tilbakestilt til fabrikkinnstillingene."</string>
@@ -714,9 +719,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Omstart"</string>
     <string name="js_dialog_title" msgid="8143918455087008109">"Siden \'<xliff:g id="TITLE">%s</xliff:g> sier:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="1901675448179653089">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
+    <!-- no translation found for js_dialog_before_unload (730366588032430474) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Bekreft"</string>
-    <string name="double_tap_toast" msgid="1068216937244567247">"Dobbelttrykk for å zoome inn og ut."</string>
+    <!-- outdated translation 1068216937244567247 -->     <string name="double_tap_toast" msgid="2729045387923870404">"Dobbelttrykk for å zoome inn og ut."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Autofyll"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Konfig. autofyll"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
@@ -736,25 +742,25 @@
     <string name="autofill_area" msgid="3547409050889952423">"Område"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lese nettleserens logg og bokmerker"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Lar applikasjonen lese alle adresser nettleseren har besøkt, og alle nettleserens bokmerker."</string>
+    <!-- outdated translation 4981489815467617191 -->     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Lar applikasjonen lese alle adresser nettleseren har besøkt, og alle nettleserens bokmerker."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skrive til nettleserens logg og bokmerker"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Lar programmet endre nettleserens logg eller bokmerker som er lagret på nettbrettet. Skadelige programmer kan bruke dette til å fjerne eller redigere nettleserens data."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Lar applikasjonen endre nettleserens logg og bokmerker lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å fjerne eller redigere nettleserens data."</string>
+    <!-- outdated translation 7193514090469945307 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Lar appen endre nettleserens logg eller bokmerker som er lagret på nettbrettet. Skadelige apper kan bruke dette til å fjerne eller redigere nettleserens data."</string>
+    <!-- outdated translation 7193514090469945307 -->     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Lar appen endre nettleserens logg eller bokmerker som er lagret på nettbrettet. Skadelige apper kan bruke dette til å fjerne eller redigere nettleserens data."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"angi alarm i alarmklokke"</string>
-    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Lar programmet angi en alarm i et installert alarmklokkeprogram. Det kan hende at enkelte alarmklokkeprogrammer ikke implementerer denne funksjonen."</string>
+    <!-- outdated translation 5966966598149875082 -->     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lar appen angi en alarm i et installert alarmklokkeprogram. Det kan hende at enkelte alarmklokkeprogrammer ikke implementerer denne funksjonen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"legg til talepost"</string>
-    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Lar applikasjonen legge til meldinger i talepostinnboksen din."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Endre nettleserens tillatelser for geografisk posisjonering"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Tillater programmet å endre nettleserens tillatelser for geografisk posisjonering. Skadelige programmer kan bruke denne funksjonen til å sende posisjonsopplysninger til vilkårlige nettsteder."</string>
+    <!-- outdated translation 4828507394878206682 -->     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lar applikasjonen legge til meldinger i talepostinnboksen din."</string>
+    <!-- outdated translation 4715212655598275532 -->     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Endre nettleserens tillatelser for geografisk posisjonering"</string>
+    <!-- outdated translation 4011908282980861679 -->     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillater appen å endre nettleserens tillatelser for geografisk posisjonering. Skadelige apper kan bruke denne funksjonen til å sende posisjonsopplysninger til vilkårlige nettsteder."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekreft pakker"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Lar appen bekrefte om en pakke kan installeres."</string>
+    <!-- outdated translation 6033195477325381106 -->     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Lar appen bekrefte om en pakke kan installeres."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind til en pakkeverifikator"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Gir innehaveren rett til å rette forespørsler mot pakkeverifikatorer. Bør aldri være nødvendig for normale applikasjoner."</string>
+    <!-- outdated translation 2409521927385789318 -->     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Gir innehaveren rett til å rette forespørsler mot pakkeverifikatorer. Bør aldri være nødvendig for normale applikasjoner."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du at nettleseren skal huske dette passordet?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nå"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Aldri"</string>
-    <string name="open_permission_deny" msgid="5661861460947222274">"Du har ikke de nødvendige rettighetene til å åpne denne siden."</string>
+    <!-- outdated translation 5661861460947222274 -->     <string name="open_permission_deny" msgid="7374036708316629800">"Du har ikke de nødvendige rettighetene til å åpne denne siden."</string>
     <string name="text_copied" msgid="4985729524670131385">"Kopierte tekst til utklippstavlen."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mer"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"menyknapp+"</string>
@@ -853,9 +859,9 @@
     <string name="weeks" msgid="6509623834583944518">"uker"</string>
     <string name="year" msgid="4001118221013892076">"år"</string>
     <string name="years" msgid="6881577717993213522">"år"</string>
-    <string name="VideoView_error_title" msgid="3359437293118172396">"Kan ikke spille video"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Beklager, denne videoen er ikke gyldig for streaming til denne enheten."</string>
-    <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Beklager, kan ikke spille denne videoen."</string>
+    <!-- outdated translation 3359437293118172396 -->     <string name="VideoView_error_title" msgid="5927895235831021723">"Kan ikke spille video"</string>
+    <!-- outdated translation 897920883624437033 -->     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Beklager, denne videoen er ikke gyldig for streaming til denne enheten."</string>
+    <!-- outdated translation 710301040038083944 -->     <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"Beklager, kan ikke spille denne videoen."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"middag"</string>
@@ -871,7 +877,7 @@
     <string name="replace" msgid="5781686059063148930">"Erstatt"</string>
     <string name="delete" msgid="6098684844021697789">"Slett"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopier URL"</string>
-    <string name="selectTextMode" msgid="6738556348861347240">"Marker tekst"</string>
+    <!-- outdated translation 6738556348861347240 -->     <string name="selectTextMode" msgid="1018691815143165326">"Marker tekst"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Merket tekst"</string>
     <string name="addToDictionary" msgid="9090375111134433012">"legg til i ordliste"</string>
     <string name="deleteText" msgid="7070985395199629156">"slett"</string>
@@ -885,46 +891,52 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Avbryt"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Merk"</string>
-    <string name="loading" msgid="1760724998928255250">"Laster inn ..."</string>
+    <!-- outdated translation 1760724998928255250 -->     <string name="loading" msgid="7933681260296021180">"Laster inn ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"På"</string>
     <string name="capital_off" msgid="6815870386972805832">"Av"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Fullfør med"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Bruk som standardvalg."</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Fjern standardvalg i Innstillinger &gt; Applikasjoner &gt; Installerte applikasjoner."</string>
+    <!-- outdated translation 4815455344600932173 -->     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Fjern standardvalg i Innstillinger &gt; Applikasjoner &gt; Installerte applikasjoner."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Velg en aktivitet"</string>
-    <string name="chooseUsbActivity" msgid="7892597146032121735">"Velg applikasjon for USB-enheten"</string>
-    <string name="noApplications" msgid="1691104391758345586">"Ingen applikasjoner kan gjøre dette."</string>
+    <!-- outdated translation 7892597146032121735 -->     <string name="chooseUsbActivity" msgid="6894748416073583509">"Velg applikasjon for USB-enheten"</string>
+    <!-- outdated translation 1691104391758345586 -->     <string name="noApplications" msgid="2991814273936504689">"Ingen applikasjoner kan gjøre dette."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g> har dessverre stoppet."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Prosessen <xliff:g id="PROCESS">%1$s</xliff:g> har dessverre stoppet."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> svarer ikke."\n\n"Vil du lukke den?"</string>
-    <string name="anr_activity_process" msgid="7018289416670457797">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> svarer ikke."\n\n"Vil du lukke den?"</string>
-    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> svarer ikke. Vil du lukke den?"</string>
-    <string name="anr_process" msgid="306819947562555821">"Prosessen <xliff:g id="PROCESS">%1$s</xliff:g> svarer ikke."\n\n"Vil du lukke den?"</string>
+    <!-- no translation found for anr_activity_application (1904477189057199066) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (5776209883299089767) -->
+    <skip />
+    <!-- no translation found for anr_application_process (8941757607340481057) -->
+    <skip />
+    <!-- no translation found for anr_process (6513209874880517125) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Rapportér"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
-    <string name="launch_warning_title" msgid="8323761616052121936">"Programmet er omdirigert"</string>
+    <!-- outdated translation 8323761616052121936 -->     <string name="launch_warning_title" msgid="1547997780506713581">"Appen er omdirigert"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> kjører nå."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> ble opprinnelig startet."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vis alltid"</string>
-    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Aktiver denne på nytt med Innstillinger  &gt; Applikasjoner &gt; Administrer applikasjoner."</string>
-    <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (prosessen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutt de selvpålagte StrictMode-retningslinjene."</string>
+    <!-- outdated translation 2953716574198046484 -->     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktiver denne på nytt med Innstillinger  &gt; Applikasjoner &gt; Administrer applikasjoner."</string>
+    <!-- no translation found for smv_application (3307209192155442829) -->
+    <skip />
     <string name="smv_process" msgid="5120397012047462446">"Prosessen<xliff:g id="PROCESS">%1$s</xliff:g> har brutt de selvpålagte StrictMode-retningslinjene."</string>
-    <string name="android_upgrading_title" msgid="378740715658358071">"Android oppgraderes …"</string>
-    <string name="android_upgrading_apk" msgid="274409861603566003">"Optimaliserer applikasjon <xliff:g id="NUMBER_0">%1$d</xliff:g> av <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="android_upgrading_starting_apps" msgid="7959542881906488763">"Starter applikasjoner."</string>
+    <!-- outdated translation 378740715658358071 -->     <string name="android_upgrading_title" msgid="1584192285441405746">"Android oppgraderes …"</string>
+    <!-- no translation found for android_upgrading_apk (7904042682111526169) -->
+    <skip />
+    <!-- outdated translation 7959542881906488763 -->     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Starter applikasjoner."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Ferdigstiller oppstart."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Velg for å bytte til programmet"</string>
-    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Bytt programmer?"</string>
-    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"En annen applikasjon kjører og må stoppes før du kan starte en ny applikasjon."</string>
+    <!-- outdated translation 2423977499339403402 -->     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Velg for å bytte til appen"</string>
+    <!-- outdated translation 1135403633766694316 -->     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Bytt apper?"</string>
+    <!-- outdated translation 4592075610079319667 -->     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"En annen applikasjon kjører og må stoppes før du kan starte en ny applikasjon."</string>
     <string name="old_app_action" msgid="493129172238566282">"Gå tilbake til <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="942967900237208466">"Ikke start det nye programmet."</string>
+    <!-- outdated translation 942967900237208466 -->     <string name="old_app_description" msgid="2082094275580358049">"Ikke start det nye programmet."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="6830398339826789493">"Stopp det gamle programmet uten å lagre det."</string>
+    <!-- outdated translation 6830398339826789493 -->     <string name="new_app_description" msgid="1932143598371537340">"Stopp det gamle programmet uten å lagre det."</string>
     <string name="sendText" msgid="5132506121645618310">"Velg mål for tekst"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringetonevolum"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medievolum"</string>
@@ -953,6 +965,10 @@
     <item quantity="one" msgid="1634101450343277345">"Åpent trådløsnett i nærheten"</item>
     <item quantity="other" msgid="7915895323644292768">"Åpne trådløsnett i nærheten"</item>
   </plurals>
+    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
+    <skip />
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig Internett-tilkobling."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
@@ -964,9 +980,9 @@
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct er slått på"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Berør for å se innstillinger"</string>
     <string name="select_character" msgid="3365550120617701745">"Sett inn tegn"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Ukjent applikasjon"</string>
+    <!-- outdated translation 7630529934366549163 -->     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Ukjent applikasjon"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sender SMS-meldinger"</string>
-    <string name="sms_control_message" msgid="1289331457999236205">"Et stort antall SMS-meldinger blir sendt. Velg «OK» for å fortsette, eller «Avbryt» for å avbryte sendingen."</string>
+    <!-- outdated translation 1289331457999236205 -->     <string name="sms_control_message" msgid="4073755190243093924">"Et stort antall SMS-meldinger blir sendt. Velg «OK» for å fortsette, eller «Avbryt» for å avbryte sendingen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Avbryt"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
@@ -999,7 +1015,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå av USB-lagring"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Det oppstod et problem ved deaktivering av USB-lagring. Kontroller at du har demontert USB-verten, og prøv på nytt."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Slå på USB-lagring"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du aktiverer USB-lagring, virker ikke lenger enkelte av programmene du bruker, og de kan være utilgjengelige inntil du deaktiverer USB-lagringen."</string>
+    <!-- outdated translation 3202838234780505886 -->     <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"Hvis du aktiverer USB-lagring, virker ikke lenger enkelte av appene du bruker, og de kan være utilgjengelige inntil du deaktiverer USB-lagringen."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-handling mislyktes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tilkoblet som medieenhet"</string>
@@ -1007,15 +1023,15 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilkoblet som installasjonsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Koblet til et USB-tilbehør"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Berør for andre USB-alternativer"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formaterer USB-lagring"</string>
-    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatere minnekort"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vil du formatere USB-lagring og slette alle lagrede filer? Handlingen kan ikke angres!"</string>
-    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Er du sikker på at du ønsker å formatere minnekortet? Alle data på kortet vil gå tapt."</string>
+    <!-- outdated translation 7980995592595097841 -->     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formaterer USB-lagring"</string>
+    <!-- outdated translation 7980995592595097841 -->     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formaterer USB-lagring"</string>
+    <!-- outdated translation 8296908079722897772 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Vil du formatere USB-lagring og slette alle lagrede filer? Handlingen kan ikke angres!"</string>
+    <!-- outdated translation 8296908079722897772 -->     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Vil du formatere USB-lagring og slette alle lagrede filer? Handlingen kan ikke angres!"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatér"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-debugging tilkoblet"</string>
-    <string name="adb_active_notification_message" msgid="8470296818270110396">"Velg for å deaktivere USB-debugging."</string>
-    <string name="select_input_method" msgid="6865512749462072765">"Velg inndatametode"</string>
-    <string name="configure_input_methods" msgid="6324843080254191535">"Konfigurer inndatametoder"</string>
+    <!-- outdated translation 8592219392855947984 -->     <string name="adb_active_notification_message" msgid="1016654627626476142">"Denne kiosken drives av Nexus S."</string>
+    <!-- outdated translation 6865512749462072765 -->     <string name="select_input_method" msgid="4653387336791222978">"Velg inndatametode"</string>
+    <!-- outdated translation 6324843080254191535 -->     <string name="configure_input_methods" msgid="9091652157722495116">"Konfigurer inndatametoder"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="candidates_style" msgid="4333913089637062257">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
@@ -1044,10 +1060,10 @@
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Minnekortet ble fjernet. Sett inn et nytt."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Fant ingen tilsvarende aktiviteter"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"oppdater statistikk over komponentbruk"</string>
-    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
-    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Tillater bruk av standard meldingsbeholdertjeneste for kopiering av innhold. Brukes ikke for normale programmer."</string>
-    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Tillater bruk av standard meldingsbeholdertjeneste for kopiering av innhold. Brukes ikke for normale programmer."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Trykk to ganger for zoomkontroll"</string>
+    <!-- outdated translation 891553695716752835 -->     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
+    <!-- outdated translation 1660908117394854464 -->     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"Tillater bruk av standard meldingsbeholdertjeneste for kopiering av innhold. Brukes ikke for normale apper."</string>
+    <!-- outdated translation 537780957633976401 -->     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Tillater bruk av standard meldingsbeholdertjeneste for kopiering av innhold. Brukes ikke for normale apper."</string>
+    <!-- outdated translation 1311810005957319690 -->     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Trykk to ganger for zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Feil under oppakking av gadget"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Søk"</string>
@@ -1058,7 +1074,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Utfør"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Ring nummeret"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Lag kontakt"\n"med nummeret <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Ett eller flere av de følgende programmene ber om tillatelse til å få tilgang til kontoen din fra nå av."</string>
+    <!-- outdated translation 6824538733852821001 -->     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Ett eller flere av de følgende programmene ber om tillatelse til å få tilgang til kontoen din fra nå av."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillate dette?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Forespørsel om tilgang"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
@@ -1122,7 +1138,7 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Slett elementene."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Opphev slettinger."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ikke gjør noe nå."</string>
-    <string name="choose_account_label" msgid="4191313562041125787">"Velg en konto"</string>
+    <!-- outdated translation 4191313562041125787 -->     <string name="choose_account_label" msgid="5655203089746423927">"Velg en konto"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Legg til en konto"</string>
     <string name="choose_account_text" msgid="6891230675141555481">"Hvilken konto vil du bruke?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Legg til konto"</string>
@@ -1157,10 +1173,10 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusendring"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="activitychooserview_choose_application" msgid="4540794444768613567">"Velg en app"</string>
+    <!-- outdated translation 4540794444768613567 -->     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Velg en app"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Del med"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Del med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="7311938669217173870">"Glidebryter. Trykk og hold inne."</string>
+    <!-- outdated translation 7311938669217173870 -->     <string name="content_description_sliding_handle" msgid="415975056159262248">"Glidebryter. Trykk og hold inne."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Opp for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Ned for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Venstre for <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1169,6 +1185,8 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Stille"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Lyd på"</string>
+    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
+    <skip />
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Koble til hodetelefoner for å høre hvilke taster som brukes for å skrive inn passordet."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punktum."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Gå til startsiden"</string>
@@ -1206,9 +1224,9 @@
     <string name="fingerprints" msgid="4516019619850763049">"Fingeravtrykk"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256-fingeravtrykk"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1-fingeravtrykk"</string>
-    <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Se alle"</string>
-    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Velg aktivitet"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Del med"</string>
+    <!-- outdated translation 180268188117163072 -->     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Se alle"</string>
+    <!-- outdated translation 3325054276356556835 -->     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Velg aktivitet"</string>
+    <!-- outdated translation 1791316789651185229 -->     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Del med"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Enheten er låst."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

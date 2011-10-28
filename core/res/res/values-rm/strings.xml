@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="6071602020171759109">"&lt;senza titel&gt;"</string>
+    <!-- outdated translation 6071602020171759109 -->     <string name="untitled" msgid="4638956954852782576">"&lt;senza titel&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <!-- no translation found for ellipsis_two_dots (1228078994866030736) -->
     <skip />
@@ -44,9 +44,9 @@
     <string name="serviceErased" msgid="1288584695297200972">"Stizzà cun success."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Il pled-clav è nuncorrect."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI terminà."</string>
-    <string name="badPin" msgid="5085454289896032547">"Il code PIN vegl che Vus avais endatà è nuncorrect."</string>
-    <string name="badPuk" msgid="5702522162746042460">"Il PUK che Vus avais tippà è nuncorrect."</string>
-    <string name="mismatchPin" msgid="3695902225843339274">"Ils codes PIN che Vus avais endatà n\'èn betg identics."</string>
+    <!-- outdated translation 5085454289896032547 -->     <string name="badPin" msgid="9015277645546710014">"Il code PIN vegl che Vus avais endatà è nuncorrect."</string>
+    <!-- outdated translation 5702522162746042460 -->     <string name="badPuk" msgid="5487257647081132201">"Il PUK che Vus avais tippà è nuncorrect."</string>
+    <!-- outdated translation 3695902225843339274 -->     <string name="mismatchPin" msgid="609379054496863419">"Ils codes PIN che Vus avais endatà n\'èn betg identics."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Endatai in code PIN che cuntegna 4 fin 8 cifras."</string>
     <!-- no translation found for invalidPuk (8761456210898036513) -->
     <skip />
@@ -70,7 +70,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"La ID dal telefonader n\'è betg limitada tenor configuraziun predefinida. Proxim clom: limitada."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"La ID dal telefonader n\'è betg limitada tenor configuraziun predefinida. Proxim clom: betg limitada."</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Quest servetsch na vegn betg sustegnì."</string>
-    <string name="CLIRPermanent" msgid="5460892159398802465">"Il parameter per la ID dal telefonader na po betg vegnir modifitgà."</string>
+    <!-- outdated translation 5460892159398802465 -->     <string name="CLIRPermanent" msgid="3377371145926835671">"Il parameter per la ID dal telefonader na po betg vegnir modifitgà."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"L\'access limità è vegnì modifitgà."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Il servetsch da datas è bloccà."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Il servetsch da cloms d\'urgenza è bloccà."</string>
@@ -112,14 +112,14 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"La pagina d\'internet cuntegna ina errur."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Impussibel da chattar la URL."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Il schema d\'autentificaziun da la site na vegn betg sustegnì."</string>
+    <!-- outdated translation 2781440683514730227 -->     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Il schema d\'autentificaziun da la site na vegn betg sustegnì."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"L\'autentificaziun n\'è betg reussida."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"L\'autentificaziun cun agid dad in proxy server n\'è betg reussida."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Betg reussì da connectar cun il server."</string>
     <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"La communicaziun cun il server n\'è betg reussida. Empruvai pli tard anc ina giada."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Surpassà il temp cun connectar al server."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Questa pagina cuntegna memia blers renviaments da server."</string>
-    <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Quest protocol na vegn betg sustegnì."</string>
+    <!-- outdated translation 5257172771607996054 -->     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Quest protocol na vegn betg sustegnì."</string>
     <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"Impussibel da stabilir ina connexiun segira."</string>
     <string name="httpErrorBadUrl" msgid="6088183159988619736">"Impussibel dad avrir la pagina. La URL è nunvalida."</string>
     <string name="httpErrorFile" msgid="8250549644091165175">"Impussibel d\'acceder a la datoteca."</string>
@@ -144,10 +144,10 @@
     <skip />
     <!-- no translation found for shutdown_confirm (649792175242821353) -->
     <skip />
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <!-- no translation found for shutdown_confirm_question (2906544768881136183) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Utilisà sco ultim"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Naginas applicaziuns utilisadas dacurt"</string>
+    <!-- outdated translation 279702952298056674 -->     <string name="no_recent_tasks" msgid="8794906658732193473">"Naginas applicaziuns utilisadas dacurt"</string>
     <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opziuns dal telefon"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opziuns dal telefon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloccaziun dal visur"</string>
@@ -163,16 +163,16 @@
     <string name="safeMode" msgid="2788228061547930246">"Modus segirà"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servetschs che custan"</string>
-    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Permetta ad applicaziuns dad exequir acziuns che custan eventualmain."</string>
+    <!-- outdated translation 8193824940620517189 -->     <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"Permetta ad applicaziuns dad exequir acziuns che custan eventualmain."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Voss messadis"</string>
-    <string name="permgroupdesc_messages" msgid="7045736972019211994">"\"Leger e scriver Voss SMS, e-mails ed auters messadis.\""</string>
+    <!-- outdated translation 7045736972019211994 -->     <string name="permgroupdesc_messages" msgid="7821999071003699236">"\"Leger e scriver Voss SMS, e-mails ed auters messadis.\""</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vossas infurmaziuns persunalas"</string>
     <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Acceder directamain als contacts ed al chalender memorisà sin il telefonin."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Acceder directamain als contacts ed al chalender memorisà sin il telefonin."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vossa posiziun"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"suandar Vossa posiziun geografica"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Communicaziun rait"</string>
-    <string name="permgroupdesc_network" msgid="5035763698958415998">"Permetta ad applicaziuns l\'access a differentas funcziuns da la rait."</string>
+    <!-- outdated translation 5035763698958415998 -->     <string name="permgroupdesc_network" msgid="4917593670797570584">"Permetta ad applicaziuns l\'access a differentas funcziuns da la rait."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Voss contos"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Access als contos disponibels"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Cumonds da la hardware"</string>
@@ -182,379 +182,379 @@
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Utensils da sistem"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Access e controlla sin nivel datiers al sistem."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Utensils per sviluppaders"</string>
-    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Questas funcziunalitads èn mo previsas per ils sviluppaders dad applicaziuns."</string>
+    <!-- outdated translation 9056431193893809814 -->     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Questas funcziunalitads èn mo previsas per ils sviluppaders dad applicaziuns."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
     <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Access a la carta SD."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Access a la carta SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deactivar u modifitgar la trav da status"</string>
-    <string name="permdesc_statusBar" msgid="1365473595331989732">"Permetta a l\'applicaziun da deactivar l\'indicatur da status u agiuntar ed allontanar simbols dal sistem."</string>
+    <!-- outdated translation 1365473595331989732 -->     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permetta a l\'applicaziun da deactivar l\'indicatur da status u agiuntar ed allontanar simbols dal sistem."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"trav da status"</string>
-    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Permetta a l\'applicaziun dad esser la trav da status."</string>
+    <!-- outdated translation 4097605867643520920 -->     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permetta a l\'applicaziun dad esser la trav da status."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expander/reducir la trav da status"</string>
-    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Permetta a l\'applicaziun da mussar u zuppentar la trav da status."</string>
+    <!-- outdated translation 7088604400110768665 -->     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permetta a l\'applicaziun da mussar u zuppentar la trav da status."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"interceptar cloms sortints"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"\"Permetta ad ina applicaziun dad elavurar ils cloms sortints e da modifitgar il numer che duai vegnir cumponì. Applicaziuns donnegiusas pon uschia eventualmain survegliar, renviar u evitar cloms sortints.\""</string>
+    <!-- outdated translation 2228988201852654461 -->     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"\"Permetta ad ina applicaziun dad elavurar ils cloms sortints e da modifitgar il numer che duai vegnir cumponì. Applicaziuns donnegiusas pon uschia eventualmain survegliar, renviar u evitar cloms sortints.\""</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"retschaiver SMS"</string>
-    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Permetta a l\'applicaziun da retschaiver ed elavurar SMS. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
+    <!-- outdated translation 6298292335965966117 -->     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Permetta a l\'applicaziun da retschaiver ed elavurar SMS. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"retschaiver MMS"</string>
-    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Permetta a l\'applicaziun da retschaiver ed elavurar MMS. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
+    <!-- outdated translation 4563346832000174373 -->     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permetta a l\'applicaziun da retschaiver ed elavurar MMS. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
     <!-- no translation found for permlab_receiveEmergencyBroadcast (1803477660846288089) -->
     <skip />
-    <!-- no translation found for permdesc_receiveEmergencyBroadcast (7118393393716546131) -->
+    <!-- no translation found for permdesc_receiveEmergencyBroadcast (848524070262431974) -->
     <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"trametter messadis SMS"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"Permetta ad applicaziuns da trametter messadis SMS. Applicaziuns donnegiusas pon chaschunar custs cun trametter messadis senza As dumandar."</string>
+    <!-- outdated translation 1946540351763502120 -->     <string name="permdesc_sendSms" msgid="906546667507626156">"Permetta ad applicaziuns da trametter messadis SMS. Applicaziuns donnegiusas pon chaschunar custs cun trametter messadis senza As dumandar."</string>
     <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
     <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (3437759207020400204) -->
     <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"leger SMS u MMS"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Permetta ad ina applicaziun da leger ils SMS memorisads sin Voss telefonin u sin Vossa carta SIM. Applicaziuns donnegiusas legian uschia eventualmain Voss messadis confidenzials."</string>
-    <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Permetta ad ina applicaziun da leger ils SMS memorisads sin Voss telefonin u sin Vossa carta SIM. Applicaziuns donnegiusas legian uschia eventualmain Voss messadis confidenzials."</string>
+    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Permetta ad ina applicaziun da leger ils SMS memorisads sin Voss telefonin u sin Vossa carta SIM. Applicaziuns donnegiusas legian uschia eventualmain Voss messadis confidenzials."</string>
+    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Permetta ad ina applicaziun da leger ils SMS memorisads sin Voss telefonin u sin Vossa carta SIM. Applicaziuns donnegiusas legian uschia eventualmain Voss messadis confidenzials."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"modifitgar SMS u MMS"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Permetta ad ina applicaziun da modifitgar SMS memorisads sin Voss telefonin u Vossa carta SIM. Applicaziuns donnegiusas stizzan uschia eventualmain Voss messadis."</string>
-    <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Permetta ad ina applicaziun da modifitgar SMS memorisads sin Voss telefonin u Vossa carta SIM. Applicaziuns donnegiusas stizzan uschia eventualmain Voss messadis."</string>
+    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Permetta ad ina applicaziun da modifitgar SMS memorisads sin Voss telefonin u Vossa carta SIM. Applicaziuns donnegiusas stizzan uschia eventualmain Voss messadis."</string>
+    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permetta ad ina applicaziun da modifitgar SMS memorisads sin Voss telefonin u Vossa carta SIM. Applicaziuns donnegiusas stizzan uschia eventualmain Voss messadis."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"retschaiver messadis WAP"</string>
-    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Permetta a l\'applicaziun da retschaiver ed elavurar messadis WAP. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"recuperaziun da las applicaziuns exequidas"</string>
-    <string name="permdesc_getTasks" msgid="7048711358713443341">"Permetta a l\'applicaziun da recuperar infurmaziuns davart incumbensas che vegnan exequidas u èn gist vegnidas exequidas. Applicaziuns donnegiusas pon uschia obtegnair infurmaziuns privatas concernent autras applicaziuns."</string>
-    <string name="permlab_reorderTasks" msgid="5669588525059921549">"reorganisar las applicaziuns che vegnan exequidas"</string>
-    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Permetta ad ina applicaziun da spustar las incumbensas en il fund davant u en il fund davos. Applicaziuns donnegiusas pon sa mussar en il fund davant senza Vossa autorisaziun."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <!-- outdated translation 5979623826128082171 -->     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Permetta a l\'applicaziun da retschaiver ed elavurar messadis WAP. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
+    <!-- outdated translation 5005277531132573353 -->     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperaziun da las applicaziuns exequidas"</string>
+    <!-- outdated translation 7048711358713443341 -->     <string name="permdesc_getTasks" msgid="6608159250520381359">"Permetta a l\'applicaziun da recuperar infurmaziuns davart incumbensas che vegnan exequidas u èn gist vegnidas exequidas. Applicaziuns donnegiusas pon uschia obtegnair infurmaziuns privatas concernent autras applicaziuns."</string>
+    <!-- outdated translation 5669588525059921549 -->     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reorganisar las applicaziuns che vegnan exequidas"</string>
+    <!-- outdated translation 126252774270522835 -->     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permetta ad ina applicaziun da spustar las incumbensas en il fund davant u en il fund davos. Applicaziuns donnegiusas pon sa mussar en il fund davant senza Vossa autorisaziun."</string>
+    <!-- no translation found for permlab_removeTasks (6821513401870377403) -->
     <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <!-- no translation found for permdesc_removeTasks (1000226123143185094) -->
     <skip />
-    <string name="permlab_setDebugApp" msgid="4339730312925176742">"activar il debugging da l\'applicaziun"</string>
-    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Permetta ad ina applicaziun dad activar il debugging per autras applicaziuns. Applicaziuns donnegiusas pon uschia serrar autras applicaziuns."</string>
+    <!-- outdated translation 4339730312925176742 -->     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activar il debugging da l\'applicaziun"</string>
+    <!-- outdated translation 5584310661711990702 -->     <string name="permdesc_setDebugApp" msgid="6215654419903651172">"Permetta ad ina applicaziun dad activar il debugging per autras applicaziuns. Applicaziuns donnegiusas pon uschia serrar autras applicaziuns."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modifitgar ils parameters da la UI"</string>
-    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Permetta ad ina applicaziun da modifitgar la configuraziun actuala (per exempel la grondezza da la scrittira ed ils parameters regiunals)."</string>
+    <!-- outdated translation 3465121501528064399 -->     <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"Permetta ad ina applicaziun da modifitgar la configuraziun actuala (per exempel la grondezza da la scrittira ed ils parameters regiunals)."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activar il modus dad auto"</string>
-    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Permetta ad ina applicaziun dad activar il modus dad auto."</string>
+    <!-- outdated translation 5673461159384850628 -->     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permetta ad ina applicaziun dad activar il modus dad auto."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"interrumper ils process en il fund davos"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Permetta ad ina applicaziun da serrar process en il fund davos dad autras applicaziuns era en cas da memoria suffizienta."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"serrar autras applicaziuns cun forza"</string>
-    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Permetta ad ina applicaziun da sfurzar autras applicaziuns da serrar."</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"serrar l\'applicaziun cun forza"</string>
-    <string name="permdesc_forceBack" msgid="6534109744159919013">"Permetta ad ina applicaziun da serrar tut las activitads che vegnan exequidas en il fund davant e da las spustar en il fund davos. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 2908829602869383753 -->     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Permetta ad ina applicaziun da serrar process en il fund davos dad autras applicaziuns era en cas da memoria suffizienta."</string>
+    <!-- outdated translation 1447830113260156236 -->     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"serrar autras applicaziuns cun forza"</string>
+    <!-- outdated translation 7263036616161367402 -->     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Permetta ad ina applicaziun da sfurzar autras applicaziuns da serrar."</string>
+    <!-- outdated translation 1804196839880393631 -->     <string name="permlab_forceBack" msgid="652935204072584616">"serrar l\'applicaziun cun forza"</string>
+    <!-- outdated translation 6534109744159919013 -->     <string name="permdesc_forceBack" msgid="3892295830419513623">"Permetta ad ina applicaziun da serrar tut las activitads che vegnan exequidas en il fund davant e da las spustar en il fund davos. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"verifitgar il status intern dal sistem"</string>
-    <string name="permdesc_dump" msgid="2198776174276275220">"\"Permetta ad ina applicaziun da vesair il status intern dal sistem. Applicaziuns donnegiusas pon uschia obtegnair numerusas infurmaziuns privatas u segiradas, a las qualas ellas na dastgassan normalmain mai acceder.\""</string>
+    <!-- outdated translation 2198776174276275220 -->     <string name="permdesc_dump" msgid="1778299088692290329">"\"Permetta ad ina applicaziun da vesair il status intern dal sistem. Applicaziuns donnegiusas pon uschia obtegnair numerusas infurmaziuns privatas u segiradas, a las qualas ellas na dastgassan normalmain mai acceder.\""</string>
     <!-- no translation found for permlab_retrieve_window_content (8022588608994589938) -->
     <skip />
-    <!-- no translation found for permdesc_retrieve_window_content (3390962289797156152) -->
+    <!-- no translation found for permdesc_retrieve_window_content (3193269069469700265) -->
     <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"serrar parzialmain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Metta l\'administratur dad activitads en in stadi da pausa. El na vegn betg serrà dal tut."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar il midar tranter applicaziuns"</string>
-    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Impedescha che l\'utilisader midia ad ina autra applicaziun."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"survegliar e controllar l\'aviar dad applicaziuns"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Permetta ad ina applicaziun da survegliar e controllar l\'aviar dad activitads dal sistem. Applicaziuns donnegiusas pon uschia periclitar l\'entir sistem. Questa permissiun è mo previsa per process da svilup e mai per il diever normal dal telefonin."</string>
+    <!-- outdated translation 3857886086919033794 -->     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Impedescha che l\'utilisader midia ad ina autra applicaziun."</string>
+    <!-- outdated translation 7811586187574696296 -->     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"survegliar e controllar l\'aviar dad applicaziuns"</string>
+    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permetta ad ina applicaziun da survegliar e controllar l\'aviar dad activitads dal sistem. Applicaziuns donnegiusas pon uschia periclitar l\'entir sistem. Questa permissiun è mo previsa per process da svilup e mai per il diever normal dal telefonin."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"trametter in broadcast senza pachet"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Permetta ad ina applicaziun da trametter in avis cura ch\'in pachet d\'applicaziun è vegnì stizzà. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per interrumper l\'execuziun dad autras applicaziuns."</string>
+    <!-- outdated translation 3453286591439891260 -->     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Permetta ad ina applicaziun da trametter in avis cura ch\'in pachet d\'applicaziun è vegnì stizzà. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per interrumper l\'execuziun dad autras applicaziuns."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"trametter in broadcast retschavì per SMS"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Permetta ad ina applicaziun da trametter in avis cura ch\'in messadi vegn retschavì. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per dar da crair ch\'in messadi saja arrivà."</string>
+    <!-- outdated translation 9122419277306740155 -->     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permetta ad ina applicaziun da trametter in avis cura ch\'in messadi vegn retschavì. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per dar da crair ch\'in messadi saja arrivà."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"trametter in broadcast retschavì da WAP-PUSH"</string>
-    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Permetta ad ina applicaziun da trametter in avis cura ch\'in messadi WAP PUSH vegn retschavì. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per dar da crair ch\'in MMS saja arrivà u per remplazzar il cuntegn da mintga pagina d\'internet cun datas donnegiusas."</string>
+    <!-- outdated translation 3955303669461378091 -->     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permetta ad ina applicaziun da trametter in avis cura ch\'in messadi WAP PUSH vegn retschavì. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per dar da crair ch\'in MMS saja arrivà u per remplazzar il cuntegn da mintga pagina d\'internet cun datas donnegiusas."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitar il dumber maximal da process exequids"</string>
-    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Permetta ad ina applicaziun da controllar il dumber maximal da process che pon vegnir exequids a medem temp. Betg previs per applicaziuns normalas."</string>
-    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"serrar tut las applicaziuns en il fund davos"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Permetta ad ina applicaziun da controllar schebain activitads vegnan adina terminadas sch\'ellas vegnan stuschadas en il fund davos. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 7824786028557379539 -->     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permetta ad ina applicaziun da controllar il dumber maximal da process che pon vegnir exequids a medem temp. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 5342837862439543783 -->     <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"serrar tut las applicaziuns en il fund davos"</string>
+    <!-- outdated translation 8773936403987091620 -->     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Permetta ad ina applicaziun da controllar schebain activitads vegnan adina terminadas sch\'ellas vegnan stuschadas en il fund davos. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"modifitgar las datas da l\'accu"</string>
-    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Permetta da modifitgar las datas statisticas da l\'accu. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 5847319823772230560 -->     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Permetta da modifitgar las datas statisticas da l\'accu. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controllar las copias da segirezza e la restauraziun dal sistem"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"Permetta a l\'applicaziun da controllar il mecanissem da copias da segirezza e da restauraziun dal sistem. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 4837493065154256525 -->     <string name="permdesc_backup" msgid="6912230525140589891">"Permetta a l\'applicaziun da controllar il mecanissem da copias da segirezza e da restauraziun dal sistem. Betg previs per applicaziuns normalas."</string>
     <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
     <skip />
-    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <!-- no translation found for permdesc_confirm_full_backup (1748762171637699562) -->
     <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"mussar fanestras betg autorisadas"</string>
-    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permetta da crear fanestras destinadas per l\'utilisaziun da l\'interfatscha d\'utilisader interna dal sistem. Questa funcziun n\'è betg previsa per applicaziuns normalas."</string>
+    <!-- outdated translation 5895082268284998469 -->     <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"Permetta da crear fanestras destinadas per l\'utilisaziun da l\'interfatscha d\'utilisader interna dal sistem. Questa funcziun n\'è betg previsa per applicaziuns normalas."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"mussar avertiments dal sistem"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Permetta ad ina applicaziun da mussar fanestras cun avertiments dal sistem. Applicaziuns donnegiusas pon uschia occupar l\'entir visur dal telefonin."</string>
+    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Permetta ad ina applicaziun da mussar fanestras cun avertiments dal sistem. Applicaziuns donnegiusas pon uschia occupar l\'entir visur dal telefonin."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modifitgar la sveltezza globala da las animaziuns"</string>
-    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Permetta ad ina applicaziun da modifitgar da tut temp la sveltezza generala da las animaziuns (per las pudair far ir pli svelt u pli plaun)."</string>
-    <string name="permlab_manageAppTokens" msgid="17124341698093865">"administrar tokens dad applicaziuns"</string>
-    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Permetta ad applicaziuns da crear ed administrar lur agens tokens cun ignorar lur urden da zavrar Z normal. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 7181522138912391988 -->     <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Permetta ad ina applicaziun da modifitgar da tut temp la sveltezza generala da las animaziuns (per las pudair far ir pli svelt u pli plaun)."</string>
+    <!-- outdated translation 17124341698093865 -->     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"administrar tokens dad applicaziuns"</string>
+    <!-- outdated translation 977127907524195988 -->     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permetta ad applicaziuns da crear ed administrar lur agens tokens cun ignorar lur urden da zavrar Z normal. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"smatgar tastas e tastas da controlla"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Permetta ad ina applicaziun da furnir ses agens cumonds (tastas smatgadas etc.) ad autras applicaziuns. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per surpigliar la controlla da Voss telefonin."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Permetta ad ina applicaziun da furnir ses agens cumonds (tastas smatgadas etc.) ad autras applicaziuns. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per surpigliar la controlla da Voss telefonin."</string>
+    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permetta ad ina applicaziun da furnir ses agens cumonds (tastas smatgadas etc.) ad autras applicaziuns. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per surpigliar la controlla da Voss telefonin."</string>
+    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permetta ad ina applicaziun da furnir ses agens cumonds (tastas smatgadas etc.) ad autras applicaziuns. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per surpigliar la controlla da Voss telefonin."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"registrar endataziuns sur la tastatura ed acziuns"</string>
-    <string name="permdesc_readInputState" msgid="5132879321450325445">"\"Permetta ad ina applicaziun dad identifitgar las tastas che Vus smatgais, era durant l\'utilisaziun dad in auter program (durant l\'endataziun dad in pled-clav, per exempel). Applicaziuns normalas na duessan betg avair access a questa funcziun.\""</string>
+    <!-- outdated translation 5132879321450325445 -->     <string name="permdesc_readInputState" msgid="8387754901688728043">"\"Permetta ad ina applicaziun dad identifitgar las tastas che Vus smatgais, era durant l\'utilisaziun dad in auter program (durant l\'endataziun dad in pled-clav, per exempel). Applicaziuns normalas na duessan betg avair access a questa funcziun.\""</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"associar cun ina metoda d\'endataziun"</string>
-    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 3734838321027317228 -->     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
     <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
     <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <!-- no translation found for permdesc_bindTextService (8151968910973998670) -->
     <skip />
     <!-- no translation found for permlab_bindVpnService (4708596021161473255) -->
     <skip />
-    <!-- no translation found for permdesc_bindVpnService (6011554199384584151) -->
+    <!-- no translation found for permdesc_bindVpnService (2067845564581693905) -->
     <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sa fixar vid in fund davos"</string>
-    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 5287754520361915347 -->     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
     <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <!-- no translation found for permdesc_bindRemoteViews (4717987810137692572) -->
     <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permetta al possessur da trametter intenziuns a l\'administratur dal apparat periferic. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 8714424333082216979 -->     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permetta al possessur da trametter intenziuns a l\'administratur dal apparat periferic. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"midar l\'orientaziun dal visur"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permetta a l\'applicaziun da midar da tut temp la orientaziun dal visur. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 6335814461615851863 -->     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permetta a l\'applicaziun da midar da tut temp la orientaziun dal visur. Betg previs per applicaziuns normalas."</string>
     <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
     <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <!-- no translation found for permdesc_setPointerSpeed (6866563234274104233) -->
     <skip />
-    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"trametter signals Linux a las applicaziuns"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permetta a l\'applicaziun da pretender ch\'il signal furnì vegnia tramess a tut ils process persistents."</string>
-    <string name="permlab_persistentActivity" msgid="8659652042401085862">"exequir permanentamain applicaziuns"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Permetta ad ina applicaziun da render persistent atgnas cumponentas per ch\'il sistem na po betg utilisar questas per autras applicaziuns."</string>
-    <string name="permlab_deletePackages" msgid="3343439331576348805">"stizzar applicaziuns"</string>
-    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Permetta ad ina applicaziun da stizzar pachets da datas Android. Applicaziuns donnegiusas pon utilisar questa funcziun per stizzar applicaziuns impurtantas."</string>
-    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"stizzar datas dad ina autra applicaziun"</string>
-    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Permetta ad ina applicaziun da stizzar las datas da l\'utilisader."</string>
-    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"stizzar ils caches dad autras applicaziuns"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Permetta ad ina applicaziun da stizzar las datotecas en il cache."</string>
-    <string name="permlab_getPackageSize" msgid="4799785352306641460">"evaluar la capacitad da memoria occupada da l\'applicaziun"</string>
-    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"\"Permetta ad ina applicaziun dad obtegnair la grondezza dal code, da las datas e dal cache.\""</string>
-    <string name="permlab_installPackages" msgid="335800214119051089">"installar directamain applicaziuns"</string>
-    <string name="permdesc_installPackages" msgid="526669220850066132">"Permetta ad ina applicaziun dad installar pachets novs u actualisads dad Android. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per agiuntar novas applicaziuns che han tut las permissiuns pussaivlas."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"stizzar las datas dal cache da tut las applicaziuns"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Permetta ad ina applicaziun da dar liber capacitad da memorisar dal telefonin cun stizzar datotecas en l\'ordinatur da cache da l\'applicaziun. L\'access è per regla limità a process da sistem."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Permetta ad ina applicaziun da dar liber capacitad da memorisar dal telefonin cun stizzar datotecas en l\'ordinatur da cache da l\'applicaziun. L\'access è per regla limità a process da sistem."</string>
-    <string name="permlab_movePackage" msgid="728454979946503926">"Spustar resursas d\'applicaziun"</string>
-    <string name="permdesc_movePackage" msgid="6323049291923925277">"Permetta ad ina applicaziun da spustar resursas d\'applicaziun dad in medium intern ad in medium extern e viceversa."</string>
+    <!-- outdated translation 4255467255488653854 -->     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"trametter signals Linux a las applicaziuns"</string>
+    <!-- outdated translation 3565530463215015289 -->     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Permetta a l\'applicaziun da pretender ch\'il signal furnì vegnia tramess a tut ils process persistents."</string>
+    <!-- outdated translation 8659652042401085862 -->     <string name="permlab_persistentActivity" msgid="8841113627955563938">"exequir permanentamain applicaziuns"</string>
+    <!-- outdated translation 5037199778265006008 -->     <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Permetta ad ina applicaziun da render persistent atgnas cumponentas per ch\'il sistem na po betg utilisar questas per autras applicaziuns."</string>
+    <!-- outdated translation 3343439331576348805 -->     <string name="permlab_deletePackages" msgid="184385129537705938">"stizzar applicaziuns"</string>
+    <!-- outdated translation 3634943677518723314 -->     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Permetta ad ina applicaziun da stizzar pachets da datas Android. Applicaziuns donnegiusas pon utilisar questa funcziun per stizzar applicaziuns impurtantas."</string>
+    <!-- outdated translation 2192134353540277878 -->     <string name="permlab_clearAppUserData" msgid="274109191845842756">"stizzar datas dad ina autra applicaziun"</string>
+    <!-- outdated translation 7546345080434325456 -->     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Permetta ad ina applicaziun da stizzar las datas da l\'utilisader."</string>
+    <!-- outdated translation 1518556602634276725 -->     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"stizzar ils caches dad autras applicaziuns"</string>
+    <!-- outdated translation 2283074077168165971 -->     <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Permetta ad ina applicaziun da stizzar las datotecas en il cache."</string>
+    <!-- outdated translation 4799785352306641460 -->     <string name="permlab_getPackageSize" msgid="7472921768357981986">"evaluar la capacitad da memoria occupada da l\'applicaziun"</string>
+    <!-- outdated translation 5557253039670753437 -->     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"\"Permetta ad ina applicaziun dad obtegnair la grondezza dal code, da las datas e dal cache.\""</string>
+    <!-- outdated translation 335800214119051089 -->     <string name="permlab_installPackages" msgid="2199128482820306924">"installar directamain applicaziuns"</string>
+    <!-- outdated translation 526669220850066132 -->     <string name="permdesc_installPackages" msgid="5628530972548071284">"Permetta ad ina applicaziun dad installar pachets novs u actualisads dad Android. Applicaziuns donnegiusas pon utilisar questa funcziunalitad per agiuntar novas applicaziuns che han tut las permissiuns pussaivlas."</string>
+    <!-- outdated translation 4747698311163766540 -->     <string name="permlab_clearAppCache" msgid="7487279391723526815">"stizzar las datas dal cache da tut las applicaziuns"</string>
+    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"Permetta ad ina applicaziun da dar liber capacitad da memorisar dal telefonin cun stizzar datotecas en l\'ordinatur da cache da l\'applicaziun. L\'access è per regla limità a process da sistem."</string>
+    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"Permetta ad ina applicaziun da dar liber capacitad da memorisar dal telefonin cun stizzar datotecas en l\'ordinatur da cache da l\'applicaziun. L\'access è per regla limità a process da sistem."</string>
+    <!-- outdated translation 728454979946503926 -->     <string name="permlab_movePackage" msgid="3289890271645921411">"Spustar resursas d\'applicaziun"</string>
+    <!-- outdated translation 6323049291923925277 -->     <string name="permdesc_movePackage" msgid="319562217778244524">"Permetta ad ina applicaziun da spustar resursas d\'applicaziun dad in medium intern ad in medium extern e viceversa."</string>
     <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"leger datotecas da protocol dal sistem"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permetta ad ina applicaziun da leger las differentas datotecas da protocol dal sistem. Quai pussibilitescha dad obtegnair infurmaziuns generalas davart il diever da Voss telefon che na duessan betg cuntegnair datas persunalas u privatas."</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permetta ad ina applicaziun da leger las differentas datotecas da protocol dal sistem. Quai pussibilitescha dad obtegnair infurmaziuns generalas davart il diever da Voss telefon che na duessan betg cuntegnair datas persunalas u privatas."</string>
+    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permetta ad ina applicaziun da leger las differentas datotecas da protocol dal sistem. Quai pussibilitescha dad obtegnair infurmaziuns generalas davart il diever da Voss telefon che na duessan betg cuntegnair datas persunalas u privatas."</string>
+    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permetta ad ina applicaziun da leger las differentas datotecas da protocol dal sistem. Quai pussibilitescha dad obtegnair infurmaziuns generalas davart il diever da Voss telefon che na duessan betg cuntegnair datas persunalas u privatas."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
-    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permetta ad ina applicaziun da leger e modifitgar tut ils elements ella gruppa da diagnosa (per exempel las datotecas en /dev). Quai po avair consequenzas negativas per la stabilitad e la segirezza dal sistem e duess vegnir permess mo a programs da diagnosa specifics per la hardware mess a disposiziun dal producider u dal gestiunari da la rait."</string>
-    <string name="permlab_changeComponentState" msgid="79425198834329406">"activar u deactivar cumponentas dad applicaziuns"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"\"Permetta ad ina applicaziun dad activar u deactivar cumponentas dad autras applicaziuns. Applicaziuns donnegiusas pon uschia deactivar funcziuns impurtantas dal telefonin. Faschai attenziun cun permetter l\'access a questa funcziun perquai ch\'ella permetta da render nunduvrablas, incoerentas ed instabilas las cumponentas da las applicaziuns.\""</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"\"Permetta ad ina applicaziun dad activar u deactivar cumponentas dad autras applicaziuns. Applicaziuns donnegiusas pon uschia deactivar funcziuns impurtantas dal telefonin. Faschai attenziun cun permetter l\'access a questa funcziun perquai ch\'ella permetta da render nunduvrablas, incoerentas ed instabilas las cumponentas da las applicaziuns.\""</string>
-    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"definir las applicaziuns preferidas"</string>
-    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Permetta ad ina applicaziun da modifitgar Vossas applicaziuns preferidas. Applicaziuns donnegiusas pon uschia remplazzar en il zuppà applicaziuns che vegnan gist exequidas ed imitar Vossas applicaziuns existentas cun la finamira da rimnar datas persunalas da Vus."</string>
+    <!-- outdated translation 3121238373951637049 -->     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permetta ad ina applicaziun da leger e modifitgar tut ils elements ella gruppa da diagnosa (per exempel las datotecas en /dev). Quai po avair consequenzas negativas per la stabilitad e la segirezza dal sistem e duess vegnir permess mo a programs da diagnosa specifics per la hardware mess a disposiziun dal producider u dal gestiunari da la rait."</string>
+    <!-- outdated translation 79425198834329406 -->     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activar u deactivar cumponentas dad applicaziuns"</string>
+    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"\"Permetta ad ina applicaziun dad activar u deactivar cumponentas dad autras applicaziuns. Applicaziuns donnegiusas pon uschia deactivar funcziuns impurtantas dal telefonin. Faschai attenziun cun permetter l\'access a questa funcziun perquai ch\'ella permetta da render nunduvrablas, incoerentas ed instabilas las cumponentas da las applicaziuns.\""</string>
+    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"\"Permetta ad ina applicaziun dad activar u deactivar cumponentas dad autras applicaziuns. Applicaziuns donnegiusas pon uschia deactivar funcziuns impurtantas dal telefonin. Faschai attenziun cun permetter l\'access a questa funcziun perquai ch\'ella permetta da render nunduvrablas, incoerentas ed instabilas las cumponentas da las applicaziuns.\""</string>
+    <!-- outdated translation 3393305202145172005 -->     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"definir las applicaziuns preferidas"</string>
+    <!-- outdated translation 760008293501937546 -->     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permetta ad ina applicaziun da modifitgar Vossas applicaziuns preferidas. Applicaziuns donnegiusas pon uschia remplazzar en il zuppà applicaziuns che vegnan gist exequidas ed imitar Vossas applicaziuns existentas cun la finamira da rimnar datas persunalas da Vus."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modifitgar parameters generals dal sistem"</string>
-    <string name="permdesc_writeSettings" msgid="838789419871034696">"Permetta ad ina applicaziun da modifitgar las datas dals parameters dal sistem. Applicaziuns donnegiusas pon utilisar questa funcziun per donnegiar la configuraziun da Voss sistem."</string>
+    <!-- outdated translation 838789419871034696 -->     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Permetta ad ina applicaziun da modifitgar las datas dals parameters dal sistem. Applicaziuns donnegiusas pon utilisar questa funcziun per donnegiar la configuraziun da Voss sistem."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"modifitgar ils parameters da segirezza dal sistem"</string>
-    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Permetta ad ina applicaziun da modifitgar las datas da configuraziun da segirezza dal sistem. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 5497873143539034724 -->     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Permetta ad ina applicaziun da modifitgar las datas da configuraziun da segirezza dal sistem. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"modifitgar Google Services Map"</string>
-    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Permetta ad ina applicaziun da modifitgar la charta da servetschs Google. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 6602362746516676175 -->     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Permetta ad ina applicaziun da modifitgar la charta da servetschs Google. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"aviar automaticamain suenter ch\'il sistem è avià"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"\"Permetta ad ina applicaziun dad aviar sasez suenter ch\'il sistem è vegnì avià. Qua tras po l\'aviar dal telefonin durar pli ditg, ultra da quai po l\'entir sistem vegnir retardà cun l\'activitad permanenta da l\'applicaziun.\""</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"\"Permetta ad ina applicaziun dad aviar sasez suenter ch\'il sistem è vegnì avià. Qua tras po l\'aviar dal telefonin durar pli ditg, ultra da quai po l\'entir sistem vegnir retardà cun l\'activitad permanenta da l\'applicaziun.\""</string>
+    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"\"Permetta ad ina applicaziun dad aviar sasez suenter ch\'il sistem è vegnì avià. Qua tras po l\'aviar dal telefonin durar pli ditg, ultra da quai po l\'entir sistem vegnir retardà cun l\'activitad permanenta da l\'applicaziun.\""</string>
+    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"\"Permetta ad ina applicaziun dad aviar sasez suenter ch\'il sistem è vegnì avià. Qua tras po l\'aviar dal telefonin durar pli ditg, ultra da quai po l\'entir sistem vegnir retardà cun l\'activitad permanenta da l\'applicaziun.\""</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"trametter in broadcast permanent"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Permetta ad ina applicaziun da trametter broadcasts persistents che na sa serran betg a la fin dal broadcast. Applicaziuns donnegiusas pon uschia render plaun ed instabil il telefonin cun occupar memia blera memoria."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Permetta ad ina applicaziun da trametter broadcasts persistents che na sa serran betg a la fin dal broadcast. Applicaziuns donnegiusas pon uschia render plaun ed instabil il telefonin cun occupar memia blera memoria."</string>
+    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permetta ad ina applicaziun da trametter broadcasts persistents che na sa serran betg a la fin dal broadcast. Applicaziuns donnegiusas pon uschia render plaun ed instabil il telefonin cun occupar memia blera memoria."</string>
+    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permetta ad ina applicaziun da trametter broadcasts persistents che na sa serran betg a la fin dal broadcast. Applicaziuns donnegiusas pon uschia render plaun ed instabil il telefonin cun occupar memia blera memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"leger las datas da contact"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Permetta ad ina applicaziun da leger tut las datas da contacts (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter Vossas datas ad autras persunas."</string>
-    <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Permetta ad ina applicaziun da leger tut las datas da contacts (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter Vossas datas ad autras persunas."</string>
+    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Permetta ad ina applicaziun da leger tut las datas da contacts (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter Vossas datas ad autras persunas."</string>
+    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Permetta ad ina applicaziun da leger tut las datas da contacts (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter Vossas datas ad autras persunas."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"scriver datas da contact"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permetta ad ina applicaziun da modifitgar tut las datas da contact (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per stizzar u modifitgar Vossas datas da contact."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permetta ad ina applicaziun da modifitgar tut las datas da contact (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per stizzar u modifitgar Vossas datas da contact."</string>
+    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permetta ad ina applicaziun da modifitgar tut las datas da contact (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per stizzar u modifitgar Vossas datas da contact."</string>
+    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permetta ad ina applicaziun da modifitgar tut las datas da contact (adressas) memorisadas sin Voss telefonin. Applicaziuns donnegiusas pon utilisar questa funcziun per stizzar u modifitgar Vossas datas da contact."</string>
     <!-- no translation found for permlab_readProfile (6824681438529842282) -->
     <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <!-- no translation found for permdesc_readProfile (94520753797630679) -->
     <skip />
     <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
     <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <!-- no translation found for permdesc_writeProfile (4637366723793045603) -->
     <skip />
     <!-- no translation found for permlab_readSocialStream (1268920956152419170) -->
     <skip />
-    <!-- no translation found for permdesc_readSocialStream (6619997662735851111) -->
+    <!-- no translation found for permdesc_readSocialStream (3419050808547335320) -->
     <skip />
     <!-- no translation found for permlab_writeSocialStream (3504179222493235645) -->
     <skip />
-    <!-- no translation found for permdesc_writeSocialStream (2689083745826002521) -->
+    <!-- no translation found for permdesc_writeSocialStream (3496277176955721451) -->
     <skip />
     <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"leger eveniments da chalender"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permetta ad ina applicaziun da leger tut ils eveniments da chalender memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia trametter Voss eveniments da chalender ad autras persunas."</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permetta ad ina applicaziun da leger tut ils eveniments da chalender memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia trametter Voss eveniments da chalender ad autras persunas."</string>
+    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Permetta ad ina applicaziun da leger tut ils eveniments da chalender memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia trametter Voss eveniments da chalender ad autras persunas."</string>
+    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Permetta ad ina applicaziun da leger tut ils eveniments da chalender memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia trametter Voss eveniments da chalender ad autras persunas."</string>
     <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"agiuntar u modifitgar eveniments en il chalender e trametter e-mails als envidads"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Permetta ad ina applicaziun dad agiuntar u modifitgar eveniments en Voss chalender che pon trametter e-mails ad envidads. Applicaziuns donnegiusas pon uschia stizzar u modifitgar las datas en Voss chalender u trametter e-mails ad envidads."</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Permetta ad ina applicaziun dad agiuntar u modifitgar eveniments en Voss chalender che pon trametter e-mails ad envidads. Applicaziuns donnegiusas pon uschia stizzar u modifitgar las datas en Voss chalender u trametter e-mails ad envidads."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"creaziun da funtaunas da posiziun fictivas per motivs da test"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Permetta da crear funtaunas da localisaziun fictivas per motivs da test. Applicaziuns donnegiusas pon uschia remplazzar la posiziun ed il status returnà da las vairas funtaunas sco GPS u Voss gestiunari da la rait."</string>
+    <!-- outdated translation 7648286063459727252 -->     <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Permetta da crear funtaunas da localisaziun fictivas per motivs da test. Applicaziuns donnegiusas pon uschia remplazzar la posiziun ed il status returnà da las vairas funtaunas sco GPS u Voss gestiunari da la rait."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"access als cumonds supplementars da purschiders da posiziuns geograficas"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Permetta d\'acceder a cumonds supplementars da purschiders da posiziuns geograficas. Applicaziuns donnegiusas pon uschia eventualmain disturbar il funcziunament da GPS u autras funtaunas da localisaziun geografica."</string>
+    <!-- outdated translation 1948144701382451721 -->     <string name="permdesc_accessLocationExtraCommands" msgid="6737736970602176133">"Permetta d\'acceder a cumonds supplementars da purschiders da posiziuns geograficas. Applicaziuns donnegiusas pon uschia eventualmain disturbar il funcziunament da GPS u autras funtaunas da localisaziun geografica."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permetter l\'installaziun d\'in purschider da servetschs da localisaziun"</string>
-    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Crear funtaunas da localisaziun fictivas per motivs da test. Applicaziuns donnegiusas pon uschia remplazzar la posiziun ed il status returnads da las funtaunas vairas sco GPS u Voss gestiunari da la rait u survegliar Vossa posiziun geografica e la transmetter ad ina funtauna externa."</string>
+    <!-- outdated translation 5449175116732002106 -->     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Crear funtaunas da localisaziun fictivas per motivs da test. Applicaziuns donnegiusas pon uschia remplazzar la posiziun ed il status returnads da las funtaunas vairas sco GPS u Voss gestiunari da la rait u survegliar Vossa posiziun geografica e la transmetter ad ina funtauna externa."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"posiziun exacta (GPS)"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Permetta d\'acceder a funtaunas da localisaziun exactas sco GPS (Global Positioning System) sche in tal è disponibel. Applicaziuns donnegiusas pon uschia identifitgar Vossa posiziun geografica e consumar energia supplementara da l\'accu."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Permetta d\'acceder a funtaunas da localisaziun exactas sco GPS (Global Positioning System) sche in tal è disponibel. Applicaziuns donnegiusas pon uschia identifitgar Vossa posiziun geografica e consumar energia supplementara da l\'accu."</string>
+    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Permetta d\'acceder a funtaunas da localisaziun exactas sco GPS (Global Positioning System) sche in tal è disponibel. Applicaziuns donnegiusas pon uschia identifitgar Vossa posiziun geografica e consumar energia supplementara da l\'accu."</string>
+    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Permetta d\'acceder a funtaunas da localisaziun exactas sco GPS (Global Positioning System) sche in tal è disponibel. Applicaziuns donnegiusas pon uschia identifitgar Vossa posiziun geografica e consumar energia supplementara da l\'accu."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"Posiziun geografica approximativa (sin basa da la rait)"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"\"Acceda a funtaunas approximativas da localisaziun (per exempel bancas da datas da raits mobilas) per determinar la posiziun geografica dal telefonin, sche questa opziun è disponibla. Applicaziuns donnegiusas pon utilisar questa funcziun per vegnir a savair nua che Vus sa chattais circa.\""</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"\"Acceda a funtaunas approximativas da localisaziun (per exempel bancas da datas da raits mobilas) per determinar la posiziun geografica dal telefonin, sche questa opziun è disponibla. Applicaziuns donnegiusas pon utilisar questa funcziun per vegnir a savair nua che Vus sa chattais circa.\""</string>
+    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"\"Acceda a funtaunas approximativas da localisaziun (per exempel bancas da datas da raits mobilas) per determinar la posiziun geografica dal telefonin, sche questa opziun è disponibla. Applicaziuns donnegiusas pon utilisar questa funcziun per vegnir a savair nua che Vus sa chattais circa.\""</string>
+    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"\"Acceda a funtaunas approximativas da localisaziun (per exempel bancas da datas da raits mobilas) per determinar la posiziun geografica dal telefonin, sche questa opziun è disponibla. Applicaziuns donnegiusas pon utilisar questa funcziun per vegnir a savair nua che Vus sa chattais circa.\""</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"access a SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Permetta ad ina applicaziun dad utilisar las funcziuns SurfaceFlinger datiers al nivel dal sistem."</string>
+    <!-- outdated translation 6805241830020733025 -->     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permetta ad ina applicaziun dad utilisar las funcziuns SurfaceFlinger datiers al nivel dal sistem."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leger il paraculp da frame"</string>
-    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Permetta ad ina applicaziun da leger il cuntegn dal paraculp da frame."</string>
+    <!-- outdated translation 5777679658669057819 -->     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permetta ad ina applicaziun da leger il cuntegn dal paraculp da frame."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifitgar Voss parameters audio"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Permetta a l\'applicaziun da modifitgar ils parameters generals dad audio (per exempel il volumen e routing)."</string>
+    <!-- outdated translation 5793461287365991922 -->     <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"Permetta a l\'applicaziun da modifitgar ils parameters generals dad audio (per exempel il volumen e routing)."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"registrar audio"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Permetta a l\'applicaziun dad acceder a la via d\'access per registraziuns dad audio."</string>
+    <!-- outdated translation 6493228261176552356 -->     <string name="permdesc_recordAudio" msgid="2387462233976248635">"Permetta a l\'applicaziun dad acceder a la via d\'access per registraziuns dad audio."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografar e registrar videos"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"Permetta a l\'applicaziun da fotografar e da registrar videos cun la camera. Uschia po l\'applicaziun rimnar da tut temp maletgs fatgs cun la camera."</string>
+    <!-- outdated translation 6004878235852154239 -->     <string name="permdesc_camera" msgid="1507407407002492176">"Permetta a l\'applicaziun da fotografar e da registrar videos cun la camera. Uschia po l\'applicaziun rimnar da tut temp maletgs fatgs cun la camera."</string>
     <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"deactivar permanentamain il telefonin"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"deactivar permanentamain il telefonin"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Permetta ad ina applicaziun da deactivar definitivamain il telefon. Questa autorisaziun è fitg privlusa."</string>
-    <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Permetta ad ina applicaziun da deactivar definitivamain il telefon. Questa autorisaziun è fitg privlusa."</string>
+    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permetta ad ina applicaziun da deactivar definitivamain il telefon. Questa autorisaziun è fitg privlusa."</string>
+    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Permetta ad ina applicaziun da deactivar definitivamain il telefon. Questa autorisaziun è fitg privlusa."</string>
     <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"sfurzar il telefonin da reaviar"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"sfurzar il telefonin da reaviar"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Permetta a l\'applicaziun da sfurzar il telefonin da reaviar."</string>
-    <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Permetta a l\'applicaziun da sfurzar il telefonin da reaviar."</string>
+    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Permetta a l\'applicaziun da sfurzar il telefonin da reaviar."</string>
+    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Permetta a l\'applicaziun da sfurzar il telefonin da reaviar."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"montar e demontar sistems da datotecas"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Permetta a l\'applicaziun da montar e demontar sistems da datotecas per apparats periferics da memoria mobila."</string>
+    <!-- outdated translation 6253263792535859767 -->     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Permetta a l\'applicaziun da montar e demontar sistems da datotecas per apparats periferics da memoria mobila."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formataziun da la memoria externa"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Permetta a l\'applicaziun da formatar memoria mobila."</string>
+    <!-- outdated translation 574060044906047386 -->     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Permetta a l\'applicaziun da formatar memoria mobila."</string>
     <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"obtegnair infurmaziuns davart la memoria segira"</string>
-    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Permetta a l\'applicaziun dad obtegnair infurmaziuns davart la memoria segira."</string>
+    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="3094563844593878548">"Permetta a l\'applicaziun dad obtegnair infurmaziuns davart la memoria segira."</string>
     <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"crear ina memoria segira"</string>
-    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Permetta a l\'applicaziun da crear ina memoria segira."</string>
+    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="4558869273585856876">"Permetta a l\'applicaziun da crear ina memoria segira."</string>
     <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"allontanar la memoria segira"</string>
-    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Permetta a l\'applicaziun dad allontanar la memoria segira."</string>
-    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"montar/demontar la memoria segira"</string>
-    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Permetta a l\'applicaziun da montar/demontar la memoria segira."</string>
+    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Permetta a l\'applicaziun dad allontanar la memoria segira."</string>
+    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"montar/demontar la memoria segira"</string>
+    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Permetta a l\'applicaziun da montar/demontar la memoria segira."</string>
     <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"renumnar la memoria segira"</string>
-    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Permetta a l\'applicaziun da renumnar la memoria segira."</string>
+    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Permetta a l\'applicaziun da renumnar la memoria segira."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"controllar la vibraziun"</string>
-    <string name="permdesc_vibrate" msgid="2886677177257789187">"Permetta a l\'applicaziun da controllar la vibraziun."</string>
+    <!-- outdated translation 2886677177257789187 -->     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permetta a l\'applicaziun da controllar la vibraziun."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controllar la glischina"</string>
-    <string name="permdesc_flashlight" msgid="6433045942283802309">"Permetta a l\'applicaziun da controllar la glischina."</string>
+    <!-- outdated translation 6433045942283802309 -->     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permetta a l\'applicaziun da controllar la glischina."</string>
     <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
     <skip />
-    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
+    <!-- no translation found for permdesc_manageUsb (7776155430218239833) -->
     <skip />
     <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
     <skip />
     <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
     <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar la hardware"</string>
-    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permetta ad ina applicaziun da controllar differents apparats periferics per motivs da test da hardware."</string>
+    <!-- outdated translation 3668894686500081699 -->     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permetta ad ina applicaziun da controllar differents apparats periferics per motivs da test da hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonar directamain a numers da telefon"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"Permetta a l\'applicaziun da far telefons senza Vossa intervenziun. Applicaziuns donnegiusas pon uschia chaschunar telefons nunspetgads sin Voss quint da telefon. Questa funcziun permetta dentant betg da telefonar a numers d\'urgenza."</string>
+    <!-- outdated translation 3369867353692722456 -->     <string name="permdesc_callPhone" msgid="6396463004110544744">"Permetta a l\'applicaziun da far telefons senza Vossa intervenziun. Applicaziuns donnegiusas pon uschia chaschunar telefons nunspetgads sin Voss quint da telefon. Questa funcziun permetta dentant betg da telefonar a numers d\'urgenza."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"telefonar directamain a mintga numer"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Permetta a l\'applicaziun da cumponer mintga numer (inclus numers d\'urgenza) senza Vossa intervenziun. Applicaziuns donnegiusas pon uschia far telefons nunnecessaris ed illegals a numers d\'urgenza."</string>
+    <!-- outdated translation 244405067160028452 -->     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permetta a l\'applicaziun da cumponer mintga numer (inclus numers d\'urgenza) senza Vossa intervenziun. Applicaziuns donnegiusas pon uschia far telefons nunnecessaris ed illegals a numers d\'urgenza."</string>
     <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"aviar directamain la configuraziun dal telefonin CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"aviar directamain la configuraziun dal telefonin CDMA"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Permetta a l\'applicaziun dad aviar il provediment CDMA. Applicaziuns donnegiusas pon uschia aviar inutilmain il provediment CDMA."</string>
+    <!-- outdated translation 6457447676108355905 -->     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Permetta a l\'applicaziun dad aviar il provediment CDMA. Applicaziuns donnegiusas pon uschia aviar inutilmain il provediment CDMA."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controllar ils avis ad actualisaziuns da la posiziun geografica"</string>
-    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Permetta l\'activaziun/deactivaziun dad avis ad actualisaziuns da la posiziun geografica che derivan dal signal da radio. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 2300018303720930256 -->     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Permetta l\'activaziun/deactivaziun dad avis ad actualisaziuns da la posiziun geografica che derivan dal signal da radio. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"access a las caracteristicas check-in"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Permetta l\'access (leger e scriver) ad elements transmess dal servetsch check-in. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 7150307006141883832 -->     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Permetta l\'access (leger e scriver) ad elements transmess dal servetsch check-in. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"tscherner ils widgets"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Permetta a l\'applicaziun dad annunziar al sistem tge widgets che pon vegnir utilisads da tge applicaziun. Cun questa permissiun pon applicaziuns autorisar l\'access a datas persunalas per autras applicaziuns. Questa opziun n\'è betg previsa per applicaziuns normalas."</string>
+    <!-- outdated translation 2098697834497452046 -->     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Permetta a l\'applicaziun dad annunziar al sistem tge widgets che pon vegnir utilisads da tge applicaziun. Cun questa permissiun pon applicaziuns autorisar l\'access a datas persunalas per autras applicaziuns. Questa opziun n\'è betg previsa per applicaziuns normalas."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modifitgar il status dal telefon"</string>
-    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"\"Permetta ad ina applicaziun da controllar las funcziunalitads telefonicas da l\'apparat. Ina applicaziun po uschia midar la rait, deactivar ed activar il signal radiofonic dal telefon etc. senza As avertir.\""</string>
+    <!-- outdated translation 3302284561346956587 -->     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"\"Permetta ad ina applicaziun da controllar las funcziunalitads telefonicas da l\'apparat. Ina applicaziun po uschia midar la rait, deactivar ed activar il signal radiofonic dal telefon etc. senza As avertir.\""</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"leger il status e l\'identitad dal telefon"</string>
-    <string name="permdesc_readPhoneState" msgid="188877305147626781">"\"Permetta a l\'applicaziun dad acceder a las funcziuns da clom dal telefonin. Ina applicaziun cun questas permissiuns po eruir il numer da telefon che quest telefonin utilisescha, ses numer da seria, schebain i vegn telefonà ed identifitgar il numer clamà etc.\""</string>
+    <!-- outdated translation 8987653603298258459 -->     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"\"Permetta a l\'applicaziun dad acceder a las funcziuns da clom dal telefonin. Ina applicaziun cun questas permissiuns po eruir il numer che quest telefonin utilisescha, schebain i vegn telefonà ed identifitgar il numer clamà etc.\""</string>
     <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evitar ch\'il telefon midia en il modus stand-by"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar ch\'il telefon midia en il modus stand-by"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Permetta ad ina applicaziun dad evitar ch\'il telefon midia en il modus standby."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Permetta ad ina applicaziun dad evitar ch\'il telefon midia en il modus standby."</string>
+    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permetta ad ina applicaziun dad evitar ch\'il telefon midia en il modus standby."</string>
+    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permetta ad ina applicaziun dad evitar ch\'il telefon midia en il modus standby."</string>
     <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"metter en/ord funcziun l\'apparat"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"metter en/ord funcziun l\'apparat"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Permetta ad ina applicaziun dad activar u deactivar il telefonin."</string>
-    <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Permetta ad ina applicaziun dad activar u deactivar il telefonin."</string>
+    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permetta ad ina applicaziun dad activar u deactivar il telefonin."</string>
+    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Permetta ad ina applicaziun dad activar u deactivar il telefonin."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"exequir en il modus da test da fabrica"</string>
     <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Permetta d\'exequir sco test da fabrica datiers al nivel dal sistem cun autorisar l\'access a la hardware dal telefonin. Questa funcziunalitad è mo disponibla sch\'il telefonin sa chatta en il modus da test da fabrica."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Permetta d\'exequir sco test da fabrica datiers al nivel dal sistem cun autorisar l\'access a la hardware dal telefonin. Questa funcziunalitad è mo disponibla sch\'il telefonin sa chatta en il modus da test da fabrica."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"definir la culissa"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Permetta a l\'applicaziun da definir il fund davos dal sistem."</string>
+    <!-- outdated translation 6417041752170585837 -->     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permetta a l\'applicaziun da definir il fund davos dal sistem."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"definir ils indicaturs da grondezza per il fund davos"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Permetta a l\'applicaziun da definir la grondezza dal fund dal visur."</string>
+    <!-- outdated translation 6019479164008079626 -->     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Permetta a l\'applicaziun da definir la grondezza dal fund dal visur."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"reinizialisar il sistem cun ses parameters originals"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"\"Permetta ad ina applicaziun da restaurar il stadi original dal sistem. Qua tras vegnan tut las datas, las configuraziuns e las applicaziuns installadas stizzadas.\""</string>
+    <!-- outdated translation 5033465107545174514 -->     <string name="permdesc_masterClear" msgid="3665380492633910226">"\"Permetta ad ina applicaziun da restaurar il stadi original dal sistem. Qua tras vegnan tut las datas, las configuraziuns e las applicaziuns installadas stizzadas.\""</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"drizzar l\'ura"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Permetta ad ina applicaziun da drizzar l\'ura dal telefonin."</string>
-    <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Permetta ad ina applicaziun da drizzar l\'ura dal telefonin."</string>
+    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Permetta ad ina applicaziun da drizzar l\'ura dal telefonin."</string>
+    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Permetta ad ina applicaziun da drizzar l\'ura dal telefonin."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"definir la zona d\'urari"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Permetta ad ina applicaziun da modifitgar la zona d\'urari dal telefonin."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Permetta ad ina applicaziun da modifitgar la zona d\'urari dal telefonin."</string>
+    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Permetta ad ina applicaziun da modifitgar la zona d\'urari dal telefonin."</string>
+    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Permetta ad ina applicaziun da modifitgar la zona d\'urari dal telefonin."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"agir sco administratur da contos"</string>
-    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Permetta ad ina applicaziun da telefonar ad autentificaturs da contos."</string>
+    <!-- outdated translation 6056903274106394752 -->     <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Permetta ad ina applicaziun da telefonar ad autentificaturs da contos."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"tschertgar contos enconuschents"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Permetta ad ina applicaziun da consultar la glista dals contos enconuschents al telefonin."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Permetta ad ina applicaziun da consultar la glista dals contos enconuschents al telefonin."</string>
+    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Permetta ad ina applicaziun da consultar la glista dals contos enconuschents al telefonin."</string>
+    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Permetta ad ina applicaziun da consultar la glista dals contos enconuschents al telefonin."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"agir sco autentificatur da contos"</string>
-    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"\"Permetta ad ina applicaziun dad utilisar las funcziuns d\'autentificaziun da conto da l\'administratur da contos, inclus funcziuns per crear contos ed obtegnair e definir lur pleds-clav.\""</string>
+    <!-- outdated translation 4006839406474208874 -->     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"\"Permetta ad ina applicaziun dad utilisar las funcziuns d\'autentificaziun da conto da l\'administratur da contos, inclus funcziuns per crear contos ed obtegnair e definir lur pleds-clav.\""</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"administrar la glista da contos"</string>
-    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Permetta ad ina applicaziun dad agiuntar ed allontanar contos e stizzar lur pleds-clav."</string>
+    <!-- outdated translation 8804114016661104517 -->     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Permetta ad ina applicaziun dad agiuntar ed allontanar contos e stizzar lur pleds-clav."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"utilisar las infurmaziuns dad autentificaziun dad in conto"</string>
-    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Permetta ad ina applicaziun da dumandar tokens d\'autentificaziun."</string>
+    <!-- outdated translation 7416570544619546974 -->     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permetta ad ina applicaziun da dumandar tokens d\'autentificaziun."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"mussar il status da la rait"</string>
-    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Permetta ad ina applicaziun da vesair ils status da tut las raits."</string>
+    <!-- outdated translation 558721128707712766 -->     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Permetta ad ina applicaziun da vesair ils status da tut las raits."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"access cumplet a l\'internet"</string>
-    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Permetta ad ina applicaziun da crear sockets da rait."</string>
+    <!-- outdated translation 4593339106921772192 -->     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Permetta ad ina applicaziun da crear sockets da rait."</string>
     <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"scriver parameters per nums da puncts d\'access"</string>
-    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"\"Permetta ad ina applicaziun da modifitgar ils parameters APN (num dals puncts d\'access), sco proxy ni port da mintga APN.\""</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"\"Permetta ad ina applicaziun da modifitgar ils parameters APN (num dals puncts d\'access), sco proxy ni port da mintga APN.\""</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifitgar la connectivitad da la rait"</string>
-    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Permetta ad ina applicaziun da modifitgar il status da connectivitad da la rait."</string>
-    <string name="permlab_changeTetherState" msgid="2702121155761140799">"midar la connectivitad da tethering"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Permetta ad ina applicaziun da modifitgar il status da connectivitad dal tethering."</string>
+    <!-- outdated translation 4199958910396387075 -->     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permetta ad ina applicaziun da modifitgar il status da connectivitad da la rait."</string>
+    <!-- outdated translation 2702121155761140799 -->     <string name="permlab_changeTetherState" msgid="5952584964373017960">"midar la connectivitad da tethering"</string>
+    <!-- outdated translation 8905815579146349568 -->     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permetta ad ina applicaziun da modifitgar il status da connectivitad dal tethering."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"modifitgar il parameter d\'utilisaziun da datas dal fund davos"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Permetta ad ina applicaziun da modifitgar il parameters d\'utilisaziun da las datas dal fund davos."</string>
+    <!-- outdated translation 1001482853266638864 -->     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permetta ad ina applicaziun da modifitgar il parameters d\'utilisaziun da las datas dal fund davos."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"mussar il status WLAN"</string>
-    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Permetta ad ina applicaziun da vesair las infurmaziuns concernent il status WLAN."</string>
+    <!-- outdated translation 485796529139236346 -->     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Permetta ad ina applicaziun da vesair las infurmaziuns concernent il status WLAN."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"modifitgar il status WLAN"</string>
-    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"\"Permetta ad ina applicaziun da stabilir ina connexiun a puncts d\'access WLAN, da sa deconnectar da quels e da modifitgar ils parameters da raits WLAN configuradas.\""</string>
+    <!-- outdated translation 2950383153656873267 -->     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"\"Permetta ad ina applicaziun da stabilir ina connexiun a puncts d\'access WLAN, da sa deconnectar da quels e da modifitgar ils parameters da raits WLAN configuradas.\""</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permetter la recepziun da multicast WLAN"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permetta ad ina applicaziun da retschaiver pachets da datas che n\'èn betg adressads directamain a Voss apparat. Quai po esser nizzaivel per tschertgar servetschs che vegnan mess a disposiziun en il conturn. Consumescha dapli energia ch\'il modus betg-multicast."</string>
-    <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administraziun bluetooth"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"\"Permetta ad ina applicaziun da configurar il telefon bluetooth local, dad identifitgar apparats periferics a distanza e d\'als associar cun il telefon.\""</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"\"Permetta ad ina applicaziun da configurar il telefon bluetooth local, dad identifitgar apparats periferics a distanza e d\'als associar cun il telefon.\""</string>
+    <!-- outdated translation 8199464507656067553 -->     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Permetta ad ina applicaziun da retschaiver pachets da datas che n\'èn betg adressads directamain a Voss apparat. Quai po esser nizzaivel per tschertgar servetschs che vegnan mess a disposiziun en il conturn. Consumescha dapli energia ch\'il modus betg-multicast."</string>
+    <!-- outdated translation 1092209628459341292 -->     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"administraziun bluetooth"</string>
+    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"\"Permetta ad ina applicaziun da configurar il telefon bluetooth local, dad identifitgar apparats periferics a distanza e d\'als associar cun il telefon.\""</string>
+    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"\"Permetta ad ina applicaziun da configurar il telefon bluetooth local, dad identifitgar apparats periferics a distanza e d\'als associar cun il telefon.\""</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"stabilir connexiuns bluetooth"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Permetta ad ina applicaziun dad obtegnair la configuraziun dal telefon bluetooth local e da crear ed acceptar connexiuns ad apparats associads."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permetta ad ina applicaziun dad obtegnair la configuraziun dal telefon bluetooth local e da crear ed acceptar connexiuns ad apparats associads."</string>
+    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permetta ad ina applicaziun dad obtegnair la configuraziun dal telefon bluetooth local e da crear ed acceptar connexiuns ad apparats associads."</string>
+    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permetta ad ina applicaziun dad obtegnair la configuraziun dal telefon bluetooth local e da crear ed acceptar connexiuns ad apparats associads."</string>
     <!-- no translation found for permlab_nfc (4423351274757876953) -->
     <skip />
-    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <!-- no translation found for permdesc_nfc (7120611819401789907) -->
     <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deactivar la bloccaziun da la tastatura"</string>
-    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permetta ad ina applicaziun da deactivar la bloccaziun da la tastatura e la protecziun cun il pled-clav associada. In exempel dad ina utilisaziun legitima: La bloccaziun da la tastatura vegn deactivada sche Vus retschavais in clom ed ella vegn reactivada sche Vus finis il telefon."</string>
+    <!-- outdated translation 3189763479326302017 -->     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Permetta ad ina applicaziun da deactivar la bloccaziun da la tastatura e la protecziun cun il pled-clav associada. In exempel dad ina utilisaziun legitima: La bloccaziun da la tastatura vegn deactivada sche Vus retschavais in clom ed ella vegn reactivada sche Vus finis il telefon."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leger ils parameters da sincronisaziun"</string>
-    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Permetta ad ina applicaziun da leger ils parameters da sincronisaziun (per exempel per savair sche la sincronisaziun da contacts è activà u betg)."</string>
+    <!-- outdated translation 5315925706353341823 -->     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Permetta ad ina applicaziun da leger ils parameters da sincronisaziun (per exempel per savair sche la sincronisaziun da contacts è activà u betg)."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"scriver configuraziuns da sincronisaziun"</string>
-    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Permetta ad ina applicaziun da modifitgar ils parameters da sincronisaziun. Uschia po ella per exempel activar e deactivar la sincronisaziun da contacts."</string>
+    <!-- outdated translation 2498201614431360044 -->     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Permetta ad ina applicaziun da modifitgar ils parameters da sincronisaziun. Uschia po ella per exempel activar e deactivar la sincronisaziun da contacts."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"leger las statisticas da sincronisaziun"</string>
-    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Permetta ad ina applicaziun da leger las statisticas da sincronisaziun (per exempel la cronologia da las sincronisaziuns exequidas)."</string>
+    <!-- outdated translation 7511448343374465000 -->     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Permetta ad ina applicaziun da leger las statisticas da sincronisaziun (per exempel la cronologia da las sincronisaziuns exequidas)."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leger feeds abunads"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Permetta ad ina applicaziun dad obtegnair infurmaziuns davart ils feeds actualisads dacurt."</string>
+    <!-- outdated translation 3622200625634207660 -->     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permetta ad ina applicaziun dad obtegnair infurmaziuns davart ils feeds actualisads dacurt."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"scriver feeds abunads"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Permetta ad ina applicaziun da modifitgar Voss feeds sincronisads dacurt. Applicaziuns donnegiusas pudessan uschia modifitgar Voss feeds sincronisads."</string>
-    <string name="permlab_readDictionary" msgid="432535716804748781">"leger il dicziunari definì da l\'utilisader"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permetta ad ina applicaziun da leger tut ils pleds e nums privats e las expressiuns privatas che in utilisader ha memorisà en ses dicziunari."</string>
-    <string name="permlab_writeDictionary" msgid="6703109511836343341">"scriver en il dicziunari definì da l\'utilisader"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permetta ad ina applicaziun da scriver novs pleds en il dicziunari dal utilisader."</string>
+    <!-- outdated translation 8121607099326533878 -->     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Permetta ad ina applicaziun da modifitgar Voss feeds sincronisads dacurt. Applicaziuns donnegiusas pudessan uschia modifitgar Voss feeds sincronisads."</string>
+    <!-- outdated translation 432535716804748781 -->     <string name="permlab_readDictionary" msgid="8410247960433376352">"leger il dicziunari definì da l\'utilisader"</string>
+    <!-- outdated translation 1082972603576360690 -->     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Permetta ad ina applicaziun da leger tut ils pleds e nums privats e las expressiuns privatas che in utilisader ha memorisà en ses dicziunari."</string>
+    <!-- outdated translation 6703109511836343341 -->     <string name="permlab_writeDictionary" msgid="2296383164914812772">"scriver en il dicziunari definì da l\'utilisader"</string>
+    <!-- outdated translation 2241256206524082880 -->     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permetta ad ina applicaziun da scriver novs pleds en il dicziunari dal utilisader."</string>
     <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modifitgar/stizzar cuntegns da la carta SD"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifitgar/stizzar cuntegns da la carta SD"</string>
-    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Permetta ad ina applicaziun da scriver sin la carta SD."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Permetta ad ina applicaziun da scriver sin la carta SD."</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permetta ad ina applicaziun da scriver sin la carta SD."</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permetta ad ina applicaziun da scriver sin la carta SD."</string>
     <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
     <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
+    <!-- no translation found for permdesc_mediaStorageWrite (8189160597698529185) -->
     <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"access al sistem da datotecas da cache"</string>
-    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permetta ad ina applicaziun da leger e da scriver en il sistem da datotecas dal cache."</string>
+    <!-- outdated translation 1624734528435659906 -->     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permetta ad ina applicaziun da leger e da scriver en il sistem da datotecas dal cache."</string>
     <!-- no translation found for permlab_use_sip (5986952362795870502) -->
     <skip />
-    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
+    <!-- no translation found for permdesc_use_sip (4717632000062674294) -->
     <skip />
     <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
     <skip />
-    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
+    <!-- no translation found for permdesc_readNetworkUsageHistory (7689060749819126472) -->
     <skip />
     <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
     <skip />
-    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
+    <!-- no translation found for permdesc_manageNetworkPolicy (7537586771559370668) -->
     <skip />
     <!-- no translation found for permlab_modifyNetworkAccounting (5088217309088729650) -->
     <skip />
-    <!-- no translation found for permdesc_modifyNetworkAccounting (8702285686629184404) -->
+    <!-- no translation found for permdesc_modifyNetworkAccounting (8553240749784321765) -->
     <skip />
     <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Limitar il pled-clav"</string>
     <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Restrenscher ils tips da pleds-clav che Vus pudais utilisar."</string>
     <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Survegliar las emprovas da s\'annunziar"</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Survegliar las emprovas betg reussidas da s\'annunziar ad in apparat periferic / dad exequir ina acziun."</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Survegliar las emprovas betg reussidas da s\'annunziar ad in apparat periferic / dad exequir ina acziun."</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Survegliar las emprovas betg reussidas da s\'annunziar ad in apparat periferic / dad exequir ina acziun."</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Survegliar las emprovas betg reussidas da s\'annunziar ad in apparat periferic / dad exequir ina acziun."</string>
     <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Reinizialisar il pled-clav"</string>
     <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"\"Definir ina nova valur per Voss pled-clav, uschia che l\'administratur As sto dar il pled-clav avant che Vus pudais s\'annunziar.\""</string>
     <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Sfurzar da bloccar"</string>
@@ -570,7 +570,7 @@
     <skip />
     <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
     <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <!-- no translation found for policydesc_encryptedStorage (8877192718681120469) -->
     <skip />
     <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
     <skip />
@@ -709,17 +709,17 @@
     <skip />
     <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
     <skip />
-    <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Endatar il code PIN"</string>
-    <!-- no translation found for keyguard_password_enter_puk_code (5965173481572346878) -->
+    <!-- outdated translation 3731488827218876115 -->     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Endatar il code PIN"</string>
+    <!-- no translation found for keyguard_password_enter_puk_code (4800725266925845333) -->
     <skip />
     <!-- no translation found for keyguard_password_enter_puk_prompt (1341112146710087048) -->
     <skip />
-    <!-- no translation found for keyguard_password_enter_pin_prompt (2987350144349051286) -->
+    <!-- no translation found for keyguard_password_enter_pin_prompt (8027680321614196258) -->
     <skip />
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <!-- no translation found for keyguard_password_entry_touch_hint (7858547464982981384) -->
     <skip />
-    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Endatai il pled-clav per debloccar."</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Endatar il PIN per debloccar"</string>
+    <!-- outdated translation 9138158344813213754 -->     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Endatai il pled-clav per debloccar."</string>
+    <!-- outdated translation 638347075625491514 -->     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Endatar il PIN per debloccar"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Code PIN nuncorrect!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Smatgai per debloccar sin la tasta Menu e lura sin 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numer d\'urgenza"</string>
@@ -731,8 +731,8 @@
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Numer d\'urgenza"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Enavos al clom"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correct!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Quai ans displascha. Empruvai anc ina giada."</string>
-    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"\"Perstgisai, empruvai anc ina giada.\""</string>
+    <!-- outdated translation 4817583279053112312 -->     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Quai ans displascha. Empruvai anc ina giada."</string>
+    <!-- outdated translation 6237443657358168819 -->     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"\"Perstgisai, empruvai anc ina giada.\""</string>
     <!-- no translation found for lockscreen_plugged_in (8057762828355572315) -->
     <skip />
     <string name="lockscreen_charged" msgid="4938930459620989972">"Chargià"</string>
@@ -741,10 +741,10 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nagina carta SIM."</string>
     <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"En il telefon na sa chatta nagina carta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"En il telefon na sa chatta nagina carta SIM."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inseri per plaschair ina carta SIM."</string>
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
+    <!-- outdated translation 8874620818937719067 -->     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Inseri per plaschair ina carta SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (3526573099019319472) -->
     <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (910904643433151371) -->
     <skip />
     <!-- no translation found for lockscreen_transport_prev_description (201594905152746886) -->
     <skip />
@@ -760,15 +760,19 @@
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rait bloccada"</string>
     <!-- no translation found for lockscreen_sim_puk_locked_message (7441797339976230) -->
     <skip />
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Ulteriuras infurmaziuns chattais Vus en il manual u che Vus pudais contactar il servetsch da clientella."</string>
+    <!-- outdated translation 635967534992394321 -->     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Ulteriuras infurmaziuns chattais Vus en il manual u che Vus pudais contactar il servetsch da clientella."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"La carta SIM è bloccada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Debloccar la carta SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Vus avais dissegnà fallà <xliff:g id="NUMBER_0">%d</xliff:g> giadas Voss schema da debloccaziun. "\n\n"Empruvai anc ina giada en <xliff:g id="NUMBER_1">%d</xliff:g> secundas."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Vus avais endatà <xliff:g id="NUMBER_0">%d</xliff:g> giadas in pled-clav nuncorrect. "\n\n"Empruvai anc ina giada en <xliff:g id="NUMBER_1">%d</xliff:g> secundas."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Vus avais endatà <xliff:g id="NUMBER_0">%d</xliff:g> giadas in code PIN nuncorrect. "\n\n"Empruvai anc ina giada en <xliff:g id="NUMBER_1">%d</xliff:g> secundas."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
+    <!-- no translation found for lockscreen_too_many_failed_attempts_dialog_message (6481623830344107222) -->
     <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vus avais dissegnà <xliff:g id="NUMBER_0">%d</xliff:g> giadas in schema da debloccaziun nuncorrect. Suenter  <xliff:g id="NUMBER_1">%d</xliff:g> ulteriuras emprovas senza success As dumonda il sistem da debloccar il telefonin cun agid da Vossas infurmaziuns d\'annunzia da Google."\n\n"Empruvai per plaschair anc ina giada en <xliff:g id="NUMBER_2">%d</xliff:g> secundas."</string>
+    <!-- no translation found for lockscreen_too_many_failed_password_attempts_dialog_message (2725973286239344555) -->
+    <skip />
+    <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6216672706545696955) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (9191611984625460820) -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (2590227559763762751) -->
+    <skip />
     <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (6128106399745755604) -->
     <skip />
     <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (8603565142156826565) -->
@@ -811,9 +815,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reaviar il sistem"</string>
     <string name="js_dialog_title" msgid="8143918455087008109">"La pagina \'<xliff:g id="TITLE">%s</xliff:g>\' annunzia:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vus vulais bandunar questa pagina?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tscherni OK per cuntinuar u Interrumper per restar sin la pagina actuala."</string>
+    <!-- no translation found for js_dialog_before_unload (730366588032430474) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confermar"</string>
-    <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Smatgar duas giadas per zoomar pli datiers u zoomar pli lontan."</string>
+    <!-- outdated translation 1068216937244567247 -->     <string name="double_tap_toast" msgid="2729045387923870404">"Tip: Smatgar duas giadas per zoomar pli datiers u zoomar pli lontan."</string>
     <!-- no translation found for autofill_this_form (1272247532604569872) -->
     <skip />
     <!-- no translation found for setup_autofill (8154593408885654044) -->
@@ -851,33 +856,33 @@
     <!-- no translation found for autofill_emirate (2893880978835698818) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"leger la cronologia ed ils segnapaginas dal navigatur"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"\"Permetta a l\'applicaziun da leger tut las URLs visitadas, sco era ils segnapaginas dal navigatur.\""</string>
+    <!-- outdated translation 4981489815467617191 -->     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"\"Permetta a l\'applicaziun da leger tut las URLs visitadas, sco era ils segnapaginas dal navigatur.\""</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"scriver en la cronologia ed en ils segnapaginas dal navigatur"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"\"Permetta ad ina applicaziun da modifitgar la cronologia u ils segnapaginas dal navigatur, memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia stizzar u modifitgar las datas da Voss navigatur.\""</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"\"Permetta ad ina applicaziun da modifitgar la cronologia u ils segnapaginas dal navigatur, memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia stizzar u modifitgar las datas da Voss navigatur.\""</string>
+    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"\"Permetta ad ina applicaziun da modifitgar la cronologia u ils segnapaginas dal navigatur, memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia stizzar u modifitgar las datas da Voss navigatur.\""</string>
+    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"\"Permetta ad ina applicaziun da modifitgar la cronologia u ils segnapaginas dal navigatur, memorisads sin Voss telefonin. Applicaziuns donnegiusas pon uschia stizzar u modifitgar las datas da Voss navigatur.\""</string>
     <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
     <skip />
-    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <!-- no translation found for permdesc_setAlarm (316392039157473848) -->
     <skip />
     <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <!-- no translation found for permdesc_addVoicemail (6604508651428252437) -->
     <skip />
-    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifitgar las autorisaziuns da geolocalisaziun dal navigatur"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permetta ad ina applicaziun da modifitgar las permissiuns da geolocalisaziun dal navigatur. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter datas da posiziun a websites arbitraras."</string>
+    <!-- outdated translation 4715212655598275532 -->     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modifitgar las autorisaziuns da geolocalisaziun dal navigatur"</string>
+    <!-- outdated translation 4011908282980861679 -->     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permetta ad ina applicaziun da modifitgar las permissiuns da geolocalisaziun dal navigatur. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter datas da posiziun a websites arbitraras."</string>
     <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
     <skip />
-    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <!-- no translation found for permdesc_packageVerificationAgent (8437590190990843381) -->
     <skip />
     <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
     <skip />
-    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <!-- no translation found for permdesc_bindPackageVerifier (3180741773233862126) -->
     <skip />
     <string name="save_password_message" msgid="767344687139195790">"Vulais Vus ch\'il navigatur memorisescha quest pled-clav?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Betg ussa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Memorisar"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Mai"</string>
-    <string name="open_permission_deny" msgid="5661861460947222274">"Vus n\'avais betg las permissiuns necessarias per avrir questa pagina."</string>
+    <!-- outdated translation 5661861460947222274 -->     <string name="open_permission_deny" msgid="7374036708316629800">"Vus n\'avais betg las permissiuns necessarias per avrir questa pagina."</string>
     <string name="text_copied" msgid="4985729524670131385">"Il text è vegnì copià en l\'archiv provisoric."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Dapli"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
@@ -981,9 +986,9 @@
     <string name="weeks" msgid="6509623834583944518">"emnas"</string>
     <string name="year" msgid="4001118221013892076">"onn"</string>
     <string name="years" msgid="6881577717993213522">"onns"</string>
-    <string name="VideoView_error_title" msgid="3359437293118172396">"Betg reussì da reproducir il video."</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"\"Perstgisai, deplorablamain n\'è quest video betg valid per il streaming sin quest apparat.\""</string>
-    <string name="VideoView_error_text_unknown" msgid="710301040038083944">"\"Perstgisai, impussibel da leger quest video.\""</string>
+    <!-- outdated translation 3359437293118172396 -->     <string name="VideoView_error_title" msgid="5927895235831021723">"Betg reussì da reproducir il video."</string>
+    <!-- outdated translation 897920883624437033 -->     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"\"Perstgisai, deplorablamain n\'è quest video betg valid per il streaming sin quest apparat.\""</string>
+    <!-- outdated translation 710301040038083944 -->     <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"\"Perstgisai, impussibel da leger quest video.\""</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"\"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>\""</string>
     <string name="noon" msgid="7245353528818587908">"mezdi"</string>
@@ -1001,7 +1006,7 @@
     <!-- no translation found for delete (6098684844021697789) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiar l\'URL"</string>
-    <string name="selectTextMode" msgid="6738556348861347240">"Selecziunar text…"</string>
+    <!-- outdated translation 6738556348861347240 -->     <string name="selectTextMode" msgid="1018691815143165326">"Selecziunar text…"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecziun da text"</string>
     <!-- unknown placeholder WORD in addToDictionary -->
     <skip />
@@ -1019,34 +1024,34 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Interrumper"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Attenziun"</string>
-    <string name="loading" msgid="1760724998928255250">"Chargiar…"</string>
+    <!-- outdated translation 1760724998928255250 -->     <string name="loading" msgid="7933681260296021180">"Chargiar…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ACTIVÀ"</string>
     <string name="capital_off" msgid="6815870386972805832">"DEACTIVÀ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Cumplettar l\'acziun cun"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilisar questa applicaziun sco standard per questa acziun."</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Stizzar ils parameters da standard en Parameters da la pagina da partenza &gt; Applicaziuns &gt; Administrar las applicaziuns."</string>
+    <!-- outdated translation 4815455344600932173 -->     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Stizzar ils parameters da standard en Parameters da la pagina da partenza &gt; Applicaziuns &gt; Administrar las applicaziuns."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Tscherner ina acziun"</string>
-    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
+    <!-- no translation found for chooseUsbActivity (6894748416073583509) -->
     <skip />
-    <string name="noApplications" msgid="1691104391758345586">"Nagina applicaziun po exequir questa acziun."</string>
+    <!-- outdated translation 1691104391758345586 -->     <string name="noApplications" msgid="2991814273936504689">"Nagina applicaziun po exequir questa acziun."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
     <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <!-- no translation found for anr_activity_application (1904477189057199066) -->
     <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <!-- no translation found for anr_activity_process (5776209883299089767) -->
     <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <!-- no translation found for anr_application_process (8941757607340481057) -->
     <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
+    <!-- no translation found for anr_process (6513209874880517125) -->
     <skip />
     <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Sfurzar da serrar"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Spetgar"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <!-- no translation found for launch_warning_title (1547997780506713581) -->
     <skip />
     <!-- no translation found for launch_warning_replace (6202498949970281412) -->
     <skip />
@@ -1056,26 +1061,27 @@
     <skip />
     <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
     <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <!-- no translation found for screen_compat_mode_hint (1064524084543304459) -->
     <skip />
-    <string name="smv_application" msgid="295583804361236288">"L\'applicaziun <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) ha violà sia atgna directiva StrictMode."</string>
+    <!-- no translation found for smv_application (3307209192155442829) -->
+    <skip />
     <string name="smv_process" msgid="5120397012047462446">"Il process <xliff:g id="PROCESS">%1$s</xliff:g> ha violà sia atgna directiva StrictMode."</string>
-    <!-- no translation found for android_upgrading_title (378740715658358071) -->
+    <!-- no translation found for android_upgrading_title (1584192285441405746) -->
     <skip />
-    <!-- no translation found for android_upgrading_apk (274409861603566003) -->
+    <!-- no translation found for android_upgrading_apk (7904042682111526169) -->
     <skip />
-    <!-- no translation found for android_upgrading_starting_apps (7959542881906488763) -->
+    <!-- no translation found for android_upgrading_starting_apps (451464516346926713) -->
     <skip />
     <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
     <skip />
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> vegn exequida"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Tscherner per midar a l\'applicaziun"</string>
-    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Midar dad ina applicaziun a l\'autra?"</string>
-    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Ina autra applicaziun vegn gia exequida e sto vegnir serrada avant ch\'ina nova po vegnir aviada."</string>
+    <!-- outdated translation 2423977499339403402 -->     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Tscherner per midar a l\'applicaziun"</string>
+    <!-- outdated translation 1135403633766694316 -->     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Midar dad ina applicaziun a l\'autra?"</string>
+    <!-- outdated translation 4592075610079319667 -->     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Ina autra applicaziun vegn gia exequida e sto vegnir serrada avant ch\'ina nova po vegnir aviada."</string>
     <string name="old_app_action" msgid="493129172238566282">"Turnar a <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="942967900237208466">"Betg aviai la nova applicaziun."</string>
+    <!-- outdated translation 942967900237208466 -->     <string name="old_app_description" msgid="2082094275580358049">"Betg aviai la nova applicaziun."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Aviar <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="6830398339826789493">"Fermai l\'applicaziun veglia senza memorisar."</string>
+    <!-- outdated translation 6830398339826789493 -->     <string name="new_app_description" msgid="1932143598371537340">"Fermai l\'applicaziun veglia senza memorisar."</string>
     <string name="sendText" msgid="5132506121645618310">"Tscherner ina acziun per il text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumen dal tun da scalin"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volumen da medias"</string>
@@ -1109,6 +1115,10 @@
     <item quantity="one" msgid="1634101450343277345">"Rait WLAN averta disponibla"</item>
     <item quantity="other" msgid="7915895323644292768">"Raits WLAN avertas disponiblas"</item>
   </plurals>
+    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
+    <skip />
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
     <skip />
     <!-- no translation found for wifi_watchdog_network_disabled_detailed (4917472096696322767) -->
@@ -1130,9 +1140,9 @@
     <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
     <skip />
     <string name="select_character" msgid="3365550120617701745">"Inserir in caracter"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Applicaziun nunenconuschenta"</string>
+    <!-- outdated translation 7630529934366549163 -->     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Applicaziun nunenconuschenta"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Trametter messadis SMS"</string>
-    <string name="sms_control_message" msgid="1289331457999236205">"Vulais Vus trametter in grond dumber da messadis SMS? Tschernì OK per cuntinuar u Interrumper per annullar la spediziun."</string>
+    <!-- outdated translation 1289331457999236205 -->     <string name="sms_control_message" msgid="4073755190243093924">"Vulais Vus trametter in grond dumber da messadis SMS? Tschernì OK per cuntinuar u Interrumper per annullar la spediziun."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Interrumper"</string>
     <!-- no translation found for sim_removed_title (6227712319223226185) -->
@@ -1173,7 +1183,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Deactivar l\'apparat periferic da memoria USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Cun deactivar la memoria USB è in problem cumparì. Verifitgai che Vus avais demontà il host USB ed empruvai anc ina giada."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activar la memoria USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Sche Vus activais l\'apparat periferic da memoria USB sa ferman tschertas applicaziuns che Vus utilisais. Ellas n\'èn probablamain betg disponiblas enfin che l\'apparat periferic vegn puspè deactivà."</string>
+    <!-- outdated translation 3202838234780505886 -->     <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"Sche Vus activais l\'apparat periferic da memoria USB sa ferman tschertas applicaziuns che Vus utilisais. Ellas n\'èn probablamain betg disponiblas enfin che l\'apparat periferic vegn puspè deactivà."</string>
     <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Operaziun USB betg reussida"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
@@ -1186,15 +1196,15 @@
     <skip />
     <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
-    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatar la carta SD"</string>
-    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatar la carta SD"</string>
-    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vulais Vus propi formatar la carta SD? En quest cas van tut las datas sin Vossa carta a perder."</string>
-    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Vulais Vus propi formatar la carta SD? En quest cas van tut las datas sin Vossa carta a perder."</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatar la carta SD"</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formatar la carta SD"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Vulais Vus propi formatar la carta SD? En quest cas van tut las datas sin Vossa carta a perder."</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Vulais Vus propi formatar la carta SD? En quest cas van tut las datas sin Vossa carta a perder."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB connectà"</string>
-    <string name="adb_active_notification_message" msgid="8470296818270110396">"Tscherner per deactivar il debugging USB."</string>
-    <string name="select_input_method" msgid="6865512749462072765">"Tscherner ina metoda d\'endataziun"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <!-- outdated translation 8470296818270110396 -->     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tscherner per deactivar il debugging USB."</string>
+    <!-- outdated translation 6865512749462072765 -->     <string name="select_input_method" msgid="4653387336791222978">"Tscherner ina metoda d\'endataziun"</string>
+    <!-- no translation found for configure_input_methods (9091652157722495116) -->
     <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1224,10 +1234,10 @@
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Allontanà la carta SD. Inseri ina nova."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Betg chattà activitads correspundentas"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"actualisar las datas statisticas da la cumponenta"</string>
-    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Permetta da modifitgar las datas statisticas rimnadas da la cumponenta. Betg previs per applicaziuns normalas."</string>
-    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Permetta da clamar il servetsch da container predefinì per copiar il cuntegn. Betg previs per applicaziuns normalas."</string>
-    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Permetta da clamar il servetsch da container predefinì per copiar il cuntegn. Betg previs per applicaziuns normalas."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tutgar duas giadas per reglar il zoom"</string>
+    <!-- outdated translation 891553695716752835 -->     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Permetta da modifitgar las datas statisticas rimnadas da la cumponenta. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 1660908117394854464 -->     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"Permetta da clamar il servetsch da container predefinì per copiar il cuntegn. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 537780957633976401 -->     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Permetta da clamar il servetsch da container predefinì per copiar il cuntegn. Betg previs per applicaziuns normalas."</string>
+    <!-- outdated translation 1311810005957319690 -->     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tutgar duas giadas per reglar il zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Errur cun engrondir il widget"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Dai"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Tschertgar"</string>
@@ -1239,7 +1249,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Exequir"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Cumponer il numer"\n"cun utilisar <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Agiuntar in contact"\n"cun il numer <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Las suandantas applicaziuns dumondan l\'autorisaziun dad acceder a partir dad ussa a Voss conto."</string>
+    <!-- outdated translation 6824538733852821001 -->     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Las suandantas applicaziuns dumondan l\'autorisaziun dad acceder a partir dad ussa a Voss conto."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vulais Vus autorisar questa dumonda?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Dumonda d\'access"</string>
     <string name="allow" msgid="7225948811296386551">"Permetter"</string>
@@ -1334,7 +1344,7 @@
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
     <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
+    <!-- no translation found for choose_account_label (5655203089746423927) -->
     <skip />
     <!-- no translation found for add_account_label (2935267344849993553) -->
     <skip />
@@ -1404,13 +1414,13 @@
     <skip />
     <!-- no translation found for keyboardview_keycode_enter (2985864015076059467) -->
     <skip />
-    <!-- no translation found for activitychooserview_choose_application (4540794444768613567) -->
+    <!-- no translation found for activitychooserview_choose_application (2125168057199941199) -->
     <skip />
     <!-- no translation found for shareactionprovider_share_with (806688056141131819) -->
     <skip />
     <!-- no translation found for shareactionprovider_share_with_application (5627411384638389738) -->
     <skip />
-    <!-- no translation found for content_description_sliding_handle (7311938669217173870) -->
+    <!-- no translation found for content_description_sliding_handle (415975056159262248) -->
     <skip />
     <!-- no translation found for description_direction_up (1983114130441878529) -->
     <skip />
@@ -1427,6 +1437,8 @@
     <!-- no translation found for description_target_silent (893551287746522182) -->
     <skip />
     <!-- no translation found for description_target_soundon (30052466675500172) -->
+    <skip />
+    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
     <skip />
     <!-- no translation found for keyboard_headset_required_to_hear_password (5913502399391940888) -->
     <skip />
@@ -1502,11 +1514,11 @@
     <skip />
     <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
     <skip />
-    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
+    <!-- no translation found for activity_chooser_view_see_all (4292569383976636200) -->
     <skip />
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
+    <!-- no translation found for activity_chooser_view_dialog_title_default (4710013864974040615) -->
     <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <!-- no translation found for share_action_provider_share_with (5247684435979149216) -->
     <skip />
     <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
