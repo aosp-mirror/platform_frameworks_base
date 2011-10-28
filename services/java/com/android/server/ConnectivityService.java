@@ -2450,6 +2450,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0);
+        // Short term disabling of Tethering if DUN is required.
+        // TODO - fix multi-connection tethering using policy-base routing
+        int[] upstreamConnTypes = mTethering.getUpstreamIfaceTypes();
+        for (int i : upstreamConnTypes) {
+            if (i == ConnectivityManager.TYPE_MOBILE_DUN) return false;
+        }
         return tetherEnabledInSettings && mTetheringConfigValid;
     }
 
