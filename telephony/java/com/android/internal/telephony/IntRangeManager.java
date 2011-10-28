@@ -543,6 +543,14 @@ public abstract class IntRangeManager {
     }
 
     /**
+     * Returns whether the list of ranges is completely empty.
+     * @return true if there are no enabled ranges
+     */
+    public boolean isEmpty() {
+        return mRanges.isEmpty();
+    }
+
+    /**
      * Called when the list of enabled ranges has changed. This will be
      * followed by zero or more calls to {@link #addRange} followed by
      * a call to {@link #finishUpdate}.

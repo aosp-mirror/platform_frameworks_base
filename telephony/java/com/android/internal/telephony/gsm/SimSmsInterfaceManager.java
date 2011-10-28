@@ -246,6 +246,8 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
             log("Added cell broadcast subscription for MID range " + startMessageId
                     + " to " + endMessageId + " from client " + client);
 
+        setCellBroadcastActivation(!mCellBroadcastRangeManager.isEmpty());
+
         return true;
     }
 
@@ -270,6 +272,8 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
         if (DBG)
             log("Removed cell broadcast subscription for MID range " + startMessageId
                     + " to " + endMessageId + " from client " + client);
+
+        setCellBroadcastActivation(!mCellBroadcastRangeManager.isEmpty());
 
         return true;
     }
@@ -301,14 +305,15 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
         /**
          * Called to indicate the end of a range update started by the
          * previous call to {@link #startUpdate}.
+         * @return true if successful, false otherwise
          */
         protected boolean finishUpdate() {
             if (mConfigList.isEmpty()) {
-                return setCellBroadcastActivation(false);
+                return true;
             } else {
                 SmsBroadcastConfigInfo[] configs =
                         mConfigList.toArray(new SmsBroadcastConfigInfo[mConfigList.size()]);
-                return setCellBroadcastConfig(configs) && setCellBroadcastActivation(true);
+                return setCellBroadcastConfig(configs);
             }
         }
     }
