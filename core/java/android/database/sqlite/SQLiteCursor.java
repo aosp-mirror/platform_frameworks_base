@@ -89,6 +89,8 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * @param query the {@link SQLiteQuery} object associated with this cursor object.
      */
     public SQLiteCursor(SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
+        // The AbstractCursor constructor needs to do some setup.
+        super();
         if (query == null) {
             throw new IllegalArgumentException("query object cannot be null");
         }
@@ -155,7 +157,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     }
 
     private void fillWindow(int startPos) {
-        clearOrCreateLocalWindow();
+        if (mWindow == null) {
+            // If there isn't a window set already it will only be accessed locally
+            mWindow = new CursorWindow(true /* the window is local only */);
+        } else {
+            mWindow.clear();
+        }
         mWindow.setStartPosition(startPos);
         int count = getQuery().fillWindow(mWindow);
         if (startPos == 0) { // fillWindow returns count(*) only for startPos = 0
@@ -207,9 +214,16 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         return mColumns;
     }
 
+    private void deactivateCommon() {
+        if (false) Log.v(TAG, "<<< Releasing cursor " + this);
+        closeWindow();
+        if (false) Log.v("DatabaseWindow", "closing window in release()");
+    }
+
     @Override
     public void deactivate() {
         super.deactivate();
+        deactivateCommon();
         mDriver.cursorDeactivated();
     }
 
@@ -217,6 +231,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     public void close() {
         super.close();
         synchronized (this) {
+            deactivateCommon();
             mQuery.close();
             mDriver.cursorClosed();
         }

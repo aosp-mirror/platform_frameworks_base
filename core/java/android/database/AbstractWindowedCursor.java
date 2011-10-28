@@ -19,11 +19,6 @@ package android.database;
 /**
  * A base class for Cursors that store their data in {@link CursorWindow}s.
  * <p>
- * The cursor owns the cursor window it uses.  When the cursor is closed,
- * its window is also closed.  Likewise, when the window used by the cursor is
- * changed, its old window is closed.  This policy of strict ownership ensures
- * that cursor windows are not leaked.
- * </p><p>
  * Subclasses are responsible for filling the cursor window with data during
  * {@link #onMove(int, int)}, allocating a new cursor window if necessary.
  * During {@link #requery()}, the existing cursor window should be cleared and
@@ -184,26 +179,5 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
             mWindow.close();
             mWindow = null;
         }
-    }
-
-    /**
-     * If there is a window, clear it.
-     * Otherwise, creates a local window.
-     * @hide
-     */
-    protected void clearOrCreateLocalWindow() {
-        if (mWindow == null) {
-            // If there isn't a window set already it will only be accessed locally
-            mWindow = new CursorWindow(true /* the window is local only */);
-        } else {
-            mWindow.clear();
-        }
-    }
-
-    /** @hide */
-    @Override
-    protected void onDeactivateOrClose() {
-        super.onDeactivateOrClose();
-        closeWindow();
     }
 }

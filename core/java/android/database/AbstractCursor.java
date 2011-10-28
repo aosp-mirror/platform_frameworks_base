@@ -78,11 +78,13 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     }
 
     public void deactivate() {
-        onDeactivateOrClose();
+        deactivateInternal();
     }
 
-    /** @hide */
-    protected void onDeactivateOrClose() {
+    /**
+     * @hide
+     */
+    public void deactivateInternal() {
         if (mSelfObserver != null) {
             mContentResolver.unregisterContentObserver(mSelfObserver);
             mSelfObserverRegistered = false;
@@ -106,7 +108,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     public void close() {
         mClosed = true;
         mContentObservable.unregisterAll();
-        onDeactivateOrClose();
+        deactivateInternal();
     }
 
     /**

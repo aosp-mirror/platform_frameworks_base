@@ -62,13 +62,13 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
                     data.enforceInterface(IBulkCursor.descriptor);
                     int startPos = data.readInt();
                     CursorWindow window = getWindow(startPos);
-                    reply.writeNoException();
                     if (window == null) {
                         reply.writeInt(0);
-                    } else {
-                        reply.writeInt(1);
-                        window.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                        return true;
                     }
+                    reply.writeNoException();
+                    reply.writeInt(1);
+                    window.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
                 }
 

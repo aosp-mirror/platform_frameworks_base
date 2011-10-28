@@ -18,6 +18,9 @@ package android.content;
 
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.database.CursorWindow;
+import android.database.IBulkCursor;
+import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -33,6 +36,13 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
+    /**
+     * @hide - hide this because return type IBulkCursor and parameter
+     * IContentObserver are system private classes.
+     */
+    public IBulkCursor bulkQuery(Uri url, String[] projection,
+            String selection, String[] selectionArgs, String sortOrder, IContentObserver observer,
+            CursorWindow window) throws RemoteException;
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException;
     public String getType(Uri url) throws RemoteException;

@@ -21,12 +21,16 @@ import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.EntityIterator;
 import android.content.IContentProvider;
 import android.content.OperationApplicationException;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.database.CursorWindow;
+import android.database.IBulkCursor;
+import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -51,75 +55,84 @@ public class MockContentProvider extends ContentProvider {
      * IContentProvider that directs all calls to this MockContentProvider.
      */
     private class InversionIContentProvider implements IContentProvider {
-        @Override
+        @SuppressWarnings("unused")
         public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
                 throws RemoteException, OperationApplicationException {
             return MockContentProvider.this.applyBatch(operations);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException {
             return MockContentProvider.this.bulkInsert(url, initialValues);
         }
 
-        @Override
+        @SuppressWarnings("unused")
+        public IBulkCursor bulkQuery(Uri url, String[] projection, String selection,
+                String[] selectionArgs, String sortOrder, IContentObserver observer,
+                CursorWindow window) throws RemoteException {
+            throw new UnsupportedOperationException("Must not come here");
+        }
+
+        @SuppressWarnings("unused")
         public int delete(Uri url, String selection, String[] selectionArgs)
                 throws RemoteException {
             return MockContentProvider.this.delete(url, selection, selectionArgs);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public String getType(Uri url) throws RemoteException {
             return MockContentProvider.this.getType(url);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public Uri insert(Uri url, ContentValues initialValues) throws RemoteException {
             return MockContentProvider.this.insert(url, initialValues);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public AssetFileDescriptor openAssetFile(Uri url, String mode) throws RemoteException,
                 FileNotFoundException {
             return MockContentProvider.this.openAssetFile(url, mode);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public ParcelFileDescriptor openFile(Uri url, String mode) throws RemoteException,
                 FileNotFoundException {
             return MockContentProvider.this.openFile(url, mode);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) throws RemoteException {
             return MockContentProvider.this.query(url, projection, selection,
                     selectionArgs, sortOrder);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
                 throws RemoteException {
             return MockContentProvider.this.update(url, values, selection, selectionArgs);
         }
 
-        @Override
+        /**
+         * @hide
+         */
+        @SuppressWarnings("unused")
         public Bundle call(String method, String request, Bundle args)
                 throws RemoteException {
             return MockContentProvider.this.call(method, request, args);
         }
 
-        @Override
         public IBinder asBinder() {
             throw new UnsupportedOperationException();
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
             return MockContentProvider.this.getStreamTypes(url, mimeTypeFilter);
         }
 
-        @Override
+        @SuppressWarnings("unused")
         public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openTypedAssetFile(url, mimeType, opts);
