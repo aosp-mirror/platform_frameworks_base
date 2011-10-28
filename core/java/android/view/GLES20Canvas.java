@@ -504,7 +504,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void setMatrix(Matrix matrix) {
-        nSetMatrix(mRenderer, matrix.native_instance);
+        nSetMatrix(mRenderer, matrix == null ? 0 : matrix.native_instance);
     }
     
     private static native void nSetMatrix(int renderer, int matrix);

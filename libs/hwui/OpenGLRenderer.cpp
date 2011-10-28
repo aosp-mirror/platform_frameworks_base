@@ -939,7 +939,11 @@ void OpenGLRenderer::skew(float sx, float sy) {
 }
 
 void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
-    mSnapshot->transform->load(*matrix);
+    if (matrix) {
+        mSnapshot->transform->load(*matrix);
+    } else {
+        mSnapshot->transform->loadIdentity();
+    }
 }
 
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
