@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2010 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- All ids in this layout must be in wifi_dialog.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- UI components that should be shown appropriately -->
+    <FrameLayout
+        android:id="@+id/eap_not_supported"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="360dip"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="12dip"
+            android:text="Foo"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="20sp" />
+    </FrameLayout>
+    <!-- In "add network" flow, we have security type field (@id/security below) below
+         this View, so need a bit different layout than the other flow, in which we'll use
+         @id/eap_not_supported. -->
+    <FrameLayout
+        android:id="@+id/eap_not_supported_for_add_network"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="12dip"
+            android:text="Bar"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="20sp" />
+    </FrameLayout>
+    <LinearLayout
+        android:id="@+id/wps_fields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="match_parent"
+            android:minWidth="128dip"
+            android:layout_height="wrap_content"
+            android:text="Blah"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="20sp"
+            android:gravity="bottom" />
+
+        <EditText
+            android:id="@+id/wps_pin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:inputType="textPassword"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="20sp" />
+    </LinearLayout>
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dip">
+        <!-- To accomodate @id/type into TableLayout, we splitted the layout into two:
+             @id/type_ssid and @id/type_security. -->
+        <TableRow
+            android:id="@+id/type_ssid"
+            android:minHeight="56dip"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/ssid_text"
+                android:layout_width="wrap_content"
+                android:minWidth="128dip"
+                android:layout_height="wrap_content"
+                android:minHeight="56dip"
+                android:paddingRight="16dip"
+                android:layout_alignParentLeft="true"
+                android:text="Whatever"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="20sp"
+                android:gravity="left|center_vertical" />
+
+            <FrameLayout
+                android:id="@+id/ssid_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/ssid_text"
+                android:layout_toRightOf="@id/ssid_text">
+                <EditText
+                    android:id="@+id/ssid"
+                    android:layout_width="368dip"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="textNoSuggestions"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="20sp" />
+            </FrameLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/security_fields"
+            android:minHeight="56dip"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/password_text"
+                android:layout_width="wrap_content"
+                android:minWidth="128dip"
+                android:layout_height="wrap_content"
+                android:minHeight="56dip"
+                android:text="Whenever"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="20sp"
+                android:gravity="left|center_vertical" />
+
+            <LinearLayout
+                android:id="@+id/password_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom">
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="368dip"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dip"
+                    android:singleLine="true"
+                    android:password="true"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!-- It looks CheckBox isn't aligned well with TableRow -->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <CheckBox
+                    android:id="@+id/show_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dip"
+                    android:text="However"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="20sp" />
+            </FrameLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/type_security"
+            android:minHeight="56dip"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/security_text"
+                android:layout_width="wrap_content"
+                android:minWidth="128dip"
+                android:layout_height="wrap_content"
+                android:minHeight="56dip"
+                android:text="Whoever"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="20sp"
+                android:gravity="bottom"/>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom">
+                <Spinner
+                    android:id="@+id/security"
+                    android:layout_width="368dip"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dip"
+                    android:paddingLeft="4dip"/>
+            </FrameLayout>
+        </TableRow>
+    </TableLayout>
+
+    <!-- All the views below are "gone".
+         We want them as data storage, not as UI components. -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+    <LinearLayout android:id="@+id/info"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"/>
+
+    <LinearLayout android:id="@+id/setup_fields"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:visibility="gone">
+
+        <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="On the top" />
+
+        <Spinner android:id="@+id/network_setup"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <!--  android:id="@+id/security_fields" -->
+    <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:visibility="gone">
+
+        <LinearLayout android:id="@+id/eap"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:visibility="gone">
+
+            <TextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="On the bottom" />
+
+            <Spinner android:id="@+id/method"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content" />
+
+            <TextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="On the side" />
+
+            <Spinner android:id="@+id/phase2"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content" />
+
+            <TextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="SRH" />
+
+            <Spinner android:id="@+id/ca_cert"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content" />
+
+            <TextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="Enjoyable" />
+
+            <Spinner android:id="@+id/user_cert"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content" />
+
+            <TextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="Fantastic" />
+
+            <EditText android:id="@+id/identity"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:singleLine="true"
+                      android:inputType="textNoSuggestions" />
+
+            <TextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="Superb" />
+
+            <EditText android:id="@+id/anonymous"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:singleLine="true"
+                      android:inputType="textNoSuggestions" />
+        </LinearLayout> <!-- android:id="@+id/eap" -->
+
+        <!-- <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="@string/wifi_password" />
+
+        <EditText android:id="@+id/password"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:singleLine="true"
+                  android:password="true" />
+
+        <CheckBox android:id="@+id/show_password"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="@string/wifi_show_password" /> -->
+    </LinearLayout>  <!-- android:id="@+id/security_fields" -->
+
+        <LinearLayout android:id="@+id/proxy_settings_fields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+            <TextView android:id="@+id/proxy_settings_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Heavenly" />
+
+            <Spinner android:id="@+id/proxy_settings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/proxy_warning_limited_support"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:visibility="gone">
+
+                <!--  Dummy to enable right-justification of warning -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Orgasmic" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/proxy_fields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+            <TextView android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Really" />
+
+            <EditText android:id="@+id/proxy_hostname"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="textNoSuggestions" />
+
+            <TextView android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Really really" />
+
+            <EditText android:id="@+id/proxy_port"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="textNoSuggestions" />
+
+            <TextView android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Really really with cherries on top" />
+
+            <EditText android:id="@+id/proxy_exclusionlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="textNoSuggestions" />
+
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/ip_fields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mmmmm... cherries" />
+
+            <Spinner android:id="@+id/ip_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/staticip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I mean Mmmmm.. cherries" />
+
+            <EditText android:id="@+id/ipaddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Shorter" />
+
+            <EditText android:id="@+id/gateway"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="is" />
+
+            <EditText android:id="@+id/network_prefix_length"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="better" />
+
+            <EditText android:id="@+id/dns1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="always" />
+
+            <EditText android:id="@+id/dns2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
