@@ -4521,7 +4521,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfosByViewTextClientThread(text, accessibilityNodeId,
+                    .findAccessibilityNodeInfosByTextClientThread(text, accessibilityNodeId,
                             interactionId, callback, interrogatingPid, interrogatingTid);
             }
         }
