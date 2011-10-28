@@ -418,6 +418,10 @@ class LoaderManagerImpl extends LoaderManager {
                 info.destroy();
                 mInactiveLoaders.remove(mId);
             }
+
+            if (!hasRunningLoaders() && mActivity != null) {
+                mActivity.mFragments.startPendingDeferredFragments();
+            }
         }
 
         void callOnLoadFinished(Loader<Object> loader, Object data) {
@@ -819,5 +823,15 @@ class LoaderManagerImpl extends LoaderManager {
                 li.dump(innerPrefix, fd, writer, args);
             }
         }
+    }
+
+    public boolean hasRunningLoaders() {
+        boolean loadersRunning = false;
+        final int count = mLoaders.size();
+        for (int i = 0; i < count; i++) {
+            final LoaderInfo li = mLoaders.valueAt(i);
+            loadersRunning |= li.mStarted && !li.mDeliveredData;
+        }
+        return loadersRunning;
     }
 }

@@ -3245,6 +3245,7 @@ package android.app {
     method public final boolean isInLayout();
     method public final boolean isRemoving();
     method public final boolean isResumed();
+    method public boolean isStartDeferred();
     method public final boolean isVisible();
     method public void onActivityCreated(android.os.Bundle);
     method public void onActivityResult(int, int, android.content.Intent);
@@ -3280,6 +3281,7 @@ package android.app {
     method public void setInitialSavedState(android.app.Fragment.SavedState);
     method public void setMenuVisibility(boolean);
     method public void setRetainInstance(boolean);
+    method public void setStartDeferred(boolean);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void startActivity(android.content.Intent);
     method public void startActivityForResult(android.content.Intent, int);
