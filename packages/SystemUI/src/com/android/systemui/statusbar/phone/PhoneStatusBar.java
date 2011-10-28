@@ -252,7 +252,7 @@ public class PhoneStatusBar extends StatusBar {
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
 
-        super.start();
+        super.start(); // calls makeStatusBarView()
 
         addNavigationBar();
 
@@ -270,12 +270,7 @@ public class PhoneStatusBar extends StatusBar {
 
         Resources res = context.getResources();
 
-        mDisplay.getMetrics(mDisplayMetrics);
-        if (DEBUG) {
-            Slog.d(TAG, "makeStatusBarView: mDisplayMetrics=" + mDisplayMetrics);
-            mDisplayMetrics = res.getDisplayMetrics();
-            Slog.d(TAG, "makeStatusBarView: mDisplayMetrics2=" + mDisplayMetrics);
-        }
+        updateDisplaySize(); // populates mDisplayMetrics
         loadDimens();
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
@@ -1793,6 +1788,11 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     void onBarViewAttached() {
+        // The status bar has just been attached to the view hierarchy; it's possible that the
+        // screen has rotated in-between when we set up the window and now, so let's double-check
+        // the display metrics just in case.
+        updateDisplaySize();
+
         WindowManager.LayoutParams lp;
         int pixelFormat;
         Drawable bg;
