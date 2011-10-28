@@ -392,7 +392,7 @@ public class AudioManager {
              * since the last volume key up, so cancel any sounds.
              */
             if (mUseMasterVolume) {
-                adjustMasterVolume(ADJUST_SAME);
+                adjustMasterVolume(ADJUST_SAME, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
             } else {
                 adjustSuggestedStreamVolume(ADJUST_SAME,
                         stream, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
@@ -416,7 +416,8 @@ public class AudioManager {
                     adjustMasterVolume(
                             keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                     ? ADJUST_RAISE
-                                    : ADJUST_LOWER);
+                                    : ADJUST_LOWER,
+                            flags);
                 } else {
                     if (mVolumeControlStream != -1) {
                         stream = mVolumeControlStream;
@@ -449,7 +450,7 @@ public class AudioManager {
                  */
                 if (mUseMasterVolume) {
                     if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                        adjustMasterVolume(ADJUST_SAME);
+                        adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
                     }
                 } else {
                     int flags = FLAG_PLAY_SOUND;
@@ -555,11 +556,12 @@ public class AudioManager {
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
+     * @param flags One or more flags.
      */
-    private void adjustMasterVolume(int direction) {
+    private void adjustMasterVolume(int direction, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustMasterVolume(direction);
+            service.adjustMasterVolume(direction, flags);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustMasterVolume", e);
         }
