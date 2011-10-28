@@ -726,6 +726,32 @@ public class DatabaseUtils {
     }
 
     /**
+     * Picks a start position for {@link Cursor#fillWindow} such that the
+     * window will contain the requested row and a useful range of rows
+     * around it.
+     *
+     * When the data set is too large to fit in a cursor window, seeking the
+     * cursor can become a very expensive operation since we have to run the
+     * query again when we move outside the bounds of the current window.
+     *
+     * We try to choose a start position for the cursor window such that
+     * 1/3 of the window's capacity is used to hold rows before the requested
+     * position and 2/3 of the window's capacity is used to hold rows after the
+     * requested position.
+     *
+     * @param cursorPosition The row index of the row we want to get.
+     * @param cursorWindowCapacity The estimated number of rows that can fit in
+     * a cursor window, or 0 if unknown.
+     * @return The recommended start position, always less than or equal to
+     * the requested row.
+     * @hide
+     */
+    public static int cursorPickFillWindowStartPosition(
+            int cursorPosition, int cursorWindowCapacity) {
+        return Math.max(cursorPosition - cursorWindowCapacity / 3, 0);
+    }
+
+    /**
      * Query the table for the number of rows in the table.
      * @param db the database the table is in
      * @param table the name of the table to query

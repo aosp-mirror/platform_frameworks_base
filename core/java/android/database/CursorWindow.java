@@ -55,6 +55,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     public int mWindowPtr;
 
     private int mStartPos;
+    private final String mName;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -84,6 +85,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static native boolean nativePutDouble(int windowPtr, double value, int row, int column);
     private static native boolean nativePutNull(int windowPtr, int row, int column);
 
+    private static native String nativeGetName(int windowPtr);
+
     /**
      * Creates a new empty cursor window and gives it a name.
      * <p>
@@ -95,6 +98,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     public CursorWindow(String name) {
         mStartPos = 0;
+        mName = name;
         mWindowPtr = nativeCreate(name, sCursorWindowSize);
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
@@ -129,6 +133,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             throw new CursorWindowAllocationException("Cursor window could not be "
                     + "created from binder.");
         }
+        mName = nativeGetName(mWindowPtr);
         mCloseGuard.open("close");
     }
 
@@ -153,6 +158,14 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             nativeDispose(mWindowPtr);
             mWindowPtr = 0;
         }
+    }
+
+    /**
+     * Gets the name of this cursor window.
+     * @hide
+     */
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -757,5 +770,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         // limit the returned string size to 1000
         String s = (buff.length() > 980) ? buff.substring(0, 980) : buff.toString();
         return "# Open Cursors=" + total + s;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " {" + Integer.toHexString(mWindowPtr) + "}";
     }
 }

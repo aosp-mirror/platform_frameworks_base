@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
+import android.database.DatabaseUtils;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -48,7 +49,10 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private final SQLiteCursorDriver mDriver;
 
     /** The number of rows in the cursor */
-    private volatile int mCount = NO_COUNT;
+    private int mCount = NO_COUNT;
+
+    /** The number of rows that can fit in the cursor window, 0 if unknown */
+    private int mCursorWindowCapacity;
 
     /** A mapping of column names to column indices, to speed up lookups */
     private Map<String, Integer> mColumnNameMap;
@@ -158,18 +162,20 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         return mCount;
     }
 
-    private void fillWindow(int startPos) {
+    private void fillWindow(int requiredPos) {
         clearOrCreateWindow(getDatabase().getPath());
-        mWindow.setStartPosition(startPos);
-        int count = getQuery().fillWindow(mWindow);
-        if (startPos == 0) { // fillWindow returns count(*) only for startPos = 0
+
+        if (mCount == NO_COUNT) {
+            int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos, 0);
+            mCount = getQuery().fillWindow(mWindow, startPos, requiredPos, true);
+            mCursorWindowCapacity = mWindow.getNumRows();
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "received count(*) from native_fill_window: " + count);
+                Log.d(TAG, "received count(*) from native_fill_window: " + mCount);
             }
-            mCount = count;
-        } else if (mCount <= 0) {
-            throw new IllegalStateException("Row count should never be zero or negative "
-                    + "when the start position is non-zero");
+        } else {
+            int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos,
+                    mCursorWindowCapacity);
+            getQuery().fillWindow(mWindow, startPos, requiredPos, false);
         }
     }
 

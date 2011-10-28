@@ -180,13 +180,13 @@ final class BulkCursorProxy implements IBulkCursor {
         return mRemote;
     }
 
-    public CursorWindow getWindow(int startPos) throws RemoteException
+    public CursorWindow getWindow(int position) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IBulkCursor.descriptor);
-            data.writeInt(startPos);
+            data.writeInt(position);
 
             mRemote.transact(GET_CURSOR_WINDOW_TRANSACTION, data, reply, 0);
             DatabaseUtils.readExceptionFromParcel(reply);
