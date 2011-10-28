@@ -148,7 +148,10 @@ public abstract class WallpaperService extends Service {
         int mCurWidth;
         int mCurHeight;
         int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        int mWindowPrivateFlags =
+                WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
         int mCurWindowFlags = mWindowFlags;
+        int mCurWindowPrivateFlags = mWindowPrivateFlags;
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
         final Rect mContentInsets = new Rect();
@@ -359,6 +362,25 @@ public abstract class WallpaperService extends Service {
                 updateSurface(false, false, false);
             }
         }
+
+        /**
+         * Control whether this wallpaper will receive notifications when the wallpaper
+         * has been scrolled. By default, wallpapers will receive notifications, although
+         * the default static image wallpapers do not. It is a performance optimization to
+         * set this to false.
+         *
+         * @param enabled whether the wallpaper wants to receive offset notifications
+         */
+        public void setOffsetNotificationsEnabled(boolean enabled) {
+            mWindowPrivateFlags = enabled
+                    ? (mWindowPrivateFlags |
+                        WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS)
+                    : (mWindowPrivateFlags &
+                        ~WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS);
+            if (mCreated) {
+                updateSurface(false, false, false);
+            }
+        }
         
         /**
          * Called once to initialize the engine.  After returning, the
@@ -478,6 +500,8 @@ public abstract class WallpaperService extends Service {
             out.print(prefix); out.print("mType="); out.print(mType);
                     out.print(" mWindowFlags="); out.print(mWindowFlags);
                     out.print(" mCurWindowFlags="); out.println(mCurWindowFlags);
+                    out.print(" mWindowPrivateFlags="); out.print(mWindowPrivateFlags);
+                    out.print(" mCurWindowPrivateFlags="); out.println(mCurWindowPrivateFlags);
             out.print(prefix); out.print("mVisibleInsets=");
                     out.print(mVisibleInsets.toShortString());
                     out.print(" mWinFrame="); out.print(mWinFrame.toShortString());
@@ -528,7 +552,8 @@ public abstract class WallpaperService extends Service {
             final boolean formatChanged = mFormat != mSurfaceHolder.getRequestedFormat();
             boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
             final boolean typeChanged = mType != mSurfaceHolder.getRequestedType();
-            final boolean flagsChanged = mCurWindowFlags != mWindowFlags;
+            final boolean flagsChanged = mCurWindowFlags != mWindowFlags ||
+                    mCurWindowPrivateFlags != mWindowPrivateFlags;
             if (forceRelayout || creating || surfaceCreating || formatChanged || sizeChanged
                     || typeChanged || flagsChanged || redrawNeeded) {
 
@@ -554,6 +579,8 @@ public abstract class WallpaperService extends Service {
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                             | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             ;
+                    mCurWindowPrivateFlags = mWindowPrivateFlags;
+                    mLayout.privateFlags = mWindowPrivateFlags;
 
                     mLayout.memoryType = mType;
                     mLayout.token = mWindowToken;

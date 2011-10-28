@@ -170,6 +170,8 @@ public class ImageWallpaper extends WallpaperService {
             //registerReceiver(mReceiver, filter, null, mHandler);
 
             updateSurfaceSize(surfaceHolder);
+
+            setOffsetNotificationsEnabled(false);
         }
 
         @Override
