@@ -2978,7 +2978,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Process.sendSignal(app.pid, Process.SIGNAL_QUIT);
         }
 
-        addErrorToDropBox("anr", app, activity, parent, annotation, cpuInfo, tracesFile, null);
+        addErrorToDropBox("anr", app, app.processName, activity, parent, annotation,
+                cpuInfo, tracesFile, null);
 
         if (mController != null) {
             try {
@@ -7082,16 +7083,18 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public void handleApplicationCrash(IBinder app, ApplicationErrorReport.CrashInfo crashInfo) {
         ProcessRecord r = findAppProcess(app, "Crash");
+        final String processName = app == null ? "system_server"
+                : (r == null ? "unknown" : r.processName);
 
         EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
-                app == null ? "system" : (r == null ? "unknown" : r.processName),
+                processName,
                 r == null ? -1 : r.info.flags,
                 crashInfo.exceptionClassName,
                 crashInfo.exceptionMessage,
                 crashInfo.throwFileName,
                 crashInfo.throwLineNumber);
 
-        addErrorToDropBox("crash", r, null, null, null, null, null, crashInfo);
+        addErrorToDropBox("crash", r, processName, null, null, null, null, null, crashInfo);
 
         crashApplication(r, crashInfo);
     }
@@ -7164,6 +7167,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean isSystemApp = process == null ||
                 (process.info.flags & (ApplicationInfo.FLAG_SYSTEM |
                                        ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+        final String processName = process == null ? "unknown" : process.processName;
         final String dropboxTag = isSystemApp ? "system_app_strictmode" : "data_app_strictmode";
         final DropBoxManager dbox = (DropBoxManager)
                 mContext.getSystemService(Context.DROPBOX_SERVICE);
@@ -7176,7 +7180,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final StringBuilder sb = isSystemApp ? mStrictModeBuffer : new StringBuilder(1024);
         synchronized (sb) {
             bufferWasEmpty = sb.length() == 0;
-            appendDropBoxProcessHeaders(process, sb);
+            appendDropBoxProcessHeaders(process, processName, sb);
             sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
             sb.append("System-App: ").append(isSystemApp).append("\n");
             sb.append("Uptime-Millis: ").append(info.violationUptimeMillis).append("\n");
@@ -7278,13 +7282,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) {
         ProcessRecord r = findAppProcess(app, "WTF");
+        final String processName = app == null ? "system_server"
+                : (r == null ? "unknown" : r.processName);
 
         EventLog.writeEvent(EventLogTags.AM_WTF, Binder.getCallingPid(),
-                app == null ? "system" : (r == null ? "unknown" : r.processName),
+                processName,
                 r == null ? -1 : r.info.flags,
                 tag, crashInfo.exceptionMessage);
 
-        addErrorToDropBox("wtf", r, null, null, tag, null, null, crashInfo);
+        addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
 
         if (r != null && r.pid != Process.myPid() &&
                 Settings.Secure.getInt(mContext.getContentResolver(),
@@ -7327,7 +7333,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Utility function for addErrorToDropBox and handleStrictModeViolation's logging
      * to append various headers to the dropbox log text.
      */
-    private void appendDropBoxProcessHeaders(ProcessRecord process, StringBuilder sb) {
+    private void appendDropBoxProcessHeaders(ProcessRecord process, String processName,
+            StringBuilder sb) {
         // Watchdog thread ends up invoking this function (with
         // a null ProcessRecord) to add the stack file to dropbox.
         // Do not acquire a lock on this (am) in such cases, as it
@@ -7335,18 +7342,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         // is invoked due to unavailability of lock on am and it
         // would prevent watchdog from killing system_server.
         if (process == null) {
-            sb.append("Process: system_server\n");
+            sb.append("Process: ").append(processName).append("\n");
             return;
         }
         // Note: ProcessRecord 'process' is guarded by the service
         // instance.  (notably process.pkgList, which could otherwise change
         // concurrently during execution of this method)
         synchronized (this) {
-            if (process.pid == MY_PID) {
-                sb.append("Process: system_server\n");
-            } else {
-                sb.append("Process: ").append(process.processName).append("\n");
-            }
+            sb.append("Process: ").append(processName).append("\n");
             int flags = process.info.flags;
             IPackageManager pm = AppGlobals.getPackageManager();
             sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
@@ -7390,7 +7393,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
-            ProcessRecord process, ActivityRecord activity, ActivityRecord parent, String subject,
+            ProcessRecord process, String processName, ActivityRecord activity,
+            ActivityRecord parent, String subject,
             final String report, final File logFile,
             final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
@@ -7404,7 +7408,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         final StringBuilder sb = new StringBuilder(1024);
-        appendDropBoxProcessHeaders(process, sb);
+        appendDropBoxProcessHeaders(process, processName, sb);
         if (activity != null) {
             sb.append("Activity: ").append(activity.shortComponentName).append("\n");
         }
