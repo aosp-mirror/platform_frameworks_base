@@ -52,8 +52,13 @@ import android.util.Log;
  * <li>the number of segments left to play in the queue,</li>
  * <li>application controller events (CC80-83) to mark points in the MIDI segments.</li>
  * </ul>
- *  Use {@link #getJetPlayer()} to construct a JetPlayer instance. JetPlayer is a singleton class.
- * 
+ * Use {@link #getJetPlayer()} to construct a JetPlayer instance. JetPlayer is a singleton class.
+ * </p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use JetPlayer, read the
+ * <a href="{@docRoot}guide/topics/media/jetplayer.html">JetPlayer</a> developer guide.</p></div>
  */
 public class JetPlayer
 {    
