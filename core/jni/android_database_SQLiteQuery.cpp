@@ -35,6 +35,12 @@
 
 namespace android {
 
+sqlite3_stmt * compile(JNIEnv* env, jobject object,
+                       sqlite3 * handle, jstring sqlString);
+
+// From android_database_CursorWindow.cpp
+CursorWindow * get_window_from_object(JNIEnv * env, jobject javaWindow);
+
 static jfieldID gHandleField;
 static jfieldID gStatementField;
 
@@ -99,7 +105,7 @@ static int finish_program_and_get_row_count(sqlite3_stmt *statement) {
     return numRows;
 }
 
-static jint native_fill_window(JNIEnv* env, jobject object, jint windowPtr,
+static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                                jint startPos, jint offsetParam, jint maxRead, jint lastPos)
 {
     int err;
@@ -136,7 +142,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jint windowPtr,
     }
 
     // Get the native window
-    window = reinterpret_cast<CursorWindow*>(windowPtr);
+    window = get_window_from_object(env, javaWindow);
     if (!window) {
         LOGE("Invalid CursorWindow");
         jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -354,7 +360,7 @@ static jstring native_column_name(JNIEnv* env, jobject object, jint columnIndex)
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_fill_window", "(IIIII)I",
+    {"native_fill_window", "(Landroid/database/CursorWindow;IIII)I",
             (void *)native_fill_window},
     {"native_column_count", "()I", (void*)native_column_count},
     {"native_column_name", "(I)Ljava/lang/String;", (void *)native_column_name},

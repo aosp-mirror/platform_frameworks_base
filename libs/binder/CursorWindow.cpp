@@ -236,6 +236,33 @@ field_slot_t * CursorWindow::getFieldSlotWithCheck(int row, int column)
   return ((field_slot_t *)offsetToPtr(fieldDirOffset)) + column;  
 }
 
+uint32_t CursorWindow::read_field_slot(int row, int column, field_slot_t * slotOut)
+{
+    if (row < 0 || row >= mHeader->numRows || column < 0 || column >= mHeader->numColumns) {
+        LOGE("Can't read row# %d, col# %d from CursorWindow. Make sure your Cursor is initialized correctly.",
+                row, column);
+        return -1;
+    }        
+    row_slot_t * rowSlot = getRowSlot(row);
+    if (!rowSlot) {
+        LOGE("Failed to find rowSlot for row %d", row);
+        return -1;
+    }
+    if (rowSlot->offset == 0 || rowSlot->offset >= mSize) {
+        LOGE("Invalid rowSlot, offset = %d", rowSlot->offset);
+        return -1;
+    }
+LOG_WINDOW("Found field directory for %d,%d at rowSlot %d, offset %d", row, column, (uint8_t *)rowSlot - mData, rowSlot->offset);
+    field_slot_t * fieldDir = (field_slot_t *)offsetToPtr(rowSlot->offset);
+LOG_WINDOW("Read field_slot_t %d,%d: offset = %d, size = %d, type = %d", row, column, fieldDir[column].data.buffer.offset, fieldDir[column].data.buffer.size, fieldDir[column].type);
+
+    // Copy the data to the out param
+    slotOut->data.buffer.offset = fieldDir[column].data.buffer.offset;
+    slotOut->data.buffer.size = fieldDir[column].data.buffer.size;
+    slotOut->type = fieldDir[column].type;
+    return 0;
+}
+
 void CursorWindow::copyIn(uint32_t offset, uint8_t const * data, size_t size)
 {
     assert(offset + size <= mSize);    
@@ -343,8 +370,12 @@ bool CursorWindow::getLong(unsigned int row, unsigned int col, int64_t * valueOu
     if (!fieldSlot || fieldSlot->type != FIELD_TYPE_INTEGER) {
         return false;
     }
-
-    *valueOut = getFieldSlotValueLong(fieldSlot);
+    
+#if WINDOW_STORAGE_INLINE_NUMERICS
+    *valueOut = fieldSlot->data.l;
+#else
+    *valueOut = copyOutLong(fieldSlot->data.buffer.offset);
+#endif
     return true;
 }
 
@@ -355,7 +386,11 @@ bool CursorWindow::getDouble(unsigned int row, unsigned int col, double * valueO
         return false;
     }
 
-    *valueOut = getFieldSlotValueDouble(fieldSlot);
+#if WINDOW_STORAGE_INLINE_NUMERICS
+    *valueOut = fieldSlot->data.d;
+#else
+    *valueOut = copyOutDouble(fieldSlot->data.buffer.offset);
+#endif
     return true;
 }
 

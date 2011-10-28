@@ -18,12 +18,17 @@ package android.database;
 
 /**
  * This exception is thrown when a CursorWindow couldn't be allocated,
- * most probably due to memory not being available.
- *
- * @hide
+ * most probably due to memory not being available
  */
-public class CursorWindowAllocationException extends RuntimeException {
-    public CursorWindowAllocationException(String description) {
+class CursorWindowAllocationException extends java.lang.RuntimeException
+{
+    public CursorWindowAllocationException()
+    {
+        super();
+    }
+
+    public CursorWindowAllocationException(String description)
+    {
         super(description);
     }
 }
