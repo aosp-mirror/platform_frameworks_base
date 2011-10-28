@@ -468,7 +468,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
         acquireReference();
         try {
-            nativeCopyStringToBuffer(mWindowPtr, row, column, buffer);
+            nativeCopyStringToBuffer(mWindowPtr, row - mStartPos, column, buffer);
         } finally {
             releaseReference();
         }
