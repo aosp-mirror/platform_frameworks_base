@@ -38,13 +38,11 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
      * Initializes the adaptor.
      * Must be called before first use.
      */
-    public void initialize(IBulkCursor bulkCursor, int count, int idIndex,
-            boolean wantsAllOnMoveCalls) {
+    public void initialize(IBulkCursor bulkCursor, int count, int idIndex) {
         mBulkCursor = bulkCursor;
         mColumns = null;  // lazily retrieved
         mCount = count;
         mRowIdColumnIndex = idIndex;
-        mWantsAllOnMoveCalls = wantsAllOnMoveCalls;
     }
 
     /**
@@ -88,12 +86,15 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
 
         try {
             // Make sure we have the proper window
-            if (mWindow == null
-                    || newPosition < mWindow.getStartPosition()
-                    || newPosition >= mWindow.getStartPosition() + mWindow.getNumRows()) {
+            if (mWindow != null) {
+                if (newPosition < mWindow.getStartPosition() ||
+                        newPosition >= (mWindow.getStartPosition() + mWindow.getNumRows())) {
+                    setWindow(mBulkCursor.getWindow(newPosition));
+                } else if (mWantsAllOnMoveCalls) {
+                    mBulkCursor.onMove(newPosition);
+                }
+            } else {
                 setWindow(mBulkCursor.getWindow(newPosition));
-            } else if (mWantsAllOnMoveCalls) {
-                mBulkCursor.onMove(newPosition);
             }
         } catch (RemoteException ex) {
             // We tried to get a window and failed
@@ -144,19 +145,25 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
         throwIfCursorIsClosed();
 
         try {
-            mCount = mBulkCursor.requery(getObserver());
-            if (mCount != -1) {
-                mPos = -1;
-                closeWindow();
+            CursorWindow newWindow = new CursorWindow(false /* create a remote window */);
+            try {
+                mCount = mBulkCursor.requery(getObserver(), newWindow);
+                if (mCount != -1) {
+                    mPos = -1;
+                    closeWindow();
 
-                // super.requery() will call onChanged. Do it here instead of relying on the
-                // observer from the far side so that observers can see a correct value for mCount
-                // when responding to onChanged.
-                super.requery();
-                return true;
-            } else {
-                deactivate();
-                return false;
+                    // super.requery() will call onChanged. Do it here instead of relying on the
+                    // observer from the far side so that observers can see a correct value for mCount
+                    // when responding to onChanged.
+                    super.requery();
+                    return true;
+                } else {
+                    deactivate();
+                    return false;
+                }
+            } finally {
+                // Don't take ownership of the window until the next call to onMove.
+                newWindow.close();
             }
         } catch (Exception ex) {
             Log.e(TAG, "Unable to requery because the remote process exception " + ex.getMessage());

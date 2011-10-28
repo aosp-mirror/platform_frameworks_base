@@ -189,14 +189,12 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
     /**
      * If there is a window, clear it.
      * Otherwise, creates a local window.
-     *
-     * @param name The window name.
      * @hide
      */
-    protected void clearOrCreateLocalWindow(String name) {
+    protected void clearOrCreateLocalWindow() {
         if (mWindow == null) {
             // If there isn't a window set already it will only be accessed locally
-            mWindow = new CursorWindow(name, true /* the window is local only */);
+            mWindow = new CursorWindow(true /* the window is local only */);
         } else {
             mWindow.clear();
         }

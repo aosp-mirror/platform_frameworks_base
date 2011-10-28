@@ -56,7 +56,7 @@ public interface IBulkCursor extends IInterface  {
 
     public void close() throws RemoteException;
 
-    public int requery(IContentObserver observer) throws RemoteException;
+    public int requery(IContentObserver observer, CursorWindow window) throws RemoteException;
 
     boolean getWantsAllOnMoveCalls() throws RemoteException;
 

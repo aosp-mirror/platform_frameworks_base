@@ -109,8 +109,9 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
                 case REQUERY_TRANSACTION: {
                     data.enforceInterface(IBulkCursor.descriptor);
                     IContentObserver observer =
-                            IContentObserver.Stub.asInterface(data.readStrongBinder());
-                    int count = requery(observer);
+                        IContentObserver.Stub.asInterface(data.readStrongBinder());
+                    CursorWindow window = CursorWindow.CREATOR.createFromParcel(data);
+                    int count = requery(observer, window);
                     reply.writeNoException();
                     reply.writeInt(count);
                     reply.writeBundle(getExtras());
@@ -293,12 +294,13 @@ final class BulkCursorProxy implements IBulkCursor {
         }
     }
     
-    public int requery(IContentObserver observer) throws RemoteException {
+    public int requery(IContentObserver observer, CursorWindow window) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IBulkCursor.descriptor);
             data.writeStrongInterface(observer);
+            window.writeToParcel(data, 0);
 
             boolean result = mRemote.transact(REQUERY_TRANSACTION, data, reply, 0);
             DatabaseUtils.readExceptionFromParcel(reply);

@@ -53,7 +53,6 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
      * for managing the lifetime of their window.
      */
     private CursorWindow mWindowForNonWindowedCursor;
-    private boolean mWindowForNonWindowedCursorWasFilled;
 
     private static final class ContentObserverProxy extends ContentObserver {
         protected IContentObserver mRemote;
@@ -88,11 +87,26 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
     }
 
-    public CursorToBulkCursorAdaptor(Cursor cursor, IContentObserver observer,
-            String providerName) {
+    public CursorToBulkCursorAdaptor(Cursor cursor, IContentObserver observer, String providerName,
+            CursorWindow window) {
         try {
             mCursor = (CrossProcessCursor) cursor;
+            if (mCursor instanceof AbstractWindowedCursor) {
+                AbstractWindowedCursor windowedCursor = (AbstractWindowedCursor) cursor;
+                if (windowedCursor.hasWindow()) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE) || false) {
+                        Log.v(TAG, "Cross process cursor has a local window before setWindow in "
+                                + providerName, new RuntimeException());
+                    }
+                }
+                windowedCursor.setWindow(window); // cursor takes ownership of window
+            } else {
+                mWindowForNonWindowedCursor = window; // we own the window
+                mCursor.fillWindow(0, window);
+            }
         } catch (ClassCastException e) {
+            // TODO Implement this case.
+            window.close();
             throw new UnsupportedOperationException(
                     "Only CrossProcessCursor cursors are supported across process for now", e);
         }
@@ -103,22 +117,17 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
     }
 
-    private void closeWindowForNonWindowedCursorLocked() {
-        if (mWindowForNonWindowedCursor != null) {
-            mWindowForNonWindowedCursor.close();
-            mWindowForNonWindowedCursor = null;
-            mWindowForNonWindowedCursorWasFilled = false;
-        }
-    }
-
-    private void disposeLocked() {
+    private void closeCursorAndWindowLocked() {
         if (mCursor != null) {
             unregisterObserverProxyLocked();
             mCursor.close();
             mCursor = null;
         }
 
-        closeWindowForNonWindowedCursorLocked();
+        if (mWindowForNonWindowedCursor != null) {
+            mWindowForNonWindowedCursor.close();
+            mWindowForNonWindowedCursor = null;
+        }
     }
 
     private void throwIfCursorIsClosed() {
@@ -130,7 +139,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
     @Override
     public void binderDied() {
         synchronized (mLock) {
-            disposeLocked();
+            closeCursorAndWindowLocked();
         }
     }
 
@@ -139,30 +148,17 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         synchronized (mLock) {
             throwIfCursorIsClosed();
 
-            CursorWindow window;
-            if (mCursor instanceof AbstractWindowedCursor) {
-                AbstractWindowedCursor windowedCursor = (AbstractWindowedCursor)mCursor;
-                window = windowedCursor.getWindow();
-                if (window == null) {
-                    window = new CursorWindow(mProviderName, false /*localOnly*/);
-                    windowedCursor.setWindow(window);
-                }
+            mCursor.moveToPosition(startPos);
 
-                mCursor.moveToPosition(startPos);
+            final CursorWindow window;
+            if (mCursor instanceof AbstractWindowedCursor) {
+                window = ((AbstractWindowedCursor)mCursor).getWindow();
             } else {
                 window = mWindowForNonWindowedCursor;
-                if (window == null) {
-                    window = new CursorWindow(mProviderName, false /*localOnly*/);
-                    mWindowForNonWindowedCursor = window;
-                }
-
-                mCursor.moveToPosition(startPos);
-
-                if (!mWindowForNonWindowedCursorWasFilled
-                        || startPos < window.getStartPosition()
-                        || startPos >= window.getStartPosition() + window.getNumRows()) {
+                if (window != null
+                        && (startPos < window.getStartPosition() ||
+                                startPos >= (window.getStartPosition() + window.getNumRows()))) {
                     mCursor.fillWindow(startPos, window);
-                    mWindowForNonWindowedCursorWasFilled = true;
                 }
             }
 
@@ -210,24 +206,29 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                 unregisterObserverProxyLocked();
                 mCursor.deactivate();
             }
-
-            closeWindowForNonWindowedCursorLocked();
         }
     }
 
     @Override
     public void close() {
         synchronized (mLock) {
-            disposeLocked();
+            closeCursorAndWindowLocked();
         }
     }
 
     @Override
-    public int requery(IContentObserver observer) {
+    public int requery(IContentObserver observer, CursorWindow window) {
         synchronized (mLock) {
             throwIfCursorIsClosed();
 
-            closeWindowForNonWindowedCursorLocked();
+            if (mCursor instanceof AbstractWindowedCursor) {
+                ((AbstractWindowedCursor) mCursor).setWindow(window);
+            } else {
+                if (mWindowForNonWindowedCursor != null) {
+                    mWindowForNonWindowedCursor.close();
+                }
+                mWindowForNonWindowedCursor = window;
+            }
 
             try {
                 if (!mCursor.requery()) {
@@ -238,6 +239,12 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                         mProviderName + " Requery misuse db, mCursor isClosed:" +
                         mCursor.isClosed(), e);
                 throw leakProgram;
+            }
+
+            if (!(mCursor instanceof AbstractWindowedCursor)) {
+                if (window != null) {
+                    mCursor.fillWindow(0, window);
+                }
             }
 
             unregisterObserverProxyLocked();

@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -30,13 +31,6 @@ import android.util.SparseIntArray;
 
 /**
  * A buffer containing multiple cursor rows.
- * <p>
- * A {@link CursorWindow} is read-write when created and used locally.  When sent
- * to a remote process (by writing it to a {@link Parcel}), the remote process
- * receives a read-only view of the cursor window.  Typically the cursor window
- * will be allocated by the producer, filled with data, and then sent to the
- * consumer for reading.
- * </p>
  */
 public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static final String STATS_TAG = "CursorWindowStats";
@@ -58,11 +52,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private static native int nativeCreate(String name,
-            int cursorWindowSize, boolean localOnly);
-    private static native int nativeCreateFromParcel(Parcel parcel);
+    private static native int nativeInitializeEmpty(int cursorWindowSize, boolean localOnly);
+    private static native int nativeInitializeFromBinder(IBinder nativeBinder);
     private static native void nativeDispose(int windowPtr);
-    private static native void nativeWriteToParcel(int windowPtr, Parcel parcel);
+    private static native IBinder nativeGetBinder(int windowPtr);
 
     private static native void nativeClear(int windowPtr);
 
@@ -86,30 +79,6 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static native boolean nativePutNull(int windowPtr, int row, int column);
 
     /**
-     * Creates a new empty cursor window and gives it a name.
-     * <p>
-     * The cursor initially has no rows or columns.  Call {@link #setNumColumns(int)} to
-     * set the number of columns before adding any rows to the cursor.
-     * </p>
-     *
-     * @param name The name of the cursor window, or null if none.
-     * @param localWindow True if this window will be used in this process only,
-     * false if it might be sent to another processes.
-     *
-     * @hide
-     */
-    public CursorWindow(String name, boolean localWindow) {
-        mStartPos = 0;
-        mWindowPtr = nativeCreate(name, sCursorWindowSize, localWindow);
-        if (mWindowPtr == 0) {
-            throw new CursorWindowAllocationException("Cursor window allocation of " +
-                    (sCursorWindowSize / 1024) + " kb failed. " + printStats());
-        }
-        mCloseGuard.open("close");
-        recordNewWindow(Binder.getCallingPid(), mWindowPtr);
-    }
-
-    /**
      * Creates a new empty cursor window.
      * <p>
      * The cursor initially has no rows or columns.  Call {@link #setNumColumns(int)} to
@@ -120,12 +89,20 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * false if it might be sent to another processes.
      */
     public CursorWindow(boolean localWindow) {
-        this(null, localWindow);
+        mStartPos = 0;
+        mWindowPtr = nativeInitializeEmpty(sCursorWindowSize, localWindow);
+        if (mWindowPtr == 0) {
+            throw new CursorWindowAllocationException("Cursor window allocation of " +
+                    (sCursorWindowSize / 1024) + " kb failed. " + printStats());
+        }
+        mCloseGuard.open("close");
+        recordNewWindow(Binder.getCallingPid(), mWindowPtr);
     }
 
     private CursorWindow(Parcel source) {
+        IBinder binder = source.readStrongBinder();
         mStartPos = source.readInt();
-        mWindowPtr = nativeCreateFromParcel(source);
+        mWindowPtr = nativeInitializeFromBinder(binder);
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window could not be "
                     + "created from binder.");
@@ -710,8 +687,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStrongBinder(nativeGetBinder(mWindowPtr));
         dest.writeInt(mStartPos);
-        nativeWriteToParcel(mWindowPtr, dest);
 
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             releaseReference();

@@ -21,8 +21,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <binder/Parcel.h>
-#include <utils/String8.h>
+#include <binder/IMemory.h>
+#include <utils/RefBase.h>
+
+#define DEFAULT_WINDOW_SIZE 4096
+#define WINDOW_ALLOCATION_SIZE 4096
+
+#define ROW_SLOT_CHUNK_NUM_ROWS 16
+
+// Row slots are allocated in chunks of ROW_SLOT_CHUNK_NUM_ROWS,
+// with an offset after the rows that points to the next chunk
+#define ROW_SLOT_CHUNK_SIZE ((ROW_SLOT_CHUNK_NUM_ROWS * sizeof(row_slot_t)) + sizeof(uint32_t))
+
 
 #if LOG_NDEBUG
 
@@ -36,157 +46,176 @@
 
 #endif
 
+
+// When defined to true strings are stored as UTF8, otherwise they're UTF16
+#define WINDOW_STORAGE_UTF8 1
+
+// When defined to true numberic values are stored inline in the field_slot_t, otherwise they're allocated in the window
+#define WINDOW_STORAGE_INLINE_NUMERICS 1
+
 namespace android {
+
+typedef struct
+{
+    uint32_t numRows;
+    uint32_t numColumns;
+} window_header_t;
+
+typedef struct
+{
+    uint32_t offset;
+} row_slot_t;
+
+typedef struct
+{
+    uint8_t type;
+    union {
+        double d;
+        int64_t l;
+        struct {
+            uint32_t offset;
+            uint32_t size;
+        } buffer;
+    } data;
+} __attribute__((packed)) field_slot_t;
+
+#define FIELD_TYPE_NULL 0
+#define FIELD_TYPE_INTEGER 1
+#define FIELD_TYPE_FLOAT 2
+#define FIELD_TYPE_STRING 3
+#define FIELD_TYPE_BLOB 4
 
 /**
  * This class stores a set of rows from a database in a buffer. The begining of the
- * window has first chunk of RowSlots, which are offsets to the row directory, followed by
- * an offset to the next chunk in a linked-list of additional chunk of RowSlots in case
+ * window has first chunk of row_slot_ts, which are offsets to the row directory, followed by
+ * an offset to the next chunk in a linked-list of additional chunk of row_slot_ts in case
  * the pre-allocated chunk isn't big enough to refer to all rows. Each row directory has a
- * FieldSlot per column, which has the size, offset, and type of the data for that field.
+ * field_slot_t per column, which has the size, offset, and type of the data for that field.
  * Note that the data types come from sqlite3.h.
- *
- * Strings are stored in UTF-8.
  */
-class CursorWindow {
-    CursorWindow(const String8& name, int ashmemFd,
-            void* data, size_t size, bool readOnly);
-
+class CursorWindow
+{
 public:
-    /* Field types. */
-    enum {
-        FIELD_TYPE_NULL = 0,
-        FIELD_TYPE_INTEGER = 1,
-        FIELD_TYPE_FLOAT = 2,
-        FIELD_TYPE_STRING = 3,
-        FIELD_TYPE_BLOB = 4,
-    };
+                        CursorWindow(size_t maxSize);
+                        CursorWindow(){}
+    bool                setMemory(const sp<IMemory>&);
+                        ~CursorWindow();
 
-    /* Opaque type that describes a field slot. */
-    struct FieldSlot {
-    private:
-        int32_t type;
-        union {
-            double d;
-            int64_t l;
-            struct {
-                uint32_t offset;
-                uint32_t size;
-            } buffer;
-        } data;
+    bool                initBuffer(bool localOnly);
+    sp<IMemory>         getMemory() {return mMemory;}
 
-        friend class CursorWindow;
-    } __attribute((packed));
+    size_t              size() {return mSize;}
+    uint8_t *           data() {return mData;}
+    uint32_t            getNumRows() {return mHeader->numRows;}
+    uint32_t            getNumColumns() {return mHeader->numColumns;}
+    void                freeLastRow() {
+                            if (mHeader->numRows > 0) {
+                                mHeader->numRows--;
+                            }
+                        }
+    bool                setNumColumns(uint32_t numColumns)
+                            {
+                                uint32_t cur = mHeader->numColumns;
+                                if (cur > 0 && cur != numColumns) {
+                                    LOGE("Trying to go from %d columns to %d", cur, numColumns);
+                                    return false;
+                                }
+                                mHeader->numColumns = numColumns;
+                                return true;
+                            }
 
-    ~CursorWindow();
+    int32_t             freeSpace();
 
-    static status_t create(const String8& name, size_t size, bool localOnly,
-            CursorWindow** outCursorWindow);
-    static status_t createFromParcel(Parcel* parcel, CursorWindow** outCursorWindow);
+    void                clear();
 
-    status_t writeToParcel(Parcel* parcel);
+                        /**
+                         * Allocate a row slot and its directory. The returned
+                         * pointer points to the begining of the row's directory
+                         * or NULL if there wasn't room. The directory is
+                         * initialied with NULL entries for each field.
+                         */
+    field_slot_t *      allocRow();
 
-    inline String8 name() { return mName; }
-    inline size_t size() { return mSize; }
-    inline size_t freeSpace() { return mSize - mHeader->freeOffset; }
-    inline uint32_t getNumRows() { return mHeader->numRows; }
-    inline uint32_t getNumColumns() { return mHeader->numColumns; }
+                        /**
+                         * Allocate a portion of the window. Returns the offset
+                         * of the allocation, or 0 if there isn't enough space.
+                         * If aligned is true, the allocation gets 4 byte alignment.
+                         */
+    uint32_t            alloc(size_t size, bool aligned = false);
 
-    status_t clear();
-    status_t setNumColumns(uint32_t numColumns);
+                        /**
+                         * Copy data into the window at the given offset.
+                         */
+    void                copyIn(uint32_t offset, uint8_t const * data, size_t size);
+    void                copyIn(uint32_t offset, int64_t data);
+    void                copyIn(uint32_t offset, double data);
 
-    /**
-     * Allocate a row slot and its directory.
-     * The row is initialized will null entries for each field.
-     */
-    status_t allocRow();
-    status_t freeLastRow();
+    void                copyOut(uint32_t offset, uint8_t * data, size_t size);
+    int64_t             copyOutLong(uint32_t offset);
+    double              copyOutDouble(uint32_t offset);
 
-    status_t putBlob(uint32_t row, uint32_t column, const void* value, size_t size);
-    status_t putString(uint32_t row, uint32_t column, const char* value, size_t sizeIncludingNull);
-    status_t putLong(uint32_t row, uint32_t column, int64_t value);
-    status_t putDouble(uint32_t row, uint32_t column, double value);
-    status_t putNull(uint32_t row, uint32_t column);
+    bool                putLong(unsigned int row, unsigned int col, int64_t value);
+    bool                putDouble(unsigned int row, unsigned int col, double value);
+    bool                putNull(unsigned int row, unsigned int col);
 
-    /**
-     * Gets the field slot at the specified row and column.
-     * Returns null if the requested row or column is not in the window.
-     */
-    FieldSlot* getFieldSlot(uint32_t row, uint32_t column);
+    bool                getLong(unsigned int row, unsigned int col, int64_t * valueOut);
+    bool                getDouble(unsigned int row, unsigned int col, double * valueOut);
+    bool                getNull(unsigned int row, unsigned int col, bool * valueOut);
 
-    inline int32_t getFieldSlotType(FieldSlot* fieldSlot) {
-        return fieldSlot->type;
-    }
+    uint8_t *           offsetToPtr(uint32_t offset) {return mData + offset;}
 
-    inline int64_t getFieldSlotValueLong(FieldSlot* fieldSlot) {
+    row_slot_t *        allocRowSlot();
+
+    row_slot_t *        getRowSlot(int row);
+
+                        /**
+                         * return NULL if Failed to find rowSlot or
+                         * Invalid rowSlot
+                         */
+    field_slot_t *      getFieldSlotWithCheck(int row, int column);
+    field_slot_t *      getFieldSlot(int row, int column)
+                            {
+                                int fieldDirOffset = getRowSlot(row)->offset;
+                                return ((field_slot_t *)offsetToPtr(fieldDirOffset)) + column;
+                            }
+
+    int64_t getFieldSlotValueLong(field_slot_t* fieldSlot) {
+#if WINDOW_STORAGE_INLINE_NUMERICS
         return fieldSlot->data.l;
+#else
+        return copyOutLong(fieldSlot->data.buffer.offset);
+#endif
     }
 
-    inline double getFieldSlotValueDouble(FieldSlot* fieldSlot) {
+    double getFieldSlotValueDouble(field_slot_t* fieldSlot) {
+#if WINDOW_STORAGE_INLINE_NUMERICS
         return fieldSlot->data.d;
+#else
+        return copyOutDouble(fieldSlot->data.buffer.offset);
+#endif
     }
 
-    inline const char* getFieldSlotValueString(FieldSlot* fieldSlot,
-            size_t* outSizeIncludingNull) {
-        *outSizeIncludingNull = fieldSlot->data.buffer.size;
-        return static_cast<char*>(offsetToPtr(fieldSlot->data.buffer.offset));
+#if WINDOW_STORAGE_UTF8
+    char* getFieldSlotValueString(field_slot_t* fieldSlot) {
+        return reinterpret_cast<char*>(offsetToPtr(fieldSlot->data.buffer.offset));
     }
-
-    inline const void* getFieldSlotValueBlob(FieldSlot* fieldSlot, size_t* outSize) {
-        *outSize = fieldSlot->data.buffer.size;
-        return offsetToPtr(fieldSlot->data.buffer.offset);
+#else
+    char16_t* getFieldSlotValueString(field_slot_t* fieldSlot) {
+        return reinterpret_cast<char16_t*>(offsetToPtr(fieldSlot->data.buffer.offset));
     }
+#endif
 
 private:
-    static const size_t ROW_SLOT_CHUNK_NUM_ROWS = 100;
-
-    struct Header {
-        // Offset of the lowest unused byte in the window.
-        uint32_t freeOffset;
-
-        // Offset of the first row slot chunk.
-        uint32_t firstChunkOffset;
-
-        uint32_t numRows;
-        uint32_t numColumns;
-    };
-
-    struct RowSlot {
-        uint32_t offset;
-    };
-
-    struct RowSlotChunk {
-        RowSlot slots[ROW_SLOT_CHUNK_NUM_ROWS];
-        uint32_t nextChunkOffset;
-    };
-
-    String8 mName;
-    int mAshmemFd;
-    void* mData;
+    uint8_t * mData;
     size_t mSize;
-    bool mReadOnly;
-    Header* mHeader;
-
-    inline void* offsetToPtr(uint32_t offset) {
-        return static_cast<uint8_t*>(mData) + offset;
-    }
-
-    inline uint32_t offsetFromPtr(void* ptr) {
-        return static_cast<uint8_t*>(ptr) - static_cast<uint8_t*>(mData);
-    }
+    size_t mMaxSize;
+    window_header_t * mHeader;
+    sp<IMemory> mMemory;
 
     /**
-     * Allocate a portion of the window. Returns the offset
-     * of the allocation, or 0 if there isn't enough space.
-     * If aligned is true, the allocation gets 4 byte alignment.
+     * Offset of the lowest unused data byte in the array.
      */
-    uint32_t alloc(size_t size, bool aligned = false);
-
-    RowSlot* getRowSlot(uint32_t row);
-    RowSlot* allocRowSlot();
-
-    status_t putBlobOrString(uint32_t row, uint32_t column,
-            const void* value, size_t size, int32_t type);
+    uint32_t mFreeOffset;
 };
 
 }; // namespace android
