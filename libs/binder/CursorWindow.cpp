@@ -211,7 +211,7 @@ uint32_t CursorWindow::alloc(size_t size, bool aligned) {
     uint32_t offset = mHeader->freeOffset + padding;
     uint32_t nextFreeOffset = offset + size;
     if (nextFreeOffset > mSize) {
-        LOGE("Window is full: requested allocation %d bytes, "
+        LOGW("Window is full: requested allocation %d bytes, "
                 "free space %d bytes, window size %d bytes",
                 size, freeSpace(), mSize);
         return 0;
