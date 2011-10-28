@@ -50,10 +50,10 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"تنظیم روش‌های ورودی"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"از صفحه کلید فیزیکی استفاده کنید"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می دهید به دستگاه USB دسترسی داشته باشد؟"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه میدهد تا به USB دسترسی داشته باشد؟"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه میدهد تا به وسیله جانبی USB دسترسی داشته باشد؟"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"وقتی این دستگاه USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"وقتی این وسیله جانبی USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"هیچ برنامه کاربردی نصب شده‌ای با این USB کار نمیکند. در <xliff:g id="URL">%1$s</xliff:g> درباره این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"هیچ برنامه کاربردی نصب شده‌ای با این وسیله جانبی USB کار نمیکند. در <xliff:g id="URL">%1$s</xliff:g> درباره این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"لوازم جانبی USB"</string>
     <string name="label_view" msgid="6304565553218192990">"مشاهده"</string>
     <string name="always_use_device" msgid="1450287437017315906">"استفاده به صورت پیش فرض برای این دستگاه USB"</string>
@@ -65,9 +65,9 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"در حال ذخیره تصویر صفحه..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره تصویر صفحه..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"تصویر صفحه ذخیره شد."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"تصویر صفحه ضبط شد."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"تصویر صفحه گرفته شد."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده تصویر صفحه خود، لمس کنید."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه ضبط نشد."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه گرفته نشد."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"تصویر صفحه ذخیره نشد. ممکن است دستگاه ذخیره‌ در حال استفاده باشد."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"گزینه های انتقال فایل USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"نصب به عنوان دستگاه پخش رسانه (MTP)"</string>

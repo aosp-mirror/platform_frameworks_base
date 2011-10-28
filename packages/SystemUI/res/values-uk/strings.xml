@@ -126,7 +126,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Дані 4G вимкнено"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобільне передавання даних вимкнено"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Використання даних вимкнено"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Досягнуто вказаного ліміту використання даних."\n\n"Повторне ввімкнення використання даних може призвести до стягнення плати оператором."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Досягнуто вказаного ліміту використання даних."\n\n"Якщо ввімкнути використання даних знову, оператор може стягнути плату."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Повторно ввімкнути дані"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Немає з’єднання"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi під’єднано"</string>
