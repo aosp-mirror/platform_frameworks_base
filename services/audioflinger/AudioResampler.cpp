@@ -33,7 +33,7 @@
 namespace android {
 
 #ifdef __ARM_HAVE_HALFWORD_MULTIPLY // optimized asm option
-    #define ASM_ARM_RESAMP1 // enable asm optimisation for ResamplerOrder1
+    //#define ASM_ARM_RESAMP1 // enable asm optimisation for ResamplerOrder1
 #endif // __ARM_HAVE_HALFWORD_MULTIPLY
 // ----------------------------------------------------------------------------
 
