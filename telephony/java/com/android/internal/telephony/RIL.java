@@ -1956,7 +1956,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         if (RILJ_LOGD) {
             riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
-                    + " with " + numOfConfig + "configs : ");
+                    + " with " + numOfConfig + " configs : ");
             for (int i = 0; i < numOfConfig; i++) {
                 riljLog(config[i].toString());
             }
