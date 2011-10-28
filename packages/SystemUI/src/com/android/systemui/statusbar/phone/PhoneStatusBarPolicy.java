@@ -82,7 +82,7 @@ public class PhoneStatusBarPolicy {
     private boolean mVolumeVisible;
 
     // bluetooth device status
-    private boolean mBluetoothEnabled;
+    private boolean mBluetoothEnabled = false;
 
     // wifi
     private static final int[][] sWifiSignalImages = {
@@ -139,6 +139,18 @@ public class PhoneStatusBarPolicy {
         mContext = context;
         mService = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
 
+        // listen for broadcasts
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_ALARM_CHANGED);
+        filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
+        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
+        mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+
         // storage
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         mStorageManager.registerListener(
@@ -153,13 +165,15 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility("cdma_eri", false);
 
         // bluetooth status
-        mService.setIcon("bluetooth", R.drawable.stat_sys_data_bluetooth, 0, null);
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        int bluetoothIcon = R.drawable.stat_sys_data_bluetooth;
         if (adapter != null) {
-            mBluetoothEnabled = adapter.isEnabled();
-        } else {
-            mBluetoothEnabled = false;
+            mBluetoothEnabled = (adapter.getState() == BluetoothAdapter.STATE_ON);
+            if (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED) {
+                bluetoothIcon = R.drawable.stat_sys_data_bluetooth_connected;
+            }
         }
+        mService.setIcon("bluetooth", bluetoothIcon, 0, null);
         mService.setIconVisibility("bluetooth", mBluetoothEnabled);
 
         // Alarm clock
@@ -176,19 +190,6 @@ public class PhoneStatusBarPolicy {
         mService.setIcon("volume", R.drawable.stat_sys_ringer_silent, 0, null);
         mService.setIconVisibility("volume", false);
         updateVolume();
-
-        IntentFilter filter = new IntentFilter();
-
-        // Register for Intent broadcasts for...
-        filter.addAction(Intent.ACTION_ALARM_CHANGED);
-        filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
-        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
-        mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
     }
 
     private final void updateAlarm(Intent intent) {
