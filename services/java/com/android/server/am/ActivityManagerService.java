@@ -721,6 +721,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mLruSeq = 0;
 
     /**
+     * Keep track of the number of service processes we last found, to
+     * determine on the next iteration which should be B services.
+     */
+    int mNumServiceProcs = 0;
+    int mNewNumServiceProcs = 0;
+
+    /**
      * System monitoring: number of processes that died since the last
      * N procs were started.
      */
@@ -3123,7 +3130,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 killPackageProcessesLocked(packageName, pkgUid,
-                        ProcessList.SECONDARY_SERVER_ADJ, false, true, true, false);
+                        ProcessList.SERVICE_ADJ, false, true, true, false);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -4922,7 +4929,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         outInfo.lowMemory = outInfo.availMem < (homeAppMem + ((hiddenAppMem-homeAppMem)/2));
         outInfo.hiddenAppThreshold = hiddenAppMem;
         outInfo.secondaryServerThreshold = mProcessList.getMemLevel(
-                ProcessList.SECONDARY_SERVER_ADJ);
+                ProcessList.SERVICE_ADJ);
         outInfo.visibleAppThreshold = mProcessList.getMemLevel(
                 ProcessList.VISIBLE_APP_ADJ);
         outInfo.foregroundAppThreshold = mProcessList.getMemLevel(
@@ -6113,7 +6120,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if ((info.flags&(ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT))
                 == (ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT)) {
             app.persistent = true;
-            app.maxAdj = ProcessList.CORE_SERVER_ADJ;
+            app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
         }
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
@@ -6511,14 +6518,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             
             // If the worst oom_adj is somewhere in the hidden proc LRU range,
             // then constrain it so we will kill all hidden procs.
-            if (worstType < ProcessList.EMPTY_APP_ADJ && worstType > ProcessList.HIDDEN_APP_MIN_ADJ) {
+            if (worstType < ProcessList.HIDDEN_APP_MAX_ADJ
+                    && worstType > ProcessList.HIDDEN_APP_MIN_ADJ) {
                 worstType = ProcessList.HIDDEN_APP_MIN_ADJ;
             }
 
             // If this is not a secure call, don't let it kill processes that
             // are important.
-            if (!secure && worstType < ProcessList.SECONDARY_SERVER_ADJ) {
-                worstType = ProcessList.SECONDARY_SERVER_ADJ;
+            if (!secure && worstType < ProcessList.SERVICE_ADJ) {
+                worstType = ProcessList.SERVICE_ADJ;
             }
 
             Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
@@ -7657,19 +7665,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     static int oomAdjToImportance(int adj, ActivityManager.RunningAppProcessInfo currApp) {
-        if (adj >= ProcessList.EMPTY_APP_ADJ) {
-            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;
-        } else if (adj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
+        if (adj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
             if (currApp != null) {
                 currApp.lru = adj - ProcessList.HIDDEN_APP_MIN_ADJ + 1;
             }
             return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+        } else if (adj >= ProcessList.SERVICE_B_ADJ) {
+            return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
         } else if (adj >= ProcessList.HOME_APP_ADJ) {
             if (currApp != null) {
                 currApp.lru = 0;
             }
             return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-        } else if (adj >= ProcessList.SECONDARY_SERVER_ADJ) {
+        } else if (adj >= ProcessList.SERVICE_ADJ) {
             return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
         } else if (adj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
             return ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
@@ -8158,6 +8166,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  mGoingToSleep=" + mMainStack.mGoingToSleep);
             pw.println("  mLaunchingActivity=" + mMainStack.mLaunchingActivity);
             pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
+            pw.println("  mNumServiceProcs=" + mNumServiceProcs
+                    + " mNewNumServiceProcs=" + mNewNumServiceProcs);
         }
         
         return true;
@@ -8194,16 +8204,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
             pw.println("  OOM levels:");
             pw.print("    SYSTEM_ADJ: "); pw.println(ProcessList.SYSTEM_ADJ);
-            pw.print("    CORE_SERVER_ADJ: "); pw.println(ProcessList.CORE_SERVER_ADJ);
+            pw.print("    PERSISTENT_PROC_ADJ: "); pw.println(ProcessList.PERSISTENT_PROC_ADJ);
             pw.print("    FOREGROUND_APP_ADJ: "); pw.println(ProcessList.FOREGROUND_APP_ADJ);
             pw.print("    VISIBLE_APP_ADJ: "); pw.println(ProcessList.VISIBLE_APP_ADJ);
             pw.print("    PERCEPTIBLE_APP_ADJ: "); pw.println(ProcessList.PERCEPTIBLE_APP_ADJ);
             pw.print("    HEAVY_WEIGHT_APP_ADJ: "); pw.println(ProcessList.HEAVY_WEIGHT_APP_ADJ);
             pw.print("    BACKUP_APP_ADJ: "); pw.println(ProcessList.BACKUP_APP_ADJ);
-            pw.print("    SECONDARY_SERVER_ADJ: "); pw.println(ProcessList.SECONDARY_SERVER_ADJ);
+            pw.print("    SERVICE_ADJ: "); pw.println(ProcessList.SERVICE_ADJ);
             pw.print("    HOME_APP_ADJ: "); pw.println(ProcessList.HOME_APP_ADJ);
+            pw.print("    SERVICE_B_ADJ: "); pw.println(ProcessList.SERVICE_B_ADJ);
             pw.print("    HIDDEN_APP_MIN_ADJ: "); pw.println(ProcessList.HIDDEN_APP_MIN_ADJ);
-            pw.print("    EMPTY_APP_ADJ: "); pw.println(ProcessList.EMPTY_APP_ADJ);
+            pw.print("    HIDDEN_APP_MAX_ADJ: "); pw.println(ProcessList.HIDDEN_APP_MAX_ADJ);
 
             if (needSep) pw.println(" ");
             needSep = true;
@@ -8994,14 +9005,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i=N; i>=0; i--) {
             ProcessRecord r = list.get(i).first;
             String oomAdj;
-            if (r.setAdj >= ProcessList.EMPTY_APP_ADJ) {
-                oomAdj = buildOomTag("empty", null, r.setAdj, ProcessList.EMPTY_APP_ADJ);
-            } else if (r.setAdj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
+            if (r.setAdj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
                 oomAdj = buildOomTag("bak", "  ", r.setAdj, ProcessList.HIDDEN_APP_MIN_ADJ);
+            } else if (r.setAdj >= ProcessList.SERVICE_B_ADJ) {
+                oomAdj = buildOomTag("svcb ", null, r.setAdj, ProcessList.SERVICE_B_ADJ);
             } else if (r.setAdj >= ProcessList.HOME_APP_ADJ) {
                 oomAdj = buildOomTag("home ", null, r.setAdj, ProcessList.HOME_APP_ADJ);
-            } else if (r.setAdj >= ProcessList.SECONDARY_SERVER_ADJ) {
-                oomAdj = buildOomTag("svc", "  ", r.setAdj, ProcessList.SECONDARY_SERVER_ADJ);
+            } else if (r.setAdj >= ProcessList.SERVICE_ADJ) {
+                oomAdj = buildOomTag("svc  ", null, r.setAdj, ProcessList.SERVICE_ADJ);
             } else if (r.setAdj >= ProcessList.BACKUP_APP_ADJ) {
                 oomAdj = buildOomTag("bckup", null, r.setAdj, ProcessList.BACKUP_APP_ADJ);
             } else if (r.setAdj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
@@ -9012,8 +9023,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 oomAdj = buildOomTag("vis  ", null, r.setAdj, ProcessList.VISIBLE_APP_ADJ);
             } else if (r.setAdj >= ProcessList.FOREGROUND_APP_ADJ) {
                 oomAdj = buildOomTag("fore ", null, r.setAdj, ProcessList.FOREGROUND_APP_ADJ);
-            } else if (r.setAdj >= ProcessList.CORE_SERVER_ADJ) {
-                oomAdj = buildOomTag("core ", null, r.setAdj, ProcessList.CORE_SERVER_ADJ);
+            } else if (r.setAdj >= ProcessList.PERSISTENT_PROC_ADJ) {
+                oomAdj = buildOomTag("pers ", null, r.setAdj, ProcessList.PERSISTENT_PROC_ADJ);
             } else if (r.setAdj >= ProcessList.SYSTEM_ADJ) {
                 oomAdj = buildOomTag("sys  ", null, r.setAdj, ProcessList.SYSTEM_ADJ);
             } else {
@@ -9273,14 +9284,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
 
         final int[] oomAdj = new int[] {
-            ProcessList.SYSTEM_ADJ, ProcessList.CORE_SERVER_ADJ, ProcessList.FOREGROUND_APP_ADJ,
+            ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
-            ProcessList.BACKUP_APP_ADJ, ProcessList.SECONDARY_SERVER_ADJ, ProcessList.HOME_APP_ADJ, ProcessList.EMPTY_APP_ADJ
+            ProcessList.BACKUP_APP_ADJ, ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
+            ProcessList.SERVICE_B_ADJ, ProcessList.HIDDEN_APP_MAX_ADJ
         };
         final String[] oomLabel = new String[] {
                 "System", "Persistent", "Foreground",
                 "Visible", "Perceptible", "Heavy Weight",
-                "Backup", "Services", "Home", "Background"
+                "Backup", "A Services", "Home", "B Services", "Background"
         };
         long oomPss[] = new long[oomLabel.length];
         ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])new ArrayList[oomLabel.length];
@@ -12935,7 +12947,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     private final int computeOomAdjLocked(ProcessRecord app, int hiddenAdj,
-            ProcessRecord TOP_APP, boolean recursed) {
+            ProcessRecord TOP_APP, boolean recursed, boolean doingAll) {
         if (mAdjSeq == app.adjSeq) {
             // This adjustment has already been computed.  If we are calling
             // from the top, we may have already computed our adjustment with
@@ -12950,7 +12962,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.thread == null) {
             app.adjSeq = mAdjSeq;
             app.curSchedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
-            return (app.curAdj=ProcessList.EMPTY_APP_ADJ);
+            return (app.curAdj=ProcessList.HIDDEN_APP_MAX_ADJ);
         }
 
         app.adjTypeCode = ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN;
@@ -13134,7 +13146,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // go to the LRU list because it may be pretty heavy with
                         // UI stuff.  We'll tag it with a label just to help
                         // debug and understand what is going on.
-                        if (adj > ProcessList.SECONDARY_SERVER_ADJ) {
+                        if (adj > ProcessList.SERVICE_ADJ) {
                             app.adjType = "started-bg-ui-services";
                         }
                     } else {
@@ -13142,8 +13154,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // This service has seen some activity within
                             // recent memory, so we will keep its process ahead
                             // of the background processes.
-                            if (adj > ProcessList.SECONDARY_SERVER_ADJ) {
-                                adj = ProcessList.SECONDARY_SERVER_ADJ;
+                            if (adj > ProcessList.SERVICE_ADJ) {
+                                adj = ProcessList.SERVICE_ADJ;
                                 app.adjType = "started-services";
                                 app.hidden = false;
                             }
@@ -13151,7 +13163,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // If we have let the service slide into the background
                         // state, still have some text describing what it is doing
                         // even though the service no longer has an impact.
-                        if (adj > ProcessList.SECONDARY_SERVER_ADJ) {
+                        if (adj > ProcessList.SERVICE_ADJ) {
                             app.adjType = "started-bg-services";
                         }
                     }
@@ -13185,7 +13197,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     }
                                 }
                                 clientAdj = computeOomAdjLocked(
-                                    client, myHiddenAdj, TOP_APP, true);
+                                    client, myHiddenAdj, TOP_APP, true, doingAll);
                                 String adjType = null;
                                 if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
                                     // Not doing bind OOM management, so treat
@@ -13315,7 +13327,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                         }
                         int clientAdj = computeOomAdjLocked(
-                            client, myHiddenAdj, TOP_APP, true);
+                            client, myHiddenAdj, TOP_APP, true, doingAll);
                         if (adj > clientAdj) {
                             if (app.hasShownUi && app != mHomeProcess
                                     && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -13386,9 +13398,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
             } else if (adj < ProcessList.HIDDEN_APP_MIN_ADJ) {
                 adj = ProcessList.HIDDEN_APP_MIN_ADJ;
-            } else if (adj < ProcessList.EMPTY_APP_ADJ) {
+            } else if (adj < ProcessList.HIDDEN_APP_MAX_ADJ) {
                 adj++;
             }
+        }
+
+        if (adj == ProcessList.SERVICE_ADJ) {
+            if (doingAll) {
+                app.serviceb = mNewNumServiceProcs > (mNumServiceProcs/3);
+                mNewNumServiceProcs++;
+            }
+            if (app.serviceb) {
+                adj = ProcessList.SERVICE_B_ADJ;
+            }
+        } else {
+            app.serviceb = false;
         }
 
         app.curAdj = adj;
@@ -13631,7 +13655,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean updateOomAdjLocked(
-            ProcessRecord app, int hiddenAdj, ProcessRecord TOP_APP) {
+            ProcessRecord app, int hiddenAdj, ProcessRecord TOP_APP, boolean doingAll) {
         app.hiddenAdj = hiddenAdj;
 
         if (app.thread == null) {
@@ -13642,7 +13666,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean success = true;
 
-        computeOomAdjLocked(app, hiddenAdj, TOP_APP, false);
+        computeOomAdjLocked(app, hiddenAdj, TOP_APP, false, doingAll);
 
         if (app.curRawAdj != app.setRawAdj) {
             if (false) {
@@ -13676,11 +13700,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             app.setRawAdj = app.curRawAdj;
         }
+
         if (app.curAdj != app.setAdj) {
             if (Process.setOomAdj(app.pid, app.curAdj)) {
-                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
-                    TAG, "Set app " + app.processName +
-                    " oom adj to " + app.curAdj + " because " + app.adjType);
+                if (true || DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
+                    TAG, "Set " + app.pid + " " + app.processName +
+                    " adj " + app.curAdj + ": " + app.adjType);
                 app.setAdj = app.curAdj;
             } else {
                 success = false;
@@ -13744,7 +13769,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mAdjSeq++;
 
-        boolean success = updateOomAdjLocked(app, app.hiddenAdj, TOP_APP);
+        boolean success = updateOomAdjLocked(app, app.hiddenAdj, TOP_APP, false);
         final boolean nowHidden = app.curAdj >= ProcessList.HIDDEN_APP_MIN_ADJ
             && app.curAdj <= ProcessList.HIDDEN_APP_MAX_ADJ;
         if (nowHidden != wasHidden) {
@@ -13766,6 +13791,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mAdjSeq++;
+        mNewNumServiceProcs = 0;
 
         // Let's determine how many processes we have running vs.
         // how many slots we have for background processes; we may want
@@ -13786,8 +13812,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             i--;
             ProcessRecord app = mLruProcesses.get(i);
             //Slog.i(TAG, "OOM " + app + ": cur hidden=" + curHiddenAdj);
-            updateOomAdjLocked(app, curHiddenAdj, TOP_APP);
-            if (curHiddenAdj < ProcessList.EMPTY_APP_ADJ
+            updateOomAdjLocked(app, curHiddenAdj, TOP_APP, true);
+            if (curHiddenAdj < ProcessList.HIDDEN_APP_MAX_ADJ
                 && app.curAdj == curHiddenAdj) {
                 step++;
                 if (step >= factor) {
@@ -13813,6 +13839,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+
+        mNumServiceProcs = mNewNumServiceProcs;
 
         // Now determine the memory trimming level of background processes.
         // Unfortunately we need to start at the back of the list to do this

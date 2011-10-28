@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -24,7 +23,6 @@ import com.android.internal.util.MemInfoReader;
 import com.android.server.wm.WindowManagerService;
 
 import android.graphics.Point;
-import android.os.StrictMode;
 import android.util.Slog;
 
 /**
@@ -37,27 +35,23 @@ class ProcessList {
 
     // OOM adjustments for processes in various states:
 
-    // This is a process without anything currently running in it.  Definitely
-    // the first to go! Value set in system/rootdir/init.rc on startup.
-    // This value is initalized in the constructor, careful when refering to
-    // this static variable externally.
-    static final int EMPTY_APP_ADJ = 15;
-
     // This is a process only hosting activities that are not visible,
-    // so it can be killed without any disruption. Value set in
-    // system/rootdir/init.rc on startup.
+    // so it can be killed without any disruption.
     static final int HIDDEN_APP_MAX_ADJ = 15;
-    static int HIDDEN_APP_MIN_ADJ = 7;
+    static int HIDDEN_APP_MIN_ADJ = 8;
+
+    // The B list of SERVICE_ADJ -- these are the old and decrepit
+    // services that aren't as shiny and interesting as the ones in the A list.
+    static final int SERVICE_B_ADJ = 7;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
     // because the user interacts with it so much.
     static final int HOME_APP_ADJ = 6;
 
-    // This is a process holding a secondary server -- killing it will not
-    // have much of an impact as far as the user is concerned. Value set in
-    // system/rootdir/init.rc on startup.
-    static final int SECONDARY_SERVER_ADJ = 5;
+    // This is a process holding an application service -- killing it will not
+    // have much of an impact as far as the user is concerned.
+    static final int SERVICE_ADJ = 5;
 
     // This is a process currently hosting a backup operation.  Killing it
     // is not entirely fatal but is generally a bad idea.
@@ -70,22 +64,20 @@ class ProcessList {
 
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
-    // immediately visible. An example is background music playback.  Value set in
-    // system/rootdir/init.rc on startup.
+    // immediately visible. An example is background music playback.
     static final int PERCEPTIBLE_APP_ADJ = 2;
 
     // This is a process only hosting activities that are visible to the
-    // user, so we'd prefer they don't disappear. Value set in
-    // system/rootdir/init.rc on startup.
+    // user, so we'd prefer they don't disappear.
     static final int VISIBLE_APP_ADJ = 1;
 
     // This is the process running the current foreground app.  We'd really
-    // rather not kill it! Value set in system/rootdir/init.rc on startup.
+    // rather not kill it!
     static final int FOREGROUND_APP_ADJ = 0;
 
-    // This is a process running a core server, such as telephony.  Definitely
+    // This is a system persistent process, such as telephony.  Definitely
     // don't want to kill it, but doing so is not completely fatal.
-    static final int CORE_SERVER_ADJ = -12;
+    static final int PERSISTENT_PROC_ADJ = -12;
 
     // The system process runs at the default adjustment.
     static final int SYSTEM_ADJ = -16;
@@ -115,7 +107,7 @@ class ProcessList {
     // can't give it a different value for every possible kind of process.
     private final int[] mOomAdj = new int[] {
             FOREGROUND_APP_ADJ, VISIBLE_APP_ADJ, PERCEPTIBLE_APP_ADJ,
-            BACKUP_APP_ADJ, HIDDEN_APP_MIN_ADJ, EMPTY_APP_ADJ
+            BACKUP_APP_ADJ, HIDDEN_APP_MIN_ADJ, HIDDEN_APP_MAX_ADJ
     };
     // These are the low-end OOM level limits.  This is appropriate for an
     // HVGA or smaller phone with less than 512MB.  Values are in KB.

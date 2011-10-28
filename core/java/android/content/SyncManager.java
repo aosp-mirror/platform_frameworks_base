@@ -416,7 +416,8 @@ public class SyncManager implements OnAccountsUpdateListener {
         intent.setComponent(syncAdapterInfo.componentName);
         if (!mContext.bindService(intent,
                 new InitializerServiceConnection(account, authority, mContext, mMainHandler),
-                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND)) {
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                | Context.BIND_ALLOW_OOM_MANAGEMENT)) {
             Log.w(TAG, "initializeSyncAdapter: failed to bind to " + intent);
         }
     }
@@ -971,7 +972,8 @@ public class SyncManager implements OnAccountsUpdateListener {
                     mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0));
             mBound = true;
             final boolean bindResult = mContext.bindService(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND);
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                    | Context.BIND_ALLOW_OOM_MANAGEMENT);
             if (!bindResult) {
                 mBound = false;
             }
