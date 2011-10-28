@@ -53,9 +53,9 @@ public class HoloClock extends FrameLayout {
     private SimpleDateFormat mClockFormat;
 
     private static final String FONT_DIR = "/system/fonts/";
-    private static final String CLOCK_FONT = FONT_DIR + "AndroidClock_Solid.ttf"; 
-    private static final String CLOCK_FG_FONT = FONT_DIR + "AndroidClock.ttf"; 
-    private static final String CLOCK_BG_FONT = FONT_DIR + "AndroidClock_Highlight.ttf"; 
+    private static final String CLOCK_FONT = FONT_DIR + "AndroidClock_Solid.ttf";
+    private static final String CLOCK_FG_FONT = FONT_DIR + "AndroidClock.ttf";
+    private static final String CLOCK_BG_FONT = FONT_DIR + "AndroidClock_Highlight.ttf";
 
     private static Typeface sBackgroundType, sForegroundType, sSolidType;
     private TextView mSolidText, mBgText, mFgText;
@@ -84,7 +84,9 @@ public class HoloClock extends FrameLayout {
         mBgText = (TextView) findViewById(R.id.time_bg);
         if (mBgText != null) {
             mBgText.setTypeface(sBackgroundType);
+            mBgText.setVisibility(View.INVISIBLE);
         }
+
         mFgText = (TextView) findViewById(R.id.time_fg);
         if (mFgText != null) {
             mFgText.setTypeface(sForegroundType);

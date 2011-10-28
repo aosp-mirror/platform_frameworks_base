@@ -168,6 +168,8 @@ public class DigitalClock extends RelativeLayout {
         /* The time display consists of two tones. That's why we have two overlapping text views. */
         mTimeDisplayBackground = (TextView) findViewById(R.id.timeDisplayBackground);
         mTimeDisplayBackground.setTypeface(sBackgroundFont);
+        mTimeDisplayBackground.setVisibility(View.INVISIBLE);
+
         mTimeDisplayForeground = (TextView) findViewById(R.id.timeDisplayForeground);
         mTimeDisplayForeground.setTypeface(sForegroundFont);
         mAmPm = new AmPm(this, null);
