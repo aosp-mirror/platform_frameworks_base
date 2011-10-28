@@ -64,10 +64,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /* Methods that may optionally be implemented by subclasses */
 
     /**
-     * If the cursor is backed by a {@link CursorWindow}, returns a pre-filled
-     * window with the contents of the cursor, otherwise null.
-     *
-     * @return The pre-filled window that backs this cursor, or null if none.
+     * returns a pre-filled window, return NULL if no such window
      */
     public CursorWindow getWindow() {
         return null;

@@ -105,12 +105,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        try {
-            dispose();
-        } finally {
-            super.finalize();
-        }
+    protected void finalize() {
+        dispose();
     }
 
     private void dispose() {
@@ -149,12 +145,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
 
     /**
      * Gets the start position of this cursor window.
-     * <p>
-     * The start position is the zero-based index of the first row that this window contains
+     * The start position is the index of the first row that this window contains
      * relative to the entire result set of the {@link Cursor}.
-     * </p>
      *
-     * @return The zero-based start position.
+     * @return The start position.
      */
     public int getStartPosition() {
         return mStartPos;
@@ -162,12 +156,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
 
     /**
      * Sets the start position of this cursor window.
-     * <p>
-     * The start position is the zero-based index of the first row that this window contains
+     * The start position is the index of the first row that this window contains
      * relative to the entire result set of the {@link Cursor}.
-     * </p>
      *
-     * @param pos The new zero-based start position.
+     * @param pos The new start position.
      */
     public void setStartPosition(int pos) {
         mStartPos = pos;

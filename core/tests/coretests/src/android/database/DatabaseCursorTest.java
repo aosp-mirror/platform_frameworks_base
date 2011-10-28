@@ -290,7 +290,110 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
         public void onInvalidated() {
         }
     }
+    
+    //@Large
+    @Suppress
+    public void testLoadingThreadDelayRegisterData() throws Exception {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
+        
+        final int count = 505; 
+        String sql = "INSERT INTO test (data) VALUES (?);";
+        SQLiteStatement s = mDatabase.compileStatement(sql);
+        for (int i = 0; i < count; i++) {
+            s.bindLong(1, i);
+            s.execute();
+        }
 
+        int maxRead = 500;
+        int initialRead = 5;
+        SQLiteCursor c = (SQLiteCursor)mDatabase.rawQuery("select * from test;",
+                null, initialRead, maxRead);
+        
+        TestObserver observer = new TestObserver(count, c);
+        c.getCount();
+        c.registerDataSetObserver(observer);
+        if (!observer.quit) {
+            Looper.loop();
+        }
+        c.close();
+    }
+    
+    //@LargeTest
+    @BrokenTest("Consistently times out")
+    @Suppress
+    public void testLoadingThread() throws Exception {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
+        
+        final int count = 50000; 
+        String sql = "INSERT INTO test (data) VALUES (?);";
+        SQLiteStatement s = mDatabase.compileStatement(sql);
+        for (int i = 0; i < count; i++) {
+            s.bindLong(1, i);
+            s.execute();
+        }
+
+        int maxRead = 1000;
+        int initialRead = 5;
+        SQLiteCursor c = (SQLiteCursor)mDatabase.rawQuery("select * from test;",
+                null, initialRead, maxRead);
+        
+        TestObserver observer = new TestObserver(count, c);
+        c.registerDataSetObserver(observer);
+        c.getCount();
+        
+        Looper.loop();
+        c.close();
+    } 
+    
+    //@LargeTest
+    @BrokenTest("Consistently times out")
+    @Suppress
+    public void testLoadingThreadClose() throws Exception {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
+        
+        final int count = 1000; 
+        String sql = "INSERT INTO test (data) VALUES (?);";
+        SQLiteStatement s = mDatabase.compileStatement(sql);
+        for (int i = 0; i < count; i++) {
+            s.bindLong(1, i);
+            s.execute();
+        }
+
+        int maxRead = 11;
+        int initialRead = 5;
+        SQLiteCursor c = (SQLiteCursor)mDatabase.rawQuery("select * from test;",
+                null, initialRead, maxRead);
+        
+        TestObserver observer = new TestObserver(count, c);
+        c.registerDataSetObserver(observer);
+        c.getCount();       
+        c.close();
+    }
+    
+    @LargeTest
+    public void testLoadingThreadDeactivate() throws Exception {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
+        
+        final int count = 1000; 
+        String sql = "INSERT INTO test (data) VALUES (?);";
+        SQLiteStatement s = mDatabase.compileStatement(sql);
+        for (int i = 0; i < count; i++) {
+            s.bindLong(1, i);
+            s.execute();
+        }
+
+        int maxRead = 11;
+        int initialRead = 5;
+        SQLiteCursor c = (SQLiteCursor)mDatabase.rawQuery("select * from test;",
+                null, initialRead, maxRead);
+        
+        TestObserver observer = new TestObserver(count, c);
+        c.registerDataSetObserver(observer);
+        c.getCount();       
+        c.deactivate();
+        c.close();
+    }
+    
     @LargeTest
     public void testManyRowsLong() throws Exception {
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");

@@ -18,11 +18,16 @@ package android.database.sqlite;
 
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
+import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Process;
 import android.os.StrictMode;
 import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A Cursor implementation that exposes results from a query on a
@@ -55,7 +60,139 @@ public class SQLiteCursor extends AbstractWindowedCursor {
 
     /** Used to find out where a cursor was allocated in case it never got released. */
     private final Throwable mStackTrace;
+    
+    /** 
+     *  mMaxRead is the max items that each cursor window reads 
+     *  default to a very high value
+     */
+    private int mMaxRead = Integer.MAX_VALUE;
+    private int mInitialRead = Integer.MAX_VALUE;
+    private int mCursorState = 0;
+    private ReentrantLock mLock = null;
+    private boolean mPendingData = false;
 
+    /**
+     *  support for a cursor variant that doesn't always read all results
+     *  initialRead is the initial number of items that cursor window reads 
+     *  if query contains more than this number of items, a thread will be
+     *  created and handle the left over items so that caller can show 
+     *  results as soon as possible 
+     * @param initialRead initial number of items that cursor read
+     * @param maxRead leftover items read at maxRead items per time
+     * @hide
+     */
+    public void setLoadStyle(int initialRead, int maxRead) {
+        mMaxRead = maxRead;
+        mInitialRead = initialRead;
+        mLock = new ReentrantLock(true);
+    }
+    
+    private void queryThreadLock() {
+        if (mLock != null) {
+            mLock.lock();            
+        }
+    }
+    
+    private void queryThreadUnlock() {
+        if (mLock != null) {
+            mLock.unlock();            
+        }
+    }
+    
+    
+    /**
+     * @hide
+     */
+    final private class QueryThread implements Runnable {
+        private final int mThreadState;
+        QueryThread(int version) {
+            mThreadState = version;
+        }
+        private void sendMessage() {
+            if (mNotificationHandler != null) {
+                mNotificationHandler.sendEmptyMessage(1);
+                mPendingData = false;
+            } else {
+                mPendingData = true;
+            }
+            
+        }
+        public void run() {
+             // use cached mWindow, to avoid get null mWindow
+            CursorWindow cw = mWindow;
+            Process.setThreadPriority(Process.myTid(), Process.THREAD_PRIORITY_BACKGROUND);
+            // the cursor's state doesn't change
+            while (true) {
+                mLock.lock();
+                try {
+                    if (mCursorState != mThreadState) {
+                        break;
+                    }
+
+                    int count = getQuery().fillWindow(cw, mMaxRead, mCount);
+                    // return -1 means there is still more data to be retrieved from the resultset
+                    if (count != 0) {
+                        if (count == NO_COUNT){
+                            mCount += mMaxRead;
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "received -1 from native_fill_window. read " +
+                                        mCount + " rows so far");
+                            }
+                            sendMessage();
+                        } else {                                
+                            mCount += count;
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "received all data from native_fill_window. read " +
+                                        mCount + " rows.");
+                            }
+                            sendMessage();
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // end the tread when the cursor is close
+                    break;
+                } finally {
+                    mLock.unlock();
+                }
+            }
+        }        
+    }
+    
+    /**
+     * @hide
+     */   
+    protected class MainThreadNotificationHandler extends Handler {
+        public void handleMessage(Message msg) {
+            notifyDataSetChange();
+        }
+    }
+    
+    /**
+     * @hide
+     */
+    protected MainThreadNotificationHandler mNotificationHandler;    
+    
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+        if ((Integer.MAX_VALUE != mMaxRead || Integer.MAX_VALUE != mInitialRead) && 
+                mNotificationHandler == null) {
+            queryThreadLock();
+            try {
+                mNotificationHandler = new MainThreadNotificationHandler();
+                if (mPendingData) {
+                    notifyDataSetChange();
+                    mPendingData = false;
+                }
+            } finally {
+                queryThreadUnlock();
+            }
+        }
+        
+    }
+    
     /**
      * Execute a query and provide access to its result set through a Cursor
      * interface. For a query such as: {@code SELECT name, birth, phone FROM
@@ -156,23 +293,36 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         return mCount;
     }
 
-    private void fillWindow(int startPos) {
+    private void fillWindow (int startPos) {
         if (mWindow == null) {
             // If there isn't a window set already it will only be accessed locally
             mWindow = new CursorWindow(true /* the window is local only */);
         } else {
-            mWindow.clear();
+            mCursorState++;
+                queryThreadLock();
+                try {
+                    mWindow.clear();
+                } finally {
+                    queryThreadUnlock();
+                }
         }
         mWindow.setStartPosition(startPos);
-        int count = getQuery().fillWindow(mWindow);
-        if (startPos == 0) { // fillWindow returns count(*) only for startPos = 0
+        int count = getQuery().fillWindow(mWindow, mInitialRead, 0);
+        // return -1 means there is still more data to be retrieved from the resultset
+        if (count == NO_COUNT){
+            mCount = startPos + mInitialRead;
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "received -1 from native_fill_window. read " + mCount + " rows so far");
+            }
+            Thread t = new Thread(new QueryThread(mCursorState), "query thread");
+            t.start();
+        } else if (startPos == 0) { // native_fill_window returns count(*) only for startPos = 0
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "received count(*) from native_fill_window: " + count);
             }
             mCount = count;
         } else if (mCount <= 0) {
-            throw new IllegalStateException("Row count should never be zero or negative "
-                    + "when the start position is non-zero");
+            throw new IllegalStateException("count should never be non-zero negative number");
         }
     }
 
@@ -216,7 +366,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
 
     private void deactivateCommon() {
         if (false) Log.v(TAG, "<<< Releasing cursor " + this);
-        closeWindow();
+        mCursorState = 0;
+        if (mWindow != null) {
+            mWindow.close();
+            mWindow = null;
+        }
         if (false) Log.v("DatabaseWindow", "closing window in release()");
     }
 
@@ -285,12 +439,16 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             // This one will recreate the temp table, and get its count
             mDriver.cursorRequeried(this);
             mCount = NO_COUNT;
+            mCursorState++;
+            queryThreadLock();
             try {
                 mQuery.requery();
             } catch (IllegalStateException e) {
                 // for backwards compatibility, just return false
                 Log.w(TAG, "requery() failed " + e.getMessage(), e);
                 return false;
+            } finally {
+                queryThreadUnlock();
             }
         }
 
@@ -314,9 +472,18 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     }
 
     @Override
-    public void setWindow(CursorWindow window) {
-        super.setWindow(window);
-        mCount = NO_COUNT;
+    public void setWindow(CursorWindow window) {        
+        if (mWindow != null) {
+            mCursorState++;
+            queryThreadLock();
+            try {
+                mWindow.close();
+            } finally {
+                queryThreadUnlock();
+            }
+            mCount = NO_COUNT;
+        }
+        mWindow = window;
     }
 
     /**
@@ -353,5 +520,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * this is only for testing purposes.
+     */
+    /* package */ int getMCount() {
+        return mCount;
     }
 }

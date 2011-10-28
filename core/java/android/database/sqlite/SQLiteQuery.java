@@ -30,11 +30,6 @@ import android.util.Log;
 public class SQLiteQuery extends SQLiteProgram {
     private static final String TAG = "SQLiteQuery";
 
-    private static native int nativeFillWindow(int databasePtr, int statementPtr, int windowPtr,
-            int startPos, int offsetParam);
-    private static native int nativeColumnCount(int statementPtr);
-    private static native String nativeColumnName(int statementPtr, int columnIndex);
-
     /** The index of the unbound OFFSET parameter */
     private int mOffsetIndex = 0;
 
@@ -73,15 +68,19 @@ public class SQLiteQuery extends SQLiteProgram {
      * @param window The window to fill into
      * @return number of total rows in the query
      */
-    /* package */ int fillWindow(CursorWindow window) {
+    /* package */ int fillWindow(CursorWindow window,
+            int maxRead, int lastPos) {
         mDatabase.lock(mSql);
         long timeStart = SystemClock.uptimeMillis();
         try {
             acquireReference();
             try {
                 window.acquireReference();
-                int numRows = nativeFillWindow(nHandle, nStatement, window.mWindowPtr,
-                        window.getStartPosition(), mOffsetIndex);
+                // if the start pos is not equal to 0, then most likely window is
+                // too small for the data set, loading by another thread
+                // is not safe in this situation. the native code will ignore maxRead
+                int numRows = native_fill_window(window.mWindowPtr, window.getStartPosition(),
+                        mOffsetIndex, maxRead, lastPos);
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
             } catch (IllegalStateException e){
@@ -112,7 +111,7 @@ public class SQLiteQuery extends SQLiteProgram {
     /* package */ int columnCountLocked() {
         acquireReference();
         try {
-            return nativeColumnCount(nStatement);
+            return native_column_count();
         } finally {
             releaseReference();
         }
@@ -128,17 +127,17 @@ public class SQLiteQuery extends SQLiteProgram {
     /* package */ String columnNameLocked(int columnIndex) {
         acquireReference();
         try {
-            return nativeColumnName(nStatement, columnIndex);
+            return native_column_name(columnIndex);
         } finally {
             releaseReference();
         }
     }
-
+    
     @Override
     public String toString() {
         return "SQLiteQuery: " + mSql;
     }
-
+    
     @Override
     public void close() {
         super.close();
@@ -154,4 +153,11 @@ public class SQLiteQuery extends SQLiteProgram {
         }
         compileAndbindAllArgs();
     }
+
+    private final native int native_fill_window(int windowPtr,
+            int startPos, int offsetParam, int maxRead, int lastPos);
+
+    private final native int native_column_count();
+
+    private final native String native_column_name(int columnIndex);
 }

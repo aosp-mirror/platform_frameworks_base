@@ -154,7 +154,10 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
                     false /* the window will be accessed across processes */));
             if (mCount != -1) {
                 mPos = -1;
-                closeWindow();
+                if (mWindow != null) {
+                    mWindow.close();
+                    mWindow = null;
+                }
 
                 // super.requery() will call onChanged. Do it here instead of relying on the
                 // observer from the far side so that observers can see a correct value for mCount
