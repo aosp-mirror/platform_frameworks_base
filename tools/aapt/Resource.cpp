@@ -14,6 +14,14 @@
 #include "FileFinder.h"
 #include "CacheUpdater.h"
 
+#if HAVE_PRINTF_ZD
+#  define ZD "%zd"
+#  define ZD_TYPE ssize_t
+#else
+#  define ZD "%ld"
+#  define ZD_TYPE long
+#endif
+
 #define NOISY(x) // x
 
 // ==========================================================================
@@ -566,11 +574,11 @@ static bool applyFileOverlay(Bundle *bundle,
                         DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles =
                                 baseGroup->getFiles();
                         for (size_t i=0; i < baseFiles.size(); i++) {
-                            printf("baseFile %zd has flavor %s\n", i,
+                            printf("baseFile " ZD " has flavor %s\n", (ZD_TYPE) i,
                                     baseFiles.keyAt(i).toString().string());
                         }
                         for (size_t i=0; i < overlayFiles.size(); i++) {
-                            printf("overlayFile %zd has flavor %s\n", i,
+                            printf("overlayFile " ZD " has flavor %s\n", (ZD_TYPE) i,
                                     overlayFiles.keyAt(i).toString().string());
                         }
                     }
@@ -584,8 +592,8 @@ static bool applyFileOverlay(Bundle *bundle,
                                 keyAt(overlayGroupIndex));
                         if (baseFileIndex < UNKNOWN_ERROR) {
                             if (bundle->getVerbose()) {
-                                printf("found a match (%zd) for overlay file %s, for flavor %s\n",
-                                        baseFileIndex,
+                                printf("found a match (" ZD ") for overlay file %s, for flavor %s\n",
+                                        (ZD_TYPE) baseFileIndex,
                                         overlayGroup->getLeaf().string(),
                                         overlayFiles.keyAt(overlayGroupIndex).toString().string());
                             }
