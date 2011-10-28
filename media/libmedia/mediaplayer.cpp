@@ -86,8 +86,6 @@ void MediaPlayer::disconnect()
     if (p != 0) {
         p->disconnect();
     }
-
-    disconnectNativeWindow();
 }
 
 // always call with lock held
@@ -221,63 +219,12 @@ status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *m
     return mPlayer->getMetadata(update_only, apply_filter, metadata);
 }
 
-void MediaPlayer::disconnectNativeWindow() {
-    if (mConnectedWindow != NULL) {
-        status_t err = native_window_api_disconnect(mConnectedWindow.get(),
-                NATIVE_WINDOW_API_MEDIA);
-
-        if (err != OK) {
-            LOGW("native_window_api_disconnect returned an error: %s (%d)",
-                    strerror(-err), err);
-        }
-    }
-    mConnectedWindow.clear();
-}
-
 status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {
     ALOGV("setVideoSurface");
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
-
-    sp<IBinder> binder(surface == NULL ? NULL : surface->asBinder());
-    if (mConnectedWindowBinder == binder) {
-        return OK;
-    }
-
-    if (surface != NULL) {
-        status_t err = native_window_api_connect(surface.get(),
-                NATIVE_WINDOW_API_MEDIA);
-
-        if (err != OK) {
-            LOGE("setVideoSurface failed: %d", err);
-            // Note that we must do the reset before disconnecting from the ANW.
-            // Otherwise queue/dequeue calls could be made on the disconnected
-            // ANW, which may result in errors.
-            reset_l();
-
-            disconnectNativeWindow();
-
-            return err;
-        }
-    }
-
-    // Note that we must set the player's new surface before disconnecting the
-    // old one.  Otherwise queue/dequeue calls could be made on the disconnected
-    // ANW, which may result in errors.
-    status_t err = mPlayer->setVideoSurface(surface);
-
-    disconnectNativeWindow();
-
-    mConnectedWindow = surface;
-
-    if (err == OK) {
-        mConnectedWindowBinder = binder;
-    } else {
-        disconnectNativeWindow();
-    }
-
-    return err;
+    return mPlayer->setVideoSurface(surface);
 }
 
 status_t MediaPlayer::setVideoSurfaceTexture(
@@ -286,48 +233,7 @@ status_t MediaPlayer::setVideoSurfaceTexture(
     ALOGV("setVideoSurfaceTexture");
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
-
-    sp<IBinder> binder(surfaceTexture == NULL ? NULL :
-            surfaceTexture->asBinder());
-    if (mConnectedWindowBinder == binder) {
-        return OK;
-    }
-
-    sp<ANativeWindow> anw;
-    if (surfaceTexture != NULL) {
-        anw = new SurfaceTextureClient(surfaceTexture);
-        status_t err = native_window_api_connect(anw.get(),
-                NATIVE_WINDOW_API_MEDIA);
-
-        if (err != OK) {
-            LOGE("setVideoSurfaceTexture failed: %d", err);
-            // Note that we must do the reset before disconnecting from the ANW.
-            // Otherwise queue/dequeue calls could be made on the disconnected
-            // ANW, which may result in errors.
-            reset_l();
-
-            disconnectNativeWindow();
-
-            return err;
-        }
-    }
-
-    // Note that we must set the player's new SurfaceTexture before
-    // disconnecting the old one.  Otherwise queue/dequeue calls could be made
-    // on the disconnected ANW, which may result in errors.
-    status_t err = mPlayer->setVideoSurfaceTexture(surfaceTexture);
-
-    disconnectNativeWindow();
-
-    mConnectedWindow = anw;
-
-    if (err == OK) {
-        mConnectedWindowBinder = binder;
-    } else {
-        disconnectNativeWindow();
-    }
-
-    return err;
+    return mPlayer->setVideoSurfaceTexture(surfaceTexture);
 }
 
 // must call with lock held
