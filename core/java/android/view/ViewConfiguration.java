@@ -49,7 +49,7 @@ public class ViewConfiguration {
 
     /**
      * Defines the width of the horizontal scrollbar and the height of the vertical scrollbar in
-     * pixels
+     * dips
      */
     private static final int SCROLL_BAR_SIZE = 10;
 
@@ -64,7 +64,7 @@ public class ViewConfiguration {
     private static final int SCROLL_BAR_DEFAULT_DELAY = 300;
 
     /**
-     * Defines the length of the fading edges in pixels
+     * Defines the length of the fading edges in dips
      */
     private static final int FADING_EDGE_LENGTH = 12;
 
@@ -134,15 +134,21 @@ public class ViewConfiguration {
     private static final int ZOOM_CONTROLS_TIMEOUT = 3000;
 
     /**
-     * Inset in pixels to look for touchable content when the user touches the edge of the screen
+     * Inset in dips to look for touchable content when the user touches the edge of the screen
      */
     private static final int EDGE_SLOP = 12;
     
     /**
-     * Distance a touch can wander before we think the user is scrolling in pixels
+     * Distance a touch can wander before we think the user is scrolling in dips
      */
     private static final int TOUCH_SLOP = 16;
     
+    /**
+     * Distance the first touch can wander before we stop considering this event a double tap
+     * (in dips)
+     */
+    private static final int DOUBLE_TAP_TOUCH_SLOP = TOUCH_SLOP;
+
     /**
      * Distance a touch can wander before we think the user is attempting a paged scroll
      * (in dips)
@@ -150,28 +156,28 @@ public class ViewConfiguration {
     private static final int PAGING_TOUCH_SLOP = TOUCH_SLOP * 2;
     
     /**
-     * Distance between the first touch and second touch to still be considered a double tap
+     * Distance in dips between the first touch and second touch to still be considered a double tap
      */
     private static final int DOUBLE_TAP_SLOP = 100;
     
     /**
-     * Distance a touch needs to be outside of a window's bounds for it to
+     * Distance in dips a touch needs to be outside of a window's bounds for it to
      * count as outside for purposes of dismissing the window.
      */
     private static final int WINDOW_TOUCH_SLOP = 16;
 
     /**
-     * Minimum velocity to initiate a fling, as measured in pixels per second
+     * Minimum velocity to initiate a fling, as measured in dips per second
      */
     private static final int MINIMUM_FLING_VELOCITY = 50;
     
     /**
-     * Maximum velocity to initiate a fling, as measured in pixels per second
+     * Maximum velocity to initiate a fling, as measured in dips per second
      */
     private static final int MAXIMUM_FLING_VELOCITY = 8000;
 
     /**
-     * Distance between a touch up event denoting the end of a touch exploration
+     * Distance in dips between a touch up event denoting the end of a touch exploration
      * gesture and the touch up event of a subsequent tap for the latter tap to be
      * considered as a tap i.e. to perform a click.
      */
@@ -198,12 +204,12 @@ public class ViewConfiguration {
     private static final float SCROLL_FRICTION = 0.015f;
 
     /**
-     * Max distance to overscroll for edge effects
+     * Max distance in dips to overscroll for edge effects
      */
     private static final int OVERSCROLL_DISTANCE = 0;
 
     /**
-     * Max distance to overfling for edge effects
+     * Max distance in dips to overfling for edge effects
      */
     private static final int OVERFLING_DISTANCE = 6;
 
@@ -213,6 +219,7 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mDoubleTapTouchSlop;
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
     private final int mScaledTouchExplorationTapSlop;
@@ -239,6 +246,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
         mScaledTouchExplorationTapSlop = TOUCH_EXPLORATION_TAP_SLOP;
@@ -278,6 +286,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mTouchSlop = (int) (sizeAndDensity * TOUCH_SLOP + 0.5f);
+        mDoubleTapTouchSlop = (int) (sizeAndDensity * DOUBLE_TAP_TOUCH_SLOP + 0.5f);
         mPagingTouchSlop = (int) (sizeAndDensity * PAGING_TOUCH_SLOP + 0.5f);
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
         mScaledTouchExplorationTapSlop = (int) (density * TOUCH_EXPLORATION_TAP_SLOP + 0.5f);
@@ -325,7 +334,7 @@ public class ViewConfiguration {
 
     /**
      * @return The width of the horizontal scrollbar and the height of the vertical
-     *         scrollbar in pixels
+     *         scrollbar in dips
      *
      * @deprecated Use {@link #getScaledScrollBarSize()} instead.
      */
@@ -357,7 +366,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return the length of the fading edges in pixels
+     * @return the length of the fading edges in dips
      *
      * @deprecated Use {@link #getScaledFadingEdgeLength()} instead.
      */
@@ -452,7 +461,7 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Inset in pixels to look for touchable content when the user touches the edge of the
+     * @return Inset in dips to look for touchable content when the user touches the edge of the
      *         screen
      *
      * @deprecated Use {@link #getScaledEdgeSlop()} instead.
@@ -471,7 +480,7 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Distance a touch can wander before we think the user is scrolling in pixels
+     * @return Distance in dips a touch can wander before we think the user is scrolling
      *
      * @deprecated Use {@link #getScaledTouchSlop()} instead.
      */
@@ -481,22 +490,31 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Distance a touch can wander before we think the user is scrolling in pixels
+     * @return Distance in pixels a touch can wander before we think the user is scrolling
      */
     public int getScaledTouchSlop() {
         return mTouchSlop;
     }
     
     /**
-     * @return Distance a touch can wander before we think the user is scrolling a full page
-     *         in dips
+     * @return Distance in pixels the first touch can wander before we do not consider this a
+     * potential double tap event
+     * @hide
+     */
+    public int getScaledDoubleTapTouchSlop() {
+        return mDoubleTapTouchSlop;
+    }
+
+    /**
+     * @return Distance in pixels a touch can wander before we think the user is scrolling a full
+     * page
      */
     public int getScaledPagingTouchSlop() {
         return mPagingTouchSlop;
     }
 
     /**
-     * @return Distance between the first touch and second touch to still be
+     * @return Distance in dips between the first touch and second touch to still be
      *         considered a double tap
      * @deprecated Use {@link #getScaledDoubleTapSlop()} instead.
      * @hide The only client of this should be GestureDetector, which needs this
@@ -508,7 +526,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return Distance between the first touch and second touch to still be
+     * @return Distance in pixels between the first touch and second touch to still be
      *         considered a double tap
      */
     public int getScaledDoubleTapSlop() {
@@ -516,7 +534,7 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Distance between a touch up event denoting the end of a touch exploration
+     * @return Distance in pixels between a touch up event denoting the end of a touch exploration
      * gesture and the touch up event of a subsequent tap for the latter tap to be
      * considered as a tap i.e. to perform a click.
      *
@@ -540,7 +558,7 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Distance a touch must be outside the bounds of a window for it
+     * @return Distance in dips a touch must be outside the bounds of a window for it
      * to be counted as outside the window for purposes of dismissing that
      * window.
      *
@@ -552,16 +570,15 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Distance a touch must be outside the bounds of a window for it
-     * to be counted as outside the window for purposes of dismissing that
-     * window.
+     * @return Distance in pixels a touch must be outside the bounds of a window for it
+     * to be counted as outside the window for purposes of dismissing that window.
      */
     public int getScaledWindowTouchSlop() {
         return mWindowTouchSlop;
     }
     
     /**
-     * @return Minimum velocity to initiate a fling, as measured in pixels per second.
+     * @return Minimum velocity to initiate a fling, as measured in dips per second.
      *
      * @deprecated Use {@link #getScaledMinimumFlingVelocity()} instead.
      */
@@ -578,7 +595,7 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Maximum velocity to initiate a fling, as measured in pixels per second.
+     * @return Maximum velocity to initiate a fling, as measured in dips per second.
      *
      * @deprecated Use {@link #getScaledMaximumFlingVelocity()} instead.
      */
@@ -617,14 +634,16 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return The maximum distance a View should overscroll by when showing edge effects.
+     * @return The maximum distance a View should overscroll by when showing edge effects (in
+     * pixels).
      */
     public int getScaledOverscrollDistance() {
         return mOverscrollDistance;
     }
 
     /**
-     * @return The maximum distance a View should overfling by when showing edge effects.
+     * @return The maximum distance a View should overfling by when showing edge effects (in
+     * pixels).
      */
     public int getScaledOverflingDistance() {
         return mOverflingDistance;
