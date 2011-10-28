@@ -796,7 +796,7 @@ void NuPlayer::notifyListener(int msg, int ext1, int ext2) {
         return;
     }
 
-    driver->sendEvent(msg, ext1, ext2);
+    driver->notifyListener(msg, ext1, ext2);
 }
 
 void NuPlayer::flushDecoder(bool audio, bool needShutdown) {
