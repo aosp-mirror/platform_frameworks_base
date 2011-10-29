@@ -104,11 +104,6 @@ static void nativeDispose(JNIEnv* env, jclass clazz, jint windowPtr) {
     }
 }
 
-static jstring nativeGetName(JNIEnv* env, jclass clazz, jint windowPtr) {
-    CursorWindow* window = reinterpret_cast<CursorWindow*>(windowPtr);
-    return env->NewStringUTF(window->name().string());
-}
-
 static void nativeWriteToParcel(JNIEnv * env, jclass clazz, jint windowPtr,
         jobject parcelObj) {
     CursorWindow* window = reinterpret_cast<CursorWindow*>(windowPtr);
@@ -490,8 +485,6 @@ static JNINativeMethod sMethods[] =
             (void*)nativeDispose },
     { "nativeWriteToParcel", "(ILandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
-    { "nativeGetName", "(I)Ljava/lang/String;",
-            (void*)nativeGetName },
     { "nativeClear", "(I)V",
             (void*)nativeClear },
     { "nativeGetNumRows", "(I)I",
