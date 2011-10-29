@@ -123,7 +123,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Телетайп включен."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибровызов."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Беззвучный режим."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложение <xliff:g id="APP">%s</xliff:g> убрано."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" удалено из списка."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Передача данных по каналам 2G и 3G отключена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Передача данных по каналу 4G отключена"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобильный Интернет отключен"</string>
