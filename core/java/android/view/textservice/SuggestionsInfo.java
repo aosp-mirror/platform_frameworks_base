@@ -39,6 +39,12 @@ public final class SuggestionsInfo implements Parcelable {
      * word looks like a typo.
      */
     public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 0x0002;
+    /**
+     * Flag of the attributes of the suggestions that can be obtained by
+     * {@link #getSuggestionsAttributes}: this tells that the text service thinks
+     * the result suggestions include highly recommended ones.
+     */
+    public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 0x0004;
     private final int mSuggestionsAttributes;
     private final String[] mSuggestions;
     private final boolean mSuggestionsAvailable;

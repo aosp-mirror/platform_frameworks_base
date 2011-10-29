@@ -24785,6 +24785,7 @@ package android.view.textservice {
     method public void setCookieAndSequence(int, int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 4; // 0x4
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
     field public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 2; // 0x2
   }
