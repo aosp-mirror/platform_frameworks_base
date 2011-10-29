@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -35,12 +36,19 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 /**
  * So you thought sync used up your battery life.
  */
 public class FrameworkPerfActivity extends Activity {
+    static final String TAG = "Perf";
+
     final Handler mHandler = new Handler();
 
     TextView mLog;
@@ -56,12 +64,35 @@ public class FrameworkPerfActivity extends Activity {
             new MethodCallOp(), new CpuOp(),
             new MethodCallOp(), new SchedulerOp(),
             new MethodCallOp(), new GcOp(),
+            new MethodCallOp(), new CreateFileOp(),
+            new MethodCallOp(), new CreateWriteFileOp(),
+            new MethodCallOp(), new CreateWriteSyncFileOp(),
+            new MethodCallOp(), new WriteFileOp(),
+            new MethodCallOp(), new ReadFileOp(),
             new SchedulerOp(), new SchedulerOp(),
             new GcOp(), new NoOp(),
             new IpcOp(), new NoOp(),
             new IpcOp(), new CpuOp(),
             new IpcOp(), new SchedulerOp(),
             new IpcOp(), new GcOp(),
+            new IpcOp(), new CreateFileOp(),
+            new IpcOp(), new CreateWriteFileOp(),
+            new IpcOp(), new CreateWriteSyncFileOp(),
+            new IpcOp(), new WriteFileOp(),
+            new IpcOp(), new ReadFileOp(),
+            new CreateFileOp(), new NoOp(),
+            new CreateWriteFileOp(), new NoOp(),
+            new CreateWriteSyncFileOp(), new NoOp(),
+            new WriteFileOp(), new NoOp(),
+            new ReadFileOp(), new NoOp(),
+            new WriteFileOp(), new CreateWriteFileOp(),
+            new ReadFileOp(), new CreateWriteFileOp(),
+            new WriteFileOp(), new CreateWriteSyncFileOp(),
+            new ReadFileOp(), new CreateWriteSyncFileOp(),
+            new WriteFileOp(), new WriteFileOp(),
+            new WriteFileOp(), new ReadFileOp(),
+            new ReadFileOp(), new WriteFileOp(),
+            new ReadFileOp(), new ReadFileOp(),
             new ParseXmlResOp(), new NoOp(),
             new ParseLargeXmlResOp(), new NoOp(),
             new LayoutInflaterOp(), new NoOp(),
@@ -204,7 +235,7 @@ public class FrameworkPerfActivity extends Activity {
                 float bgMsPerOp = result.getBgMsPerOp();
                 String fgMsPerOpStr = fgMsPerOp != 0 ? Float.toString(fgMsPerOp) : "";
                 String bgMsPerOpStr = bgMsPerOp != 0 ? Float.toString(bgMsPerOp) : "";
-                Log.i("Perf", "\t" + result.name + "\t" + result.fgOps
+                Log.i(TAG, "\t" + result.name + "\t" + result.fgOps
                         + "\t" + result.getFgMsPerOp() + "\t" + result.fgTime
                         + "\t" + result.fgLongName + "\t" + result.bgOps
                         + "\t" + result.getBgMsPerOp() + "\t" + result.bgTime
@@ -229,7 +260,7 @@ public class FrameworkPerfActivity extends Activity {
 
     void log(String s) {
         mLog.setText(mLog.getText() + "\n" + s);
-        Log.i("Perf", s);
+        Log.i(TAG, s);
     }
 
     enum BackgroundMode {
@@ -322,8 +353,8 @@ public class FrameworkPerfActivity extends Activity {
                 }
             }, Process.THREAD_PRIORITY_FOREGROUND);
 
-            mForegroundOp.onInit(FrameworkPerfActivity.this);
-            mBackgroundOp.onInit(FrameworkPerfActivity.this);
+            mForegroundOp.onInit(FrameworkPerfActivity.this, true);
+            mBackgroundOp.onInit(FrameworkPerfActivity.this, false);
 
             synchronized (this) {
                 mStartTime = SystemClock.uptimeMillis();
@@ -380,6 +411,8 @@ public class FrameworkPerfActivity extends Activity {
                 if (!mBackgroundRunning && !mForegroundRunning) {
                     mHandler.post(new Runnable() {
                         @Override public void run() {
+                            mForegroundOp.onTerm(FrameworkPerfActivity.this);
+                            mBackgroundOp.onTerm(FrameworkPerfActivity.this);
                             if (mDoneCallback != null) {
                                 mDoneCallback.run();
                             }
@@ -423,10 +456,13 @@ public class FrameworkPerfActivity extends Activity {
             return mLongName;
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
         }
 
         abstract boolean onRun();
+
+        void onTerm(Context context) {
+        }
 
         int getOpsPerRun() {
             return 1;
@@ -510,7 +546,7 @@ public class FrameworkPerfActivity extends Activity {
             super("Ipc", "IPC to system process");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mPm = context.getPackageManager();
             mProcessName = context.getApplicationInfo().processName;
         }
@@ -535,7 +571,7 @@ public class FrameworkPerfActivity extends Activity {
             super("ParseXmlRes", "Parse compiled XML resource");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -553,7 +589,7 @@ public class FrameworkPerfActivity extends Activity {
             super("ParseLargeXmlRes", "Parse large XML resource");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -571,7 +607,7 @@ public class FrameworkPerfActivity extends Activity {
             super("LayoutInflaterOp", "Inflate layout resource");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -593,7 +629,7 @@ public class FrameworkPerfActivity extends Activity {
             super("LayoutInflaterLargeOp", "Inflate large layout resource");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -615,7 +651,7 @@ public class FrameworkPerfActivity extends Activity {
             super("LoadSmallBitmap", "Load small raw bitmap");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -636,7 +672,7 @@ public class FrameworkPerfActivity extends Activity {
             super("LoadLargeBitmap", "Load large raw bitmap");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -657,7 +693,7 @@ public class FrameworkPerfActivity extends Activity {
             super("LoadSmallScaledBitmap", "Load small raw bitmap that is scaled for density");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -678,7 +714,7 @@ public class FrameworkPerfActivity extends Activity {
             super("LoadLargeScaledBitmap", "Load large raw bitmap that is scaled for density");
         }
 
-        void onInit(Context context) {
+        void onInit(Context context, boolean foreground) {
             mContext = context;
         }
 
@@ -689,6 +725,171 @@ public class FrameworkPerfActivity extends Activity {
                     R.drawable.wallpaper_goldengate_scale, opts);
             bm.recycle();
             return true;
+        }
+    }
+
+    static class CreateFileOp extends Op {
+        File mFile;
+
+        CreateFileOp() {
+            super("CreateFile", "Create and delete a file");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
+            mFile.delete();
+        }
+
+        boolean onRun() {
+            try {
+                mFile.createNewFile();
+            } catch (IOException e) {
+                Log.w(TAG, "Failure creating " + mFile, e);
+            }
+            mFile.delete();
+            return true;
+        }
+    }
+
+    static class CreateWriteFileOp extends Op {
+        File mFile;
+
+        CreateWriteFileOp() {
+            super("CreateWriteFile", "Create, write, and delete a file");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
+            mFile.delete();
+        }
+
+        boolean onRun() {
+            try {
+                FileOutputStream fos = new FileOutputStream(mFile);
+                fos.write(1);
+                fos.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Failure creating " + mFile, e);
+            }
+            mFile.delete();
+            return true;
+        }
+    }
+
+    static class CreateWriteSyncFileOp extends Op {
+        File mFile;
+
+        CreateWriteSyncFileOp() {
+            super("CreateWriteSyncFile", "Create, write, sync, and delete a file");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
+            mFile.delete();
+        }
+
+        boolean onRun() {
+            try {
+                FileOutputStream fos = new FileOutputStream(mFile);
+                fos.write(1);
+                fos.flush();
+                FileUtils.sync(fos);
+                fos.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Failure creating " + mFile, e);
+            }
+            mFile.delete();
+            return true;
+        }
+    }
+
+    static class WriteFileOp extends Op {
+        File mFile;
+        RandomAccessFile mRAF;
+        byte[] mBuffer;
+
+        WriteFileOp() {
+            super("WriteFile", "Truncate and write a 64k file");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mBuffer = new byte[1024*64];
+            for (int i=0; i<mBuffer.length; i++) {
+                mBuffer[i] = (byte)i;
+            }
+            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
+            mFile.delete();
+            try {
+                mRAF = new RandomAccessFile(mFile, "rw");
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Failure creating " + mFile, e);
+            }
+        }
+
+        boolean onRun() {
+            try {
+                mRAF.seek(0);
+                mRAF.setLength(0);
+                mRAF.write(mBuffer);
+            } catch (IOException e) {
+                Log.w(TAG, "Failure writing " + mFile, e);
+            }
+            return true;
+        }
+
+        void onTerm(Context context) {
+            try {
+                mRAF.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Failure closing " + mFile, e);
+            }
+            mFile.delete();
+        }
+    }
+
+    static class ReadFileOp extends Op {
+        File mFile;
+        RandomAccessFile mRAF;
+        byte[] mBuffer;
+
+        ReadFileOp() {
+            super("ReadFile", "Seek and read a 64k file");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mBuffer = new byte[1024*64];
+            for (int i=0; i<mBuffer.length; i++) {
+                mBuffer[i] = (byte)i;
+            }
+            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
+            mFile.delete();
+            try {
+                mRAF = new RandomAccessFile(mFile, "rw");
+                mRAF.seek(0);
+                mRAF.setLength(0);
+                mRAF.write(mBuffer);
+            } catch (IOException e) {
+                Log.w(TAG, "Failure creating " + mFile, e);
+            }
+        }
+
+        boolean onRun() {
+            try {
+                mRAF.seek(0);
+                mRAF.read(mBuffer);
+            } catch (IOException e) {
+                Log.w(TAG, "Failure reading " + mFile, e);
+            }
+            return true;
+        }
+
+        void onTerm(Context context) {
+            try {
+                mRAF.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Failure closing " + mFile, e);
+            }
+            mFile.delete();
         }
     }
 }
