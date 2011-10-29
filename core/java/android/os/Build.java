@@ -326,6 +326,13 @@ public class Build {
     public static final String HOST = getString("ro.build.host");
 
     /**
+     * Returns true if we are running a debug build such as "user-debug" or "eng".
+     * @hide
+     */
+    public static final boolean IS_DEBUGGABLE =
+            SystemProperties.getInt("ro.debuggable", 0) == 1;
+
+    /**
      * Returns the version string for the radio firmware.  May return
      * null (if, for instance, the radio is not currently on).
      */
