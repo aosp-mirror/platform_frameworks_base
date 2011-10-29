@@ -65,9 +65,9 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ekran görüntüsü kaydediliyor..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Ekran görüntüsü kaydediliyor..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Ekran görüntüsü kaydediliyor."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekran görüntüsü yakalandı."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekran görüntüsü alındı."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Ekran görüntünüzü izlemek için dokunun."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Ekran görüntüsü yakalanamadı."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Ekran görüntüsü alınamadı."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Ekran görüntüsü kaydedilemedi. Depolama birimi kullanımda olabilir."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB dosya aktarım seçenekleri"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Medya oynatıcı olarak ekle (MTP)"</string>
