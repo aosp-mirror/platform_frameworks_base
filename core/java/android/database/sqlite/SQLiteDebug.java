@@ -18,8 +18,6 @@ package android.database.sqlite;
 
 import java.util.ArrayList;
 
-import android.os.Build;
-import android.os.SystemProperties;
 import android.util.Log;
 
 /**
@@ -65,28 +63,6 @@ public final class SQLiteDebug {
      */
     public static final boolean DEBUG_LOCK_TIME_TRACKING_STACK_TRACE =
             Log.isLoggable("SQLiteLockStackTrace", Log.VERBOSE);
-
-    /**
-     * True to enable database performance testing instrumentation.
-     * @hide
-     */
-    public static final boolean DEBUG_LOG_SLOW_QUERIES = Build.IS_DEBUGGABLE;
-
-    /**
-     * Determines whether a query should be logged.
-     *
-     * Reads the "db.log.slow_query_threshold" system property, which can be changed
-     * by the user at any time.  If the value is zero, then all queries will
-     * be considered slow.  If the value does not exist, then no queries will
-     * be considered slow.
-     *
-     * This value can be changed dynamically while the system is running.
-     * @hide
-     */
-    public static final boolean shouldLogSlowQuery(long elapsedTimeMillis) {
-        int slowQueryMillis = SystemProperties.getInt("db.log.slow_query_threshold", -1);
-        return slowQueryMillis >= 0 && elapsedTimeMillis > slowQueryMillis;
-    }
 
     /**
      * Contains statistics about the active pagers in the current process.
