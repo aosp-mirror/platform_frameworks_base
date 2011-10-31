@@ -1635,8 +1635,10 @@ public class AudioService extends IAudioService.Stub {
                     // "silent mode", but which one?
                     newRingerMode = vibeInSilent ? RINGER_MODE_VIBRATE : RINGER_MODE_SILENT;
                 }
-                if (uiIndex == 0 || (mPrevVolDirection == AudioManager.ADJUST_LOWER &&
-                        mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
+                if (uiIndex == 0 ||
+                        (!vibeInSilent &&
+                         mPrevVolDirection == AudioManager.ADJUST_LOWER &&
+                         mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
                     adjustVolumeIndex = false;
                 }
             }
