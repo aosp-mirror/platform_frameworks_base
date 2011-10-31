@@ -462,16 +462,20 @@ class GlobalScreenshot {
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mBackgroundView.setAlpha(0f);
+                mBackgroundView.setFastAlpha(0f);
                 mBackgroundView.setVisibility(View.VISIBLE);
-                mScreenshotContainerView.setAlpha(0f);
-                mScreenshotContainerView.setTranslationX(0f);
-                mScreenshotContainerView.setTranslationY(0f);
-                mScreenshotContainerView.setScaleX(SCREENSHOT_SCALE + mBgPaddingScale);
-                mScreenshotContainerView.setScaleY(SCREENSHOT_SCALE + mBgPaddingScale);
+                mBackgroundView.fastInvalidate();
+                mScreenshotContainerView.setFastAlpha(0f);
+                mScreenshotContainerView.setFastTranslationX(0f);
+                mScreenshotContainerView.setFastTranslationY(0f);
+                mScreenshotContainerView.setFastScaleX(SCREENSHOT_SCALE + mBgPaddingScale);
+                mScreenshotContainerView.setFastScaleY(SCREENSHOT_SCALE + mBgPaddingScale);
                 mScreenshotContainerView.setVisibility(View.VISIBLE);
-                mScreenshotFlash.setAlpha(0f);
+                mScreenshotContainerView.fastInvalidate();
+                mScreenshotFlash.setFastAlpha(0f);
                 mScreenshotFlash.setVisibility(View.VISIBLE);
+                mScreenshotFlash.fastInvalidate();
+                mScreenshotLayout.invalidate();
             }
             @Override
             public void onAnimationEnd(android.animation.Animator animation) {
@@ -485,11 +489,15 @@ class GlobalScreenshot {
                 float scaleT = (SCREENSHOT_SCALE + mBgPaddingScale)
                     - (float) scaleInterpolator.getInterpolation(t)
                         * (SCREENSHOT_SCALE - SCREENSHOT_DROP_IN_MIN_SCALE);
-                mBackgroundView.setAlpha(scaleInterpolator.getInterpolation(t) * BACKGROUND_ALPHA);
-                mScreenshotContainerView.setAlpha(t);
-                mScreenshotContainerView.setScaleX(scaleT);
-                mScreenshotContainerView.setScaleY(scaleT);
-                mScreenshotFlash.setAlpha(flashAlphaInterpolator.getInterpolation(t));
+                mBackgroundView.setFastAlpha(scaleInterpolator.getInterpolation(t) * BACKGROUND_ALPHA);
+                mBackgroundView.fastInvalidate();
+                mScreenshotContainerView.setFastAlpha(t);
+                mScreenshotContainerView.setFastScaleX(scaleT);
+                mScreenshotContainerView.setFastScaleY(scaleT);
+                mScreenshotContainerView.fastInvalidate();
+                mScreenshotFlash.setFastAlpha(flashAlphaInterpolator.getInterpolation(t));
+                mScreenshotFlash.fastInvalidate();
+                mScreenshotLayout.invalidate();
             }
         });
         return anim;
@@ -517,10 +525,13 @@ class GlobalScreenshot {
                     float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
                             - (float) t * (SCREENSHOT_DROP_IN_MIN_SCALE
                                     - SCREENSHOT_FAST_DROP_OUT_MIN_SCALE);
-                    mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
-                    mScreenshotContainerView.setAlpha(1f - t);
-                    mScreenshotContainerView.setScaleX(scaleT);
-                    mScreenshotContainerView.setScaleY(scaleT);
+                    mBackgroundView.setFastAlpha((1f - t) * BACKGROUND_ALPHA);
+                    mBackgroundView.fastInvalidate();
+                    mScreenshotContainerView.setFastAlpha(1f - t);
+                    mScreenshotContainerView.setFastScaleX(scaleT);
+                    mScreenshotContainerView.setFastScaleY(scaleT);
+                    mScreenshotContainerView.fastInvalidate();
+                    mScreenshotLayout.invalidate();
                 }
             });
         } else {
@@ -555,12 +566,15 @@ class GlobalScreenshot {
                     float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
                         - (float) scaleInterpolator.getInterpolation(t)
                             * (SCREENSHOT_DROP_IN_MIN_SCALE - SCREENSHOT_DROP_OUT_MIN_SCALE);
-                    mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
-                    mScreenshotContainerView.setAlpha(1f - scaleInterpolator.getInterpolation(t));
-                    mScreenshotContainerView.setScaleX(scaleT);
-                    mScreenshotContainerView.setScaleY(scaleT);
-                    mScreenshotContainerView.setTranslationX(t * finalPos.x);
-                    mScreenshotContainerView.setTranslationY(t * finalPos.y);
+                    mBackgroundView.setFastAlpha((1f - t) * BACKGROUND_ALPHA);
+                    mBackgroundView.fastInvalidate();
+                    mScreenshotContainerView.setFastAlpha(1f - scaleInterpolator.getInterpolation(t));
+                    mScreenshotContainerView.setFastScaleX(scaleT);
+                    mScreenshotContainerView.setFastScaleY(scaleT);
+                    mScreenshotContainerView.setFastTranslationX(t * finalPos.x);
+                    mScreenshotContainerView.setFastTranslationY(t * finalPos.y);
+                    mScreenshotContainerView.fastInvalidate();
+                    mScreenshotLayout.invalidate();
                 }
             });
         }
