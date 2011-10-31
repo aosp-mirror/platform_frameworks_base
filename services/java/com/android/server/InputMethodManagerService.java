@@ -374,6 +374,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mScreenOn = true;
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
+                setImeWindowVisibilityStatusHiddenLocked();
             } else if (intent.getAction().equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
                 hideInputMethodMenu();
                 return;
@@ -468,8 +469,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
-                            mImeWindowVis = 0;
-                            updateImeWindowStatusLocked();
+                            setImeWindowVisibilityStatusHiddenLocked();
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -625,7 +625,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void updateImeWindowStatusLocked() {
+    private void setImeWindowVisibilityStatusHiddenLocked() {
+        mImeWindowVis = 0;
+        updateImeWindowStatusLocked();
+    }
+
+    private void updateImeWindowStatusLocked() {
         setImeWindowStatus(mCurToken, mImeWindowVis, mBackDisposition);
     }
 
@@ -999,8 +1004,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 sessionState.session.finishSession();
             } catch (RemoteException e) {
                 Slog.w(TAG, "Session failed to close due to remote exception", e);
-                mImeWindowVis = 0;
-                updateImeWindowStatusLocked();
+                setImeWindowVisibilityStatusHiddenLocked();
             }
         }
     }
@@ -1395,13 +1399,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
                             if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
                                     + uid + ": " + client);
-                            mImeWindowVis = 0;
-                            updateImeWindowStatusLocked();
+                            setImeWindowVisibilityStatusHiddenLocked();
                             return false;
                         }
                     } catch (RemoteException e) {
-                        mImeWindowVis = 0;
-                        updateImeWindowStatusLocked();
+                        setImeWindowVisibilityStatusHiddenLocked();
                         return false;
                     }
                 }
