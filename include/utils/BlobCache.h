@@ -25,8 +25,8 @@
 
 namespace android {
 
-// A BlobCache is an in-memory cache for binary key/value pairs. All the public
-// methods are thread-safe.
+// A BlobCache is an in-memory cache for binary key/value pairs.  A BlobCache
+// does NOT provide any thread-safety guarantees.
 //
 // The cache contents can be serialized to a file and reloaded in a subsequent
 // execution of the program. This serialization is non-portable and should only
@@ -166,17 +166,12 @@ private:
     size_t mTotalSize;
 
     // mRandState is the pseudo-random number generator state. It is passed to
-    // nrand48 to generate random numbers when needed. It must be protected by
-    // mMutex.
+    // nrand48 to generate random numbers when needed.
     unsigned short mRandState[3];
 
     // mCacheEntries stores all the cache entries that are resident in memory.
     // Cache entries are added to it by the 'set' method.
     SortedVector<CacheEntry> mCacheEntries;
-
-    // mMutex is used to synchronize access to all member variables.  It must be
-    // locked any time the member variables are written or read.
-    Mutex mMutex;
 };
 
 }

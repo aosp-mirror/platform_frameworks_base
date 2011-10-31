@@ -67,7 +67,6 @@ void BlobCache::set(const void* key, size_t keySize, const void* value,
         return;
     }
 
-    Mutex::Autolock lock(mMutex);
     sp<Blob> dummyKey(new Blob(key, keySize, false));
     CacheEntry dummyEntry(dummyKey, NULL);
 
@@ -129,7 +128,6 @@ size_t BlobCache::get(const void* key, size_t keySize, void* value,
                 keySize, mMaxKeySize);
         return 0;
     }
-    Mutex::Autolock lock(mMutex);
     sp<Blob> dummyKey(new Blob(key, keySize, false));
     CacheEntry dummyEntry(dummyKey, NULL);
     ssize_t index = mCacheEntries.indexOf(dummyEntry);
