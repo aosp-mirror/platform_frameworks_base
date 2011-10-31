@@ -1646,8 +1646,8 @@ please see styles_device_defaults.xml.
         <item name="android:flingable">true</item>
         <item name="android:selectionDivider">@android:drawable/numberpicker_selection_divider</item>
         <item name="android:selectionDividerHeight">2dip</item>
-        <item name="android:maxHeight">180dip</item>
-        <item name="android:maxWidth">56dip</item>
+        <item name="android:minWidth">48dip</item>
+        <item name="android:maxHeight">200dip</item>
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
@@ -1676,6 +1676,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.EditText.NumberPickerInputText">
         <item name="android:paddingTop">13sp</item>
         <item name="android:paddingBottom">13sp</item>
+        <item name="android:paddingLeft">2sp</item>
+        <item name="android:paddingRight">2sp</item>
         <item name="android:gravity">center</item>
         <item name="android:singleLine">true</item>
         <item name="android:textSize">18sp</item>
