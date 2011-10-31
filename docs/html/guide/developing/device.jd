@@ -58,14 +58,17 @@ would on the emulator. Before you can start, there are just a few things to do:<
 element.</p>
   </li>
   <li>Set up your device to allow installation of non-Market applications. <p>On
-the device, go to <strong>Settings > Applications</strong> and enable
+the device, go to <strong>Settings > Applications</strong> and enable 
 
-<strong>Unknown sources</strong>.</p>
+<strong>Unknown sources</strong> (on an Android 4.0 device, the setting is
+located in <strong>Settings > Security</strong>).</p>
   
   </li>
   <li>Turn on "USB Debugging" on your device.
-    <p>On the device, go to <strong>Settings > Applications > Development</strong>
-    and enable <strong>USB debugging</strong>.</p>
+    <p>On the device, go to <strong>Settings > Applications > Development</strong> 
+    and enable <strong>USB debugging</strong> 
+    (on an Android 4.0 device, the setting is 
+located in <strong>Settings > Developer options</strong>).</p>
   </li>
   <li>Set up your system to detect your device.
     <ul>
