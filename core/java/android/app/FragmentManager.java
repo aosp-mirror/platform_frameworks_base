@@ -1025,6 +1025,8 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     void startPendingDeferredFragments() {
+        if (mActive == null) return;
+
         for (int i=0; i<mActive.size(); i++) {
             Fragment f = mActive.get(i);
             if (f != null) {
