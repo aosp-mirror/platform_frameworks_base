@@ -412,11 +412,13 @@ public final class NfcAdapter {
     /**
      * Return true if this NFC Adapter has any features enabled.
      *
-     * <p>Application may use this as a helper to suggest that the user
-     * should turn on NFC in Settings.
      * <p>If this method returns false, the NFC hardware is guaranteed not to
-     * generate or respond to any NFC transactions.
+     * generate or respond to any NFC communication over its NFC radio.
+     * <p>Applications can use this to check if NFC is enabled. Applications
+     * can request Settings UI allowing the user to toggle NFC using:
+     * <p><pre>startActivity(new Intent(Settings.ACTION_NFC_SETTINGS))</pre>
      *
+     * @see android.provider.Settings#ACTION_NFC_SETTINGS
      * @return true if this NFC Adapter has any features enabled
      */
     public boolean isEnabled() {
@@ -796,16 +798,28 @@ public final class NfcAdapter {
     }
 
     /**
-     * Return true if NDEF Push feature is enabled.
-     * <p>This function can return true even if NFC is currently turned-off.
-     * This indicates that NDEF Push is not currently active, but it has
-     * been requested by the user and will be active as soon as NFC is turned
-     * on.
-     * <p>If you want to check if NDEF PUsh sharing is currently active, use
-     * <code>{@link #isEnabled()} && {@link #isNdefPushEnabled()}</code>
+     * Return true if the NDEF Push (Android Beam) feature is enabled.
+     * <p>This function will return true only if both NFC is enabled, and the
+     * NDEF Push feature is enabled.
+     * <p>Note that if NFC is enabled but NDEF Push is disabled then this
+     * device can still <i>receive</i> NDEF messages, it just cannot send them.
+     * <p>Applications cannot directly toggle the NDEF Push feature, but they
+     * can request Settings UI allowing the user to toggle NDEF Push using
+     * <code>startActivity(new Intent(Settings.ACTION_NFCSHARING_SETTINGS))</code>
+     * <p>Example usage in an Activity that requires NDEF Push:
+     * <p><pre>
+     * protected void onResume() {
+     *     super.onResume();
+     *     if (!nfcAdapter.isEnabled()) {
+     *         startActivity(new Intent(Settings.ACTION_NFC_SETTINGS));
+     *     } else if (!nfcAdapter.isNdefPushEnabled()) {
+     *         startActivity(new Intent(Settings.ACTION_NFCSHARING_SETTINGS));
+     *     }
+     * }
+     * </pre>
      *
+     * @see android.provider.Settings#ACTION_NFCSHARING_SETTINGS
      * @return true if NDEF Push feature is enabled
-     * @hide
      */
     public boolean isNdefPushEnabled() {
         try {

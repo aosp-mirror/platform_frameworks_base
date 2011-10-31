@@ -569,7 +569,9 @@ public final class Settings {
         "android.settings.DEVICE_INFO_SETTINGS";
 
     /**
-     * Activity Action: Show NFC sharing settings.
+     * Activity Action: Show NFC settings.
+     * <p>
+     * This shows UI that allows NFC to be turned on or off.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
@@ -577,6 +579,24 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing
+     * @see android.nfc.NfcAdapter#isEnabled()
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
+
+    /**
+     * Activity Action: Show NFC Sharing settings.
+     * <p>
+     * This shows UI that allows NDEF Push (Android Beam) to be turned on or
+     * off.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     * @see android.nfc.NfcAdapter#isNdefPushEnabled()
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NFCSHARING_SETTINGS =
