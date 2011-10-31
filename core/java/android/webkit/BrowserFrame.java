@@ -1404,4 +1404,17 @@ class BrowserFrame extends Handler {
     native void nativeSslClientCert(int handle,
                                     byte[] pkcs8EncodedPrivateKey,
                                     byte[][] asn1DerEncodedCertificateChain);
+
+    /**
+     * Returns true when the contents of the frame is an RTL or vertical-rl
+     * page. This is used for determining whether a frame should be initially
+     * scrolled right-most as opposed to left-most.
+     * @return true when the frame should be initially scrolled right-most
+     * based on the text direction and writing mode.
+     */
+    /* package */ boolean getShouldStartScrolledRight() {
+        return nativeGetShouldStartScrolledRight(mNativeFrame);
+    }
+
+    private native boolean nativeGetShouldStartScrolledRight(int nativeBrowserFrame);
 }

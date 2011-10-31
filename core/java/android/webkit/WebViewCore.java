@@ -1982,6 +1982,7 @@ public final class WebViewCore {
         int mScrollY;
         boolean mMobileSite;
         boolean mIsRestored;
+        boolean mShouldStartScrolledRight;
     }
 
     static class DrawData {
@@ -2382,6 +2383,7 @@ public final class WebViewCore {
             viewState.mMobileSite = false;
             // for non-mobile site, we don't need minPrefWidth, set it as 0
             viewState.mScrollX = 0;
+            viewState.mShouldStartScrolledRight = false;
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.UPDATE_ZOOM_RANGE, viewState).sendToTarget();
             return;
@@ -2412,6 +2414,11 @@ public final class WebViewCore {
         mInitialViewState.mDefaultScale = adjust;
         mInitialViewState.mScrollX = mRestoredX;
         mInitialViewState.mScrollY = mRestoredY;
+        mInitialViewState.mShouldStartScrolledRight = (mRestoredX == 0)
+                && (mRestoredY == 0)
+                && (mBrowserFrame != null)
+                && mBrowserFrame.getShouldStartScrolledRight();
+
         mInitialViewState.mMobileSite = (0 == mViewportWidth);
         if (mIsRestored) {
             mInitialViewState.mIsRestored = true;
