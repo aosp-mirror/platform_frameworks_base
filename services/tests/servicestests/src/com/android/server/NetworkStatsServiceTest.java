@@ -83,6 +83,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private static final String TAG = "NetworkStatsServiceTest";
 
     private static final String TEST_IFACE = "test0";
+    private static final String TEST_IFACE2 = "test1";
     private static final long TEST_START = 1194220800000L;
 
     private static final String IMSI_1 = "310004";
@@ -418,8 +419,12 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectCurrentTime();
         expectDefaultSettings();
         expectNetworkState(buildMobile3gState(IMSI_2));
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 2048L, 16L, 512L, 4L));
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 3)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1536L, 12L, 512L, 4L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
+                .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
         expectNetworkStatsPoll();
 
         replay();
@@ -432,9 +437,11 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectCurrentTime();
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 128L, 1L, 1024L, 8L));
+                .addIfaceValues(TEST_IFACE, 2176L, 17L, 1536L, 12L));
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 128L, 1L, 1024L, 8L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1536L, 12L, 512L, 4L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
+                .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 640L, 5L, 1024L, 8L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, 0xFAAD, 128L, 1L, 1024L, 8L, 0L));
         expectNetworkStatsPoll();
 
@@ -499,6 +506,15 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         // special "removed" bucket.
         expectCurrentTime();
         expectDefaultSettings();
+        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 4128L, 258L, 544L, 34L));
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 16L, 1L, 16L, 1L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xFAAD, 16L, 1L, 16L, 1L, 0L)
+                .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 4096L, 258L, 512L, 32L, 0L)
+                .addValues(TEST_IFACE, UID_GREEN, SET_DEFAULT, TAG_NONE, 16L, 1L, 16L, 1L, 0L));
+        expectNetworkStatsPoll();
+
         replay();
         final Intent intent = new Intent(ACTION_UID_REMOVED);
         intent.putExtra(EXTRA_UID, UID_BLUE);
@@ -553,9 +569,11 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectCurrentTime();
         expectDefaultSettings();
-        expectNetworkState(buildMobile4gState());
+        expectNetworkState(buildMobile4gState(TEST_IFACE2));
         expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
         expectNetworkStatsPoll();
 
         replay();
@@ -569,8 +587,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 512L, 4L, 256L, 2L, 0L)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xFAAD, 512L, 4L, 256L, 2L, 0L));
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
+                .addValues(TEST_IFACE2, UID_RED, SET_DEFAULT, TAG_NONE, 512L, 4L, 256L, 2L, 0L)
+                .addValues(TEST_IFACE2, UID_RED, SET_DEFAULT, 0xFAAD, 512L, 4L, 256L, 2L, 0L));
         expectNetworkStatsPoll();
 
         mService.incrementOperationCount(UID_RED, 0xFAAD, 5);
@@ -625,6 +645,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 50L, 5L, 50L, 5L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 10L, 1L, 10L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 2048L, 16L, 1024L, 8L, 0L));
         expectNetworkStatsPoll();
 
@@ -881,11 +903,11 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         return new NetworkState(info, prop, null, subscriberId);
     }
 
-    private static NetworkState buildMobile4gState() {
+    private static NetworkState buildMobile4gState(String iface) {
         final NetworkInfo info = new NetworkInfo(TYPE_WIMAX, 0, null, null);
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
-        prop.setInterfaceName(TEST_IFACE);
+        prop.setInterfaceName(iface);
         return new NetworkState(info, prop, null);
     }
 
