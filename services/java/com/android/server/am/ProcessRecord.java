@@ -63,6 +63,7 @@ class ProcessRecord {
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
+    boolean serviceb;           // Process currently is on the service B list
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
@@ -179,6 +180,7 @@ class ProcessRecord {
         pw.print(prefix); pw.print("lastActivityTime=");
                 TimeUtils.formatDuration(lastActivityTime, now, pw);
                 pw.print(" lruWeight="); pw.print(lruWeight);
+                pw.print(" serviceb="); pw.print(serviceb);
                 pw.print(" keeping="); pw.print(keeping);
                 pw.print(" hidden="); pw.print(hidden);
                 pw.print(" empty="); pw.println(empty);
@@ -271,7 +273,7 @@ class ProcessRecord {
         processName = _processName;
         pkgList.add(_info.packageName);
         thread = _thread;
-        maxAdj = ProcessList.EMPTY_APP_ADJ;
+        maxAdj = ProcessList.HIDDEN_APP_MAX_ADJ;
         hiddenAdj = ProcessList.HIDDEN_APP_MIN_ADJ;
         curRawAdj = setRawAdj = -100;
         curAdj = setAdj = -100;

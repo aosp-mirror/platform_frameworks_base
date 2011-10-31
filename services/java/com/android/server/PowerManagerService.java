@@ -2193,25 +2193,21 @@ public class PowerManagerService extends IPowerManager.Stub
         }
 
         public void run() {
-            if (mAnimateScreenLights) {
-                synchronized (mLocks) {
+            synchronized (mLocks) {
+                // we're turning off
+                final boolean turningOff = animating && targetValue == Power.BRIGHTNESS_OFF;
+                if (mAnimateScreenLights || !turningOff) {
                     long now = SystemClock.uptimeMillis();
                     boolean more = mScreenBrightness.stepLocked();
                     if (more) {
                         mScreenOffHandler.postAtTime(this, now+(1000/60));
                     }
-                }
-            } else {
-                synchronized (mLocks) {
-                    // we're turning off
-                    final boolean animate = animating && targetValue == Power.BRIGHTNESS_OFF;
-                    if (animate) {
-                        // It's pretty scary to hold mLocks for this long, and we should
-                        // redesign this, but it works for now.
-                        nativeStartSurfaceFlingerAnimation(
-                                mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
-                                ? 0 : mAnimationSetting);
-                    }
+                } else {
+                    // It's pretty scary to hold mLocks for this long, and we should
+                    // redesign this, but it works for now.
+                    nativeStartSurfaceFlingerAnimation(
+                            mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
+                            ? 0 : mAnimationSetting);
                     mScreenBrightness.jumpToTargetLocked();
                 }
             }
