@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Set;
 
 
 /**
@@ -67,7 +68,6 @@ import java.util.Locale;
  * any. Any pending data from the current synthesis will be discarded.
  *
  */
-// TODO: Add a link to the sample TTS engine once it's done.
 public abstract class TextToSpeechService extends Service {
 
     private static final boolean DBG = false;
@@ -195,6 +195,18 @@ public abstract class TextToSpeechService extends Service {
      */
     protected abstract void onSynthesizeText(SynthesisRequest request,
             SynthesisCallback callback);
+
+    /**
+     * Queries the service for a set of features supported for a given language.
+     *
+     * @param lang ISO-3 language code.
+     * @param country ISO-3 country code. May be empty or null.
+     * @param variant Language variant. May be empty or null.
+     * @return A list of features supported for the given language.
+     */
+    protected Set<String> onGetFeaturesForLanguage(String lang, String country, String variant) {
+        return null;
+    }
 
     private int getDefaultSpeechRate() {
         return getSecureSettingInt(Settings.Secure.TTS_DEFAULT_RATE, Engine.DEFAULT_RATE);
@@ -776,6 +788,13 @@ public abstract class TextToSpeechService extends Service {
             }
 
             return onIsLanguageAvailable(lang, country, variant);
+        }
+
+        public String[] getFeaturesForLanguage(String lang, String country, String variant) {
+            Set<String> features = onGetFeaturesForLanguage(lang, country, variant);
+            String[] featuresArray = new String[features.size()];
+            features.toArray(featuresArray);
+            return featuresArray;
         }
 
         /*

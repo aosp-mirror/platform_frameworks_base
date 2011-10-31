@@ -18808,6 +18808,7 @@ package android.speech.tts {
     method public boolean areDefaultsEnforced();
     method public java.lang.String getDefaultEngine();
     method public java.util.List<android.speech.tts.TextToSpeech.EngineInfo> getEngines();
+    method public java.util.Set<java.lang.String> getFeatures(java.util.Locale);
     method public java.util.Locale getLanguage();
     method public int isLanguageAvailable(java.util.Locale);
     method public boolean isSpeaking();
@@ -18853,6 +18854,8 @@ package android.speech.tts {
     field public static final java.lang.String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
     field public static final java.lang.String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
     field public static final java.lang.String INTENT_ACTION_TTS_SERVICE = "android.intent.action.TTS_SERVICE";
+    field public static final java.lang.String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
+    field public static final java.lang.String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
     field public static final java.lang.String KEY_PARAM_PAN = "pan";
     field public static final java.lang.String KEY_PARAM_STREAM = "streamType";
     field public static final java.lang.String KEY_PARAM_UTTERANCE_ID = "utteranceId";
@@ -18878,6 +18881,7 @@ package android.speech.tts {
   public abstract class TextToSpeechService extends android.app.Service {
     ctor public TextToSpeechService();
     method public android.os.IBinder onBind(android.content.Intent);
+    method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract java.lang.String[] onGetLanguage();
     method protected abstract int onIsLanguageAvailable(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
