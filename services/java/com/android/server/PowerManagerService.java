@@ -2213,11 +2213,13 @@ public class PowerManagerService extends IPowerManager.Stub
                         mScreenOffHandler.postAtTime(this, now+(1000/60));
                     }
                 } else {
-                    // It's pretty scary to hold mLocks for this long, and we should
-                    // redesign this, but it works for now.
-                    nativeStartSurfaceFlingerAnimation(
-                            mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
-                            ? 0 : mAnimationSetting);
+                    if (!mHeadless) {
+                        // It's pretty scary to hold mLocks for this long, and we should
+                        // redesign this, but it works for now.
+                        nativeStartSurfaceFlingerAnimation(
+                                mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
+                                ? 0 : mAnimationSetting);
+                    }
                     mScreenBrightness.jumpToTargetLocked();
                 }
             }
