@@ -38,6 +38,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * <p>
  * See {@link ListView}, {@link GridView}, {@link Spinner} and
  *      {@link Gallery} for commonly used subclasses of AdapterView.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using AdapterView, read the
+ * <a href="{@docRoot}guide/topics/ui/binding.html">Binding to Data with AdapterView</a>
+ * developer guide.</p></div>
  */
 public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 

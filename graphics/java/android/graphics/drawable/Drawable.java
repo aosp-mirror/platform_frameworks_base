@@ -103,9 +103,15 @@ import java.util.Arrays;
  *     <li> <b>Scale</b>: a compound drawable with a single child drawable,
  *     whose overall size is modified based on the current level.
  * </ul>
- * <p>For information and examples of creating drawable resources (XML or bitmap files that
- * can be loaded in code), see <a
- * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use drawables, read the
+ * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and Drawables</a> developer
+ * guide. For information and examples of creating drawable resources (XML or bitmap files that
+ * can be loaded in code), read the
+ * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>
+ * document.</p></div>
  */
 public abstract class Drawable {
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
