@@ -419,7 +419,7 @@ class LoaderManagerImpl extends LoaderManager {
                 mInactiveLoaders.remove(mId);
             }
 
-            if (!hasRunningLoaders() && mActivity != null) {
+            if (mActivity != null && !hasRunningLoaders()) {
                 mActivity.mFragments.startPendingDeferredFragments();
             }
         }
@@ -680,6 +680,9 @@ class LoaderManagerImpl extends LoaderManager {
             LoaderInfo info = mInactiveLoaders.valueAt(idx);
             mInactiveLoaders.removeAt(idx);
             info.destroy();
+        }
+        if (mActivity != null && !hasRunningLoaders()) {
+            mActivity.mFragments.startPendingDeferredFragments();
         }
     }
 
