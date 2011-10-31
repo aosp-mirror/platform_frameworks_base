@@ -161,6 +161,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
             new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
 
+    // Used to bring IME service up to visible adjustment while it is being shown.
+    final ServiceConnection mVisibleConnection = new ServiceConnection() {
+        @Override public void onServiceConnected(ComponentName name, IBinder service) {
+        }
+
+        @Override public void onServiceDisconnected(ComponentName name) {
+        }
+    };
+    boolean mVisibleBound = false;
+
     // Ongoing notification
     private NotificationManager mNotificationManager;
     private KeyguardManager mKeyguardManager;
@@ -893,7 +903,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.string.input_method_binding_label);
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
-        if (mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE)) {
+        if (mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE
+                | Context.BIND_NOT_VISIBLE)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
@@ -975,6 +986,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void unbindCurrentMethodLocked(boolean reportToClient) {
+        if (mVisibleBound) {
+            mContext.unbindService(mVisibleConnection);
+            mVisibleBound = false;
+        }
+
         if (mHaveConnection) {
             mContext.unbindService(this);
             mHaveConnection = false;
@@ -1366,6 +1382,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_SHOW_SOFT_INPUT, getImeShowFlags(), mCurMethod,
                     resultReceiver));
             mInputShown = true;
+            if (mHaveConnection && !mVisibleBound) {
+                mContext.bindService(mCurIntent, mVisibleConnection, Context.BIND_AUTO_CREATE);
+                mVisibleBound = true;
+            }
             res = true;
         } else if (mHaveConnection && SystemClock.uptimeMillis()
                 >= (mLastBindTime+TIME_TO_RECONNECT)) {
@@ -1377,7 +1397,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     SystemClock.uptimeMillis()-mLastBindTime,1);
             Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
             mContext.unbindService(this);
-            mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE);
+            mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE
+                    | Context.BIND_NOT_VISIBLE);
         }
 
         return res;
@@ -1435,6 +1456,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             res = true;
         } else {
             res = false;
+        }
+        if (mHaveConnection && mVisibleBound) {
+            mContext.unbindService(mVisibleConnection);
+            mVisibleBound = false;
         }
         mInputShown = false;
         mShowRequested = false;

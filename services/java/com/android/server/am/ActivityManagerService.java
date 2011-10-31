@@ -13241,10 +13241,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         if ((cr.flags&(Context.BIND_ABOVE_CLIENT
                                                 |Context.BIND_IMPORTANT)) != 0) {
                                             adj = clientAdj;
-                                        } else if (clientAdj >= ProcessList.VISIBLE_APP_ADJ) {
+                                        } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
+                                                && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
+                                                && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                                            adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                                        } else if (clientAdj > ProcessList.VISIBLE_APP_ADJ) {
                                             adj = clientAdj;
                                         } else {
-                                            adj = ProcessList.VISIBLE_APP_ADJ;
+                                            app.pendingUiClean = true;
+                                            if (adj > ProcessList.VISIBLE_APP_ADJ) {
+                                                adj = ProcessList.VISIBLE_APP_ADJ;
+                                            }
                                         }
                                         if (!client.hidden) {
                                             app.hidden = false;
