@@ -3256,7 +3256,6 @@ public class Camera {
          * disable video stabilization.
          * @see #isVideoStabilizationSupported()
          * @see #getVideoStabilization()
-         * @hide
          */
         public void setVideoStabilization(boolean toggle) {
             set(KEY_VIDEO_STABILIZATION, toggle ? TRUE : FALSE);
@@ -3269,7 +3268,6 @@ public class Camera {
          * @return true if video stabilization is enabled
          * @see #isVideoStabilizationSupported()
          * @see #setVideoStabilization(boolean)
-         * @hide
          */
         public boolean getVideoStabilization() {
             String str = get(KEY_VIDEO_STABILIZATION);
@@ -3283,7 +3281,6 @@ public class Camera {
          * @return true if video stabilization is supported
          * @see #setVideoStabilization(boolean)
          * @see #getVideoStabilization()
-         * @hide
          */
         public boolean isVideoStabilizationSupported() {
             String str = get(KEY_VIDEO_STABILIZATION_SUPPORTED);
