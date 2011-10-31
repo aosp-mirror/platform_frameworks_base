@@ -42,6 +42,12 @@ import java.io.IOException;
  * {@link BackupAgentHelper} framework.  See the {@link BackupHelper} interface
  * documentation for details.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using BackupAgentHelper, read the
+ * <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a> developer guide.</p>
+ * </div>
+ *
  * @see BackupHelper
  * @see FileBackupHelper
  * @see SharedPreferencesBackupHelper

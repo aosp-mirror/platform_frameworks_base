@@ -85,6 +85,8 @@ public class NetworkController extends BroadcastReceiver {
     boolean mDataActive;
     int mMobileActivityIconId; // overlay arrows for data direction
     int mLastSignalLevel;
+    boolean mShowPhoneRSSIForData = false;
+    boolean mShowAtLeastThreeGees = false;
 
     String mContentDescriptionPhoneSignal;
     String mContentDescriptionWifi;
@@ -151,10 +153,14 @@ public class NetworkController extends BroadcastReceiver {
      */
     public NetworkController(Context context) {
         mContext = context;
+        final Resources res = context.getResources();
 
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         mHasMobileDataFeature = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+
+        mShowPhoneRSSIForData = res.getBoolean(R.bool.config_showPhoneRSSIForData);
+        mShowAtLeastThreeGees = res.getBoolean(R.bool.config_showMin3G);
 
         // set up the default wifi icon, used when no radios have ever appeared
         updateWifiIcons();
@@ -240,7 +246,7 @@ public class NetworkController extends BroadcastReceiver {
                 mContentDescriptionWifi);
         cluster.setMobileDataIndicators(
                 mHasMobileDataFeature,
-                mPhoneSignalIconId,
+                mShowPhoneRSSIForData ? mPhoneSignalIconId : mDataSignalIconId,
                 mMobileActivityIconId,
                 mDataTypeIconId,
                 mContentDescriptionPhoneSignal,
@@ -434,17 +440,25 @@ public class NetworkController extends BroadcastReceiver {
     private final void updateDataNetType() {
         switch (mDataNetType) {
             case TelephonyManager.NETWORK_TYPE_UNKNOWN:
-                mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
-                mDataTypeIconId = 0;
-                mContentDescriptionDataType = mContext.getString(
-                        R.string.accessibility_data_connection_gprs);
-                break;
+                if (!mShowAtLeastThreeGees) {
+                    mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
+                    mDataTypeIconId = 0;
+                    mContentDescriptionDataType = mContext.getString(
+                            R.string.accessibility_data_connection_gprs);
+                    break;
+                } else {
+                    // fall through
+                }
             case TelephonyManager.NETWORK_TYPE_EDGE:
-                mDataIconList = TelephonyIcons.DATA_E[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_data_connected_e;
-                mContentDescriptionDataType = mContext.getString(
-                        R.string.accessibility_data_connection_edge);
-                break;
+                if (!mShowAtLeastThreeGees) {
+                    mDataIconList = TelephonyIcons.DATA_E[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_e;
+                    mContentDescriptionDataType = mContext.getString(
+                            R.string.accessibility_data_connection_edge);
+                    break;
+                } else {
+                    // fall through
+                }
             case TelephonyManager.NETWORK_TYPE_UMTS:
                 mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
                 mDataTypeIconId = R.drawable.stat_sys_data_connected_3g;
@@ -496,10 +510,17 @@ public class NetworkController extends BroadcastReceiver {
                         R.string.accessibility_data_connection_4g);
                 break;
             default:
-                mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_data_connected_g;
-                mContentDescriptionDataType = mContext.getString(
-                        R.string.accessibility_data_connection_gprs);
+                if (!mShowAtLeastThreeGees) {
+                    mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_g;
+                    mContentDescriptionDataType = mContext.getString(
+                            R.string.accessibility_data_connection_gprs);
+                } else {
+                    mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_3g;
+                    mContentDescriptionDataType = mContext.getString(
+                            R.string.accessibility_data_connection_3g);
+                }
                 break;
         }
         if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
@@ -877,7 +898,7 @@ public class NetworkController extends BroadcastReceiver {
                         mContentDescriptionWifi);
                 cluster.setMobileDataIndicators(
                         mHasMobileDataFeature,
-                        mPhoneSignalIconId,
+                        mShowPhoneRSSIForData ? mPhoneSignalIconId : mDataSignalIconId,
                         mMobileActivityIconId,
                         mDataTypeIconId,
                         mContentDescriptionPhoneSignal,

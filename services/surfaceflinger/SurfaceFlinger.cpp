@@ -1784,8 +1784,10 @@ status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
     // redraw the screen entirely...
     glDisable(GL_TEXTURE_EXTERNAL_OES);
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);

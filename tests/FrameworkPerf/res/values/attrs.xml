@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <!-- Base attributes that are available to all Item objects. -->
+    <declare-styleable name="MenuItem">
+
+        <!-- The ID of the item. -->
+        <attr name="android:id" />
+
+        <!-- The category applied to the item.
+             (This will be or'ed with the orderInCategory attribute.) -->
+        <attr name="android:menuCategory" />
+
+        <!-- The order within the category applied to the item.
+             (This will be or'ed with the category attribute.) -->
+        <attr name="android:orderInCategory" />
+
+        <!-- The title associated with the item. -->
+        <attr name="android:title" />
+
+        <!-- The condensed title associated with the item.  This is used in situations where the
+             normal title may be too long to be displayed. -->
+        <attr name="android:titleCondensed" />
+
+        <!-- The icon associated with this item.  This icon will not always be shown, so
+             the title should be sufficient in describing this item. -->
+        <attr name="android:icon" />
+
+        <!-- The alphabetic shortcut key.  This is the shortcut when using a keyboard
+             with alphabetic keys. -->
+        <attr name="android:alphabeticShortcut" />
+
+        <!-- The numeric shortcut key.  This is the shortcut when using a numeric (e.g., 12-key)
+             keyboard. -->
+        <attr name="android:numericShortcut" />
+
+        <!-- Whether the item is capable of displaying a check mark. -->
+        <attr name="android:checkable" />
+
+        <!-- Whether the item is checked.  Note that you must first have enabled checking with
+             the checkable attribute or else the check mark will not appear. -->
+        <attr name="android:checked" />
+
+        <!-- Whether the item is shown/visible. -->
+        <attr name="android:visible" />
+
+        <!-- Whether the item is enabled. -->
+        <attr name="android:enabled" />
+    </declare-styleable>
+</resources>

@@ -3245,6 +3245,7 @@ package android.app {
     method public final boolean isInLayout();
     method public final boolean isRemoving();
     method public final boolean isResumed();
+    method public boolean isStartDeferred();
     method public final boolean isVisible();
     method public void onActivityCreated(android.os.Bundle);
     method public void onActivityResult(int, int, android.content.Intent);
@@ -3280,6 +3281,7 @@ package android.app {
     method public void setInitialSavedState(android.app.Fragment.SavedState);
     method public void setMenuVisibility(boolean);
     method public void setRetainInstance(boolean);
+    method public void setStartDeferred(boolean);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void startActivity(android.content.Intent);
     method public void startActivityForResult(android.content.Intent, int);
@@ -10537,6 +10539,7 @@ package android.media {
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_LOW = 0; // 0x0
     field public static final int QUALITY_QCIF = 2; // 0x2
+    field public static final int QUALITY_QVGA = 7; // 0x7
     field public static final int QUALITY_TIME_LAPSE_1080P = 1006; // 0x3ee
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
@@ -10544,6 +10547,7 @@ package android.media {
     field public static final int QUALITY_TIME_LAPSE_HIGH = 1001; // 0x3e9
     field public static final int QUALITY_TIME_LAPSE_LOW = 1000; // 0x3e8
     field public static final int QUALITY_TIME_LAPSE_QCIF = 1002; // 0x3ea
+    field public static final int QUALITY_TIME_LAPSE_QVGA = 1007; // 0x3ef
     field public int audioBitRate;
     field public int audioChannels;
     field public int audioCodec;
@@ -15728,6 +15732,7 @@ package android.provider {
     field public static final int TYPE_NONE = 0; // 0x0
     field public static final int TYPE_OPTIONAL = 2; // 0x2
     field public static final int TYPE_REQUIRED = 1; // 0x1
+    field public static final int TYPE_RESOURCE = 3; // 0x3
   }
 
   public static final class CalendarContract.CalendarAlerts implements android.provider.BaseColumns android.provider.CalendarContract.CalendarAlertsColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.EventsColumns {
@@ -15766,9 +15771,12 @@ package android.provider {
   }
 
   protected static abstract interface CalendarContract.CalendarColumns {
+    field public static final java.lang.String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
+    field public static final java.lang.String ALLOWED_AVAILABILITY = "allowedAvailability";
     field public static final java.lang.String ALLOWED_REMINDERS = "allowedReminders";
     field public static final java.lang.String CALENDAR_ACCESS_LEVEL = "calendar_access_level";
     field public static final java.lang.String CALENDAR_COLOR = "calendar_color";
+    field public static final java.lang.String CALENDAR_COLOR_KEY = "calendar_color_index";
     field public static final java.lang.String CALENDAR_DISPLAY_NAME = "calendar_displayName";
     field public static final java.lang.String CALENDAR_TIME_ZONE = "calendar_timezone";
     field public static final int CAL_ACCESS_CONTRIBUTOR = 500; // 0x1f4
@@ -15813,6 +15821,18 @@ package android.provider {
     field public static final java.lang.String NAME = "name";
   }
 
+  public static final class CalendarContract.Colors implements android.provider.CalendarContract.ColorsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+  }
+
+  protected static abstract interface CalendarContract.ColorsColumns implements android.provider.SyncStateContract.Columns {
+    field public static final java.lang.String COLOR = "color";
+    field public static final java.lang.String COLOR_KEY = "color_index";
+    field public static final java.lang.String COLOR_TYPE = "color_type";
+    field public static final int TYPE_CALENDAR = 0; // 0x0
+    field public static final int TYPE_EVENT = 1; // 0x1
+  }
+
   public static final class CalendarContract.EventDays implements android.provider.CalendarContract.EventDaysColumns {
     method public static final android.database.Cursor query(android.content.ContentResolver, int, int, java.lang.String[]);
     field public static final android.net.Uri CONTENT_URI;
@@ -15838,6 +15858,7 @@ package android.provider {
     field public static final java.lang.String AVAILABILITY = "availability";
     field public static final int AVAILABILITY_BUSY = 0; // 0x0
     field public static final int AVAILABILITY_FREE = 1; // 0x1
+    field public static final int AVAILABILITY_TENTATIVE = 2; // 0x2
     field public static final java.lang.String CALENDAR_ID = "calendar_id";
     field public static final java.lang.String CAN_INVITE_OTHERS = "canInviteOthers";
     field public static final java.lang.String DESCRIPTION = "description";
@@ -15845,6 +15866,7 @@ package android.provider {
     field public static final java.lang.String DTSTART = "dtstart";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String EVENT_COLOR = "eventColor";
+    field public static final java.lang.String EVENT_COLOR_KEY = "eventColor_index";
     field public static final java.lang.String EVENT_END_TIMEZONE = "eventEndTimezone";
     field public static final java.lang.String EVENT_LOCATION = "eventLocation";
     field public static final java.lang.String EVENT_TIMEZONE = "eventTimezone";
@@ -18647,6 +18669,7 @@ package android.service.wallpaper {
     method public void onSurfaceRedrawNeeded(android.view.SurfaceHolder);
     method public void onTouchEvent(android.view.MotionEvent);
     method public void onVisibilityChanged(boolean);
+    method public void setOffsetNotificationsEnabled(boolean);
     method public void setTouchEventsEnabled(boolean);
   }
 
@@ -24762,6 +24785,7 @@ package android.view.textservice {
     method public void setCookieAndSequence(int, int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 4; // 0x4
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
     field public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 2; // 0x2
   }

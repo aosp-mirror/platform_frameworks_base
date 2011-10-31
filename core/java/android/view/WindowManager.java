@@ -813,6 +813,17 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED = 0x00000002;
 
         /**
+         * By default, wallpapers are sent new offsets when the wallpaper is scrolled. Wallpapers
+         * may elect to skp these notifications if they are no doing anything productive with
+         * them (they do not affect the wallpaper scrolling operation) by calling
+         * {@link
+         * android.service.wallpaper.WallpaperService.Engine#setOffsetNotificationsEnabled(boolean)}.
+         *
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */

@@ -635,11 +635,13 @@ class KeyguardStatusViewManager implements OnClickListener {
      * @return
      */
     private static CharSequence makeCarierString(CharSequence plmn, CharSequence spn) {
-        if (plmn != null && spn == null) {
-            return plmn;
-        } else if (plmn != null && spn != null) {
+        final boolean plmnValid = !TextUtils.isEmpty(plmn);
+        final boolean spnValid = !TextUtils.isEmpty(spn);
+        if (plmnValid && spnValid) {
             return plmn + "|" + spn;
-        } else if (plmn == null && spn != null) {
+        } else if (plmnValid) {
+            return plmn;
+        } else if (spnValid) {
             return spn;
         } else {
             return "";

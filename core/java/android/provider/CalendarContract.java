@@ -300,20 +300,17 @@ public final class CalendarContract {
         public static final String CALENDAR_COLOR = "calendar_color";
 
         /**
-         * An index for looking up a color from the {@link Colors} table. NULL
-         * or an empty string are reserved for indicating that the calendar does
-         * not use an index for looking up the color. The provider will update
-         * {@link #CALENDAR_COLOR} automatically when a valid index is written
-         * to this column. The index must reference an existing row of the
+         * A key for looking up a color from the {@link Colors} table. NULL or
+         * an empty string are reserved for indicating that the calendar does
+         * not use a key for looking up the color. The provider will update
+         * {@link #CALENDAR_COLOR} automatically when a valid key is written to
+         * this column. The key must reference an existing row of the
          * {@link Colors} table. @see Colors
          * <P>
          * Type: TEXT
          * </P>
-         * TODO UNHIDE
-         *
-         * @hide
          */
-        public static final String CALENDAR_COLOR_INDEX = "calendar_color_index";
+        public static final String CALENDAR_COLOR_KEY = "calendar_color_index";
 
         /**
          * The display name of the calendar. Column name.
@@ -419,9 +416,6 @@ public final class CalendarContract {
          * {@link Events#AVAILABILITY_BUSY} should be used to indicate that
          * changing the availability is not supported.
          *
-         * TODO UNHIDE, Update Calendars doc
-         *
-         * @hide
          */
         public static final String ALLOWED_AVAILABILITY = "allowedAvailability";
 
@@ -433,9 +427,6 @@ public final class CalendarContract {
          * {@link Attendees#TYPE_NONE} should be used to indicate that changing
          * the attendee type is not supported.
          *
-         * TODO UNHIDE, Update Calendars doc
-         *
-         * @hide
          */
         public static final String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
     }
@@ -573,6 +564,8 @@ public final class CalendarContract {
      * <li>{@link #SYNC_EVENTS} set to 1</li>
      * <li>{@link #CALENDAR_TIME_ZONE}</li>
      * <li>{@link #ALLOWED_REMINDERS}</li>
+     * <li>{@link #ALLOWED_AVAILABILITY}</li>
+     * <li>{@link #ALLOWED_ATTENDEE_TYPES}</li>
      * </ul>
      * <dt><b>Update</b></dt>
      * <dd>To perform an update on a calendar the {@link #_ID} of the calendar
@@ -612,6 +605,8 @@ public final class CalendarContract {
      * <li>{@link #OWNER_ACCOUNT}</li>
      * <li>{@link #MAX_REMINDERS}</li>
      * <li>{@link #ALLOWED_REMINDERS}</li>
+     * <li>{@link #ALLOWED_AVAILABILITY}</li>
+     * <li>{@link #ALLOWED_ATTENDEE_TYPES}</li>
      * <li>{@link #CAN_MODIFY_TIME_ZONE}</li>
      * <li>{@link #CAN_ORGANIZER_RESPOND}</li>
      * <li>{@link #CAN_PARTIALLY_UPDATE}</li>
@@ -735,7 +730,8 @@ public final class CalendarContract {
         /**
          * The type of attendee. Column name.
          * <P>
-         * Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL}
+         * Type: Integer (one of {@link #TYPE_NONE}, {@link #TYPE_REQUIRED},
+         * {@link #TYPE_OPTIONAL}, {@link #TYPE_RESOURCE})
          * </P>
          */
         public static final String ATTENDEE_TYPE = "attendeeType";
@@ -744,10 +740,8 @@ public final class CalendarContract {
         public static final int TYPE_REQUIRED = 1;
         public static final int TYPE_OPTIONAL = 2;
         /**
-         * This specifies that an attendee is a resource, such as a room, and
-         * not an actual person. TODO UNHIDE and add to ATTENDEE_TYPE comment
-         *
-         * @hide
+         * This specifies that an attendee is a resource, like a room, a
+         * cabbage, or something and not an actual person.
          */
         public static final int TYPE_RESOURCE = 3;
 
@@ -849,20 +843,17 @@ public final class CalendarContract {
         public static final String EVENT_COLOR = "eventColor";
 
         /**
-         * A secondary color index for the individual event. NULL or an empty
-         * string are reserved for indicating that the event does not use an
-         * index for looking up the color. The provider will update
-         * {@link #EVENT_COLOR} automatically when a valid index is written to
-         * this column. The index must reference an existing row of the
+         * A secondary color key for the individual event. NULL or an empty
+         * string are reserved for indicating that the event does not use a key
+         * for looking up the color. The provider will update
+         * {@link #EVENT_COLOR} automatically when a valid key is written to
+         * this column. The key must reference an existing row of the
          * {@link Colors} table. @see Colors
          * <P>
          * Type: TEXT
          * </P>
-         * TODO UNHIDE
-         *
-         * @hide
          */
-        public static final String EVENT_COLOR_INDEX = "eventColor_index";
+        public static final String EVENT_COLOR_KEY = "eventColor_index";
 
         /**
          * The event status. Column name.
@@ -1020,8 +1011,10 @@ public final class CalendarContract {
         /**
          * If this event counts as busy time or is still free time that can be
          * scheduled over. Column name.
-         * <P>Type: INTEGER (One of {@link #AVAILABILITY_BUSY},
-         * {@link #AVAILABILITY_FREE})</P>
+         * <P>
+         * Type: INTEGER (One of {@link #AVAILABILITY_BUSY},
+         * {@link #AVAILABILITY_FREE}, {@link #AVAILABILITY_TENTATIVE})
+         * </P>
          */
         public static final String AVAILABILITY = "availability";
 
@@ -1038,10 +1031,6 @@ public final class CalendarContract {
         /**
          * Indicates that the owner's availability may change, but should be
          * considered busy time that will conflict.
-         *
-         * TODO UNHIDE
-         *
-         * @hide
          */
         public static final int AVAILABILITY_TENTATIVE = 2;
 
@@ -1418,6 +1407,7 @@ public final class CalendarContract {
      * <li>dtend if the event is non-recurring</li>
      * <li>duration if the event is recurring</li>
      * <li>rrule or rdate if the event is recurring</li>
+     * <li>eventTimezone</li>
      * <li>a calendar_id</li>
      * </ul>
      * There are also further requirements when inserting or updating an event.
@@ -1555,6 +1545,8 @@ public final class CalendarContract {
                 CAL_SYNC9,
                 CAL_SYNC10,
                 ALLOWED_REMINDERS,
+                ALLOWED_ATTENDEE_TYPES,
+                ALLOWED_AVAILABILITY,
                 CALENDAR_ACCESS_LEVEL,
                 CALENDAR_COLOR,
                 CALENDAR_TIME_ZONE,
@@ -2306,10 +2298,6 @@ public final class CalendarContract {
         }
     }
 
-    /**
-     * @hide
-     * TODO UNHIDE
-     */
     protected interface ColorsColumns extends SyncStateContract.Columns {
 
         /**
@@ -2331,14 +2319,14 @@ public final class CalendarContract {
         public static final int TYPE_EVENT = 1;
 
         /**
-         * The index used to reference this color. This can be any non-empty
+         * The key used to reference this color. This can be any non-empty
          * string, but must be unique for a given {@link #ACCOUNT_TYPE} and
          * {@link #ACCOUNT_NAME}. Column name.
          * <P>
          * Type: TEXT
          * </P>
          */
-        public static final String COLOR_INDEX = "color_index";
+        public static final String COLOR_KEY = "color_index";
 
         /**
          * The color as an 8-bit ARGB integer value. Colors should specify alpha
@@ -2356,14 +2344,11 @@ public final class CalendarContract {
 
     /**
      * Fields for accessing colors available for a given account. Colors are
-     * referenced by {@link #COLOR_INDEX} which must be unique for a given
+     * referenced by {@link #COLOR_KEY} which must be unique for a given
      * account name/type. These values can only be updated by the sync
      * adapter. Only {@link #COLOR} may be updated after the initial insert. In
      * addition, a row can only be deleted once all references to that color
      * have been removed from the {@link Calendars} or {@link Events} tables.
-     * TODO UNHIDE
-     *
-     * @hide
      */
     public static final class Colors implements ColorsColumns {
         /**

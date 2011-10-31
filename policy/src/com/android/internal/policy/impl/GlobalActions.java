@@ -121,10 +121,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 R.string.global_action_silent_mode_off_status) {
 
             void willCreate() {
-                // XXX: FIXME: Add vibrate indicator when available
                 mEnabledIconResId = (Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.VIBRATE_IN_SILENT, 1) == 1)
-                    ? R.drawable.ic_audio_vol_mute
+                    ? R.drawable.ic_audio_ring_notif_vibrate
                     : R.drawable.ic_audio_vol_mute;
             }
 

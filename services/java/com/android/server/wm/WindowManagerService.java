@@ -1840,7 +1840,8 @@ public class WindowManagerService extends IWindowManager.Stub
             rawChanged = true;
         }
 
-        if (rawChanged) {
+        if (rawChanged && (wallpaperWin.getAttrs().privateFlags &
+                    WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS) != 0) {
             try {
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Report new wp offset "
                         + wallpaperWin + " x=" + wallpaperWin.mWallpaperX
@@ -1890,11 +1891,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
+    void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         final int dw = mAppDisplayWidth;
         final int dh = mAppDisplayHeight;
-
-        boolean changed = false;
 
         WindowState target = mWallpaperTarget;
         if (target != null) {
@@ -1920,14 +1919,31 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
                 if (updateWallpaperOffsetLocked(wallpaper, dw, dh, sync)) {
                     wallpaper.computeShownFrameLocked();
-                    changed = true;
+                    // No need to lay out the windows - we can just set the wallpaper position
+                    // directly.
+                    if (wallpaper.mSurfaceX != wallpaper.mShownFrame.left
+                            || wallpaper.mSurfaceY != wallpaper.mShownFrame.top) {
+                        Surface.openTransaction();
+                        try {
+                            if (SHOW_TRANSACTIONS) logSurface(wallpaper,
+                                    "POS " + wallpaper.mShownFrame.left
+                                    + ", " + wallpaper.mShownFrame.top, null);
+                            wallpaper.mSurfaceX = wallpaper.mShownFrame.left;
+                            wallpaper.mSurfaceY = wallpaper.mShownFrame.top;
+                            wallpaper.mSurface.setPosition(wallpaper.mShownFrame.left,
+                                    wallpaper.mShownFrame.top);
+                        } catch (RuntimeException e) {
+                            Slog.w(TAG, "Error positioning surface of " + wallpaper
+                                    + " pos=(" + wallpaper.mShownFrame.left
+                                    + "," + wallpaper.mShownFrame.top + ")", e);
+                        }
+                        Surface.closeTransaction();
+                    }
                     // We only want to be synchronous with one wallpaper.
                     sync = false;
                 }
             }
         }
-
-        return changed;
     }
 
     void updateWallpaperVisibilityLocked() {
@@ -2440,9 +2456,7 @@ public class WindowManagerService extends IWindowManager.Stub
             window.mWallpaperY = y;
             window.mWallpaperXStep = xStep;
             window.mWallpaperYStep = yStep;
-            if (updateWallpaperOffsetLocked(window, true)) {
-                performLayoutAndPlaceSurfacesLocked();
-            }
+            updateWallpaperOffsetLocked(window, true);
         }
     }
 

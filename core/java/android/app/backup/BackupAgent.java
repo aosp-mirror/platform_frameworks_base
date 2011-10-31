@@ -46,9 +46,15 @@ import libcore.io.StructStat;
  * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup()}
  * and {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} methods,
  * and provide the name of its backup agent class in its {@code AndroidManifest.xml} file via
- * the <code><a
- * href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+ * the <code>
+ * <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
  * tag's {@code android:backupAgent} attribute.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using BackupAgent, read the
+ * <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a> developer guide.</p></div>
+ *
  * <h3>Basic Operation</h3>
  * <p>
  * When the application makes changes to data that it wishes to keep backed up,

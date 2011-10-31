@@ -16,6 +16,10 @@
 
 package android.media;
 
+import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import static android.media.AudioManager.RINGER_MODE_SILENT;
+import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -540,8 +544,8 @@ public class AudioService extends IAudioService.Stub {
              (!mVoiceCapable && streamType != AudioSystem.STREAM_VOICE_CALL &&
                streamType != AudioSystem.STREAM_BLUETOOTH_SCO) ||
                 (mVoiceCapable && streamTypeAlias == AudioSystem.STREAM_RING)) {
-            //  do not vibrate if already in silent mode
-            if (mRingerMode != AudioManager.RINGER_MODE_NORMAL) {
+            // do not vibrate if already in vibrate mode
+            if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
                 flags &= ~AudioManager.FLAG_VIBRATE;
             }
             // Check if the ringer mode changes with this volume adjustment. If
@@ -1662,26 +1666,36 @@ public class AudioService extends IAudioService.Stub {
         boolean adjustVolumeIndex = true;
         int newRingerMode = mRingerMode;
         int uiIndex = (oldIndex + 5) / 10;
+        boolean vibeInSilent = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1;
 
-        if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+        if (mRingerMode == RINGER_MODE_NORMAL) {
             if ((direction == AudioManager.ADJUST_LOWER) && (uiIndex <= 1)) {
                 // enter silent mode if current index is the last audible one and not repeating a
                 // volume key down
-                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                if (vibeInSilent || mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                     // "silent mode", but which one?
-                    newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
-                        ? AudioManager.RINGER_MODE_VIBRATE
-                        : AudioManager.RINGER_MODE_SILENT;
+                    newRingerMode = vibeInSilent ? RINGER_MODE_VIBRATE : RINGER_MODE_SILENT;
                 }
                 if (uiIndex == 0 || (mPrevVolDirection == AudioManager.ADJUST_LOWER &&
                         mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
                     adjustVolumeIndex = false;
                 }
             }
+        } else if (mRingerMode == RINGER_MODE_VIBRATE) {
+            if ((direction == AudioManager.ADJUST_LOWER)) {
+                // Set it to silent, if it wasn't a long-press
+                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                    newRingerMode = RINGER_MODE_SILENT;
+                }
+            } else if (direction == AudioManager.ADJUST_RAISE) {
+                newRingerMode = RINGER_MODE_NORMAL;
+            }
+            adjustVolumeIndex = false;
         } else {
             if (direction == AudioManager.ADJUST_RAISE) {
                 // exiting silent mode
-                newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+                // If VIBRATE_IN_SILENT, then go into vibrate mode
+                newRingerMode = vibeInSilent ? RINGER_MODE_VIBRATE : RINGER_MODE_NORMAL;
             }
             adjustVolumeIndex = false;
         }

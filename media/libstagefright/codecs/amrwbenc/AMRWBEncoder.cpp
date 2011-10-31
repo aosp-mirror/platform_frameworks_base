@@ -137,8 +137,12 @@ status_t AMRWBEncoder::start(MetaData *params) {
     CHECK_EQ(OK, initCheck());
 
     mNumFramesOutput = 0;
-    mSource->start(params);
 
+    status_t err = mSource->start(params);
+    if (err != OK) {
+        LOGE("AudioSource is not available");
+        return err;
+    }
     mStarted = true;
 
     return OK;

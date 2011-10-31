@@ -436,7 +436,9 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/NotePad \
 		            resources/samples/NotePad "Note Pad" \
 		-samplecode $(sample_dir)/SpellChecker/SampleSpellCheckerService \
-		            resources/samples/SpellChecker/SampleSpellCheckerService "Spell Checker" \
+		            resources/samples/SpellChecker/SampleSpellCheckerService "Spell Checker Service" \
+		-samplecode $(sample_dir)/SpellChecker/HelloSpellChecker \
+		            resources/samples/SpellChecker/HelloSpellChecker "Spell Checker Client" \
 		-samplecode $(sample_dir)/SampleSyncAdapter \
 		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/RandomMusicPlayer \

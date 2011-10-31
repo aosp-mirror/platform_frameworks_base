@@ -60,9 +60,15 @@ import java.lang.ref.WeakReference;
  * applications are required to create MediaRecorder objects on threads with a
  * Looper running (the main UI thread by default already has a Looper running).
  *
- * <p>See the <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a>
- * documentation for additional help with using MediaRecorder.
- * <p>Note: Currently, MediaRecorder does not work on the emulator.
+ * <p><strong>Note:</strong> Currently, MediaRecorder does not work on the emulator.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about how to use MediaRecorder for recording video, read the
+ * <a href="{@docRoot}guide/topics/media/camera.html#capture-video">Camera</a> developer guide.
+ * For more information about how to use MediaRecorder for recording sound, read the
+ * <a href="{@docRoot}guide/topics/media/audio-capture.html">Audio Capture</a> developer guide.</p>
+ * </div>
  */
 public class MediaRecorder
 {
@@ -299,7 +305,7 @@ public class MediaRecorder
         setVideoEncodingBitRate(profile.videoBitRate);
         setVideoEncoder(profile.videoCodec);
         if (profile.quality >= CamcorderProfile.QUALITY_TIME_LAPSE_LOW &&
-             profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_1080P) {
+             profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_QVGA) {
             // Enable time lapse. Also don't set audio for time lapse.
             setParameter(String.format("time-lapse-enable=1"));
         } else {

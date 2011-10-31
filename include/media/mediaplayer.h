@@ -209,7 +209,6 @@ private:
             status_t        prepareAsync_l();
             status_t        getDuration_l(int *msec);
             status_t        attachNewPlayer(const sp<IMediaPlayer>& player);
-            void            disconnectNativeWindow();
             status_t        reset_l();
 
     sp<IMediaPlayer>            mPlayer;
@@ -233,8 +232,6 @@ private:
     int                         mVideoHeight;
     int                         mAudioSessionId;
     float                       mSendLevel;
-    sp<ANativeWindow>           mConnectedWindow;
-    sp<IBinder>                 mConnectedWindowBinder;
 };
 
 }; // namespace android

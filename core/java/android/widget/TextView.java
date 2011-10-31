@@ -9484,8 +9484,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return false;
             }
 
-            int posX = mPositionX + positionX - getScrollX();
-            int posY = mPositionY + positionY - getScrollY();
+            int posX = mPositionX + positionX;
+            int posY = mPositionY + positionY;
 
             // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
             return posX >= clip.left - 1 && posX <= clip.right + 1 &&
@@ -9496,7 +9496,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int line = mLayout.getLineForOffset(offset);
             final int lineBottom = mLayout.getLineBottom(line);
             final int primaryHorizontal = (int) mLayout.getPrimaryHorizontal(offset);
-            return isVisible(primaryHorizontal, lineBottom);
+            return isVisible(primaryHorizontal + viewportToContentHorizontalOffset(),
+                    lineBottom + viewportToContentVerticalOffset());
         }
 
         public void onScrollChanged() {
@@ -10643,7 +10644,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mPositionX = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX);
                 mPositionY = mLayout.getLineBottom(line);
 
-                // Take TextView's padding into account.
+                // Take TextView's padding and scroll into account.
                 mPositionX += viewportToContentHorizontalOffset();
                 mPositionY += viewportToContentVerticalOffset();
 

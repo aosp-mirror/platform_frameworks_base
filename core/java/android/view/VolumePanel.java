@@ -414,6 +414,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         sc.seekbarView.setProgress(getLastAudibleStreamVolume(sc.streamType));
         final boolean muted = isMuted(sc.streamType);
         sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
+        if (sc.streamType == AudioManager.STREAM_RING && muted
+                && mAudioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
+            sc.icon.setImageResource(R.drawable.ic_audio_ring_notif_vibrate);
+        }
         sc.seekbarView.setEnabled(!muted);
     }
 
@@ -762,8 +766,14 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             expand();
         } else if (v.getTag() instanceof StreamControl) {
             StreamControl sc = (StreamControl) v.getTag();
-            mAudioManager.setRingerMode(mAudioManager.isSilentMode()
-                    ? AudioManager.RINGER_MODE_NORMAL : AudioManager.RINGER_MODE_SILENT);
+            boolean vibeInSilent = Settings.System.getInt(mContext.getContentResolver(),
+                    System.VIBRATE_IN_SILENT, 1) == 1;
+            int newMode = mAudioManager.isSilentMode()
+                    ? AudioManager.RINGER_MODE_NORMAL
+                    : (vibeInSilent
+                            ? AudioManager.RINGER_MODE_VIBRATE 
+                            : AudioManager.RINGER_MODE_SILENT);
+            mAudioManager.setRingerMode(newMode);
             // Expand the dialog if it hasn't been expanded yet.
             if (mShowCombinedVolumes && !isExpanded()) expand();
         }

@@ -137,7 +137,7 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Вимкнути радіо"</string>
     <string name="screen_lock" msgid="799094655496098153">"Заблок. екран"</string>
     <string name="power_off" msgid="4266614107412865048">"Вимкнути"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"Заверш. роботи..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ваш телефон буде вимкнено."</string>
     <string name="shutdown_confirm_question" msgid="6656441286856415014">"Дійсно вимкнути?"</string>

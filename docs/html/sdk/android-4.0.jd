@@ -264,10 +264,11 @@ the {@link android.Manifest.permission#READ_CALENDAR} permission (for read acces
 
 <h4>Event intent</h4>
 
-<p>If all you want to do is add an event to the user’s calendar, you can use an
-{@link android.content.Intent#ACTION_INSERT} intent with a {@code "vnd.android.cursor.item/event"}
-MIME type to start an activity in the Calendar app that creates new events. Using the intent does
-not require any permission and you can specify event details with the following extras:</p>
+<p>If all you want to do is add an event to the user’s calendar, you can use an {@link
+android.content.Intent#ACTION_INSERT} intent with the data defined by {@link
+android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} in order to start an
+activity in the Calendar app that creates new events. Using the intent does not require any
+permission and you can specify event details with the following extras:</p>
 
 <ul>
   <li>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}: Name for the
@@ -957,8 +958,10 @@ android:name="android.service.textservice.SpellCheckerService" />} as the intent
 include a {@code &lt;meta-data&gt;} element that declares configuration information for the spell
 checker. </p>
 
-<p>See the <a href="{@docRoot}resources/samples/SpellChecker/SampleSpellCheckerService/index.html">
-Spell Checker</a> sample app for example code.</p>
+<p>See the sample <a href="{@docRoot}resources/samples/SpellChecker/SampleSpellCheckerService/index.html">
+Spell Checker Service</a> app and
+sample <a href="{@docRoot}resources/samples/SpellChecker/HelloSpellChecker/index.html">
+Spell Checker Client</a> app for example code.</p>
 
 
 
@@ -1906,7 +1909,6 @@ built-in applications:</p>
 <li>Phone</li>
 <li>Search</li>
 <li>Settings</li>
-<li>Speech Recorder</li>
 <li>Speech Recorder</li>
 <li>Widget Preview</li>
 </ul>

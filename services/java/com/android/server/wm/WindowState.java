@@ -612,7 +612,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mSurface == null) {
             mReportDestroySurface = false;
             mSurfacePendingDestroy = false;
-            Slog.i(WindowManagerService.TAG, "createSurface " + this + ": DRAW NOW PENDING");
+            if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(WindowManagerService.TAG,
+                    "createSurface " + this + ": DRAW NOW PENDING");
             mDrawPending = true;
             mCommitDrawPending = false;
             mReadyToShow = false;
