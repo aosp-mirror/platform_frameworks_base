@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import android.database.CursorWindow;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -30,10 +31,9 @@ import android.util.Log;
 public class SQLiteQuery extends SQLiteProgram {
     private static final String TAG = "SQLiteQuery";
 
-    private static final boolean DEBUG_FILL_WINDOW_PERFORMANCE = false;
-
     private static native long nativeFillWindow(int databasePtr, int statementPtr, int windowPtr,
             int offsetParam, int startPos, int requiredPos, boolean countAllRows);
+
     private static native int nativeColumnCount(int statementPtr);
     private static native String nativeColumnName(int statementPtr, int columnIndex);
 
@@ -94,15 +94,22 @@ public class SQLiteQuery extends SQLiteProgram {
                 int actualPos = (int)(result >> 32);
                 int countedRows = (int)result;
                 window.setStartPosition(actualPos);
-                if (DEBUG_FILL_WINDOW_PERFORMANCE) {
-                    Log.d(TAG, "fillWindow: window=\"" + window
-                            + "\", startPos=" + startPos + ", requiredPos=" + requiredPos
-                            + ", countAllRows=" + countAllRows
-                            + ", offset=" + mOffsetIndex
-                            + ", actualPos=" + actualPos + ", filledRows=" + window.getNumRows()
-                            + ", countedRows=" + countedRows
-                            + ", took " + (SystemClock.uptimeMillis() - timeStart)
-                            + " ms, query=\"" + mSql + "\"");
+                if (SQLiteDebug.DEBUG_LOG_SLOW_QUERIES) {
+                    long elapsed = SystemClock.uptimeMillis() - timeStart;
+                    if (SQLiteDebug.shouldLogSlowQuery(elapsed)) {
+                        Log.d(TAG, "fillWindow took " + elapsed
+                                + " ms: window=\"" + window
+                                + "\", startPos=" + startPos
+                                + ", requiredPos=" + requiredPos
+                                + ", offset=" + mOffsetIndex
+                                + ", actualPos=" + actualPos
+                                + ", filledRows=" + window.getNumRows()
+                                + ", countedRows=" + countedRows
+                                + ", query=\"" + mSql + "\""
+                                + ", args=[" + (mBindArgs != null ?
+                                        TextUtils.join(", ", mBindArgs.values()) : "")
+                                + "]");
+                    }
                 }
                 mDatabase.logTimeStat(mSql, timeStart);
                 return countedRows;

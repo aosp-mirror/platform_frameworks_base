@@ -306,10 +306,6 @@ public class SQLiteDatabase extends SQLiteClosable {
     /** Used to find out where this object was created in case it never got closed. */
     private final Throwable mStackTrace;
 
-    // System property that enables logging of slow queries. Specify the threshold in ms.
-    private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
-    private final int mSlowQueryThreshold;
-
     /** stores the list of statement ids that need to be finalized by sqlite */
     private final ArrayList<Integer> mClosedStatementIds = new ArrayList<Integer>();
 
@@ -1559,11 +1555,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             String editTable) {
         verifyDbIsOpen();
         BlockGuard.getThreadPolicy().onReadFromDisk();
-        long timeStart = 0;
-
-        if (false || mSlowQueryThreshold != -1) {
-            timeStart = System.currentTimeMillis();
-        }
 
         SQLiteDatabase db = getDbConnection(sql);
         SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(db, sql, editTable);
@@ -1574,24 +1565,6 @@ public class SQLiteDatabase extends SQLiteClosable {
                     cursorFactory != null ? cursorFactory : mFactory,
                     selectionArgs);
         } finally {
-            if (false || mSlowQueryThreshold != -1) {
-
-                // Force query execution
-                int count = -1;
-                if (cursor != null) {
-                    count = cursor.getCount();
-                }
-
-                long duration = System.currentTimeMillis() - timeStart;
-
-                if (false || duration >= mSlowQueryThreshold) {
-                    Log.v(SQLiteCursor.TAG,
-                          "query (" + duration + " ms): " + driver.toString() + ", args are "
-                                  + (selectionArgs != null
-                                  ? TextUtils.join(",", selectionArgs)
-                                  : "<null>")  + ", count is " + count);
-                }
-            }
             releaseDbConnection(db);
         }
         return cursor;
@@ -1967,7 +1940,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         setMaxSqlCacheSize(DEFAULT_SQL_CACHE_SIZE);
         mFlags = flags;
         mPath = path;
-        mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         mFactory = factory;
         mPrograms = new WeakHashMap<SQLiteClosable,Object>();
