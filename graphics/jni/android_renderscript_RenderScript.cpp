@@ -1122,6 +1122,17 @@ nSamplerCreate(JNIEnv *_env, jobject _this, RsContext con, jint magFilter, jint 
 
 // ---------------------------------------------------------------------------
 
+//native int  rsnPathCreate(int con, int prim, boolean isStatic, int vtx, int loop, float q);
+static jint
+nPathCreate(JNIEnv *_env, jobject _this, RsContext con, jint prim, jboolean isStatic, jint _vtx, jint _loop, jfloat q) {
+    LOG_API("nPathCreate, con(%p)", con);
+
+    int id = (int)rsPathCreate(con, (RsPathPrimitive)prim, isStatic,
+                               (RsAllocation)_vtx,
+                               (RsAllocation)_loop, q);
+    return id;
+}
+
 static jint
 nMeshCreate(JNIEnv *_env, jobject _this, RsContext con, jintArray _vtx, jintArray _idx, jintArray _prim)
 {
@@ -1310,6 +1321,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnSamplerCreate",                 "(IIIIIIF)I",                            (void*)nSamplerCreate },
 
+{"rsnPathCreate",                    "(IIZIIF)I",                             (void*)nPathCreate },
 {"rsnMeshCreate",                    "(I[I[I[I)I",                            (void*)nMeshCreate },
 
 {"rsnMeshGetVertexBufferCount",      "(II)I",                                 (void*)nMeshGetVertexBufferCount },

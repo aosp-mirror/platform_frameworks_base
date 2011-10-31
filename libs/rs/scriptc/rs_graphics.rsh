@@ -288,6 +288,9 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgDrawSpriteScreenspace(float x, float y, float z, float w, float h);
 
+extern void __attribute__((overloadable))
+    rsgDrawPath(rs_path p);
+
 /**
  * Draw a mesh using the current context state.  The whole mesh is
  * rendered.

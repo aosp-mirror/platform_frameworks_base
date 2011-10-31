@@ -32,6 +32,7 @@
 #include "rsAdapter.h"
 #include "rsSampler.h"
 #include "rsFont.h"
+#include "rsPath.h"
 #include "rsProgramFragment.h"
 #include "rsProgramStore.h"
 #include "rsProgramRaster.h"

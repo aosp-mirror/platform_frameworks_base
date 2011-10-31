@@ -195,6 +195,14 @@ void rsrDrawRect(Context *rsc, Script *sc, float x1, float y1, float x2, float y
     rsrDrawQuad(rsc, sc, x1, y2, z, x2, y2, z, x2, y1, z, x1, y1, z);
 }
 
+void rsrDrawPath(Context *rsc, Script *sc, Path *sm) {
+    CHECK_OBJ(sm);
+    if (!rsc->setupCheck()) {
+        return;
+    }
+    sm->render(rsc);
+}
+
 void rsrDrawMesh(Context *rsc, Script *sc, Mesh *sm) {
     CHECK_OBJ(sm);
     if (!rsc->setupCheck()) {

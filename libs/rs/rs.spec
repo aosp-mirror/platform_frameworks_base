@@ -388,3 +388,13 @@ MeshCreate {
 	param uint32_t *primType
 	ret RsMesh
 	}
+
+PathCreate {
+    param RsPathPrimitive pp
+    param bool isStatic
+    param RsAllocation vertex
+    param RsAllocation loops
+    param float quality
+    ret RsPath
+    }
+

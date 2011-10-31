@@ -29,6 +29,7 @@ class Type;
 class Allocation;
 class Script;
 class ScriptC;
+class Path;
 class Program;
 class ProgramStore;
 class ProgramRaster;
@@ -187,6 +188,13 @@ typedef struct {
         void (*draw)(const Context *rsc, const Mesh *m, uint32_t primIndex, uint32_t start, uint32_t len);
         void (*destroy)(const Context *rsc, const Mesh *m);
     } mesh;
+
+    struct {
+        bool (*initStatic)(const Context *rsc, const Path *m, const Allocation *vtx, const Allocation *loops);
+        bool (*initDynamic)(const Context *rsc, const Path *m);
+        void (*draw)(const Context *rsc, const Path *m);
+        void (*destroy)(const Context *rsc, const Path *m);
+    } path;
 
     struct {
         bool (*init)(const Context *rsc, const Sampler *m);

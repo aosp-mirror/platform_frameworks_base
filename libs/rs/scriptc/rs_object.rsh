@@ -56,6 +56,11 @@ extern void __attribute__((overloadable))
  * \overload
  */
 extern void __attribute__((overloadable))
+    rsSetObject(rs_path *dst, rs_path src);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
     rsSetObject(rs_mesh *dst, rs_mesh src);
 /**
  * \overload
@@ -110,6 +115,11 @@ extern void __attribute__((overloadable))
  */
 extern void __attribute__((overloadable))
     rsClearObject(rs_script *dst);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsClearObject(rs_path *dst);
 /**
  * \overload
  */
@@ -171,6 +181,11 @@ extern bool __attribute__((overloadable))
  */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_script);
+/**
+ * \overload
+ */
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_path);
 /**
  * \overload
  */

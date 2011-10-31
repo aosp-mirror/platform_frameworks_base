@@ -96,6 +96,7 @@ LOCAL_SRC_FILES:= \
 	rsMatrix4x4.cpp \
 	rsMesh.cpp \
 	rsMutex.cpp \
+	rsPath.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
 	rsProgramStore.cpp \
@@ -118,6 +119,7 @@ LOCAL_SRC_FILES:= \
 	driver/rsdGL.cpp \
 	driver/rsdMesh.cpp \
 	driver/rsdMeshObj.cpp \
+	driver/rsdPath.cpp \
 	driver/rsdProgram.cpp \
 	driver/rsdProgramRaster.cpp \
 	driver/rsdProgramStore.cpp \
@@ -203,6 +205,7 @@ LOCAL_SRC_FILES:= \
 	rsMatrix4x4.cpp \
 	rsMesh.cpp \
 	rsMutex.cpp \
+	rsPath.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
 	rsProgramStore.cpp \
