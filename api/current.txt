@@ -7204,7 +7204,7 @@ package android.database.sqlite {
     method public long insertWithOnConflict(java.lang.String, java.lang.String, android.content.ContentValues, int);
     method public boolean isDatabaseIntegrityOk();
     method public boolean isDbLockedByCurrentThread();
-    method public boolean isDbLockedByOtherThreads();
+    method public deprecated boolean isDbLockedByOtherThreads();
     method public boolean isOpen();
     method public boolean isReadOnly();
     method public deprecated void markTableSyncable(java.lang.String, java.lang.String);
@@ -7226,7 +7226,7 @@ package android.database.sqlite {
     method public long replace(java.lang.String, java.lang.String, android.content.ContentValues);
     method public long replaceOrThrow(java.lang.String, java.lang.String, android.content.ContentValues) throws android.database.SQLException;
     method public void setLocale(java.util.Locale);
-    method public void setLockingEnabled(boolean);
+    method public deprecated void setLockingEnabled(boolean);
     method public void setMaxSqlCacheSize(int);
     method public long setMaximumSize(long);
     method public void setPageSize(long);

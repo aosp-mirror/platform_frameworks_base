@@ -143,12 +143,14 @@ public abstract class SQLiteOpenHelper {
         // If we have a read-only database open, someone could be using it
         // (though they shouldn't), which would cause a lock to be held on
         // the file, and our attempts to open the database read-write would
-        // fail waiting for the file lock.  To prevent that, we acquire the
-        // lock on the read-only database, which shuts out other users.
+        // fail waiting for the file lock.  To prevent that, we acquire a lock
+        // on the read-only database, which shuts out other users.
 
         boolean success = false;
         SQLiteDatabase db = null;
-        if (mDatabase != null) mDatabase.lock();
+        if (mDatabase != null) {
+            mDatabase.lockPrimaryConnection();
+        }
         try {
             mIsInitializing = true;
             if (mName == null) {
@@ -185,11 +187,13 @@ public abstract class SQLiteOpenHelper {
             if (success) {
                 if (mDatabase != null) {
                     try { mDatabase.close(); } catch (Exception e) { }
-                    mDatabase.unlock();
+                    mDatabase.unlockPrimaryConnection();
                 }
                 mDatabase = db;
             } else {
-                if (mDatabase != null) mDatabase.unlock();
+                if (mDatabase != null) {
+                    mDatabase.unlockPrimaryConnection();
+                }
                 if (db != null) db.close();
             }
         }

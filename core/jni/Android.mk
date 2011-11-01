@@ -39,12 +39,10 @@ LOCAL_SRC_FILES:= \
 	android_opengl_GLES11Ext.cpp \
 	android_opengl_GLES20.cpp \
 	android_database_CursorWindow.cpp \
-	android_database_SQLiteCompiledSql.cpp \
+	android_database_SQLiteCommon.cpp \
+	android_database_SQLiteConnection.cpp \
+	android_database_SQLiteGlobal.cpp \
 	android_database_SQLiteDebug.cpp \
-	android_database_SQLiteDatabase.cpp \
-	android_database_SQLiteProgram.cpp \
-	android_database_SQLiteQuery.cpp \
-	android_database_SQLiteStatement.cpp \
 	android_emoji_EmojiFactory.cpp \
 	android_view_Display.cpp \
 	android_view_DisplayEventReceiver.cpp \
