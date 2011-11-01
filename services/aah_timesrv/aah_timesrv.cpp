@@ -280,9 +280,10 @@ class AAHTimeService : public Thread {
     /*** status while in the Client state ***/
     struct sockaddr_in mClient_MasterAddr;
     uint64_t mClient_MasterDeviceID;
-    bool mClient_SeenFirstSyncResponse;
     bool mClient_SyncRequestPending;
     int mClient_SyncRequestTimeouts;
+    uint32_t mClient_SyncsSentToCurMaster;
+    uint32_t mClient_SyncRespsRvcedFromCurMaster;
     static const int kClient_SyncRequestIntervalMs;
     static const int kClient_SyncRequestTimeoutMs;
     static const int kClient_NumSyncRequestRetries;
@@ -364,9 +365,10 @@ AAHTimeService::AAHTimeService()
     , mClockSynced(false)
     , mInitial_WhoIsMasterRequestTimeouts(0)
     , mClient_MasterDeviceID(0)
-    , mClient_SeenFirstSyncResponse(false)
     , mClient_SyncRequestPending(false)
     , mClient_SyncRequestTimeouts(0)
+    , mClient_SyncsSentToCurMaster(0)
+    , mClient_SyncRespsRvcedFromCurMaster(0)
     , mRonin_WhoIsMasterRequestTimeouts(0) {
     memset(&mMulticastAddr, 0, sizeof(mMulticastAddr));
     memset(&mClient_MasterAddr, 0, sizeof(mClient_MasterAddr));
@@ -828,6 +830,22 @@ bool AAHTimeService::handleSyncResponse(
     if (mState != STATE_CLIENT)
         return true;
 
+    if ((srcAddr.sin_addr.s_addr != mClient_MasterAddr.sin_addr.s_addr) ||
+        (srcAddr.sin_port        != mClient_MasterAddr.sin_port)) {
+        uint32_t srcIP      = ntohl(srcAddr.sin_addr.s_addr);
+        uint32_t expectedIP = ntohl(mClient_MasterAddr.sin_addr.s_addr);
+        LOGI("Dropping sync response from unexpected address."
+             " Expected %u.%u.%u.%u:%hu"
+             " Got %u.%u.%u.%u:%hu",
+             ((expectedIP >> 24) & 0xFF), ((expectedIP >> 16) & 0xFF),
+             ((expectedIP >>  8) & 0xFF),  (expectedIP & 0xFF),
+             ntohs(mClient_MasterAddr.sin_port),
+             ((srcIP >> 24) & 0xFF), ((srcIP >> 16) & 0xFF),
+             ((srcIP >>  8) & 0xFF),  (srcIP & 0xFF),
+             ntohs(srcAddr.sin_port));
+        return true;
+    }
+
     if (ntohl(response->nak)) {
         // if our master is no longer accepting requests, then we need to find
         // a new master
@@ -838,10 +856,10 @@ bool AAHTimeService::handleSyncResponse(
     mClient_SyncRequestTimeouts = 0;
 
     bool result;
-    if (!mClient_SeenFirstSyncResponse) {
+
+    if (!(mClient_SyncRespsRvcedFromCurMaster++)) {
         // the first request/response exchange between a client and a master
         // may take unusually long due to ARP, so discard it.
-        mClient_SeenFirstSyncResponse = true;
         result = true;
     } else {
         int64_t clientTxLocalTime = ntohq(response->clientTxLocalTime);
@@ -939,6 +957,7 @@ bool AAHTimeService::sendSyncRequest() {
         LOGE("%s:%d sendto failed", __PRETTY_FUNCTION__, __LINE__);
     }
 
+    mClient_SyncsSentToCurMaster++;
     mTimeoutMs = kClient_SyncRequestTimeoutMs;
     mClient_SyncRequestPending = true;
     return (sendBytes != -1);
@@ -966,8 +985,21 @@ bool AAHTimeService::sendMasterAnnouncement() {
 bool AAHTimeService::becomeClient(const sockaddr_in& masterAddr,
                                   uint64_t masterDeviceID,
                                   uint32_t timelineID) {
-    mClient_MasterAddr = masterAddr;
-    mClient_MasterDeviceID = masterDeviceID;
+    uint32_t newIP = ntohl(masterAddr.sin_addr.s_addr);
+    uint32_t oldIP = ntohl(mClient_MasterAddr.sin_addr.s_addr);
+    LOGI("%s --> CLIENT%s"
+         " OldMaster: %016llx::%08x::%u.%u.%u.%u:%hu"
+         " NewMaster: %016llx::%08x::%u.%u.%u.%u:%hu",
+         stateToString(mState),
+         (mTimelineID != timelineID) ? " (new timeline)" : "",
+         mClient_MasterDeviceID, mTimelineID,
+         ((oldIP >> 24) & 0xFF), ((oldIP >> 16) & 0xFF),
+         ((oldIP >>  8) & 0xFF),  (oldIP & 0xFF),
+         ntohs(mClient_MasterAddr.sin_port),
+         masterDeviceID, timelineID,
+         ((newIP >> 24) & 0xFF), ((newIP >> 16) & 0xFF),
+         ((newIP >>  8) & 0xFF),  (newIP & 0xFF),
+         ntohs(masterAddr.sin_port));
 
     if (mTimelineID != timelineID) {
         // start following a new timeline
@@ -979,9 +1011,12 @@ bool AAHTimeService::becomeClient(const sockaddr_in& masterAddr,
         mClockRecovery.reset(false, true);
     }
 
+    mClient_MasterAddr = masterAddr;
+    mClient_MasterDeviceID = masterDeviceID;
     mClient_SyncRequestPending = 0;
     mClient_SyncRequestTimeouts = 0;
-    mClient_SeenFirstSyncResponse = false;
+    mClient_SyncsSentToCurMaster = 0;
+    mClient_SyncRespsRvcedFromCurMaster = 0;
 
     setState(STATE_CLIENT);
 
@@ -994,6 +1029,7 @@ bool AAHTimeService::becomeClient(const sockaddr_in& masterAddr,
 }
 
 bool AAHTimeService::becomeMaster() {
+    uint32_t oldTimelineID = mTimelineID;
     if (mTimelineID == ICommonClock::kInvalidTimelineID) {
         // this device has not been following any existing timeline,
         // so it will create a new timeline and declare itself master
@@ -1008,6 +1044,12 @@ bool AAHTimeService::becomeMaster() {
         // notify listeners that we've created a common timeline
         notifyClockSync();
     }
+
+    LOGI("%s --> MASTER %s timeline %08x",
+         stateToString(mState),
+         (oldTimelineID == mTimelineID) ? "taking ownership of"
+                                        : "creating new",
+         mTimelineID);
 
     mClockRecovery.reset(false, true);
 
@@ -1024,22 +1066,48 @@ bool AAHTimeService::becomeRonin() {
     // other clients who know what time it is, but would lose master arbitration
     // in the Ronin case, will step up and become the proper new master of the
     // old timeline.
+    uint32_t oldIP = ntohl(mClient_MasterAddr.sin_addr.s_addr);
     if (mCommonClock.isValid()) {
+        LOGI("%s --> RONIN : lost track of previously valid timeline "
+             "%016llx::%08x::%u.%u.%u.%u:%hu (%d TXed %d RXed)",
+             stateToString(mState),
+             mClient_MasterDeviceID, mTimelineID,
+             ((oldIP >> 24) & 0xFF), ((oldIP >> 16) & 0xFF),
+             ((oldIP >>  8) & 0xFF),  (oldIP & 0xFF),
+             ntohs(mClient_MasterAddr.sin_port),
+             mClient_SyncsSentToCurMaster,
+             mClient_SyncRespsRvcedFromCurMaster);
+
         mRonin_WhoIsMasterRequestTimeouts = 0;
         setState(STATE_RONIN);
         return sendWhoIsMasterRequest();
     } else {
+        LOGI("%s --> INITIAL : never synced timeline "
+             "%016llx::%08x::%u.%u.%u.%u:%hu (%d TXed %d RXed)",
+             stateToString(mState),
+             mClient_MasterDeviceID, mTimelineID,
+             ((oldIP >> 24) & 0xFF), ((oldIP >> 16) & 0xFF),
+             ((oldIP >>  8) & 0xFF),  (oldIP & 0xFF),
+             ntohs(mClient_MasterAddr.sin_port),
+             mClient_SyncsSentToCurMaster,
+             mClient_SyncRespsRvcedFromCurMaster);
+
         return becomeInitial();
     }
 }
 
 bool AAHTimeService::becomeWaitForElection() {
+    LOGI("%s --> WAIT_FOR_ELECTION : dropping out of election, waiting %d mSec"
+         " for completion.", stateToString(mState), kWaitForElection_TimeoutMs);
+
     setState(STATE_WAIT_FOR_ELECTION);
     mTimeoutMs = kWaitForElection_TimeoutMs;
     return true;
 }
 
 bool AAHTimeService::becomeInitial() {
+    LOGI("Entering INITIAL, total reset.");
+
     setState(STATE_INITIAL);
 
     // reset clock recovery
@@ -1052,7 +1120,8 @@ bool AAHTimeService::becomeInitial() {
     mClockSynced = false;
     mInitial_WhoIsMasterRequestTimeouts = 0;
     mClient_MasterDeviceID = 0;
-    mClient_SeenFirstSyncResponse = false;
+    mClient_SyncsSentToCurMaster = 0;
+    mClient_SyncRespsRvcedFromCurMaster = 0;
     mClient_SyncRequestPending = false;
     mClient_SyncRequestTimeouts = 0;
     mRonin_WhoIsMasterRequestTimeouts = 0;
@@ -1077,7 +1146,6 @@ void AAHTimeService::notifyClockSyncLoss() {
 
 void AAHTimeService::setState(State s) {
     mState = s;
-    LOGI("State transition; state is now %s", stateToString(s));
 }
 
 const char* AAHTimeService::stateToString(State s) {
