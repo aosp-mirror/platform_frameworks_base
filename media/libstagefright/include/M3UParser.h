@@ -72,6 +72,10 @@ private:
     static status_t parseCipherInfo(
             const AString &line, sp<AMessage> *meta, const AString &baseURI);
 
+    static status_t parseByteRange(
+            const AString &line, uint64_t curOffset,
+            uint64_t *length, uint64_t *offset);
+
     static status_t ParseInt32(const char *s, int32_t *x);
     static status_t ParseDouble(const char *s, double *x);
 

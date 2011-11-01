@@ -215,7 +215,9 @@ void LiveSession::onDisconnect() {
     mDisconnectPending = false;
 }
 
-status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
+status_t LiveSession::fetchFile(
+        const char *url, sp<ABuffer> *out,
+        int64_t range_offset, int64_t range_length) {
     *out = NULL;
 
     sp<DataSource> source;
@@ -234,8 +236,18 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
             }
         }
 
-        status_t err = mHTTPDataSource->connect(
-                url, mExtraHeaders.isEmpty() ? NULL : &mExtraHeaders);
+        KeyedVector<String8, String8> headers = mExtraHeaders;
+        if (range_offset > 0 || range_length >= 0) {
+            headers.add(
+                    String8("Range"),
+                    String8(
+                        StringPrintf(
+                            "bytes=%lld-%s",
+                            range_offset,
+                            range_length < 0
+                                ? "" : StringPrintf("%lld", range_offset + range_length - 1).c_str()).c_str()));
+        }
+        status_t err = mHTTPDataSource->connect(url, &headers);
 
         if (err != OK) {
             return err;
@@ -270,9 +282,21 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
             buffer = copy;
         }
 
+        size_t maxBytesToRead = bufferRemaining;
+        if (range_length >= 0) {
+            int64_t bytesLeftInRange = range_length - buffer->size();
+            if (bytesLeftInRange < maxBytesToRead) {
+                maxBytesToRead = bytesLeftInRange;
+
+                if (bytesLeftInRange == 0) {
+                    break;
+                }
+            }
+        }
+
         ssize_t n = source->readAt(
                 buffer->size(), buffer->data() + buffer->size(),
-                bufferRemaining);
+                maxBytesToRead);
 
         if (n < 0) {
             return n;
@@ -659,8 +683,15 @@ rinse_repeat:
         explicitDiscontinuity = true;
     }
 
+    int64_t range_offset, range_length;
+    if (!itemMeta->findInt64("range-offset", &range_offset)
+            || !itemMeta->findInt64("range-length", &range_length)) {
+        range_offset = 0;
+        range_length = -1;
+    }
+
     sp<ABuffer> buffer;
-    status_t err = fetchFile(uri.c_str(), &buffer);
+    status_t err = fetchFile(uri.c_str(), &buffer, range_offset, range_length);
     if (err != OK) {
         LOGE("failed to fetch .ts segment at url '%s'", uri.c_str());
         mDataSource->queueEOS(err);

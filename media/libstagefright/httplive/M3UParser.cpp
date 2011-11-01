@@ -152,6 +152,7 @@ status_t M3UParser::parse(const void *_data, size_t size) {
 
     const char *data = (const char *)_data;
     size_t offset = 0;
+    uint64_t segmentRangeOffset = 0;
     while (offset < size) {
         size_t offsetLF = offset;
         while (offsetLF < size && data[offsetLF] != '\n') {
@@ -218,6 +219,24 @@ status_t M3UParser::parse(const void *_data, size_t size) {
                 }
                 mIsVariantPlaylist = true;
                 err = parseStreamInf(line, &itemMeta);
+            } else if (line.startsWith("#EXT-X-BYTERANGE")) {
+                if (mIsVariantPlaylist) {
+                    return ERROR_MALFORMED;
+                }
+
+                uint64_t length, offset;
+                err = parseByteRange(line, segmentRangeOffset, &length, &offset);
+
+                if (err == OK) {
+                    if (itemMeta == NULL) {
+                        itemMeta = new AMessage;
+                    }
+
+                    itemMeta->setInt64("range-offset", offset);
+                    itemMeta->setInt64("range-length", length);
+
+                    segmentRangeOffset = offset + length;
+                }
             }
 
             if (err != OK) {
@@ -441,6 +460,52 @@ status_t M3UParser::parseCipherInfo(
 
             (*meta)->setString(key.c_str(), val.c_str(), val.size());
         }
+    }
+
+    return OK;
+}
+
+// static
+status_t M3UParser::parseByteRange(
+        const AString &line, uint64_t curOffset,
+        uint64_t *length, uint64_t *offset) {
+    ssize_t colonPos = line.find(":");
+
+    if (colonPos < 0) {
+        return ERROR_MALFORMED;
+    }
+
+    ssize_t atPos = line.find("@", colonPos + 1);
+
+    AString lenStr;
+    if (atPos < 0) {
+        lenStr = AString(line, colonPos + 1, line.size() - colonPos - 1);
+    } else {
+        lenStr = AString(line, colonPos + 1, atPos - colonPos - 1);
+    }
+
+    lenStr.trim();
+
+    const char *s = lenStr.c_str();
+    char *end;
+    *length = strtoull(s, &end, 10);
+
+    if (s == end || *end != '\0') {
+        return ERROR_MALFORMED;
+    }
+
+    if (atPos >= 0) {
+        AString offStr = AString(line, atPos + 1, line.size() - atPos - 1);
+        offStr.trim();
+
+        const char *s = offStr.c_str();
+        *offset = strtoull(s, &end, 10);
+
+        if (s == end || *end != '\0') {
+            return ERROR_MALFORMED;
+        }
+    } else {
+        *offset = curOffset;
     }
 
     return OK;
