@@ -29,7 +29,7 @@ class String8;
 
 class AACExtractor : public MediaExtractor {
 public:
-    AACExtractor(const sp<DataSource> &source);
+    AACExtractor(const sp<DataSource> &source, const sp<AMessage> &meta);
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);

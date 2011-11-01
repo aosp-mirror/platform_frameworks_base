@@ -22,6 +22,7 @@
 #include "include/avc_utils.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
@@ -131,18 +132,28 @@ static size_t getAdtsFrameLength(const sp<DataSource> &source, off64_t offset, s
     return frameSize;
 }
 
-AACExtractor::AACExtractor(const sp<DataSource> &source)
+AACExtractor::AACExtractor(
+        const sp<DataSource> &source, const sp<AMessage> &_meta)
     : mDataSource(source),
       mInitCheck(NO_INIT),
       mFrameDurationUs(0) {
-    String8 mimeType;
-    float confidence;
-    if (!SniffAAC(mDataSource, &mimeType, &confidence, NULL)) {
-        return;
+    sp<AMessage> meta = _meta;
+
+    if (meta == NULL) {
+        String8 mimeType;
+        float confidence;
+        sp<AMessage> _meta;
+
+        if (!SniffAAC(mDataSource, &mimeType, &confidence, &meta)) {
+            return;
+        }
     }
 
+    int64_t offset;
+    CHECK(meta->findInt64("offset", &offset));
+
     uint8_t profile, sf_index, channel, header[2];
-    if (mDataSource->readAt(2, &header, 2) < 2) {
+    if (mDataSource->readAt(offset + 2, &header, 2) < 2) {
         return;
     }
 
@@ -156,7 +167,6 @@ AACExtractor::AACExtractor(const sp<DataSource> &source)
 
     mMeta = MakeAACCodecSpecificData(profile, sf_index, channel);
 
-    off64_t offset = 0;
     off64_t streamSize, numFrames = 0;
     size_t frameSize = 0;
     int64_t duration = 0;
@@ -245,7 +255,12 @@ AACSource::~AACSource() {
 status_t AACSource::start(MetaData *params) {
     CHECK(!mStarted);
 
-    mOffset = 0;
+    if (mOffsetVector.empty()) {
+        mOffset = 0;
+    } else {
+        mOffset = mOffsetVector.itemAt(0);
+    }
+
     mCurrentTimeUs = 0;
     mGroup = new MediaBufferGroup;
     mGroup->add_buffer(new MediaBuffer(kMaxFrameSize));
@@ -318,10 +333,39 @@ status_t AACSource::read(
 
 bool SniffAAC(
         const sp<DataSource> &source, String8 *mimeType, float *confidence,
-        sp<AMessage> *) {
+        sp<AMessage> *meta) {
+    off64_t pos = 0;
+
+    for (;;) {
+        uint8_t id3header[10];
+        if (source->readAt(pos, id3header, sizeof(id3header))
+                < (ssize_t)sizeof(id3header)) {
+            return false;
+        }
+
+        if (memcmp("ID3", id3header, 3)) {
+            break;
+        }
+
+        // Skip the ID3v2 header.
+
+        size_t len =
+            ((id3header[6] & 0x7f) << 21)
+            | ((id3header[7] & 0x7f) << 14)
+            | ((id3header[8] & 0x7f) << 7)
+            | (id3header[9] & 0x7f);
+
+        len += 10;
+
+        pos += len;
+
+        ALOGV("skipped ID3 tag, new starting offset is %lld (0x%016llx)",
+             pos, pos);
+    }
+
     uint8_t header[2];
 
-    if (source->readAt(0, &header, 2) != 2) {
+    if (source->readAt(pos, &header, 2) != 2) {
         return false;
     }
 
@@ -329,6 +373,10 @@ bool SniffAAC(
     if ((header[0] == 0xff) && ((header[1] & 0xf6) == 0xf0)) {
         *mimeType = MEDIA_MIMETYPE_AUDIO_AAC_ADTS;
         *confidence = 0.2;
+
+        *meta = new AMessage;
+        (*meta)->setInt64("offset", pos);
+
         return true;
     }
 
