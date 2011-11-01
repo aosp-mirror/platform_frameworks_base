@@ -635,7 +635,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     if (DBG) {
                         Slog.w(TAG, "Remove " + removeList.get(i));
                     }
-                    mListeners.remove(removeList.get(i));
+                    final InternalDeathRecipient idr = removeList.get(i);
+                    idr.mScListener.asBinder().unlinkToDeath(idr, 0);
+                    mListeners.remove(idr);
                 }
                 cleanLocked();
             }
@@ -664,6 +666,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public void removeAll() {
             Slog.e(TAG, "Remove the spell checker bind unexpectedly.");
             synchronized(mSpellCheckerMap) {
+                final int size = mListeners.size();
+                for (int i = 0; i < size; ++i) {
+                    final InternalDeathRecipient idr = mListeners.get(i);
+                    idr.mScListener.asBinder().unlinkToDeath(idr, 0);
+                }
                 mListeners.clear();
                 cleanLocked();
             }
