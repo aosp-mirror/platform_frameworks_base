@@ -321,6 +321,10 @@ following layout classes:</p>
   <li>{@link android.widget.ProgressBar}</li>
   <li>{@link android.widget.TextView}</li>
   <li>{@link android.widget.ViewFlipper}</li>
+  <li>{@link android.widget.ListView}</li>
+  <li>{@link android.widget.GridView}</li>
+  <li>{@link android.widget.StackView}</li>
+  <li>{@link android.widget.AdapterViewFlipper}</li>
 </ul>
 
 <p>Descendants of these classes are not supported.</p>
