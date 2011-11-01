@@ -110,6 +110,8 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private Handler mListenersHandler;
 
+    private ActionMode mActionMode;
+
     private final Runnable mDismissAction = new Runnable() {
         public void run() {
             dismissDialog();
@@ -310,6 +312,9 @@ public class Dialog implements DialogInterface, Window.Callback,
         try {
             mWindowManager.removeView(mDecor);
         } finally {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
             mDecor = null;
             mWindow.closeAllPanels();
             onStop();
@@ -952,10 +957,26 @@ public class Dialog implements DialogInterface, Window.Callback,
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Note that if you override this method you should always call through
+     * to the superclass implementation by calling super.onActionModeStarted(mode).
+     */
     public void onActionModeStarted(ActionMode mode) {
+        mActionMode = mode;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Note that if you override this method you should always call through
+     * to the superclass implementation by calling super.onActionModeFinished(mode).
+     */
     public void onActionModeFinished(ActionMode mode) {
+        if (mode == mActionMode) {
+            mActionMode = null;
+        }
     }
 
     /**
