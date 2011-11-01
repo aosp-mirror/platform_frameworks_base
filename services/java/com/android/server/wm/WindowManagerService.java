@@ -6392,6 +6392,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REMOVE_STARTING = 6;
         public static final int FINISHED_STARTING = 7;
         public static final int REPORT_APPLICATION_TOKEN_WINDOWS = 8;
+        public static final int REPORT_APPLICATION_TOKEN_DRAWN = 9;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
         public static final int HOLD_SCREEN_CHANGED = 12;
         public static final int APP_TRANSITION_TIMEOUT = 13;
@@ -6602,6 +6603,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         } catch (Exception e) {
                             Slog.w(TAG, "Exception when removing starting window", e);
                         }
+                    }
+                } break;
+
+                case REPORT_APPLICATION_TOKEN_DRAWN: {
+                    final AppWindowToken wtoken = (AppWindowToken)msg.obj;
+
+                    try {
+                        if (DEBUG_VISIBILITY) Slog.v(
+                                TAG, "Reporting drawn in " + wtoken);
+                        wtoken.appToken.windowsDrawn();
+                    } catch (RemoteException ex) {
                     }
                 } break;
 

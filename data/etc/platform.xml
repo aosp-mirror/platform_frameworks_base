@@ -156,6 +156,7 @@
     <assign-permission name="android.permission.INSTALL_LOCATION_PROVIDER" uid="shell" />
     <assign-permission name="android.permission.BACKUP" uid="shell" />
     <assign-permission name="android.permission.FORCE_STOP_PACKAGES" uid="shell" />
+    <assign-permission name="android.permission.STOP_APP_SWITCHES" uid="shell" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="media" />
     <assign-permission name="android.permission.ACCESS_DRM" uid="media" />

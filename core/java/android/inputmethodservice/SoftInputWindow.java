@@ -18,16 +18,12 @@ package android.inputmethodservice;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowManager;
-
-import java.lang.Math;
 
 /**
  * A SoftInputWindow is a Dialog that is intended to be used for a top-level input
@@ -46,7 +42,7 @@ class SoftInputWindow extends Dialog {
     }
     
     /**
-     * Create a DockWindow that uses a custom style.
+     * Create a SoftInputWindow that uses a custom style.
      * 
      * @param context The Context in which the DockWindow should run. In
      *        particular, it uses the window manager and theme from this context
