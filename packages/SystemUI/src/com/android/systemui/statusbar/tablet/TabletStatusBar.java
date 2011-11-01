@@ -23,13 +23,14 @@ import java.util.ArrayList;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
-import android.app.Dialog;
 import android.app.KeyguardManager;
-import android.app.PendingIntent;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -38,7 +39,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.LayerDrawable;
-import android.provider.Settings;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -68,17 +68,19 @@ import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
-
 import com.android.systemui.R;
-import com.android.systemui.statusbar.*;
+import com.android.systemui.recent.RecentTasksLoader;
+import com.android.systemui.recent.RecentsPanelView;
+import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.SignalClusterView;
+import com.android.systemui.statusbar.StatusBar;
+import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
-import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.RecentsPanelView;
 
 public class TabletStatusBar extends StatusBar implements
         HeightReceiver.OnBarHeightChangedListener,
@@ -600,6 +602,12 @@ public class TabletStatusBar extends StatusBar implements
 
         mHeightReceiver.addOnBarHeightChangedListener(this);
 
+        // receive broadcasts
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        context.registerReceiver(mBroadcastReceiver, filter);
+
         return sb;
     }
 
@@ -974,6 +982,12 @@ public class TabletStatusBar extends StatusBar implements
                         | StatusBarManager.DISABLE_BACK 
                         | StatusBarManager.DISABLE_HOME)) != 0) {
             setNavigationVisibility(state);
+
+            if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
+                // close recents if it's visible
+                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+            }
         }
     }
 
@@ -1033,10 +1047,16 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     public void animateCollapse() {
+        animateCollapse(false);
+    }
+
+    private void animateCollapse(boolean excludeRecents) {
         mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
-        mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+        if (!excludeRecents) {
+            mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+        }
         mHandler.removeMessages(MSG_CLOSE_INPUT_METHODS_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
         mHandler.removeMessages(MSG_CLOSE_COMPAT_MODE_PANEL);
@@ -1813,6 +1833,31 @@ public class TabletStatusBar extends StatusBar implements
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
+                || Intent.ACTION_SCREEN_OFF.equals(action)) {
+                boolean excludeRecents = false;
+                if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+                    String reason = intent.getStringExtra("reason");
+                    if (reason != null) {
+                        excludeRecents = reason.equals("recentapps");
+                    }
+                }
+                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                    // If we're turning the screen off, we want to hide the
+                    // recents panel with no animation
+                    // TODO: hide other things, like the notification tray,
+                    // with no animation as well
+                    mRecentsPanel.show(false, false);
+                    excludeRecents = true;
+                }
+                animateCollapse(excludeRecents);
+            }
+        }
+    };
 
     public class TouchOutsideListener implements View.OnTouchListener {
         private int mMsg;
