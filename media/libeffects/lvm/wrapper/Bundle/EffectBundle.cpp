@@ -49,6 +49,16 @@ extern "C" const struct effect_interface_s gLvmEffectInterface;
         }\
     }
 
+
+static inline int16_t clamp16(int32_t sample)
+{
+    // check overflow for both positive and negative values:
+    // all bits above short range must me equal to sign bit
+    if ((sample>>15) ^ (sample>>31))
+        sample = 0x7FFF ^ (sample>>31);
+    return sample;
+}
+
 // Namespaces
 namespace android {
 namespace {
@@ -706,13 +716,6 @@ int LvmBundle_init(EffectContext *pContext){
     return 0;
 }   /* end LvmBundle_init */
 
-
-static inline int16_t clamp16(int32_t sample)
-{
-    if ((sample>>15) ^ (sample>>31))
-        sample = 0x7FFF ^ (sample>>31);
-    return sample;
-}
 
 //----------------------------------------------------------------------------
 // LvmBundle_process()
@@ -2683,12 +2686,19 @@ int Effect_process(effect_handle_t     self,
             LOGV("\tLVM_ERROR : LvmBundle_process returned error %d", lvmStatus);
             return lvmStatus;
         }
-    }else{
+    } else {
         //LOGV("\tEffect_process Not Calling process with %d effects enabled, %d called: Effect %d",
         //pContext->pBundledContext->NumberEffectsEnabled,
         //pContext->pBundledContext->NumberEffectsCalled, pContext->EffectType);
         // 2 is for stereo input
-        memcpy(outBuffer->raw, inBuffer->raw, outBuffer->frameCount*sizeof(LVM_INT16)*2);
+        if (pContext->config.outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE) {
+            for (size_t i=0; i < outBuffer->frameCount*2; i++){
+                outBuffer->s16[i] =
+                        clamp16((LVM_INT32)outBuffer->s16[i] + (LVM_INT32)inBuffer->s16[i]);
+            }
+        } else {
+            memcpy(outBuffer->raw, inBuffer->raw, outBuffer->frameCount*sizeof(LVM_INT16)*2);
+        }
     }
 
     return status;
