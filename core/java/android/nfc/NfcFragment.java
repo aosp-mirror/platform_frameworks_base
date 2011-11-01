@@ -48,7 +48,10 @@ public final class NfcFragment extends Fragment {
         FragmentManager manager = activity.getFragmentManager();
         Fragment fragment = manager.findFragmentByTag(FRAGMENT_TAG);
         if (fragment != null) {
-            manager.beginTransaction().remove(fragment).commit();
+            // We allow state loss at this point, because the state is only
+            // lost when activity is being paused *AND* subsequently destroyed.
+            // In that case, the app will setup foreground dispatch again anyway.
+            manager.beginTransaction().remove(fragment).commitAllowingStateLoss();
         }
     }
 
