@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"מצלמה"</string>
     <string name="description_target_silent" msgid="893551287746522182">"שקט"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"הקול פועל"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"החלק לביטול נעילה."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"חבר אוזניות כדי לשמוע הקראה של מפתחות סיסמה."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"נקודה."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"נווט לדף הבית"</string>

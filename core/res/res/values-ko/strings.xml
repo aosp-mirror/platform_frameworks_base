@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"카메라"</string>
     <string name="description_target_silent" msgid="893551287746522182">"무음"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"사운드 켜기"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"스와이프하여 잠급니다."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"비밀번호 키를 음성으로 들으려면 헤드셋을 연결하세요."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"점"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>

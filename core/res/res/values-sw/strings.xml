@@ -667,7 +667,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Kadi yako ya SIM imelemazwa kabisa. "\n" tafadhali wasiliana na mtoa huduma wako wa psiwaya ili kupata kadi nyingine ya SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Kitufe cha awali cha wimbo"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Kitufe cha wimbo unaofuata"</string>
-    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Kitufe cha pauzi"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Kitufe cha kusitisha"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Kitufe cha kucheza"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Kitufe cha kusitisha"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Simu za dharura pekee"</string>
@@ -699,10 +699,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Fungua"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sauti imewezeshwa"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Sauti imezimwa"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Kiolezo imeanzishwa"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Kiolezo imefutwa"</string>
-    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini imeongezwa"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Kiolezo imekamilika"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Ruwaza imeanzishwa"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Ruwaza imefutwa"</string>
+    <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini kimeongezwa"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Ruwaza imekamilika"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Kimya"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Sauti imewashwa"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Pitisha ili kufungua."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Chomeka plagi ya kifaa cha kichwa cha kusikiza ili kusikiliza msimbo wa nenosiri inayozungumwa kwa sauti ya juu."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Nukta."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Abiri nyumbani"</string>
