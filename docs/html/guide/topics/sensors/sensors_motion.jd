@@ -1,0 +1,454 @@
+page.title=Motion Sensors
+parent.title=Sensors
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#sensors-motion-accel">Using the Accelerometer</a></li>
+      <li><a href="#sensors-motion-grav">Using the Gravity Sensor</a></li>
+      <li><a href="#sensors-motion-gyro">Using the Gyroscope</a></li>
+      <li><a href="#sensors-motion-linear">Using the Linear Accelerometer</a></li>
+      <li><a href="#sensors-motion-rotate">Using the Rotation Vector Sensor</a></li>
+    </ol>
+    <h2>Key classes and interfaces</h2>
+    <ol>
+      <li>{@link android.hardware.Sensor}</li>
+      <li>{@link android.hardware.SensorEvent}</li>
+      <li>{@link android.hardware.SensorManager}</li>
+      <li>{@link android.hardware.SensorEventListener}</li>
+    </ol>
+    <h2>Related samples</h2>
+    <ol>
+      <li><a href="{@docRoot}resources/samples/AccelerometerPlay/index.html">Accelerometer
+      Play</a></li>
+      <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
+API Demos (OS - RotationVectorDemo)</a></li>
+      <li><a
+href="{@docRoot}/resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html"
+>API Demos (OS - Sensors)</a></li>
+    </ol>
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/sensors/index.html">Sensors</a></li>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_position.html">Position Sensors</a></li>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_environment.html">Environment
+Sensors</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>The Android platform provides several sensors that let you monitor the motion of a device. Two of
+these sensors are always hardware-based (the accelerometer and gyroscope), and three of these
+sensors can be either hardware-based or software-based (the gravity, linear acceleration, and
+rotation vector sensors). For example, on some devices the software-based sensors derive their data
+from the accelerometer and magnetometer, but on other devices they may also use the gyroscope to
+derive their data. Most Android-powered devices have an accelerometer, and many now
+include a gyroscope. The availability of the softare-based sensors is more variable because they
+often rely on one or more hardware sensors to derive their data.</p>
+
+<p>Motion sensors are useful for monitoring device movement, such as tilt, shake, rotation, or
+swing. The movement is usually a reflection of direct user input (for example, a user steering a
+car in a game or a user controlling a ball in a game), but it can also be a reflection of the
+physical environment in which the device is sitting (for example, moving with you while you drive
+your car). In the first case, you are monitoring motion relative to the device's frame of reference
+or your application's frame of reference; in the second case you are monitoring motion relative to
+the world's frame of reference. Motion sensors by themselves are not typically used to monitor
+device position, but they can be used with other sensors, such as the geomagnetic field sensor, to
+determine a device's position relative to the world's frame of reference (see <a
+href="{@docRoot}guide/topics/sensors/sensors_position.html">Position Sensors</a> for more
+information).</p>
+
+<p>All of the motion sensors return multi-dimensional arrays of sensor values for each {@link
+android.hardware.SensorEvent}. For example, during a single sensor event the accelerometer returns
+acceleration force data for the three coordinate axes, and the gyroscope returns rate of rotation
+data for the three coordinate axes. These data values are returned in a <code>float</code> array
+({@link android.hardware.SensorEvent#values}) along with other {@link android.hardware.SensorEvent}
+parameters. Table 1 summarizes the motion sensors that are available on the Android platform.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> Motion sensors that are supported on the Android platform.</p>
+<table>
+  <tr>
+    <th scope="col" style="white-space:nowrap">Sensor</th>
+    <th scope="col" style="white-space:nowrap">Sensor event data</th>
+    <th scope="col" style="white-space:nowrap">Description</th>
+    <th scope="col" style="white-space:nowrap">Units of measure</th>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_ACCELEROMETER}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Acceleration force along the x axis (including gravity).</td>
+    <td rowspan="3">m/s<sup>2</sup></td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Acceleration force along the y axis (including gravity).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Acceleration force along the z axis (including gravity).</td>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_GRAVITY}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Force of gravity along the x axis.</td>
+    <td rowspan="3">m/s<sup>2</sup></td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Force of gravity along the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Force of gravity along the z axis.</td>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_GYROSCOPE}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Rate of rotation around the x axis.</td>
+    <td rowspan="3">rad/s</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Rate of rotation around the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Rate of rotation around the z axis.</td>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Acceleration force along the x axis (excluding gravity).</td>
+    <td rowspan="3">m/s<sup>2</sup></td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Acceleration force along the y axis (excluding gravity).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Acceleration force along the z axis (excluding gravity).</td>
+  </tr>
+  <tr>
+    <td rowspan="4">{@link android.hardware.Sensor#TYPE_ROTATION_VECTOR}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Rotation vector component along the x axis (x * sin(θ/2)).</td>
+    <td rowspan="4">Unitless</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Rotation vector component along the y axis (y * sin(θ/2)).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Rotation vector component along the z axis (z * sin(θ/2)).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[3]</code></td>
+    <td>Scalar component of the rotation vector ((cos(θ/2)).<sup>1</sup></td>
+  </tr>
+</table>
+
+<p class="note"><strong><sup>1</sup></strong> The scalar component is an optional value.</p>
+
+<p>The rotation vector sensor and the gravity sensor are the most frequently used sensors for motion
+detection and monitoring. The rotational vector sensor is particularly versatile and can be used for
+a wide range of motion-related tasks, such as detecting gestures, monitoring angular change, and
+monitoring relative orientation changes. For example, the rotational vector sensor is ideal if you
+are developing a game, an augmented reality application, a 2-dimensional or 3-dimensional compass,
+or a camera stabilization app. In most cases, using these sensors is a better choice than using
+the accelerometer and geomagnetic field sensor or the orientation sensor.</p>
+
+<h3>Android Open Source Project Sensors</h3>
+
+<p>The Android Open Source Project (AOSP) provides three software-based motion sensors: a gravity
+sensor, a linear acceleration sensor, and a rotation vector sensor. These sensors were updated in
+Android 4.0 and now use a device's gyroscope (in addition to other sensors) to improve stability and
+performance. If you want to try these sensors, you can identify them by using the {@link
+android.hardware.Sensor#getVendor} method and the {@link android.hardware.Sensor#getVersion} method
+(the vendor is Google Inc.; the version number is 3). Identifying these sensors by vendor and
+version number is necessary because the Android system considers these three sensors to be secondary
+sensors. For example, if a device manufacturer provides their own gravity sensor, then the AOSP
+gravity sensor shows up as a secondary gravity sensor. All three of these sensors rely on a
+gyroscope: if a device does not have a gyroscope, these sensors do not show up and are not
+available for use.</p>
+
+<h2 id="sensors-motion-accel">Using the Accelerometer</h2>
+
+<p>An acceleration sensor measures the acceleration applied to the device, including the force of
+gravity. The following code shows you how to get an instance of the default acceleration sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+  ...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+</pre>
+
+<p>Conceptually, an acceleration sensor determines the acceleration that is applied
+to a device (A<sub>d</sub>) by measuring the forces that are applied to the sensor
+itself (F<sub>s</sub>) using the following relationship:</p>
+
+<pre class="no-pretty-print classic">
+A<sub>d</sub> = - ∑F<sub>s</sub> / mass
+</pre>
+
+<p>However, the force of gravity is always influencing the measured acceleration according to
+the following relationship:</p>
+
+<pre class="no-pretty-print classic">
+A<sub>d</sub> = -g - ∑F / mass
+</pre>
+
+<p>For this reason, when the device is sitting on a table (and not accelerating), the
+accelerometer reads a magnitude of g = 9.81 m/s<sup>2</sup>. Similarly, when the device is in
+free fall and therefore rapidly accelerating toward the ground at 9.81 m/s<sup>2</sup>, its
+accelerometer reads a magnitude of g = 0 m/s<sup>2</sup>. Therefore, to measure
+the real acceleration of the device, the contribution of the force of gravity must be removed from
+the accelerometer data. This can be achieved by applying a high-pass filter. Conversely, a low-pass
+filter can be used to isolate the force of gravity. The following example shows how you can do
+this:</p>
+
+<pre>
+public void onSensorChanged(SensorEvent event){
+  // In this example, alpha is calculated as t / (t + dT),
+  // where t is the low-pass filter's time-constant and
+  // dT is the event delivery rate.
+
+  final float alpha = 0.8;
+
+  // Isolate the force of gravity with the low-pass filter.
+  gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+  gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+  gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+
+  // Remove the gravity contribution with the high-pass filter.
+  linear_acceleration[0] = event.values[0] - gravity[0];
+  linear_acceleration[1] = event.values[1] - gravity[1];
+  linear_acceleration[2] = event.values[2] - gravity[2];
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> You can use many different techniques to filter sensor data.
+The code sample above uses a simple filter constant (alpha) to create a low-pass filter. This filter
+constant is derived from a time constant (t), which is a rough representation of the latency that
+the filter adds to the sensor events, and the sensor's event delivery rate (dt). The code sample
+uses an alpha value of 0.8 for demonstration purposes. If you use this filtering method you may need
+to choose a different alpha value.</p>
+
+<p>Accelerometers use the standard sensor <a
+href="{@docRoot}guide/topics/sensors/sensors_overview.html#sensors-coords">coordinate
+system</a>. In practice, this means that the following conditions apply when a device is laying
+flat on a table in its natural orientation:</p>
+
+<ul>
+  <li>If you push the device on the left side (so it moves to the right), the x acceleration value
+is positive.</li>
+  <li>If you push the device on the bottom (so it moves away from you), the y acceleration value is
+positive.</li>
+  <li>If you push the device toward the sky with an acceleration of A m/s<sup>2</sup>, the
+z acceleration value is equal to A + 9.81, which corresponds to the acceleration of the device (+A
+m/s<sup>2</sup>) minus the force of gravity (-9.81 m/s<sup>2</sup>).</li>
+  <li>The stationary device will have an acceleration value of +9.81, which corresponds to the
+acceleration of the device (0 m/s<sup>2</sup> minus the force of gravity, which is -9.81
+m/s<sup>2</sup>).</li>
+</ul>
+
+<p>In general, the accelerometer is a good sensor to use if you are monitoring device motion.
+Almost every Android-powered handset and tablet has an accelerometer, and it uses about 10 times
+less power than the other motion sensors. One drawback is that you might have to implement
+low-pass and high-pass filters to eliminate gravitational forces and reduce noise.</p>
+
+<p>The Android SDK provides a sample application that shows how to use the acceleration sensor (<a
+href="{@docRoot}resources/samples/AccelerometerPlay/index.html">Accelerometer Play</a>).</p>
+
+<h2 id="sensors-motion-grav">Using the Gravity Sensor</h2>
+
+<p>The gravity sensor provides a three dimensional vector indicating the direction and magnitude of
+gravity. The following code shows you how to get an instance of the default gravity sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+</pre>
+
+<p>The units are the same as those used by the acceleration
+sensor (m/s<sup>2</sup>), and the coordinate system is the same as the one used by the
+acceleration sensor.</p>
+
+<p class="note"><strong>Note:</strong> When a device is at rest, the output of the gravity sensor
+should be identical to that of the accelerometer.</p>
+
+<h2 id="sensors-motion-gyro">Using the Gyroscope</h2>
+<p>The gyroscope measures the rate or rotation in rad/s around a device's x, y,
+and z axis. The following code shows you how to get an instance of the default gyroscope:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+</pre>
+
+<p>The sensor's <a
+href="{@docRoot}guide/topics/sensors/sensors_overview.html#sensors-coords">coordinate system</a>
+is the same as the one used for the acceleration sensor. Rotation is positive in the
+counter-clockwise direction; that is, an observer looking
+from some positive location on the x, y or z axis at a device positioned on the origin would report
+positive rotation if the device appeared to be rotating counter clockwise. This is the
+standard mathematical definition of positive rotation and is not the same as the definition for
+roll that is used by the orientation sensor.</p>
+
+<p>Usually, the output of the gyroscope is integrated over time to calculate a rotation describing
+the change of angles over the timestep. For example:</p>
+
+<pre>
+// Create a constant to convert nanoseconds to seconds.
+private static final float NS2S = 1.0f / 1000000000.0f;
+private final float[] deltaRotationVector = new float[4]();
+private float timestamp;
+
+public void onSensorChanged(SensorEvent event) {
+  // This timestep's delta rotation to be multiplied by the current rotation
+  // after computing it from the gyro sample data.
+  if (timestamp != 0) {
+    final float dT = (event.timestamp - timestamp) * NS2S;
+    // Axis of the rotation sample, not normalized yet.
+    float axisX = event.values[0];
+    float axisY = event.values[1];
+    float axisZ = event.values[2];
+
+    // Calculate the angular speed of the sample
+    float omegaMagnitude = sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
+
+    // Normalize the rotation vector if it's big enough to get the axis
+    // (that is, EPSILON should represent your maximum allowable margin of error)
+    if (omegaMagnitude > EPSILON) {
+      axisX /= omegaMagnitude;
+      axisY /= omegaMagnitude;
+      axisZ /= omegaMagnitude;
+    }
+
+    // Integrate around this axis with the angular speed by the timestep
+    // in order to get a delta rotation from this sample over the timestep
+    // We will convert this axis-angle representation of the delta rotation
+    // into a quaternion before turning it into the rotation matrix.
+    float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+    float sinThetaOverTwo = sin(thetaOverTwo);
+    float cosThetaOverTwo = cos(thetaOverTwo);
+    deltaRotationVector[0] = sinThetaOverTwo * axisX;
+    deltaRotationVector[1] = sinThetaOverTwo * axisY;
+    deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+    deltaRotationVector[3] = cosThetaOverTwo;
+  }
+  timestamp = event.timestamp;
+  float[] deltaRotationMatrix = new float[9];
+  SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+    // User code should concatenate the delta rotation we computed with the current rotation
+    // in order to get the updated rotation.
+    // rotationCurrent = rotationCurrent * deltaRotationMatrix;
+   }
+}
+ </pre>
+
+<p>Standard gyroscopes provide raw rotational data without any filtering or correction for noise and
+drift (bias). In practice, gyroscope noise and drift will introduce errors that need to be
+compensated for. You usually determine the drift (bias) and noise by monitoring other sensors, such
+as the gravity sensor or accelerometer.</p>
+
+<h2 id="sensors-motion-linear">Using the Linear Accelerometer</h2>
+
+<p>The linear acceleration sensor provides you with a three-dimensional vector representing
+acceleration along each device axis, excluding gravity. The following code shows you how to get an
+instance of the default linear acceleration sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+</pre>
+
+<p>Conceptually, this sensor provides you with acceleration data according to the following
+relationship:</p>
+
+<pre class="no-pretty-print classic">
+linear acceleration = acceleration - acceleration due to gravity
+</pre>
+
+<p>You typically use this sensor when you want to obtain acceleration data without the influence of
+gravity. For example, you could use this sensor to see how fast your car is going. The linear
+acceleration sensor always has an offset, which you need to remove. The simplest way to do this is
+to build a calibration step into your application. During calibration you can ask the user to set
+the device on a table, and then read the offsets for all three axes. You can then subtract that
+offset from the acceleration sensor's direct readings to get the actual linear
+acceleration.</p>
+
+<p>The sensor <a
+  href="{@docRoot}guide/topics/sensors/sensors_overview.html#sensors-coords">coordinate
+system</a> is the same as the one used by the acceleration sensor, as are the units of measure
+(m/s<sup>2</sup>).
+
+<h2 id="sensors-motion-rotate">Using the Rotation Vector Sensor</h2>
+
+<p>The rotation vector represents the orientation of the device as a combination of an angle and an
+axis, in which the device has rotated through an angle θ around an axis (x, y, or z). The following
+code shows you how to get an instance of the default rotation vector sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+</pre>
+
+<p>The three elements of the rotation vector are expressed as follows:</p>
+
+<pre class="no-pretty-print classic">
+x*sin(θ/2)
+y*sin(θ/2)
+z*sin(θ/2)
+</pre>
+
+<p>Where the magnitude of the rotation vector is equal to sin(θ/2), and the direction of the
+rotation vector is equal to the direction of the axis of rotation.</p>
+
+<div class="figure" style="width:246px">
+  <img src="{@docRoot}images/axis_globe.png" alt="" height="235" />
+  <p class="img-caption">
+    <strong>Figure 1.</strong> Coordinate system used by the rotation vector sensor.
+  </p>
+</div>
+
+<p>The three elements of the rotation vector are equal to the last three components of a unit
+quaternion (cos(θ/2), x*sin(θ/2), y*sin(θ/2), z*sin(θ/2)). Elements of the rotation vector are
+unitless. The x, y, and z axes are defined in the same way as the acceleration sensor. The reference
+coordinate system is defined as a direct orthonormal basis (see figure 1). This coordinate system
+has the following characteristics:</p>
+
+<ul>
+  <li>X is defined as the vector product Y x Z. It is tangential to the
+ground at the device's current location and points approximately East.</li>
+  <li>Y is tangential to the ground at the device's current location and points toward the
+geomagnetic
+North Pole.</li>
+  <li>Z points toward the sky and is perpendicular to the ground plane.</li>
+</ul>
+
+<p>The Android SDK provides a sample application that shows how to use the rotation vector sensor.
+The sample application is located in the API Demos code (<a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
+OS - RotationVectorDemo</a>).</p>
