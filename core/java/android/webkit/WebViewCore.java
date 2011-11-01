@@ -2290,6 +2290,18 @@ public final class WebViewCore {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
+        // clamp initial scale
+        if (mViewportInitialScale > 0) {
+            if (mViewportMinimumScale > 0) {
+                mViewportInitialScale = Math.max(mViewportInitialScale,
+                        mViewportMinimumScale);
+            }
+            if (mViewportMaximumScale > 0) {
+                mViewportInitialScale = Math.min(mViewportInitialScale,
+                        mViewportMaximumScale);
+            }
+        }
+
         if (mSettings.forceUserScalable()) {
             mViewportUserScalable = true;
             if (mViewportInitialScale > 0) {
