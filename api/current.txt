@@ -9366,6 +9366,7 @@ package android.hardware {
     method public java.util.List<android.hardware.Camera.Size> getSupportedVideoSizes();
     method public java.util.List<java.lang.String> getSupportedWhiteBalance();
     method public float getVerticalViewAngle();
+    method public boolean getVideoStabilization();
     method public java.lang.String getWhiteBalance();
     method public int getZoom();
     method public java.util.List<java.lang.Integer> getZoomRatios();
@@ -9373,6 +9374,7 @@ package android.hardware {
     method public boolean isAutoWhiteBalanceLockSupported();
     method public boolean isSmoothZoomSupported();
     method public boolean isVideoSnapshotSupported();
+    method public boolean isVideoStabilizationSupported();
     method public boolean isZoomSupported();
     method public void remove(java.lang.String);
     method public void removeGpsData();
@@ -9404,6 +9406,7 @@ package android.hardware {
     method public void setRecordingHint(boolean);
     method public void setRotation(int);
     method public void setSceneMode(java.lang.String);
+    method public void setVideoStabilization(boolean);
     method public void setWhiteBalance(java.lang.String);
     method public void setZoom(int);
     method public void unflatten(java.lang.String);
