@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Máy ảnh"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Im lặng"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Bật âm thanh"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Trượt để mở khóa."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Hãy cắm tai nghe để nghe mật khẩu."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Dấu chấm."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Điều hướng về trang chủ"</string>

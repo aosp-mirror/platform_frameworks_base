@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Câmara"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencioso"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Som ativado"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Deslizar rapidamente para desbloquear."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Ligue os auscultadores com microfone integrado para ouvir as teclas da palavra-passe."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Ponto."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navegar para página inicial"</string>
