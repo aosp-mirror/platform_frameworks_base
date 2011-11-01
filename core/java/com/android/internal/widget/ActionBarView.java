@@ -518,6 +518,7 @@ public class ActionBarView extends AbsActionBarView {
 
     public void setHomeButtonEnabled(boolean enable) {
         mHomeLayout.setEnabled(enable);
+        mHomeLayout.setFocusable(enable);
         // Make sure the home button has an accurate content description for accessibility.
         if (!enable) {
             mHomeLayout.setContentDescription(null);

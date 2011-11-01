@@ -54,5 +54,7 @@
     <!-- Compensate for double margin : preference_screen_side_margin + 4 (frame background shadow) = -preference_screen_side_margin_negative -->
     <dimen name="preference_screen_side_margin_negative">-4dp</dimen>
 
+    <!-- Minimum width for an action button in the menu area of an action bar -->
+    <dimen name="action_button_min_width">64dip</dimen>
 </resources>
 
