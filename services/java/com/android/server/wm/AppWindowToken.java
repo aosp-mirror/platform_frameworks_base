@@ -77,6 +77,9 @@ class AppWindowToken extends WindowToken {
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
 
+    // Last drawn state we reported to the app token.
+    boolean reportedDrawn;
+
     // Set to true when the token has been removed from the window mgr.
     boolean removed;
 
@@ -277,6 +280,7 @@ class AppWindowToken extends WindowToken {
 
         int numInteresting = 0;
         int numVisible = 0;
+        int numDrawn = 0;
         boolean nowGone = true;
 
         if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Update reported visibility: " + this);
@@ -307,6 +311,7 @@ class AppWindowToken extends WindowToken {
             }
             numInteresting++;
             if (win.isDrawnLw()) {
+                numDrawn++;
                 if (!win.isAnimating()) {
                     numVisible++;
                 }
@@ -316,9 +321,27 @@ class AppWindowToken extends WindowToken {
             }
         }
 
+        boolean nowDrawn = numInteresting > 0 && numDrawn >= numInteresting;
         boolean nowVisible = numInteresting > 0 && numVisible >= numInteresting;
+        if (!nowGone) {
+            // If the app is not yet gone, then it can only become visible/drawn.
+            if (!nowDrawn) {
+                nowDrawn = reportedDrawn;
+            }
+            if (!nowVisible) {
+                nowVisible = reportedVisible;
+            }
+        }
         if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
+        if (nowDrawn != reportedDrawn) {
+            if (nowDrawn) {
+                Message m = service.mH.obtainMessage(
+                        H.REPORT_APPLICATION_TOKEN_DRAWN, this);
+                service.mH.sendMessage(m);
+            }
+            reportedDrawn = nowDrawn;
+        }
         if (nowVisible != reportedVisible) {
             if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(
                     WindowManagerService.TAG, "Visibility changed in " + this
@@ -360,6 +383,7 @@ class AppWindowToken extends WindowToken {
         pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
                 pw.print(" clientHidden="); pw.print(clientHidden);
                 pw.print(" willBeHidden="); pw.print(willBeHidden);
+                pw.print(" reportedDrawn="); pw.print(reportedDrawn);
                 pw.print(" reportedVisible="); pw.println(reportedVisible);
         if (paused || freezingScreen) {
             pw.print(prefix); pw.print("paused="); pw.print(paused);

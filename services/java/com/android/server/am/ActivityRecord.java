@@ -523,7 +523,7 @@ final class ActivityRecord extends IApplicationToken.Stub {
         }
     }
     
-    public void windowsVisible() {
+    public void windowsDrawn() {
         synchronized(service) {
             if (launchTime != 0) {
                 final long curTime = SystemClock.uptimeMillis();
@@ -555,6 +555,11 @@ final class ActivityRecord extends IApplicationToken.Stub {
                 stack.mInitialStartTime = 0;
             }
             startTime = 0;
+        }
+    }
+
+    public void windowsVisible() {
+        synchronized(service) {
             stack.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);

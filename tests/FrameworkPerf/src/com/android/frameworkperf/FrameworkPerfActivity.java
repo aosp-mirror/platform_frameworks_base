@@ -34,6 +34,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.io.File;
@@ -46,11 +49,14 @@ import java.util.ArrayList;
 /**
  * So you thought sync used up your battery life.
  */
-public class FrameworkPerfActivity extends Activity {
+public class FrameworkPerfActivity extends Activity
+        implements AdapterView.OnItemSelectedListener {
     static final String TAG = "Perf";
 
     final Handler mHandler = new Handler();
 
+    Spinner mFgSpinner;
+    Spinner mBgSpinner;
     TextView mLog;
     PowerManager.WakeLock mPartialWakeLock;
 
@@ -109,6 +115,11 @@ public class FrameworkPerfActivity extends Activity {
             new SchedulerOp(),
             new MethodCallOp(),
             new IpcOp(),
+            new CreateFileOp(),
+            new CreateWriteFileOp(),
+            new CreateWriteSyncFileOp(),
+            new WriteFileOp(),
+            new ReadFileOp(),
             new ParseXmlResOp(),
             new ParseLargeXmlResOp(),
             new LoadSmallBitmapOp(),
@@ -116,7 +127,12 @@ public class FrameworkPerfActivity extends Activity {
             new LoadSmallScaledBitmapOp(),
             new LoadLargeScaledBitmapOp(),
     };
-    
+
+    final String[] mAvailOpLabels;
+    final String[] mAvailOpDescriptions;
+
+    Op mFgTest;
+    Op mBgTest;
     int mCurOpIndex = 0;
 
     class RunResult {
@@ -149,6 +165,21 @@ public class FrameworkPerfActivity extends Activity {
 
     final ArrayList<RunResult> mResults = new ArrayList<RunResult>();
 
+    public FrameworkPerfActivity() {
+        mAvailOpLabels = new String[mAvailOps.length];
+        mAvailOpDescriptions = new String[mAvailOps.length];
+        for (int i=0; i<mAvailOps.length; i++) {
+            Op op = mAvailOps[i];
+            if (op.getClass() == NoOp.class) {
+                mAvailOpLabels[i] = "All";
+                mAvailOpDescriptions[i] = "All tests";
+            } else {
+                mAvailOpLabels[i] = op.getName();
+                mAvailOpDescriptions[i] = op.getLongName();
+            }
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +187,19 @@ public class FrameworkPerfActivity extends Activity {
         // Set the layout for this activity.  You can find it
         // in res/layout/hello_activity.xml
         setContentView(R.layout.main);
+
+        mFgSpinner = (Spinner) findViewById(R.id.fgspinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, mAvailOpLabels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mFgSpinner.setAdapter(adapter);
+        mFgSpinner.setOnItemSelectedListener(this);
+        mBgSpinner = (Spinner) findViewById(R.id.bgspinner);
+        adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, mAvailOpLabels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mBgSpinner.setAdapter(adapter);
+        mBgSpinner.setOnItemSelectedListener(this);
 
         findViewById(R.id.start).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -175,6 +219,30 @@ public class FrameworkPerfActivity extends Activity {
     }
 
     @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (parent == mFgSpinner || parent == mBgSpinner) {
+            Spinner spinner = (Spinner)parent;
+            Op op = mAvailOps[position];
+            if (op.getClass() == NoOp.class) {
+                op = null;
+            }
+            if (parent == mFgSpinner) {
+                mFgTest = op;
+                ((TextView)findViewById(R.id.fgtext)).setText(mAvailOpDescriptions[position]);
+            } else {
+                mBgTest = op;
+                ((TextView)findViewById(R.id.bgtext)).setText(mAvailOpDescriptions[position]);
+            }
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
     }
@@ -189,7 +257,21 @@ public class FrameworkPerfActivity extends Activity {
     }
 
     void startCurOp() {
-        mRunner.run(mHandler, mOpPairs[mCurOpIndex], mOpPairs[mCurOpIndex+1], new Runnable() {
+        Op fgOp, bgOp;
+        if (mFgTest == null && mBgTest == null) {
+            fgOp = mOpPairs[mCurOpIndex];
+            bgOp = mOpPairs[mCurOpIndex+1];
+        } else if (mFgTest != null && mBgTest != null) {
+            fgOp = mFgTest;
+            bgOp = mBgTest;
+        } else if (mFgTest != null) {
+            fgOp = mFgTest;
+            bgOp = mAvailOps[mCurOpIndex];
+        } else {
+            fgOp = mAvailOps[mCurOpIndex];
+            bgOp = mBgTest;
+        }
+        mRunner.run(mHandler, fgOp, bgOp, new Runnable() {
             @Override public void run() {
                 RunResult result = new RunResult(mRunner);
                 log(String.format("%s: fg=%d*%gms/op (%dms) / bg=%d*%gms/op (%dms)",
@@ -201,8 +283,21 @@ public class FrameworkPerfActivity extends Activity {
                     stopRunning();
                     return;
                 }
-                mCurOpIndex+=2;
-                if (mCurOpIndex >= mOpPairs.length) {
+                if (mFgTest != null && mBgTest != null) {
+                    log("Finished");
+                    stopRunning();
+                    return;
+                }
+                if (mFgTest == null && mBgTest == null) {
+                    mCurOpIndex+=2;
+                    if (mCurOpIndex >= mOpPairs.length) {
+                        log("Finished");
+                        stopRunning();
+                        return;
+                    }
+                }
+                mCurOpIndex++;
+                if (mCurOpIndex >= mAvailOps.length) {
                     log("Finished");
                     stopRunning();
                     return;

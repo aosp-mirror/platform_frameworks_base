@@ -60,6 +60,8 @@ public class Am {
     private boolean mWaitOption = false;
     private boolean mStopOption = false;
 
+    private int mRepeat = 0;
+
     private String mProfileFile;
     private boolean mProfileAutoStop;
 
@@ -133,6 +135,7 @@ public class Am {
         mDebugOption = false;
         mWaitOption = false;
         mStopOption = false;
+        mRepeat = 0;
         mProfileFile = null;
         Uri data = null;
         String type = null;
@@ -263,6 +266,8 @@ public class Am {
             } else if (opt.equals("--start-profiler")) {
                 mProfileFile = nextArgRequired();
                 mProfileAutoStop = false;
+            } else if (opt.equals("-R")) {
+                mRepeat = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-S")) {
                 mStopOption = true;
             } else {
@@ -335,138 +340,144 @@ public class Am {
             mimeType = mAm.getProviderMimeType(intent.getData());
         }
 
-        if (mStopOption) {
-            String packageName;
-            if (intent.getComponent() != null) {
-                packageName = intent.getComponent().getPackageName();
+        do {
+            if (mStopOption) {
+                String packageName;
+                if (intent.getComponent() != null) {
+                    packageName = intent.getComponent().getPackageName();
+                } else {
+                    IPackageManager pm = IPackageManager.Stub.asInterface(
+                            ServiceManager.getService("package"));
+                    if (pm == null) {
+                        System.err.println("Error: Package manager not running; aborting");
+                        return;
+                    }
+                    List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0);
+                    if (activities == null || activities.size() <= 0) {
+                        System.err.println("Error: Intent does not match any activities: "
+                                + intent);
+                        return;
+                    } else if (activities.size() > 1) {
+                        System.err.println("Error: Intent matches multiple activities; can't stop: "
+                                + intent);
+                        return;
+                    }
+                    packageName = activities.get(0).activityInfo.packageName;
+                }
+                System.out.println("Stopping: " + packageName);
+                mAm.forceStopPackage(packageName);
+                Thread.sleep(250);
+            }
+    
+            System.out.println("Starting: " + intent);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    
+            ParcelFileDescriptor fd = null;
+    
+            if (mProfileFile != null) {
+                try {
+                    fd = ParcelFileDescriptor.open(
+                            new File(mProfileFile),
+                            ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE |
+                            ParcelFileDescriptor.MODE_READ_WRITE);
+                } catch (FileNotFoundException e) {
+                    System.err.println("Error: Unable to open file: " + mProfileFile);
+                    return;
+                }
+            }
+    
+            IActivityManager.WaitResult result = null;
+            int res;
+            if (mWaitOption) {
+                result = mAm.startActivityAndWait(null, intent, mimeType,
+                            null, 0, null, null, 0, false, mDebugOption,
+                            mProfileFile, fd, mProfileAutoStop);
+                res = result.result;
             } else {
-                IPackageManager pm = IPackageManager.Stub.asInterface(
-                        ServiceManager.getService("package"));
-                if (pm == null) {
-                    System.err.println("Error: Package manager not running; aborting");
-                    return;
-                }
-                List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0);
-                if (activities == null || activities.size() <= 0) {
-                    System.err.println("Error: Intent does not match any activities: "
-                            + intent);
-                    return;
-                } else if (activities.size() > 1) {
-                    System.err.println("Error: Intent matches multiple activities; can't stop: "
-                            + intent);
-                    return;
-                }
-                packageName = activities.get(0).activityInfo.packageName;
-            }
-            System.out.println("Stopping: " + packageName);
-            mAm.forceStopPackage(packageName);
-            Thread.sleep(250);
-        }
-
-        System.out.println("Starting: " + intent);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        ParcelFileDescriptor fd = null;
-
-        if (mProfileFile != null) {
-            try {
-                fd = ParcelFileDescriptor.open(
-                        new File(mProfileFile),
-                        ParcelFileDescriptor.MODE_CREATE |
-                        ParcelFileDescriptor.MODE_TRUNCATE |
-                        ParcelFileDescriptor.MODE_READ_WRITE);
-            } catch (FileNotFoundException e) {
-                System.err.println("Error: Unable to open file: " + mProfileFile);
-                return;
-            }
-        }
-
-        IActivityManager.WaitResult result = null;
-        int res;
-        if (mWaitOption) {
-            result = mAm.startActivityAndWait(null, intent, mimeType,
+                res = mAm.startActivity(null, intent, mimeType,
                         null, 0, null, null, 0, false, mDebugOption,
                         mProfileFile, fd, mProfileAutoStop);
-            res = result.result;
-        } else {
-            res = mAm.startActivity(null, intent, mimeType,
-                    null, 0, null, null, 0, false, mDebugOption,
-                    mProfileFile, fd, mProfileAutoStop);
-        }
-        PrintStream out = mWaitOption ? System.out : System.err;
-        boolean launched = false;
-        switch (res) {
-            case IActivityManager.START_SUCCESS:
-                launched = true;
-                break;
-            case IActivityManager.START_SWITCHES_CANCELED:
-                launched = true;
-                out.println(
-                        "Warning: Activity not started because the "
-                        + " current activity is being kept for the user.");
-                break;
-            case IActivityManager.START_DELIVERED_TO_TOP:
-                launched = true;
-                out.println(
-                        "Warning: Activity not started, intent has "
-                        + "been delivered to currently running "
-                        + "top-most instance.");
-                break;
-            case IActivityManager.START_RETURN_INTENT_TO_CALLER:
-                launched = true;
-                out.println(
-                        "Warning: Activity not started because intent "
-                        + "should be handled by the caller");
-                break;
-            case IActivityManager.START_TASK_TO_FRONT:
-                launched = true;
-                out.println(
-                        "Warning: Activity not started, its current "
-                        + "task has been brought to the front");
-                break;
-            case IActivityManager.START_INTENT_NOT_RESOLVED:
-                out.println(
-                        "Error: Activity not started, unable to "
-                        + "resolve " + intent.toString());
-                break;
-            case IActivityManager.START_CLASS_NOT_FOUND:
-                out.println(NO_CLASS_ERROR_CODE);
-                out.println("Error: Activity class " +
-                        intent.getComponent().toShortString()
-                        + " does not exist.");
-                break;
-            case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
-                out.println(
-                        "Error: Activity not started, you requested to "
-                        + "both forward and receive its result");
-                break;
-            case IActivityManager.START_PERMISSION_DENIED:
-                out.println(
-                        "Error: Activity not started, you do not "
-                        + "have permission to access it.");
-                break;
-            default:
-                out.println(
-                        "Error: Activity not started, unknown error code " + res);
-                break;
-        }
-        if (mWaitOption && launched) {
-            if (result == null) {
-                result = new IActivityManager.WaitResult();
-                result.who = intent.getComponent();
             }
-            System.out.println("Status: " + (result.timeout ? "timeout" : "ok"));
-            if (result.who != null) {
-                System.out.println("Activity: " + result.who.flattenToShortString());
+            PrintStream out = mWaitOption ? System.out : System.err;
+            boolean launched = false;
+            switch (res) {
+                case IActivityManager.START_SUCCESS:
+                    launched = true;
+                    break;
+                case IActivityManager.START_SWITCHES_CANCELED:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started because the "
+                            + " current activity is being kept for the user.");
+                    break;
+                case IActivityManager.START_DELIVERED_TO_TOP:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started, intent has "
+                            + "been delivered to currently running "
+                            + "top-most instance.");
+                    break;
+                case IActivityManager.START_RETURN_INTENT_TO_CALLER:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started because intent "
+                            + "should be handled by the caller");
+                    break;
+                case IActivityManager.START_TASK_TO_FRONT:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started, its current "
+                            + "task has been brought to the front");
+                    break;
+                case IActivityManager.START_INTENT_NOT_RESOLVED:
+                    out.println(
+                            "Error: Activity not started, unable to "
+                            + "resolve " + intent.toString());
+                    break;
+                case IActivityManager.START_CLASS_NOT_FOUND:
+                    out.println(NO_CLASS_ERROR_CODE);
+                    out.println("Error: Activity class " +
+                            intent.getComponent().toShortString()
+                            + " does not exist.");
+                    break;
+                case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                    out.println(
+                            "Error: Activity not started, you requested to "
+                            + "both forward and receive its result");
+                    break;
+                case IActivityManager.START_PERMISSION_DENIED:
+                    out.println(
+                            "Error: Activity not started, you do not "
+                            + "have permission to access it.");
+                    break;
+                default:
+                    out.println(
+                            "Error: Activity not started, unknown error code " + res);
+                    break;
             }
-            if (result.thisTime >= 0) {
-                System.out.println("ThisTime: " + result.thisTime);
+            if (mWaitOption && launched) {
+                if (result == null) {
+                    result = new IActivityManager.WaitResult();
+                    result.who = intent.getComponent();
+                }
+                System.out.println("Status: " + (result.timeout ? "timeout" : "ok"));
+                if (result.who != null) {
+                    System.out.println("Activity: " + result.who.flattenToShortString());
+                }
+                if (result.thisTime >= 0) {
+                    System.out.println("ThisTime: " + result.thisTime);
+                }
+                if (result.totalTime >= 0) {
+                    System.out.println("TotalTime: " + result.totalTime);
+                }
+                System.out.println("Complete");
             }
-            if (result.totalTime >= 0) {
-                System.out.println("TotalTime: " + result.totalTime);
+            mRepeat--;
+            if (mRepeat > 1) {
+                mAm.unhandledBack();
             }
-            System.out.println("Complete");
-        }
+        } while (mRepeat > 1);
     }
 
     private void runForceStop() throws Exception {
@@ -1164,7 +1175,8 @@ public class Am {
     private static void showUsage() {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
-                "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>] [-S] <INTENT>\n" +
+                "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
+                "               [--R COUNT] [-S] <INTENT>\n" +
                 "       am startservice <INTENT>\n" +
                 "       am force-stop <PACKAGE>\n" +
                 "       am broadcast <INTENT>\n" +
@@ -1182,6 +1194,8 @@ public class Am {
                 "    -W: wait for launch to complete\n" +
                 "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
                 "    -P <FILE>: like above, but profiling stops when app goes idle\n" +
+                "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
+                "        the top activity will be finished.\n" +
                 "    -S: force stop the target app before starting the activity\n" +
                 "\n" +
                 "am startservice: start a Service.\n" +
