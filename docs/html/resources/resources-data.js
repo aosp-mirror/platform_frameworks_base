@@ -398,16 +398,6 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'accessibility'],
-    path: 'samples/AccessibilityService/index.html',
-    title: {
-      en: 'Accessibility Service'
-    },
-    description: {
-      en: 'Illustrates an accessibility service that provides custom feedback for the Clock application which comes by default with Android devices'
-    }
-  },
-  {
     tags: ['sample', 'new', 'ui', 'compatibility', 'newfeature'],
     path: 'samples/ActionBarCompat/index.html',
     title: {

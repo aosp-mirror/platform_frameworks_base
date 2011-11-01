@@ -396,8 +396,6 @@ sample_dir := development/samples
 # (see development/build/sdk.atree)
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
-		-samplecode $(sample_dir)/AccessibilityService \
-		            resources/samples/AccessibilityService "Accessibility Service" \
 		-samplecode $(sample_dir)/AccelerometerPlay \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
 		-samplecode $(sample_dir)/ActionBarCompat \
