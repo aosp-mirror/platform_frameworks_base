@@ -2394,6 +2394,10 @@
         <attr name="description" />
     </declare-styleable>
 
+    <declare-styleable name="ActionMenuItemView">
+        <attr name="minWidth" />
+    </declare-styleable>
+
     <!-- =============================== -->
     <!-- Widget package class attributes -->
     <!-- =============================== -->

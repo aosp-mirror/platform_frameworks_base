@@ -189,4 +189,7 @@
     <dimen name="default_app_widget_padding_top">8dp</dimen>
     <dimen name="default_app_widget_padding_right">8dp</dimen>
     <dimen name="default_app_widget_padding_bottom">8dp</dimen>
+
+    <!-- Minimum width for an action button in the menu area of an action bar -->
+    <dimen name="action_button_min_width">56dip</dimen>
 </resources>
