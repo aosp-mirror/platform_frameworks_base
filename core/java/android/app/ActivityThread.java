@@ -2769,7 +2769,9 @@ public final class ActivityThread {
             if (info != null) {
                 try {
                     // First create a thumbnail for the activity...
-                    info.thumbnail = createThumbnailBitmap(r);
+                    // For now, don't create the thumbnail here; we are
+                    // doing that by doing a screen snapshot.
+                    info.thumbnail = null; //createThumbnailBitmap(r);
                     info.description = r.activity.onCreateDescription();
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {

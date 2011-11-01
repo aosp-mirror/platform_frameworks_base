@@ -58,6 +58,7 @@ public class FrameworkPerfActivity extends Activity
     Spinner mFgSpinner;
     Spinner mBgSpinner;
     TextView mLog;
+    TextView mTestTime;
     PowerManager.WakeLock mPartialWakeLock;
 
     long mMaxRunTime = 5000;
@@ -110,6 +111,7 @@ public class FrameworkPerfActivity extends Activity
     };
 
     final Op[] mAvailOps = new Op[] {
+            null,
             new NoOp(),
             new CpuOp(),
             new SchedulerOp(),
@@ -122,6 +124,8 @@ public class FrameworkPerfActivity extends Activity
             new ReadFileOp(),
             new ParseXmlResOp(),
             new ParseLargeXmlResOp(),
+            new LayoutInflaterOp(),
+            new LayoutInflaterLargeOp(),
             new LoadSmallBitmapOp(),
             new LoadLargeBitmapOp(),
             new LoadSmallScaledBitmapOp(),
@@ -170,11 +174,14 @@ public class FrameworkPerfActivity extends Activity
         mAvailOpDescriptions = new String[mAvailOps.length];
         for (int i=0; i<mAvailOps.length; i++) {
             Op op = mAvailOps[i];
-            if (op.getClass() == NoOp.class) {
+            if (op == null) {
                 mAvailOpLabels[i] = "All";
                 mAvailOpDescriptions[i] = "All tests";
             } else {
                 mAvailOpLabels[i] = op.getName();
+                if (mAvailOpLabels[i] == null) {
+                    mAvailOpLabels[i] = "Nothing";
+                }
                 mAvailOpDescriptions[i] = op.getLongName();
             }
         }
@@ -211,6 +218,7 @@ public class FrameworkPerfActivity extends Activity
                 stopRunning();
             }
         });
+        mTestTime = (TextView)findViewById(R.id.testtime);
         mLog = (TextView)findViewById(R.id.log);
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
@@ -221,11 +229,7 @@ public class FrameworkPerfActivity extends Activity
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if (parent == mFgSpinner || parent == mBgSpinner) {
-            Spinner spinner = (Spinner)parent;
             Op op = mAvailOps[position];
-            if (op.getClass() == NoOp.class) {
-                op = null;
-            }
             if (parent == mFgSpinner) {
                 mFgTest = op;
                 ((TextView)findViewById(R.id.fgtext)).setText(mAvailOpDescriptions[position]);
@@ -238,8 +242,6 @@ public class FrameworkPerfActivity extends Activity
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
@@ -314,6 +316,7 @@ public class FrameworkPerfActivity extends Activity
             updateWakeLock();
             startService(new Intent(this, SchedulerService.class));
             mCurOpIndex = 0;
+            mMaxRunTime = Integer.parseInt(mTestTime.getText().toString());
             mResults.clear();
             startCurOp();
         }

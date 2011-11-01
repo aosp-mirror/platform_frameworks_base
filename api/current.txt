@@ -22849,6 +22849,7 @@ package android.view {
     method public void buildDrawingCache();
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
+    method public boolean callOnClick();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -23000,6 +23001,7 @@ package android.view {
     method public float getY();
     method public boolean hasFocus();
     method public boolean hasFocusable();
+    method public boolean hasOnClickListeners();
     method public boolean hasWindowFocus();
     method public static android.view.View inflate(android.content.Context, int, android.view.ViewGroup);
     method protected void initializeFadingEdge(android.content.res.TypedArray);
