@@ -22,7 +22,7 @@
     </style>
 
     <style name="StatusBarPanelSettingsRow">
-        <item name="android:paddingRight">48dp</item>
+        <item name="android:paddingRight">16dp</item>
         <item name="android:layout_height">64dp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:orientation">horizontal</item>
@@ -45,7 +45,7 @@
     </style>
 
     <style name="StatusBarPanelSettingsPanelSeparator">
-        <item name="android:layout_marginRight">48dp</item>
+        <item name="android:layout_marginRight">0dp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@android:drawable/divider_horizontal_dark</item>
