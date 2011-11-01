@@ -1169,8 +1169,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Fotoaparát"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tichý"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Zapnout zvuk"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Odemknete posunutím prstu."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Chcete-li slyšet, které klávesy jste při zadávání hesla stiskli, připojte sluchátka."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Tečka."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Přejít na plochu"</string>
