@@ -4171,10 +4171,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         bounds.offset(locationOnScreen[0], locationOnScreen[1]);
         info.setBoundsInScreen(bounds);
 
-        ViewParent parent = getParent();
-        if (parent instanceof View) {
-            View parentView = (View) parent;
-            info.setParent(parentView);
+        if ((mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+            ViewParent parent = getParent();
+            if (parent instanceof View) {
+                View parentView = (View) parent;
+                info.setParent(parentView);
+            }
         }
 
         info.setPackageName(mContext.getPackageName());
