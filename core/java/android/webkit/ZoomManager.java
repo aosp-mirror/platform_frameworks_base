@@ -169,11 +169,7 @@ class ZoomManager {
     
     /*
      * The initial scale for the WebView. 0 means default. If initial scale is
-     * greater than 0 the WebView starts with this value as its initial scale. The
-     * value is converted from an integer percentage so it is guarenteed to have
-     * no more than 2 significant digits after the decimal.  This restriction
-     * allows us to convert the scale back to the original percentage by simply
-     * multiplying the value by 100.
+     * greater than 0, the WebView starts with this value as its initial scale.
      */
     private float mInitialScale;
 
@@ -313,7 +309,7 @@ class ZoomManager {
     }
 
     public final float getDefaultScale() {
-        return mInitialScale > 0 ? mInitialScale : mDefaultScale;
+        return mDefaultScale;
     }
 
     /**
@@ -353,9 +349,7 @@ class ZoomManager {
     }
 
     public final void setInitialScaleInPercent(int scaleInPercent) {
-        mInitialScale = scaleInPercent * 0.01f;
-        mActualScale = mInitialScale > 0 ? mInitialScale : mDefaultScale;
-        mInvActualScale = 1 / mActualScale;
+        mInitialScale = scaleInPercent * mDisplayDensity * 0.01f;
     }
 
     public final float computeScaleWithLimits(float scale) {
@@ -1120,7 +1114,6 @@ class ZoomManager {
             float scale;
             if (mInitialScale > 0) {
                 scale = mInitialScale;
-                mTextWrapScale = scale;
             } else if (viewState.mIsRestored) {
                 scale = (viewState.mViewScale > 0)
                     ? viewState.mViewScale : overviewScale;
@@ -1141,7 +1134,7 @@ class ZoomManager {
             }
             boolean reflowText = false;
             if (!viewState.mIsRestored) {
-                if (settings.getUseFixedViewport() && mInitialScale == 0) {
+                if (settings.getUseFixedViewport()) {
                     // Override the scale only in case of fixed viewport.
                     scale = Math.max(scale, overviewScale);
                     mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
