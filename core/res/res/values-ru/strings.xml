@@ -1080,7 +1080,7 @@
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Чтобы выйти, нажмите здесь."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем или точка доступа Wi-Fi активны"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем/точка доступа Wi-Fi используется"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Далее"</string>
