@@ -725,8 +725,9 @@ final class FragmentManagerImpl extends FragmentManager {
             // While removing a fragment, we can't change it to a higher state.
             newState = f.mState;
         }
-        // Defer start if requested; don't allow it to move to STARTED or higher.
-        if (f.mDeferStart && newState > Fragment.STOPPED) {
+        // Defer start if requested; don't allow it to move to STARTED or higher
+        // if it's not already started.
+        if (f.mDeferStart && f.mState < Fragment.STARTED && newState > Fragment.STOPPED) {
             newState = Fragment.STOPPED;
         }
         if (f.mState < newState) {
