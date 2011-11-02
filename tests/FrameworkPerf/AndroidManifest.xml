@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-sdk android:minSdkVersion="5" />
 
-    <application>
+    <application android:hardwareAccelerated="false">
         <activity android:name="FrameworkPerfActivity" android:label="Framework Perf">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
