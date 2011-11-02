@@ -1363,6 +1363,13 @@ final class ActivityStack {
                         + ", nowVisible=" + next.nowVisible);
                 }
             }
+
+            if (!prev.finishing && prev.app != null && prev.app != next.app) {
+                // We are switching to a new activity that is in a different
+                // process than the previous one.  Note the previous process,
+                // so we can try to keep it around.
+                mService.mPreviousProcess = prev.app;
+            }
         }
 
         // Launching this app's activity, make sure the app is no longer
