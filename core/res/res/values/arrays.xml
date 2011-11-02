@@ -343,8 +343,6 @@
        <item>@drawable/list_divider_holo_dark</item>
        <item>@drawable/list_divider_holo_light</item>
        <item>@drawable/list_divider_holo_light</item>
-       <item>@drawable/ic_lockscreen_handle</item>
-       <item>@drawable/ic_lockscreen_outerring</item>
        <item>@drawable/ic_lockscreen_chevron_left</item>
        <item>@drawable/ic_lockscreen_chevron_right</item>
        <item>@drawable/ab_transparent_dark_holo</item>
