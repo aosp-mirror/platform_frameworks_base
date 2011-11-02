@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextMenu;
@@ -77,6 +78,7 @@ import java.lang.ref.WeakReference;
  */
 public class Dialog implements DialogInterface, Window.Callback,
         KeyEvent.Callback, OnCreateContextMenuListener {
+    private static final String TAG = "Dialog";
     private Activity mOwnerActivity;
     
     final Context mContext;
@@ -300,12 +302,18 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (Thread.currentThread() != mUiThread) {
             mHandler.post(mDismissAction);
         } else {
+            mHandler.removeCallbacks(mDismissAction);
             mDismissAction.run();
         }
     }
 
-    private void dismissDialog() {
+    void dismissDialog() {
         if (mDecor == null || !mShowing) {
+            return;
+        }
+
+        if (mWindow.isDestroyed()) {
+            Log.e(TAG, "Tried to dismissDialog() but the Dialog's window was already destroyed!");
             return;
         }
 
