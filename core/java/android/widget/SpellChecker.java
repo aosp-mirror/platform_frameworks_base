@@ -84,9 +84,14 @@ public class SpellChecker implements SpellCheckerSessionListener {
     private void setLocale(Locale locale) {
         final TextServicesManager textServicesManager = (TextServicesManager)
                 mTextView.getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
-                null /* Bundle not currently used by the textServicesManager */,
-                locale, this, false /* means any available languages from current spell checker */);
+        if (!textServicesManager.isSpellCheckerEnabled()) {
+            mSpellCheckerSession = null;
+        } else {
+            mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
+                    null /* Bundle not currently used by the textServicesManager */,
+                    locale, this,
+                    false /* means any available languages from current spell checker */);
+        }
         mCurrentLocale = locale;
 
         // Restore SpellCheckSpans in pool
