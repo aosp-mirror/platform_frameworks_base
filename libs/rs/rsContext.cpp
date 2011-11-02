@@ -359,6 +359,7 @@ Context::Context() {
     mTargetSdkVersion = 14;
     mDPI = 96;
     mIsContextLite = false;
+    memset(&watchdog, 0, sizeof(watchdog));
 }
 
 Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc) {
