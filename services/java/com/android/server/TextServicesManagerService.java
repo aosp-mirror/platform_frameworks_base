@@ -334,7 +334,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         final String sciId = info.getId();
         final InternalServiceConnection connection = new InternalServiceConnection(
-                sciId, locale, scListener, bundle);
+                sciId, locale, bundle);
         final Intent serviceIntent = new Intent(SpellCheckerService.SERVICE_INTERFACE);
         serviceIntent.setComponent(info.getComponent());
         if (DBG) {
@@ -635,7 +635,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     if (DBG) {
                         Slog.w(TAG, "Remove " + removeList.get(i));
                     }
-                    mListeners.remove(removeList.get(i));
+                    final InternalDeathRecipient idr = removeList.get(i);
+                    idr.mScListener.asBinder().unlinkToDeath(idr, 0);
+                    mListeners.remove(idr);
                 }
                 cleanLocked();
             }
@@ -664,6 +666,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public void removeAll() {
             Slog.e(TAG, "Remove the spell checker bind unexpectedly.");
             synchronized(mSpellCheckerMap) {
+                final int size = mListeners.size();
+                for (int i = 0; i < size; ++i) {
+                    final InternalDeathRecipient idr = mListeners.get(i);
+                    idr.mScListener.asBinder().unlinkToDeath(idr, 0);
+                }
                 mListeners.clear();
                 cleanLocked();
             }
@@ -671,15 +678,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     private class InternalServiceConnection implements ServiceConnection {
-        private final ISpellCheckerSessionListener mListener;
         private final String mSciId;
         private final String mLocale;
         private final Bundle mBundle;
         public InternalServiceConnection(
-                String id, String locale, ISpellCheckerSessionListener listener, Bundle bundle) {
+                String id, String locale, Bundle bundle) {
             mSciId = id;
             mLocale = locale;
-            mListener = listener;
             mBundle = bundle;
         }
 

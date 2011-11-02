@@ -152,6 +152,7 @@ public class SpellCheckerSession {
     public void close() {
         mIsUsed = false;
         try {
+            mSpellCheckerSessionListenerImpl.close();
             mTextServicesManager.finishSpellCheckerService(mSpellCheckerSessionListenerImpl);
         } catch (RemoteException e) {
             // do nothing
@@ -190,9 +191,10 @@ public class SpellCheckerSession {
     private static class SpellCheckerSessionListenerImpl extends ISpellCheckerSessionListener.Stub {
         private static final int TASK_CANCEL = 1;
         private static final int TASK_GET_SUGGESTIONS_MULTIPLE = 2;
+        private static final int TASK_CLOSE = 3;
         private final Queue<SpellCheckerParams> mPendingTasks =
                 new LinkedList<SpellCheckerParams>();
-        private final Handler mHandler;
+        private Handler mHandler;
 
         private boolean mOpened;
         private ISpellCheckerSession mISpellCheckerSession;
@@ -224,6 +226,9 @@ public class SpellCheckerSession {
                 case TASK_GET_SUGGESTIONS_MULTIPLE:
                     processGetSuggestionsMultiple(scp);
                     break;
+                case TASK_CLOSE:
+                    processClose();
+                    break;
             }
         }
 
@@ -245,6 +250,13 @@ public class SpellCheckerSession {
             processOrEnqueueTask(
                     new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE, textInfos,
                             suggestionsLimit, sequentialWords));
+        }
+
+        public void close() {
+            if (DBG) {
+                Log.w(TAG, "close");
+            }
+            processOrEnqueueTask(new SpellCheckerParams(TASK_CLOSE, null, 0, false));
         }
 
         public boolean isDisconnected() {
@@ -281,6 +293,22 @@ public class SpellCheckerSession {
                 mISpellCheckerSession.onCancel();
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to cancel " + e);
+            }
+        }
+
+        private void processClose() {
+            if (!checkOpenConnection()) {
+                return;
+            }
+            if (DBG) {
+                Log.w(TAG, "Close spell checker tasks.");
+            }
+            try {
+                mISpellCheckerSession.onClose();
+                mISpellCheckerSession = null;
+                mHandler = null;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to close " + e);
             }
         }
 

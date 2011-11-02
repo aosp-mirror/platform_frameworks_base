@@ -146,6 +146,15 @@ public abstract class SpellCheckerService extends Service {
         public void onCancel() {}
 
         /**
+         * @hide
+         * Request to close this session.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         */
+        public void onClose() {}
+
+        /**
          * @return Locale for this session
          */
         public String getLocale() {
@@ -162,7 +171,7 @@ public abstract class SpellCheckerService extends Service {
 
     // Preventing from exposing ISpellCheckerSession.aidl, create an internal class.
     private static class InternalISpellCheckerSession extends ISpellCheckerSession.Stub {
-        private final ISpellCheckerSessionListener mListener;
+        private ISpellCheckerSessionListener mListener;
         private final Session mSession;
         private final String mLocale;
         private final Bundle mBundle;
@@ -190,6 +199,12 @@ public abstract class SpellCheckerService extends Service {
         @Override
         public void onCancel() {
             mSession.onCancel();
+        }
+
+        @Override
+        public void onClose() {
+            mSession.onClose();
+            mListener = null;
         }
 
         public String getLocale() {
