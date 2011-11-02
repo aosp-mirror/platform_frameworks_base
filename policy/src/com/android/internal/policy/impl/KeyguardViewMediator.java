@@ -616,8 +616,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         final IccCard.State state = mUpdateMonitor.getSimState();
         final boolean lockedOrMissing = state.isPinLocked()
                 || ((state == IccCard.State.ABSENT
-                        || state == IccCard.State.PERM_DISABLED)
-                        && requireSim);
+                || state == IccCard.State.PERM_DISABLED)
+                && requireSim);
 
         if (!lockedOrMissing && !provisioned) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
@@ -625,7 +625,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             return;
         }
 
-        if (mLockPatternUtils.isLockScreenDisabled()) {
+        if (mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
             return;
         }
