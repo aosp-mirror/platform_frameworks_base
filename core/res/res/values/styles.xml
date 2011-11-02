@@ -216,8 +216,8 @@ please see styles_device_defaults.xml.
         <item name="windowEnterAnimation">@null</item>
         <item name="windowExitAnimation">@anim/fade_out</item>
     </style>
-    <!-- Status Bar Styles -->
 
+    <!-- Status Bar Styles -->
     <style name="TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
@@ -229,17 +229,24 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.StatusBar.Icon">
     </style>
+    <!-- Notification content styles -->
     <style name="TextAppearance.StatusBar.EventContent">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">12sp</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="TextAppearance.StatusBar.EventContent.Info">
+    <style name="TextAppearance.StatusBar.EventContent.Line2">
         <item name="android:textSize">13sp</item>
+    </style>
+    <style name="TextAppearance.StatusBar.EventContent.Info">
+        <!-- inherit all -->
+    </style>
+    <style name="TextAppearance.StatusBar.EventContent.Time">
+        <!-- inherit all -->
     </style>
 
     <style name="TextAppearance.Small.CalendarViewWeekDayView">
