@@ -32,7 +32,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:baselineAlignedChildIndex="0"
-        android:layout_marginLeft="32dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         >
@@ -138,40 +138,28 @@
         android:contentDescription="@string/accessibility_notifications_button"
         />
 
-    <View
-        android:id="@+id/title_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginLeft="32dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="64dip"
-        android:background="@android:drawable/divider_horizontal_dark"
-        />
-
     <com.android.systemui.statusbar.tablet.HoloClock
         android:id="@+id/clock"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_above="@id/title_divider"
-        android:layout_marginRight="6dip"
-        android:layout_marginBottom="8dip"
+        android:layout_marginRight="16dip"
+        android:layout_marginTop="16dip"
         >
         <TextView android:id="@+id/time_bg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:singleLine="true"
-            android:textSize="78sp"
-            android:textColor="#999999" />
+            android:textSize="92sp"
+            android:textColor="#ffffff" />
         <TextView android:id="@+id/time_fg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:singleLine="true"
-            android:textSize="78sp"
-            android:textColor="#666666" />
+            android:textSize="92sp"
+            android:textColor="#ffffff" />
     </com.android.systemui.statusbar.tablet.HoloClock>
 
     <com.android.systemui.statusbar.policy.DateView
@@ -182,7 +170,8 @@
         android:layout_alignBottom="@id/clock"
         android:layout_alignParentLeft="true"
         android:gravity="left"
-        android:layout_marginLeft="32dp"
+        android:layout_marginLeft="16dp"
+        android:textColor="#ffffff"
         />
 
 </com.android.systemui.statusbar.tablet.NotificationPanelTitle>
