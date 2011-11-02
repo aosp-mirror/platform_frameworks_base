@@ -965,8 +965,7 @@
     <item quantity="one" msgid="1634101450343277345">"Available ang bukas na Wi-Fi network"</item>
     <item quantity="other" msgid="7915895323644292768">"Buksan ang mga available na Wi-Fi network"</item>
   </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Mag-sign in sa Wi-Fi network"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
@@ -1185,8 +1184,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tahimik"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"I-on ang tunog"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Mag-swipe upang i-unlock."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Mag-plug in ng isang headset upang marinig ang mga password key na binabanggit nang malakas."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Dot."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Magnabiga sa home"</string>

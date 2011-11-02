@@ -965,8 +965,7 @@
     <item quantity="one" msgid="1634101450343277345">"उपलब्‍ध Wi-Fi नेटवर्क खोलें"</item>
     <item quantity="other" msgid="7915895323644292768">"खुले Wi-Fi नेटवर्क उपलब्‍ध है"</item>
   </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi नेटवर्क में साइन इन करें"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi से कनेक्‍ट नहीं हो सका"</string>
@@ -1185,8 +1184,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"कैमरा"</string>
     <string name="description_target_silent" msgid="893551287746522182">"मौन"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"ध्‍वनि चालू करें"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"अनलॉक करने के लिए स्‍वाइप करें."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"ज़ोर से बोली गईं पासवर्ड कुंजियां सुनने के लिए हेडसेट प्‍लग इन करें."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"बिंदु."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"होम पर नेविगेट करें"</string>
