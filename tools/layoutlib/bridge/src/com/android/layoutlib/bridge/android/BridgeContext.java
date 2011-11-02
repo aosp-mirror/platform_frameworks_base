@@ -568,7 +568,7 @@ public final class BridgeContext extends Context {
                     defStyleValues = (StyleResourceValue)item;
                 }
             } else {
-                Bridge.getLog().error(null,
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
                         String.format(
                                 "Failed to find style '%s' in current theme", defStyleName),
                         null /*data*/);
