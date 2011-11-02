@@ -18,7 +18,6 @@ package android.database.sqlite;
 
 import android.database.CursorWindow;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -33,7 +32,6 @@ public class SQLiteQuery extends SQLiteProgram {
 
     private static native int nativeFillWindow(int databasePtr, int statementPtr, int windowPtr,
             int startPos, int offsetParam);
-
     private static native int nativeColumnCount(int statementPtr);
     private static native String nativeColumnName(int statementPtr, int columnIndex);
 
@@ -82,24 +80,8 @@ public class SQLiteQuery extends SQLiteProgram {
             acquireReference();
             try {
                 window.acquireReference();
-                int startPos = window.getStartPosition();
                 int numRows = nativeFillWindow(nHandle, nStatement, window.mWindowPtr,
-                        startPos, mOffsetIndex);
-                if (SQLiteDebug.DEBUG_LOG_SLOW_QUERIES) {
-                    long elapsed = SystemClock.uptimeMillis() - timeStart;
-                    if (SQLiteDebug.shouldLogSlowQuery(elapsed)) {
-                        Log.d(TAG, "fillWindow took " + elapsed
-                                + " ms: window=\"" + window
-                                + "\", startPos=" + startPos
-                                + ", offset=" + mOffsetIndex
-                                + ", filledRows=" + window.getNumRows()
-                                + ", countedRows=" + numRows
-                                + ", query=\"" + mSql + "\""
-                                + ", args=[" + (mBindArgs != null ?
-                                        TextUtils.join(", ", mBindArgs.values()) : "")
-                                + "]");
-                    }
-                }
+                        window.getStartPosition(), mOffsetIndex);
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
             } catch (IllegalStateException e){
