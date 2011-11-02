@@ -5,15 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-Type* SERVICE_CONTEXT_TYPE = new Type("android.content",
+Type* ANDROID_CONTEXT_TYPE = new Type("android.content",
         "Context", Type::BUILT_IN, false, false, false);
 Type* PRESENTER_BASE_TYPE = new Type("com.android.athome.connector",
         "EventListener", Type::BUILT_IN, false, false, false);
 Type* PRESENTER_LISTENER_BASE_TYPE = new Type("com.android.athome.connector",
         "EventListener.Listener", Type::BUILT_IN, false, false, false);
 Type* RPC_BROKER_TYPE = new Type("com.android.athome.connector", "Broker",
-        Type::BUILT_IN, false, false, false);
-Type* RPC_CONTAINER_TYPE = new Type("com.android.athome.connector", "ConnectorContainer",
         Type::BUILT_IN, false, false, false);
 // TODO: Just use Endpoint, so this works for all endpoints.
 Type* RPC_CONNECTOR_TYPE = new Type("com.android.athome.connector", "Connector",
@@ -458,7 +456,7 @@ EndpointBaseClass::~EndpointBaseClass()
 void
 EndpointBaseClass::generate_ctor()
 {
-    Variable* container = new Variable(RPC_CONTAINER_TYPE, "container");
+    Variable* container = new Variable(ANDROID_CONTEXT_TYPE, "context");
     Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
