@@ -182,12 +182,14 @@
     <!-- Regex of wired ethernet ifaces -->
     <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
 
-    <!-- If the mobile hotspot feature requires provisioning, an intent string can be provided
-        to the launch a supported application that provisions the devices.
+    <!-- If the mobile hotspot feature requires provisioning, a package name and class name
+        can be provided to launch a supported application that provisions the devices.
 
         Example Usage:
 
-        Intent intent = new Intent(R.string.config_mobile_hotspot_provision_intent);
+        String[] appDetails = getStringArray(R.array.config_mobile_hotspot_provision_app);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setClassName(appDetails[0], appDetails[1]);
         startActivityForResult(intent, 0);
 
         public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -202,7 +204,14 @@
 
         See src/com/android/settings/TetherSettings.java for more details.
         -->
-    <string translatable="false" name="config_mobile_hotspot_provision_intent"></string>
+    <!-- The first element is the package name and the second element is the class name
+         of the provisioning app -->
+    <string-array translatable="false" name="config_mobile_hotspot_provision_app">
+    <!--
+        <item>com.example.provisioning</item>
+        <item>com.example.provisioning.Activity</item>
+    -->
+    </string-array>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
     <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
