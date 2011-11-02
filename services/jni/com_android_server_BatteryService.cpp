@@ -141,10 +141,10 @@ static int readFromFile(const char* path, char* buf, size_t size)
         return -1;
     }
     
-    ssize_t count = read(fd, buf, size);
+    size_t count = read(fd, buf, size);
     if (count > 0) {
-        while (count > 0 && buf[count-1] == '\n')
-            count--;
+        count = (count < size) ? count : size - 1;
+        while (count > 0 && buf[count-1] == '\n') count--;
         buf[count] = '\0';
     } else {
         buf[0] = '\0';
