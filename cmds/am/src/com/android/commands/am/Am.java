@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -109,6 +110,8 @@ public class Am {
             runStartService();
         } else if (op.equals("force-stop")) {
             runForceStop();
+        } else if (op.equals("clear-data")) {
+            runClearData();
         } else if (op.equals("instrument")) {
             runInstrument();
         } else if (op.equals("broadcast")) {
@@ -497,6 +500,31 @@ public class Am {
 
     private void runForceStop() throws Exception {
         mAm.forceStopPackage(nextArgRequired());
+    }
+
+    class ClearUserDataObserver extends IPackageDataObserver.Stub {
+        public int status = -1;
+
+        public void onRemoveCompleted(final String packageName, final boolean succeeded) {
+            synchronized (this) {
+                status = succeeded ? 0 : 1;
+                notify();
+            }
+        }
+    }
+
+    private void runClearData() throws Exception {
+        ClearUserDataObserver observer = new ClearUserDataObserver();
+        mAm.clearApplicationUserData(nextArgRequired(), observer);
+        synchronized (observer) {
+            while (observer.status < 0) {
+                try {
+                    observer.wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+        System.exit(observer.status);
     }
 
     private void sendBroadcast() throws Exception {
@@ -1194,6 +1222,7 @@ public class Am {
                 "               [--R COUNT] [-S] <INTENT>\n" +
                 "       am startservice <INTENT>\n" +
                 "       am force-stop <PACKAGE>\n" +
+                "       am clear-data <PACKAGE>\n" +
                 "       am broadcast <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
@@ -1216,6 +1245,8 @@ public class Am {
                 "am startservice: start a Service.\n" +
                 "\n" +
                 "am force-stop: force stop everything associated with <PACKAGE>.\n" +
+                "\n" +
+                "am clear-data: clear the user data associated with <PACKAGE>.\n" +
                 "\n" +
                 "am broadcast: send a broadcast Intent.\n" +
                 "\n" +
