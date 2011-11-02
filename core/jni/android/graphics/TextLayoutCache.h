@@ -30,7 +30,6 @@
 #include <SkPaint.h>
 #include <SkTemplates.h>
 #include <SkUtils.h>
-#include <SkScalerContext.h>
 #include <SkAutoKern.h>
 
 #include <unicode/ubidi.h>
@@ -162,17 +161,21 @@ private:
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
 
-    static void computeRunValuesWithHarfbuzz(HB_ShaperItem& shaperItem, SkPaint* paint,
-            size_t start, size_t count, bool isRTL,
+    static void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+            size_t count, bool isRTL,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
 
     static void initShaperItem(HB_ShaperItem& shaperItem, HB_FontRec* font, FontData* fontData,
-            SkPaint* paint, const UChar* chars, size_t contextCount);
+            SkPaint* paint, const UChar* chars, size_t count);
 
     static void freeShaperItem(HB_ShaperItem& shaperItem);
 
-    static void shapeRun(HB_ShaperItem& shaperItem, size_t start, size_t count, bool isRTL);
+    static unsigned shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* paint,
+            size_t count, bool isRTL);
+
+    static HB_Script getScriptFromRun(const UChar* chars, size_t start, size_t count,
+            bool isRTL);
 
     static void deleteGlyphArrays(HB_ShaperItem& shaperItem);
 
