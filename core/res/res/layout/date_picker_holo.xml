@@ -23,8 +23,8 @@
      depending on the date format selected by the user.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
     android:orientation="horizontal"
     android:gravity="center">
@@ -32,7 +32,6 @@
     <LinearLayout android:id="@+id/pickers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="22dip"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:gravity="center">
@@ -40,10 +39,10 @@
         <!-- Month -->
         <NumberPicker
             android:id="@+id/month"
-            android:layout_width="48dip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="22dip"
-            android:layout_marginRight="22dip"
+            android:layout_marginLeft="16dip"
+            android:layout_marginRight="16dip"
             android:focusable="true"
             android:focusableInTouchMode="true"
             />
@@ -51,10 +50,10 @@
         <!-- Day -->
         <NumberPicker
             android:id="@+id/day"
-            android:layout_width="48dip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="22dip"
-            android:layout_marginRight="22dip"
+            android:layout_marginLeft="16dip"
+            android:layout_marginRight="16dip"
             android:focusable="true"
             android:focusableInTouchMode="true"
             />
@@ -62,10 +61,10 @@
         <!-- Year -->
         <NumberPicker
             android:id="@+id/year"
-            android:layout_width="48dip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="22dip"
-            android:layout_marginRight="22dip"
+            android:layout_marginLeft="16dip"
+            android:layout_marginRight="16dip"
             android:focusable="true"
             android:focusableInTouchMode="true"
             />
