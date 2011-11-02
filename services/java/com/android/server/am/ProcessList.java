@@ -38,11 +38,19 @@ class ProcessList {
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
     static final int HIDDEN_APP_MAX_ADJ = 15;
-    static int HIDDEN_APP_MIN_ADJ = 8;
+    static int HIDDEN_APP_MIN_ADJ = 9;
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
-    static final int SERVICE_B_ADJ = 7;
+    static final int SERVICE_B_ADJ = 8;
+
+    // This is the process of the previous application that the user was in.
+    // This process is kept above other things, because it is very common to
+    // switch back to the previous app.  This is important both for recent
+    // task switch (toggling between the two top recent apps) as well as normal
+    // UI flow such as clicking on a URI in the e-mail app to view in the browser,
+    // and then pressing back to return to e-mail.
+    static final int PREVIOUS_APP_ADJ = 7;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
