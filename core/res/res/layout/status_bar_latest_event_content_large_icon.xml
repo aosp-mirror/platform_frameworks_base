@@ -7,16 +7,34 @@
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
     >
-    <TextView android:id="@+id/title"
-        android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+    <LinearLayout
+        android:id="@+id/line1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:fadingEdge="horizontal"
-        />
+        android:orientation="horizontal"
+        >
+        <TextView android:id="@+id/title"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
+            android:layout_weight="1"
+            />
+        <DateTimeView android:id="@+id/time"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="0"
+            android:singleLine="true"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            />
+    </LinearLayout>
     <TextView android:id="@+id/text2"
-        android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
+        android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Line2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="-2dp"
