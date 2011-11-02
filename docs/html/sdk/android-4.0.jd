@@ -518,7 +518,7 @@ the device does not support the corresponding feature.</p>
 
 <p>To specify the focus or metering areas to use, simply call {@link
 android.hardware.Camera.Parameters#setFocusAreas setFocusAreas()} or {@link
-android.hardware.Camera.Parameters#setFocusAreas setMeteringAreas()}. Each take a {@link
+android.hardware.Camera.Parameters#setMeteringAreas setMeteringAreas()}. Each take a {@link
 java.util.List} of {@link android.hardware.Camera.Area} objects that indicate the areas to consider
 for focus or metering. For example, you might implement a feature that allows the user to set the
 focus area by touching an area of the preview, which you then translate to an {@link
@@ -1028,7 +1028,7 @@ href="{@docRoot}resources/samples/TtsEngine/index.html">Text To Speech Engine</a
 <p>Android 4.0 gives users precise visibility of how much network data their applications are using.
 The Settings app provides controls that allow users to manage set limits for network data usage and
 even disable the use of background data for individual apps. In order to avoid users disabling your
-app’s access to data from the background, you should develop strategies to use use the data
+app’s access to data from the background, you should develop strategies to use the data
 connection efficiently and adjust your usage depending on the type of connection available.</p>
 
 <p>If your application performs a lot of network transactions, you should provide user settings that
