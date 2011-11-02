@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="231613018159186962">"TБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <!-- outdated translation 6071602020171759109 -->     <string name="untitled" msgid="4638956954852782576">"&lt;без названия&gt;"</string>
+    <string name="untitled" msgid="4638956954852782576">"&lt;Без названия&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нет номера телефона)"</string>
@@ -43,9 +43,9 @@
     <string name="serviceErased" msgid="1288584695297200972">"Удаление выполнено успешно."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Неверный пароль."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"Запрос MMI завершен."</string>
-    <!-- outdated translation 5085454289896032547 -->     <string name="badPin" msgid="9015277645546710014">"Введен неверный старый PUK."</string>
-    <!-- outdated translation 5702522162746042460 -->     <string name="badPuk" msgid="5487257647081132201">"Введен неверный PUK."</string>
-    <!-- outdated translation 3695902225843339274 -->     <string name="mismatchPin" msgid="609379054496863419">"Введенные PIN-коды не совпадают."</string>
+    <string name="badPin" msgid="9015277645546710014">"Неправильный старый PIN-код."</string>
+    <string name="badPuk" msgid="5487257647081132201">"Введен неверный PUK-код."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"Введенные PIN-коды не совпадают."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Введите PIN-код (от 4 до 8 цифр)."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Введите PUK-код из 8 или более цифр."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM-карта заблокирована с помощью кода PUK. Для разблокировки введите код PUK."</string>
@@ -68,7 +68,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Идентификация абонента по умолчанию не запрещена. След. вызов: запрещена"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Идентификация абонента по умолчанию не запрещена. След. вызов: разрешена"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услуга не предоставляется."</string>
-    <!-- outdated translation 5460892159398802465 -->     <string name="CLIRPermanent" msgid="3377371145926835671">"Невозможно изменить настройку идентификации абонента."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Невозможно изменить параметр идентификатора вызывающего абонента."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ограничения доступа изменены"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Служба данных заблокирована."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Служба экстренной помощи заблокирована."</string>
@@ -110,14 +110,14 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"ОК"</string>
     <string name="httpError" msgid="6603022914760066338">"Произошла сетевая ошибка."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Не удалось найти URL."</string>
-    <!-- outdated translation 2781440683514730227 -->     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Схема аутентификации сайта не поддерживается."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Схема аутентификации сайта не поддерживается."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Не удалось провести аутентификацию."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Не удалось выполнить аутентификацию через прокси-сервер."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Не удалось подключиться к серверу."</string>
     <string name="httpErrorIO" msgid="4270874999047767599">"Сервер не отвечает. Повторите попытку позже."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Время ожидания соединения с сервером истекло."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страница содержит слишком много перенаправлений сервера."</string>
-    <!-- outdated translation 5257172771607996054 -->     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Этот протокол не поддерживается."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Этот протокол не поддерживается."</string>
     <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"Не удалось установить безопасное соединение."</string>
     <string name="httpErrorBadUrl" msgid="6088183159988619736">"Не удалось открыть страницу. Указан недопустимый URL."</string>
     <string name="httpErrorFile" msgid="8250549644091165175">"Не удается получить доступ к файлу."</string>
@@ -140,9 +140,9 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон будет выключен."</string>
-    <!-- outdated translation 6656441286856415014 -->     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Завершить работу?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Завершить работу?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Недавние"</string>
-    <!-- outdated translation 279702952298056674 -->     <string name="no_recent_tasks" msgid="8794906658732193473">"Нет последних приложений."</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"Недавно использовавшиеся приложения отсутствуют"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Настройки планшетного ПК"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
@@ -157,16 +157,16 @@
     <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Платные услуги"</string>
-    <!-- outdated translation 8193824940620517189 -->     <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"Разрешать приложениям использовать платные услуги."</string>
+    <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"Приложение сможет использовать платные услуги."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Сообщения"</string>
-    <!-- outdated translation 7045736972019211994 -->     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Считывать и записывать SMS, электронные письма и другие сообщения."</string>
+    <string name="permgroupdesc_messages" msgid="7821999071003699236">"Чтение и запись SMS, электронных писем и других сообщений."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Личная информация"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Прямой доступ к контактам и событиям календаря, сохраненным в памяти планшетного ПК."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Прямой доступ к контактам и событиям календаря, сохраненным в памяти телефона."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Ваше местоположение"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Отслеживание физического местоположения"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Сетевой обмен данными"</string>
-    <!-- outdated translation 5035763698958415998 -->     <string name="permgroupdesc_network" msgid="4917593670797570584">"Позволяет приложениям получать доступ к различным сетевым функциям."</string>
+    <string name="permgroupdesc_network" msgid="4917593670797570584">"Предоставляет приложениям доступ к различным сетевым функциям."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваши аккаунты"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ к имеющимся аккаунтам."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Управление оборудованием"</string>
@@ -176,337 +176,337 @@
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Системные инструменты"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Доступ нижнего уровня и управление системой."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Инструменты разработки"</string>
-    <!-- outdated translation 9056431193893809814 -->     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Функции, необходимые только разработчикам приложений."</string>
+    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Функции, необходимые только разработчикам приложений."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Доступ к USB-накопителю."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Доступ к SD-карте."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"отключать или изменять строку состояния"</string>
-    <!-- outdated translation 1365473595331989732 -->     <string name="permdesc_statusBar" msgid="8434669549504290975">"Позволяет приложению отключать строку состояния или добавлять/удалять системные значки."</string>
+    <string name="permdesc_statusBar" msgid="8434669549504290975">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"строка состояния"</string>
-    <!-- outdated translation 4097605867643520920 -->     <string name="permdesc_statusBarService" msgid="716113660795976060">"Позволяет приложению заменять строку состояния."</string>
+    <string name="permdesc_statusBarService" msgid="716113660795976060">"Приложение сможет заменять собой строку состояния."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разворачивать/сворачивать строку состояния"</string>
-    <!-- outdated translation 7088604400110768665 -->     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Позволяет приложению разворачивать или сворачивать строку состояния."</string>
+    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Приложение сможет разворачивать и сворачивать строку состояния."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"перехватывать исходящие вызовы"</string>
-    <!-- outdated translation 2228988201852654461 -->     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Позволяет приложению обрабатывать исходящие вызовы и изменять набираемый номер. Вредоносные приложения могут отслеживать, перенаправлять или запрещать исходящие вызовы."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Приложение сможет обрабатывать исходящие вызовы и изменять набираемый номер. Вредоносные программы смогут отслеживать, перенаправлять или блокировать исходящие вызовы."</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"получать SMS"</string>
-    <!-- outdated translation 6298292335965966117 -->     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Позволяет приложению получать и обрабатывать SMS-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
+    <string name="permdesc_receiveSms" msgid="8107887121893611793">"Приложение сможет получать и обрабатывать SMS. Вредоносные программы смогут отслеживать и удалять сообщения, не показывая их."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"получать MMS"</string>
-    <!-- outdated translation 4563346832000174373 -->     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Позволяет приложению получать и обрабатывать MMS-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
+    <string name="permdesc_receiveMms" msgid="1424805308566612086">"Приложение сможет получать и обрабатывать MMS. Вредоносные программы смогут отслеживать и удалять сообщения, не показывая их."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"принимать экстренные вызовы"</string>
-    <!-- outdated translation 7118393393716546131 -->     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Позволяет приложению принимать и обрабатывать экстренные сообщения. Это разрешение доступно только для системных приложений."</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Приложение сможет получать и обрабатывать экстренные сообщения рассылок. Это разрешение доступно только для системных приложений."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"отправлять SMS-сообщения"</string>
-    <!-- outdated translation 1946540351763502120 -->     <string name="permdesc_sendSms" msgid="906546667507626156">"Позволяет приложению отправлять SMS-сообщения. Вредоносные приложения могут отправлять сообщения без уведомления, что приведет к непредвиденным расходам."</string>
+    <string name="permdesc_sendSms" msgid="906546667507626156">"Приложение сможет отправлять SMS. Вредоносные программы смогут расходовать средства на счету, отправляя сообщения без вашего подтверждения."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"отправка SMS без подтверждения"</string>
-    <!-- outdated translation 4477752891276276168 -->     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Приложение сможет отправлять SMS. Вредоносные приложения могут отправлять сообщения без уведомления, что приведет к непредвиденным расходам."</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Приложение сможет отправлять SMS. Вредоносные программы смогут расходовать средства на счету, отправляя SMS без вашего подтверждения."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"считывать SMS или MMS"</string>
-    <!-- outdated translation 5836710350295631545 -->     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Позволяет приложению считывать SMS-сообщения, сохраненные на планшетном ПК или на SIM-карте. Вредоносные приложения могут считывать конфиденциальные сообщения."</string>
-    <!-- outdated translation 5836710350295631545 -->     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Позволяет приложению считывать SMS-сообщения, сохраненные на планшетном ПК или на SIM-карте. Вредоносные приложения могут считывать конфиденциальные сообщения."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Приложение сможет читать SMS, сохраненные на планшетном ПК или SIM-карте. Вредоносные программы смогут читать конфиденциальные сообщения."</string>
+    <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Приложение сможет читать SMS, сохраненные на телефоне или SIM-карте. Вредоносные программы смогут читать конфиденциальные сообщения."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"изменять SMS или MMS"</string>
-    <!-- outdated translation 5332124772918835437 -->     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Позволяет приложению перезаписывать SMS-сообщения, сохраненные на планшетном ПК или на SIM-карте. Вредоносные приложения могут удалить сообщения."</string>
-    <!-- outdated translation 5332124772918835437 -->     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Позволяет приложению перезаписывать SMS-сообщения, сохраненные на планшетном ПК или на SIM-карте. Вредоносные приложения могут удалить сообщения."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Приложение сможет изменять SMS, сохраненные на планшетном ПК или SIM-карте. Вредоносные программы смогут удалять ваши сообщения."</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Приложение сможет изменять SMS, сохраненные на телефоне или SIM-карте. Вредоносные программы смогут удалять ваши сообщения."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"получать WAP"</string>
-    <!-- outdated translation 5979623826128082171 -->     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Позволяет приложению получать и обрабатывать WAP-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
-    <!-- outdated translation 5005277531132573353 -->     <string name="permlab_getTasks" msgid="6466095396623933906">"извлечь запущенные приложения"</string>
-    <!-- outdated translation 7048711358713443341 -->     <string name="permdesc_getTasks" msgid="6608159250520381359">"Позволяет приложению получать сведения о последних и текущих задачах. Вредоносные приложения могут получить доступ к конфиденциальной информации о других приложениях."</string>
-    <!-- outdated translation 5669588525059921549 -->     <string name="permlab_reorderTasks" msgid="2018575526934422779">"изменять порядок запущенных приложений"</string>
-    <!-- outdated translation 126252774270522835 -->     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Позволяет приложению переключать режим выполнения задачи с активного на фоновый. Вредоносные приложения могут установить для себя активный режим без уведомления."</string>
-    <!-- outdated translation 4802740047161700683 -->     <string name="permlab_removeTasks" msgid="6821513401870377403">"останавливать запущенные приложения"</string>
-    <!-- outdated translation 2000332928514575461 -->     <string name="permdesc_removeTasks" msgid="1000226123143185094">"Разрешает приложению удалять задачи и их приложения. Вредоносные программы могут нарушать работу других приложений."</string>
-    <!-- outdated translation 4339730312925176742 -->     <string name="permlab_setDebugApp" msgid="3022107198686584052">"запускать отладку приложения"</string>
-    <!-- outdated translation 5584310661711990702 -->     <string name="permdesc_setDebugApp" msgid="6215654419903651172">"Позволяет приложению запускать процесс отладки другого приложения. Вредоносные приложения могут использовать эту возможность для остановки других приложений."</string>
+    <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Приложение сможет получать и обрабатывать WAP-сообщения. Вредоносные программы смогут отслеживать и удалять сообщения, не показывая их."</string>
+    <string name="permlab_getTasks" msgid="6466095396623933906">"получение запущенных приложений"</string>
+    <string name="permdesc_getTasks" msgid="6608159250520381359">"Приложение сможет получать информацию о недавно запущенных и выполняемых задачах. Вредоносные программы смогут получить личную информацию из других приложений."</string>
+    <string name="permlab_reorderTasks" msgid="2018575526934422779">"изменение порядка запущенных приложений"</string>
+    <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Приложение сможет перемещать задачи в режим активного или фонового выполнения. Вредоносные программы смогут переводить себя в активный режим без вашего ведома."</string>
+    <string name="permlab_removeTasks" msgid="6821513401870377403">"остановка запущенных приложений"</string>
+    <string name="permdesc_removeTasks" msgid="1000226123143185094">"Приложение сможет удалять задачи и собственные программы. Вредоносные программы при этом смогут нарушать работу других приложений."</string>
+    <string name="permlab_setDebugApp" msgid="3022107198686584052">"включение отладки приложений"</string>
+    <string name="permdesc_setDebugApp" msgid="6215654419903651172">"Приложение сможет включать отладку для другой программы. Вредоносные программы смогут таким образом останавливать работу других приложений."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"изменять настройки пользовательского интерфейса"</string>
-    <!-- outdated translation 3465121501528064399 -->     <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"Позволяет приложению изменять текущую конфигурацию, например региональные настройки или размер шрифта."</string>
+    <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"Приложение сможет изменять текущую конфигурацию, например региональные настройки или размер шрифта."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"включить режим громкой связи"</string>
-    <!-- outdated translation 5673461159384850628 -->     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Позволяет программе включить режим громкой связи."</string>
+    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Приложение сможет включать режим \"Штурман\"."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"завершать фоновые процессы"</string>
-    <!-- outdated translation 2908829602869383753 -->     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Позволяет программе завершать фоновые процессы других программ, даже если память не заполнена."</string>
-    <!-- outdated translation 1447830113260156236 -->     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"принудительно закрывать другие программы"</string>
-    <!-- outdated translation 7263036616161367402 -->     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Позволяет программе принудительно останавливать другие программы."</string>
-    <!-- outdated translation 1804196839880393631 -->     <string name="permlab_forceBack" msgid="652935204072584616">"принудительно закрывать приложения"</string>
-    <!-- outdated translation 6534109744159919013 -->     <string name="permdesc_forceBack" msgid="3892295830419513623">"Позволяет приложению принудительно закрыть или вернуть в исходное состояние процессы, выполняемые в активном режиме. Не требуется для обычных приложений."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Приложение сможет останавливать фоновые процессы других программ, даже если памяти достаточно."</string>
+    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"принудительное закрытие других приложений"</string>
+    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Приложение сможет принудительно останавливать работу других приложений."</string>
+    <string name="permlab_forceBack" msgid="652935204072584616">"принудительное закрытие приложений"</string>
+    <string name="permdesc_forceBack" msgid="3892295830419513623">"Приложение сможет завершать процессы, выполняемые в активном режиме. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"извлекать данные о внутреннем состоянии системы"</string>
-    <!-- outdated translation 2198776174276275220 -->     <string name="permdesc_dump" msgid="1778299088692290329">"Позволяет приложению извлекать внутренние сведения о состоянии системы. Вредоносные приложения смогут извлечь разнообразные личные и защищенные сведения, в которых обычно нет необходимости."</string>
+    <string name="permdesc_dump" msgid="1778299088692290329">"Приложение сможет получать данные о внутреннем состоянии системы. Вредоносные программы смогут получать личную и защищенную информацию, к которой у них не должно быть доступа."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"получать доступ к содержанию экрана"</string>
-    <!-- outdated translation 3390962289797156152 -->     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Позволяет приложению получать доступ к содержанию активного окна. Вредоносное ПО может извлечь все данные окна и проанализировать весь его текст, кроме паролей."</string>
+    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Приложение сможет получать контент активного окна. Вредоносные программы смогут перехватывать такой контент и анализировать весь текст, кроме паролей."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"частичное завершение работы"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Завершает работу диспетчера активности. Не выполняет полное завершение работы."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запретить переключение приложений"</string>
-    <!-- outdated translation 3857886086919033794 -->     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запрещает пользователям переключаться между приложениями."</string>
-    <!-- outdated translation 7811586187574696296 -->     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"отслеживать и управлять запуском всех приложений"</string>
-    <!-- outdated translation 2149363027173451218 -->     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Позволяет приложению отслеживать и управлять способом запуска процессов. Вредоносные приложения могут поставить под угрозу безопасность системы. Такое разрешение необходимо только при разработке, но не при обычной работе."</string>
+    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запрещает пользователям переключаться между приложениями."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"отслеживание и управление запуском всех приложений"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Приложение сможет отслеживать запуск системой процессов и управлять им. Вредоносные программы смогут получить полный контроль над системой. Это разрешение необходимо только для разработки и не нужно в обычном режиме."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"отправлять рассылку об удалении пакета"</string>
-    <!-- outdated translation 3453286591439891260 -->     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Позволяет приложению выполнять рассылку уведомлений об удалении пакета приложения. Вредоносные приложения могут использовать эту возможность для остановки всех остальных выполняющихся приложений."</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Приложение сможет рассылать уведомления об удалении пакета программы. Вредоносные программы смогут таким образом прекращать работу других программ."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"отправлять рассылку уведомлений о получении SMS"</string>
-    <!-- outdated translation 9122419277306740155 -->     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Позволяет приложению отправлять уведомления о получении SMS-сообщения. Вредоносные приложения могут использовать эту возможность для имитации получения SMS -сообщений."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Приложение сможет рассылать уведомления о получении SMS. Вредоносные программы смогут таким образом подделывать входящие SMS."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"отправлять рассылку уведомлений о получении WAP-сообщений поставщика услуг"</string>
-    <!-- outdated translation 3955303669461378091 -->     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Позволяет приложению отправлять уведомления о получении WAP-сообщения поставщика услуг. Вредоносные приложения могут использовать эту возможность для имитации получения MMS-сообщения или замены содержимого любой веб-страницы на вредоносное без уведомления."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Приложение сможет рассылать уведомления о получении сообщении WAP PUSH. Вредоносные программы смогут таким образом фальсифицировать получение MMS или незаметно подменять содержание любой страницы вредоносными данными."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничивать количество запущенных процессов"</string>
-    <!-- outdated translation 7824786028557379539 -->     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Позволяет приложению управлять максимальным количеством выполняемых процессов. Не требуется для обычных приложений."</string>
-    <!-- outdated translation 5342837862439543783 -->     <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"закрывать все приложения, работающие в фоновом режиме"</string>
-    <!-- outdated translation 8773936403987091620 -->     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Позволяет приложению контролировать, были ли действия завершены сразу же после их перехода в фоновый режим. Не требуется для обычных приложений."</string>
+    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Приложение сможет управлять максимальным количеством процессов, которые могут быть запущены. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"закрытие всех фоновых приложений"</string>
+    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Приложение сможет управлять завершением процессов после их перехода в фоновый режим. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"изменять статистику батареи"</string>
-    <!-- outdated translation 5847319823772230560 -->     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Позволяет изменять собранную статистику батареи. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_batteryStats" msgid="6835186932305744068">"Приложение сможет изменять собранную статистику использования заряда батареи. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_backup" msgid="470013022865453920">"управление резервным копированием и восстановлением системы"</string>
-    <!-- outdated translation 4837493065154256525 -->     <string name="permdesc_backup" msgid="6912230525140589891">"Разрешает приложению контролировать механизмы резервного копирования и восстановления системы. Не используется обычными приложениями."</string>
+    <string name="permdesc_backup" msgid="6912230525140589891">"Приложение сможет управлять механизмами резервного копирования и восстановления системы. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"подтверждать полное резервное копирование или восстановление"</string>
-    <!-- outdated translation 9005017754175897954 -->     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Позволяет приложению отображать окно подтверждения полного резервного копирования. Используется не во всех приложениях."</string>
+    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Приложение сможет отображать окно подтверждения полного резервного копирования. Это разрешение не предназначено для всех приложений."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"показывать неавторизованные окна"</string>
-    <!-- outdated translation 5895082268284998469 -->     <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"Разрешает создание окон, предназначенных для использования внутренним пользовательским интерфейсом системы. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"Приложение сможет создавать окна внутреннего системного интерфейса пользователя. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"показывать оповещения системного уровня"</string>
-    <!-- outdated translation 2884149573672821318 -->     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Позволяет приложению отображать окна системных предупреждений. Вредоносные приложения смогут получить контроль над всем экраном планшетного ПК."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Приложение сможет показывать окна системных предупреждений. Вредоносные программы смогут перехватить управление всем экраном."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"изменять глобальную скорость анимации"</string>
-    <!-- outdated translation 7181522138912391988 -->     <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Позволяет приложению в любое время изменять общую скорость анимации (ускоренная или замедленная анимация)."</string>
-    <!-- outdated translation 17124341698093865 -->     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"управлять маркерами приложений"</string>
-    <!-- outdated translation 977127907524195988 -->     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Позволяет приложениям создавать собственные маркеры и управлять ими, обходя обычное Z-упорядочивание. Не требуется для обычных приложений."</string>
+    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Приложение сможет в любой момент изменить общую скорость анимации (ускорить или замедлить ее)."</string>
+    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"управление токенами приложений"</string>
+    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Приложение сможет создавать собственные токены и управлять ими в обход обычной Z-последовательности. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"отрабатывать нажатия клавиш и кнопок управления"</string>
-    <!-- outdated translation 7200014808195664505 -->     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Позволяет приложению передавать собственные события ввода (например, нажатия клавиш) в другие приложения. Вредоносные приложения могут использовать эту возможность для установки полного контроля над планшетным ПК."</string>
-    <!-- outdated translation 7200014808195664505 -->     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Позволяет приложению передавать собственные события ввода (например, нажатия клавиш) в другие приложения. Вредоносные приложения могут использовать эту возможность для установки полного контроля над планшетным ПК."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Приложение сможет передавать собственные входные события (нажатия клавиш и пр.) другим программам. Вредоносные программы смогут таким образом перехватить управление планшетным ПК."</string>
+    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Приложение сможет передавать собственные входные события (нажатия клавиш и пр.) другим программам. Вредоносные программы смогут таким образом перехватить управление телефоном."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"записывать вводимый текст и совершаемые действия"</string>
-    <!-- outdated translation 5132879321450325445 -->     <string name="permdesc_readInputState" msgid="8387754901688728043">"Позволяет приложению распознавать нажатые пользователем клавиши даже при работе с другим приложением (например, при вводе пароля). Не требуется для обычных приложений."</string>
+    <string name="permdesc_readInputState" msgid="8387754901688728043">"Приложение сможет отслеживать нажатие пользователем клавиш даже при работе с другими программами (например, при вводе пароля). Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"связывать с методом ввода"</string>
-    <!-- outdated translation 3734838321027317228 -->     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
+    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Приложение сможет выполнять привязку к интерфейсу верхнего уровня способа ввода. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"привязка к службе текстовых сообщений"</string>
-    <!-- outdated translation 172508880651909350 -->     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Позволяет выполнить привязку к интерфейсу текстовой службы верхнего уровня (например, SpellCheckerService). Не требуется для обычных приложений."</string>
+    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Позволяет выполнить привязку к интерфейсу верхнего уровня службы текстовых сообщений (например, SpellCheckerService). Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"подключаться к VPN-службе"</string>
-    <!-- outdated translation 6011554199384584151 -->     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Разрешает подключаться к базовому интерфейсу VPN-сервиса. Не требуется для обычных приложений."</string>
+    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Приложение сможет подключаться к базовому интерфейсу службы VPN. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"связать с фоновым рисунком"</string>
-    <!-- outdated translation 5287754520361915347 -->     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Разрешает выполнять привязку к интерфейсу фонового рисунка верхнего уровня. Не требуется для обычных приложений."</string>
+    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Приложение сможет выполнять привязку к интерфейсу фонового рисунка верхнего уровня. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"привязка к службе виджетов"</string>
-    <!-- outdated translation 2930855984822926963 -->     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Разрешает выполнять привязку к интерфейсу верхнего уровня службы виджетов. Не требуется для обычных приложений."</string>
+    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Приложение сможет выполнять привязку к интерфейсу верхнего уровня службы виджетов. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаимодействовать с администратором устройства"</string>
-    <!-- outdated translation 8714424333082216979 -->     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Позволяет владельцу отправлять целевые значения администратору устройства. Никогда не используется обычными приложениями."</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Приложение сможет отправлять объекты intent администратору устройства. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"изменять ориентацию экрана"</string>
-    <!-- outdated translation 6335814461615851863 -->     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Позволяет приложению изменять ориентацию экрана в любое время. Не требуется для обычных приложений."</string>
+    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Приложение сможет менять ориентацию экрана. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"изменять скорость указателя"</string>
-    <!-- outdated translation 137436038503379864 -->     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Позволяет приложению изменять скорость указателя мыши или трекпада. Для большинства приложений это не требуется."</string>
-    <!-- outdated translation 4255467255488653854 -->     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"отправлять приложениям сигналы Linux"</string>
-    <!-- outdated translation 3565530463215015289 -->     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Позволяет приложению направлять запрос на передачу предоставленного сигнала всем постоянным процессам."</string>
-    <!-- outdated translation 8659652042401085862 -->     <string name="permlab_persistentActivity" msgid="8841113627955563938">"запускать постоянную работу приложения"</string>
-    <!-- outdated translation 5037199778265006008 -->     <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Позволяет приложению сделать свои компоненты постоянными, благодаря чему система не может использовать их для других приложений."</string>
-    <!-- outdated translation 3343439331576348805 -->     <string name="permlab_deletePackages" msgid="184385129537705938">"удалять приложения"</string>
-    <!-- outdated translation 3634943677518723314 -->     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Позволяет приложению удалять пакеты Android. Вредоносные приложения могут использовать эту возможность для удаления важных приложений."</string>
-    <!-- outdated translation 2192134353540277878 -->     <string name="permlab_clearAppUserData" msgid="274109191845842756">"удалять данные других приложений"</string>
-    <!-- outdated translation 7546345080434325456 -->     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Позволяет приложению удалять данные пользователя."</string>
-    <!-- outdated translation 1518556602634276725 -->     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"очищать кэши других приложений"</string>
-    <!-- outdated translation 2283074077168165971 -->     <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Позволяет приложению удалять файлы из кэша."</string>
-    <!-- outdated translation 4799785352306641460 -->     <string name="permlab_getPackageSize" msgid="7472921768357981986">"определять объем памяти приложений"</string>
-    <!-- outdated translation 5557253039670753437 -->     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Позволяет приложению получать сведения о размере кода, данных и кэша."</string>
-    <!-- outdated translation 335800214119051089 -->     <string name="permlab_installPackages" msgid="2199128482820306924">"устанавливать приложения непосредственно"</string>
-    <!-- outdated translation 526669220850066132 -->     <string name="permdesc_installPackages" msgid="5628530972548071284">"Позволяет приложению устанавливать новые или обновленные пакеты Android. Вредоносные приложения могут использовать эту возможность для добавления новых приложений со сколь угодно высоким уровнем разрешения."</string>
-    <!-- outdated translation 4747698311163766540 -->     <string name="permlab_clearAppCache" msgid="7487279391723526815">"удалять все данные из кэша приложений"</string>
-    <!-- outdated translation 3097119797652477973 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"Позволяет приложению освобождать память телефона путем удаления файлов из каталога кэша приложений. Обычно это разрешается только системным процессам."</string>
-    <!-- outdated translation 3097119797652477973 -->     <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"Позволяет приложению освобождать память телефона путем удаления файлов из каталога кэша приложений. Обычно это разрешается только системным процессам."</string>
-    <!-- outdated translation 728454979946503926 -->     <string name="permlab_movePackage" msgid="3289890271645921411">"Перемещать ресурсы приложения"</string>
-    <!-- outdated translation 6323049291923925277 -->     <string name="permdesc_movePackage" msgid="319562217778244524">"Позволяет приложению перемещать ресурсы приложения с внутренних на внешние носители и наоборот."</string>
+    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Приложение сможет в любой момент изменить скорость движения указателя мыши или сенсорной панели. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"отправка сигналов Linux приложениям"</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Приложение сможет отправить запрос на передачу полученного сигнала всем постоянным процессам."</string>
+    <string name="permlab_persistentActivity" msgid="8841113627955563938">"постоянная работа приложения"</string>
+    <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Приложение сможет делать свои компоненты постоянными таким образом, чтобы система не могла использовать их для других приложений."</string>
+    <string name="permlab_deletePackages" msgid="184385129537705938">"удаление приложений"</string>
+    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Приложение сможет удалять пакеты Android. Вредоносные программы смогут таким образом удалять важные программы."</string>
+    <string name="permlab_clearAppUserData" msgid="274109191845842756">"удаление данных других приложений"</string>
+    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Приложение сможет удалять данные пользователя."</string>
+    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"очистка кэш-памяти других приложений"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Приложение сможет удалять файлы из кэша."</string>
+    <string name="permlab_getPackageSize" msgid="7472921768357981986">"определение объема памяти приложений"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Приложение сможет получать сведения о размере кода, данных и кэша."</string>
+    <string name="permlab_installPackages" msgid="2199128482820306924">"непосредственная установка приложений"</string>
+    <string name="permdesc_installPackages" msgid="5628530972548071284">"Приложение сможет устанавливать новые или обновленные пакеты Android. Вредоносные программы смогут таким образом добавлять новые программы с любыми разрешениями."</string>
+    <string name="permlab_clearAppCache" msgid="7487279391723526815">"удаление всех данных из кэша приложений"</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"Приложение сможет очищать память планшетного ПК, удаляя файлы из каталога кэш-памяти программ. Как правило, такой доступ предоставляется только системным процессам."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"Приложение сможет очищать память телефона, удаляя файлы из каталога кэш-памяти. Как правило, такой доступ предоставляется только системным процессам."</string>
+    <string name="permlab_movePackage" msgid="3289890271645921411">"перемещение ресурсов приложения"</string>
+    <string name="permdesc_movePackage" msgid="319562217778244524">"Приложение сможет перемещать ресурсы из внутренней памяти во внешнюю и наоборот."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"считывать конфиденциальные данные журнала"</string>
-    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Позволяет приложению считывать информацию из различных файлов журналов системы. Приложение может получать сведения о работе пользователя на планшетном ПК, которые могут содержать личную или конфиденциальную информацию."</string>
-    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Позволяет приложению считывать информацию из различных файлов журналов системы. Приложение может получать сведения о работе пользователя на планшетном ПК, которые могут содержать личную или конфиденциальную информацию."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Приложение сможет считывать информацию из различных файлов журналов системы. Приложение может получать сведения о работе пользователя на планшетном ПК, в том числе к личной и конфиденциальной информации."</string>
+    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Приложение сможет считывать информацию из различных файлов журналов системы, а также получать сведения о работе пользователя на телефоне, в том числе к личной и конфиденциальной информации."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"считывать/записывать данные в ресурсы, принадлежащие группе диагностики"</string>
-    <!-- outdated translation 3121238373951637049 -->     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Позволяет приложению считывать и записывать данные в любые ресурсы, принадлежащие группе диагностики (например, файлы в каталоге /dev). Это может повлиять на стабильность и безопасность системы. Эта возможность может быть использована ТОЛЬКО производителем или оператором для диагностики аппаратного обеспечения."</string>
-    <!-- outdated translation 79425198834329406 -->     <string name="permlab_changeComponentState" msgid="6335576775711095931">"включать или отключать компоненты приложения"</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Позволяет приложению отключать или включать компоненты другого приложения. Вредоносные приложения могут использовать это разрешение для отключения важных возможностей планшетного ПК. Это разрешение следует использовать с осторожностью, так как оно может привести к несовместимости, нестабильности и неработоспособности компонентов приложения."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Позволяет приложению отключать или включать компоненты другого приложения. Вредоносные приложения могут использовать это разрешение для отключения важных возможностей планшетного ПК. Это разрешение следует использовать с осторожностью, так как оно может привести к несовместимости, нестабильности и неработоспособности компонентов приложения."</string>
-    <!-- outdated translation 3393305202145172005 -->     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"выбирать предпочтительные приложения"</string>
-    <!-- outdated translation 760008293501937546 -->     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Позволяет приложению изменять предпочтительные приложения. Вредоносные приложения могут использовать эту возможность для незаметного изменения запущенных приложений и для сбора конфиденциальной информации с помощью имитации подключения существующих приложений."</string>
+    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Приложение сможет считывать и записывать данные системы диагностики (например, файлы в каталоге /dev). Это может повлиять на стабильность и безопасность системы. Это разрешение должно использоваться ТОЛЬКО производителем или оператором для диагностики аппаратного обеспечения."</string>
+    <string name="permlab_changeComponentState" msgid="6335576775711095931">"включение и отключение компонентов приложения"</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Приложение сможет включать и отключать компоненты других программ. Вредоносные программы смогут таким образом отключать важные функции планшетного ПК. Используйте это разрешение с особой осторожностью, т. к. возможно сделать компоненты приложения неработоспособными, несогласованными или неустойчивыми."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Приложение сможет включать и отключать компоненты других программ. Вредоносные программы смогут таким образом отключать важные функции телефона. Используйте это разрешение с особой осторожностью, т. к. возможно сделать компоненты приложения неработоспособными, несогласованными или неустойчивыми."</string>
+    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"настройка предпочтительных приложений"</string>
+    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Приложение сможет изменять предпочтительные приложения. Вредоносные программы смогут незаметно изменять запускаемые вами программы и собирать ваши личные данные от имени существующих приложений."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"изменять общие настройки системы"</string>
-    <!-- outdated translation 838789419871034696 -->     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Позволяет приложению изменять данные настроек системы. Вредоносные приложения могут повредить конфигурацию системы."</string>
+    <string name="permdesc_writeSettings" msgid="7775723441558907181">"Приложение сможет изменять настройки системы. Вредоносные программы смогут  повредить конфигурацию системы."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"изменять настройки системы безопасности"</string>
-    <!-- outdated translation 5497873143539034724 -->     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Позволяет приложению изменять данные настроек безопасности системы. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Приложение сможет изменять системные настройки безопасности. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"изменять карту служб Google"</string>
-    <!-- outdated translation 6602362746516676175 -->     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Позволяет приложению изменять карту служб Google. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Приложение сможет изменять карту служб Google. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"автоматически запускать при загрузке"</string>
-    <!-- outdated translation 7530977064379338199 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Позволяет приложению запускаться сразу же по завершении загрузки. Это может увеличить время запуска планшетного ПК и замедлить его работу в связи с постоянной работой приложения."</string>
-    <!-- outdated translation 7530977064379338199 -->     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Позволяет приложению запускаться сразу же по завершении загрузки. Это может увеличить время запуска планшетного ПК и замедлить его работу в связи с постоянной работой приложения."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Приложение сможет запускаться после начальной загрузки системы. Это может привести к увеличению времени включения планшетного ПК и уменьшить его быстродействие в связи с постоянной работой приложения."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Приложение сможет запускаться после начальной загрузки системы. Это может привести к увеличению времени включения телефона и уменьшить его быстродействие в связи с постоянной работой приложения."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"отправить несрочную рассылку"</string>
-    <!-- outdated translation 6322249605930062595 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Позволяет приложению отправлять несрочные рассылки, которые остались по завершении данной рассылки. Вредоносные приложения могут замедлить работу планшетного ПК или сделать ее нестабильной из-за использования слишком большого объема памяти."</string>
-    <!-- outdated translation 6322249605930062595 -->     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Позволяет приложению отправлять несрочные рассылки, которые остались по завершении данной рассылки. Вредоносные приложения могут замедлить работу планшетного ПК или сделать ее нестабильной из-за использования слишком большого объема памяти."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Приложение сможет отправлять несрочные рассылки, которые не удаляются после их завершения. Вредоносные программы смогут замедлить работу планшетного ПК или сделать ее нестабильной из-за чрезмерного использования памяти."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Приложение сможет отправлять несрочные рассылки, которые не удаляются после их завершения. Вредоносные программы смогут замедлить работу телефона или сделать ее нестабильной из-за чрезмерного использования памяти."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"считывать данные контакта"</string>
-    <!-- outdated translation 7596158687301157686 -->     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Позволяет приложению считывать все данные контактов (адресов), сохраненные в памяти планшетного ПК. Вредоносные приложения могут использовать эту возможность для передачи данных посторонним лицам."</string>
-    <!-- outdated translation 7596158687301157686 -->     <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Позволяет приложению считывать все данные контактов (адресов), сохраненные в памяти планшетного ПК. Вредоносные приложения могут использовать эту возможность для передачи данных посторонним лицам."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"У приложения будет доступ ко всем адресам, сохраненным на планшетном ПК. Вредоносные программы смогут таким образом отправлять вашу информацию другим людям."</string>
+    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"У приложения будет доступ ко всем адресам, сохраненным на телефоне. Вредоносные программы смогут таким образом отправлять вашу информацию другим людям."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"перезаписывать данные контакта"</string>
-    <!-- outdated translation 7782689510038568495 -->     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти планшетного ПК. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
-    <!-- outdated translation 7782689510038568495 -->     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти планшетного ПК. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Приложение сможет изменять адреса, сохраненные на планшетном ПК. Вредоносные программы смогут таким образом удалять и изменять данные ваших контактов."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Приложение сможет изменять адреса, сохраненные на телефоне. Вредоносные программы смогут таким образом удалять и изменять данные ваших контактов."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"просматривать данные профиля"</string>
-    <!-- outdated translation 6335739730324727203 -->     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Позволяет приложению получать доступ к хранящейся на вашем устройстве личной информации профиля, например к имени и контактным данным. Это означает, что приложение может идентифицировать вас и отправить эти данные другим пользователям."</string>
+    <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Приложение сможет считывать информацию личного профиля, сохраненную на устройстве, такую как ваше имя и контактные данные. Это означает, что приложение сможет получить ваши личные данные и отправить их другим пользователям."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"изменение данных профиля"</string>
-    <!-- outdated translation 6431297330378229453 -->     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Позволяет приложению изменять или добавлять в личный профиль хранящуюся на вашем устройстве информацию, например имя или контактные данные. Это означает, что приложение может идентифицировать вас и отправить эти данные другим пользователям."</string>
+    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Приложение сможет изменять и добавлять информацию личного профиля, сохраненную на устройстве, такую как ваше имя и контактные данные. Это означает, что другие приложения смогут получить ваши личные данные и отправить их другим пользователям."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читать записи в вашей социальной ленте"</string>
-    <!-- outdated translation 1300659548047580769 -->     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Позволяет приложению читать и синхронизировать новости от ваших друзей. Вредоносные программы могут таким образом получить доступ к вашим личным записям в социальных сетях."</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Приложение сможет считывать и синхронизировать новости от вас и ваших друзей. Вредоносные программы смогут получить доступ к вашим личным записям и записям ваших друзей в социальных сетях."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"добавлять записи в вашу социальную ленту"</string>
-    <!-- outdated translation 8649864102944627446 -->     <string name="permdesc_writeSocialStream" product="default" msgid="3496277176955721451">"Позволяет приложению отображать новости от друзей в социальных сетях. Вредоносные программы могут таким образом получить доступ к вашим конфиденциальным данным."</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="3496277176955721451">"Приложение сможет отображать новости от друзей в социальных сетях. Вредоносные программы смогут получить доступ к вашим паролям и другим конфиденциальным данным."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"просматривать в календаре мероприятия и конфиденциальную информацию"</string>
-    <!-- outdated translation 5665520896961671949 -->     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Приложениe получит доступ ко всем данным календаря, сохраненным в вашем устройстве (в том числе к мероприятиям ваших друзей и коллег). Вредоносное ПО с таким уровнем доступа сможет извлекать личную информацию без ведома владельцев календарей."</string>
-    <!-- outdated translation 5665520896961671949 -->     <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Приложениe получит доступ ко всем данным календаря, сохраненным в вашем устройстве (в том числе к мероприятиям ваших друзей и коллег). Вредоносное ПО с таким уровнем доступа сможет извлекать личную информацию без ведома владельцев календарей."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Приложение сможет считывать информацию обо всех мероприятиях календаря, сохраненных на планшетном ПК, включая сведения о мероприятиях друзей и коллег. Вредоносные программы смогут получать личные данные из календарей без ведома их владельцев."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Приложение сможет считывать информацию обо всех мероприятиях календаря, сохраненных на телефоне, включая сведения о мероприятиях друзей и коллег. Вредоносные программы смогут получать личные данные из календарей без ведома их владельцев."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"добавлять мероприятия и изменять их, а также отправлять гостям электронные сообщения, не предупреждая об этом владельца календаря"</string>
-    <!-- outdated translation 5368129321997977226 -->     <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Приложение получит возможность отправлять приглашения от имени владельца календаря, а также добавлять, удалять и изменять мероприятия (в том числе мероприятия ваших друзей и коллег), которые доступны для редактирования на вашем устройстве. Вредоносное ПО с таким уровнем доступа сможет рассылать письма, добавлять и изменять мероприятия без ведома владельцев календарей."</string>
+    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Приложение сможет отправлять приглашения от имени владельца календаря, а также добавлять, удалять и изменять мероприятия, которые можно редактировать на этом устройстве, включая мероприятия друзей или коллег. Вредоносные программы смогут рассылать спам от имени владельцев календаря, изменять мероприятия без ведома владельцев или добавлять фиктивные мероприятия."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"копировать источники мест для проверки"</string>
-    <!-- outdated translation 7648286063459727252 -->     <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Создавать фиктивные источники данных о местоположении. Вредоносные приложения могут использовать эту возможность для перезаписи данных о местоположении или состоянии телефона, полученных от оператора связи или GPS-приемника."</string>
+    <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Приложение сможет создавать фиктивные источники данных местоположения для тестирования. Вредоносные программы смогут использовать их для изменения сведений о местоположении или статусе, полученных от настоящих источников, таких как GPS и сетевые операторы."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"получать доступ к дополнительным командам источника данных о местоположении"</string>
-    <!-- outdated translation 1948144701382451721 -->     <string name="permdesc_accessLocationExtraCommands" msgid="6737736970602176133">"Получать доступ к дополнительным командам поставщика данных о местоположении. Вредоносные приложения могут использовать эту возможность для вмешательства в работу GPS или других источников места."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6737736970602176133">"Предоставляет приложению доступ к дополнительным командам поставщика информации о местоположении. Вредоносные программы смогут таким образом нарушить работу системы GPS или других источников информации о местоположении."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"разрешение на установку поставщика местоположения"</string>
-    <!-- outdated translation 5449175116732002106 -->     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Создайте фиктивные источники местоположения для тестирования. Вредоносное ПО может использовать их для переопределения местоположения и/или статуса, возвращаемого действительными источниками местоположения, такими как GPS или сетевые провайдеры, а также отслеживать ваше положение и передавать внешним источникам."</string>
+    <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Приложение сможет создавать фиктивные источники данных местоположения для тестирования. Вредоносные программы смогут использовать их для изменения сведений о местоположении или статусе, полученных от настоящих источников, таких как GPS и сетевые операторы, а также отслеживать ваше местоположение и передавать информацию о нем внешним источникам."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"точное местоположение (GPS)"</string>
-    <!-- outdated translation 243973693233359681 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Получать доступ к источникам точного местоположения, таким как GPS, когда это возможно. Вредоносные приложения могут использовать это разрешение для определения вашего местоположения и расходовать ресурс батареи."</string>
-    <!-- outdated translation 243973693233359681 -->     <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Получать доступ к источникам точного местоположения, таким как GPS, когда это возможно. Вредоносные приложения могут использовать это разрешение для определения вашего местоположения и расходовать ресурс батареи."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Приложение получит доступ к источникам точного местоположения, таким как GPS, когда это возможно. Вредоносные программы смогут таким образом определять ваше местоположение и повысить расход заряда батареи."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Приложение получит доступ к источникам точного местоположения, таким как GPS, когда это возможно. Вредоносные программы смогут таким образом определять ваше местоположение и повысить расход заряда батареи."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"отслеживать местоположение по сигналам сети"</string>
-    <!-- outdated translation 3704633168985466045 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Получать доступ к источникам данных о местоположении, таким как база данных сотовой сети, для определения приблизительного местоположения планшетного ПК, когда это возможно. Вредоносные приложения могут использовать это разрешение для определения вашего приблизительного местоположения."</string>
-    <!-- outdated translation 3704633168985466045 -->     <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Получать доступ к источникам данных о местоположении, таким как база данных сотовой сети, для определения приблизительного местоположения планшетного ПК, когда это возможно. Вредоносные приложения могут использовать это разрешение для определения вашего приблизительного местоположения."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Приложение получит доступ к источникам данных о местоположении, таким как база данных сотовой сети, для определения приблизительного местоположения планшетного ПК, когда это возможно. Вредоносные программы смогут таким образом определять ваше местоположение."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Приложение получит доступ к источникам данных о местоположении, таким как база данных сотовой сети, для определения приблизительного местоположения телефона, когда это возможно. Вредоносные программы смогут таким образом определять ваше местоположение."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"получать доступ к SurfaceFlinger"</string>
-    <!-- outdated translation 6805241830020733025 -->     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Позволяет приложению использовать функции SurfaceFlinger нижнего уровня."</string>
+    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Приложение сможет использовать низкоуровневые функции SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"считывать буфер фреймов"</string>
-    <!-- outdated translation 5777679658669057819 -->     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Позволяет приложению использовать функцию чтения содержимого буфера фреймов."</string>
+    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Приложение сможет считывать содержание буфера фреймов."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"изменять настройки аудио"</string>
-    <!-- outdated translation 5793461287365991922 -->     <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"Позволяет приложению изменять глобальные аудионастройки, такие как громкость и маршрутизацию."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"Приложение сможет изменять глобальные аудионастройки, такие как громкость и маршрутизация."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"записывать аудио"</string>
-    <!-- outdated translation 6493228261176552356 -->     <string name="permdesc_recordAudio" msgid="2387462233976248635">"Позволяет приложению получать доступ к пути аудиозаписи."</string>
+    <string name="permdesc_recordAudio" msgid="2387462233976248635">"Приложение сможет обращаться к каналу записи аудио."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимать фото и видео"</string>
-    <!-- outdated translation 6004878235852154239 -->     <string name="permdesc_camera" msgid="1507407407002492176">"Позволяет приложению делать снимки и видео с помощью камеры в любое время."</string>
+    <string name="permdesc_camera" msgid="1507407407002492176">"Приложение сможет делать фотографии и снимать видео с помощью камеры. таким образом приложение может в любой момент делать фотографии всего, что находится перед камерой."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"отключить планшетный ПК навсегда"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"отключать телефон"</string>
-    <!-- outdated translation 7379164636920817963 -->     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Позволяет данному приложению отключить планшетный ПК навсегда. Это очень опасно."</string>
-    <!-- outdated translation 7379164636920817963 -->     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Позволяет данному приложению отключить планшетный ПК навсегда. Это очень опасно."</string>
+    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Приложение сможет сделать планшетный ПК полностью неработоспособным. Это очень опасно."</string>
+    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Приложение сможет сделать телефон полностью неработоспособным. Это очень опасно."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"принудительно перезагружать планшетный ПК"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"принудительно перезагружать телефон"</string>
-    <!-- outdated translation 4555793623560701557 -->     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Позволяет приложению принудительно перезагружать планшетный ПК."</string>
-    <!-- outdated translation 4555793623560701557 -->     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Позволяет приложению принудительно перезагружать планшетный ПК."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Приложение сможет принудительно перезагружать планшетный ПК."</string>
+    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Приложение сможет принудительно перезагружать телефон."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"монтировать и удалять файловые системы"</string>
-    <!-- outdated translation 6253263792535859767 -->     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Позволяет приложению монтировать и удалять файловые системы съемных носителей."</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Приложение сможет подключать и удалять файловые системы для съемных накопителей."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"форматировать внешний накопитель"</string>
-    <!-- outdated translation 574060044906047386 -->     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Позволяет приложению форматировать съемный накопитель."</string>
+    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Приложение сможет форматировать съемный накопитель."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"получать сведения о внутреннем накопителе"</string>
-    <!-- outdated translation 8820326551687285439 -->     <string name="permdesc_asec_access" msgid="3094563844593878548">"Позволяет приложению получать сведения о внутреннем накопителе."</string>
+    <string name="permdesc_asec_access" msgid="3094563844593878548">"Приложение сможет получать сведения о внутренней памяти."</string>
     <string name="permlab_asec_create" msgid="6414757234789336327">"создавать внутренний накопитель"</string>
-    <!-- outdated translation 2621346764995731250 -->     <string name="permdesc_asec_create" msgid="4558869273585856876">"Позволяет приложениям создавать внутренний накопитель."</string>
+    <string name="permdesc_asec_create" msgid="4558869273585856876">"Приложение сможет создавать внутреннее хранилище."</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"удалять внутренний накопитель"</string>
-    <!-- outdated translation 2746706889208066256 -->     <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Позволяет приложению удалять внутренний накопитель."</string>
-    <!-- outdated translation 2456287623689029744 -->     <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"подключать/отключать внутренний накопитель"</string>
-    <!-- outdated translation 5934375590189368200 -->     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Позволяет приложению подключать и отключать внутренний накопитель."</string>
+    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Приложение сможет удалять внутренние хранилища."</string>
+    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"подключение и отключение внутренней памяти"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Приложение сможет подключать и отключать внутреннюю память."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"переименовывать внутренний накопитель"</string>
-    <!-- outdated translation 2152829985238876790 -->     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Позволяет приложениям переименовывать внутренний накопитель."</string>
+    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Приложение сможет переименовывать внутреннюю память."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"управлять вибровызовом"</string>
-    <!-- outdated translation 2886677177257789187 -->     <string name="permdesc_vibrate" msgid="6284989245902300945">"Позволяет приложению управлять виброзвонком."</string>
+    <string name="permdesc_vibrate" msgid="6284989245902300945">"Приложение сможет управлять виброзвонком."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"управлять вспышкой"</string>
-    <!-- outdated translation 6433045942283802309 -->     <string name="permdesc_flashlight" msgid="6522284794568368310">"Позволяет приложению управлять вспышкой."</string>
+    <string name="permdesc_flashlight" msgid="6522284794568368310">"Приложение сможет управлять вспышкой."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"управлять настройками и разрешениями для USB-устройств"</string>
-    <!-- outdated translation 6148489202092166164 -->     <string name="permdesc_manageUsb" msgid="7776155430218239833">"Приложение может управлять настройками и разрешениями для USB-устройств."</string>
+    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Приложение сможет управлять настройками и разрешениями для USB-устройств."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"Реализовать протокол MTP"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Разрешает доступ к драйверу основного устройства MTP для реализации протокола MTP USB"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"проверять аппаратное обеспечение"</string>
-    <!-- outdated translation 3668894686500081699 -->     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Позволяет приложению управлять различными периферийными устройствами для проверки аппаратного обеспечения."</string>
+    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Приложение сможет управлять различными периферийными устройствами для проверки аппаратного обеспечения."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"посылать прямые вызовы на номера телефонов"</string>
-    <!-- outdated translation 3369867353692722456 -->     <string name="permdesc_callPhone" msgid="6396463004110544744">"Позволяет приложению вызывать телефонные номера без вмешательства пользователя. Вредоносные приложения могут осуществлять нежелательные вызовы. Это разрешение не позволяет приложению совершать вызовы служб экстренной помощи."</string>
+    <string name="permdesc_callPhone" msgid="6396463004110544744">"Приложение сможет звонить по номерам телефонов без вашего участия. Результатом работы вредоносных приложений могут стать неучтенные звонки, которые вам придется оплачивать. Обратите внимание, что это разрешение не позволяет звонить на номера экстренного вызова."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"посылать прямые вызовы на любые номера"</string>
-    <!-- outdated translation 244405067160028452 -->     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Позволяет приложению осуществлять вызов любого номера, включая номера экстренной помощи, без вмешательства пользователя. Вредоносные приложения могут осуществить нежелательные или незаконные вызовы служб экстренной помощи."</string>
+    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Приложение сможет без вашего участия звонить по любому номеру телефона, включая номера экстренного вызова. Вредоносные программы смогут помещать ненужные или незаконные номера в список служб экстренного вызова."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"напрямую запускать настройку CDMA планшетного ПК"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"прямой запуск настройки телефона CDMA"</string>
-    <!-- outdated translation 6457447676108355905 -->     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Позволяет приложению запустить настройку CDMA. Вредоносное ПО может запустить настройку CDMA"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Приложение сможет запускать настройку CDMA. Вредоносные программы также смогут делать это без необходимости."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"управлять уведомлениями об обновлении местоположения"</string>
-    <!-- outdated translation 2300018303720930256 -->     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Позволяет включать/отключать отправку уведомлений об обновлениях местоположения по радиосвязи. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Приложение сможет включать и отключать уведомления об обновлении местоположения на основе данных приемопередачика. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"получать доступ к свойствам регистрации"</string>
-    <!-- outdated translation 7150307006141883832 -->     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Позволяет получать доступ для чтения/записи свойств, загруженных службой регистрации. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Предоставляет приложению доступ для чтения и записи к значениям свойств, добавленным с помощью службы регистрации. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"выбирать виджеты"</string>
-    <!-- outdated translation 2098697834497452046 -->     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Позволяет приложению сообщить системе, какие приложения могут использовать какие виджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Приложение сможет настраивать в системе возможность использования виджетов различными программами. Приложение с таким разрешением может предоставлять другим программам доступ к личным данным. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"изменять состояние телефона"</string>
-    <!-- outdated translation 3302284561346956587 -->     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Позволяет приложению управлять функциями телефона в устройстве. Приложение, обладающее этим разрешением, может переключать сети, включать и выключать радио на телефоне и выполнять другие подобные действия без соответствующего уведомления."</string>
+    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Приложение сможет управлять функциями телефона на устройстве. Приложение с таким разрешением может переключать сети, включать и выключать приемопередатчик, а также выполнять другие подобные действия без уведомления."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"считывать состояние и идентификаторы телефона"</string>
-    <!-- outdated translation 8987653603298258459 -->     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Позволяет приложению получить доступ к функциям телефона на устройстве. Приложение с таким разрешением может определить номер телефона устройства, наличие активного вызова, номер вызываемого/вызывающего абонента и тому подобное."</string>
+    <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Предоставляет приложению доступ к функциям телефона на устройстве. Приложение с таким разрешением может определить номер и серийный номер телефона, состояние активности вызова, номер, с которым установлено соединение, или получить другую подобную информацию."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не разрешать переключение планшетного ПК в спящий режим"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"предотвращать переключение телефона в спящий режим"</string>
-    <!-- outdated translation 4032181488045338551 -->     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Позволяет приложению запрещать переход планшетного ПК в спящий режим."</string>
-    <!-- outdated translation 4032181488045338551 -->     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Позволяет приложению запрещать переход планшетного ПК в спящий режим."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Приложение сможет запрещать перевод планшетного ПК в спящий режим."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Приложение сможет запрещать перевод телефона в спящий режим."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"включать или выключать питание планшетного ПК"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"включать и выключать питание телефона"</string>
-    <!-- outdated translation 3853773100100451905 -->     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Позволяет приложению включать и отключать планшетный ПК."</string>
-    <!-- outdated translation 3853773100100451905 -->     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Позволяет приложению включать и отключать планшетный ПК."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Приложение сможет включать и выключать планшетный ПК."</string>
+    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Приложение сможет включать и выключать телефон."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"запустить в тестовом режиме"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Выполнять стандартную проверку нижнего уровня, обеспечивающую полный доступ к аппаратному обеспечению планшетного ПК. Доступно только в режиме стандартной проверки."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Выполнить стандартную проверку нижнего уровня, обеспечивающую полный доступ к аппаратному обеспечению телефона. Доступно, только в режиме стандартной проверки."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"устанавливать фоновый рисунок"</string>
-    <!-- outdated translation 6417041752170585837 -->     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Позволяет данному приложению устанавливать системный фоновый рисунок."</string>
+    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Приложение сможет устанавливать системные обои."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"давать рекомендации по размеру фоновых рисунков"</string>
-    <!-- outdated translation 6019479164008079626 -->     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Позволяет данному приложению устанавливать советы по размеру фоновых рисунков."</string>
+    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Приложение сможет устанавливать подсказки по размеру системных обоев."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"восстанавливать параметры системы по умолчанию, установленные на заводе-изготовителе"</string>
-    <!-- outdated translation 5033465107545174514 -->     <string name="permdesc_masterClear" msgid="3665380492633910226">"Позволяет приложению восстановить заводские настройки системы, удалив все данные, конфигурацию и установленные приложения."</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"Приложение сможет выполнить полный сброс системы до заводских настроек, удалив все данные, параметры и установленные программы."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"установить время"</string>
-    <!-- outdated translation 209693136361006073 -->     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Позволяет программе изменять время на планшетном ПК."</string>
-    <!-- outdated translation 209693136361006073 -->     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Позволяет программе изменять время на планшетном ПК."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Приложение сможет изменять время на планшетном ПК."</string>
+    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Приложение сможет изменять время на телефоне."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"настраивать часовой пояс"</string>
-    <!-- outdated translation 2522877107613885139 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Позволяет приложению изменять часовой пояс планшетного ПК."</string>
-    <!-- outdated translation 2522877107613885139 -->     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Позволяет приложению изменять часовой пояс планшетного ПК."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Приложение сможет изменять часовой пояс планшетного ПК."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Приложение сможет изменять часовой пояс телефона."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"выступать в качестве службы управления аккаунтом"</string>
-    <!-- outdated translation 6056903274106394752 -->     <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Разрешает приложению вызывать службы аутентификации аккаунта."</string>
+    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Приложение сможет вызывать службы аутентификации аккаунта."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"обнаруживать известные аккаунты"</string>
-    <!-- outdated translation 857622793935544694 -->     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Позволяет приложению получать список аккаунтов, известных планшетному ПК."</string>
-    <!-- outdated translation 857622793935544694 -->     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Позволяет приложению получать список аккаунтов, известных планшетному ПК."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Приложение сможет получать список аккаунтов, известных планшетному ПК."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Приложение сможет получать список аккаунтов, известных телефону."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"выступать в качестве службы аутентификации аккаунта"</string>
-    <!-- outdated translation 4006839406474208874 -->     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Разрешает приложению использовать возможности аутентификации диспетчера аккаунта, в том числе создавать аккаунты, получать и устанавливать пароли для них."</string>
+    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Приложение сможет использовать возможности аутентификации диспетчера аккаунтов, в том числе создавать аккаунты, получать и устанавливать пароли для них."</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"управление списком аккаунтов"</string>
-    <!-- outdated translation 8804114016661104517 -->     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Разрешает приложению добавлять и удалять аккаунты и стирать их пароли."</string>
+    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Приложение сможет добавлять и удалять аккаунты, а также стирать их пароли."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"использование учетных данных аккаунта для аутентификации"</string>
-    <!-- outdated translation 7416570544619546974 -->     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Разрешает приложению запрашивать маркеры аутентификации."</string>
+    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Приложение сможет запрашивать токены аутентификации."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"просматривать состояние сети"</string>
-    <!-- outdated translation 558721128707712766 -->     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Позволяет приложению просматривать состояние всех сетей."</string>
+    <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Приложение сможет просматривать состояние всех сетей."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"неограниченный доступ в Интернет"</string>
-    <!-- outdated translation 4593339106921772192 -->     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Позволяет приложению создавать сетевые сокеты."</string>
+    <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Приложение сможет создавать сетевые сокеты."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"изменение/перехват сетевых настроек и трафика"</string>
-    <!-- outdated translation 2369786339323021771 -->     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Позволяет приложению изменять настройки сети, перехватывать и проверять весь сетевой трафик, например, чтобы изменить прокси-сервер или порт APN. Вредоносное ПО может отслеживать, перенаправлять или изменять сетевые пакеты без вашего ведома."</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Приложение сможет изменять сетевые настройки, а также перехватывать и просматривать весь сетевой трафик (например, изменять прокси-сервер или порт для любой APN). Вредоносные программы смогут отслеживать, перенаправлять или изменять сетевые пакеты без вашего ведома."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"изменять настройки подключения к сети"</string>
-    <!-- outdated translation 4199958910396387075 -->     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Позволяет программе изменять состояние сетевого канала."</string>
+    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Приложение сможет изменять состояние подключения к сети."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"изменить подключение к компьютеру"</string>
-    <!-- outdated translation 8905815579146349568 -->     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Позволяет программе изменять состояние подключенного сетевого канала."</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Приложение сможет изменять состояние подключения к сети в режиме модема."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"изменять настройки использования данных в фоновом режиме"</string>
-    <!-- outdated translation 1001482853266638864 -->     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Позволяет приложению изменять настройку использования данных в фоновом режиме."</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Приложение сможет изменять настройки использования трафика в фоновом режиме."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"просматривать состояние Wi-Fi"</string>
-    <!-- outdated translation 485796529139236346 -->     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Позволяет приложению просматривать сведения о состоянии Wi-Fi."</string>
+    <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Приложение сможет просматривать сведения о состоянии Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"изменять состояние Wi-Fi"</string>
-    <!-- outdated translation 2950383153656873267 -->     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Позволяет приложению подключаться к точкам доступа Wi-Fi и отключаться от них, а также вносить изменения в конфигурацию сетей Wi-Fi."</string>
+    <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Приложение сможет подключаться к точкам доступа Wi-Fi и отключаться от них, а также вносить изменения в настроенные сети Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"разрешить принимать многоадресный сигнал Wi-Fi"</string>
-    <!-- outdated translation 8199464507656067553 -->     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Разрешает приложению получать пакеты, не адресованные напрямую вашему устройству. Это может быть полезно при поиске находящихся рядом служб. Расход заряда батареи при этом выше, чем при одноадресной передаче."</string>
-    <!-- outdated translation 1092209628459341292 -->     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"управление Bluetooth"</string>
-    <!-- outdated translation 3511795757324345837 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Позволяет приложению настраивать локальный планшетный ПК через Bluetooth, а также обнаруживать и выполнять сопряжение удаленных устройств."</string>
-    <!-- outdated translation 3511795757324345837 -->     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Позволяет приложению настраивать локальный планшетный ПК через Bluetooth, а также обнаруживать и выполнять сопряжение удаленных устройств."</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Приложение сможет получать пакеты данных, не адресованные напрямую вашему устройству. Благодаря этому устройство может обнаруживать новые службы, которые доступны поблизости. Расход заряда батареи при использовании этой функции повышается."</string>
+    <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"управление Bluetooth"</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Приложение сможет настраивать параметры локального планшетного ПК с поддержкой Bluetooth, а также обнаруживать удаленные устройства и выполнять сопряжение с ними."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Приложение сможет настраивать параметры локального телефона с поддержкой Bluetooth, а также обнаруживать удаленные устройства и выполнять сопряжение с ними."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"создавать подключения Bluetooth"</string>
-    <!-- outdated translation 4191941825910543803 -->     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Позволяет приложению просматривать конфигурацию локального планшетного ПК, подключенного через Bluetooth, а также создавать подключения с сопряженными устройствами."</string>
-    <!-- outdated translation 4191941825910543803 -->     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Позволяет приложению просматривать конфигурацию локального планшетного ПК, подключенного через Bluetooth, а также создавать подключения с сопряженными устройствами."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Приложение сможет просматривать конфигурацию локального планшетного ПК с поддержкой Bluetooth, а также создавать и принимать соединения с сопряженными устройствами."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Приложение сможет просматривать конфигурацию локального телефона с поддержкой Bluetooth, а также создавать и принимать соединения с сопряженными устройствами."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"управлять радиосвязью ближнего действия"</string>
-    <!-- outdated translation 9171401851954407226 -->     <string name="permdesc_nfc" msgid="7120611819401789907">"Позволяет приложению обмениваться данными с метками, картами и считывателями через радиосвязь ближнего действия (NFC)."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с метками, картами и устройствами считывания посредством связи малого радиуса действия (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"отключать блокировку клавиатуры"</string>
-    <!-- outdated translation 3189763479326302017 -->     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Позволяет приложению отключить блокировку клавиатуры и другие функции защиты паролем. Примером допустимого использования этой функции является отключение блокировки клавиатуры при получении входящего вызова и включение блокировки после завершения разговора."</string>
+    <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Приложение сможет отключать блокировку экрана и другие функции защиты. Пример допустимого использования этой функции – отключение блокировки экрана при получении входящего вызова и ее включение после завершения разговора."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"считывать настройки синхронизации"</string>
-    <!-- outdated translation 5315925706353341823 -->     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Позволяет приложению считывать настройки синхронизации, такие как включение синхронизации Контактов."</string>
+    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Приложение сможет считывать настройки синхронизации, например сведения о том, включена ли синхронизация Контактов."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"записывать настройки синхронизации"</string>
-    <!-- outdated translation 2498201614431360044 -->     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Позволяет приложению изменять настройки синхронизации, например включение синхронизации Контактов."</string>
+    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Приложение сможет изменять настройки синхронизации, например включать синхронизацию Контактов."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"считывать статистику синхронизации"</string>
-    <!-- outdated translation 7511448343374465000 -->     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Позволяет приложению считывать статистику синхронизации, например историю произведенных синхронизаций."</string>
+    <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Предоставляет приложению доступ к статистике синхронизации, например истории выполненных синхронизаций."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"считывать каналы, на которые есть подписка"</string>
-    <!-- outdated translation 3622200625634207660 -->     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Позволяет приложению получить сведения о последних синхронизированных каналах."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Приложение сможет получать сведения о синхронизируемых в настоящее время фидах."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"создавать фиды с возможностью подписки"</string>
-    <!-- outdated translation 8121607099326533878 -->     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Позволяет приложению изменять синхронизированные каналы. Вредоносные приложения могут использовать эту возможность для изменения синхронизированных каналов."</string>
-    <!-- outdated translation 432535716804748781 -->     <string name="permlab_readDictionary" msgid="8410247960433376352">"выполнять чтение из пользовательского словаря"</string>
-    <!-- outdated translation 1082972603576360690 -->     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
-    <!-- outdated translation 6703109511836343341 -->     <string name="permlab_writeDictionary" msgid="2296383164914812772">"записывать в словарь пользователя"</string>
-    <!-- outdated translation 2241256206524082880 -->     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Позволяет приложению записывать новые слова в словарь пользователя."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"изм./удал. содерж. накопителя"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Приложение сможет изменять фиды, синхронизируемые в настоящее время. Вредоносные программы смогут изменять синхронизированные фиды."</string>
+    <string name="permlab_readDictionary" msgid="8410247960433376352">"чтение данных из пользовательского словаря"</string>
+    <string name="permdesc_readDictionary" msgid="8977815988329283705">"Приложение сможет считывать любые слова, имена и фразы, которые хранятся в пользовательском словаре."</string>
+    <string name="permlab_writeDictionary" msgid="2296383164914812772">"запись данных в пользовательский словарь"</string>
+    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Приложение сможет добавлять слова в пользовательский словарь."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"доступ к USB-накопителю"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"изменять/удалять содержимое SD-карты"</string>
-    <!-- outdated translation 6594393334785738252 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Разрешает приложению запись на USB-накопитель."</string>
-    <!-- outdated translation 6594393334785738252 -->     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Разрешает приложению запись на USB-накопитель."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Приложение сможет записывать данные на USB-накопитель."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Приложение сможет записывать данные на SD-карту."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"изм./удал. данных мультимедиа"</string>
-    <!-- outdated translation 8232008512478316233 -->     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Приложение сможет изменять содержание внутреннего хранилища мультимедиа."</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Приложение сможет изменять содержание внутреннего хранилища мультимедиа."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"получать доступ к кэшу файловой системы"</string>
-    <!-- outdated translation 1624734528435659906 -->     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Разрешает программам доступ для записи и чтения к кэшу файловой системы."</string>
+    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Приложение сможет выполнять чтение и запись в файловую систему кэша."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"совершать и принимать интернет-вызовы"</string>
-    <!-- outdated translation 6320376185606661843 -->     <string name="permdesc_use_sip" msgid="4717632000062674294">"Позволяет приложению использовать службу SIP для интернет-вызовов."</string>
+    <string name="permdesc_use_sip" msgid="4717632000062674294">"Приложение сможет использовать службу SIP для интернет-вызовов."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"читать журнал использования сети"</string>
-    <!-- outdated translation 6040738474779135653 -->     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Разрешает приложению читать журнал использования определенных сетей и приложений."</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Приложение сможет считывать сохраненную историю использования определенных сетей и приложений."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"управление сетевой политикой"</string>
-    <!-- outdated translation 3723795285132803958 -->     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Разрешает приложению управлять сетевыми политиками и задавать правила для приложений."</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Приложение сможет управлять сетевыми политиками и определять правила для отдельных приложений."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"изменение учета использования сети"</string>
-    <!-- outdated translation 8702285686629184404 -->     <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"Позволяет изменить способ учета использования сети приложениями. Не для использования обычными приложениями."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"Приложение сможет вносить изменения в порядок расчета использования сетевых ресурсов различными программами. Это разрешение не используется обычными приложениями."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
-    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Отслеживать количество неверно введенных паролей для снятия блокировки экрана и блокировать планшетный ПК либо уничтожить все данные на нем, если было введено слишком много неверных паролей"</string>
-    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Отслеживать количество неверно введенных паролей для снятия блокировки экрана и блокировать планшетный ПК либо уничтожить все данные на нем, если было введено слишком много неверных паролей"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует телефон или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Изменять пароль для снятия блокировки экрана"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Изменять пароль для снятия блокировки экрана"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировать экран"</string>
@@ -519,7 +519,7 @@
     <string name="policylab_expirePassword" msgid="885279151847254056">"Задать срок действия пароля"</string>
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Укажите, как часто следует менять пароль блокировки экрана"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Настроить шифрование хранилища"</string>
-    <!-- outdated translation 2504984732631479399 -->     <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Требует шифровать данные приложений, находящиеся в хранилище."</string>
+    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Обязательное шифрование данных приложений в хранилище"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Отключить камеры"</string>
     <string name="policydesc_disableCamera" msgid="5680054212889413366">"Запретить использование всех камер устройства"</string>
   <string-array name="phoneTypes">
@@ -635,13 +635,13 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Домашний"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Рабочий"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Другой"</string>
-    <!-- outdated translation 3731488827218876115 -->     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Введите PIN-код"</string>
-    <!-- outdated translation 5965173481572346878 -->     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Введите PUK-код и новый PIN-код"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Введите PIN-код"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Введите PUK-код и новый PIN-код"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-код"</string>
-    <!-- outdated translation 2987350144349051286 -->     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Новый PIN-код"</string>
-    <!-- outdated translation 7906561917570259833 -->     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Нажмите для ввода пароля"</font></string>
-    <!-- outdated translation 9138158344813213754 -->     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Введите пароль для разблокировки"</string>
-    <!-- outdated translation 638347075625491514 -->     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Введите PIN-код для разблокировки"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Новый PIN-код"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Нажмите для ввода пароля"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Введите пароль для разблокировки"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Введите PIN-код для разблокировки"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неверный PIN-код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Экстренная служба"</string>
@@ -653,8 +653,8 @@
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Экстренный вызов"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вернуться к вызову"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
-    <!-- outdated translation 4817583279053112312 -->     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторите попытку"</string>
-    <!-- outdated translation 6237443657358168819 -->     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторите попытку"</string>
+    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторить попытку"</string>
+    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторить попытку"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Батарея заряжена"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -662,9 +662,9 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIM-карта не установлена."</string>
-    <!-- outdated translation 8874620818937719067 -->     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Вставьте SIM-карту."</string>
-    <!-- outdated translation 7138450788301444298 -->     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-карта отсутствует или не читается. Вставьте SIM-карту."</string>
-    <!-- outdated translation 1631853574702335453 -->     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ваша SIM-карта окончательно заблокирована."\n"Чтобы получить новую SIM-карту, обратитесь к оператору мобильной связи."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Вставьте SIM-карту."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-карта отсутствует или не читается. Вставьте SIM-карту."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-карта окончательно заблокирована."\n"Чтобы получить новую, обратитесь к оператору сотовой связи."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Кнопка перехода к предыдущему треку"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Кнопка перехода к следующему треку"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Кнопка паузы"</string>
@@ -673,19 +673,14 @@
     <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренные вызовы"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
-    <!-- outdated translation 635967534992394321 -->     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Ознакомьтесь с руководством пользователя или свяжитесь со службой поддержки."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-карта заблокирована"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Разблокировка SIM-карты…"</string>
-    <!-- no translation found for lockscreen_too_many_failed_attempts_dialog_message (6481623830344107222) -->
-    <skip />
-    <!-- no translation found for lockscreen_too_many_failed_password_attempts_dialog_message (2725973286239344555) -->
-    <skip />
-    <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6216672706545696955) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (9191611984625460820) -->
-    <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (2590227559763762751) -->
-    <skip />
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Количество неудачных попыток ввода пароля: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Количество неудачных попыток ввода PIN-кода: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого вам будет предложено разблокировать планшетный ПК с помощью учетных данных Google. "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого вам будет предложено разблокировать телефон с помощью учетных данных Google. "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Не удалось разблокировать телефон (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER">%d</xliff:g>). Будут установлены настройки по умолчанию."</string>
@@ -719,10 +714,9 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Перезагрузка"</string>
     <string name="js_dialog_title" msgid="8143918455087008109">"Подтвердите действие на <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload (730366588032430474) -->
-    <skip />
+    <string name="js_dialog_before_unload" msgid="730366588032430474">"Уйти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
-    <!-- outdated translation 1068216937244567247 -->     <string name="double_tap_toast" msgid="2729045387923870404">"Совет: нажмите дважды, чтобы увеличить и уменьшить масштаб."</string>
+    <string name="double_tap_toast" msgid="2729045387923870404">"Совет: вы можете увеличить или уменьшить масштаб двойным нажатием."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Автозаполнение"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Нужна настройка"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
@@ -742,25 +736,25 @@
     <string name="autofill_area" msgid="3547409050889952423">"Область"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Эмират"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"считывать историю и закладки браузера"</string>
-    <!-- outdated translation 4981489815467617191 -->     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Разрешает приложению считывать все URL, посещенные браузером, и все его закладки."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Приложение сможет считывать все URL, посещенные браузером, и все его закладки."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"записывать историю и закладки браузера"</string>
-    <!-- outdated translation 7193514090469945307 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Разрешает приложению изменять историю и закладки браузера, сохраненные на вашем планшетном ПК. Вредоносное ПО может пользоваться этой функцией, чтобы стирать или изменять данные вашего браузера."</string>
-    <!-- outdated translation 7193514090469945307 -->     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Разрешает приложению изменять историю и закладки браузера, сохраненные на вашем планшетном ПК. Вредоносное ПО может пользоваться этой функцией, чтобы стирать или изменять данные вашего браузера."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Приложение сможет изменять историю или закладки Браузера, сохраненные на планшетном ПК. Вредоносные программы смогут таким образом удалять и менять ваши данные в Браузере."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Приложение сможет изменять историю или закладки Браузера, сохраненные на телефоне. Вредоносные программы смогут таким образом удалять и менять ваши данные в Браузере."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"настраивать сигнал будильника"</string>
-    <!-- outdated translation 5966966598149875082 -->     <string name="permdesc_setAlarm" msgid="316392039157473848">"Позволяет настраивать сигнал установленного приложения будильника. Для некоторых приложений будильника эта функция может быть недоступна."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"Приложение сможет настраивать будильник в установленной программе будильника. В некоторых таких программах эта функция может не поддерживаться."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавлять голосовые сообщения"</string>
-    <!-- outdated translation 4828507394878206682 -->     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Приложение сможет добавлять голосовые сообщения во входящие."</string>
-    <!-- outdated translation 4715212655598275532 -->     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Изменить разрешения браузера для доступа к географическому местоположению"</string>
-    <!-- outdated translation 4011908282980861679 -->     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Позволяет программе изменять разрешения браузера для доступа к географическому положению. Вредоносные программы могут пользоваться этим для отправки информации о местоположении на некоторые сайты."</string>
+    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Приложение сможет добавлять голосовые сообщения в папку \"Входящие\"."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"изменить разрешения браузера на доступ к службам геопозиционирования"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Приложение сможет изменять разрешения службы геопозиционирования браузера. Вредоносные программы смогут таким образом отправлять информацию о местоположении на любые веб-сайты."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"проверять пакеты"</string>
-    <!-- outdated translation 6033195477325381106 -->     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Позволяет приложению проверить, может ли пакет быть установлен."</string>
+    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Приложение сможет проверять возможность установки пакетов."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"связываться с верификатором пакетов"</string>
-    <!-- outdated translation 2409521927385789318 -->     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Позволяет приложению отправлять запросы на проверку пакетов. Не требуется для обычных приложений."</string>
+    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Приложение сможет отправлять запросы на проверку пакетов. Это разрешение не используется обычными приложениями."</string>
     <string name="save_password_message" msgid="767344687139195790">"Вы хотите, чтобы браузер запомнил этот пароль?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сейчас"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомнить"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Никогда"</string>
-    <!-- outdated translation 5661861460947222274 -->     <string name="open_permission_deny" msgid="7374036708316629800">"У вас нет разрешения на открытие этой страницы."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"У вас нет разрешения на открытие этой страницы."</string>
     <string name="text_copied" msgid="4985729524670131385">"Текст скопирован в буфер обмена."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Ещё"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Меню+"</string>
@@ -859,9 +853,9 @@
     <string name="weeks" msgid="6509623834583944518">"нед."</string>
     <string name="year" msgid="4001118221013892076">"г."</string>
     <string name="years" msgid="6881577717993213522">"г."</string>
-    <!-- outdated translation 3359437293118172396 -->     <string name="VideoView_error_title" msgid="5927895235831021723">"Не удалось воспроизвести видео"</string>
-    <!-- outdated translation 897920883624437033 -->     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Это видео не подходит для потокового воспроизведения на данном устройстве."</string>
-    <!-- outdated translation 710301040038083944 -->     <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"Невозможно воспроизвести видео."</string>
+    <string name="VideoView_error_title" msgid="5927895235831021723">"Невозможно воспроизвести видео."</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Это видео не предназначено для потокового воспроизведения на данном устройстве."</string>
+    <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"Невозможно воспроизвести видео."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"ОК"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"полдень"</string>
@@ -877,7 +871,7 @@
     <string name="replace" msgid="5781686059063148930">"Заменить"</string>
     <string name="delete" msgid="6098684844021697789">"Удалить"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
-    <!-- outdated translation 6738556348861347240 -->     <string name="selectTextMode" msgid="1018691815143165326">"Выбрать текст..."</string>
+    <string name="selectTextMode" msgid="1018691815143165326">"Выбрать текст"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Выбор текста"</string>
     <string name="addToDictionary" msgid="9090375111134433012">"добавить в словарь"</string>
     <string name="deleteText" msgid="7070985395199629156">"удалить"</string>
@@ -891,52 +885,46 @@
     <string name="yes" msgid="5362982303337969312">"ОК"</string>
     <string name="no" msgid="5141531044935541497">"Отмена"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Внимание"</string>
-    <!-- outdated translation 1760724998928255250 -->     <string name="loading" msgid="7933681260296021180">"Загрузка..."</string>
+    <string name="loading" msgid="7933681260296021180">"Загрузка…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ВКЛ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ВЫКЛ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Что использовать?"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
-    <!-- outdated translation 4815455344600932173 -->     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Удалить настройки по умолчанию: главный экран &gt; \"Настройки\" &gt; \"Приложения\" &gt; \"Управление приложениями\"."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Удаляет настройки по умолчанию в меню \"Системные настройки\" &gt; \"Приложения\" &gt; \"Загруженные\"."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Выберите действие"</string>
-    <!-- outdated translation 7892597146032121735 -->     <string name="chooseUsbActivity" msgid="6894748416073583509">"Выбор приложения для USB-устройства"</string>
-    <!-- outdated translation 1691104391758345586 -->     <string name="noApplications" msgid="2991814273936504689">"Это действие не может выполнять ни одно приложение."</string>
+    <string name="chooseUsbActivity" msgid="6894748416073583509">"Выбор приложения для USB-устройства"</string>
+    <string name="noApplications" msgid="2991814273936504689">"Ни одно приложение не может выполнить это действие."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"В приложении \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" произошла ошибка."</string>
     <string name="aerr_process" msgid="4507058997035697579">"В приложении \"<xliff:g id="PROCESS">%1$s</xliff:g>\" произошла ошибка."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (1904477189057199066) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (5776209883299089767) -->
-    <skip />
-    <!-- no translation found for anr_application_process (8941757607340481057) -->
-    <skip />
-    <!-- no translation found for anr_process (6513209874880517125) -->
-    <skip />
+    <string name="anr_activity_application" msgid="1904477189057199066">"Приложение <xliff:g id="APPLICATION">%2$s</xliff:g> не отвечает."\n\n"Закрыть его?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Приложение <xliff:g id="ACTIVITY">%1$s</xliff:g> не отвечает."\n\n"Закрыть его?"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> не отвечает. Закрыть его?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> не отвечает."\n\n"Закрыть его?"</string>
     <string name="force_close" msgid="8346072094521265605">"ОК"</string>
     <string name="report" msgid="4060218260984795706">"Отзыв"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
-    <!-- outdated translation 8323761616052121936 -->     <string name="launch_warning_title" msgid="1547997780506713581">"Приложение перенаправлено"</string>
+    <string name="launch_warning_title" msgid="1547997780506713581">"Приложение перенаправлено"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> выполняется."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Изначально было запущено приложение <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Масштаб"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Всегда показывать"</string>
-    <!-- outdated translation 2953716574198046484 -->     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Включите еще раз в меню \"Настройки &gt; Приложения &gt; Управление приложениями\"."</string>
-    <!-- no translation found for smv_application (3307209192155442829) -->
-    <skip />
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Повторно включить эту функцию можно в меню \"Системные настройки\" &gt; \"Приложения\" &gt; \"Загруженные\"."</string>
+    <string name="smv_application" msgid="3307209192155442829">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>) нарушило собственную политику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> нарушил собственную политику StrictMode."</string>
-    <!-- outdated translation 378740715658358071 -->     <string name="android_upgrading_title" msgid="1584192285441405746">"Обновление Android..."</string>
-    <!-- no translation found for android_upgrading_apk (7904042682111526169) -->
-    <skip />
-    <!-- outdated translation 7959542881906488763 -->     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск приложений..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Обновление Android..."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизация приложения <xliff:g id="NUMBER_0">%1$d</xliff:g> из <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Окончание загрузки..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
-    <!-- outdated translation 2423977499339403402 -->     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Нажмите, чтобы перейти к приложению"</string>
-    <!-- outdated translation 1135403633766694316 -->     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Переключить приложения?"</string>
-    <!-- outdated translation 4592075610079319667 -->     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Выполняется другое приложение, которое должно быть остановлено прежде, чем запускать новое."</string>
+    <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Нажмите, чтобы переключиться на приложение"</string>
+    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Переключение приложений"</string>
+    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Выполняется другое приложение, которое необходимо остановить перед запуском нового."</string>
     <string name="old_app_action" msgid="493129172238566282">"Вернуться к приложению <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <!-- outdated translation 942967900237208466 -->     <string name="old_app_description" msgid="2082094275580358049">"Не запускать новое приложение."</string>
+    <string name="old_app_description" msgid="2082094275580358049">"Не запускать новое приложение."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Запустить приложение <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <!-- outdated translation 6830398339826789493 -->     <string name="new_app_description" msgid="1932143598371537340">"Остановить старое приложение без сохранения изменений."</string>
+    <string name="new_app_description" msgid="1932143598371537340">"Остановить старое приложение без сохранения изменений."</string>
     <string name="sendText" msgid="5132506121645618310">"Выберите действие для текста"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Громкость звонка"</string>
     <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>
@@ -965,8 +953,7 @@
     <item quantity="one" msgid="1634101450343277345">"Найдена доступная сеть Wi-Fi"</item>
     <item quantity="other" msgid="7915895323644292768">"Найдены доступные сети Wi-Fi"</item>
   </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Подключение к Wi-Fi"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не удалось подключиться к сети Wi-Fi"</string>
@@ -980,9 +967,9 @@
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct включен"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Нажмите, чтобы открыть настройки"</string>
     <string name="select_character" msgid="3365550120617701745">"Введите символ"</string>
-    <!-- outdated translation 7630529934366549163 -->     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Неизвестное приложение"</string>
+    <string name="sms_control_default_app_name" msgid="3058577482636640465">"Неизвестное приложение"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Отправка SMS-сообщений"</string>
-    <!-- outdated translation 1289331457999236205 -->     <string name="sms_control_message" msgid="4073755190243093924">"Отправляется большое количество SMS-сообщений. Нажмите \"ОК\" для продолжения или \"Отмена\" для прекращения отправки."</string>
+    <string name="sms_control_message" msgid="4073755190243093924">"Отправляется большое количество SMS-сообщений. Нажмите \"ОК\", чтобы продолжить отправку, или \"Отмена\", чтобы прекратить ее."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"ОК"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Отмена"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карта удалена"</string>
@@ -1015,7 +1002,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Отключить USB-накопитель"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Включение USB-накопителя"</string>
-    <!-- outdated translation 3202838234780505886 -->     <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"При включении USB-накопителя некоторые используемые приложения могут прекратить работу и оставаться недоступными до отключения USB-накопителя."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"При включении USB-накопителя некоторые приложения могут прекратить работу и оставаться недоступными до его отключения."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Ошибка при подключении USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Подключен как устройство хранения данных"</string>
@@ -1023,15 +1010,15 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Подключен как установщик"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Нажмите, чтобы увидеть другие параметры USB"</string>
-    <!-- outdated translation 7980995592595097841 -->     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Форматирование"</string>
-    <!-- outdated translation 7980995592595097841 -->     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Форматирование"</string>
-    <!-- outdated translation 8296908079722897772 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Форматирование USB-накопителя безвозвратно удалит все файлы на нем! Продолжить?"</string>
-    <!-- outdated translation 8296908079722897772 -->     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Форматирование USB-накопителя безвозвратно удалит все файлы на нем! Продолжить?"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Отформатировать USB-накопитель?"</string>
+    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Отформатировать SD-карту?"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Все файлы, сохраненные на USB-накопителе, будут удалены. Это действие невозможно отменить."</string>
+    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Все данные, хранящиеся на карте, будут потеряны."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
-    <!-- outdated translation 8592219392855947984 -->     <string name="adb_active_notification_message" msgid="1016654627626476142">"Этот терминал оснащен ПО Nexus S."</string>
-    <!-- outdated translation 6865512749462072765 -->     <string name="select_input_method" msgid="4653387336791222978">"Выберите способ ввода"</string>
-    <!-- outdated translation 6324843080254191535 -->     <string name="configure_input_methods" msgid="9091652157722495116">"Настроить способ ввода"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Нажмите, чтобы отключить отладку USB."</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Выберите способ ввода"</string>
+    <string name="configure_input_methods" msgid="9091652157722495116">"Настройка способов ввода"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
@@ -1060,10 +1047,10 @@
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-карта извлечена. Вставьте новую карту."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Подходящих действий не найдено"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"обновлять статистику использования компонентов"</string>
-    <!-- outdated translation 891553695716752835 -->     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>
-    <!-- outdated translation 1660908117394854464 -->     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"Позволяет вызывать службу контейнера для копирования содержания. Не предназначена для обычных программ."</string>
-    <!-- outdated translation 537780957633976401 -->     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Позволяет вызывать службу контейнера для копирования содержания. Не предназначена для обычных программ."</string>
-    <!-- outdated translation 1311810005957319690 -->     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Нажмите дважды для изменения масштаба"</string>
+    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Приложение сможет изменять собранную статистику использования компонентов. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"копирование содержания"</string>
+    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Приложение сможет вызывать службу контейнеров по умолчанию для копирования содержания. Это разрешение не используется обычными приложениями."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Нажмите дважды для изменения масштаба"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Ошибка при наполнении виджета"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Выбрать"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Поиск"</string>
@@ -1074,7 +1061,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Выполнить"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Набрать номер"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- outdated translation 6824538733852821001 -->     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Одна или несколько программ требуют разрешения для доступа к вашему аккаунту сейчас и в дальнейшем."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Одному или нескольким приложениям требуется разрешение на доступ к вашему аккаунту сейчас и в дальнейшем."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Разрешить доступ?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Запрос доступа"</string>
     <string name="allow" msgid="7225948811296386551">"Разрешить"</string>
@@ -1138,7 +1125,7 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Удалить элементы."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Отменить удаления."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ничего не делать сейчас."</string>
-    <!-- outdated translation 4191313562041125787 -->     <string name="choose_account_label" msgid="5655203089746423927">"Выберите аккаунт"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Выберите аккаунт"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Добавить аккаунт"</string>
     <string name="choose_account_text" msgid="6891230675141555481">"Выберите аккаунт"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Добавить аккаунт"</string>
@@ -1173,10 +1160,10 @@
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Клавиша смены режима"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Клавиша смены регистра"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Клавиша ввода"</string>
-    <!-- outdated translation 4540794444768613567 -->     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Выберите приложение"</string>
+    <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Выберите приложение"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Открыть доступ:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Открыть доступ приложению \"<xliff:g id="APPLICATION_NAME">%s</xliff:g>\""</string>
-    <!-- outdated translation 7311938669217173870 -->     <string name="content_description_sliding_handle" msgid="415975056159262248">"Сенсорное управление. Нажмите и удерживайте."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Перетаскиваемый значок блокировки. Нажмите и удерживайте."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Проведите вниз, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Проведите влево, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1185,8 +1172,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Без звука"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Включить звук"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Проведите по экрану, чтобы разблокировать устройство."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Подключите гарнитуру, чтобы услышать пароль."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Точка"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на главную"</string>
@@ -1224,9 +1210,9 @@
     <string name="fingerprints" msgid="4516019619850763049">"Отпечатки:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Отпечаток SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Отпечаток SHA-1:"</string>
-    <!-- outdated translation 180268188117163072 -->     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Просмотреть все"</string>
-    <!-- outdated translation 3325054276356556835 -->     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Выбор действия"</string>
-    <!-- outdated translation 1791316789651185229 -->     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Настройка доступа"</string>
+    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Просмотреть все"</string>
+    <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Выбор действия"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Открыть доступ"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройство заблокировано."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

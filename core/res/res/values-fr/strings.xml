@@ -965,8 +965,7 @@
     <item quantity="one" msgid="1634101450343277345">"Réseau Wi-Fi ouvert disponible"</item>
     <item quantity="other" msgid="7915895323644292768">"Réseaux Wi-Fi ouverts disponibles"</item>
   </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Connectez-vous au réseau Wi-Fi"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossible de se connecter au Wi-Fi."</string>
@@ -1185,8 +1184,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"Appareil photo"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Mode silencieux"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Son activé"</string>
-    <!-- no translation found for description_target_unlock_tablet (3833195335629795055) -->
-    <skip />
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Faites glisser votre doigt pour déverrouiller l\'appareil."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Branchez des écouteurs pour entendre l\'énoncé à haute voix des touches du mot de passe."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Point."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Retour à l\'accueil"</string>
