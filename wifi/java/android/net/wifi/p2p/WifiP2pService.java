@@ -81,7 +81,7 @@ import java.util.Collection;
  */
 public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final String TAG = "WifiP2pService";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String NETWORKTYPE = "WIFI_P2P";
 
     private Context mContext;
@@ -131,12 +131,22 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* User rejected to disable Wi-Fi in order to enable p2p */
     private static final int WIFI_DISABLE_USER_REJECT       =   BASE + 5;
 
+    /* User accepted a group negotiation request */
+    private static final int GROUP_NEGOTIATION_USER_ACCEPT  =   BASE + 6;
+    /* User rejected a group negotiation request */
+    private static final int GROUP_NEGOTIATION_USER_REJECT  =   BASE + 7;
+
+    /* User accepted a group invitation request */
+    private static final int GROUP_INVITATION_USER_ACCEPT   =   BASE + 8;
+    /* User rejected a group invitation request */
+    private static final int GROUP_INVITATION_USER_REJECT   =   BASE + 9;
+
     /* Airplane mode changed */
-    private static final int AIRPLANE_MODE_CHANGED          =   BASE + 6;
+    private static final int AIRPLANE_MODE_CHANGED          =   BASE + 10;
     /* Emergency callback mode */
-    private static final int EMERGENCY_CALLBACK_MODE        =   BASE + 7;
-    private static final int WPS_PBC                        =   BASE + 8;
-    private static final int WPS_PIN                        =   BASE + 9;
+    private static final int EMERGENCY_CALLBACK_MODE        =   BASE + 11;
+    private static final int WPS_PBC                        =   BASE + 12;
+    private static final int WPS_PIN                        =   BASE + 13;
 
     private final boolean mP2pSupported;
 
@@ -260,6 +270,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         private P2pEnabledState mP2pEnabledState = new P2pEnabledState();
         // Inactive is when p2p is enabled with no connectivity
         private InactiveState mInactiveState = new InactiveState();
+        private UserAuthorizingGroupNegotiationState mUserAuthorizingGroupNegotiationState
+                = new UserAuthorizingGroupNegotiationState();
+        private UserAuthorizingGroupInvitationState mUserAuthorizingGroupInvitationState
+                = new UserAuthorizingGroupInvitationState();
         private GroupNegotiationState mGroupNegotiationState = new GroupNegotiationState();
         private GroupCreatedState mGroupCreatedState = new GroupCreatedState();
 
@@ -290,6 +304,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 addState(mP2pEnablingState, mDefaultState);
                 addState(mP2pEnabledState, mDefaultState);
                     addState(mInactiveState, mP2pEnabledState);
+                        addState(mUserAuthorizingGroupNegotiationState, mInactiveState);
+                        addState(mUserAuthorizingGroupInvitationState, mInactiveState);
                     addState(mGroupNegotiationState, mP2pEnabledState);
                     addState(mGroupCreatedState, mP2pEnabledState);
 
@@ -379,6 +395,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     // Ignore
                 case WIFI_DISABLE_USER_ACCEPT:
                 case WIFI_DISABLE_USER_REJECT:
+                case GROUP_NEGOTIATION_USER_ACCEPT:
+                case GROUP_NEGOTIATION_USER_REJECT:
+                case GROUP_INVITATION_USER_ACCEPT:
+                case GROUP_INVITATION_USER_REJECT:
                 case GROUP_NEGOTIATION_TIMED_OUT:
                     break;
                 default:
@@ -747,6 +767,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_GO_NEGOTIATION_REQUEST_EVENT:
                     mSavedGoNegotiationConfig = (WifiP2pConfig) message.obj;
                     notifyP2pGoNegotationRequest(mSavedGoNegotiationConfig);
+                    transitionTo(mUserAuthorizingGroupNegotiationState);
                     break;
                 case WifiP2pManager.CREATE_GROUP:
                     mPersistGroup = true;
@@ -761,6 +782,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_INVITATION_RECEIVED_EVENT:
                     WifiP2pGroup group = (WifiP2pGroup) message.obj;
                     notifyP2pInvitationReceived(group);
+                    transitionTo(mUserAuthorizingGroupInvitationState);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -768,6 +790,70 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             return HANDLED;
         }
     }
+
+    class UserAuthorizingGroupNegotiationState extends State {
+        @Override
+        public void enter() {
+            if (DBG) logd(getName());
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) logd(getName() + message.toString());
+            switch (message.what) {
+                case WifiMonitor.P2P_GO_NEGOTIATION_REQUEST_EVENT:
+                case WifiMonitor.P2P_INVITATION_RECEIVED_EVENT:
+                    //Ignore additional connection requests
+                    break;
+                case GROUP_NEGOTIATION_USER_ACCEPT:
+                    sendMessage(WifiP2pManager.CONNECT, mSavedGoNegotiationConfig);
+                    mSavedGoNegotiationConfig = null;
+                    break;
+                case GROUP_NEGOTIATION_USER_REJECT:
+                    if (DBG) logd("User rejected incoming negotiation request");
+                    mSavedGoNegotiationConfig = null;
+                    transitionTo(mInactiveState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
+    class UserAuthorizingGroupInvitationState extends State {
+        @Override
+        public void enter() {
+            if (DBG) logd(getName());
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) logd(getName() + message.toString());
+            switch (message.what) {
+                case WifiMonitor.P2P_GO_NEGOTIATION_REQUEST_EVENT:
+                case WifiMonitor.P2P_INVITATION_RECEIVED_EVENT:
+                    //Ignore additional connection requests
+                    break;
+                case GROUP_INVITATION_USER_ACCEPT:
+                    if (DBG) logd(getName() + " connect to invited group");
+                    WifiP2pConfig config = new WifiP2pConfig();
+                    config.deviceAddress = mSavedP2pGroup.getOwner().deviceAddress;
+                    sendMessage(WifiP2pManager.CONNECT, config);
+                    mSavedP2pGroup = null;
+                    break;
+                case GROUP_INVITATION_USER_REJECT:
+                    if (DBG) logd("User rejected incoming invitation request");
+                    mSavedP2pGroup = null;
+                    transitionTo(mInactiveState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
 
     class GroupNegotiationState extends State {
         @Override
@@ -1091,15 +1177,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 mSavedGoNegotiationConfig.wps.setup = WpsInfo.KEYPAD;
                                 mSavedGoNegotiationConfig.wps.pin = pin.getText().toString();
                             }
-                            sendMessage(WifiP2pManager.CONNECT, mSavedGoNegotiationConfig);
-                            mSavedGoNegotiationConfig = null;
+                            sendMessage(GROUP_NEGOTIATION_USER_ACCEPT);
                         }
                     })
             .setNegativeButton(r.getString(R.string.cancel), new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (DBG) logd(getName() + " ignore connect");
-                            mSavedGoNegotiationConfig = null;
+                            sendMessage(GROUP_NEGOTIATION_USER_REJECT);
                         }
                     })
             .create();
@@ -1180,14 +1265,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             .setView(textEntryView)
             .setPositiveButton(r.getString(R.string.ok), new OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                                WifiP2pConfig config = new WifiP2pConfig();
-                                config.deviceAddress = mSavedP2pGroup.getOwner().deviceAddress;
-                                if (DBG) logd(getName() + " connect to invited group");
-                                sendMessage(WifiP2pManager.CONNECT, config);
-                                mSavedP2pGroup = null;
+                            sendMessage(GROUP_INVITATION_USER_ACCEPT);
                         }
                     })
-            .setNegativeButton(r.getString(R.string.cancel), null)
+            .setNegativeButton(r.getString(R.string.cancel), new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (DBG) logd(getName() + " ignore invite");
+                            sendMessage(GROUP_INVITATION_USER_REJECT);
+                        }
+                    })
             .create();
 
         pin.setVisibility(View.GONE);
