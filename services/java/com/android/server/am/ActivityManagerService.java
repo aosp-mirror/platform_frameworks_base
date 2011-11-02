@@ -410,6 +410,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     ProcessRecord mHomeProcess;
     
     /**
+     * This is the process holding the activity the user last visited that
+     * is in a different process from the one they are currently in.
+     */
+    ProcessRecord mPreviousProcess;
+    
+    /**
      * Packages that the user has asked to have run in screen size
      * compatibility mode instead of filling the screen.
      */
@@ -8126,6 +8132,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
+        pw.println("  mPreviousProcess: " + mPreviousProcess);
         if (mHeavyWeightProcess != null) {
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
         }
@@ -8224,6 +8231,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print("    BACKUP_APP_ADJ: "); pw.println(ProcessList.BACKUP_APP_ADJ);
             pw.print("    SERVICE_ADJ: "); pw.println(ProcessList.SERVICE_ADJ);
             pw.print("    HOME_APP_ADJ: "); pw.println(ProcessList.HOME_APP_ADJ);
+            pw.print("    PREVIOUS_APP_ADJ: "); pw.println(ProcessList.PREVIOUS_APP_ADJ);
             pw.print("    SERVICE_B_ADJ: "); pw.println(ProcessList.SERVICE_B_ADJ);
             pw.print("    HIDDEN_APP_MIN_ADJ: "); pw.println(ProcessList.HIDDEN_APP_MIN_ADJ);
             pw.print("    HIDDEN_APP_MAX_ADJ: "); pw.println(ProcessList.HIDDEN_APP_MAX_ADJ);
@@ -8240,6 +8248,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
+        pw.println("  mPreviousProcess: " + mPreviousProcess);
         if (mHeavyWeightProcess != null) {
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
         }
@@ -9021,6 +9030,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 oomAdj = buildOomTag("bak", "  ", r.setAdj, ProcessList.HIDDEN_APP_MIN_ADJ);
             } else if (r.setAdj >= ProcessList.SERVICE_B_ADJ) {
                 oomAdj = buildOomTag("svcb ", null, r.setAdj, ProcessList.SERVICE_B_ADJ);
+            } else if (r.setAdj >= ProcessList.PREVIOUS_APP_ADJ) {
+                oomAdj = buildOomTag("prev ", null, r.setAdj, ProcessList.PREVIOUS_APP_ADJ);
             } else if (r.setAdj >= ProcessList.HOME_APP_ADJ) {
                 oomAdj = buildOomTag("home ", null, r.setAdj, ProcessList.HOME_APP_ADJ);
             } else if (r.setAdj >= ProcessList.SERVICE_ADJ) {
@@ -9299,12 +9310,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
-            ProcessList.SERVICE_B_ADJ, ProcessList.HIDDEN_APP_MAX_ADJ
+            ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.HIDDEN_APP_MAX_ADJ
         };
         final String[] oomLabel = new String[] {
                 "System", "Persistent", "Foreground",
                 "Visible", "Perceptible", "Heavy Weight",
-                "Backup", "A Services", "Home", "B Services", "Background"
+                "Backup", "A Services", "Home", "Previous",
+                "B Services", "Background"
         };
         long oomPss[] = new long[oomLabel.length];
         ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])new ArrayList[oomLabel.length];
@@ -9726,7 +9738,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app == mHomeProcess) {
             mHomeProcess = null;
         }
-        
+        if (app == mPreviousProcess) {
+            mPreviousProcess = null;
+        }
+
         if (restart) {
             // We have components that still need to be running in the
             // process, so re-launch it.
@@ -13127,6 +13142,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.adjType = "home";
         }
 
+        if (adj > ProcessList.PREVIOUS_APP_ADJ && app == mPreviousProcess
+                && app.activities.size() > 0) {
+            // This was the previous process that showed UI to the user.
+            // We want to try to keep it around more aggressively, to give
+            // a good experience around switching between two apps.
+            adj = ProcessList.PREVIOUS_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.hidden = false;
+            app.adjType = "previous";
+        }
+
         if (false) Slog.i(TAG, "OOM " + app + ": initial adj=" + adj
                 + " reason=" + app.adjType);
 
@@ -13856,7 +13882,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     } else {
                         numBg++;
                     }
-                } else if (app.curAdj >= ProcessList.HOME_APP_ADJ) {
+                } else if (app.curAdj >= ProcessList.HOME_APP_ADJ
+                        && app.curAdj != ProcessList.SERVICE_B_ADJ) {
                     numBg++;
                 }
             }
