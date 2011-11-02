@@ -3245,7 +3245,6 @@ package android.app {
     method public final boolean isInLayout();
     method public final boolean isRemoving();
     method public final boolean isResumed();
-    method public boolean isStartDeferred();
     method public final boolean isVisible();
     method public void onActivityCreated(android.os.Bundle);
     method public void onActivityResult(int, int, android.content.Intent);
@@ -3281,7 +3280,6 @@ package android.app {
     method public void setInitialSavedState(android.app.Fragment.SavedState);
     method public void setMenuVisibility(boolean);
     method public void setRetainInstance(boolean);
-    method public void setStartDeferred(boolean);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void startActivity(android.content.Intent);
     method public void startActivityForResult(android.content.Intent, int);
@@ -6784,13 +6782,6 @@ package android.database {
     method public abstract boolean onMove(int, int);
   }
 
-  public class CrossProcessCursorWrapper extends android.database.CursorWrapper implements android.database.CrossProcessCursor {
-    ctor public CrossProcessCursorWrapper(android.database.Cursor);
-    method public void fillWindow(int, android.database.CursorWindow);
-    method public android.database.CursorWindow getWindow();
-    method public boolean onMove(int, int);
-  }
-
   public abstract interface Cursor {
     method public abstract void close();
     method public abstract void copyStringToBuffer(int, android.database.CharArrayBuffer);
@@ -6860,8 +6851,7 @@ package android.database {
   }
 
   public class CursorWindow extends android.database.sqlite.SQLiteClosable implements android.os.Parcelable {
-    ctor public CursorWindow(java.lang.String);
-    ctor public deprecated CursorWindow(boolean);
+    ctor public CursorWindow(boolean);
     method public boolean allocRow();
     method public void clear();
     method public void close();
@@ -9366,7 +9356,6 @@ package android.hardware {
     method public java.util.List<android.hardware.Camera.Size> getSupportedVideoSizes();
     method public java.util.List<java.lang.String> getSupportedWhiteBalance();
     method public float getVerticalViewAngle();
-    method public boolean getVideoStabilization();
     method public java.lang.String getWhiteBalance();
     method public int getZoom();
     method public java.util.List<java.lang.Integer> getZoomRatios();
@@ -9374,7 +9363,6 @@ package android.hardware {
     method public boolean isAutoWhiteBalanceLockSupported();
     method public boolean isSmoothZoomSupported();
     method public boolean isVideoSnapshotSupported();
-    method public boolean isVideoStabilizationSupported();
     method public boolean isZoomSupported();
     method public void remove(java.lang.String);
     method public void removeGpsData();
@@ -9406,7 +9394,6 @@ package android.hardware {
     method public void setRecordingHint(boolean);
     method public void setRotation(int);
     method public void setSceneMode(java.lang.String);
-    method public void setVideoStabilization(boolean);
     method public void setWhiteBalance(java.lang.String);
     method public void setZoom(int);
     method public void unflatten(java.lang.String);
@@ -10542,7 +10529,6 @@ package android.media {
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_LOW = 0; // 0x0
     field public static final int QUALITY_QCIF = 2; // 0x2
-    field public static final int QUALITY_QVGA = 7; // 0x7
     field public static final int QUALITY_TIME_LAPSE_1080P = 1006; // 0x3ee
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
@@ -10550,7 +10536,6 @@ package android.media {
     field public static final int QUALITY_TIME_LAPSE_HIGH = 1001; // 0x3e9
     field public static final int QUALITY_TIME_LAPSE_LOW = 1000; // 0x3e8
     field public static final int QUALITY_TIME_LAPSE_QCIF = 1002; // 0x3ea
-    field public static final int QUALITY_TIME_LAPSE_QVGA = 1007; // 0x3ef
     field public int audioBitRate;
     field public int audioChannels;
     field public int audioCodec;
@@ -12639,7 +12624,6 @@ package android.nfc {
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method public static deprecated android.nfc.NfcAdapter getDefaultAdapter();
     method public boolean isEnabled();
-    method public boolean isNdefPushEnabled();
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
     method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
     method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
@@ -15736,7 +15720,6 @@ package android.provider {
     field public static final int TYPE_NONE = 0; // 0x0
     field public static final int TYPE_OPTIONAL = 2; // 0x2
     field public static final int TYPE_REQUIRED = 1; // 0x1
-    field public static final int TYPE_RESOURCE = 3; // 0x3
   }
 
   public static final class CalendarContract.CalendarAlerts implements android.provider.BaseColumns android.provider.CalendarContract.CalendarAlertsColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.EventsColumns {
@@ -15775,12 +15758,9 @@ package android.provider {
   }
 
   protected static abstract interface CalendarContract.CalendarColumns {
-    field public static final java.lang.String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
-    field public static final java.lang.String ALLOWED_AVAILABILITY = "allowedAvailability";
     field public static final java.lang.String ALLOWED_REMINDERS = "allowedReminders";
     field public static final java.lang.String CALENDAR_ACCESS_LEVEL = "calendar_access_level";
     field public static final java.lang.String CALENDAR_COLOR = "calendar_color";
-    field public static final java.lang.String CALENDAR_COLOR_KEY = "calendar_color_index";
     field public static final java.lang.String CALENDAR_DISPLAY_NAME = "calendar_displayName";
     field public static final java.lang.String CALENDAR_TIME_ZONE = "calendar_timezone";
     field public static final int CAL_ACCESS_CONTRIBUTOR = 500; // 0x1f4
@@ -15825,18 +15805,6 @@ package android.provider {
     field public static final java.lang.String NAME = "name";
   }
 
-  public static final class CalendarContract.Colors implements android.provider.CalendarContract.ColorsColumns {
-    field public static final android.net.Uri CONTENT_URI;
-  }
-
-  protected static abstract interface CalendarContract.ColorsColumns implements android.provider.SyncStateContract.Columns {
-    field public static final java.lang.String COLOR = "color";
-    field public static final java.lang.String COLOR_KEY = "color_index";
-    field public static final java.lang.String COLOR_TYPE = "color_type";
-    field public static final int TYPE_CALENDAR = 0; // 0x0
-    field public static final int TYPE_EVENT = 1; // 0x1
-  }
-
   public static final class CalendarContract.EventDays implements android.provider.CalendarContract.EventDaysColumns {
     method public static final android.database.Cursor query(android.content.ContentResolver, int, int, java.lang.String[]);
     field public static final android.net.Uri CONTENT_URI;
@@ -15862,7 +15830,6 @@ package android.provider {
     field public static final java.lang.String AVAILABILITY = "availability";
     field public static final int AVAILABILITY_BUSY = 0; // 0x0
     field public static final int AVAILABILITY_FREE = 1; // 0x1
-    field public static final int AVAILABILITY_TENTATIVE = 2; // 0x2
     field public static final java.lang.String CALENDAR_ID = "calendar_id";
     field public static final java.lang.String CAN_INVITE_OTHERS = "canInviteOthers";
     field public static final java.lang.String DESCRIPTION = "description";
@@ -15870,7 +15837,6 @@ package android.provider {
     field public static final java.lang.String DTSTART = "dtstart";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String EVENT_COLOR = "eventColor";
-    field public static final java.lang.String EVENT_COLOR_KEY = "eventColor_index";
     field public static final java.lang.String EVENT_END_TIMEZONE = "eventEndTimezone";
     field public static final java.lang.String EVENT_LOCATION = "eventLocation";
     field public static final java.lang.String EVENT_TIMEZONE = "eventTimezone";
@@ -17302,7 +17268,6 @@ package android.provider {
     field public static final java.lang.String ACTION_MEMORY_CARD_SETTINGS = "android.settings.MEMORY_CARD_SETTINGS";
     field public static final java.lang.String ACTION_NETWORK_OPERATOR_SETTINGS = "android.settings.NETWORK_OPERATOR_SETTINGS";
     field public static final java.lang.String ACTION_NFCSHARING_SETTINGS = "android.settings.NFCSHARING_SETTINGS";
-    field public static final java.lang.String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
     field public static final java.lang.String ACTION_PRIVACY_SETTINGS = "android.settings.PRIVACY_SETTINGS";
     field public static final java.lang.String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
     field public static final java.lang.String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
@@ -18674,7 +18639,6 @@ package android.service.wallpaper {
     method public void onSurfaceRedrawNeeded(android.view.SurfaceHolder);
     method public void onTouchEvent(android.view.MotionEvent);
     method public void onVisibilityChanged(boolean);
-    method public void setOffsetNotificationsEnabled(boolean);
     method public void setTouchEventsEnabled(boolean);
   }
 
@@ -21054,7 +21018,6 @@ package android.text.style {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FLAG_AUTO_CORRECTION = 4; // 0x4
     field public static final int FLAG_EASY_CORRECT = 1; // 0x1
     field public static final int FLAG_MISSPELLED = 2; // 0x2
     field public static final int SUGGESTIONS_MAX_SIZE = 5; // 0x5
@@ -22902,7 +22865,6 @@ package android.view {
     method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
     method public void forceLayout();
-    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
@@ -23303,7 +23265,6 @@ package android.view {
   public static class View.AccessibilityDelegate {
     ctor public View.AccessibilityDelegate();
     method public boolean dispatchPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
-    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider(android.view.View);
     method public void onInitializeAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void onInitializeAccessibilityNodeInfo(android.view.View, android.view.accessibility.AccessibilityNodeInfo);
     method public void onPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
@@ -24059,7 +24020,6 @@ package android.view.accessibility {
   public class AccessibilityNodeInfo implements android.os.Parcelable {
     method public void addAction(int);
     method public void addChild(android.view.View);
-    method public void addChild(android.view.View, int);
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
     method public int getActions();
@@ -24084,7 +24044,6 @@ package android.view.accessibility {
     method public boolean isScrollable();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
-    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
@@ -24102,12 +24061,10 @@ package android.view.accessibility {
     method public void setLongClickable(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
-    method public void setParent(android.view.View, int);
     method public void setPassword(boolean);
     method public void setScrollable(boolean);
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
-    method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
@@ -24115,13 +24072,6 @@ package android.view.accessibility {
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public abstract class AccessibilityNodeProvider {
-    ctor public AccessibilityNodeProvider();
-    method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
-    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
-    method public boolean performAccessibilityAction(int, int);
   }
 
   public class AccessibilityRecord {
@@ -24132,8 +24082,6 @@ package android.view.accessibility {
     method public int getCurrentItemIndex();
     method public int getFromIndex();
     method public int getItemCount();
-    method public int getMaxScrollX();
-    method public int getMaxScrollY();
     method public android.os.Parcelable getParcelableData();
     method public int getRemovedCount();
     method public int getScrollX();
@@ -24160,8 +24108,6 @@ package android.view.accessibility {
     method public void setFromIndex(int);
     method public void setFullScreen(boolean);
     method public void setItemCount(int);
-    method public void setMaxScrollX(int);
-    method public void setMaxScrollY(int);
     method public void setParcelableData(android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
@@ -24169,7 +24115,6 @@ package android.view.accessibility {
     method public void setScrollY(int);
     method public void setScrollable(boolean);
     method public void setSource(android.view.View);
-    method public void setSource(android.view.View, int);
     method public void setToIndex(int);
   }
 
@@ -24804,7 +24749,6 @@ package android.view.textservice {
     method public void setCookieAndSequence(int, int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 4; // 0x4
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
     field public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 2; // 0x2
   }
@@ -26826,7 +26770,6 @@ package android.widget {
     method public void setChar(int, java.lang.String, char);
     method public void setCharSequence(int, java.lang.String, java.lang.CharSequence);
     method public void setChronometer(int, long, java.lang.String, boolean);
-    method public void setContentDescription(int, java.lang.CharSequence);
     method public void setDisplayedChild(int, int);
     method public void setDouble(int, java.lang.String, double);
     method public void setEmptyView(int, int);

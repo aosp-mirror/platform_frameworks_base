@@ -183,6 +183,12 @@ public class Loader<D> {
     }
 
     /**
+     * This function will normally be called for you automatically by
+     * {@link android.app.LoaderManager} when the associated fragment/activity
+     * is being started.  When using a Loader with {@link android.app.LoaderManager},
+     * you <em>must not</em> call this method yourself, or you will conflict
+     * with its management of the Loader.
+     *
      * Starts an asynchronous load of the Loader's data. When the result
      * is ready the callbacks will be called on the process's main thread.
      * If a previous load has been completed and is still valid
@@ -232,7 +238,13 @@ public class Loader<D> {
     }
 
     /**
-     * Stops delivery of updates until the next time {@link #startLoading()} is called.
+     * This function will normally be called for you automatically by
+     * {@link android.app.LoaderManager} when the associated fragment/activity
+     * is being stopped.  When using a Loader with {@link android.app.LoaderManager},
+     * you <em>must not</em> call this method yourself, or you will conflict
+     * with its management of the Loader.
+     *
+     * <p>Stops delivery of updates until the next time {@link #startLoading()} is called.
      * Implementations should <em>not</em> invalidate their data at this point --
      * clients are still free to use the last data the loader reported.  They will,
      * however, typically stop reporting new data if the data changes; they can
@@ -260,6 +272,12 @@ public class Loader<D> {
     }
 
     /**
+     * This function will normally be called for you automatically by
+     * {@link android.app.LoaderManager} when restarting a Loader.  When using
+     * a Loader with {@link android.app.LoaderManager},
+     * you <em>must not</em> call this method yourself, or you will conflict
+     * with its management of the Loader.
+     *
      * Tell the Loader that it is being abandoned.  This is called prior
      * to {@link #reset} to have it retain its current data but not report
      * any new data.
@@ -282,6 +300,12 @@ public class Loader<D> {
     }
     
     /**
+     * This function will normally be called for you automatically by
+     * {@link android.app.LoaderManager} when destroying a Loader.  When using
+     * a Loader with {@link android.app.LoaderManager},
+     * you <em>must not</em> call this method yourself, or you will conflict
+     * with its management of the Loader.
+     *
      * Resets the state of the Loader.  The Loader should at this point free
      * all of its resources, since it may never be called again; however, its
      * {@link #startLoading()} may later be called at which point it must be
