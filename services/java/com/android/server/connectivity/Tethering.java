@@ -73,7 +73,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private Context mContext;
     private final static String TAG = "Tethering";
     private final static boolean DBG = true;
-    private final static boolean VDBG = false;
+    private final static boolean VDBG = true;
 
     // TODO - remove both of these - should be part of interface inspection/selection stuff
     private String[] mTetherableUsbRegexs;
@@ -920,6 +920,29 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 setTethered(true);
                 sendTetherStateChangedBroadcast();
             }
+
+            void cleanupUpstream() {
+                if (mMyUpstreamIfaceName != null) {
+                    // note that we don't care about errors here.
+                    // sometimes interfaces are gone before we get
+                    // to remove their rules, which generates errors.
+                    // just do the best we can.
+                    try {
+                        // about to tear down NAT; gather remaining statistics
+                        mStatsService.forceUpdate();
+                    } catch (Exception e) {
+                        if (VDBG) Log.e(TAG, "Exception in forceUpdate: " + e.toString());
+                    }
+                    try {
+                        mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                    } catch (Exception e) {
+                        if (VDBG) Log.e(TAG, "Exception in disableNat: " + e.toString());
+                    }
+                    mMyUpstreamIfaceName = null;
+                }
+                return;
+            }
+
             @Override
             public boolean processMessage(Message message) {
                 if (VDBG) Log.d(TAG, "TetheredState.processMessage what=" + message.what);
@@ -928,23 +951,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 switch (message.what) {
                     case CMD_TETHER_UNREQUESTED:
                     case CMD_INTERFACE_DOWN:
-                        if (mMyUpstreamIfaceName != null) {
-                            try {
-                                // about to tear down NAT; gather remaining statistics
-                                mStatsService.forceUpdate();
-
-                                mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
-                                mMyUpstreamIfaceName = null;
-                            } catch (Exception e) {
-                                try {
-                                    mNMService.untetherInterface(mIfaceName);
-                                } catch (Exception ee) {}
-
-                                setLastErrorAndTransitionToInitialState(
-                                        ConnectivityManager.TETHER_ERROR_DISABLE_NAT_ERROR);
-                                break;
-                            }
-                        }
+                        cleanupUpstream();
                         try {
                             mNMService.untetherInterface(mIfaceName);
                         } catch (Exception e) {
@@ -975,23 +982,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             if (VDBG) Log.d(TAG, "Connection changed noop - dropping");
                             break;
                         }
-                        if (mMyUpstreamIfaceName != null) {
-                            try {
-                                // about to tear down NAT; gather remaining statistics
-                                mStatsService.forceUpdate();
-
-                                mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
-                                mMyUpstreamIfaceName = null;
-                            } catch (Exception e) {
-                                try {
-                                    mNMService.untetherInterface(mIfaceName);
-                                } catch (Exception ee) {}
-
-                                setLastErrorAndTransitionToInitialState(
-                                        ConnectivityManager.TETHER_ERROR_DISABLE_NAT_ERROR);
-                                break;
-                            }
-                        }
+                        cleanupUpstream();
                         if (newUpstreamIfaceName != null) {
                             try {
                                 mNMService.enableNat(mIfaceName, newUpstreamIfaceName);
@@ -1016,23 +1007,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         error = true;
                         // fall through
                     case CMD_TETHER_MODE_DEAD:
-                        if (mMyUpstreamIfaceName != null) {
-                            try {
-                                // about to tear down NAT; gather remaining statistics
-                                mStatsService.forceUpdate();
-
-                                mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
-                                mMyUpstreamIfaceName = null;
-                            } catch (Exception e) {
-                                try {
-                                    mNMService.untetherInterface(mIfaceName);
-                                } catch (Exception ee) {}
-
-                                setLastErrorAndTransitionToInitialState(
-                                        ConnectivityManager.TETHER_ERROR_DISABLE_NAT_ERROR);
-                                break;
-                            }
-                        }
+                        cleanupUpstream();
                         try {
                             mNMService.untetherInterface(mIfaceName);
                         } catch (Exception e) {
