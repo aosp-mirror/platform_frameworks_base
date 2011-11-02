@@ -68,6 +68,7 @@ static const char* mobile_iface_list[] = {
     "rmnet1",
     "rmnet2",
     "rmnet3",
+    "cdma_rmnet4",
     "ppp0",
     0
 };
