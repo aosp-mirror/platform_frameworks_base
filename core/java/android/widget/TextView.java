@@ -271,7 +271,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int SIGNED = 2;
     private static final int DECIMAL = 4;
 
-    class Drawables {
+    static class Drawables {
         final Rect mCompoundRect = new Rect();
         Drawable mDrawableTop, mDrawableBottom, mDrawableLeft, mDrawableRight,
                 mDrawableStart, mDrawableEnd;
@@ -304,7 +304,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int mMarqueeRepeatLimit = 3;
 
-    class InputContentType {
+    static class InputContentType {
         int imeOptions = EditorInfo.IME_NULL;
         String privateImeOptions;
         CharSequence imeActionLabel;
@@ -315,7 +315,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     InputContentType mInputContentType;
 
-    class InputMethodState {
+    static class InputMethodState {
         Rect mCursorRectInWindow = new Rect();
         RectF mTmpRectF = new RectF();
         float[] mTmpOffset = new float[2];
@@ -5377,7 +5377,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // don't let it be inserted into the text.
                     if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
                             || shouldAdvanceFocusOnEnter()) {
-                        if (mOnClickListener != null) {
+                        if (hasOnClickListeners()) {
                             return 0;
                         }
                         return -1;
@@ -5511,7 +5511,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                      * call performClick(), but that won't do anything in
                      * this case.)
                      */
-                    if (mOnClickListener == null) {
+                    if (hasOnClickListeners()) {
                         if (mMovement != null && mText instanceof Editable
                                 && mLayout != null && onCheckIsTextEditor()) {
                             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -5549,7 +5549,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                          * call performClick(), but that won't do anything in
                          * this case.)
                          */
-                        if (mOnClickListener == null) {
+                        if (hasOnClickListeners()) {
                             View v = focusSearch(FOCUS_DOWN);
 
                             if (v != null) {

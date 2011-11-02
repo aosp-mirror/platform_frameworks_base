@@ -352,7 +352,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
 
     // Used to draw cached views
-    private final Paint mCachePaint = new Paint();
+    private Paint mCachePaint;
 
     // Used to animate add/remove changes in layout
     private LayoutTransition mTransition;
@@ -404,8 +404,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         mChildren = new View[ARRAY_INITIAL_CAPACITY];
         mChildrenCount = 0;
-
-        mCachePaint.setDither(false);
 
         mPersistentDrawingCache = PERSISTENT_SCROLLING_CACHE;
     }
@@ -2909,6 +2907,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (layerType == LAYER_TYPE_NONE) {
                 cachePaint = mCachePaint;
+                if (cachePaint == null) {
+                    cachePaint = new Paint();
+                    cachePaint.setDither(false);
+                    mCachePaint = cachePaint;
+                }
                 if (alpha < 1.0f) {
                     cachePaint.setAlpha((int) (alpha * 255));
                     mGroupFlags |= FLAG_ALPHA_LOWER_THAN_ONE;
