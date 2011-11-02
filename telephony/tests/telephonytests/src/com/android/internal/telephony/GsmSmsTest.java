@@ -16,11 +16,14 @@
 
 package com.android.internal.telephony;
 
+import android.telephony.TelephonyManager;
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.util.HexDump;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import java.util.ArrayList;
 
 public class GsmSmsTest extends AndroidTestCase {
 
@@ -230,6 +233,110 @@ public class GsmSmsTest extends AndroidTestCase {
             + "*+,-./0123456789:;<=>?\u00cdABCDEFGHIJKLMNOPQRSTUVWXYZ\u00c3\u00d5\u00da\u00dc"
             + "\u00a7~abcdefghijklmnopqrstuvwxyz\u00e3\u00f5`\u00fc\u00e0"
     };
+
+    @SmallTest
+    public void testFragmentText() throws Exception {
+        boolean isGsmPhone = (TelephonyManager.getDefault().getPhoneType() ==
+                TelephonyManager.PHONE_TYPE_GSM);
+
+        // Valid 160 character 7-bit text.
+        String text = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "123456789012345678901234567890";
+        SmsMessageBase.TextEncodingDetails ted = SmsMessage.calculateLength(text, false);
+        assertEquals(1, ted.msgCount);
+        assertEquals(160, ted.codeUnitCount);
+        assertEquals(1, ted.codeUnitSize);
+        assertEquals(0, ted.languageTable);
+        assertEquals(0, ted.languageShiftTable);
+        if (isGsmPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text);
+            assertEquals(1, fragments.size());
+        }
+
+        // Valid 161 character 7-bit text.
+        text = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901";
+        ted = SmsMessage.calculateLength(text, false);
+        assertEquals(2, ted.msgCount);
+        assertEquals(161, ted.codeUnitCount);
+        assertEquals(1, ted.codeUnitSize);
+        assertEquals(0, ted.languageTable);
+        assertEquals(0, ted.languageShiftTable);
+        if (isGsmPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text);
+            assertEquals(2, fragments.size());
+            assertEquals(text, fragments.get(0) + fragments.get(1));
+            assertEquals(153, fragments.get(0).length());
+            assertEquals(8, fragments.get(1).length());
+        }
+    }
+
+    @SmallTest
+    public void testFragmentTurkishText() throws Exception {
+        boolean isGsmPhone = (TelephonyManager.getDefault().getPhoneType() ==
+                TelephonyManager.PHONE_TYPE_GSM);
+
+        int[] oldTables = GsmAlphabet.getEnabledSingleShiftTables();
+        int[] turkishTable = { 1 };
+        GsmAlphabet.setEnabledSingleShiftTables(turkishTable);
+
+        // Valid 77 character text with Turkish characters.
+        String text = "ĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşı" +
+                "ĞŞİğşıĞŞİğşıĞŞİğş";
+        SmsMessageBase.TextEncodingDetails ted = SmsMessage.calculateLength(text, false);
+        assertEquals(1, ted.msgCount);
+        assertEquals(154, ted.codeUnitCount);
+        assertEquals(1, ted.codeUnitSize);
+        assertEquals(0, ted.languageTable);
+        assertEquals(1, ted.languageShiftTable);
+        if (isGsmPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text);
+            assertEquals(1, fragments.size());
+            assertEquals(text, fragments.get(0));
+            assertEquals(77, fragments.get(0).length());
+        }
+
+        // Valid 78 character text with Turkish characters.
+        text = "ĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşı" +
+                "ĞŞİğşıĞŞİğşıĞŞİğşı";
+        ted = SmsMessage.calculateLength(text, false);
+        assertEquals(2, ted.msgCount);
+        assertEquals(156, ted.codeUnitCount);
+        assertEquals(1, ted.codeUnitSize);
+        assertEquals(0, ted.languageTable);
+        assertEquals(1, ted.languageShiftTable);
+        if (isGsmPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text);
+            assertEquals(2, fragments.size());
+            assertEquals(text, fragments.get(0) + fragments.get(1));
+            assertEquals(74, fragments.get(0).length());
+            assertEquals(4, fragments.get(1).length());
+        }
+
+        // Valid 160 character text with Turkish characters.
+        text = "ĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşı" +
+                "ĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğ" +
+                "ĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşıĞŞİğşı";
+        ted = SmsMessage.calculateLength(text, false);
+        assertEquals(3, ted.msgCount);
+        assertEquals(320, ted.codeUnitCount);
+        assertEquals(1, ted.codeUnitSize);
+        assertEquals(0, ted.languageTable);
+        assertEquals(1, ted.languageShiftTable);
+        if (isGsmPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text);
+            assertEquals(3, fragments.size());
+            assertEquals(text, fragments.get(0) + fragments.get(1) + fragments.get(2));
+            assertEquals(74, fragments.get(0).length());
+            assertEquals(74, fragments.get(1).length());
+            assertEquals(12, fragments.get(2).length());
+        }
+
+        GsmAlphabet.setEnabledSingleShiftTables(oldTables);
+    }
+
 
     @SmallTest
     public void testDecode() throws Exception {
