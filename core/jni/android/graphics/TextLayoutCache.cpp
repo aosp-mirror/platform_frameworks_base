@@ -557,7 +557,11 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                     LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d",
                             dirFlags, rc, paraDir);
 #endif
-                    if (!U_SUCCESS(status) || rc <= 1) {
+                    if (U_SUCCESS(status) && rc == 1) {
+                        // Normal case: one run, status is ok
+                        isRTL = (paraDir == 1);
+                        useSingleRun = true;
+                    } else if (!U_SUCCESS(status) || rc < 1) {
                         LOGW("computeValuesWithHarfbuzz -- need to force to single run");
                         isRTL = (paraDir == 1);
                         useSingleRun = true;
