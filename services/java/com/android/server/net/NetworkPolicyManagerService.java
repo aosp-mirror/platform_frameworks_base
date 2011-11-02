@@ -186,8 +186,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
-    private static final int MSG_RULES_CHANGED = 0x1;
-    private static final int MSG_METERED_IFACES_CHANGED = 0x2;
+    private static final int MSG_RULES_CHANGED = 1;
+    private static final int MSG_METERED_IFACES_CHANGED = 2;
+    private static final int MSG_FOREGROUND_ACTIVITIES_CHANGED = 3;
+    private static final int MSG_PROCESS_DIED = 4;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -335,37 +337,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
         @Override
         public void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
-            // only someone like AMS should only be calling us
-            mContext.enforceCallingOrSelfPermission(MANAGE_APP_TOKENS, TAG);
-
-            synchronized (mRulesLock) {
-                // because a uid can have multiple pids running inside, we need to
-                // remember all pid states and summarize foreground at uid level.
-
-                // record foreground for this specific pid
-                SparseBooleanArray pidForeground = mUidPidForeground.get(uid);
-                if (pidForeground == null) {
-                    pidForeground = new SparseBooleanArray(2);
-                    mUidPidForeground.put(uid, pidForeground);
-                }
-                pidForeground.put(pid, foregroundActivities);
-                computeUidForegroundLocked(uid);
-            }
+            mHandler.obtainMessage(MSG_FOREGROUND_ACTIVITIES_CHANGED,
+                    pid, uid, foregroundActivities).sendToTarget();
         }
 
         @Override
         public void onProcessDied(int pid, int uid) {
-            // only someone like AMS should only be calling us
-            mContext.enforceCallingOrSelfPermission(MANAGE_APP_TOKENS, TAG);
-
-            synchronized (mRulesLock) {
-                // clear records and recompute, when they exist
-                final SparseBooleanArray pidForeground = mUidPidForeground.get(uid);
-                if (pidForeground != null) {
-                    pidForeground.delete(pid);
-                    computeUidForegroundLocked(uid);
-                }
-            }
+            mHandler.obtainMessage(MSG_PROCESS_DIED, pid, uid).sendToTarget();
         }
     };
 
@@ -1467,6 +1445,40 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                     }
                     mListeners.finishBroadcast();
+                    return true;
+                }
+                case MSG_FOREGROUND_ACTIVITIES_CHANGED: {
+                    final int pid = msg.arg1;
+                    final int uid = msg.arg2;
+                    final boolean foregroundActivities = (Boolean) msg.obj;
+
+                    synchronized (mRulesLock) {
+                        // because a uid can have multiple pids running inside, we need to
+                        // remember all pid states and summarize foreground at uid level.
+
+                        // record foreground for this specific pid
+                        SparseBooleanArray pidForeground = mUidPidForeground.get(uid);
+                        if (pidForeground == null) {
+                            pidForeground = new SparseBooleanArray(2);
+                            mUidPidForeground.put(uid, pidForeground);
+                        }
+                        pidForeground.put(pid, foregroundActivities);
+                        computeUidForegroundLocked(uid);
+                    }
+                    return true;
+                }
+                case MSG_PROCESS_DIED: {
+                    final int pid = msg.arg1;
+                    final int uid = msg.arg2;
+
+                    synchronized (mRulesLock) {
+                        // clear records and recompute, when they exist
+                        final SparseBooleanArray pidForeground = mUidPidForeground.get(uid);
+                        if (pidForeground != null) {
+                            pidForeground.delete(pid);
+                            computeUidForegroundLocked(uid);
+                        }
+                    }
                     return true;
                 }
                 default: {
