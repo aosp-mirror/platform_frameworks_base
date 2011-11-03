@@ -169,6 +169,9 @@
     <!-- Size of top margin on Clock font to edge on unlock LockScreen -->
     <dimen name="keyguard_lockscreen_status_line_clockfont_bottom_margin">12dip</dimen>
 
+    <!-- Padding on left margin of PIN text entry field to center it when del button is showing -->
+    <dimen name="keyguard_lockscreen_pin_margin_left">40dip</dimen>
+
     <!-- Minimum popup width for selecting an activity in ActivityChooserDialog/ActivityChooserView. -->
     <dimen name="activity_chooser_popup_min_width">200dip</dimen>
 
