@@ -1114,7 +1114,7 @@ class ZoomManager {
             float scale;
             if (mInitialScale > 0) {
                 scale = mInitialScale;
-            } else if (viewState.mIsRestored) {
+            } else if (viewState.mIsRestored || viewState.mViewScale > 0) {
                 scale = (viewState.mViewScale > 0)
                     ? viewState.mViewScale : overviewScale;
                 mTextWrapScale = (viewState.mTextWrapScale > 0)
