@@ -49,6 +49,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private LinkCapabilities mLinkCapabilities;
     private NetworkInfo mNetworkInfo;
     private InterfaceObserver mInterfaceObserver;
+    private String mHwAddr;
 
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
@@ -102,6 +103,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
         mLinkProperties = new LinkProperties();
         mLinkCapabilities = new LinkCapabilities();
         mLinkUp = false;
+        mHwAddr = null;
 
         mNetworkInfo.setIsAvailable(false);
         setTeardownRequested(false);
@@ -132,7 +134,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
 
         mLinkProperties.clear();
         mNetworkInfo.setIsAvailable(false);
-        mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
+        mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, mHwAddr);
 
         Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
         msg.sendToTarget();
@@ -169,7 +171,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
                 mLinkProperties = dhcpInfoInternal.makeLinkProperties();
                 mLinkProperties.setInterfaceName(mIface);
 
-                mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+                mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, mHwAddr);
                 Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
                 msg.sendToTarget();
             }
@@ -218,6 +220,12 @@ public class EthernetDataTracker implements NetworkStateTracker {
                     mIface = iface;
                     InterfaceConfiguration config = service.getInterfaceConfig(iface);
                     mLinkUp = config.isActive();
+                    if (config != null && mHwAddr == null) {
+                        mHwAddr = config.hwAddr;
+                        if (mHwAddr != null) {
+                            mNetworkInfo.setExtraInfo(mHwAddr);
+                        }
+                    }
                     reconnect();
                     break;
                 }
