@@ -1651,6 +1651,7 @@ public class WifiStateMachine extends StateMachine {
             mDhcpInfoInternal = dhcpInfoInternal;
         }
         mLastSignalLevel = -1; // force update of signal strength
+        mReconnectCount = 0; //Reset IP failure tracking
         WifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
         InetAddress addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
         mWifiInfo.setInetAddress(addr);
