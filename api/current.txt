@@ -18637,6 +18637,7 @@ package android.service.textservice {
     method public android.os.Bundle getBundle();
     method public java.lang.String getLocale();
     method public void onCancel();
+    method public void onClose();
     method public abstract void onCreate();
     method public abstract android.view.textservice.SuggestionsInfo onGetSuggestions(android.view.textservice.TextInfo, int);
     method public android.view.textservice.SuggestionsInfo[] onGetSuggestionsMultiple(android.view.textservice.TextInfo[], int, boolean);
