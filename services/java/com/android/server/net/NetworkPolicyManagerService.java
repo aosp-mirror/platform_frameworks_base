@@ -19,7 +19,6 @@ package com.android.server.net;
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
-import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
@@ -93,6 +92,7 @@ import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.Message;
+import android.os.MessageQueue.IdleHandler;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -1581,6 +1581,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_NETWORK_TEMPLATE, template);
         return intent;
+    }
+
+    // @VisibleForTesting
+    public void addIdleHandler(IdleHandler handler) {
+        mHandler.getLooper().getQueue().addIdleHandler(handler);
     }
 
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
