@@ -89,7 +89,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      * Ensure that downloading on wifi reports reasonable stats.
      */
     @LargeTest
-    public void testWifiDownload() {
+    public void testWifiDownload() throws Exception {
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         NetworkStats pre_test_stats = fetchDataFromProc(mUid);
         String ts = Long.toString(System.currentTimeMillis());
@@ -123,7 +123,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      * Ensure that downloading on wifi reports reasonable stats.
      */
     @LargeTest
-    public void testWifiUpload() {
+    public void testWifiUpload() throws Exception {
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         // Download a file from the server.
         String ts = Long.toString(System.currentTimeMillis());
@@ -160,7 +160,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      * accounting still goes to the app making the call and that the numbers still make sense.
      */
     @LargeTest
-    public void testWifiDownloadWithDownloadManager() {
+    public void testWifiDownloadWithDownloadManager() throws Exception {
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         // If we are using the download manager, then the data that is written to /proc/uid_stat/
         // is accounted against download manager's uid, since it uses pre-ICS API.

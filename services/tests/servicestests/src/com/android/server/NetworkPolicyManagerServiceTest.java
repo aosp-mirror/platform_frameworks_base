@@ -66,6 +66,7 @@ import android.net.NetworkTemplate;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
+import android.os.MessageQueue.IdleHandler;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -87,6 +88,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Handler;
 
 import libcore.io.IoUtils;
 
@@ -99,6 +101,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
+
+    private static final long KB_IN_BYTES = 1024;
+    private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
+    private static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
 
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi();
 
@@ -255,31 +261,37 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
         mProcessObserver.onForegroundActivitiesChanged(PID_3, UID_B, false);
+        waitUntilIdle();
         assertFalse(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // push one of the shared pids into foreground
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, true);
+        waitUntilIdle();
         assertTrue(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // and swap another uid into foreground
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
         mProcessObserver.onForegroundActivitiesChanged(PID_3, UID_B, true);
+        waitUntilIdle();
         assertFalse(mService.isUidForeground(UID_A));
         assertTrue(mService.isUidForeground(UID_B));
 
         // push both pid into foreground
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, true);
+        waitUntilIdle();
         assertTrue(mService.isUidForeground(UID_A));
 
         // pull one out, should still be foreground
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
+        waitUntilIdle();
         assertTrue(mService.isUidForeground(UID_A));
 
         // pull final pid out, should now be background
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
+        waitUntilIdle();
         assertFalse(mService.isUidForeground(UID_A));
     }
 
@@ -528,13 +540,14 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // TODO: consider making strongly ordered mock
         expectRemoveInterfaceQuota(TEST_IFACE);
-        expectSetInterfaceQuota(TEST_IFACE, 1536L);
+        expectSetInterfaceQuota(TEST_IFACE, (2 * MB_IN_BYTES) - 512);
 
         expectClearNotifications();
         future = expectMeteredIfacesChanged(TEST_IFACE);
 
         replay();
-        setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1024L, 2048L, SNOOZE_NEVER));
+        setNetworkPolicies(new NetworkPolicy(
+                sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, SNOOZE_NEVER));
         future.get();
         verifyAndReset();
     }
@@ -590,8 +603,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged();
 
             replay();
-            setNetworkPolicies(
-                    new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1024L, 2048L, SNOOZE_NEVER));
+            setNetworkPolicies(new NetworkPolicy(
+                    sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, SNOOZE_NEVER));
             future.get();
             verifyAndReset();
         }
@@ -609,7 +622,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                     .andReturn(stats).atLeastOnce();
 
             expectRemoveInterfaceQuota(TEST_IFACE);
-            expectSetInterfaceQuota(TEST_IFACE, 2048L);
+            expectSetInterfaceQuota(TEST_IFACE, 2 * MB_IN_BYTES);
 
             expectClearNotifications();
             future = expectMeteredIfacesChanged(TEST_IFACE);
@@ -623,7 +636,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // go over warning, which should kick notification
         incrementCurrentTime(MINUTE_IN_MILLIS);
         stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 1536L, 15L, 0L, 0L);
+                .addIfaceValues(TEST_IFACE, 1536 * KB_IN_BYTES, 15L, 0L, 0L);
 
         {
             expectCurrentTime();
@@ -643,7 +656,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // go over limit, which should kick notification and dialog
         incrementCurrentTime(MINUTE_IN_MILLIS);
         stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 5120L, 512L, 0L, 0L);
+                .addIfaceValues(TEST_IFACE, 5 * MB_IN_BYTES, 512L, 0L, 0L);
 
         {
             expectCurrentTime();
@@ -797,6 +810,32 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             set(null);
             return null;
         }
+    }
+
+    private static class IdleFuture extends AbstractFuture<Void> implements IdleHandler {
+        @Override
+        public Void get() throws InterruptedException, ExecutionException {
+            try {
+                return get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** {@inheritDoc} */
+        public boolean queueIdle() {
+            set(null);
+            return false;
+        }
+    }
+
+    /**
+     * Wait until {@link #mService} internal {@link Handler} is idle.
+     */
+    private void waitUntilIdle() throws Exception {
+        final IdleFuture future = new IdleFuture();
+        mService.addIdleHandler(future);
+        future.get();
     }
 
     private static void assertTimeEquals(long expected, long actual) {

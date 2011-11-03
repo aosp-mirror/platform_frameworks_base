@@ -71,21 +71,12 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         stageFile(R.raw.xt_qtaguid_typical, new File(mTestProc, "net/xt_qtaguid/stats"));
 
         final NetworkStats stats = mFactory.readNetworkStatsDetail();
-        assertEquals(31, stats.size());
-        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0, 14615L, 4270L);
-        assertStatsEntry(stats, "wlan0", 10004, SET_DEFAULT, 0, 333821L, 53558L);
-        assertStatsEntry(stats, "wlan0", 10004, SET_DEFAULT, 1947740890, 18725L, 1066L);
-        assertStatsEntry(stats, "rmnet0", 10037, SET_DEFAULT, 0, 31184994L, 684122L);
-        assertStatsEntry(stats, "rmnet0", 10037, SET_DEFAULT, 1947740890, 28507378L, 437004L);
-    }
-
-    public void testNetworkStatsDetailExtended() throws Exception {
-        stageFile(R.raw.xt_qtaguid_extended, new File(mTestProc, "net/xt_qtaguid/stats"));
-
-        final NetworkStats stats = mFactory.readNetworkStatsDetail();
-        assertEquals(2, stats.size());
-        assertStatsEntry(stats, "test0", 1000, SET_DEFAULT, 0, 1024L, 2048L);
-        assertStatsEntry(stats, "test0", 1000, SET_DEFAULT, 0xF00D, 512L, 512L);
+        assertEquals(70, stats.size());
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, 18621L, 2898L);
+        assertStatsEntry(stats, "wlan0", 10011, SET_DEFAULT, 0x0, 35777L, 5718L);
+        assertStatsEntry(stats, "wlan0", 10021, SET_DEFAULT, 0x7fffff01, 562386L, 49228L);
+        assertStatsEntry(stats, "rmnet1", 10021, SET_DEFAULT, 0x30100000, 219110L, 227423L);
+        assertStatsEntry(stats, "rmnet2", 10001, SET_DEFAULT, 0x0, 1125899906842624L, 984L);
     }
 
     public void testNetworkStatsSummary() throws Exception {
@@ -149,12 +140,12 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
     }
 
     public void testNetworkStatsWithSet() throws Exception {
-        stageFile(R.raw.xt_qtaguid_typical_with_set, new File(mTestProc, "net/xt_qtaguid/stats"));
+        stageFile(R.raw.xt_qtaguid_typical, new File(mTestProc, "net/xt_qtaguid/stats"));
 
         final NetworkStats stats = mFactory.readNetworkStatsDetail();
-        assertEquals(12, stats.size());
-        assertStatsEntry(stats, "rmnet0", 1000, SET_DEFAULT, 0, 278102L, 253L, 10487L, 182L);
-        assertStatsEntry(stats, "rmnet0", 1000, SET_FOREGROUND, 0, 26033L, 30L, 1401L, 26L);
+        assertEquals(70, stats.size());
+        assertStatsEntry(stats, "rmnet1", 10021, SET_DEFAULT, 0x30100000, 219110L, 578L, 227423L, 676L);
+        assertStatsEntry(stats, "rmnet1", 10021, SET_FOREGROUND, 0x30100000, 742L, 3L, 1265L, 3L);
     }
 
     public void testNetworkStatsSingle() throws Exception {
