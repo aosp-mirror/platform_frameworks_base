@@ -424,8 +424,9 @@ check_method(const char* filename, int kind, method_type* m)
     } else {
         if (!(kind == INTERFACE_TYPE_BINDER ? returnType->CanWriteToParcel()
                     : returnType->CanWriteToRpcData())) {
-            fprintf(stderr, "%s:%d return type %s can't be marshalled.\n", filename,
-                        m->type.type.lineno, m->type.type.data);
+            fprintf(stderr, "%s:%d return type %s can't be marshalled. kind=%d p=%d m=%d\n", filename,
+                        m->type.type.lineno, m->type.type.data, kind,
+                        returnType->CanWriteToParcel(), returnType->CanWriteToRpcData());
             err = 1;
         }
     }
