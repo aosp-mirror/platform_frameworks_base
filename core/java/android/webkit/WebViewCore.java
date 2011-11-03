@@ -2416,7 +2416,11 @@ public final class WebViewCore {
         if (mIsRestored) {
             mInitialViewState.mIsRestored = true;
             mInitialViewState.mViewScale = mRestoredScale;
-            mInitialViewState.mTextWrapScale = mRestoredTextWrapScale;
+            if (mRestoredTextWrapScale > 0) {
+                mInitialViewState.mTextWrapScale = mRestoredTextWrapScale;
+            } else {
+                mInitialViewState.mTextWrapScale = mInitialViewState.mViewScale;
+            }
         } else {
             if (mViewportInitialScale > 0) {
                 mInitialViewState.mViewScale = mInitialViewState.mTextWrapScale =
@@ -2535,9 +2539,11 @@ public final class WebViewCore {
     // called by JNI
     private void restoreScale(float scale, float textWrapScale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
-            mIsRestored = true;
+            mIsRestored = scale > 0;
             mRestoredScale = scale;
-            mRestoredTextWrapScale = textWrapScale;
+            if (mSettings.getUseWideViewPort()) {
+                mRestoredTextWrapScale = textWrapScale;
+            }
         }
     }
 
