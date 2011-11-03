@@ -282,7 +282,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
                 if (err == -EWOULDBLOCK) {
                     if (mSource->feedMoreTSData() == OK) {
-                        msg->post();
+                        msg->post(10000ll);
                     }
                 }
             } else if (what == ACodec::kWhatEOS) {
