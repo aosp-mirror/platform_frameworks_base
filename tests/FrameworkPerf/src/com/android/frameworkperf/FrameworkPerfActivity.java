@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -29,13 +31,16 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -45,6 +50,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * So you thought sync used up your battery life.
@@ -57,8 +65,10 @@ public class FrameworkPerfActivity extends Activity
 
     Spinner mFgSpinner;
     Spinner mBgSpinner;
-    TextView mLog;
     TextView mTestTime;
+    Button mStartButton;
+    Button mStopButton;
+    TextView mLog;
     PowerManager.WakeLock mPartialWakeLock;
 
     long mMaxRunTime = 5000;
@@ -100,12 +110,21 @@ public class FrameworkPerfActivity extends Activity
             new WriteFileOp(), new ReadFileOp(),
             new ReadFileOp(), new WriteFileOp(),
             new ReadFileOp(), new ReadFileOp(),
+            new OpenXmlResOp(), new NoOp(),
+            new ReadXmlAttrsOp(), new NoOp(),
             new ParseXmlResOp(), new NoOp(),
             new ParseLargeXmlResOp(), new NoOp(),
             new LayoutInflaterOp(), new NoOp(),
             new LayoutInflaterLargeOp(), new NoOp(),
+            new LayoutInflaterViewOp(), new NoOp(),
+            new LayoutInflaterButtonOp(), new NoOp(),
+            new LayoutInflaterImageButtonOp(), new NoOp(),
+            new CreateBitmapOp(), new NoOp(),
+            new CreateRecycleBitmapOp(), new NoOp(),
             new LoadSmallBitmapOp(), new NoOp(),
+            new LoadRecycleSmallBitmapOp(), new NoOp(),
             new LoadLargeBitmapOp(), new NoOp(),
+            new LoadRecycleLargeBitmapOp(), new NoOp(),
             new LoadSmallScaledBitmapOp(), new NoOp(),
             new LoadLargeScaledBitmapOp(), new NoOp(),
     };
@@ -122,12 +141,21 @@ public class FrameworkPerfActivity extends Activity
             new CreateWriteSyncFileOp(),
             new WriteFileOp(),
             new ReadFileOp(),
+            new OpenXmlResOp(),
+            new ReadXmlAttrsOp(),
             new ParseXmlResOp(),
             new ParseLargeXmlResOp(),
             new LayoutInflaterOp(),
             new LayoutInflaterLargeOp(),
+            new LayoutInflaterViewOp(),
+            new LayoutInflaterButtonOp(),
+            new LayoutInflaterImageButtonOp(),
+            new CreateBitmapOp(),
+            new CreateRecycleBitmapOp(),
             new LoadSmallBitmapOp(),
+            new LoadRecycleSmallBitmapOp(),
             new LoadLargeBitmapOp(),
+            new LoadRecycleLargeBitmapOp(),
             new LoadSmallScaledBitmapOp(),
             new LoadLargeScaledBitmapOp(),
     };
@@ -208,17 +236,22 @@ public class FrameworkPerfActivity extends Activity
         mBgSpinner.setAdapter(adapter);
         mBgSpinner.setOnItemSelectedListener(this);
 
-        findViewById(R.id.start).setOnClickListener(new View.OnClickListener() {
+        mTestTime = (TextView)findViewById(R.id.testtime);
+
+        mStartButton = (Button)findViewById(R.id.start);
+        mStartButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 startRunning();
             }
         });
-        findViewById(R.id.stop).setOnClickListener(new View.OnClickListener() {
+        mStopButton = (Button)findViewById(R.id.stop);
+        mStopButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 stopRunning();
             }
         });
-        mTestTime = (TextView)findViewById(R.id.testtime);
+        mStopButton.setEnabled(false);
+
         mLog = (TextView)findViewById(R.id.log);
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
@@ -267,9 +300,17 @@ public class FrameworkPerfActivity extends Activity
             fgOp = mFgTest;
             bgOp = mBgTest;
         } else if (mFgTest != null) {
+            // Skip null test.
+            if (mCurOpIndex == 0) {
+                mCurOpIndex = 1;
+            }
             fgOp = mFgTest;
             bgOp = mAvailOps[mCurOpIndex];
         } else {
+            // Skip null test.
+            if (mCurOpIndex == 0) {
+                mCurOpIndex = 1;
+            }
             fgOp = mAvailOps[mCurOpIndex];
             bgOp = mBgTest;
         }
@@ -297,12 +338,13 @@ public class FrameworkPerfActivity extends Activity
                         stopRunning();
                         return;
                     }
-                }
-                mCurOpIndex++;
-                if (mCurOpIndex >= mAvailOps.length) {
-                    log("Finished");
-                    stopRunning();
-                    return;
+                } else {
+                    mCurOpIndex++;
+                    if (mCurOpIndex >= mAvailOps.length) {
+                        log("Finished");
+                        stopRunning();
+                        return;
+                    }
                 }
                 startCurOp();
             }
@@ -313,6 +355,11 @@ public class FrameworkPerfActivity extends Activity
         if (!mStarted) {
             log("Start");
             mStarted = true;
+            mStartButton.setEnabled(false);
+            mStopButton.setEnabled(true);
+            mTestTime.setEnabled(false);
+            mFgSpinner.setEnabled(false);
+            mBgSpinner.setEnabled(false);
             updateWakeLock();
             startService(new Intent(this, SchedulerService.class));
             mCurOpIndex = 0;
@@ -325,6 +372,11 @@ public class FrameworkPerfActivity extends Activity
     void stopRunning() {
         if (mStarted) {
             mStarted = false;
+            mStartButton.setEnabled(true);
+            mStopButton.setEnabled(false);
+            mTestTime.setEnabled(true);
+            mFgSpinner.setEnabled(true);
+            mBgSpinner.setEnabled(true);
             updateWakeLock();
             stopService(new Intent(this, SchedulerService.class));
             for (int i=0; i<mResults.size(); i++) {
@@ -333,7 +385,7 @@ public class FrameworkPerfActivity extends Activity
                 float bgMsPerOp = result.getBgMsPerOp();
                 String fgMsPerOpStr = fgMsPerOp != 0 ? Float.toString(fgMsPerOp) : "";
                 String bgMsPerOpStr = bgMsPerOp != 0 ? Float.toString(bgMsPerOp) : "";
-                Log.i(TAG, "\t" + result.name + "\t" + result.fgOps
+                Log.i("PerfRes", "\t" + result.name + "\t" + result.fgOps
                         + "\t" + result.getFgMsPerOp() + "\t" + result.fgTime
                         + "\t" + result.fgLongName + "\t" + result.bgOps
                         + "\t" + result.getBgMsPerOp() + "\t" + result.bgTime
@@ -662,6 +714,71 @@ public class FrameworkPerfActivity extends Activity
         }
     }
 
+    static class OpenXmlResOp extends Op {
+        Context mContext;
+
+        OpenXmlResOp() {
+            super("OpenXmlRes", "Open (and close) an XML resource");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            XmlResourceParser parser = mContext.getResources().getLayout(R.xml.simple);
+            parser.close();
+            return true;
+        }
+    }
+
+    static class ReadXmlAttrsOp extends Op {
+        Context mContext;
+        XmlResourceParser mParser;
+        AttributeSet mAttrs;
+
+        ReadXmlAttrsOp() {
+            super("ReadXmlAttrs", "Read attributes from an XML tag");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+            mParser = mContext.getResources().getLayout(R.xml.simple);
+            mAttrs = Xml.asAttributeSet(mParser);
+
+            int eventType;
+            try {
+                // Find the first <item> tag.
+                eventType = mParser.getEventType();
+                String tagName;
+                do {
+                    if (eventType == XmlPullParser.START_TAG) {
+                        tagName = mParser.getName();
+                        if (tagName.equals("item")) {
+                            break;
+                        }
+                    }
+                    eventType = mParser.next();
+                } while (eventType != XmlPullParser.END_DOCUMENT);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException("I died", e);
+            } catch (IOException e) {
+                throw new RuntimeException("I died", e);
+            }
+        }
+
+        void onTerm(Context context) {
+            mParser.close();
+        }
+
+        boolean onRun() {
+            TypedArray a = mContext.obtainStyledAttributes(mAttrs,
+                    com.android.internal.R.styleable.MenuItem);
+            a.recycle();
+            return true;
+        }
+    }
+
     static class ParseXmlResOp extends Op {
         Context mContext;
 
@@ -702,7 +819,7 @@ public class FrameworkPerfActivity extends Activity
         Context mContext;
 
         LayoutInflaterOp() {
-            super("LayoutInflaterOp", "Inflate layout resource");
+            super("LayoutInflater", "Inflate layout resource");
         }
 
         void onInit(Context context, boolean foreground) {
@@ -724,7 +841,7 @@ public class FrameworkPerfActivity extends Activity
         Context mContext;
 
         LayoutInflaterLargeOp() {
-            super("LayoutInflaterLargeOp", "Inflate large layout resource");
+            super("LayoutInflaterLarge", "Inflate large layout resource");
         }
 
         void onInit(Context context, boolean foreground) {
@@ -742,11 +859,136 @@ public class FrameworkPerfActivity extends Activity
         }
     }
 
+    static class LayoutInflaterViewOp extends Op {
+        Context mContext;
+
+        LayoutInflaterViewOp() {
+            super("LayoutInflaterView", "Inflate layout with 50 View objects");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            inf.inflate(R.layout.view_layout, null);
+            return true;
+        }
+    }
+
+    static class LayoutInflaterButtonOp extends Op {
+        Context mContext;
+
+        LayoutInflaterButtonOp() {
+            super("LayoutInflaterButton", "Inflate layout with 50 Button objects");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            inf.inflate(R.layout.button_layout, null);
+            return true;
+        }
+    }
+
+    static class LayoutInflaterImageButtonOp extends Op {
+        Context mContext;
+
+        LayoutInflaterImageButtonOp() {
+            super("LayoutInflaterImageButton", "Inflate layout with 50 ImageButton objects");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            inf.inflate(R.layout.image_button_layout, null);
+            return true;
+        }
+    }
+
+    static class CreateBitmapOp extends Op {
+        Context mContext;
+
+        CreateBitmapOp() {
+            super("CreateBitmap", "Create a Bitmap");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
+            Bitmap bm = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+            return true;
+        }
+    }
+
+    static class CreateRecycleBitmapOp extends Op {
+        Context mContext;
+
+        CreateRecycleBitmapOp() {
+            super("CreateRecycleBitmap", "Create and recycle a Bitmap");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
+            Bitmap bm = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+            bm.recycle();
+            return true;
+        }
+    }
+
     static class LoadSmallBitmapOp extends Op {
         Context mContext;
 
         LoadSmallBitmapOp() {
             super("LoadSmallBitmap", "Load small raw bitmap");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
+            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
+                    R.drawable.stat_sample, opts);
+            return true;
+        }
+    }
+
+    static class LoadRecycleSmallBitmapOp extends Op {
+        Context mContext;
+
+        LoadRecycleSmallBitmapOp() {
+            super("LoadRecycleSmallBitmap", "Load and recycle small raw bitmap");
         }
 
         void onInit(Context context, boolean foreground) {
@@ -779,6 +1021,26 @@ public class FrameworkPerfActivity extends Activity
             opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
             Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
                     R.drawable.wallpaper_goldengate, opts);
+            return true;
+        }
+    }
+
+    static class LoadRecycleLargeBitmapOp extends Op {
+        Context mContext;
+
+        LoadRecycleLargeBitmapOp() {
+            super("LoadRecycleLargeBitmap", "Load and recycle large raw bitmap");
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mContext = context;
+        }
+
+        boolean onRun() {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
+            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
+                    R.drawable.wallpaper_goldengate, opts);
             bm.recycle();
             return true;
         }
@@ -800,7 +1062,6 @@ public class FrameworkPerfActivity extends Activity
             opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
             Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
                     R.drawable.stat_sample_scale, opts);
-            bm.recycle();
             return true;
         }
     }
@@ -821,7 +1082,6 @@ public class FrameworkPerfActivity extends Activity
             opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
             Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
                     R.drawable.wallpaper_goldengate_scale, opts);
-            bm.recycle();
             return true;
         }
     }
