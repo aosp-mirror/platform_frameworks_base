@@ -51,6 +51,27 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(-1, stats.findIndex(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE));
     }
 
+    public void testFindIndexHinted() {
+        final NetworkStats stats = new NetworkStats(TEST_START, 3)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 1024L, 8L, 0L, 0L, 10)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 12)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 1024L, 8L, 0L, 0L, 10)
+                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 12);
+
+        // verify that we correctly find across regardless of hinting
+        for (int hint = 0; hint < stats.size(); hint++) {
+            assertEquals(0, stats.findIndexHinted(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, hint));
+            assertEquals(1, stats.findIndexHinted(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, hint));
+            assertEquals(2, stats.findIndexHinted(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, hint));
+            assertEquals(3, stats.findIndexHinted(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, hint));
+            assertEquals(4, stats.findIndexHinted(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, hint));
+            assertEquals(5, stats.findIndexHinted(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, hint));
+            assertEquals(-1, stats.findIndexHinted(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE, hint));
+        }
+    }
+
     public void testAddEntryGrow() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 2);
 
@@ -255,6 +276,22 @@ public class NetworkStatsTest extends TestCase {
 
         ifaces.add(TEST_IFACE2);
         assertValues(stats.getTotal(null, ifaces), 1024L, 64L, 0L, 0L, 0L);
+    }
+
+    public void testWithoutUid() throws Exception {
+        final NetworkStats before = new NetworkStats(TEST_START, 3)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 64L, 4L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 128L, 8L, 0L, 0L, 0L);
+
+        final NetworkStats after = before.withoutUid(100);
+        assertEquals(6, before.size());
+        assertEquals(2, after.size());
+        assertValues(after, 0, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 0L, 0L);
+        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 128L, 8L, 0L, 0L, 0L);
     }
 
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,

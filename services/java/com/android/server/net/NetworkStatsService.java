@@ -32,7 +32,6 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.net.NetworkStatsHistory.randomLong;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
@@ -49,7 +48,6 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
-import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
@@ -73,9 +71,11 @@ import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.NetworkStats;
+import android.net.NetworkStats.NonMonotonicException;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Binder;
+import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -150,6 +150,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Sample recent usage after each poll event. */
     private static final boolean ENABLE_SAMPLE_AFTER_POLL = true;
 
+    private static final String TAG_NETSTATS_ERROR = "netstats_error";
+
+    private static final String DEV = "dev";
+    private static final String XT = "xt";
+    private static final String UID = "uid";
+
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
     private final IAlarmManager mAlarmManager;
@@ -160,6 +166,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final PowerManager.WakeLock mWakeLock;
 
     private IConnectivityManager mConnManager;
+    private DropBoxManager mDropBox;
 
     // @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
@@ -306,6 +313,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // bootstrap initial stats to prevent double-counting later
         bootstrapStats();
+
+        mDropBox = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
     }
 
     private void shutdownLocked() {
@@ -621,7 +630,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // broadcast.
             final int uid = intent.getIntExtra(EXTRA_UID, 0);
             synchronized (mStatsLock) {
-                // TODO: perform one last stats poll for UID
                 mWakeLock.acquire();
                 try {
                     removeUidLocked(uid);
@@ -829,9 +837,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // persist when enough network data has occurred
         final long persistNetworkDevDelta = computeStatsDelta(
-                mLastPersistNetworkDevSnapshot, networkDevSnapshot, true).getTotalBytes();
+                mLastPersistNetworkDevSnapshot, networkDevSnapshot, true, DEV).getTotalBytes();
         final long persistNetworkXtDelta = computeStatsDelta(
-                mLastPersistNetworkXtSnapshot, networkXtSnapshot, true).getTotalBytes();
+                mLastPersistNetworkXtSnapshot, networkXtSnapshot, true, XT).getTotalBytes();
         final boolean networkOverThreshold = persistNetworkDevDelta > threshold
                 || persistNetworkXtDelta > threshold;
         if (persistForce || (persistNetwork && networkOverThreshold)) {
@@ -842,8 +850,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // persist when enough uid data has occurred
-        final long persistUidDelta = computeStatsDelta(mLastPersistUidSnapshot, uidSnapshot, true)
-                .getTotalBytes();
+        final long persistUidDelta = computeStatsDelta(
+                mLastPersistUidSnapshot, uidSnapshot, true, UID).getTotalBytes();
         if (persistForce || (persistUid && persistUidDelta > threshold)) {
             writeUidStatsLocked();
             mLastPersistUidSnapshot = uidSnapshot;
@@ -872,7 +880,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final HashSet<String> unknownIface = Sets.newHashSet();
 
         final NetworkStats delta = computeStatsDelta(
-                mLastPollNetworkDevSnapshot, networkDevSnapshot, false);
+                mLastPollNetworkDevSnapshot, networkDevSnapshot, false, DEV);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -902,7 +910,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final HashSet<String> unknownIface = Sets.newHashSet();
 
         final NetworkStats delta = computeStatsDelta(
-                mLastPollNetworkXtSnapshot, networkXtSnapshot, false);
+                mLastPollNetworkXtSnapshot, networkXtSnapshot, false, XT);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -931,9 +939,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performUidPollLocked(NetworkStats uidSnapshot, long currentTime) {
         ensureUidStatsLoadedLocked();
 
-        final NetworkStats delta = computeStatsDelta(mLastPollUidSnapshot, uidSnapshot, false);
+        final NetworkStats delta = computeStatsDelta(
+                mLastPollUidSnapshot, uidSnapshot, false, UID);
         final NetworkStats operationsDelta = computeStatsDelta(
-                mLastPollOperationsSnapshot, mOperations, false);
+                mLastPollOperationsSnapshot, mOperations, false, UID);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -1014,6 +1023,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void removeUidLocked(int uid) {
         ensureUidStatsLoadedLocked();
 
+        // perform one last poll before removing
+        performPollLocked(FLAG_PERSIST_ALL);
+
         final ArrayList<UidStatsKey> knownKeys = Lists.newArrayList();
         knownKeys.addAll(mUidStats.keySet());
 
@@ -1030,6 +1042,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mUidStats.remove(key);
             }
         }
+
+        // clear UID from current stats snapshot
+        mLastPollUidSnapshot = mLastPollUidSnapshot.withoutUid(uid);
+        mLastPollNetworkXtSnapshot = computeNetworkXtSnapshotFromUid(mLastPollUidSnapshot);
 
         // clear kernel stats associated with UID
         resetKernelUidStats(uid);
@@ -1490,10 +1506,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Return the delta between two {@link NetworkStats} snapshots, where {@code
      * before} can be {@code null}.
      */
-    private static NetworkStats computeStatsDelta(
-            NetworkStats before, NetworkStats current, boolean collectStale) {
+    private NetworkStats computeStatsDelta(
+            NetworkStats before, NetworkStats current, boolean collectStale, String type) {
         if (before != null) {
-            return current.subtractClamped(before);
+            try {
+                return current.subtract(before);
+            } catch (NonMonotonicException e) {
+                Log.w(TAG, "found non-monotonic values; saving to dropbox");
+
+                // record error for debugging
+                final StringBuilder builder = new StringBuilder();
+                builder.append("found non-monotonic " + type + "values at left[" + e.leftIndex
+                        + "] - right[" + e.rightIndex + "]\n");
+                builder.append("left=").append(e.left).append('\n');
+                builder.append("right=").append(e.right).append('\n');
+                mDropBox.addText(TAG_NETSTATS_ERROR, builder.toString());
+
+                // return empty delta to avoid recording broken stats
+                return new NetworkStats(0L, 10);
+            }
         } else if (collectStale) {
             // caller is okay collecting stale stats for first call.
             return current;

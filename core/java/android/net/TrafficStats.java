@@ -20,6 +20,7 @@ import android.app.DownloadManager;
 import android.app.backup.BackupManager;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.net.NetworkStats.NonMonotonicException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
@@ -192,12 +193,15 @@ public class TrafficStats {
                 throw new IllegalStateException("not profiling data");
             }
 
-            // subtract starting values and return delta
-            final NetworkStats profilingStop = getDataLayerSnapshotForUid(context);
-            final NetworkStats profilingDelta = profilingStop.subtractClamped(
-                    sActiveProfilingStart);
-            sActiveProfilingStart = null;
-            return profilingDelta;
+            try {
+                // subtract starting values and return delta
+                final NetworkStats profilingStop = getDataLayerSnapshotForUid(context);
+                final NetworkStats profilingDelta = profilingStop.subtract(sActiveProfilingStart);
+                sActiveProfilingStart = null;
+                return profilingDelta;
+            } catch (NonMonotonicException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
