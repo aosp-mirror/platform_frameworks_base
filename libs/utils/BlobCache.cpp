@@ -21,9 +21,19 @@
 #include <string.h>
 
 #include <utils/BlobCache.h>
+#include <utils/Errors.h>
 #include <utils/Log.h>
 
 namespace android {
+
+// BlobCache::Header::mMagicNumber value
+static const uint32_t blobCacheMagic = '_Bb$';
+
+// BlobCache::Header::mBlobCacheVersion value
+static const uint32_t blobCacheVersion = 1;
+
+// BlobCache::Header::mDeviceVersion value
+static const uint32_t blobCacheDeviceVersion = 1;
 
 BlobCache::BlobCache(size_t maxKeySize, size_t maxValueSize, size_t maxTotalSize):
         mMaxKeySize(maxKeySize),
@@ -67,12 +77,10 @@ void BlobCache::set(const void* key, size_t keySize, const void* value,
         return;
     }
 
-    Mutex::Autolock lock(mMutex);
     sp<Blob> dummyKey(new Blob(key, keySize, false));
     CacheEntry dummyEntry(dummyKey, NULL);
 
     while (true) {
-
         ssize_t index = mCacheEntries.indexOf(dummyEntry);
         if (index < 0) {
             // Create a new cache entry.
@@ -129,7 +137,6 @@ size_t BlobCache::get(const void* key, size_t keySize, void* value,
                 keySize, mMaxKeySize);
         return 0;
     }
-    Mutex::Autolock lock(mMutex);
     sp<Blob> dummyKey(new Blob(key, keySize, false));
     CacheEntry dummyEntry(dummyKey, NULL);
     ssize_t index = mCacheEntries.indexOf(dummyEntry);
@@ -150,6 +157,133 @@ size_t BlobCache::get(const void* key, size_t keySize, void* value,
                 valueSize, valueBlobSize);
     }
     return valueBlobSize;
+}
+
+static inline size_t align4(size_t size) {
+    return (size + 3) & ~3;
+}
+
+size_t BlobCache::getFlattenedSize() const {
+    size_t size = sizeof(Header);
+    for (size_t i = 0; i < mCacheEntries.size(); i++) {
+        const CacheEntry& e(mCacheEntries[i]);
+        sp<Blob> keyBlob = e.getKey();
+        sp<Blob> valueBlob = e.getValue();
+        size = align4(size);
+        size += sizeof(EntryHeader) + keyBlob->getSize() +
+                valueBlob->getSize();
+    }
+    return size;
+}
+
+size_t BlobCache::getFdCount() const {
+    return 0;
+}
+
+status_t BlobCache::flatten(void* buffer, size_t size, int fds[], size_t count)
+        const {
+    if (count != 0) {
+        LOGE("flatten: nonzero fd count: %d", count);
+        return BAD_VALUE;
+    }
+
+    // Write the cache header
+    if (size < sizeof(Header)) {
+        LOGE("flatten: not enough room for cache header");
+        return BAD_VALUE;
+    }
+    Header* header = reinterpret_cast<Header*>(buffer);
+    header->mMagicNumber = blobCacheMagic;
+    header->mBlobCacheVersion = blobCacheVersion;
+    header->mDeviceVersion = blobCacheDeviceVersion;
+    header->mNumEntries = mCacheEntries.size();
+
+    // Write cache entries
+    uint8_t* byteBuffer = reinterpret_cast<uint8_t*>(buffer);
+    off_t byteOffset = align4(sizeof(Header));
+    for (size_t i = 0; i < mCacheEntries.size(); i++) {
+        const CacheEntry& e(mCacheEntries[i]);
+        sp<Blob> keyBlob = e.getKey();
+        sp<Blob> valueBlob = e.getValue();
+        size_t keySize = keyBlob->getSize();
+        size_t valueSize = valueBlob->getSize();
+
+        size_t entrySize = sizeof(EntryHeader) + keySize + valueSize;
+        if (byteOffset + entrySize > size) {
+            LOGE("flatten: not enough room for cache entries");
+            return BAD_VALUE;
+        }
+
+        EntryHeader* eheader = reinterpret_cast<EntryHeader*>(
+            &byteBuffer[byteOffset]);
+        eheader->mKeySize = keySize;
+        eheader->mValueSize = valueSize;
+
+        memcpy(eheader->mData, keyBlob->getData(), keySize);
+        memcpy(eheader->mData + keySize, valueBlob->getData(), valueSize);
+
+        byteOffset += align4(entrySize);
+    }
+
+    return OK;
+}
+
+status_t BlobCache::unflatten(void const* buffer, size_t size, int fds[],
+        size_t count) {
+    // All errors should result in the BlobCache being in an empty state.
+    mCacheEntries.clear();
+
+    if (count != 0) {
+        LOGE("unflatten: nonzero fd count: %d", count);
+        return BAD_VALUE;
+    }
+
+    // Read the cache header
+    if (size < sizeof(Header)) {
+        LOGE("unflatten: not enough room for cache header");
+        return BAD_VALUE;
+    }
+    const Header* header = reinterpret_cast<const Header*>(buffer);
+    if (header->mMagicNumber != blobCacheMagic) {
+        LOGE("unflatten: bad magic number: %d", header->mMagicNumber);
+        return BAD_VALUE;
+    }
+    if (header->mBlobCacheVersion != blobCacheVersion ||
+            header->mDeviceVersion != blobCacheDeviceVersion) {
+        // We treat version mismatches as an empty cache.
+        return OK;
+    }
+
+    // Read cache entries
+    const uint8_t* byteBuffer = reinterpret_cast<const uint8_t*>(buffer);
+    off_t byteOffset = align4(sizeof(Header));
+    size_t numEntries = header->mNumEntries;
+    for (size_t i = 0; i < numEntries; i++) {
+        if (byteOffset + sizeof(EntryHeader) > size) {
+            mCacheEntries.clear();
+            LOGE("unflatten: not enough room for cache entry headers");
+            return BAD_VALUE;
+        }
+
+        const EntryHeader* eheader = reinterpret_cast<const EntryHeader*>(
+                &byteBuffer[byteOffset]);
+        size_t keySize = eheader->mKeySize;
+        size_t valueSize = eheader->mValueSize;
+        size_t entrySize = sizeof(EntryHeader) + keySize + valueSize;
+
+        if (byteOffset + entrySize > size) {
+            mCacheEntries.clear();
+            LOGE("unflatten: not enough room for cache entry headers");
+            return BAD_VALUE;
+        }
+
+        const uint8_t* data = eheader->mData;
+        set(data, keySize, data + keySize, valueSize);
+
+        byteOffset += align4(entrySize);
+    }
+
+    return OK;
 }
 
 long int BlobCache::blob_random() {
@@ -179,7 +313,7 @@ BlobCache::Blob::Blob(const void* data, size_t size, bool copyData):
         mData(copyData ? malloc(size) : data),
         mSize(size),
         mOwnsData(copyData) {
-    if (copyData) {
+    if (data != NULL && copyData) {
         memcpy(const_cast<void*>(mData), data, size);
     }
 }
