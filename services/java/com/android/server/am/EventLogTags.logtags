@@ -48,7 +48,7 @@ option java_package com.android.server.am
 # Reporting to applications that memory is low
 30017 am_low_memory (Num Processes|1|1)
 # An activity is being destroyed:
-30018 am_destroy_activity (Token|1|5),(Task ID|1|5),(Component Name|3)
+30018 am_destroy_activity (Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
 # An activity has been relaunched, resumed, and is now in the foreground:
 30019 am_relaunch_resume_activity (Token|1|5),(Task ID|1|5),(Component Name|3)
 # An activity has been relaunched:
