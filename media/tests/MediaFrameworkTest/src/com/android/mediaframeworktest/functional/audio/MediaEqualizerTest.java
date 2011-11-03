@@ -49,11 +49,6 @@ public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFr
     private final static int MAX_BAND_LEVEL = 1500;
     private final static int TEST_FREQUENCY_MILLIHERTZ = 1000000;
     private final static int MIN_NUMBER_OF_PRESETS = 4;
-    private final static int TEST_VOLUME = 4;
-    // Implementor UUID for volume controller effect defined in
-    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
-    private final static UUID VOLUME_EFFECT_UUID =
-        UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
 
     private Equalizer mEqualizer = null;
     private int mSession = -1;
@@ -247,80 +242,6 @@ public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFr
             loge(msg, "get parameter() called in wrong state");
         } finally {
             releaseEqualizer();
-        }
-        assertTrue(msg, result);
-    }
-
-    //-----------------------------------------------------------------
-    // 2 - Effect action
-    //----------------------------------
-
-    //Test case 2.0: test that the equalizer actually alters the sound
-    @LargeTest
-    public void test2_0SoundModification() throws Exception {
-        boolean result = false;
-        String msg = "test2_0SoundModification()";
-        EnergyProbe probe = null;
-        AudioEffect vc = null;
-        MediaPlayer mp = null;
-        AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
-        int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC,
-                           TEST_VOLUME,
-                           0);
-        try {
-            probe = new EnergyProbe(0);
-            // creating a volume controller on output mix ensures that ro.audio.silent mutes
-            // audio after the effects and not before
-            vc = new AudioEffect(
-                                AudioEffect.EFFECT_TYPE_NULL,
-                                VOLUME_EFFECT_UUID,
-                                0,
-                                0);
-            vc.setEnabled(true);
-
-            mp = new MediaPlayer();
-            mp.setDataSource(MediaNames.SINE_200_1000);
-            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getEqualizer(mp.getAudioSessionId());
-            mp.prepare();
-            mp.start();
-            Thread.sleep(500);
-            // measure reference energy around 1kHz
-            int refEnergy = probe.capture(1000);
-            short band = mEqualizer.getBand(1000000);
-            short[] levelRange = mEqualizer.getBandLevelRange();
-            mEqualizer.setBandLevel(band, levelRange[0]);
-            mEqualizer.setEnabled(true);
-            Thread.sleep(500);
-            // measure energy around 1kHz with band level at min
-            int energy = probe.capture(1000);
-            assertTrue(msg + ": equalizer has no effect at 1kHz", energy < refEnergy/4);
-            result = true;
-        } catch (IllegalArgumentException e) {
-            msg = msg.concat(": Bad parameter value");
-            loge(msg, "Bad parameter value");
-        } catch (UnsupportedOperationException e) {
-            msg = msg.concat(": get parameter() rejected");
-            loge(msg, "get parameter() rejected");
-        } catch (IllegalStateException e) {
-            msg = msg.concat("get parameter() called in wrong state");
-            loge(msg, "get parameter() called in wrong state");
-        } catch (InterruptedException e) {
-            loge(msg, "sleep() interrupted");
-        }
-        finally {
-            releaseEqualizer();
-            if (mp != null) {
-                mp.release();
-            }
-            if (vc != null) {
-                vc.release();
-            }
-            if (probe != null) {
-                probe.release();
-            }
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
         }
         assertTrue(msg, result);
     }
