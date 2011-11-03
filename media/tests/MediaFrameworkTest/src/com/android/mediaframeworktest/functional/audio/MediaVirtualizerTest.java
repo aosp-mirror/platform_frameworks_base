@@ -44,13 +44,7 @@ import java.util.UUID;
  */
 public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaVirtualizerTest";
-    private final static int MIN_ENERGY_RATIO_2 = 2;
     private final static short TEST_STRENGTH = 500;
-    private final static int TEST_VOLUME = 4;
-    // Implementor UUID for volume controller effect defined in
-    // frameworks/base/media/libeffects/lvm/wrapper/Bundle/EffectBundle.cpp
-    private final static UUID VOLUME_EFFECT_UUID =
-        UUID.fromString("119341a0-8469-11df-81f9-0002a5d5c51b");
 
     private Virtualizer mVirtualizer = null;
     private int mSession = -1;
@@ -184,89 +178,6 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
         assertTrue(msg, result);
     }
 
-    //-----------------------------------------------------------------
-    // 2 - Effect action
-    //----------------------------------
-
-    //Test case 2.0: test actual virtualizer influence on sound
-    @LargeTest
-    public void test2_0SoundModification() throws Exception {
-        boolean result = false;
-        String msg = "test2_0SoundModification()";
-        EnergyProbe probe = null;
-        AudioEffect vc = null;
-        MediaPlayer mp = null;
-        AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
-        int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC,
-                           TEST_VOLUME,
-                           0);
-
-        try {
-            probe = new EnergyProbe(0);
-            // creating a volume controller on output mix ensures that ro.audio.silent mutes
-            // audio after the effects and not before
-            vc = new AudioEffect(
-                                AudioEffect.EFFECT_TYPE_NULL,
-                                VOLUME_EFFECT_UUID,
-                                0,
-                                0);
-            vc.setEnabled(true);
-
-            mp = new MediaPlayer();
-            mp.setDataSource(MediaNames.SINE_200_1000);
-            mp.setLooping(true);
-            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getVirtualizer(mp.getAudioSessionId());
-            mp.prepare();
-            mp.start();
-            Thread.sleep(200);
-            // measure reference energy around 1kHz
-            int refEnergy200 = probe.capture(200);
-            int refEnergy1000 = probe.capture(1000);
-            mVirtualizer.setStrength((short)1000);
-            mVirtualizer.setEnabled(true);
-            Thread.sleep(4000);
-            // measure energy around 1kHz with band level at min
-            int energy200 = probe.capture(200);
-            int energy1000 = probe.capture(1000);
-            // verify that the energy ration between low and high frequencies is at least
-            // MIN_ENERGY_RATIO_2 times higher with virtualizer on.
-            // NOTE: this is what is observed with current virtualizer implementation and the test
-            // audio file but is not the primary effect of the virtualizer. A better way would
-            // be to have a stereo PCM capture and check that a strongly paned input is centered
-            // when output. However, we cannot capture stereo with the visualizer.
-            assertTrue(msg + ": virtualizer has no effect",
-                    ((float)energy200/(float)energy1000) >
-                    (MIN_ENERGY_RATIO_2 * ((float)refEnergy200/(float)refEnergy1000)));
-            result = true;
-        } catch (IllegalArgumentException e) {
-            msg = msg.concat(": Bad parameter value");
-            loge(msg, "Bad parameter value");
-        } catch (UnsupportedOperationException e) {
-            msg = msg.concat(": get parameter() rejected");
-            loge(msg, "get parameter() rejected");
-        } catch (IllegalStateException e) {
-            msg = msg.concat("get parameter() called in wrong state");
-            loge(msg, "get parameter() called in wrong state");
-        } catch (InterruptedException e) {
-            loge(msg, "sleep() interrupted");
-        }
-        finally {
-            releaseVirtualizer();
-            if (mp != null) {
-                mp.release();
-            }
-            if (vc != null) {
-                vc.release();
-            }
-            if (probe != null) {
-                probe.release();
-            }
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
-        }
-        assertTrue(msg, result);
-    }
     //-----------------------------------------------------------------
     // private methods
     //----------------------------------
