@@ -2066,7 +2066,16 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         // The first time a track is added we wait
         // for all its buffers to be filled before processing it
         mAudioMixer->setActiveTrack(track->name());
-        if (cblk->framesReady() && track->isReady() &&
+        // make sure that we have enough frames to mix one full buffer
+        uint32_t minFrames = 1;
+        if (!track->isStopped() && !track->isPausing()) {
+            if (t->sampleRate() == (int)mSampleRate) {
+                minFrames = mFrameCount;
+            } else {
+                minFrames = (mFrameCount * t->sampleRate()) / mSampleRate + 1;
+            }
+        }
+        if ((cblk->framesReady() >= minFrames) && track->isReady() &&
                 !track->isPaused() && !track->isTerminated())
         {
             //LOGV("track %d u=%08x, s=%08x [OK] on thread %p", track->name(), cblk->user, cblk->server, this);
