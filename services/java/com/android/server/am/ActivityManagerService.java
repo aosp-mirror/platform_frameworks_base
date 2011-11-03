@@ -260,6 +260,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final boolean mHeadless;
 
+    // Whether we should show our dialogs (ANR, crash, etc) or just perform their
+    // default actuion automatically.  Important for devices without direct input
+    // devices.
+    private boolean mShowDialogs = true;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -879,7 +884,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         return;
                     }
                     AppErrorResult res = (AppErrorResult) data.get("result");
-                    if (!mSleeping && !mShuttingDown) {
+                    if (mShowDialogs && !mSleeping && !mShuttingDown) {
                         Dialog d = new AppErrorDialog(mContext, res, proc);
                         d.show();
                         proc.crashDialog = d;
@@ -930,7 +935,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         return;
                     }
                     AppErrorResult res = (AppErrorResult) data.get("result");
-                    if (!mSleeping && !mShuttingDown) {
+                    if (mShowDialogs && !mSleeping && !mShuttingDown) {
                         Dialog d = new StrictModeViolationDialog(mContext, res, proc);
                         d.show();
                         proc.crashDialog = d;
@@ -1050,16 +1055,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } break;
             case SHOW_UID_ERROR_MSG: {
-                // XXX This is a temporary dialog, no need to localize.
-                AlertDialog d = new BaseErrorDialog(mContext);
-                d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-                d.setCancelable(false);
-                d.setTitle("System UIDs Inconsistent");
-                d.setMessage("UIDs on the system are inconsistent, you need to wipe your data partition or your device will be unstable.");
-                d.setButton(DialogInterface.BUTTON_POSITIVE, "I'm Feeling Lucky",
-                        mHandler.obtainMessage(IM_FEELING_LUCKY_MSG));
-                mUidAlert = d;
-                d.show();
+                String title = "System UIDs Inconsistent";
+                String text = "UIDs on the system are inconsistent, you need to wipe your"
+                        + " data partition or your device will be unstable.";
+                Log.e(TAG, title + ": " + text);
+                if (mShowDialogs) {
+                    // XXX This is a temporary dialog, no need to localize.
+                    AlertDialog d = new BaseErrorDialog(mContext);
+                    d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+                    d.setCancelable(false);
+                    d.setTitle(title);
+                    d.setMessage(text);
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, "I'm Feeling Lucky",
+                            mHandler.obtainMessage(IM_FEELING_LUCKY_MSG));
+                    mUidAlert = d;
+                    d.show();
+                }
             } break;
             case IM_FEELING_LUCKY_MSG: {
                 if (mUidAlert != null) {
@@ -12890,6 +12901,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mConfiguration = newConfig;
                 Slog.i(TAG, "Config changed: " + newConfig);
                 
+                // TODO: If our config changes, should we auto dismiss any currently
+                // showing dialogs?
+                mShowDialogs = shouldShowDialogs(newConfig);
+
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {
                     ac.updateConfiguration(mConfiguration);
@@ -12954,6 +12969,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         
         return kept;
+    }
+
+    /**
+     * Decide based on the configuration whether we should shouw the ANR,
+     * crash, etc dialogs.  The idea is that if there is no affordnace to
+     * press the on-screen buttons, we shouldn't show the dialog.
+     *
+     * A thought: SystemUI might also want to get told about this, the Power
+     * dialog / global actions also might want different behaviors.
+     */
+    private static final boolean shouldShowDialogs(Configuration config) {
+        return !(config.keyboard == Configuration.KEYBOARD_NOKEYS
+                && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH);
     }
     
     /**
