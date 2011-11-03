@@ -28,7 +28,7 @@ import android.webkit.WebViewClient;
 import junit.framework.Assert;
 
 public class JavaBridgeTestBase extends ActivityInstrumentationTestCase2<WebViewStubActivity> {
-    private class TestWebViewClient extends WebViewClient {
+    protected class TestWebViewClient extends WebViewClient {
         private boolean mIsPageFinished;
         @Override
         public synchronized void onPageFinished(WebView webView, String url) {
@@ -72,7 +72,7 @@ public class JavaBridgeTestBase extends ActivityInstrumentationTestCase2<WebView
         }
     }
 
-    private TestWebViewClient mWebViewClient;
+    protected TestWebViewClient mWebViewClient;
 
     public JavaBridgeTestBase() {
         super(WebViewStubActivity.class);
@@ -106,8 +106,12 @@ public class JavaBridgeTestBase extends ActivityInstrumentationTestCase2<WebView
         runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActivity().getWebView().loadUrl("javascript:" + script);
+                getWebView().loadUrl("javascript:" + script);
             }
         });
+    }
+
+    protected WebView getWebView() {
+        return getActivity().getWebView();
     }
 }
