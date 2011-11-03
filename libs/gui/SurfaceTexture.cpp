@@ -116,7 +116,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
     // Choose a name using the PID and a process-unique ID.
     mName = String8::format("unnamed-%d-%d", getpid(), createProcessUniqueId());
 
-    ST_LOGV("SurfaceTexture::SurfaceTexture");
+    ST_LOGV("SurfaceTexture");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
     mNextCrop.makeInvalid();
@@ -125,7 +125,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
 }
 
 SurfaceTexture::~SurfaceTexture() {
-    ST_LOGV("SurfaceTexture::~SurfaceTexture");
+    ST_LOGV("~SurfaceTexture");
     freeAllBuffersLocked();
 }
 
@@ -169,7 +169,7 @@ status_t SurfaceTexture::setBufferCountServer(int bufferCount) {
 }
 
 status_t SurfaceTexture::setBufferCount(int bufferCount) {
-    ST_LOGV("SurfaceTexture::setBufferCount");
+    ST_LOGV("setBufferCount: count=%d", bufferCount);
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -217,6 +217,7 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
 
 status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
 {
+    ST_LOGV("setDefaultBufferSize: w=%d, h=%d", w, h);
     if (!w || !h) {
         ST_LOGE("setDefaultBufferSize: dimensions cannot be 0 (w=%d, h=%d)",
                 w, h);
@@ -230,7 +231,7 @@ status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
 }
 
 status_t SurfaceTexture::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
-    ST_LOGV("SurfaceTexture::requestBuffer");
+    ST_LOGV("requestBuffer: slot=%d", slot);
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
         ST_LOGE("requestBuffer: SurfaceTexture has been abandoned!");
@@ -248,7 +249,7 @@ status_t SurfaceTexture::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
 
 status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         uint32_t format, uint32_t usage) {
-    ST_LOGV("SurfaceTexture::dequeueBuffer");
+    ST_LOGV("dequeueBuffer: w=%d h=%d fmt=%#x usage=%#x", w, h, format, usage);
 
     if ((w && !h) || (!w && h)) {
         ST_LOGE("dequeueBuffer: invalid size: w=%u, h=%u", w, h);
@@ -342,6 +343,8 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         // clients are not allowed to dequeue more than one buffer
         // if they didn't set a buffer count.
         if (!mClientBufferCount && dequeuedCount) {
+            ST_LOGE("dequeueBuffer: can't dequeue multiple buffers without "
+                    "setting the buffer count");
             return -EINVAL;
         }
 
@@ -375,6 +378,8 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     }
 
     if (found == INVALID_BUFFER_SLOT) {
+        // This should not happen.
+        ST_LOGE("dequeueBuffer: no available buffer slots");
         return -EBUSY;
     }
 
@@ -427,10 +432,13 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         }
         returnFlags |= ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
     }
+    ST_LOGV("dequeueBuffer: returning slot=%d buf=%p flags=%#x", buf,
+            mSlots[buf].mGraphicBuffer->handle, returnFlags);
     return returnFlags;
 }
 
 status_t SurfaceTexture::setSynchronousMode(bool enabled) {
+    ST_LOGV("setSynchronousMode: enabled=%d", enabled);
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -462,7 +470,7 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
 
 status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
-    ST_LOGV("SurfaceTexture::queueBuffer");
+    ST_LOGV("queueBuffer: slot=%d time=%lld", buf, timestamp);
 
     sp<FrameAvailableListener> listener;
 
@@ -534,7 +542,7 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
 }
 
 void SurfaceTexture::cancelBuffer(int buf) {
-    ST_LOGV("SurfaceTexture::cancelBuffer");
+    ST_LOGV("cancelBuffer: slot=%d", buf);
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -556,7 +564,9 @@ void SurfaceTexture::cancelBuffer(int buf) {
 }
 
 status_t SurfaceTexture::setCrop(const Rect& crop) {
-    ST_LOGV("SurfaceTexture::setCrop");
+    ST_LOGV("setCrop: crop=[%d,%d,%d,%d]", crop.left, crop.top, crop.right,
+            crop.bottom);
+
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
         ST_LOGE("setCrop: SurfaceTexture has been abandoned!");
@@ -567,7 +577,7 @@ status_t SurfaceTexture::setCrop(const Rect& crop) {
 }
 
 status_t SurfaceTexture::setTransform(uint32_t transform) {
-    ST_LOGV("SurfaceTexture::setTransform");
+    ST_LOGV("setTransform: xform=%#x", transform);
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
         ST_LOGE("setTransform: SurfaceTexture has been abandoned!");
@@ -579,7 +589,7 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
 
 status_t SurfaceTexture::connect(int api,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
-    ST_LOGV("SurfaceTexture::connect(this=%p, %d)", this, api);
+    ST_LOGV("connect: api=%d", api);
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -612,7 +622,7 @@ status_t SurfaceTexture::connect(int api,
 }
 
 status_t SurfaceTexture::disconnect(int api) {
-    ST_LOGV("SurfaceTexture::disconnect(this=%p, %d)", this, api);
+    ST_LOGV("disconnect: api=%d", api);
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -640,6 +650,7 @@ status_t SurfaceTexture::disconnect(int api) {
             }
             break;
         default:
+            ST_LOGE("disconnect: unknown API %d", api);
             err = -EINVAL;
             break;
     }
@@ -647,13 +658,14 @@ status_t SurfaceTexture::disconnect(int api) {
 }
 
 status_t SurfaceTexture::setScalingMode(int mode) {
-    ST_LOGV("SurfaceTexture::setScalingMode(%d)", mode);
+    ST_LOGV("setScalingMode: mode=%d", mode);
 
     switch (mode) {
         case NATIVE_WINDOW_SCALING_MODE_FREEZE:
         case NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW:
             break;
         default:
+            ST_LOGE("unknown scaling mode: %d", mode);
             return BAD_VALUE;
     }
 
@@ -663,7 +675,7 @@ status_t SurfaceTexture::setScalingMode(int mode) {
 }
 
 status_t SurfaceTexture::updateTexImage() {
-    ST_LOGV("SurfaceTexture::updateTexImage");
+    ST_LOGV("updateTexImage");
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -712,6 +724,10 @@ status_t SurfaceTexture::updateTexImage() {
         if (failed) {
             return -EINVAL;
         }
+
+        ST_LOGV("updateTexImage: (slot=%d buf=%p) -> (slot=%d buf=%p)", mCurrentTexture,
+                mCurrentTextureBuf != NULL ? mCurrentTextureBuf->handle : 0, buf,
+                mSlots[buf].mGraphicBuffer->handle);
 
         if (mCurrentTexture != INVALID_BUFFER_SLOT) {
             // The current buffer becomes FREE if it was still in the queued
@@ -771,7 +787,7 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
 }
 
 void SurfaceTexture::computeCurrentTransformMatrix() {
-    ST_LOGV("SurfaceTexture::computeCurrentTransformMatrix");
+    ST_LOGV("computeCurrentTransformMatrix");
 
     float xform[16];
     for (int i = 0; i < 16; i++) {
@@ -862,14 +878,14 @@ void SurfaceTexture::computeCurrentTransformMatrix() {
 }
 
 nsecs_t SurfaceTexture::getTimestamp() {
-    ST_LOGV("SurfaceTexture::getTimestamp");
+    ST_LOGV("getTimestamp");
     Mutex::Autolock lock(mMutex);
     return mCurrentTimestamp;
 }
 
 void SurfaceTexture::setFrameAvailableListener(
         const sp<FrameAvailableListener>& listener) {
-    ST_LOGV("SurfaceTexture::setFrameAvailableListener");
+    ST_LOGV("setFrameAvailableListener");
     Mutex::Autolock lock(mMutex);
     mFrameAvailableListener = listener;
 }
