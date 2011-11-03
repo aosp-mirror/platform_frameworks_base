@@ -211,7 +211,7 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_STOP_SUPPLICANT                  = BASE + 12;
     /* Start the driver */
     static final int CMD_START_DRIVER                     = BASE + 13;
-    /* Start the driver */
+    /* Stop the driver */
     static final int CMD_STOP_DRIVER                      = BASE + 14;
     /* Indicates Static IP succeded */
     static final int CMD_STATIC_IP_SUCCESS                = BASE + 15;
@@ -219,6 +219,9 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_STATIC_IP_FAILURE                = BASE + 16;
     /* Indicates supplicant stop failed */
     static final int CMD_STOP_SUPPLICANT_FAILED           = BASE + 17;
+    /* Delayed stop to avoid shutting down driver too quick*/
+    static final int CMD_DELAYED_STOP_DRIVER              = BASE + 18;
+
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
@@ -389,6 +392,13 @@ public class WifiStateMachine extends StateMachine {
     private static final int MIN_INTERVAL_ENABLE_ALL_NETWORKS_MS = 10 * 60 * 1000; /* 10 minutes */
     private long mLastEnableAllNetworksTime;
 
+    /**
+     * Starting and shutting down driver too quick causes problems leading to driver
+     * being in a bad state. Delay driver stop.
+     */
+    private static final int DELAYED_DRIVER_STOP_MS = 2 * 60 * 1000; /* 2 minutes */
+    private int mDelayedStopCounter;
+    private boolean mInDelayedStop = false;
 
     private static final int MIN_RSSI = -200;
     private static final int MAX_RSSI = 256;
@@ -1779,6 +1789,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_SUPPLICANT_FAILED:
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
+                case CMD_DELAYED_STOP_DRIVER:
                 case CMD_START_AP:
                 case CMD_START_AP_SUCCESS:
                 case CMD_START_AP_FAILURE:
@@ -2441,6 +2452,7 @@ public class WifiStateMachine extends StateMachine {
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             mIsRunning = true;
+            mInDelayedStop = false;
             updateBatteryWorkSource(null);
 
             /**
@@ -2520,6 +2532,30 @@ public class WifiStateMachine extends StateMachine {
                     WifiNative.setBluetoothCoexistenceScanModeCommand(mBluetoothConnectionActive);
                     break;
                 case CMD_STOP_DRIVER:
+                    /* Already doing a delayed stop */
+                    if (mInDelayedStop) {
+                        if (DBG) log("Already in delayed stop");
+                        break;
+                    }
+                    mInDelayedStop = true;
+                    mDelayedStopCounter++;
+                    if (DBG) log("Delayed stop message " + mDelayedStopCounter);
+                    sendMessageDelayed(obtainMessage(CMD_DELAYED_STOP_DRIVER, mDelayedStopCounter,
+                            0), DELAYED_DRIVER_STOP_MS);
+                    break;
+                case CMD_START_DRIVER:
+                    if (mInDelayedStop) {
+                        mInDelayedStop = false;
+                        mDelayedStopCounter++;
+                        if (DBG) log("Delayed stop ignored due to start");
+                    }
+                    break;
+                case CMD_DELAYED_STOP_DRIVER:
+                    if (message.arg1 != mDelayedStopCounter) break;
+                    if (getCurrentState() != mDisconnectedState) {
+                        WifiNative.disconnectCommand();
+                        handleNetworkDisconnect();
+                    }
                     mWakeLock.acquire();
                     WifiNative.stopDriverCommand();
                     transitionTo(mDriverStoppingState);
@@ -2878,10 +2914,6 @@ public class WifiStateMachine extends StateMachine {
                   /* Ignore */
               case WifiMonitor.NETWORK_CONNECTION_EVENT:
                   break;
-              case CMD_STOP_DRIVER:
-                  sendMessage(CMD_DISCONNECT);
-                  deferMessage(message);
-                  break;
               case CMD_SET_SCAN_MODE:
                   if (message.arg1 == SCAN_ONLY_MODE) {
                       sendMessage(CMD_DISCONNECT);
@@ -2935,10 +2967,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DISCONNECT:
                     WifiNative.disconnectCommand();
                     transitionTo(mDisconnectingState);
-                    break;
-                case CMD_STOP_DRIVER:
-                    sendMessage(CMD_DISCONNECT);
-                    deferMessage(message);
                     break;
                 case CMD_REQUEST_CM_WAKELOCK:
                     checkAndSetConnectivityInstance();
@@ -3035,9 +3063,6 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
-                case CMD_STOP_DRIVER: /* Stop driver only after disconnect handled */
-                    deferMessage(message);
-                    break;
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
                         deferMessage(message);
