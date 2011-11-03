@@ -25,4 +25,5 @@ oneway interface ISpellCheckerSession {
     void onGetSuggestionsMultiple(
             in TextInfo[] textInfos, int suggestionsLimit, boolean multipleWords);
     void onCancel();
+    void onClose();
 }
