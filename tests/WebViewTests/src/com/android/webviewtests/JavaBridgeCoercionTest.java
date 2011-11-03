@@ -33,58 +33,7 @@
 
 package com.android.webviewtests;
 
-import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-
-import junit.framework.Assert;
-
-public class JavaBridgeCoercionTest extends ActivityInstrumentationTestCase2<WebViewStubActivity> {
-    private class TestWebViewClient extends WebViewClient {
-        private boolean mIsPageFinished;
-        @Override
-        public synchronized void onPageFinished(WebView webView, String url) {
-            mIsPageFinished = true;
-            notify();
-        }
-        public synchronized void waitForOnPageFinished() throws RuntimeException {
-            while (!mIsPageFinished) {
-                try {
-                    wait(5000);
-                } catch (Exception e) {
-                    continue;
-                }
-                if (!mIsPageFinished) {
-                    throw new RuntimeException("Timed out waiting for onPageFinished()");
-                }
-            }
-            mIsPageFinished = false;
-        }
-    }
-
-    private class Controller {
-        private boolean mIsResultReady;
-
-        protected synchronized void notifyResultIsReady() {
-            mIsResultReady = true;
-            notify();
-        }
-        protected synchronized void waitForResult() {
-            while (!mIsResultReady) {
-                try {
-                    wait(5000);
-                } catch (Exception e) {
-                    continue;
-                }
-                if (!mIsResultReady) {
-                    Assert.fail("Wait timed out");
-                }
-            }
-            mIsResultReady = false;
-        }
-    }
-
+public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
     private class TestObject extends Controller {
         private Object objectInstance;
         private CustomType customTypeInstance;
@@ -220,45 +169,11 @@ public class JavaBridgeCoercionTest extends ActivityInstrumentationTestCase2<Web
 
     private TestObject mTestObject;
 
-    public JavaBridgeCoercionTest() {
-        super(WebViewStubActivity.class);
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        // ActivityInstrumentationTestCase2 kills the activity after each test,
-        // so each test gets a new WebView.
         mTestObject = new TestObject();
-        // This starts the activity, so muct be called on the test thread.
-        final WebViewStubActivity activity = getActivity();
-        // On the UI thread, load an empty page and wait for it to finish
-        // loading so that the Java object is injected.
-        final TestWebViewClient webViewClient = new TestWebViewClient();
-        try {
-            runTestOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    WebView webView = activity.getWebView();
-                    webView.addJavascriptInterface(mTestObject, "testObject");
-                    webView.getSettings().setJavaScriptEnabled(true);
-                    webView.setWebViewClient(webViewClient);
-                    webView.loadData("<html><head></head><body></body></html>", "text/html", null);
-                }
-            });
-            webViewClient.waitForOnPageFinished();
-        } catch (Throwable e) {
-            throw new RuntimeException("Failed to set up WebView: " + Log.getStackTraceString(e));
-        }
-    }
-
-    private void executeJavaScript(final String script) throws Throwable {
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().getWebView().loadUrl("javascript:" + script);
-            }
-        });
+        setUpWebView(mTestObject, "testObject");
     }
 
     // Test passing a JavaScript number in the int32 range to a method of an
