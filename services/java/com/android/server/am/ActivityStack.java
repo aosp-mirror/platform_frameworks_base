@@ -947,7 +947,7 @@ final class ActivityStack {
         r.state = ActivityState.STOPPED;
         if (!r.finishing) {
             if (r.configDestroy) {
-                destroyActivityLocked(r, true, false);
+                destroyActivityLocked(r, true, false, "stop-config");
                 resumeTopActivityLocked(null);
             }
         }
@@ -976,7 +976,7 @@ final class ActivityStack {
                     // instance right now, we need to first completely stop
                     // the current instance before starting the new one.
                     if (DEBUG_PAUSE) Slog.v(TAG, "Destroying after pause: " + prev);
-                    destroyActivityLocked(prev, true, false);
+                    destroyActivityLocked(prev, true, false, "pause-config");
                 } else {
                     mStoppingActivities.add(prev);
                     if (mStoppingActivities.size() > 3) {
@@ -1364,7 +1364,8 @@ final class ActivityStack {
                 }
             }
 
-            if (!prev.finishing && prev.app != null && prev.app != next.app) {
+            if (!prev.finishing && prev.app != null && prev.app != next.app
+                    && prev.app != mService.mHomeProcess) {
                 // We are switching to a new activity that is in a different
                 // process than the previous one.  Note the previous process,
                 // so we can try to keep it around.
@@ -3113,7 +3114,7 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG, "Stop failed; moving to STOPPED: " + r);
                 r.state = ActivityState.STOPPED;
                 if (r.configDestroy) {
-                    destroyActivityLocked(r, true, false);
+                    destroyActivityLocked(r, true, false, "stop-except");
                 }
             }
         }
@@ -3288,7 +3289,7 @@ final class ActivityStack {
         for (i=0; i<NF; i++) {
             ActivityRecord r = (ActivityRecord)finishes.get(i);
             synchronized (mService) {
-                destroyActivityLocked(r, true, false);
+                destroyActivityLocked(r, true, false, "finish-idle");
             }
         }
 
@@ -3487,7 +3488,7 @@ final class ActivityStack {
                 || prevState == ActivityState.INITIALIZING) {
             // If this activity is already stopped, we can just finish
             // it right now.
-            return destroyActivityLocked(r, true, true) ? null : r;
+            return destroyActivityLocked(r, true, true, "finish-imm") ? null : r;
         } else {
             // Need to go through the full pause cycle to get this
             // activity into the stopped state and then finish it.
@@ -3593,7 +3594,7 @@ final class ActivityStack {
         }
     }
     
-    final void destroyActivitiesLocked(ProcessRecord owner, boolean oomAdj) {
+    final void destroyActivitiesLocked(ProcessRecord owner, boolean oomAdj, String reason) {
         for (int i=mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = mHistory.get(i);
             if (owner != null && r.app != owner) {
@@ -3604,7 +3605,7 @@ final class ActivityStack {
             if (r.app != null && r.haveState && !r.visible && r.stopped && !r.finishing
                     && r.state != ActivityState.DESTROYING
                     && r.state != ActivityState.DESTROYED) {
-                destroyActivityLocked(r, true, oomAdj);
+                destroyActivityLocked(r, true, oomAdj, "trim");
             }
         }
     }
@@ -3616,13 +3617,13 @@ final class ActivityStack {
      * but then create a new client-side object for this same HistoryRecord.
      */
     final boolean destroyActivityLocked(ActivityRecord r,
-            boolean removeFromApp, boolean oomAdj) {
+            boolean removeFromApp, boolean oomAdj, String reason) {
         if (DEBUG_SWITCH) Slog.v(
             TAG, "Removing activity: token=" + r
               + ", app=" + (r.app != null ? r.app.processName : "(null)"));
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
                 System.identityHashCode(r),
-                r.task.taskId, r.shortComponentName);
+                r.task.taskId, r.shortComponentName, reason);
 
         boolean removedFromHistory = false;
         
@@ -4109,7 +4110,7 @@ final class ActivityStack {
             if (r.app == null || r.app.thread == null) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                         "Switch is destroying non-running " + r);
-                destroyActivityLocked(r, true, false);
+                destroyActivityLocked(r, true, false, "config");
             } else if (r.state == ActivityState.PAUSING) {
                 // A little annoying: we are waiting for this activity to
                 // finish pausing.  Let's not do anything now, but just

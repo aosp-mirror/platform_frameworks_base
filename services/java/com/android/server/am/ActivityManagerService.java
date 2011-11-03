@@ -300,7 +300,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Historical data of past broadcasts, for debugging.
      */
-    static final int MAX_BROADCAST_HISTORY = 100;
+    static final int MAX_BROADCAST_HISTORY = 25;
     final BroadcastRecord[] mBroadcastHistory
             = new BroadcastRecord[MAX_BROADCAST_HISTORY];
 
@@ -13941,7 +13941,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
                             // For these apps we will also finish their activities
                             // to help them free memory.
-                            mMainStack.destroyActivitiesLocked(app, false);
+                            mMainStack.destroyActivitiesLocked(app, false, "trim");
                         }
                     }
                     app.trimMemoryLevel = curLevel;
@@ -14005,7 +14005,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (mAlwaysFinishActivities) {
-            mMainStack.destroyActivitiesLocked(null, false);
+            mMainStack.destroyActivitiesLocked(null, false, "always-finish");
         }
     }
 
