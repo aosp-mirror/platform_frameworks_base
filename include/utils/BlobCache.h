@@ -19,19 +19,21 @@
 
 #include <stddef.h>
 
+#include <utils/Flattenable.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/threads.h>
 
 namespace android {
 
-// A BlobCache is an in-memory cache for binary key/value pairs. All the public
-// methods are thread-safe.
+// A BlobCache is an in-memory cache for binary key/value pairs.  A BlobCache
+// does NOT provide any thread-safety guarantees.
 //
-// The cache contents can be serialized to a file and reloaded in a subsequent
-// execution of the program. This serialization is non-portable and should only
-// be loaded by the device that generated it.
-class BlobCache : public RefBase {
+// The cache contents can be serialized to an in-memory buffer or mmap'd file
+// and then reloaded in a subsequent execution of the program.  This
+// serialization is non-portable and the data should only be used by the device
+// that generated it.
+class BlobCache : public RefBase, public Flattenable {
 public:
 
     // Create an empty blob cache. The blob cache will cache key/value pairs
@@ -58,14 +60,13 @@ public:
     void set(const void* key, size_t keySize, const void* value,
             size_t valueSize);
 
-    // The get function retrieves from the cache the binary value associated
-    // with a given binary key.  If the key is present in the cache then the
-    // length of the binary value associated with that key is returned.  If the
-    // value argument is non-NULL and the size of the cached value is less than
-    // valueSize bytes then the cached value is copied into the buffer pointed
-    // to by the value argument.  If the key is not present in the cache then 0
-    // is returned and the buffer pointed to by the value argument is not
-    // modified.
+    // get retrieves from the cache the binary value associated with a given
+    // binary key.  If the key is present in the cache then the length of the
+    // binary value associated with that key is returned.  If the value argument
+    // is non-NULL and the size of the cached value is less than valueSize bytes
+    // then the cached value is copied into the buffer pointed to by the value
+    // argument.  If the key is not present in the cache then 0 is returned and
+    // the buffer pointed to by the value argument is not modified.
     //
     // Note that when calling get multiple times with the same key, the later
     // calls may fail, returning 0, even if earlier calls succeeded.  The return
@@ -76,6 +77,37 @@ public:
     //   0 < keySize
     //   0 <= valueSize
     size_t get(const void* key, size_t keySize, void* value, size_t valueSize);
+
+    // getFlattenedSize returns the number of bytes needed to store the entire
+    // serialized cache.
+    virtual size_t getFlattenedSize() const;
+
+    // getFdCount returns the number of file descriptors that will result from
+    // flattening the cache.  This will always return 0 so as to allow the
+    // flattened cache to be saved to disk and then later restored.
+    virtual size_t getFdCount() const;
+
+    // flatten serializes the current contents of the cache into the memory
+    // pointed to by 'buffer'.  The serialized cache contents can later be
+    // loaded into a BlobCache object using the unflatten method.  The contents
+    // of the BlobCache object will not be modified.
+    //
+    // Preconditions:
+    //   size >= this.getFlattenedSize()
+    //   count == 0
+    virtual status_t flatten(void* buffer, size_t size, int fds[],
+            size_t count) const;
+
+    // unflatten replaces the contents of the cache with the serialized cache
+    // contents in the memory pointed to by 'buffer'.  The previous contents of
+    // the BlobCache will be evicted from the cache.  If an error occurs while
+    // unflattening the serialized cache contents then the BlobCache will be
+    // left in an empty state.
+    //
+    // Preconditions:
+    //   count == 0
+    virtual status_t unflatten(void const* buffer, size_t size, int fds[],
+            size_t count);
 
 private:
     // Copying is disallowed.
@@ -144,6 +176,46 @@ private:
         sp<Blob> mValue;
     };
 
+    // A Header is the header for the entire BlobCache serialization format. No
+    // need to make this portable, so we simply write the struct out.
+    struct Header {
+        // mMagicNumber is the magic number that identifies the data as
+        // serialized BlobCache contents.  It must always contain 'Blb$'.
+        uint32_t mMagicNumber;
+
+        // mBlobCacheVersion is the serialization format version.
+        uint32_t mBlobCacheVersion;
+
+        // mDeviceVersion is the device-specific version of the cache.  This can
+        // be used to invalidate the cache.
+        uint32_t mDeviceVersion;
+
+        // mNumEntries is number of cache entries following the header in the
+        // data.
+        size_t mNumEntries;
+    };
+
+    // An EntryHeader is the header for a serialized cache entry.  No need to
+    // make this portable, so we simply write the struct out.  Each EntryHeader
+    // is followed imediately by the key data and then the value data.
+    //
+    // The beginning of each serialized EntryHeader is 4-byte aligned, so the
+    // number of bytes that a serialized cache entry will occupy is:
+    //
+    //   ((sizeof(EntryHeader) + keySize + valueSize) + 3) & ~3
+    //
+    struct EntryHeader {
+        // mKeySize is the size of the entry key in bytes.
+        size_t mKeySize;
+
+        // mValueSize is the size of the entry value in bytes.
+        size_t mValueSize;
+
+        // mData contains both the key and value data for the cache entry.  The
+        // key comes first followed immediately by the value.
+        uint8_t mData[];
+    };
+
     // mMaxKeySize is the maximum key size that will be cached. Calls to
     // BlobCache::set with a keySize parameter larger than mMaxKeySize will
     // simply not add the key/value pair to the cache.
@@ -166,17 +238,12 @@ private:
     size_t mTotalSize;
 
     // mRandState is the pseudo-random number generator state. It is passed to
-    // nrand48 to generate random numbers when needed. It must be protected by
-    // mMutex.
+    // nrand48 to generate random numbers when needed.
     unsigned short mRandState[3];
 
     // mCacheEntries stores all the cache entries that are resident in memory.
     // Cache entries are added to it by the 'set' method.
     SortedVector<CacheEntry> mCacheEntries;
-
-    // mMutex is used to synchronize access to all member variables.  It must be
-    // locked any time the member variables are written or read.
-    Mutex mMutex;
 };
 
 }
