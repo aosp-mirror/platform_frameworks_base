@@ -69,6 +69,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private static final String INTENT_RECONNECT_ALARM =
         "com.android.internal.telephony.cdma-reconnect";
 
+    private static final String INTENT_DATA_STALL_ALARM =
+        "com.android.internal.telephony.cdma-data-stall";
+
+
     /**
      * Constants for the data connection activity:
      * physical link down/up
@@ -146,6 +150,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected String getActionIntentReconnectAlarm() {
         return INTENT_RECONNECT_ALARM;
+    }
+
+    @Override
+    protected String getActionIntentDataStallAlarm() {
+        return INTENT_DATA_STALL_ALARM;
     }
 
     @Override
