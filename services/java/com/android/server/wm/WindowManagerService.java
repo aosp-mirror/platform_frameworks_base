@@ -227,6 +227,11 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
 
     /**
+     * Frame rate. TODO: Replace with Display.getRefreshRate() when that is reliable.
+     */
+    static final int FRAME_RATE = 48;
+
+    /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
      */
@@ -8688,7 +8693,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (needRelayout) {
             requestAnimationLocked(0);
         } else if (animating) {
-            requestAnimationLocked(currentTime+(1000/60)-SystemClock.uptimeMillis());
+            requestAnimationLocked(currentTime+(1000/FRAME_RATE)-SystemClock.uptimeMillis());
         }
 
         // Finally update all input windows now that the window changes have stabilized.
