@@ -4666,6 +4666,13 @@ public final class ContactsContract {
          * @hide
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone_lookup";
+
+       /**
+        * Boolean parameter that is used to look up a SIP address.
+        *
+        * @hide
+        */
+        public static final String QUERY_PARAMETER_SIP_ADDRESS = "sip";
     }
 
     /**
