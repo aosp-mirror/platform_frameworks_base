@@ -899,7 +899,8 @@ ListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v, V
 UserDataType::UserDataType(const string& package, const string& name,
                         bool builtIn, bool canWriteToParcel, bool canWriteToRpcData,
                         const string& declFile, int declLine)
-    :Type(package, name, builtIn ? BUILT_IN : USERDATA, canWriteToParcel, canWriteToRpcData,
+    //:Type(package, name, builtIn ? BUILT_IN : USERDATA, canWriteToParcel, canWriteToRpcData,
+    :Type(package, name, builtIn ? BUILT_IN : USERDATA, true, true,
             true, declFile, declLine)
 {
 }
