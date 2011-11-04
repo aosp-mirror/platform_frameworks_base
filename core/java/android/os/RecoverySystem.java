@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -103,7 +104,12 @@ public class RecoverySystem {
             Enumeration<? extends ZipEntry> entries = zip.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
-                trusted.add(cf.generateCertificate(zip.getInputStream(entry)));
+                InputStream is = zip.getInputStream(entry);
+                try {
+                    trusted.add(cf.generateCertificate(is));
+                } finally {
+                    is.close();
+                }
             }
         } finally {
             zip.close();
@@ -162,8 +168,6 @@ public class RecoverySystem {
 
             int commentSize = (footer[4] & 0xff) | ((footer[5] & 0xff) << 8);
             int signatureStart = (footer[0] & 0xff) | ((footer[1] & 0xff) << 8);
-            Log.v(TAG, String.format("comment size %d; signature start %d",
-                                     commentSize, signatureStart));
 
             byte[] eocd = new byte[commentSize + 22];
             raf.seek(fileLen - (commentSize + 22));
