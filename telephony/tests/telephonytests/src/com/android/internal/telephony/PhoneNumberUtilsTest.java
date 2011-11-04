@@ -547,6 +547,11 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         assertEquals("+1 650-291-0000", PhoneNumberUtils.formatNumber("+16502910000", null, "CN"));
         // The given number was formatted.
         assertEquals("650-291-0000", PhoneNumberUtils.formatNumber("650-291-0000", null, "US"));
+        // A valid Polish number should be formatted.
+        assertEquals("506 128 687", PhoneNumberUtils.formatNumber("506128687", null, "PL"));
+        // An invalid Polish number should be left as it is. Note Poland doesn't use '0' as a
+        // national prefix; therefore, the leading '0' makes the number invalid.
+        assertEquals("0506128687", PhoneNumberUtils.formatNumber("0506128687", null, "PL"));
     }
     @SmallTest
     public void testIsEmergencyNumber() {
