@@ -98,6 +98,17 @@ public:
      */
     uint32_t getSize();
 
+    /**
+     * Partially flushes the cache. The amount of memory freed by a flush
+     * is defined by the flush rate.
+     */
+    void flush();
+    /**
+     * Indicates the percentage of the cache to retain when a
+     * memory trim is requested (see Caches::flush).
+     */
+    void setFlushRate(float flushRate);
+
 private:
     /**
      * Generates the texture from a bitmap into the specified texture structure.
@@ -118,6 +129,8 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
     GLint mMaxTextureSize;
+
+    float mFlushRate;
 
     bool mDebugEnabled;
 
