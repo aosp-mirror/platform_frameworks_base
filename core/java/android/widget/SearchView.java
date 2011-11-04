@@ -728,7 +728,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
     private void updateSubmitButton(boolean hasText) {
         int visibility = GONE;
-        if (isSubmitAreaEnabled() && hasFocus() && (hasText || !mVoiceButtonEnabled)) {
+        if (mSubmitButtonEnabled && isSubmitAreaEnabled() && hasFocus()
+                && (hasText || !mVoiceButtonEnabled)) {
             visibility = VISIBLE;
         }
         mSubmitButton.setVisibility(visibility);
@@ -1082,9 +1083,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         CharSequence text = mQueryTextView.getText();
         mUserQuery = text;
         boolean hasText = !TextUtils.isEmpty(text);
-        if (isSubmitButtonEnabled()) {
-            updateSubmitButton(hasText);
-        }
+        updateSubmitButton(hasText);
         updateVoiceButton(!hasText);
         updateCloseButton();
         updateSubmitArea();
