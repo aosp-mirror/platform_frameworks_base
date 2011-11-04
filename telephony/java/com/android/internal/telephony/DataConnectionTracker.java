@@ -27,12 +27,14 @@ import android.database.ContentObserver;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -56,6 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class DataConnectionTracker extends Handler {
     protected static final boolean DBG = true;
+    protected static final boolean VDBG = false;
 
     /**
      * IDLE: ready to start data connection setup, default state
@@ -114,8 +117,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_RESTORE_DEFAULT_APN = BASE + 14;
     protected static final int EVENT_DISCONNECT_DONE = BASE + 15;
     protected static final int EVENT_DATA_CONNECTION_ATTACHED = BASE + 16;
-    protected static final int EVENT_START_NETSTAT_POLL = BASE + 17;
-    protected static final int EVENT_START_RECOVERY = BASE + 18;
+    protected static final int EVENT_DATA_STALL_ALARM = BASE + 17;
+    protected static final int EVENT_DO_RECOVERY = BASE + 18;
     protected static final int EVENT_APN_CHANGED = BASE + 19;
     protected static final int EVENT_CDMA_DATA_DETACHED = BASE + 20;
     protected static final int EVENT_NV_READY = BASE + 21;
@@ -189,19 +192,16 @@ public abstract class DataConnectionTracker extends Handler {
 
     /**
      * After detecting a potential connection problem, this is the max number
-     * of subsequent polls before attempting a radio reset.  At this point,
-     * poll interval is 5 seconds (POLL_NETSTAT_SLOW_MILLIS), so set this to
-     * poll for about 2 more minutes.
+     * of subsequent polls before attempting recovery.
      */
     protected static final int NO_RECV_POLL_LIMIT = 24;
-
     // 1 sec. default polling interval when screen is on.
     protected static final int POLL_NETSTAT_MILLIS = 1000;
     // 10 min. default polling interval when screen is off.
     protected static final int POLL_NETSTAT_SCREEN_OFF_MILLIS = 1000*60*10;
     // 2 min for round trip time
     protected static final int POLL_LONGEST_RTT = 120 * 1000;
-    // 10 for packets without ack
+    // Default sent packets without ack which triggers initial recovery steps
     protected static final int NUMBER_SENT_PACKETS_OF_HANG = 10;
     // how long to wait before switching back to default APN
     protected static final int RESTORE_DEFAULT_APN_DELAY = 1 * 60 * 1000;
@@ -209,6 +209,13 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final String APN_RESTORE_DELAY_PROP_NAME = "android.telephony.apn-restore";
     // represents an invalid IP address
     protected static final String NULL_IP = "0.0.0.0";
+
+    // Default for the data stall alarm
+    protected static final int DATA_STALL_ALARM_DELAY_IN_MS_DEFAULT = 1000 * 60 * 3;
+    // If attempt is less than this value we're doing first level recovery
+    protected static final int DATA_STALL_NO_RECV_POLL_LIMIT = 1;
+    // Tag for tracking stale alarms
+    protected static final String DATA_STALL_ALARM_TAG_EXTRA = "data.stall.alram.tag";
 
     // TODO: See if we can remove INTENT_RECONNECT_ALARM
     //       having to have different values for GSM and
@@ -240,10 +247,18 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected long mTxPkts;
     protected long mRxPkts;
-    protected long mSentSinceLastRecv;
     protected int mNetStatPollPeriod;
-    protected int mNoRecvPollCount = 0;
     protected boolean mNetStatPollEnabled = false;
+
+    protected TxRxSum mDataStallTxRxSum = new TxRxSum(0, 0);
+    // Used to track stale data stall alarms.
+    protected int mDataStallAlarmTag = (int) SystemClock.elapsedRealtime();
+    // The current data stall alarm intent
+    protected PendingIntent mDataStallAlarmIntent = null;
+    // Number of packets sent since the last received packet
+    protected long mSentSinceLastRecv;
+    // Controls when a simple recovery attempt it to be tried
+    protected int mNoRecvPollCount = 0;
 
     // wifi connection status will be updated by sticky intent
     protected boolean mIsWifiConnected = false;
@@ -313,7 +328,8 @@ public abstract class DataConnectionTracker extends Handler {
             } else if (action.startsWith(getActionIntentReconnectAlarm())) {
                 log("Reconnect alarm. Previous state was " + mState);
                 onActionIntentReconnectAlarm(intent);
-
+            } else if (action.equals(getActionIntentDataStallAlarm())) {
+                onActionIntentDataStallAlarm(intent);
             } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 final android.net.NetworkInfo networkInfo = (NetworkInfo)
                         intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
@@ -363,6 +379,71 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
+    /**
+     * Maintian the sum of transmit and receive packets.
+     *
+     * The packet counts are initizlied and reset to -1 and
+     * remain -1 until they can be updated.
+     */
+    public class TxRxSum {
+        public long txPkts;
+        public long rxPkts;
+
+        public TxRxSum() {
+            reset();
+        }
+
+        public TxRxSum(long txPkts, long rxPkts) {
+            this.txPkts = txPkts;
+            this.rxPkts = rxPkts;
+        }
+
+        public TxRxSum(TxRxSum sum) {
+            txPkts = sum.txPkts;
+            rxPkts = sum.rxPkts;
+        }
+
+        public void reset() {
+            txPkts = -1;
+            rxPkts = -1;
+        }
+
+        public String toString() {
+            return "{txSum=" + txPkts + " rxSum=" + rxPkts + "}";
+        }
+
+        public void updateTxRxSum() {
+            boolean txUpdated = false, rxUpdated = false;
+            long txSum = 0, rxSum = 0;
+            for (ApnContext apnContext : mApnContexts.values()) {
+                if (apnContext.getState() == State.CONNECTED) {
+                    DataConnectionAc dcac = apnContext.getDataConnectionAc();
+                    if (dcac == null) continue;
+
+                    LinkProperties linkProp = dcac.getLinkPropertiesSync();
+                    if (linkProp == null) continue;
+
+                    String iface = linkProp.getInterfaceName();
+
+                    if (iface != null) {
+                        long stats = TrafficStats.getTxPackets(iface);
+                        if (stats > 0) {
+                            txUpdated = true;
+                            txSum += stats;
+                        }
+                        stats = TrafficStats.getRxPackets(iface);
+                        if (stats > 0) {
+                            rxUpdated = true;
+                            rxSum += stats;
+                        }
+                    }
+                }
+            }
+            if (txUpdated) this.txPkts = txSum;
+            if (rxUpdated) this.rxPkts = rxSum;
+        }
+    }
+
     protected boolean isDataSetupCompleteOk(AsyncResult ar) {
         if (ar.exception != null) {
             if (DBG) log("isDataSetupCompleteOk return false, ar.result=" + ar.result);
@@ -392,6 +473,13 @@ public abstract class DataConnectionTracker extends Handler {
             sendMessage(msg);
         }
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+    }
+
+    protected void onActionIntentDataStallAlarm(Intent intent) {
+        if (VDBG) log("onActionIntentDataStallAlarm: action=" + intent.getAction());
+        Message msg = obtainMessage(EVENT_DATA_STALL_ALARM, intent.getAction());
+        msg.arg1 = intent.getIntExtra(DATA_STALL_ALARM_TAG_EXTRA, 0);
+        sendMessage(msg);
     }
 
     /**
@@ -529,6 +617,7 @@ public abstract class DataConnectionTracker extends Handler {
 
     // abstract methods
     protected abstract String getActionIntentReconnectAlarm();
+    protected abstract String getActionIntentDataStallAlarm();
     protected abstract void startNetStatPoll();
     protected abstract void stopNetStatPoll();
     protected abstract void restartRadio();
@@ -553,6 +642,10 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onCleanUpAllConnections(String cause);
     protected abstract boolean isDataPossible(String apnType);
 
+    protected void onDataStallAlarm(int tag) {
+        loge("onDataStallAlarm: not impleted tag=" + tag);
+    }
+
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
@@ -573,6 +666,10 @@ public abstract class DataConnectionTracker extends Handler {
                     reason = (String) msg.obj;
                 }
                 onTrySetupData(reason);
+                break;
+
+            case EVENT_DATA_STALL_ALARM:
+                onDataStallAlarm(msg.arg1);
                 break;
 
             case EVENT_ROAMING_OFF:

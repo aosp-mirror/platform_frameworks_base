@@ -3640,6 +3640,13 @@ public final class Settings {
                 "pdp_watchdog_max_pdp_reset_fail_count";
 
         /**
+         * The number of milliseconds to delay when checking for data stalls
+         * @hide
+         */
+        public static final String DATA_STALL_ALARM_DELAY_IN_MS =
+                "data_stall_alarm_delay_in_ms";
+
+        /**
          * The interval in milliseconds at which to check gprs registration
          * after the first registration mismatch of gprs and voice service,
          * to detect possible data network registration problems.
