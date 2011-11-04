@@ -34,13 +34,23 @@ namespace uirenderer {
 
 TextureCache::TextureCache():
         mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)) {
+        mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
+        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
         INIT_LOGD("  Setting texture cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
         INIT_LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
+    }
+
+    if (property_get(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, property, NULL) > 0) {
+        float flushRate = atof(property);
+        INIT_LOGD("  Setting texture cache flush rate to %.2f%%", flushRate * 100.0f);
+        setFlushRate(flushRate);
+    } else {
+        INIT_LOGD("  Using default texture cache flush rate of %.2f%%",
+                DEFAULT_TEXTURE_CACHE_FLUSH_RATE * 100.0f);
     }
 
     init();
@@ -82,6 +92,10 @@ void TextureCache::setMaxSize(uint32_t maxSize) {
     while (mSize > mMaxSize) {
         mCache.removeOldest();
     }
+}
+
+void TextureCache::setFlushRate(float flushRate) {
+    mFlushRate = fmaxf(0.0f, fminf(1.0f, flushRate));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,6 +180,21 @@ void TextureCache::clearGarbage() {
 void TextureCache::clear() {
     mCache.clear();
     TEXTURE_LOGD("TextureCache:clear(), mSize = %d", mSize);
+}
+
+void TextureCache::flush() {
+    if (mFlushRate >= 1.0f || mCache.size() == 0) return;
+    if (mFlushRate <= 0.0f) {
+        clear();
+        return;
+    }
+
+    uint32_t targetSize = uint32_t(mSize * mFlushRate);
+    TEXTURE_LOGD("TextureCache::flush: target size: %d", targetSize);
+
+    while (mSize > targetSize) {
+        mCache.removeOldest();
+    }
 }
 
 void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
