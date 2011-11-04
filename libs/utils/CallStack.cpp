@@ -103,7 +103,7 @@ void CallStack::dump(const char* prefix) const {
     for (size_t i = 0; i < mCount; i++) {
         const backtrace_frame_t& frame = mStack[i];
         const backtrace_symbol_t& symbol = symbols[i];
-        const char* mapName = symbol.map_info ? symbol.map_info->name : "<unknown>";
+        const char* mapName = symbol.map_name ? symbol.map_name : "<unknown>";
         const char* symbolName = symbol.demangled_name ? symbol.demangled_name : symbol.name;
         if (symbolName) {
             LOGD("%s#%02d  pc %08x  %s (%s)\n", prefix,
@@ -124,7 +124,7 @@ String8 CallStack::toString(const char* prefix) const {
     for (size_t i = 0; i < mCount; i++) {
         const backtrace_frame_t& frame = mStack[i];
         const backtrace_symbol_t& symbol = symbols[i];
-        const char* mapName = symbol.map_info ? symbol.map_info->name : "<unknown>";
+        const char* mapName = symbol.map_name ? symbol.map_name : "<unknown>";
         const char* symbolName = symbol.demangled_name ? symbol.demangled_name : symbol.name;
         if (symbolName) {
             str.appendFormat("%s#%02d  pc %08x  %s (%s)\n", prefix,
