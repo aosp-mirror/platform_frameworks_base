@@ -98,11 +98,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     // Recovery action taken in case of data stall
     class RecoveryAction {
-        public static final int GET_DATA_CALL_LIST = 0;
-        public static final int CLEANUP            = 1;
-        public static final int REREGISTER         = 2;
-        public static final int RADIO_RESTART      = 3;
-        public static final int RADIO_RESET        = 4;
+        public static final int GET_DATA_CALL_LIST      = 0;
+        public static final int CLEANUP                 = 1;
+        public static final int REREGISTER              = 2;
+        public static final int RADIO_RESTART           = 3;
+        public static final int RADIO_RESTART_WITH_PROP = 4;
     }
     public int getRecoveryAction() {
         int action = Settings.System.getInt(mPhone.getContext().getContentResolver(),
@@ -1302,25 +1302,27 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 putRecoveryAction(RecoveryAction.REREGISTER);
                 break;
             case RecoveryAction.REREGISTER:
-                EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_REREGISTER, mSentSinceLastRecv);
+                EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_REREGISTER,
+                        mSentSinceLastRecv);
                 if (DBG) log("doRecovery() re-register");
                 mPhone.getServiceStateTracker().reRegisterNetwork(null);
                 putRecoveryAction(RecoveryAction.RADIO_RESTART);
                 break;
             case RecoveryAction.RADIO_RESTART:
-                EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_RESTART, mSentSinceLastRecv);
+                EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_RADIO_RESTART,
+                        mSentSinceLastRecv);
                 if (DBG) log("restarting radio");
-                putRecoveryAction(RecoveryAction.RADIO_RESET);
+                putRecoveryAction(RecoveryAction.RADIO_RESTART_WITH_PROP);
                 restartRadio();
                 break;
-            case RecoveryAction.RADIO_RESET:
+            case RecoveryAction.RADIO_RESTART_WITH_PROP:
                 // This is in case radio restart has not recovered the data.
                 // It will set an additional "gsm.radioreset" property to tell
                 // RIL or system to take further action.
                 // The implementation of hard reset recovery action is up to OEM product.
                 // Once gsm.radioreset property is consumed, it is expected to set back
                 // to false by RIL.
-                EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_RESTART_WITH_PROP, -1);
+                EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_RADIO_RESTART_WITH_PROP, -1);
                 if (DBG) log("restarting radio with gsm.radioreset to true");
                 SystemProperties.set("gsm.radioreset", "true");
                 // give 1 sec so property change can be notified.
