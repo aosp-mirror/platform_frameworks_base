@@ -171,6 +171,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
 
+    private static final boolean ADD = true;
+    private static final boolean REMOVE = false;
+
+    private static final boolean TO_DEFAULT_TABLE = true;
+    private static final boolean TO_SECONDARY_TABLE = false;
+
     // Share the event space with NetworkStateTracker (which can't see this
     // internal class but sends us events).  If you change these, change
     // NetworkStateTracker.java too.
@@ -501,7 +507,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService nmService = INetworkManagementService.Stub.asInterface(b);
 
-        mTethering = new Tethering(mContext, nmService, statsService, mHandler.getLooper());
+        mTethering = new Tethering(mContext, nmService, statsService, this, mHandler.getLooper());
         mTetheringConfigValid = ((mTethering.getTetherableUsbRegexs().length != 0 ||
                                   mTethering.getTetherableWifiRegexs().length != 0 ||
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
@@ -1146,23 +1152,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return false;
     }
 
-    private boolean addRoute(LinkProperties p, RouteInfo r) {
-        return modifyRoute(p.getInterfaceName(), p, r, 0, true);
+    private boolean addRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable) {
+        return modifyRoute(p.getInterfaceName(), p, r, 0, ADD, toDefaultTable);
     }
 
-    private boolean removeRoute(LinkProperties p, RouteInfo r) {
-        return modifyRoute(p.getInterfaceName(), p, r, 0, false);
+    private boolean removeRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable) {
+        return modifyRoute(p.getInterfaceName(), p, r, 0, REMOVE, toDefaultTable);
     }
 
     private boolean addRouteToAddress(LinkProperties lp, InetAddress addr) {
-        return modifyRouteToAddress(lp, addr, true);
+        return modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE);
     }
 
     private boolean removeRouteToAddress(LinkProperties lp, InetAddress addr) {
-        return modifyRouteToAddress(lp, addr, false);
+        return modifyRouteToAddress(lp, addr, REMOVE, TO_DEFAULT_TABLE);
     }
 
-    private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd) {
+    private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd,
+            boolean toDefaultTable) {
         RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), addr);
         if (bestRoute == null) {
             bestRoute = RouteInfo.makeHostRoute(addr);
@@ -1176,15 +1183,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway());
             }
         }
-        return modifyRoute(lp.getInterfaceName(), lp, bestRoute, 0, doAdd);
+        return modifyRoute(lp.getInterfaceName(), lp, bestRoute, 0, doAdd, toDefaultTable);
     }
 
     private boolean modifyRoute(String ifaceName, LinkProperties lp, RouteInfo r, int cycleCount,
-            boolean doAdd) {
+            boolean doAdd, boolean toDefaultTable) {
         if ((ifaceName == null) || (lp == null) || (r == null)) return false;
 
         if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
-            loge("Error adding route - too much recursion");
+            loge("Error modifying route - too much recursion");
             return false;
         }
 
@@ -1199,14 +1206,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     // route to it's gateway
                     bestRoute = RouteInfo.makeHostRoute(r.getGateway(), bestRoute.getGateway());
                 }
-                modifyRoute(ifaceName, lp, bestRoute, cycleCount+1, doAdd);
+                modifyRoute(ifaceName, lp, bestRoute, cycleCount+1, doAdd, toDefaultTable);
             }
         }
         if (doAdd) {
             if (VDBG) log("Adding " + r + " for interface " + ifaceName);
-            mAddedRoutes.add(r);
             try {
-                mNetd.addRoute(ifaceName, r);
+                if (toDefaultTable) {
+                    mAddedRoutes.add(r);  // only track default table - only one apps can effect
+                    mNetd.addRoute(ifaceName, r);
+                } else {
+                    mNetd.addSecondaryRoute(ifaceName, r);
+                }
             } catch (Exception e) {
                 // never crash - catch them all
                 if (VDBG) loge("Exception trying to add a route: " + e);
@@ -1215,18 +1226,29 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         } else {
             // if we remove this one and there are no more like it, then refcount==0 and
             // we can remove it from the table
-            mAddedRoutes.remove(r);
-            if (mAddedRoutes.contains(r) == false) {
+            if (toDefaultTable) {
+                mAddedRoutes.remove(r);
+                if (mAddedRoutes.contains(r) == false) {
+                    if (VDBG) log("Removing " + r + " for interface " + ifaceName);
+                    try {
+                        mNetd.removeRoute(ifaceName, r);
+                    } catch (Exception e) {
+                        // never crash - catch them all
+                        if (VDBG) loge("Exception trying to remove a route: " + e);
+                        return false;
+                    }
+                } else {
+                    if (VDBG) log("not removing " + r + " as it's still in use");
+                }
+            } else {
                 if (VDBG) log("Removing " + r + " for interface " + ifaceName);
                 try {
-                    mNetd.removeRoute(ifaceName, r);
+                    mNetd.removeSecondaryRoute(ifaceName, r);
                 } catch (Exception e) {
                     // never crash - catch them all
                     if (VDBG) loge("Exception trying to remove a route: " + e);
                     return false;
                 }
-            } else {
-                if (VDBG) log("not removing " + r + " as it's still in use");
             }
         }
         return true;
@@ -1862,14 +1884,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         for (RouteInfo r : routeDiff.removed) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
-                removeRoute(curLp, r);
+                removeRoute(curLp, r, TO_DEFAULT_TABLE);
+            }
+            if (isLinkDefault == false) {
+                // remove from a secondary route table
+                removeRoute(curLp, r, TO_SECONDARY_TABLE);
             }
         }
 
         for (RouteInfo r :  routeDiff.added) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
-                addRoute(newLp, r);
+                addRoute(newLp, r, TO_DEFAULT_TABLE);
             } else {
+                // add to a secondary route table
+                addRoute(newLp, r, TO_SECONDARY_TABLE);
+
                 // many radios add a default route even when we don't want one.
                 // remove the default route unless somebody else has asked for it
                 String ifaceName = newLp.getInterfaceName();
@@ -2450,12 +2479,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0);
-        // Short term disabling of Tethering if DUN is required.
-        // TODO - fix multi-connection tethering using policy-base routing
-        int[] upstreamConnTypes = mTethering.getUpstreamIfaceTypes();
-        for (int i : upstreamConnTypes) {
-            if (i == ConnectivityManager.TYPE_MOBILE_DUN) return false;
-        }
         return tetherEnabledInSettings && mTetheringConfigValid;
     }
 
