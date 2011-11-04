@@ -170,8 +170,11 @@ void Caches::flush(FlushMode mode) {
             patchCache.clear();
             dropShadowCache.clear();
             gradientCache.clear();
+            fontRenderer.clear();
             // fall through
         case kFlushMode_Moderate:
+            fontRenderer.flush();
+            textureCache.flush();
             pathCache.clear();
             roundRectShapeCache.clear();
             circleShapeCache.clear();
