@@ -59,7 +59,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -76,6 +80,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private static final int ADD = 1;
     private static final int REMOVE = 2;
+
+    private static final String DEFAULT = "default";
+    private static final String SECONDARY = "secondary";
 
     /**
      * Name representing {@link #setGlobalAlert(long)} limit when delivered to
@@ -500,15 +507,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     public void addRoute(String interfaceName, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        modifyRoute(interfaceName, ADD, route);
+        modifyRoute(interfaceName, ADD, route, DEFAULT);
     }
 
     public void removeRoute(String interfaceName, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        modifyRoute(interfaceName, REMOVE, route);
+        modifyRoute(interfaceName, REMOVE, route, DEFAULT);
     }
 
-    private void modifyRoute(String interfaceName, int action, RouteInfo route) {
+    public void addSecondaryRoute(String interfaceName, RouteInfo route) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        modifyRoute(interfaceName, ADD, route, SECONDARY);
+    }
+
+    public void removeSecondaryRoute(String interfaceName, RouteInfo route) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        modifyRoute(interfaceName, REMOVE, route, SECONDARY);
+    }
+
+    private void modifyRoute(String interfaceName, int action, RouteInfo route, String type) {
         ArrayList<String> rsp;
 
         StringBuilder cmd;
@@ -516,12 +533,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         switch (action) {
             case ADD:
             {
-                cmd = new StringBuilder("interface route add " + interfaceName);
+                cmd = new StringBuilder("interface route add " + interfaceName + " " + type);
                 break;
             }
             case REMOVE:
             {
-                cmd = new StringBuilder("interface route remove " + interfaceName);
+                cmd = new StringBuilder("interface route remove " + interfaceName + " " + type);
                 break;
             }
             default:
@@ -828,14 +845,33 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    private void modifyNat(String cmd, String internalInterface, String externalInterface)
+            throws SocketException {
+        cmd = String.format("nat %s %s %s", cmd, internalInterface, externalInterface);
+
+        NetworkInterface internalNetworkInterface =
+                NetworkInterface.getByName(internalInterface);
+        Collection<InterfaceAddress>interfaceAddresses =
+                internalNetworkInterface.getInterfaceAddresses();
+        cmd += " " + interfaceAddresses.size();
+        for (InterfaceAddress ia : interfaceAddresses) {
+            InetAddress addr = NetworkUtils.getNetworkPart(ia.getAddress(),
+                    ia.getNetworkPrefixLength());
+            cmd = cmd + " " + addr.getHostAddress() + "/" + ia.getNetworkPrefixLength();
+        }
+
+        mConnector.doCommand(cmd);
+    }
+
     public void enableNat(String internalInterface, String externalInterface)
             throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        if (DBG) Log.d(TAG, "enableNat(" + internalInterface + ", " + externalInterface + ")");
         try {
-            mConnector.doCommand(
-                    String.format("nat enable %s %s", internalInterface, externalInterface));
-        } catch (NativeDaemonConnectorException e) {
+            modifyNat("enable", internalInterface, externalInterface);
+        } catch (Exception e) {
+            Log.e(TAG, "enableNat got Exception " + e.toString());
             throw new IllegalStateException(
                     "Unable to communicate to native daemon for enabling NAT interface");
         }
@@ -845,10 +881,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        if (DBG) Log.d(TAG, "disableNat(" + internalInterface + ", " + externalInterface + ")");
         try {
-            mConnector.doCommand(
-                    String.format("nat disable %s %s", internalInterface, externalInterface));
-        } catch (NativeDaemonConnectorException e) {
+            modifyNat("disable", internalInterface, externalInterface);
+        } catch (Exception e) {
+            Log.e(TAG, "disableNat got Exception " + e.toString());
             throw new IllegalStateException(
                     "Unable to communicate to native daemon for disabling NAT interface");
         }
