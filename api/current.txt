@@ -4145,6 +4145,7 @@ package android.appwidget {
     ctor public AppWidgetHostView(android.content.Context, int, int);
     method public int getAppWidgetId();
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo();
+    method public static android.graphics.Rect getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect);
     method protected android.view.View getDefaultView();
     method protected android.view.View getErrorView();
     method protected void prepareView(android.view.View);
