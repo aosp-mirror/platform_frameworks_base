@@ -96,6 +96,15 @@ out_close:
     return;
 }
 
+void do_showmap(int pid, const char *name) {
+    char title[255];
+    char arg[255];
+
+    sprintf(title, "SHOW MAP %d (%s)", pid, name);
+    sprintf(arg, "%d", pid);
+    run_command(title, 10, "su", "root", "showmap", arg, NULL);
+}
+
 /* prints the contents of a file */
 int dump_file(const char *title, const char* path) {
     char buffer[32768];
