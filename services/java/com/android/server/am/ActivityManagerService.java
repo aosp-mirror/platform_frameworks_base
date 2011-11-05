@@ -120,6 +120,7 @@ import android.view.WindowManagerPolicy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -128,8 +129,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -864,9 +867,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SHOW_COMPAT_MODE_DIALOG_MSG = 30;
     static final int DISPATCH_FOREGROUND_ACTIVITIES_CHANGED = 31;
     static final int DISPATCH_PROCESS_DIED = 32;
+    static final int REPORT_MEM_USAGE = 33;
 
     AlertDialog mUidAlert;
     CompatModeDialog mCompatModeDialog;
+    long mLastMemUsageReportTime = 0;
 
     final Handler mHandler = new Handler() {
         //public Handler() {
@@ -1212,6 +1217,56 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dispatchProcessDied(pid, uid);
                 break;
             }
+            case REPORT_MEM_USAGE: {
+                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                if (!isDebuggable) {
+                    return;
+                }
+                synchronized (ActivityManagerService.this) {
+                    long now = SystemClock.uptimeMillis();
+                    if (now < (mLastMemUsageReportTime+10000)) {
+                        // Don't report more than every 10 seconds to somewhat
+                        // avoid spamming.
+                        return;
+                    }
+                    mLastMemUsageReportTime = now;
+                }
+                Thread thread = new Thread() {
+                    @Override public void run() {
+                        try {
+                            java.lang.Process proc = Runtime.getRuntime().exec(new String[] {
+                                    "procrank", });
+                            final InputStreamReader converter = new InputStreamReader(
+                                    proc.getInputStream());
+                            BufferedReader in = new BufferedReader(converter);
+                            String line;
+                            while (true) {
+                                line = in.readLine();
+                                if (line == null) {
+                                    break;
+                                }
+                                if (line.length() > 0) {
+                                    Slog.i(TAG, line);
+                                }
+                            }
+                            converter.close();
+                        } catch (IOException e) {
+                        }
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        dumpApplicationMemoryUsage(null, pw, "  ", new String[] { }, true);
+                        Slog.i(TAG, sw.toString());
+                        synchronized (ActivityManagerService.this) {
+                            long now = SystemClock.uptimeMillis();
+                            if (mLastMemUsageReportTime < now) {
+                                mLastMemUsageReportTime = now;
+                            }
+                        }
+                    }
+                };
+                thread.start();
+                break;
+            }
             }
         }
     };
@@ -1352,7 +1407,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args);
+            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false);
         }
     }
 
@@ -2789,6 +2844,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             addProcessToGcListLocked(rec);
                         }
                     }
+                    mHandler.sendEmptyMessage(REPORT_MEM_USAGE);
                     scheduleAppGcsLocked();
                 }
             }
@@ -9265,7 +9321,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
-            PrintWriter pw, String prefix, String[] args) {
+            PrintWriter pw, String prefix, String[] args, boolean brief) {
         boolean dumpAll = false;
         
         int opti = 0;
@@ -9405,15 +9461,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            pw.println();
-            pw.println("Total PSS by process:");
-            dumpMemItems(pw, "  ", procMems, true);
-            pw.println();
+            if (!brief) {
+                pw.println();
+                pw.println("Total PSS by process:");
+                dumpMemItems(pw, "  ", procMems, true);
+                pw.println();
+            }
             pw.println("Total PSS by OOM adjustment:");
             dumpMemItems(pw, "  ", oomMems, false);
-            pw.println();
-            pw.println("Total PSS by category:");
-            dumpMemItems(pw, "  ", catMems, true);
+            if (!brief) {
+                pw.println();
+                pw.println("Total PSS by category:");
+                dumpMemItems(pw, "  ", catMems, true);
+            }
             pw.println();
             pw.print("Total PSS: "); pw.print(totalPss); pw.println(" Kb");
         }
