@@ -141,6 +141,17 @@ void DisplayHardware::init(uint32_t dpy)
     mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps;
 
+
+/* FIXME: this is a temporary HACK until we are able to report the refresh rate
+ * properly from the HAL. The WindowManagerService now relies on this value.
+ */
+#ifndef REFRESH_RATE
+    mRefreshRate = fbDev->fps;
+#else
+    mRefreshRate = REFRESH_RATE;
+#warning "refresh rate set via makefile to REFRESH_RATE"
+#endif
+
     EGLint w, h, dummy;
     EGLint numConfigs=0;
     EGLSurface surface;
