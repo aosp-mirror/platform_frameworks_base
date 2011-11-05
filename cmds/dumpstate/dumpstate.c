@@ -209,6 +209,8 @@ static void dumpstate() {
 
     run_command("LIST OF OPEN FILES", 10, "su", "root", "lsof", NULL);
 
+    for_each_pid(do_showmap, "SMAPS OF ALL PROCESSES");
+
 #ifdef BOARD_HAS_DUMPSTATE
     printf("========================================================\n");
     printf("== Board\n");
