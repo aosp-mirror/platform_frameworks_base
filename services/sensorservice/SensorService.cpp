@@ -471,14 +471,20 @@ status_t SensorService::setEventRate(const sp<SensorEventConnection>& connection
     if (mInitCheck != NO_ERROR)
         return mInitCheck;
 
+    SensorInterface* sensor = mSensorMap.valueFor(handle);
+    if (!sensor)
+        return BAD_VALUE;
+
     if (ns < 0)
         return BAD_VALUE;
+
+    if (ns == 0) {
+        ns = sensor->getSensor().getMinDelayNs();
+    }
 
     if (ns < MINIMUM_EVENTS_PERIOD)
         ns = MINIMUM_EVENTS_PERIOD;
 
-    SensorInterface* sensor = mSensorMap.valueFor(handle);
-    if (!sensor) return BAD_VALUE;
     return sensor->setDelay(connection.get(), handle, ns);
 }
 
