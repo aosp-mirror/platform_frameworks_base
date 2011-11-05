@@ -93,7 +93,7 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:background="@null"
-                android:inputType="text|textAutoComplete"
+                android:inputType="text|textAutoComplete|textNoSuggestions"
                 android:imeOptions="actionSearch"
                 android:dropDownHeight="wrap_content"
                 android:dropDownAnchor="@id/search_edit_frame"
