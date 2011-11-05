@@ -45,6 +45,9 @@ void for_each_pid(void (*func)(int, const char *), const char *header);
 /* Displays a blocked processes in-kernel wait channel */
 void show_wchan(int pid, const char *name);
 
+/* Runs "showmap" for a process */
+void do_showmap(int pid, const char *name);
+
 /* Play a sound via Stagefright */
 void play_sound(const char* path);
 
