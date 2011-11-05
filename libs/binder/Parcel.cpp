@@ -722,7 +722,15 @@ status_t Parcel::writeFileDescriptor(int fd, bool takeOwnership)
 
 status_t Parcel::writeDupFileDescriptor(int fd)
 {
-    return writeFileDescriptor(dup(fd), true /*takeOwnership*/);
+    int dupFd = dup(fd);
+    if (dupFd < 0) {
+        return -errno;
+    }
+    status_t err = writeFileDescriptor(dupFd, true /*takeOwnership*/);
+    if (err) {
+        close(dupFd);
+    }
+    return err;
 }
 
 status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)
