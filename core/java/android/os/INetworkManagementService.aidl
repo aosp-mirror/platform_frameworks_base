@@ -105,6 +105,18 @@ interface INetworkManagementService
     void removeRoute(String iface, in RouteInfo route);
 
     /**
+     * Add the specified route to a secondary interface
+     * This will go into a special route table to be accessed
+     * via ip rules
+     */
+    void addSecondaryRoute(String iface, in RouteInfo route);
+
+    /**
+     * Remove the specified secondary route.
+     */
+    void removeSecondaryRoute(String iface, in RouteInfo route);
+
+    /**
      * Shuts down the service
      */
     void shutdown();
