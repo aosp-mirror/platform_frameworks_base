@@ -61,6 +61,9 @@ enum DebugLevel {
 #define PROPERTY_DROP_SHADOW_CACHE_SIZE "ro.hwui.drop_shadow_cache_size"
 #define PROPERTY_FBO_CACHE_SIZE "ro.hwui.fbo_cache_size"
 
+// These properties are defined in percentage (range 0..1)
+#define PROPERTY_TEXTURE_CACHE_FLUSH_RATE "ro.hwui.texture_cache_flush_rate"
+
 // These properties are defined in pixels
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
 #define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
@@ -81,6 +84,8 @@ enum DebugLevel {
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
 #define DEFAULT_FBO_CACHE_SIZE 16
+
+#define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
 
 #define DEFAULT_TEXT_GAMMA 1.4f
 #define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
