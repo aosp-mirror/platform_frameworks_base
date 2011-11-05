@@ -91,6 +91,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
+    private final IConnectivityManager mConnService;
     private Looper mLooper;
     private HandlerThread mThread;
 
@@ -127,10 +128,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                                          // when RNDIS is enabled
 
     public Tethering(Context context, INetworkManagementService nmService,
-            INetworkStatsService statsService, Looper looper) {
+            INetworkStatsService statsService, IConnectivityManager connService, Looper looper) {
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
+        mConnService = connService;
         mLooper = looper;
 
         mIfaces = new HashMap<String, TetherInterfaceSM>();
@@ -347,10 +349,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     private void sendTetherStateChangedBroadcast() {
-        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
         try {
-            if (!cm.isTetheringSupported()) return;
+            if (!mConnService.isTetheringSupported()) return;
         } catch (RemoteException e) {
             return;
         }
@@ -910,6 +910,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     mNMService.tetherInterface(mIfaceName);
                 } catch (Exception e) {
+                    Log.e(TAG, "Error Tethering: " + e.toString());
                     setLastError(ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR);
 
                     transitionTo(mInitialState);
@@ -987,6 +988,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             try {
                                 mNMService.enableNat(mIfaceName, newUpstreamIfaceName);
                             } catch (Exception e) {
+                                Log.e(TAG, "Exception enabling Nat: " + e.toString());
                                 try {
                                     mNMService.untetherInterface(mIfaceName);
                                 } catch (Exception ee) {}
@@ -1150,13 +1152,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 boolean retValue = true;
                 if (apnType == ConnectivityManager.TYPE_NONE) return false;
                 if (apnType != mMobileApnReserved) turnOffUpstreamMobileConnection();
-                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
                 int result = Phone.APN_REQUEST_FAILED;
                 String enableString = enableString(apnType);
                 if (enableString == null) return false;
                 try {
-                    result = cm.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                    result = mConnService.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
                             enableString, new Binder());
                 } catch (Exception e) {
                 }
@@ -1178,10 +1178,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
             protected boolean turnOffUpstreamMobileConnection() {
                 if (mMobileApnReserved != ConnectivityManager.TYPE_NONE) {
-                    IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                    IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
                     try {
-                        cm.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                        mConnService.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
                                 enableString(mMobileApnReserved));
                     } catch (Exception e) {
                         return false;
@@ -1234,8 +1232,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
 
             protected void chooseUpstreamType(boolean tryCell) {
-                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
                 int upType = ConnectivityManager.TYPE_NONE;
                 String iface = null;
 
@@ -1251,7 +1247,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 for (Integer netType : mUpstreamIfaceTypes) {
                     NetworkInfo info = null;
                     try {
-                        info = cm.getNetworkInfo(netType.intValue());
+                        info = mConnService.getNetworkInfo(netType.intValue());
                     } catch (RemoteException e) { }
                     if ((info != null) && info.isConnected()) {
                         upType = netType.intValue();
@@ -1283,7 +1279,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 } else {
                     LinkProperties linkProperties = null;
                     try {
-                        linkProperties = cm.getLinkProperties(upType);
+                        linkProperties = mConnService.getLinkProperties(upType);
                     } catch (RemoteException e) { }
                     if (linkProperties != null) iface = linkProperties.getInterfaceName();
                 }
