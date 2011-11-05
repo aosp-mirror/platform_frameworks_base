@@ -110,7 +110,8 @@ public:
     
     // Place a file descriptor into the parcel.  The given fd must remain
     // valid for the lifetime of the parcel.
-    status_t            writeFileDescriptor(int fd);
+    // The Parcel does not take ownership of the given fd unless you ask it to.
+    status_t            writeFileDescriptor(int fd, bool takeOwnership = false);
     
     // Place a file descriptor into the parcel.  A dup of the fd is made, which
     // will be closed once the parcel is destroyed.
