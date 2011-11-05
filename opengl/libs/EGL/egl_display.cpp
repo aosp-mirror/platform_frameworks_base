@@ -14,6 +14,7 @@
  ** limitations under the License.
  */
 
+#include "egl_cache.h"
 #include "egl_display.h"
 #include "egl_object.h"
 #include "egl_tls.h"
@@ -169,6 +170,8 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
                     egl_tls_t::egl_strerror(cnx->egl.eglGetError()));
         }
     }
+
+    egl_cache_t::get()->initialize(this);
 
     EGLBoolean res = EGL_FALSE;
     for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
