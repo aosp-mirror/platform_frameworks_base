@@ -31,10 +31,13 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -147,7 +150,25 @@ public class TextToSpeech {
     }
 
     /**
-     * Constants and parameter names for controlling text-to-speech.
+     * Constants and parameter names for controlling text-to-speech. These include:
+     *
+     * <ul>
+     *     <li>
+     *         Intents to ask engine to install data or check its data and
+     *         extras for a TTS engine's check data activity.
+     *     </li>
+     *     <li>
+     *         Keys for the parameters passed with speak commands, e.g.
+     *         {@link Engine#KEY_PARAM_UTTERANCE_ID}, {@link Engine#KEY_PARAM_STREAM}.
+     *     </li>
+     *     <li>
+     *         A list of feature strings that engines might support, e.g
+     *         {@link Engine#KEY_FEATURE_NETWORK_SYNTHESIS}). These values may be passed in to
+     *         {@link TextToSpeech#speak} and {@link TextToSpeech#synthesizeToFile} to modify
+     *         engine behaviour. The engine can be queried for the set of features it supports
+     *         through {@link TextToSpeech#getFeatures(java.util.Locale)}.
+     *     </li>
+     * </ul>
      */
     public class Engine {
 
@@ -435,6 +456,25 @@ public class TextToSpeech {
          */
         public static final String KEY_PARAM_PAN = "pan";
 
+        /**
+         * Feature key for network synthesis. See {@link TextToSpeech#getFeatures(Locale)}
+         * for a description of how feature keys work. If set (and supported by the engine
+         * as per {@link TextToSpeech#getFeatures(Locale)}, the engine must
+         * use network based synthesis.
+         *
+         * @see TextToSpeech#speak(String, int, java.util.HashMap)
+         * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
+         * @see TextToSpeech#getFeatures(java.util.Locale)
+         */
+        public static final String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
+
+        /**
+         * Feature key for embedded synthesis. See {@link TextToSpeech#getFeatures(Locale)}
+         * for a description of how feature keys work. If set and supported by the engine
+         * as per {@link TextToSpeech#getFeatures(Locale)}, the engine must synthesize
+         * text on-device (without making network requests).
+         */
+        public static final String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
     }
 
     private final Context mContext;
@@ -812,6 +852,36 @@ public class TextToSpeech {
     }
 
     /**
+     * Queries the engine for the set of features it supports for a given locale.
+     * Features can either be framework defined, e.g.
+     * {@link TextToSpeech.Engine#KEY_FEATURE_NETWORK_SYNTHESIS} or engine specific.
+     * Engine specific keys must be prefixed by the name of the engine they
+     * are intended for. These keys can be used as parameters to
+     * {@link TextToSpeech#speak(String, int, java.util.HashMap)} and
+     * {@link TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)}.
+     *
+     * Features are boolean flags, and their values in the synthesis parameters
+     * must be behave as per {@link Boolean#parseBoolean(String)}.
+     *
+     * @param locale The locale to query features for.
+     */
+    public Set<String> getFeatures(final Locale locale) {
+        return runAction(new Action<Set<String>>() {
+            @Override
+            public Set<String> run(ITextToSpeechService service) throws RemoteException {
+                String[] features = service.getFeaturesForLanguage(
+                        locale.getISO3Language(), locale.getISO3Country(), locale.getVariant());
+                if (features != null) {
+                    final Set<String> featureSet = new HashSet<String>();
+                    Collections.addAll(featureSet, features);
+                    return featureSet;
+                }
+                return null;
+            }
+        }, null, "getFeatures");
+    }
+
+    /**
      * Checks whether the TTS engine is busy speaking. Note that a speech item is
      * considered complete once it's audio data has been sent to the audio mixer, or
      * written to a file. There might be a finite lag between this point, and when
@@ -1016,6 +1086,9 @@ public class TextToSpeech {
             copyStringParam(bundle, params, Engine.KEY_PARAM_UTTERANCE_ID);
             copyFloatParam(bundle, params, Engine.KEY_PARAM_VOLUME);
             copyFloatParam(bundle, params, Engine.KEY_PARAM_PAN);
+
+            // Copy feature strings defined by the framework.
+            copyStringParam(bundle, params, Engine.KEY_FEATURE_NETWORK_SYNTHESIS);
 
             // Copy over all parameters that start with the name of the
             // engine that we are currently connected to. The engine is
