@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	       \
 	EGL/egl_tls.cpp        \
+	EGL/egl_cache.cpp      \
 	EGL/egl_display.cpp    \
 	EGL/egl_object.cpp     \
 	EGL/egl.cpp 	       \
@@ -157,4 +158,3 @@ LOCAL_MODULE:= libETC1
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
-
