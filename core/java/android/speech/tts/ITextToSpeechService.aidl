@@ -114,6 +114,21 @@ interface ITextToSpeechService {
     int isLanguageAvailable(in String lang, in String country, in String variant);
 
     /**
+     * Returns a list of features available for a given language. Elements of the returned
+     * string array can be passed in as keys to {@link TextToSpeech#speak} and
+     * {@link TextToSpeech#synthesizeToFile} to select a given feature or features to be
+     * used during synthesis.
+     *
+     * @param lang ISO-3 language code.
+     * @param country ISO-3 country code. May be empty or null.
+     * @param variant Language variant. May be empty or null.
+     * @return An array of strings containing the set of features supported for
+     *         the supplied locale. The array of strings must not contain 
+     *         duplicates.
+     */
+    String[] getFeaturesForLanguage(in String lang, in String country, in String variant);
+
+    /**
      * Notifies the engine that it should load a speech synthesis language.
      *
      * @param lang ISO-3 language code.
