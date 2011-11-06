@@ -19,6 +19,11 @@
 #include "egl_impl.h"
 #include "egldefs.h"
 
+// Cache size limits.
+static const size_t maxKeySize = 1024;
+static const size_t maxValueSize = 4096;
+static const size_t maxTotalSize = 64 * 1024;
+
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
@@ -26,29 +31,27 @@ namespace android {
 #define BC_EXT_STR "EGL_ANDROID_blob_cache"
 
 //
-// EGL_ANDROID_blob_cache types and functions
-//
-typedef khronos_ssize_t EGLsizei;
-
-typedef void (*EGLSetBlobFunc) (const void* key, EGLsizei keySize,
-        const void* value, EGLsizei valueSize);
-
-typedef EGLsizei (*EGLGetBlobFunc) (const void* key, EGLsizei keySize,
-        void* value, EGLsizei valueSize);
-
-typedef void (EGLAPIENTRYP PFNEGLSETBLOBCACHEFUNCSPROC) (EGLDisplay dpy,
-        EGLSetBlobFunc set, EGLGetBlobFunc get);
-
-//
-// egl_cache_t definition
+// Callback functions passed to EGL.
 //
 static void setBlob(const void* key, EGLsizei keySize, const void* value,
         EGLsizei valueSize) {
+    egl_cache_t::get()->setBlob(key, keySize, value, valueSize);
 }
 
 static EGLsizei getBlob(const void* key, EGLsizei keySize, void* value,
         EGLsizei valueSize) {
-    return 0;
+    return egl_cache_t::get()->getBlob(key, keySize, value, valueSize);
+}
+
+//
+// egl_cache_t definition
+//
+egl_cache_t::egl_cache_t() :
+        mInitialized(false),
+        mBlobCache(NULL) {
+}
+
+egl_cache_t::~egl_cache_t() {
 }
 
 egl_cache_t* egl_cache_t::get() {
@@ -57,6 +60,7 @@ egl_cache_t* egl_cache_t::get() {
 }
 
 void egl_cache_t::initialize(egl_display_t *display) {
+    Mutex::Autolock lock(mMutex);
     for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
@@ -79,7 +83,8 @@ void egl_cache_t::initialize(egl_display_t *display) {
                     continue;
                 }
 
-                eglSetBlobCacheFuncs(display->disp[i].dpy, setBlob, getBlob);
+                eglSetBlobCacheFuncs(display->disp[i].dpy, android::setBlob,
+                        android::getBlob);
                 EGLint err = cnx->egl.eglGetError();
                 if (err != EGL_SUCCESS) {
                     LOGE("eglSetBlobCacheFuncs resulted in an error: %#x",
@@ -88,6 +93,61 @@ void egl_cache_t::initialize(egl_display_t *display) {
             }
         }
     }
+    mInitialized = true;
+}
+
+void egl_cache_t::terminate() {
+    Mutex::Autolock lock(mMutex);
+    if (mBlobCache != NULL) {
+        saveBlobCacheLocked();
+        mBlobCache = NULL;
+    }
+    mInitialized = false;
+}
+
+void egl_cache_t::setBlob(const void* key, EGLsizei keySize, const void* value,
+        EGLsizei valueSize) {
+    Mutex::Autolock lock(mMutex);
+
+    if (keySize < 0 || valueSize < 0) {
+        LOGW("EGL_ANDROID_blob_cache set: negative sizes are not allowed");
+        return;
+    }
+
+    if (mInitialized) {
+        sp<BlobCache> bc = getBlobCacheLocked();
+        bc->set(key, keySize, value, valueSize);
+    }
+}
+
+EGLsizei egl_cache_t::getBlob(const void* key, EGLsizei keySize, void* value,
+        EGLsizei valueSize) {
+    Mutex::Autolock lock(mMutex);
+
+    if (keySize < 0 || valueSize < 0) {
+        LOGW("EGL_ANDROID_blob_cache set: negative sizes are not allowed");
+        return 0;
+    }
+
+    if (mInitialized) {
+        sp<BlobCache> bc = getBlobCacheLocked();
+        return bc->get(key, keySize, value, valueSize);
+    }
+    return 0;
+}
+
+sp<BlobCache> egl_cache_t::getBlobCacheLocked() {
+    if (mBlobCache == NULL) {
+        mBlobCache = new BlobCache(maxKeySize, maxValueSize, maxTotalSize);
+        loadBlobCacheLocked();
+    }
+    return mBlobCache;
+}
+
+void egl_cache_t::saveBlobCacheLocked() {
+}
+
+void egl_cache_t::loadBlobCacheLocked() {
 }
 
 // ----------------------------------------------------------------------------
