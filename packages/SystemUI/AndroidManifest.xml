@@ -46,6 +46,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- handle dock insertion, launch screensaver instead -->
+        <activity android:name=".DreamsDockLauncher"
+                android:label="@string/dreams_dock_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DESK_DOCK" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".usb.UsbStorageActivity"
                 android:excludeFromRecents="true">
         </activity>
