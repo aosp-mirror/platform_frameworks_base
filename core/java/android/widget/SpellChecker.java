@@ -82,6 +82,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     private void setLocale(Locale locale) {
+        closeSession();
+
         final TextServicesManager textServicesManager = (TextServicesManager)
                 mTextView.getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
         mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
@@ -98,12 +100,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         // Change SpellParsers' wordIterator locale
         mWordIterator = new WordIterator(locale);
-
-        // Stop all SpellParsers
-        final int length = mSpellParsers.length;
-        for (int i = 0; i < length; i++) {
-            mSpellParsers[i].finish();
-        }
 
         // Remove existing misspelled SuggestionSpans
         mTextView.removeMisspelledSpans((Editable) mTextView.getText());
