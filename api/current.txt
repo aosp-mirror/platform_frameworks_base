@@ -15131,6 +15131,7 @@ package android.os {
 
   public class RemoteException extends android.util.AndroidException {
     ctor public RemoteException();
+    ctor public RemoteException(java.lang.String);
   }
 
   public class ResultReceiver implements android.os.Parcelable {
@@ -15223,6 +15224,10 @@ package android.os {
     method public boolean isAcquired();
     method public void release(android.os.IBinder);
     method public abstract void released();
+  }
+
+  public class TransactionTooLargeException extends android.os.RemoteException {
+    ctor public TransactionTooLargeException();
   }
 
   public class Vibrator {
