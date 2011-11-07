@@ -1015,6 +1015,13 @@
         android:label="@string/permlab_readLogs"
         android:description="@string/permdesc_readLogs" />
 
+    <!-- Allows an application to use any media decoder when decoding for playback
+         @hide -->
+    <permission android:name="android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_anyCodecForPlayback"
+        android:description="@string/permdesc_anyCodecForPlayback" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->

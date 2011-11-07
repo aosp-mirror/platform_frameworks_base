@@ -831,6 +831,12 @@
         including personal or private information.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_anyCodecForPlayback">use any media decoder for playback</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_anyCodecForPlayback">Allows an application to use any installed
+        media decoder to decode for playback.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_diagnostic">Allows an application to read and write to
