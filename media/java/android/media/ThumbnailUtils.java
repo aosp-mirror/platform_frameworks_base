@@ -472,9 +472,7 @@ public class ThumbnailUtils {
         byte [] thumbData = null;
         try {
             exif = new ExifInterface(filePath);
-            if (exif != null) {
-                thumbData = exif.getThumbnail();
-            }
+            thumbData = exif.getThumbnail();
         } catch (IOException ex) {
             Log.w(TAG, ex);
         }

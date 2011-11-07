@@ -161,12 +161,10 @@ public class SoundPool
         int id = 0;
         try {
             File f = new File(path);
-            if (f != null) {
-                ParcelFileDescriptor fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
-                if (fd != null) {
-                    id = _load(fd.getFileDescriptor(), 0, f.length(), priority);
-                    fd.close();
-                }
+            ParcelFileDescriptor fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+            if (fd != null) {
+                id = _load(fd.getFileDescriptor(), 0, f.length(), priority);
+                fd.close();
             }
         } catch (java.io.IOException e) {
             Log.e(TAG, "error loading " + path);
