@@ -618,27 +618,26 @@ status_t SampleTable::findSyncSampleNear(
     }
 
     uint32_t left = 0;
-    while (left < mNumSyncSamples) {
-        uint32_t x = mSyncSamples[left];
+    uint32_t right = mNumSyncSamples;
+    while (left < right) {
+        uint32_t center = left + (right - left) / 2;
+        uint32_t x = mSyncSamples[center];
 
-        if (x >= start_sample_index) {
+        if (start_sample_index < x) {
+            right = center;
+        } else if (start_sample_index > x) {
+            left = center + 1;
+        } else {
+            left = center;
             break;
         }
-
-        ++left;
-    }
-    if (left > 0) {
-        --left;
     }
 
-    uint32_t x;
-    if (mDataSource->readAt(
-                mSyncSampleOffset + 8 + left * 4, &x, 4) != 4) {
-        return ERROR_IO;
-    }
+    // Now ssi[left] is the sync sample index just before (or at)
+    // start_sample_index.
+    // Also start_sample_index < ssi[left + 1], if left + 1 < mNumSyncSamples.
 
-    x = ntohl(x);
-    --x;
+    uint32_t x = mSyncSamples[left];
 
     if (left + 1 < mNumSyncSamples) {
         uint32_t y = mSyncSamples[left + 1];
@@ -679,15 +678,13 @@ status_t SampleTable::findSyncSampleNear(
             if (x > start_sample_index) {
                 CHECK(left > 0);
 
-                if (mDataSource->readAt(
-                            mSyncSampleOffset + 8 + (left - 1) * 4, &x, 4) != 4) {
-                    return ERROR_IO;
+                x = mSyncSamples[left - 1];
+
+                if (x > start_sample_index) {
+                    // The table of sync sample indices was not sorted
+                    // properly.
+                    return ERROR_MALFORMED;
                 }
-
-                x = ntohl(x);
-                --x;
-
-                CHECK(x <= start_sample_index);
             }
             break;
         }
@@ -701,7 +698,11 @@ status_t SampleTable::findSyncSampleNear(
 
                 x = mSyncSamples[left + 1];
 
-                CHECK(x >= start_sample_index);
+                if (x < start_sample_index) {
+                    // The table of sync sample indices was not sorted
+                    // properly.
+                    return ERROR_MALFORMED;
+                }
             }
 
             break;
