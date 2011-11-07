@@ -1023,9 +1023,9 @@ void
 UserDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, Variable** cl)
 {
-    // RpcData _obj_XX = data.getRpcData(k);
+    // RpcData _obj = data.getRpcData(k);
     // if (_data_XX != null)
-    //     v = CLASS.RPC_CREATOR.createFromParcel(parcel)
+    //     v = CLASS.RPC_CREATOR.createFromParcel(_obj)
     // } else {
     //     v = null;
     // }
@@ -1039,7 +1039,7 @@ UserDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* 
     IfStatement* ifpart = new IfStatement();
     ifpart->expression = new Comparison(_obj, "!=", NULL_VALUE);
     ifpart->statements->Add(new Assignment(v,
-                new MethodCall(v->type, "RPC_CREATOR.createFromRpcData", 1, data)));
+                new MethodCall(v->type, "RPC_CREATOR.createFromRpcData", 1, _obj)));
 
     IfStatement* elsepart = new IfStatement();
     ifpart->elseif = elsepart;
