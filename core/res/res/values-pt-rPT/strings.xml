@@ -632,7 +632,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Irmã"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Cônjuge"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizado"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Página inicial"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Residência"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Emprego"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Outro"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Introduzir código PIN"</string>
@@ -1014,7 +1014,7 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccione para desactivar depuração USB."</string>
-    <string name="select_input_method" msgid="6865512749462072765">"Seleccionar método de entrada"</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Selecionar método de entrada"</string>
     <string name="configure_input_methods" msgid="6324843080254191535">"Configurar métodos de entrada"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
