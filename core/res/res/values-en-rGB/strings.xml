@@ -151,7 +151,7 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sound is OFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sound is ON"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Aiplane mode is ON"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Airplane mode is ON"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Airplane mode is OFF"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
