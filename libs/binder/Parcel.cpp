@@ -710,24 +710,19 @@ status_t Parcel::writeNativeHandle(const native_handle* handle)
     return err;
 }
 
-status_t Parcel::writeFileDescriptor(int fd)
+status_t Parcel::writeFileDescriptor(int fd, bool takeOwnership)
 {
     flat_binder_object obj;
     obj.type = BINDER_TYPE_FD;
     obj.flags = 0x7f | FLAT_BINDER_FLAG_ACCEPTS_FDS;
     obj.handle = fd;
-    obj.cookie = (void*)0;
+    obj.cookie = (void*) (takeOwnership ? 1 : 0);
     return writeObject(obj, true);
 }
 
 status_t Parcel::writeDupFileDescriptor(int fd)
 {
-    flat_binder_object obj;
-    obj.type = BINDER_TYPE_FD;
-    obj.flags = 0x7f | FLAT_BINDER_FLAG_ACCEPTS_FDS;
-    obj.handle = dup(fd);
-    obj.cookie = (void*)1;
-    return writeObject(obj, true);
+    return writeFileDescriptor(dup(fd), true /*takeOwnership*/);
 }
 
 status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)
@@ -764,7 +759,7 @@ status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)
             } else {
                 status = writeInt32(1);
                 if (!status) {
-                    status = writeFileDescriptor(fd);
+                    status = writeFileDescriptor(fd, true /*takeOwnership*/);
                     if (!status) {
                         outBlob->init(true /*mapped*/, ptr, len);
                         return NO_ERROR;
