@@ -4068,6 +4068,13 @@ public final class Settings {
                 "contacts_preauth_uri_expiration";
 
         /**
+         * Whether the Messaging app posts notifications.
+         * 0=disabled. 1=enabled.
+         */
+        public static final String MESSAGING_APP_NOTIFICATIONS = "messaging_app_notifications";
+
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -4104,7 +4111,8 @@ public final class Settings {
             MOUNT_UMS_NOTIFY_ENABLED,
             UI_NIGHT_MODE,
             LOCK_SCREEN_OWNER_INFO,
-            LOCK_SCREEN_OWNER_INFO_ENABLED
+            LOCK_SCREEN_OWNER_INFO_ENABLED,
+            MESSAGING_APP_NOTIFICATIONS
         };
 
         /**
