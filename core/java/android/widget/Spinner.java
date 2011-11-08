@@ -68,6 +68,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     int mDropDownWidth;
 
     private int mGravity;
+    private boolean mDisableChildrenWhenDisabled;
 
     private Rect mTempRect = new Rect();
 
@@ -186,6 +187,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         mPopup.setPromptText(a.getString(com.android.internal.R.styleable.Spinner_prompt));
 
+        mDisableChildrenWhenDisabled = a.getBoolean(
+                com.android.internal.R.styleable.Spinner_disableChildrenWhenDisabled, false);
+
         a.recycle();
 
         // Base constructor can call setAdapter before we initialize mPopup.
@@ -193,6 +197,17 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         if (mTempAdapter != null) {
             mPopup.setAdapter(mTempAdapter);
             mTempAdapter = null;
+        }
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if (mDisableChildrenWhenDisabled) {
+            final int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                getChildAt(i).setEnabled(enabled);
+            }
         }
     }
 
@@ -398,6 +413,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         addViewInLayout(child, 0, lp);
 
         child.setSelected(hasFocus());
+        if (mDisableChildrenWhenDisabled) {
+            child.setEnabled(isEnabled());
+        }
 
         // Get measure specs
         int childHeightSpec = ViewGroup.getChildMeasureSpec(mHeightMeasureSpec,
