@@ -42,7 +42,6 @@ struct NuPlayer : public AHandler {
     void setDataSource(
             const char *url, const KeyedVector<String8, String8> *headers);
 
-    void setVideoSurface(const sp<Surface> &surface);
     void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink);
     void start();
