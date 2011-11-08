@@ -136,6 +136,9 @@
     <!-- Default for UI touch sounds enabled -->
     <bool name="def_sound_effects_enabled">true</bool>
 
+    <!-- Default for Messaging app notifications enabled -->
+    <bool name="def_messaging_app_notifications_on">true</bool>
+
     <!-- Development settings -->
     <bool name="def_stay_on_while_plugged_in">false</bool>
 
