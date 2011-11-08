@@ -186,6 +186,8 @@ public:
 
             status_t renderScreenToTexture(DisplayID dpy,
                     GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
+            status_t renderScreenToTextureLocked(DisplayID dpy,
+                    GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
 
             status_t postMessageAsync(const sp<MessageBase>& msg,
                     nsecs_t reltime=0, uint32_t flags = 0);
@@ -328,8 +330,6 @@ private:
             status_t turnElectronBeamOnImplLocked(int32_t mode);
             status_t electronBeamOffAnimationImplLocked();
             status_t electronBeamOnAnimationImplLocked();
-            status_t renderScreenToTextureLocked(DisplayID dpy,
-                    GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
 
             void        debugFlashRegions();
             void        debugShowFPS() const;
