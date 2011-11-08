@@ -399,9 +399,17 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
 
     // Get the glyphs base count for offsetting the glyphIDs returned by Harfbuzz
     // This is needed as the Typeface used for shaping can be not the default one
-    // when we are shapping any script that needs to use a fallback Font
-    const uint16_t* text16 = (const uint16_t*)shaperItem.string;
-    unsigned result = paint->getBaseGlyphCount(SkUTF16_NextUnichar(&text16));
+    // when we are shapping any script that needs to use a fallback Font.
+    // If we are a "common" script we dont need to shift
+    unsigned result = 0;
+    switch(shaperItem.item.script) {
+        case HB_Script_Arabic:
+        case HB_Script_Hebrew:
+            const uint16_t* text16 = (const uint16_t*)shaperItem.string;
+            SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
+            result = paint->getBaseGlyphCount(firstUnichar);
+            break;
+    }
 
     // Set the correct Typeface depending on the script
     FontData* data = reinterpret_cast<FontData*>(shaperItem.font->userData);
@@ -463,6 +471,7 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
             LOGD("Using Default Typeface");
 #endif
             }
+            break;
     }
 
     shaperItem.face = HB_NewFace(data, harfbuzzSkiaGetTable);
@@ -481,36 +490,6 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
     }
 
     return result;
-}
-
-HB_Script TextLayoutCacheValue::getScriptFromRun(const UChar* chars, size_t start, size_t count,
-        bool isRTL) {
-    ssize_t nextCodePoint = 0;
-    uint32_t codePoint = utf16_to_code_point(chars + start, count, &nextCodePoint);
-
-    HB_Script script = code_point_to_script(codePoint);
-
-    if (script == HB_Script_Inherited) {
-#if DEBUG_GLYPHS
-         LOGD("Cannot find a correct script for code point=%d "
-                 " Need to look at the next code points.", codePoint);
-#endif
-         while (script == HB_Script_Inherited && nextCodePoint < count) {
-             codePoint = utf16_to_code_point(chars, count, &nextCodePoint);
-             script = code_point_to_script(codePoint);
-        }
-    }
-    if (script == HB_Script_Inherited) {
-#if DEBUG_GLYPHS
-        LOGD("Cannot find a correct script from the text."
-                " Need to select a default script depending on the passed text direction.");
-#endif
-        script = isRTL ? HB_Script_Arabic : HB_Script_Common;
-    }
-#if DEBUG_GLYPHS
-    LOGD("Found script=%d for chars='%s'", script, String8(chars + start, count).string());
-#endif
-    return script;
 }
 
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
