@@ -500,7 +500,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 break;
             case ConnectivityManager.TYPE_WIMAX:
                 mNetTrackers[netType] = makeWimaxStateTracker();
-                if (mNetTrackers[netType != null) {
+                if (mNetTrackers[netType]!= null) {
                     mNetTrackers[netType].startMonitoring(context, mHandler);
                 }
                 break;
