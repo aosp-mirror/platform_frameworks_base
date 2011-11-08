@@ -81,7 +81,6 @@ struct AwesomePlayer {
 
     bool isPlaying() const;
 
-    status_t setSurface(const sp<Surface> &surface);
     status_t setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &audioSink);
     status_t setLooping(bool shouldLoop);
@@ -154,7 +153,6 @@ private:
     bool mUIDValid;
     uid_t mUID;
 
-    sp<Surface> mSurface;
     sp<ANativeWindow> mNativeWindow;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 
