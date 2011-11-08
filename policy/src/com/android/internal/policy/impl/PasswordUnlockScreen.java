@@ -35,15 +35,18 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -114,6 +117,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 Settings.Secure.getInt(mContext.getContentResolver(),
                         Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, 0)
                         != 0);
+        boolean imeOrDeleteButtonVisible = false;
         if (mIsAlpha) {
             // We always use the system IME for alpha keyboard, so hide lockscreen's soft keyboard
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
@@ -129,6 +133,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             View pinDelete = findViewById(R.id.pinDel);
             if (pinDelete != null) {
                 pinDelete.setVisibility(View.VISIBLE);
+                imeOrDeleteButtonVisible = true;
                 pinDelete.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -181,12 +186,23 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 Context.INPUT_METHOD_SERVICE);
         if (mIsAlpha && switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(imm, false)) {
             switchImeButton.setVisibility(View.VISIBLE);
+            imeOrDeleteButtonVisible = true;
             switchImeButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     mCallback.pokeWakelock(); // Leave the screen on a bit longer
                     imm.showInputMethodPicker();
                 }
             });
+        }
+
+        // If no icon is visible, reset the left margin on the password field so the text is
+        // still centered.
+        if (!imeOrDeleteButtonVisible) {
+            android.view.ViewGroup.LayoutParams params = mPasswordEntry.getLayoutParams();
+            if (params instanceof MarginLayoutParams) {
+                ((MarginLayoutParams)params).leftMargin = 0;
+                mPasswordEntry.setLayoutParams(params);
+            }
         }
     }
 
