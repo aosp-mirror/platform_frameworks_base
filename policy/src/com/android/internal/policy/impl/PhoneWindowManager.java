@@ -1516,12 +1516,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     static ITelephony getTelephonyService() {
-        ITelephony telephonyService = ITelephony.Stub.asInterface(
+        return ITelephony.Stub.asInterface(
                 ServiceManager.checkService(Context.TELEPHONY_SERVICE));
-        if (telephonyService == null) {
-            Log.w(TAG, "Unable to find ITelephony interface.");
-        }
-        return telephonyService;
     }
 
     static IAudioService getAudioService() {
