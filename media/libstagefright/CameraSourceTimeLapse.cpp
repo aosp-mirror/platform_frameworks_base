@@ -257,6 +257,12 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
             mForceRead = false;
             *timestampUs =
                 mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
+
+            // Really make sure that this video recording frame will not be dropped.
+            if (*timestampUs < mStartTimeUs) {
+                LOGI("set timestampUs to start time stamp %lld us", mStartTimeUs);
+                *timestampUs = mStartTimeUs;
+            }
             return false;
         }
     }
