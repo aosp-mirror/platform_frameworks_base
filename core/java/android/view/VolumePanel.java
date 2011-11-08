@@ -93,7 +93,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private static final int MSG_RINGER_MODE_CHANGED = 6;
 
     // Pseudo stream type for master volume
-    private static final int STREAM_MASTER = -1;
+    private static final int STREAM_MASTER = -100;
 
     protected Context mContext;
     private AudioManager mAudioManager;
@@ -303,34 +303,30 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     private int getStreamMaxVolume(int streamType) {
-        // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            return 100;
+            return mAudioService.getMasterMaxVolume();
         } else {
             return mAudioService.getStreamMaxVolume(streamType);
         }
     }
 
     private int getStreamVolume(int streamType) {
-         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            return Math.round(mAudioService.getMasterVolume() * 100);
+            return mAudioService.getMasterVolume();
         } else {
             return mAudioService.getStreamVolume(streamType);
         }
     }
 
     private void setStreamVolume(int streamType, int index, int flags) {
-         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            mAudioService.setMasterVolume((float)index / 100.0f);
+            mAudioService.setMasterVolume(index, flags);
         } else {
             mAudioService.setStreamVolume(streamType, index, flags);
         }
     }
 
     private int getLastAudibleStreamVolume(int streamType) {
-         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
             // master volume mute not yet supported
             return getStreamVolume(STREAM_MASTER);
