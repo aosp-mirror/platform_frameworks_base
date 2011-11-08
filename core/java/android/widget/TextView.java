@@ -9074,51 +9074,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendAccessibilityEventUnchecked(event);
     }
 
-    @Override
-    protected void onCreateContextMenu(ContextMenu menu) {
-        super.onCreateContextMenu(menu);
-        boolean added = false;
-        mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
-        // Problem with context menu on long press: the menu appears while the key in down and when
-        // the key is released, the view does not receive the key_up event.
-        // We need two layers of flags: mDPadCenterIsDown and mEnterKeyIsDown are set in key down/up
-        // events. We cannot simply clear these flags in onTextContextMenuItem since
-        // it may not be called (if the user/ discards the context menu with the back key).
-        // We clear these flags here and mContextMenuTriggeredByKey saves that state so that it is
-        // available in onTextContextMenuItem.
-        mDPadCenterIsDown = mEnterKeyIsDown = false;
-
-        MenuHandler handler = new MenuHandler();
-
-        if (mText instanceof Spanned && hasSelectionController()) {
-            long lastTouchOffset = getLastTouchOffsets();
-            final int selStart = extractRangeStartFromLong(lastTouchOffset);
-            final int selEnd = extractRangeEndFromLong(lastTouchOffset);
-
-            URLSpan[] urls = ((Spanned) mText).getSpans(selStart, selEnd, URLSpan.class);
-            if (urls.length > 0) {
-                menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).
-                        setOnMenuItemClickListener(handler);
-
-                added = true;
-            }
-        }
-        
-        // The context menu is not empty, which will prevent the selection mode from starting.
-        // Add a entry to start it in the context menu.
-        // TODO Does not handle the case where a subclass does not call super.thisMethod or
-        // populates the menu AFTER this call.
-        if (menu.size() > 0) {
-            menu.add(0, ID_SELECTION_MODE, 0, com.android.internal.R.string.selectTextMode).
-                    setOnMenuItemClickListener(handler);
-            added = true;
-        }
-
-        if (added) {
-            menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
-        }
-    }
-
     /**
      * Returns whether this text view is a current input method target.  The
      * default implementation just checks with {@link InputMethodManager}.
@@ -9133,9 +9088,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int ID_CUT = android.R.id.cut;
     private static final int ID_COPY = android.R.id.copy;
     private static final int ID_PASTE = android.R.id.paste;
-    // Context menu entries
-    private static final int ID_COPY_URL = android.R.id.copyUrl;
-    private static final int ID_SELECTION_MODE = android.R.id.selectTextMode;
 
     private class MenuHandler implements MenuItem.OnMenuItemClickListener {
         public boolean onMenuItemClick(MenuItem item) {
@@ -9145,9 +9097,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
-     * this will be {@link android.R.id#copyUrl}, {@link android.R.id#selectTextMode},
-     * {@link android.R.id#selectAll}, {@link android.R.id#paste}, {@link android.R.id#cut}
-     * or {@link android.R.id#copy}.
+     * this will be one of {@link android.R.id#selectAll}, {@link android.R.id#cut},
+     * {@link android.R.id#copy} or {@link android.R.id#paste}.
      *
      * @return true if the context menu item action was performed.
      */
@@ -9164,34 +9115,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         switch (id) {
-            case ID_COPY_URL:
-                URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
-                if (urls.length >= 1) {
-                    ClipData clip = null;
-                    for (int i=0; i<urls.length; i++) {
-                        Uri uri = Uri.parse(urls[0].getURL());
-                        if (clip == null) {
-                            clip = ClipData.newRawUri(null, uri);
-                        } else {
-                            clip.addItem(new ClipData.Item(uri));
-                        }
-                    }
-                    if (clip != null) {
-                        setPrimaryClip(clip);
-                    }
-                }
-                stopSelectionActionMode();
-                return true;
-
-            case ID_SELECTION_MODE:
-                if (mSelectionActionMode != null) {
-                    // Selection mode is already started, simply change selected part.
-                    selectCurrentWord();
-                } else {
-                    startSelectionActionMode();
-                }
-                return true;
-
             case ID_SELECT_ALL:
                 // This does not enter text selection mode. Text is highlighted, so that it can be
                 // bulk edited, like selectAllOnFocus does. Returns true even if text is empty.
