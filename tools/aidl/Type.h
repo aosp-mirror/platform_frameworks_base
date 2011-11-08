@@ -42,6 +42,7 @@ public:
     
     virtual string  ImportType() const;
     virtual string  CreatorName() const;
+    virtual string  RpcCreatorName() const;
     virtual string  InstantiableName() const;
 
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
@@ -358,6 +359,7 @@ public:
                             const string& declFile = "", int declLine = -1);
 
     virtual string  CreatorName() const;
+    virtual string  RpcCreatorName() const;
 
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
