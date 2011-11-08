@@ -109,6 +109,10 @@ public class Am {
             runStartService();
         } else if (op.equals("force-stop")) {
             runForceStop();
+        } else if (op.equals("kill")) {
+            runKill();
+        } else if (op.equals("kill-all")) {
+            runKillAll();
         } else if (op.equals("instrument")) {
             runInstrument();
         } else if (op.equals("broadcast")) {
@@ -482,6 +486,14 @@ public class Am {
 
     private void runForceStop() throws Exception {
         mAm.forceStopPackage(nextArgRequired());
+    }
+
+    private void runKill() throws Exception {
+        mAm.killBackgroundProcesses(nextArgRequired());
+    }
+
+    private void runKillAll() throws Exception {
+        mAm.killAllBackgroundProcesses();
     }
 
     private void sendBroadcast() throws Exception {
@@ -1179,6 +1191,8 @@ public class Am {
                 "               [--R COUNT] [-S] <INTENT>\n" +
                 "       am startservice <INTENT>\n" +
                 "       am force-stop <PACKAGE>\n" +
+                "       am kill <PACKAGE>\n" +
+                "       am kill-all\n" +
                 "       am broadcast <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
@@ -1201,6 +1215,12 @@ public class Am {
                 "am startservice: start a Service.\n" +
                 "\n" +
                 "am force-stop: force stop everything associated with <PACKAGE>.\n" +
+                "\n" +
+                "am kill: Kill all processes associated with <PACKAGE>.  Only kills.\n" +
+                "  processes that are safe to kill -- that is, will not impact the user\n" +
+                "  experience.\n" +
+                "\n" +
+                "am kill-all: Kill all background processes.\n" +
                 "\n" +
                 "am broadcast: send a broadcast Intent.\n" +
                 "\n" +
