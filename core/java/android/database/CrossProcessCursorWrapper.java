@@ -24,10 +24,10 @@ import android.database.CursorWrapper;
 /**
  * Cursor wrapper that implements {@link CrossProcessCursor}.
  * <p>
- * If the wrapper cursor implemented {@link CrossProcessCursor}, then delegates
- * {@link #fillWindow}, {@link #getWindow()} and {@link #onMove} to it.  Otherwise,
- * provides default implementations of these methods that traverse the contents
- * of the cursor similar to {@link AbstractCursor#fillWindow}.
+ * If the wrapped cursor implements {@link CrossProcessCursor}, then the wrapper
+ * delegates {@link #fillWindow}, {@link #getWindow()} and {@link #onMove} to it.
+ * Otherwise, the wrapper provides default implementations of these methods that
+ * traverse the contents of the cursor similar to {@link AbstractCursor#fillWindow}.
  * </p><p>
  * This wrapper can be used to adapt an ordinary {@link Cursor} into a
  * {@link CrossProcessCursor}.
