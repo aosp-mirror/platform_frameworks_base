@@ -813,8 +813,6 @@ class BrowserFrame extends Handler {
                                               boolean synchronous,
                                               String username,
                                               String password) {
-        PerfChecker checker = new PerfChecker();
-
         if (mSettings.getCacheMode() != WebSettings.LOAD_DEFAULT) {
             cacheMode = mSettings.getCacheMode();
         }
@@ -872,11 +870,6 @@ class BrowserFrame extends Handler {
                 || headers.containsKey("If-None-Match") ? 
                         WebSettings.LOAD_NO_CACHE : cacheMode);
         // Set referrer to current URL?
-        if (!loader.executeLoad()) {
-            checker.responseAlert("startLoadingResource fail");
-        }
-        checker.responseAlert("startLoadingResource succeed");
-
         return !synchronous ? loadListener : null;
     }
 
