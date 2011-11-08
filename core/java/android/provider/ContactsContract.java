@@ -1673,7 +1673,6 @@ public final class ContactsContract {
          * Querying for social stream data requires android.permission.READ_SOCIAL_STREAM
          * permission.
          * </p>
-         * @hide
          */
         public static final class StreamItems implements StreamItemsColumns {
             /**
@@ -2736,7 +2735,6 @@ public final class ContactsContract {
          * inserting or updating social stream items requires android.permission.WRITE_SOCIAL_STREAM
          * permission.
          * </p>
-         * @hide
          */
         public static final class StreamItems implements BaseColumns, StreamItemsColumns {
             /**
@@ -3149,7 +3147,6 @@ public final class ContactsContract {
      * </pre>
      * </dd>
      * </dl>
-     * @hide
      */
     public static final class StreamItems implements BaseColumns, StreamItemsColumns {
         /**
@@ -3247,7 +3244,6 @@ public final class ContactsContract {
      * Columns in the StreamItems table.
      *
      * @see ContactsContract.StreamItems
-     * @hide
      */
     protected interface StreamItemsColumns {
         /**
@@ -3538,7 +3534,6 @@ public final class ContactsContract {
      * <pre>
      * </dd>
      * </dl>
-     * @hide
      */
     public static final class StreamItemPhotos implements BaseColumns, StreamItemPhotosColumns {
         /**
@@ -3566,7 +3561,6 @@ public final class ContactsContract {
      * Columns in the StreamItemPhotos table.
      *
      * @see ContactsContract.StreamItemPhotos
-     * @hide
      */
     protected interface StreamItemPhotosColumns {
         /**
