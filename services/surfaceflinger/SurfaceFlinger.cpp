@@ -1360,11 +1360,6 @@ sp<LayerScreenshot> SurfaceFlinger::createScreenshotSurface(
         uint32_t w, uint32_t h, uint32_t flags)
 {
     sp<LayerScreenshot> layer = new LayerScreenshot(this, display, client);
-    status_t err = layer->capture();
-    if (err != NO_ERROR) {
-        layer.clear();
-        LOGW("createScreenshotSurface failed (%s)", strerror(-err));
-    }
     return layer;
 }
 
