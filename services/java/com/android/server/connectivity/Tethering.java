@@ -81,6 +81,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private String[] mTetherableBluetoothRegexs;
     private Collection<Integer> mUpstreamIfaceTypes;
 
+    // used to synchronize public access to members
+    private Object mPublicSync;
+
     private static final Integer MOBILE_TYPE = new Integer(ConnectivityManager.TYPE_MOBILE);
     private static final Integer HIPRI_TYPE = new Integer(ConnectivityManager.TYPE_MOBILE_HIPRI);
     private static final Integer DUN_TYPE = new Integer(ConnectivityManager.TYPE_MOBILE_DUN);
@@ -135,6 +138,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mConnService = connService;
         mLooper = looper;
 
+        mPublicSync = new Object();
+
         mIfaces = new HashMap<String, TetherInterfaceSM>();
 
         // make our own thread so we don't anr the system
@@ -172,18 +177,25 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     void updateConfiguration() {
-        mTetherableUsbRegexs = mContext.getResources().getStringArray(
+        String[] tetherableUsbRegexs = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_usb_regexs);
-        mTetherableWifiRegexs = mContext.getResources().getStringArray(
+        String[] tetherableWifiRegexs = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_wifi_regexs);
-        mTetherableBluetoothRegexs = mContext.getResources().getStringArray(
+        String[] tetherableBluetoothRegexs = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_bluetooth_regexs);
 
         int ifaceTypes[] = mContext.getResources().getIntArray(
                 com.android.internal.R.array.config_tether_upstream_types);
-        mUpstreamIfaceTypes = new ArrayList();
+        Collection<Integer> upstreamIfaceTypes = new ArrayList();
         for (int i : ifaceTypes) {
-            mUpstreamIfaceTypes.add(new Integer(i));
+            upstreamIfaceTypes.add(new Integer(i));
+        }
+
+        synchronized (mPublicSync) {
+            mTetherableUsbRegexs = tetherableUsbRegexs;
+            mTetherableWifiRegexs = tetherableWifiRegexs;
+            mTetherableBluetoothRegexs = tetherableBluetoothRegexs;
+            mUpstreamIfaceTypes = upstreamIfaceTypes;
         }
 
         // check if the upstream type list needs to be modified due to secure-settings
@@ -194,17 +206,17 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         if (VDBG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
         boolean found = false;
         boolean usb = false;
-        if (isWifi(iface)) {
-            found = true;
-        } else if (isUsb(iface)) {
-            found = true;
-            usb = true;
-        } else if (isBluetooth(iface)) {
-            found = true;
-        }
-        if (found == false) return;
+        synchronized (mPublicSync) {
+            if (isWifi(iface)) {
+                found = true;
+            } else if (isUsb(iface)) {
+                found = true;
+                usb = true;
+            } else if (isBluetooth(iface)) {
+                found = true;
+            }
+            if (found == false) return;
 
-        synchronized (mIfaces) {
             TetherInterfaceSM sm = mIfaces.get(iface);
             if (up) {
                 if (sm == null) {
@@ -231,46 +243,52 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     private boolean isUsb(String iface) {
-        for (String regex : mTetherableUsbRegexs) {
-            if (iface.matches(regex)) return true;
+        synchronized (mPublicSync) {
+            for (String regex : mTetherableUsbRegexs) {
+                if (iface.matches(regex)) return true;
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean isWifi(String iface) {
-        for (String regex : mTetherableWifiRegexs) {
-            if (iface.matches(regex)) return true;
+        synchronized (mPublicSync) {
+            for (String regex : mTetherableWifiRegexs) {
+                if (iface.matches(regex)) return true;
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean isBluetooth(String iface) {
-        for (String regex : mTetherableBluetoothRegexs) {
-            if (iface.matches(regex)) return true;
+        synchronized (mPublicSync) {
+            for (String regex : mTetherableBluetoothRegexs) {
+                if (iface.matches(regex)) return true;
+            }
+            return false;
         }
-        return false;
     }
 
     public void interfaceAdded(String iface) {
         if (VDBG) Log.d(TAG, "interfaceAdded " + iface);
         boolean found = false;
         boolean usb = false;
-        if (isWifi(iface)) {
-            found = true;
-        }
-        if (isUsb(iface)) {
-            found = true;
-            usb = true;
-        }
-        if (isBluetooth(iface)) {
-            found = true;
-        }
-        if (found == false) {
-            if (VDBG) Log.d(TAG, iface + " is not a tetherable iface, ignoring");
-            return;
-        }
+        synchronized (mPublicSync) {
+            if (isWifi(iface)) {
+                found = true;
+            }
+            if (isUsb(iface)) {
+                found = true;
+                usb = true;
+            }
+            if (isBluetooth(iface)) {
+                found = true;
+            }
+            if (found == false) {
+                if (VDBG) Log.d(TAG, iface + " is not a tetherable iface, ignoring");
+                return;
+            }
 
-        synchronized (mIfaces) {
             TetherInterfaceSM sm = mIfaces.get(iface);
             if (sm != null) {
                 if (VDBG) Log.d(TAG, "active iface (" + iface + ") reported as added, ignoring");
@@ -285,7 +303,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public void interfaceRemoved(String iface) {
         if (VDBG) Log.d(TAG, "interfaceRemoved " + iface);
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             TetherInterfaceSM sm = mIfaces.get(iface);
             if (sm == null) {
                 if (VDBG) {
@@ -303,7 +321,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     public int tether(String iface) {
         if (DBG) Log.d(TAG, "Tethering " + iface);
         TetherInterfaceSM sm = null;
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             sm = mIfaces.get(iface);
         }
         if (sm == null) {
@@ -321,7 +339,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     public int untether(String iface) {
         if (DBG) Log.d(TAG, "Untethering " + iface);
         TetherInterfaceSM sm = null;
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             sm = mIfaces.get(iface);
         }
         if (sm == null) {
@@ -338,16 +356,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public int getLastTetherError(String iface) {
         TetherInterfaceSM sm = null;
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             sm = mIfaces.get(iface);
+            if (sm == null) {
+                Log.e(TAG, "Tried to getLastTetherError on an unknown iface :" + iface +
+                        ", ignoring");
+                return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
+            }
+            return sm.getLastError();
         }
-        if (sm == null) {
-            Log.e(TAG, "Tried to getLastTetherError on an unknown iface :" + iface + ", ignoring");
-            return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
-        }
-        return sm.getLastError();
     }
 
+    // TODO - move all private methods used only by the state machine into the state machine
+    // to clarify what needs synchronized protection.
     private void sendTetherStateChangedBroadcast() {
         try {
             if (!mConnService.isTetheringSupported()) return;
@@ -363,7 +384,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         boolean usbTethered = false;
         boolean bluetoothTethered = false;
 
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             Set ifaces = mIfaces.keySet();
             for (Object iface : ifaces) {
                 TetherInterfaceSM sm = mIfaces.get(iface);
@@ -469,7 +490,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
             if (action.equals(UsbManager.ACTION_USB_STATE)) {
-                synchronized (Tethering.this) {
+                synchronized (Tethering.this.mPublicSync) {
                     boolean usbConnected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
                     mRndisEnabled = intent.getBooleanExtra(UsbManager.USB_FUNCTION_RNDIS, false);
                     // start tethering if we have a request pending
@@ -545,6 +566,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         return true;
     }
 
+    // TODO - return copies so people can't tamper
     public String[] getTetherableUsbRegexs() {
         return mTetherableUsbRegexs;
     }
@@ -561,7 +583,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         if (VDBG) Log.d(TAG, "setUsbTethering(" + enable + ")");
         UsbManager usbManager = (UsbManager)mContext.getSystemService(Context.USB_SERVICE);
 
-        synchronized (this) {
+        synchronized (mPublicSync) {
             if (enable) {
                 if (mRndisEnabled) {
                     tetherUsb(true);
@@ -581,11 +603,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public int[] getUpstreamIfaceTypes() {
-        updateConfiguration();
-        int values[] = new int[mUpstreamIfaceTypes.size()];
-        Iterator<Integer> iterator = mUpstreamIfaceTypes.iterator();
-        for (int i=0; i < mUpstreamIfaceTypes.size(); i++) {
-            values[i] = iterator.next();
+        int values[];
+        synchronized (mPublicSync) {
+            updateConfiguration();
+            values = new int[mUpstreamIfaceTypes.size()];
+            Iterator<Integer> iterator = mUpstreamIfaceTypes.iterator();
+            for (int i=0; i < mUpstreamIfaceTypes.size(); i++) {
+                values[i] = iterator.next();
+            }
         }
         return values;
     }
@@ -593,43 +618,46 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     public void checkDunRequired() {
         int secureSetting = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.TETHER_DUN_REQUIRED, 2);
-        // 2 = not set, 0 = DUN not required, 1 = DUN required
-        if (secureSetting != 2) {
-            int requiredApn = (secureSetting == 1 ?
-                    ConnectivityManager.TYPE_MOBILE_DUN :
-                    ConnectivityManager.TYPE_MOBILE_HIPRI);
-            if (requiredApn == ConnectivityManager.TYPE_MOBILE_DUN) {
-                while (mUpstreamIfaceTypes.contains(MOBILE_TYPE)) {
-                    mUpstreamIfaceTypes.remove(MOBILE_TYPE);
-                }
-                while (mUpstreamIfaceTypes.contains(HIPRI_TYPE)) {
-                    mUpstreamIfaceTypes.remove(HIPRI_TYPE);
-                }
-                if (mUpstreamIfaceTypes.contains(DUN_TYPE) == false) {
-                    mUpstreamIfaceTypes.add(DUN_TYPE);
-                }
-            } else {
-                while (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
-                    mUpstreamIfaceTypes.remove(DUN_TYPE);
-                }
-                if (mUpstreamIfaceTypes.contains(MOBILE_TYPE) == false) {
-                    mUpstreamIfaceTypes.add(MOBILE_TYPE);
-                }
-                if (mUpstreamIfaceTypes.contains(HIPRI_TYPE) == false) {
-                    mUpstreamIfaceTypes.add(HIPRI_TYPE);
+        synchronized (mPublicSync) {
+            // 2 = not set, 0 = DUN not required, 1 = DUN required
+            if (secureSetting != 2) {
+                int requiredApn = (secureSetting == 1 ?
+                        ConnectivityManager.TYPE_MOBILE_DUN :
+                        ConnectivityManager.TYPE_MOBILE_HIPRI);
+                if (requiredApn == ConnectivityManager.TYPE_MOBILE_DUN) {
+                    while (mUpstreamIfaceTypes.contains(MOBILE_TYPE)) {
+                        mUpstreamIfaceTypes.remove(MOBILE_TYPE);
+                    }
+                    while (mUpstreamIfaceTypes.contains(HIPRI_TYPE)) {
+                        mUpstreamIfaceTypes.remove(HIPRI_TYPE);
+                    }
+                    if (mUpstreamIfaceTypes.contains(DUN_TYPE) == false) {
+                        mUpstreamIfaceTypes.add(DUN_TYPE);
+                    }
+                } else {
+                    while (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
+                        mUpstreamIfaceTypes.remove(DUN_TYPE);
+                    }
+                    if (mUpstreamIfaceTypes.contains(MOBILE_TYPE) == false) {
+                        mUpstreamIfaceTypes.add(MOBILE_TYPE);
+                    }
+                    if (mUpstreamIfaceTypes.contains(HIPRI_TYPE) == false) {
+                        mUpstreamIfaceTypes.add(HIPRI_TYPE);
+                    }
                 }
             }
-        }
-        if (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
-            mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_DUN;
-        } else {
-            mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_HIPRI;
+            if (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
+                mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_DUN;
+            } else {
+                mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_HIPRI;
+            }
         }
     }
 
+    // TODO review API - maybe return ArrayList<String> here and below?
     public String[] getTetheredIfaces() {
         ArrayList<String> list = new ArrayList<String>();
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             Set keys = mIfaces.keySet();
             for (Object key : keys) {
                 TetherInterfaceSM sm = mIfaces.get(key);
@@ -647,7 +675,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public String[] getTetheredIfacePairs() {
         final ArrayList<String> list = Lists.newArrayList();
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             for (TetherInterfaceSM sm : mIfaces.values()) {
                 if (sm.isTethered()) {
                     list.add(sm.mMyUpstreamIfaceName);
@@ -660,7 +688,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public String[] getTetherableIfaces() {
         ArrayList<String> list = new ArrayList<String>();
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             Set keys = mIfaces.keySet();
             for (Object key : keys) {
                 TetherInterfaceSM sm = mIfaces.get(key);
@@ -678,7 +706,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public String[] getErroredIfaces() {
         ArrayList<String> list = new ArrayList<String>();
-        synchronized (mIfaces) {
+        synchronized (mPublicSync) {
             Set keys = mIfaces.keySet();
             for (Object key : keys) {
                 TetherInterfaceSM sm = mIfaces.get(key);
@@ -777,43 +805,54 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             return res;
         }
 
-        public synchronized int getLastError() {
-            return mLastError;
+        public int getLastError() {
+            synchronized (Tethering.this.mPublicSync) {
+                return mLastError;
+            }
         }
 
-        private synchronized void setLastError(int error) {
-            mLastError = error;
+        private void setLastError(int error) {
+            synchronized (Tethering.this.mPublicSync) {
+                mLastError = error;
 
-            if (isErrored()) {
-                if (mUsb) {
-                    // note everything's been unwound by this point so nothing to do on
-                    // further error..
-                    Tethering.this.configureUsbIface(false);
+                if (isErrored()) {
+                    if (mUsb) {
+                        // note everything's been unwound by this point so nothing to do on
+                        // further error..
+                        Tethering.this.configureUsbIface(false);
+                    }
                 }
             }
         }
 
-        // synchronized between this getter and the following setter
-        public synchronized boolean isAvailable() {
-            return mAvailable;
+        public boolean isAvailable() {
+            synchronized (Tethering.this.mPublicSync) {
+                return mAvailable;
+            }
         }
 
-        private synchronized void setAvailable(boolean available) {
-            mAvailable = available;
+        private void setAvailable(boolean available) {
+            synchronized (Tethering.this.mPublicSync) {
+                mAvailable = available;
+            }
         }
 
-        // synchronized between this getter and the following setter
-        public synchronized boolean isTethered() {
-            return mTethered;
+        public boolean isTethered() {
+            synchronized (Tethering.this.mPublicSync) {
+                return mTethered;
+            }
         }
 
-        private synchronized void setTethered(boolean tethered) {
-            mTethered = tethered;
+        private void setTethered(boolean tethered) {
+            synchronized (Tethering.this.mPublicSync) {
+                mTethered = tethered;
+            }
         }
 
-        // synchronized between this getter and the following setter
-        public synchronized boolean isErrored() {
-            return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
+        public boolean isErrored() {
+            synchronized (Tethering.this.mPublicSync) {
+                return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
+            }
         }
 
         class InitialState extends State {
@@ -922,7 +961,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 sendTetherStateChangedBroadcast();
             }
 
-            void cleanupUpstream() {
+            private void cleanupUpstream() {
                 if (mMyUpstreamIfaceName != null) {
                     // note that we don't care about errors here.
                     // sometimes interfaces are gone before we get
@@ -1237,21 +1276,23 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
                 updateConfiguration();
 
-                if (VDBG) {
-                    Log.d(TAG, "chooseUpstreamType has upstream iface types:");
-                    for (Integer netType : mUpstreamIfaceTypes) {
-                        Log.d(TAG, " " + netType);
+                synchronized (mPublicSync) {
+                    if (VDBG) {
+                        Log.d(TAG, "chooseUpstreamType has upstream iface types:");
+                        for (Integer netType : mUpstreamIfaceTypes) {
+                            Log.d(TAG, " " + netType);
+                        }
                     }
-                }
 
-                for (Integer netType : mUpstreamIfaceTypes) {
-                    NetworkInfo info = null;
-                    try {
-                        info = mConnService.getNetworkInfo(netType.intValue());
-                    } catch (RemoteException e) { }
-                    if ((info != null) && info.isConnected()) {
-                        upType = netType.intValue();
-                        break;
+                    for (Integer netType : mUpstreamIfaceTypes) {
+                        NetworkInfo info = null;
+                        try {
+                            info = mConnService.getNetworkInfo(netType.intValue());
+                        } catch (RemoteException e) { }
+                        if ((info != null) && info.isConnected()) {
+                            upType = netType.intValue();
+                            break;
+                        }
                     }
                 }
 
@@ -1479,14 +1520,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     return;
         }
 
-        pw.println("mUpstreamIfaceTypes: ");
-        for (Integer netType : mUpstreamIfaceTypes) {
-            pw.println(" " + netType);
-        }
+        synchronized (mPublicSync) {
+            pw.println("mUpstreamIfaceTypes: ");
+            for (Integer netType : mUpstreamIfaceTypes) {
+                pw.println(" " + netType);
+            }
 
-        pw.println();
-        pw.println("Tether state:");
-        synchronized (mIfaces) {
+            pw.println();
+            pw.println("Tether state:");
             for (Object o : mIfaces.values()) {
                 pw.println(" "+o.toString());
             }
