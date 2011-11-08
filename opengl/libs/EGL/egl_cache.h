@@ -21,6 +21,7 @@
 #include <EGL/eglext.h>
 
 #include <utils/BlobCache.h>
+#include <utils/String8.h>
 #include <utils/StrongPointer.h>
 
 // ----------------------------------------------------------------------------
@@ -29,7 +30,7 @@ namespace android {
 
 class egl_display_t;
 
-class egl_cache_t {
+class EGLAPI egl_cache_t {
 public:
 
     // get returns a pointer to the singleton egl_cache_t object.  This
@@ -59,6 +60,10 @@ public:
     // implementation via the EGL_ANDROID_blob_cache extension.
     EGLsizei getBlob(const void* key, EGLsizei keySize, void* value,
         EGLsizei valueSize);
+
+    // setCacheFilename sets the name of the file that should be used to store
+    // cache contents from one program invocation to another.
+    void setCacheFilename(const char* filename);
 
 private:
     // Creation and (the lack of) destruction is handled internally.
@@ -96,9 +101,19 @@ private:
     // first time it's needed.
     sp<BlobCache> mBlobCache;
 
+    // mFilename is the name of the file for storing cache contents in between
+    // program invocations.  It is initialized to an empty string at
+    // construction time, and can be set with the setCacheFilename method.  An
+    // empty string indicates that the cache should not be saved to or restored
+    // from disk.
+    String8 mFilename;
+
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables. It must be locked whenever the member variables are accessed.
     mutable Mutex mMutex;
+
+    // sCache is the singleton egl_cache_t object.
+    static egl_cache_t sCache;
 };
 
 // ----------------------------------------------------------------------------
