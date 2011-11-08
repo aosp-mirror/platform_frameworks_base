@@ -39,39 +39,39 @@
 
         <ImageView
             android:id="@+id/bluetooth"
-            android:layout_height="32dp"
-            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:scaleType="centerInside"
-            android:baseline="22dp"
+            android:baseline="18dp"
             android:visibility="gone"
             android:contentDescription="@null"
             />
 
         <FrameLayout
             android:id="@+id/netwerk"
-            android:layout_height="32dp"
-            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:layout_marginRight="4dp"
             >
 
             <ImageView
                 android:id="@+id/network_signal"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
                 android:contentDescription="@null"
                 />
 
             <ImageView
                 android:id="@+id/network_type"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
                 android:contentDescription="@null"
                 />
 
             <ImageView
                 android:id="@+id/network_direction"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
                 android:contentDescription="@null"
                 />
 
@@ -91,12 +91,14 @@
 
         <ImageView
             android:id="@+id/battery"
-            android:layout_height="32dp"
-            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:scaleType="centerInside"
             android:layout_toRightOf="@id/network_text"
             android:layout_alignBaseline="@id/network_signal"
-            android:baseline="22dp"
+            android:baseline="18dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:contentDescription="@null"
             />
 
