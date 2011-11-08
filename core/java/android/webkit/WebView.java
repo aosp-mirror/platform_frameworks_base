@@ -683,7 +683,6 @@ public class WebView extends AbsoluteLayout
     private static final int SWITCH_TO_LONGPRESS        = 4;
     private static final int RELEASE_SINGLE_TAP         = 5;
     private static final int REQUEST_FORM_DATA          = 6;
-    private static final int RESUME_WEBCORE_PRIORITY    = 7;
     private static final int DRAG_HELD_MOTIONLESS       = 8;
     private static final int AWAKEN_SCROLL_BARS         = 9;
     private static final int PREVENT_DEFAULT_TIMEOUT    = 10;
@@ -2850,46 +2849,47 @@ public class WebView extends AbsoluteLayout
     // Used to avoid sending many visible rect messages.
     private Rect mLastVisibleRectSent;
     private Rect mLastGlobalRect;
+    private Rect mVisibleRect = new Rect();
+    private Rect mGlobalVisibleRect = new Rect();
+    private Point mScrollOffset = new Point();
 
     Rect sendOurVisibleRect() {
         if (mZoomManager.isPreventingWebkitUpdates()) return mLastVisibleRectSent;
-        Rect rect = new Rect();
-        calcOurContentVisibleRect(rect);
+        calcOurContentVisibleRect(mVisibleRect);
         // Rect.equals() checks for null input.
-        if (!rect.equals(mLastVisibleRectSent)) {
+        if (!mVisibleRect.equals(mLastVisibleRectSent)) {
             if (!mBlockWebkitViewMessages) {
-                Point pos = new Point(rect.left, rect.top);
+                mScrollOffset.set(mVisibleRect.left, mVisibleRect.top);
                 mWebViewCore.removeMessages(EventHub.SET_SCROLL_OFFSET);
                 mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
-                        nativeMoveGeneration(), mSendScrollEvent ? 1 : 0, pos);
+                        nativeMoveGeneration(), mSendScrollEvent ? 1 : 0, mScrollOffset);
             }
-            mLastVisibleRectSent = rect;
+            mLastVisibleRectSent = mVisibleRect;
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         }
-        Rect globalRect = new Rect();
-        if (getGlobalVisibleRect(globalRect)
-                && !globalRect.equals(mLastGlobalRect)) {
+        if (getGlobalVisibleRect(mGlobalVisibleRect)
+                && !mGlobalVisibleRect.equals(mLastGlobalRect)) {
             if (DebugFlags.WEB_VIEW) {
-                Log.v(LOGTAG, "sendOurVisibleRect=(" + globalRect.left + ","
-                        + globalRect.top + ",r=" + globalRect.right + ",b="
-                        + globalRect.bottom);
+                Log.v(LOGTAG, "sendOurVisibleRect=(" + mGlobalVisibleRect.left + ","
+                        + mGlobalVisibleRect.top + ",r=" + mGlobalVisibleRect.right + ",b="
+                        + mGlobalVisibleRect.bottom);
             }
             // TODO: the global offset is only used by windowRect()
             // in ChromeClientAndroid ; other clients such as touch
             // and mouse events could return view + screen relative points.
             if (!mBlockWebkitViewMessages) {
-                mWebViewCore.sendMessage(EventHub.SET_GLOBAL_BOUNDS, globalRect);
+                mWebViewCore.sendMessage(EventHub.SET_GLOBAL_BOUNDS, mGlobalVisibleRect);
             }
-            mLastGlobalRect = globalRect;
+            mLastGlobalRect = mGlobalVisibleRect;
         }
-        return rect;
+        return mVisibleRect;
     }
 
+    private Point mGlobalVisibleOffset = new Point();
     // Sets r to be the visible rectangle of our webview in view coordinates
     private void calcOurVisibleRect(Rect r) {
-        Point p = new Point();
-        getGlobalVisibleRect(r, p);
-        r.offset(-p.x, -p.y);
+        getGlobalVisibleRect(r, mGlobalVisibleOffset);
+        r.offset(-mGlobalVisibleOffset.x, -mGlobalVisibleOffset.y);
     }
 
     // Sets r to be our visible rectangle in content coordinates
@@ -2905,21 +2905,21 @@ public class WebView extends AbsoluteLayout
         r.bottom = viewToContentY(r.bottom);
     }
 
+    private Rect mContentVisibleRect = new Rect();
     // Sets r to be our visible rectangle in content coordinates. We use this
     // method on the native side to compute the position of the fixed layers.
     // Uses floating coordinates (necessary to correctly place elements when
     // the scale factor is not 1)
     private void calcOurContentVisibleRectF(RectF r) {
-        Rect ri = new Rect(0,0,0,0);
-        calcOurVisibleRect(ri);
-        r.left = viewToContentXf(ri.left);
+        calcOurVisibleRect(mContentVisibleRect);
+        r.left = viewToContentXf(mContentVisibleRect.left);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = viewToContentYf(ri.top + getVisibleTitleHeightImpl());
-        r.right = viewToContentXf(ri.right);
-        r.bottom = viewToContentYf(ri.bottom);
+        r.top = viewToContentYf(mContentVisibleRect.top + getVisibleTitleHeightImpl());
+        r.right = viewToContentXf(mContentVisibleRect.right);
+        r.bottom = viewToContentYf(mContentVisibleRect.bottom);
     }
 
     static class ViewSizeData {
@@ -3569,7 +3569,6 @@ public class WebView extends AbsoluteLayout
                     mScrollingLayerRect.top = y;
                 }
                 abortAnimation();
-                mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 nativeSetIsScrolling(false);
                 if (!mBlockWebkitViewMessages) {
                     WebViewCore.resumePriority();
@@ -5992,7 +5991,6 @@ public class WebView extends AbsoluteLayout
                     mScroller.abortAnimation();
                     mTouchMode = TOUCH_DRAG_START_MODE;
                     mConfirmMove = true;
-                    mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                     nativeSetIsScrolling(false);
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
@@ -7329,7 +7327,6 @@ public class WebView extends AbsoluteLayout
         mLastTouchTime = eventTime;
         if (!mScroller.isFinished()) {
             abortAnimation();
-            mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
         }
         mSnapScrollMode = SNAP_NONE;
         mVelocityTracker = VelocityTracker.obtain();
@@ -8460,10 +8457,6 @@ public class WebView extends AbsoluteLayout
                     if (mWebTextView.isSameTextField(msg.arg1)) {
                         mWebTextView.setAdapterCustom(adapter);
                     }
-                    break;
-                case RESUME_WEBCORE_PRIORITY:
-                    WebViewCore.resumePriority();
-                    WebViewCore.resumeUpdatePicture(mWebViewCore);
                     break;
 
                 case LONG_PRESS_CENTER:
