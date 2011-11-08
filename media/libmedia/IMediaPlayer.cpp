@@ -35,7 +35,6 @@ enum {
     SET_DATA_SOURCE_URL,
     SET_DATA_SOURCE_FD,
     SET_DATA_SOURCE_STREAM,
-    SET_VIDEO_SURFACE,
     PREPARE_ASYNC,
     START,
     STOP,
@@ -109,16 +108,6 @@ public:
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         data.writeStrongBinder(source->asBinder());
         remote()->transact(SET_DATA_SOURCE_STREAM, data, &reply);
-        return reply.readInt32();
-    }
-
-    // pass the buffered Surface to the media player service
-    status_t setVideoSurface(const sp<Surface>& surface)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
-        Surface::writeToParcel(surface, &data);
-        remote()->transact(SET_VIDEO_SURFACE, data, &reply);
         return reply.readInt32();
     }
 
@@ -345,12 +334,6 @@ status_t BnMediaPlayer::onTransact(
             reply->writeInt32(setDataSource(source));
             return NO_ERROR;
         }
-        case SET_VIDEO_SURFACE: {
-            CHECK_INTERFACE(IMediaPlayer, data, reply);
-            sp<Surface> surface = Surface::readFromParcel(data);
-            reply->writeInt32(setVideoSurface(surface));
-            return NO_ERROR;
-        } break;
         case SET_VIDEO_SURFACETEXTURE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             sp<ISurfaceTexture> surfaceTexture =

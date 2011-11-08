@@ -99,12 +99,6 @@ void NuPlayer::setDataSource(
     msg->post();
 }
 
-void NuPlayer::setVideoSurface(const sp<Surface> &surface) {
-    sp<AMessage> msg = new AMessage(kWhatSetVideoNativeWindow, id());
-    msg->setObject("native-window", new NativeWindowWrapper(surface));
-    msg->post();
-}
-
 void NuPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
     sp<AMessage> msg = new AMessage(kWhatSetVideoNativeWindow, id());
     sp<SurfaceTextureClient> surfaceTextureClient(surfaceTexture != NULL ?
