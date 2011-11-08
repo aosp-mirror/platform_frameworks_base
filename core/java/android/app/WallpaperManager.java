@@ -433,7 +433,12 @@ public class WallpaperManager {
      */
     public WallpaperInfo getWallpaperInfo() {
         try {
-            return sGlobals.mService.getWallpaperInfo();
+            if (sGlobals.mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+                return null;
+            } else {
+                return sGlobals.mService.getWallpaperInfo();
+            }
         } catch (RemoteException e) {
             return null;
         }
@@ -451,6 +456,10 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void setResource(int resid) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
         try {
             Resources resources = mContext.getResources();
             /* Set the wallpaper to the default values */
@@ -483,6 +492,10 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void setBitmap(Bitmap bitmap) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
             if (fd == null) {
@@ -515,6 +528,10 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void setStream(InputStream data) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
             if (fd == null) {
@@ -558,6 +575,10 @@ public class WallpaperManager {
      * mandatory.
      */
     public int getDesiredMinimumWidth() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return 0;
+        }
         try {
             return sGlobals.mService.getWidthHint();
         } catch (RemoteException e) {
@@ -581,6 +602,10 @@ public class WallpaperManager {
      * mandatory.
      */
     public int getDesiredMinimumHeight() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return 0;
+        }
         try {
             return sGlobals.mService.getHeightHint();
         } catch (RemoteException e) {
@@ -599,7 +624,11 @@ public class WallpaperManager {
      */
     public void suggestDesiredDimensions(int minimumWidth, int minimumHeight) {
         try {
-            sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight);
+            if (sGlobals.mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+            } else {
+                sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight);
+            }
         } catch (RemoteException e) {
             // Ignore
         }

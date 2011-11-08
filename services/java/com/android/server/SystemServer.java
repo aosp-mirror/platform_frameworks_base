@@ -463,14 +463,17 @@ class ServerThread extends Thread {
                 reportWtf("starting DropBoxManagerService", e);
             }
 
-            try {
-                Slog.i(TAG, "Wallpaper Service");
-                if (!headless) {
-                    wallpaper = new WallpaperManagerService(context);
-                    ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
+            if (context.getResources().getBoolean(
+                        com.android.internal.R.bool.config_enableWallpaperService)) {
+                try {
+                    Slog.i(TAG, "Wallpaper Service");
+                    if (!headless) {
+                        wallpaper = new WallpaperManagerService(context);
+                        ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
+                    }
+                } catch (Throwable e) {
+                    reportWtf("starting Wallpaper Service", e);
                 }
-            } catch (Throwable e) {
-                reportWtf("starting Wallpaper Service", e);
             }
 
             if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
