@@ -550,21 +550,51 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
     }
     @SmallTest
     public void testIsEmergencyNumber() {
-      assertTrue(PhoneNumberUtils.isEmergencyNumber("911", "US"));
-      assertTrue(PhoneNumberUtils.isEmergencyNumber("112", "US"));
-      // The next two numbers are not valid phone numbers in the US, but can be used to trick the
-      // system to dial 911 and 112, which are emergency numbers in the US. For the purpose of
-      // addressing that, they are also classified as emergency numbers in the US.
-      assertTrue(PhoneNumberUtils.isEmergencyNumber("91112345", "US"));
-      assertTrue(PhoneNumberUtils.isEmergencyNumber("11212345", "US"));
-      // A valid mobile phone number from Singapore shouldn't be classified as an emergency number
-      // in Singapore, as 911 is not an emergency number there.
-      assertFalse(PhoneNumberUtils.isEmergencyNumber("91121234", "SG"));
-      // A valid fixed-line phone number from Brazil shouldn't be classified as an emergency number
-      // in Brazil, as 112 is not an emergency number there.
-      assertFalse(PhoneNumberUtils.isEmergencyNumber("1121234567", "BR"));
-      // A valid local phone number from Brazil shouldn't be classified as an emergency number in
-      // Brazil.
-      assertFalse(PhoneNumberUtils.isEmergencyNumber("91112345", "BR"));
+        // There are two parallel sets of tests here: one for the
+        // regular isEmergencyNumber() method, and the other for
+        // isPotentialEmergencyNumber().
+        //
+        // (The difference is that isEmergencyNumber() will return true
+        // only if the specified number exactly matches an actual
+        // emergency number, but isPotentialEmergencyNumber() will
+        // return true if the specified number simply starts with the
+        // same digits as any actual emergency number.)
+
+        // Tests for isEmergencyNumber():
+        assertTrue(PhoneNumberUtils.isEmergencyNumber("911", "US"));
+        assertTrue(PhoneNumberUtils.isEmergencyNumber("112", "US"));
+        // The next two numbers are not valid phone numbers in the US,
+        // so do not count as emergency numbers (but they *are* "potential"
+        // emergency numbers; see below.)
+        assertFalse(PhoneNumberUtils.isEmergencyNumber("91112345", "US"));
+        assertFalse(PhoneNumberUtils.isEmergencyNumber("11212345", "US"));
+        // A valid mobile phone number from Singapore shouldn't be classified as an emergency number
+        // in Singapore, as 911 is not an emergency number there.
+        assertFalse(PhoneNumberUtils.isEmergencyNumber("91121234", "SG"));
+        // A valid fixed-line phone number from Brazil shouldn't be classified as an emergency number
+        // in Brazil, as 112 is not an emergency number there.
+        assertFalse(PhoneNumberUtils.isEmergencyNumber("1121234567", "BR"));
+        // A valid local phone number from Brazil shouldn't be classified as an emergency number in
+        // Brazil.
+        assertFalse(PhoneNumberUtils.isEmergencyNumber("91112345", "BR"));
+
+        // Tests for isPotentialEmergencyNumber():
+        // These first two are obviously emergency numbers:
+        assertTrue(PhoneNumberUtils.isPotentialEmergencyNumber("911", "US"));
+        assertTrue(PhoneNumberUtils.isPotentialEmergencyNumber("112", "US"));
+        // The next two numbers are not valid phone numbers in the US, but can be used to trick the
+        // system to dial 911 and 112, which are emergency numbers in the US. For the purpose of
+        // addressing that, they are also classified as "potential" emergency numbers in the US.
+        assertTrue(PhoneNumberUtils.isPotentialEmergencyNumber("91112345", "US"));
+        assertTrue(PhoneNumberUtils.isPotentialEmergencyNumber("11212345", "US"));
+        // A valid mobile phone number from Singapore shouldn't be classified as an emergency number
+        // in Singapore, as 911 is not an emergency number there.
+        assertFalse(PhoneNumberUtils.isPotentialEmergencyNumber("91121234", "SG"));
+        // A valid fixed-line phone number from Brazil shouldn't be classified as an emergency number
+        // in Brazil, as 112 is not an emergency number there.
+        assertFalse(PhoneNumberUtils.isPotentialEmergencyNumber("1121234567", "BR"));
+        // A valid local phone number from Brazil shouldn't be classified as an emergency number in
+        // Brazil.
+        assertFalse(PhoneNumberUtils.isPotentialEmergencyNumber("91112345", "BR"));
     }
 }
