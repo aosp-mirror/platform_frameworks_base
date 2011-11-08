@@ -1089,6 +1089,7 @@ public class TextToSpeech {
 
             // Copy feature strings defined by the framework.
             copyStringParam(bundle, params, Engine.KEY_FEATURE_NETWORK_SYNTHESIS);
+            copyStringParam(bundle, params, Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS);
 
             // Copy over all parameters that start with the name of the
             // engine that we are currently connected to. The engine is

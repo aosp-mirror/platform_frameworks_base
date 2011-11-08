@@ -792,8 +792,13 @@ public abstract class TextToSpeechService extends Service {
 
         public String[] getFeaturesForLanguage(String lang, String country, String variant) {
             Set<String> features = onGetFeaturesForLanguage(lang, country, variant);
-            String[] featuresArray = new String[features.size()];
-            features.toArray(featuresArray);
+            String[] featuresArray = null;
+            if (features != null) {
+                featuresArray = new String[features.size()];
+                features.toArray(featuresArray);
+            } else {
+                featuresArray = new String[0];
+            }
             return featuresArray;
         }
 
