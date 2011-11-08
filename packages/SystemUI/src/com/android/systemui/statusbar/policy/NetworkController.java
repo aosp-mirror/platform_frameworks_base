@@ -31,6 +31,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wimax.WimaxManagerConstants;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
@@ -90,6 +91,7 @@ public class NetworkController extends BroadcastReceiver {
 
     String mContentDescriptionPhoneSignal;
     String mContentDescriptionWifi;
+    String mContentDescriptionWimax;
     String mContentDescriptionCombinedSignal;
     String mContentDescriptionDataType;
 
@@ -108,6 +110,14 @@ public class NetworkController extends BroadcastReceiver {
     private int mBluetoothTetherIconId =
         com.android.internal.R.drawable.stat_sys_tether_bluetooth;
 
+    //wimax
+    private boolean mIsWimaxEnabled = false;
+    private boolean mWimaxConnected = false;
+    private boolean mWimaxIdle = false;
+    private int mWimaxIconId = 0;
+    private int mWimaxSignal = 0;
+    private int mWimaxState = 0;
+    private int mWimaxExtraState = 0;
     // data connectivity (regardless of state, can we access the internet?)
     // state of inet connection - 0 not connected, 100 connected
     private int mInetCondition = 0;
@@ -121,6 +131,7 @@ public class NetworkController extends BroadcastReceiver {
     ArrayList<ImageView> mDataDirectionIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mDataDirectionOverlayIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mWifiIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mWimaxIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mCombinedSignalIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mDataTypeIconViews = new ArrayList<ImageView>();
     ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
@@ -129,6 +140,7 @@ public class NetworkController extends BroadcastReceiver {
     int mLastDataDirectionIconId = -1;
     int mLastDataDirectionOverlayIconId = -1;
     int mLastWifiIconId = -1;
+    int mLastWimaxIconId = -1;
     int mLastCombinedSignalIconId = -1;
     int mLastDataTypeIconId = -1;
     String mLastLabel = "";
@@ -164,6 +176,7 @@ public class NetworkController extends BroadcastReceiver {
 
         // set up the default wifi icon, used when no radios have ever appeared
         updateWifiIcons();
+        updateWimaxIcons();
 
         // telephony
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -200,6 +213,13 @@ public class NetworkController extends BroadcastReceiver {
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        boolean isWimaxConfigEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wimaxEnabled);
+        if(isWimaxConfigEnabled) {
+            filter.addAction(WimaxManagerConstants.WIMAX_NETWORK_STATE_CHANGED_ACTION);
+            filter.addAction(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION);
+            filter.addAction(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION);
+        }
         context.registerReceiver(this, filter);
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
@@ -223,6 +243,9 @@ public class NetworkController extends BroadcastReceiver {
 
     public void addWifiIconView(ImageView v) {
         mWifiIconViews.add(v);
+    }
+    public void addWimaxIconView(ImageView v) {
+        mWimaxIconViews.add(v);
     }
 
     public void addCombinedSignalIconView(ImageView v) {
@@ -284,6 +307,11 @@ public class NetworkController extends BroadcastReceiver {
             refreshViews();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
             updateAirplaneMode();
+            refreshViews();
+        } else if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION) ||
+                action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION) ||
+                action.equals(WimaxManagerConstants.WIMAX_NETWORK_STATE_CHANGED_ACTION)) {
+           updateWimaxState(intent);
             refreshViews();
         }
     }
@@ -735,6 +763,51 @@ public class NetworkController extends BroadcastReceiver {
     }
 
 
+ // ===== Wimax ===================================================================
+
+    private final void updateWimaxState(Intent intent) {
+        final String action = intent.getAction();
+        boolean wasConnected = mWimaxConnected;
+        if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION)) {
+            int wimaxStatus = intent.getIntExtra(WimaxManagerConstants.EXTRA_4G_STATE,
+                    WimaxManagerConstants.NET_4G_STATE_UNKNOWN);
+            mIsWimaxEnabled = (wimaxStatus ==
+		WimaxManagerConstants.NET_4G_STATE_ENABLED)? true : false;
+        } else if (action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION)) {
+            mWimaxSignal = intent.getIntExtra(WimaxManagerConstants.EXTRA_NEW_SIGNAL_LEVEL, 0);
+        } else if (action.equals(WimaxManagerConstants.WIMAX_NETWORK_STATE_CHANGED_ACTION)) {
+		mWimaxState = intent.getIntExtra(WimaxManagerConstants.EXTRA_WIMAX_STATE,
+                    WimaxManagerConstants.NET_4G_STATE_UNKNOWN);
+            mWimaxExtraState = intent.getIntExtra(
+                    WimaxManagerConstants.EXTRA_WIMAX_STATE_DETAIL,
+                    WimaxManagerConstants.NET_4G_STATE_UNKNOWN);
+            mWimaxConnected = (mWimaxState ==
+		WimaxManagerConstants.WIMAX_STATE_CONNECTED) ? true : false;
+            mWimaxIdle = (mWimaxExtraState == WimaxManagerConstants.WIMAX_IDLE)? true : false;
+        }
+        updateWimaxIcons();
+    }
+       private void updateWimaxIcons() {
+            Slog.d(TAG, "in ....  updateWimaxIcons function    :  "+mIsWimaxEnabled);
+                if (mIsWimaxEnabled) {
+                        if (mWimaxConnected) {
+                                Slog.d(TAG, "in ....  updateWimaxIcons function WiMAX COnnected");
+                                if (mWimaxIdle)
+                                        mWimaxIconId = WimaxIcons.WIMAX_IDLE;
+                                else
+                                        mWimaxIconId = WimaxIcons.WIMAX_SIGNAL_STRENGTH[mInetCondition][mWimaxSignal];
+                                mContentDescriptionWimax = mContext.getString(
+                                                AccessibilityContentDescriptions.WIMAX_CONNECTION_STRENGTH[mWimaxSignal]);
+                        } else {
+                                 Slog.d(TAG, "in ....  updateWimaxIcons function WiMAX Disconnected");
+                                mWimaxIconId = WimaxIcons.WIMAX_DISCONNECTED;
+                                mContentDescriptionWimax = mContext.getString(R.string.accessibility_no_wimax);
+                        }
+                } else {
+                         Slog.d(TAG, "in ....  updateWimaxIcons function wimax icon id 0");
+                        mWimaxIconId = 0;
+                }
+        }
     // ===== Full or limited Internet connectivity ==================================
 
     private void updateConnectivity(Intent intent) {
@@ -761,6 +834,7 @@ public class NetworkController extends BroadcastReceiver {
 
         // We want to update all the icons, all at once, for any condition change
         updateDataNetType();
+		updateWimaxIcons();
         updateDataIcon();
         updateTelephonySignalStrength();
         updateWifiIcons();
@@ -945,6 +1019,21 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
 
+        // the wimax icon on phones
+        if (mLastWimaxIconId != mWimaxIconId) {
+            mLastWimaxIconId = mWimaxIconId;
+            N = mWimaxIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mWimaxIconViews.get(i);
+                if (mWimaxIconId == 0) {
+                    v.setVisibility(View.INVISIBLE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mWimaxIconId);
+                    v.setContentDescription(mContentDescriptionWimax);
+                }
+           }
+        }
         // the combined data signal icon
         if (mLastCombinedSignalIconId != combinedSignalIconId) {
             mLastCombinedSignalIconId = combinedSignalIconId;

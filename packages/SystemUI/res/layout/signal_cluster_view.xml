@@ -52,6 +52,27 @@
         android:id="@+id/spacer"
         />
     <FrameLayout
+        android:id="@+id/wimax_combo"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="-6dp"
+        >
+        <ImageView
+            android:id="@+id/wimax_signal"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:scaleType="center"
+            />
+        <ImageView
+            android:id="@+id/wimax_inout"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center|bottom"
+            />
+    </FrameLayout>
+    <FrameLayout
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         >
