@@ -17,42 +17,27 @@
 package com.android.frameworkperf;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.FileUtils;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
-import android.os.Process;
-import android.os.SystemClock;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.os.RemoteException;
 import android.util.Log;
-import android.util.Xml;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * So you thought sync used up your battery life.
@@ -61,147 +46,71 @@ public class FrameworkPerfActivity extends Activity
         implements AdapterView.OnItemSelectedListener {
     static final String TAG = "Perf";
 
-    final Handler mHandler = new Handler();
-
     Spinner mFgSpinner;
     Spinner mBgSpinner;
     TextView mTestTime;
     Button mStartButton;
     Button mStopButton;
+    CheckBox mLocalCheckBox;
     TextView mLog;
     PowerManager.WakeLock mPartialWakeLock;
 
     long mMaxRunTime = 5000;
     boolean mStarted;
 
-    final TestRunner mRunner = new TestRunner();
-
-    final Op[] mOpPairs = new Op[] {
-            new MethodCallOp(), new NoOp(),
-            new MethodCallOp(), new CpuOp(),
-            new MethodCallOp(), new SchedulerOp(),
-            new MethodCallOp(), new GcOp(),
-            new MethodCallOp(), new CreateFileOp(),
-            new MethodCallOp(), new CreateWriteFileOp(),
-            new MethodCallOp(), new CreateWriteSyncFileOp(),
-            new MethodCallOp(), new WriteFileOp(),
-            new MethodCallOp(), new ReadFileOp(),
-            new SchedulerOp(), new SchedulerOp(),
-            new GcOp(), new NoOp(),
-            new IpcOp(), new NoOp(),
-            new IpcOp(), new CpuOp(),
-            new IpcOp(), new SchedulerOp(),
-            new IpcOp(), new GcOp(),
-            new IpcOp(), new CreateFileOp(),
-            new IpcOp(), new CreateWriteFileOp(),
-            new IpcOp(), new CreateWriteSyncFileOp(),
-            new IpcOp(), new WriteFileOp(),
-            new IpcOp(), new ReadFileOp(),
-            new CreateFileOp(), new NoOp(),
-            new CreateWriteFileOp(), new NoOp(),
-            new CreateWriteSyncFileOp(), new NoOp(),
-            new WriteFileOp(), new NoOp(),
-            new ReadFileOp(), new NoOp(),
-            new WriteFileOp(), new CreateWriteFileOp(),
-            new ReadFileOp(), new CreateWriteFileOp(),
-            new WriteFileOp(), new CreateWriteSyncFileOp(),
-            new ReadFileOp(), new CreateWriteSyncFileOp(),
-            new WriteFileOp(), new WriteFileOp(),
-            new WriteFileOp(), new ReadFileOp(),
-            new ReadFileOp(), new WriteFileOp(),
-            new ReadFileOp(), new ReadFileOp(),
-            new OpenXmlResOp(), new NoOp(),
-            new ReadXmlAttrsOp(), new NoOp(),
-            new ParseXmlResOp(), new NoOp(),
-            new ParseLargeXmlResOp(), new NoOp(),
-            new LayoutInflaterOp(), new NoOp(),
-            new LayoutInflaterLargeOp(), new NoOp(),
-            new LayoutInflaterViewOp(), new NoOp(),
-            new LayoutInflaterButtonOp(), new NoOp(),
-            new LayoutInflaterImageButtonOp(), new NoOp(),
-            new CreateBitmapOp(), new NoOp(),
-            new CreateRecycleBitmapOp(), new NoOp(),
-            new LoadSmallBitmapOp(), new NoOp(),
-            new LoadRecycleSmallBitmapOp(), new NoOp(),
-            new LoadLargeBitmapOp(), new NoOp(),
-            new LoadRecycleLargeBitmapOp(), new NoOp(),
-            new LoadSmallScaledBitmapOp(), new NoOp(),
-            new LoadLargeScaledBitmapOp(), new NoOp(),
-    };
-
-    final Op[] mAvailOps = new Op[] {
-            null,
-            new NoOp(),
-            new CpuOp(),
-            new SchedulerOp(),
-            new MethodCallOp(),
-            new IpcOp(),
-            new CreateFileOp(),
-            new CreateWriteFileOp(),
-            new CreateWriteSyncFileOp(),
-            new WriteFileOp(),
-            new ReadFileOp(),
-            new OpenXmlResOp(),
-            new ReadXmlAttrsOp(),
-            new ParseXmlResOp(),
-            new ParseLargeXmlResOp(),
-            new LayoutInflaterOp(),
-            new LayoutInflaterLargeOp(),
-            new LayoutInflaterViewOp(),
-            new LayoutInflaterButtonOp(),
-            new LayoutInflaterImageButtonOp(),
-            new CreateBitmapOp(),
-            new CreateRecycleBitmapOp(),
-            new LoadSmallBitmapOp(),
-            new LoadRecycleSmallBitmapOp(),
-            new LoadLargeBitmapOp(),
-            new LoadRecycleLargeBitmapOp(),
-            new LoadSmallScaledBitmapOp(),
-            new LoadLargeScaledBitmapOp(),
-    };
-
     final String[] mAvailOpLabels;
     final String[] mAvailOpDescriptions;
 
-    Op mFgTest;
-    Op mBgTest;
+    int mFgTestIndex = -1;
+    int mBgTestIndex = -1;
+    TestService.Op mFgTest;
+    TestService.Op mBgTest;
     int mCurOpIndex = 0;
-
-    class RunResult {
-        final String name;
-        final String fgLongName;
-        final String bgLongName;
-        final long fgTime;
-        final long fgOps;
-        final long bgTime;
-        final long bgOps;
-
-        RunResult(TestRunner op) {
-            name = op.getName();
-            fgLongName = op.getForegroundLongName();
-            bgLongName = op.getBackgroundLongName();
-            fgTime = op.getForegroundTime();
-            fgOps = op.getForegroundOps();
-            bgTime = op.getBackgroundTime();
-            bgOps = op.getBackgroundOps();
-        }
-
-        float getFgMsPerOp() {
-            return fgOps != 0 ? (fgTime / (float)fgOps) : 0;
-        }
-
-        float getBgMsPerOp() {
-            return bgOps != 0 ? (bgTime / (float)bgOps) : 0;
-        }
-    }
+    TestConnection mCurConnection;
 
     final ArrayList<RunResult> mResults = new ArrayList<RunResult>();
 
+    class TestConnection implements ServiceConnection {
+        Messenger mService;
+
+        @Override public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = new Messenger(service);
+            dispatchCurOp(this);
+        }
+
+        @Override public void onServiceDisconnected(ComponentName name) {
+        }
+    }
+
+    static final int MSG_CONTINUE = 1000;
+
+    final Handler mHandler = new Handler() {
+        @Override public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case TestService.RES_TEST_FINISHED: {
+                    Bundle bundle = (Bundle)msg.obj;
+                    bundle.setClassLoader(getClassLoader());
+                    RunResult res = (RunResult)bundle.getParcelable("res");
+                    completeCurOp(res);
+                } break;
+                case TestService.RES_TERMINATED: {
+                    // Give a little time for things to settle down.
+                    sendMessageDelayed(obtainMessage(MSG_CONTINUE), 500);
+                } break;
+                case MSG_CONTINUE: {
+                    startCurOp();
+                } break;
+            }
+        }
+    };
+
+    final Messenger mMessenger = new Messenger(mHandler);
+
     public FrameworkPerfActivity() {
-        mAvailOpLabels = new String[mAvailOps.length];
-        mAvailOpDescriptions = new String[mAvailOps.length];
-        for (int i=0; i<mAvailOps.length; i++) {
-            Op op = mAvailOps[i];
+        mAvailOpLabels = new String[TestService.mAvailOps.length];
+        mAvailOpDescriptions = new String[TestService.mAvailOps.length];
+        for (int i=0; i<TestService.mAvailOps.length; i++) {
+            TestService.Op op = TestService.mAvailOps[i];
             if (op == null) {
                 mAvailOpLabels[i] = "All";
                 mAvailOpDescriptions[i] = "All tests";
@@ -251,6 +160,7 @@ public class FrameworkPerfActivity extends Activity
             }
         });
         mStopButton.setEnabled(false);
+        mLocalCheckBox = (CheckBox)findViewById(R.id.local);
 
         mLog = (TextView)findViewById(R.id.log);
 
@@ -262,11 +172,13 @@ public class FrameworkPerfActivity extends Activity
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if (parent == mFgSpinner || parent == mBgSpinner) {
-            Op op = mAvailOps[position];
+            TestService.Op op = TestService.mAvailOps[position];
             if (parent == mFgSpinner) {
+                mFgTestIndex = position;
                 mFgTest = op;
                 ((TextView)findViewById(R.id.fgtext)).setText(mAvailOpDescriptions[position]);
             } else {
+                mBgTestIndex = position;
                 mBgTest = op;
                 ((TextView)findViewById(R.id.bgtext)).setText(mAvailOpDescriptions[position]);
             }
@@ -291,64 +203,108 @@ public class FrameworkPerfActivity extends Activity
         }
     }
 
-    void startCurOp() {
-        Op fgOp, bgOp;
-        if (mFgTest == null && mBgTest == null) {
-            fgOp = mOpPairs[mCurOpIndex];
-            bgOp = mOpPairs[mCurOpIndex+1];
-        } else if (mFgTest != null && mBgTest != null) {
-            fgOp = mFgTest;
-            bgOp = mBgTest;
-        } else if (mFgTest != null) {
-            // Skip null test.
-            if (mCurOpIndex == 0) {
-                mCurOpIndex = 1;
-            }
-            fgOp = mFgTest;
-            bgOp = mAvailOps[mCurOpIndex];
+    void dispatchCurOp(TestConnection conn) {
+        if (mCurConnection != conn) {
+            Log.w(TAG, "Dispatching on invalid connection: " + conn);
+            return;
+        }
+        TestArgs args = new TestArgs();
+        args.maxTime = mMaxRunTime;
+        if (mFgTestIndex == 0 && mBgTestIndex == 0) {
+            args.combOp = mCurOpIndex;
+        } else if (mFgTestIndex != 0 && mBgTestIndex != 0) {
+            args.fgOp = mFgTestIndex;
+            args.bgOp = mBgTestIndex;
         } else {
             // Skip null test.
             if (mCurOpIndex == 0) {
                 mCurOpIndex = 1;
             }
-            fgOp = mAvailOps[mCurOpIndex];
-            bgOp = mBgTest;
-        }
-        mRunner.run(mHandler, fgOp, bgOp, new Runnable() {
-            @Override public void run() {
-                RunResult result = new RunResult(mRunner);
-                log(String.format("%s: fg=%d*%gms/op (%dms) / bg=%d*%gms/op (%dms)",
-                        result.name, result.fgOps, result.getFgMsPerOp(), result.fgTime,
-                        result.bgOps, result.getBgMsPerOp(), result.bgTime));
-                mResults.add(result);
-                if (!mStarted) {
-                    log("Stop");
-                    stopRunning();
-                    return;
-                }
-                if (mFgTest != null && mBgTest != null) {
-                    log("Finished");
-                    stopRunning();
-                    return;
-                }
-                if (mFgTest == null && mBgTest == null) {
-                    mCurOpIndex+=2;
-                    if (mCurOpIndex >= mOpPairs.length) {
-                        log("Finished");
-                        stopRunning();
-                        return;
-                    }
-                } else {
-                    mCurOpIndex++;
-                    if (mCurOpIndex >= mAvailOps.length) {
-                        log("Finished");
-                        stopRunning();
-                        return;
-                    }
-                }
-                startCurOp();
+            if (mFgTestIndex != 0) {
+                args.fgOp = mFgTestIndex;
+                args.bgOp = mCurOpIndex;
+            } else {
+                args.fgOp = mCurOpIndex;
+                args.bgOp = mFgTestIndex;
             }
-        });
+        }
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("args", args);
+        Message msg = Message.obtain(null, TestService.CMD_START_TEST, bundle);
+        msg.replyTo = mMessenger;
+        try {
+            conn.mService.send(msg);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Failure communicating with service", e);
+        }
+    }
+
+    void completeCurOp(RunResult result) {
+        log(String.format("%s: fg=%d*%gms/op (%dms) / bg=%d*%gms/op (%dms)",
+                result.name, result.fgOps, result.getFgMsPerOp(), result.fgTime,
+                result.bgOps, result.getBgMsPerOp(), result.bgTime));
+        mResults.add(result);
+        if (!mStarted) {
+            log("Stop");
+            stopRunning();
+            return;
+        }
+        if (mFgTest != null && mBgTest != null) {
+            log("Finished");
+            stopRunning();
+            return;
+        }
+        if (mFgTest == null && mBgTest == null) {
+            mCurOpIndex+=2;
+            if (mCurOpIndex >= TestService.mOpPairs.length) {
+                log("Finished");
+                stopRunning();
+                return;
+            }
+        } else {
+            mCurOpIndex++;
+            if (mCurOpIndex >= TestService.mAvailOps.length) {
+                log("Finished");
+                stopRunning();
+                return;
+            }
+        }
+        startCurOp();
+    }
+
+    void disconnect() {
+        if (mCurConnection != null) {
+            unbindService(mCurConnection);
+            if (mCurConnection.mService != null) {
+                Message msg = Message.obtain(null, TestService.CMD_TERMINATE);
+                msg.replyTo = mMessenger;
+                try {
+                    mCurConnection.mService.send(msg);
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Failure communicating with service", e);
+                }
+            }
+            mCurConnection = null;
+        }
+    }
+
+    void startCurOp() {
+        if (mCurConnection != null) {
+            disconnect();
+        }
+        if (mStarted) {
+            mHandler.removeMessages(TestService.RES_TEST_FINISHED);
+            mHandler.removeMessages(TestService.RES_TERMINATED);
+            mHandler.removeMessages(MSG_CONTINUE);
+            mCurConnection = new TestConnection();
+            Intent intent;
+            if (mLocalCheckBox.isChecked()) {
+                intent = new Intent(this, LocalTestService.class);
+            } else {
+                intent = new Intent(this, TestService.class);
+            }
+            bindService(intent, mCurConnection, BIND_AUTO_CREATE|BIND_IMPORTANT);
+        }
     }
 
     void startRunning() {
@@ -357,6 +313,7 @@ public class FrameworkPerfActivity extends Activity
             mStarted = true;
             mStartButton.setEnabled(false);
             mStopButton.setEnabled(true);
+            mLocalCheckBox.setEnabled(false);
             mTestTime.setEnabled(false);
             mFgSpinner.setEnabled(false);
             mBgSpinner.setEnabled(false);
@@ -371,9 +328,11 @@ public class FrameworkPerfActivity extends Activity
 
     void stopRunning() {
         if (mStarted) {
+            disconnect();
             mStarted = false;
             mStartButton.setEnabled(true);
             mStopButton.setEnabled(false);
+            mLocalCheckBox.setEnabled(true);
             mTestTime.setEnabled(true);
             mFgSpinner.setEnabled(true);
             mBgSpinner.setEnabled(true);
@@ -411,843 +370,5 @@ public class FrameworkPerfActivity extends Activity
     void log(String s) {
         mLog.setText(mLog.getText() + "\n" + s);
         Log.i(TAG, s);
-    }
-
-    enum BackgroundMode {
-        NOTHING,
-        CPU,
-        SCHEDULER
-    };
-
-    public class TestRunner {
-        Handler mHandler;
-        Op mForegroundOp;
-        Op mBackgroundOp;
-        Runnable mDoneCallback;
-
-        RunnerThread mBackgroundThread;
-        RunnerThread mForegroundThread;
-        long mStartTime;
-
-        boolean mBackgroundRunning;
-        boolean mForegroundRunning;
-
-        long mBackgroundEndTime;
-        long mBackgroundOps;
-        long mForegroundEndTime;
-        long mForegroundOps;
-
-        public TestRunner() {
-        }
-
-        public String getForegroundName() {
-            return mForegroundOp.getName();
-        }
-
-        public String getBackgroundName() {
-            return mBackgroundOp.getName();
-        }
-
-        public String getName() {
-            String fgName = mForegroundOp.getName();
-            String bgName = mBackgroundOp.getName();
-            StringBuilder res = new StringBuilder();
-            if (fgName != null) {
-                res.append(fgName);
-                res.append("Fg");
-            }
-            if (bgName != null) {
-                res.append(bgName);
-                res.append("Bg");
-            }
-            return res.toString();
-        }
-
-        public String getForegroundLongName() {
-            return mForegroundOp.getLongName();
-        }
-
-        public String getBackgroundLongName() {
-            return mBackgroundOp.getLongName();
-        }
-
-        public void run(Handler handler, Op foreground, Op background, Runnable doneCallback) {
-            mHandler = handler;
-            mForegroundOp = foreground;
-            mBackgroundOp = background;
-            mDoneCallback = doneCallback;
-            mBackgroundThread = new RunnerThread("background", new Runnable() {
-                @Override public void run() {
-                    boolean running;
-                    int ops = 0;
-                    do {
-                        running = mBackgroundOp.onRun();
-                        ops++;
-                    } while (evalRepeat(running, true) && running);
-                    mBackgroundEndTime = SystemClock.uptimeMillis();
-                    mBackgroundOps = ops * mBackgroundOp.getOpsPerRun();
-                    threadFinished(false);
-                }
-            }, Process.THREAD_PRIORITY_BACKGROUND);
-            mForegroundThread = new RunnerThread("background", new Runnable() {
-                @Override public void run() {
-                    boolean running;
-                    int ops = 0;
-                    do {
-                        running = mForegroundOp.onRun();
-                        ops++;
-                    } while (evalRepeat(true, running) && running);
-                    mForegroundEndTime = SystemClock.uptimeMillis();
-                    mForegroundOps = ops * mForegroundOp.getOpsPerRun();
-                    threadFinished(true);
-                }
-            }, Process.THREAD_PRIORITY_FOREGROUND);
-
-            mForegroundOp.onInit(FrameworkPerfActivity.this, true);
-            mBackgroundOp.onInit(FrameworkPerfActivity.this, false);
-
-            synchronized (this) {
-                mStartTime = SystemClock.uptimeMillis();
-                mBackgroundRunning = true;
-                mForegroundRunning = true;
-            }
-
-            mBackgroundThread.start();
-            mForegroundThread.start();
-        }
-
-        public long getForegroundTime() {
-            return mForegroundEndTime-mStartTime;
-        }
-
-        public long getForegroundOps() {
-            return mForegroundOps;
-        }
-
-        public long getBackgroundTime() {
-            return mBackgroundEndTime-mStartTime;
-        }
-
-        public long getBackgroundOps() {
-            return mBackgroundOps;
-        }
-
-        private boolean evalRepeat(boolean bgRunning, boolean fgRunning) {
-            synchronized (this) {
-                if (!bgRunning) {
-                    mBackgroundRunning = false;
-                }
-                if (!fgRunning) {
-                    mForegroundRunning = false;
-                }
-                if (!mBackgroundRunning && !mForegroundRunning) {
-                    return false;
-                }
-                long now = SystemClock.uptimeMillis();
-                if (now > (mStartTime+mMaxRunTime)) {
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        private void threadFinished(boolean foreground) {
-            synchronized (this) {
-                if (foreground) {
-                    mForegroundRunning = false;
-                } else {
-                    mBackgroundRunning = false;
-                }
-                if (!mBackgroundRunning && !mForegroundRunning) {
-                    mHandler.post(new Runnable() {
-                        @Override public void run() {
-                            mForegroundOp.onTerm(FrameworkPerfActivity.this);
-                            mBackgroundOp.onTerm(FrameworkPerfActivity.this);
-                            if (mDoneCallback != null) {
-                                mDoneCallback.run();
-                            }
-                        }
-                    });
-                }
-            }
-        }
-    }
-
-    class RunnerThread extends Thread {
-        private final Runnable mOp;
-        private final int mPriority;
-
-        RunnerThread(String name, Runnable op, int priority) {
-            super(name);
-            mOp = op;
-            mPriority = priority;
-        }
-
-        public void run() {
-            Process.setThreadPriority(mPriority);
-            mOp.run();
-        }
-    }
-
-    static public abstract class Op {
-        final String mName;
-        final String mLongName;
-
-        public Op(String name, String longName) {
-            mName = name;
-            mLongName = longName;
-        }
-
-        public String getName() {
-            return mName;
-        }
-
-        public String getLongName() {
-            return mLongName;
-        }
-
-        void onInit(Context context, boolean foreground) {
-        }
-
-        abstract boolean onRun();
-
-        void onTerm(Context context) {
-        }
-
-        int getOpsPerRun() {
-            return 1;
-        }
-    }
-
-    static class NoOp extends Op {
-        NoOp() {
-            super(null, "Nothing");
-        }
-
-        boolean onRun() {
-            return false;
-        }
-
-        int getOpsPerRun() {
-            return 0;
-        }
-    }
-
-    static class CpuOp extends Op {
-        CpuOp() {
-            super("CPU", "Consume CPU");
-        }
-
-        boolean onRun() {
-            return true;
-        }
-    }
-
-    static class SchedulerOp extends Op {
-        SchedulerOp() {
-            super("Sched", "Change scheduler group");
-        }
-
-        boolean onRun() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            return true;
-        }
-    }
-
-    static class GcOp extends Op {
-        GcOp() {
-            super("Gc", "Run garbage collector");
-        }
-
-        boolean onRun() {
-            byte[] stuff = new byte[1024*1024];
-            return true;
-        }
-    }
-
-    static class MethodCallOp extends Op {
-        MethodCallOp() {
-            super("MethodCall", "Method call");
-        }
-
-        boolean onRun() {
-            final int N = getOpsPerRun();
-            for (int i=0; i<N; i++) {
-                someFunc(i);
-            }
-            return true;
-        }
-
-        int someFunc(int foo) {
-            return 0;
-        }
-
-        int getOpsPerRun() {
-            return 500;
-        }
-    }
-
-    static class IpcOp extends Op {
-        PackageManager mPm;
-        String mProcessName;
-
-        IpcOp() {
-            super("Ipc", "IPC to system process");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mPm = context.getPackageManager();
-            mProcessName = context.getApplicationInfo().processName;
-        }
-
-        boolean onRun() {
-            final int N = getOpsPerRun();
-            for (int i=0; i<N; i++) {
-                mPm.queryContentProviders(mProcessName, Process.myUid(), 0);
-            }
-            return true;
-        }
-
-        int getOpsPerRun() {
-            return 100;
-        }
-    }
-
-    static class OpenXmlResOp extends Op {
-        Context mContext;
-
-        OpenXmlResOp() {
-            super("OpenXmlRes", "Open (and close) an XML resource");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            XmlResourceParser parser = mContext.getResources().getLayout(R.xml.simple);
-            parser.close();
-            return true;
-        }
-    }
-
-    static class ReadXmlAttrsOp extends Op {
-        Context mContext;
-        XmlResourceParser mParser;
-        AttributeSet mAttrs;
-
-        ReadXmlAttrsOp() {
-            super("ReadXmlAttrs", "Read attributes from an XML tag");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-            mParser = mContext.getResources().getLayout(R.xml.simple);
-            mAttrs = Xml.asAttributeSet(mParser);
-
-            int eventType;
-            try {
-                // Find the first <item> tag.
-                eventType = mParser.getEventType();
-                String tagName;
-                do {
-                    if (eventType == XmlPullParser.START_TAG) {
-                        tagName = mParser.getName();
-                        if (tagName.equals("item")) {
-                            break;
-                        }
-                    }
-                    eventType = mParser.next();
-                } while (eventType != XmlPullParser.END_DOCUMENT);
-            } catch (XmlPullParserException e) {
-                throw new RuntimeException("I died", e);
-            } catch (IOException e) {
-                throw new RuntimeException("I died", e);
-            }
-        }
-
-        void onTerm(Context context) {
-            mParser.close();
-        }
-
-        boolean onRun() {
-            TypedArray a = mContext.obtainStyledAttributes(mAttrs,
-                    com.android.internal.R.styleable.MenuItem);
-            a.recycle();
-            return true;
-        }
-    }
-
-    static class ParseXmlResOp extends Op {
-        Context mContext;
-
-        ParseXmlResOp() {
-            super("ParseXmlRes", "Parse compiled XML resource");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            SimpleInflater inf = new SimpleInflater(mContext);
-            inf.inflate(R.xml.simple);
-            return true;
-        }
-    }
-
-    static class ParseLargeXmlResOp extends Op {
-        Context mContext;
-
-        ParseLargeXmlResOp() {
-            super("ParseLargeXmlRes", "Parse large XML resource");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            SimpleInflater inf = new SimpleInflater(mContext);
-            inf.inflate(R.xml.simple_large);
-            return true;
-        }
-    }
-
-    static class LayoutInflaterOp extends Op {
-        Context mContext;
-
-        LayoutInflaterOp() {
-            super("LayoutInflater", "Inflate layout resource");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            inf.inflate(R.layout.small_layout, null);
-            return true;
-        }
-    }
-
-    static class LayoutInflaterLargeOp extends Op {
-        Context mContext;
-
-        LayoutInflaterLargeOp() {
-            super("LayoutInflaterLarge", "Inflate large layout resource");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            inf.inflate(R.layout.large_layout, null);
-            return true;
-        }
-    }
-
-    static class LayoutInflaterViewOp extends Op {
-        Context mContext;
-
-        LayoutInflaterViewOp() {
-            super("LayoutInflaterView", "Inflate layout with 50 View objects");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            inf.inflate(R.layout.view_layout, null);
-            return true;
-        }
-    }
-
-    static class LayoutInflaterButtonOp extends Op {
-        Context mContext;
-
-        LayoutInflaterButtonOp() {
-            super("LayoutInflaterButton", "Inflate layout with 50 Button objects");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            inf.inflate(R.layout.button_layout, null);
-            return true;
-        }
-    }
-
-    static class LayoutInflaterImageButtonOp extends Op {
-        Context mContext;
-
-        LayoutInflaterImageButtonOp() {
-            super("LayoutInflaterImageButton", "Inflate layout with 50 ImageButton objects");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-            LayoutInflater inf = (LayoutInflater)mContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            inf.inflate(R.layout.image_button_layout, null);
-            return true;
-        }
-    }
-
-    static class CreateBitmapOp extends Op {
-        Context mContext;
-
-        CreateBitmapOp() {
-            super("CreateBitmap", "Create a Bitmap");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-            return true;
-        }
-    }
-
-    static class CreateRecycleBitmapOp extends Op {
-        Context mContext;
-
-        CreateRecycleBitmapOp() {
-            super("CreateRecycleBitmap", "Create and recycle a Bitmap");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-            bm.recycle();
-            return true;
-        }
-    }
-
-    static class LoadSmallBitmapOp extends Op {
-        Context mContext;
-
-        LoadSmallBitmapOp() {
-            super("LoadSmallBitmap", "Load small raw bitmap");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.stat_sample, opts);
-            return true;
-        }
-    }
-
-    static class LoadRecycleSmallBitmapOp extends Op {
-        Context mContext;
-
-        LoadRecycleSmallBitmapOp() {
-            super("LoadRecycleSmallBitmap", "Load and recycle small raw bitmap");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.stat_sample, opts);
-            bm.recycle();
-            return true;
-        }
-    }
-
-    static class LoadLargeBitmapOp extends Op {
-        Context mContext;
-
-        LoadLargeBitmapOp() {
-            super("LoadLargeBitmap", "Load large raw bitmap");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.wallpaper_goldengate, opts);
-            return true;
-        }
-    }
-
-    static class LoadRecycleLargeBitmapOp extends Op {
-        Context mContext;
-
-        LoadRecycleLargeBitmapOp() {
-            super("LoadRecycleLargeBitmap", "Load and recycle large raw bitmap");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.wallpaper_goldengate, opts);
-            bm.recycle();
-            return true;
-        }
-    }
-
-    static class LoadSmallScaledBitmapOp extends Op {
-        Context mContext;
-
-        LoadSmallScaledBitmapOp() {
-            super("LoadSmallScaledBitmap", "Load small raw bitmap that is scaled for density");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.stat_sample_scale, opts);
-            return true;
-        }
-    }
-
-    static class LoadLargeScaledBitmapOp extends Op {
-        Context mContext;
-
-        LoadLargeScaledBitmapOp() {
-            super("LoadLargeScaledBitmap", "Load large raw bitmap that is scaled for density");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mContext = context;
-        }
-
-        boolean onRun() {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
-            Bitmap bm = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.wallpaper_goldengate_scale, opts);
-            return true;
-        }
-    }
-
-    static class CreateFileOp extends Op {
-        File mFile;
-
-        CreateFileOp() {
-            super("CreateFile", "Create and delete a file");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
-            mFile.delete();
-        }
-
-        boolean onRun() {
-            try {
-                mFile.createNewFile();
-            } catch (IOException e) {
-                Log.w(TAG, "Failure creating " + mFile, e);
-            }
-            mFile.delete();
-            return true;
-        }
-    }
-
-    static class CreateWriteFileOp extends Op {
-        File mFile;
-
-        CreateWriteFileOp() {
-            super("CreateWriteFile", "Create, write, and delete a file");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
-            mFile.delete();
-        }
-
-        boolean onRun() {
-            try {
-                FileOutputStream fos = new FileOutputStream(mFile);
-                fos.write(1);
-                fos.close();
-            } catch (IOException e) {
-                Log.w(TAG, "Failure creating " + mFile, e);
-            }
-            mFile.delete();
-            return true;
-        }
-    }
-
-    static class CreateWriteSyncFileOp extends Op {
-        File mFile;
-
-        CreateWriteSyncFileOp() {
-            super("CreateWriteSyncFile", "Create, write, sync, and delete a file");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
-            mFile.delete();
-        }
-
-        boolean onRun() {
-            try {
-                FileOutputStream fos = new FileOutputStream(mFile);
-                fos.write(1);
-                fos.flush();
-                FileUtils.sync(fos);
-                fos.close();
-            } catch (IOException e) {
-                Log.w(TAG, "Failure creating " + mFile, e);
-            }
-            mFile.delete();
-            return true;
-        }
-    }
-
-    static class WriteFileOp extends Op {
-        File mFile;
-        RandomAccessFile mRAF;
-        byte[] mBuffer;
-
-        WriteFileOp() {
-            super("WriteFile", "Truncate and write a 64k file");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mBuffer = new byte[1024*64];
-            for (int i=0; i<mBuffer.length; i++) {
-                mBuffer[i] = (byte)i;
-            }
-            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
-            mFile.delete();
-            try {
-                mRAF = new RandomAccessFile(mFile, "rw");
-            } catch (FileNotFoundException e) {
-                Log.w(TAG, "Failure creating " + mFile, e);
-            }
-        }
-
-        boolean onRun() {
-            try {
-                mRAF.seek(0);
-                mRAF.setLength(0);
-                mRAF.write(mBuffer);
-            } catch (IOException e) {
-                Log.w(TAG, "Failure writing " + mFile, e);
-            }
-            return true;
-        }
-
-        void onTerm(Context context) {
-            try {
-                mRAF.close();
-            } catch (IOException e) {
-                Log.w(TAG, "Failure closing " + mFile, e);
-            }
-            mFile.delete();
-        }
-    }
-
-    static class ReadFileOp extends Op {
-        File mFile;
-        RandomAccessFile mRAF;
-        byte[] mBuffer;
-
-        ReadFileOp() {
-            super("ReadFile", "Seek and read a 64k file");
-        }
-
-        void onInit(Context context, boolean foreground) {
-            mBuffer = new byte[1024*64];
-            for (int i=0; i<mBuffer.length; i++) {
-                mBuffer[i] = (byte)i;
-            }
-            mFile = context.getFileStreamPath(foreground ? "test-fg.file" : "test-bg.file");
-            mFile.delete();
-            try {
-                mRAF = new RandomAccessFile(mFile, "rw");
-                mRAF.seek(0);
-                mRAF.setLength(0);
-                mRAF.write(mBuffer);
-            } catch (IOException e) {
-                Log.w(TAG, "Failure creating " + mFile, e);
-            }
-        }
-
-        boolean onRun() {
-            try {
-                mRAF.seek(0);
-                mRAF.read(mBuffer);
-            } catch (IOException e) {
-                Log.w(TAG, "Failure reading " + mFile, e);
-            }
-            return true;
-        }
-
-        void onTerm(Context context) {
-            try {
-                mRAF.close();
-            } catch (IOException e) {
-                Log.w(TAG, "Failure closing " + mFile, e);
-            }
-            mFile.delete();
-        }
     }
 }

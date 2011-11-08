@@ -91,6 +91,11 @@
             android:layout_height="wrap_content"
             android:text="@string/stop"
             />
+        <CheckBox android:id="@+id/local"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Local"
+            />
     </LinearLayout>
 
     <TextView android:id="@+id/log"
