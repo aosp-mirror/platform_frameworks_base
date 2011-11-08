@@ -177,14 +177,6 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
     return true;
 }
 
-static void scalePointerCoords(const PointerCoords* inCoords, size_t count, float scaleFactor,
-        PointerCoords* outCoords) {
-   for (size_t i = 0; i < count; i++) {
-       outCoords[i] = inCoords[i];
-       outCoords[i].scale(scaleFactor);
-   }
-}
-
 static void dumpRegion(String8& dump, const SkRegion& region) {
     if (region.isEmpty()) {
         dump.append("<empty>");
