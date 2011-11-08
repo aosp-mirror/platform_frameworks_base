@@ -60,6 +60,12 @@
     <!-- Compensate for double margin : preference_screen_side_margin + 4 (frame background shadow) = -preference_screen_side_margin_negative -->
     <dimen name="preference_screen_side_margin_negative">-4dp</dimen>
 
+    <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
+    <dimen name="default_app_widget_padding_left">12dp</dimen>
+    <dimen name="default_app_widget_padding_top">12dp</dimen>
+    <dimen name="default_app_widget_padding_right">4dp</dimen>
+    <dimen name="default_app_widget_padding_bottom">20dp</dimen>
+
     <!-- Minimum width for an action button in the menu area of an action bar -->
     <dimen name="action_button_min_width">64dip</dimen>
 </resources>
