@@ -458,6 +458,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // have been started and their loaders are finished.
     boolean mDeferStart;
 
+    // Hint provided by the app that this fragment is currently visible to the user.
+    boolean mUserVisibleHint = true;
+
     LoaderManagerImpl mLoaderManager;
     boolean mLoadersStarted;
     boolean mCheckedForLoaderManager;
@@ -915,31 +918,32 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Set whether this fragment should enter the started state as normal or if
-     * start should be deferred until a system-determined convenient time, such
-     * as after any loaders have completed their work.
+     * Set a hint to the system about whether this fragment's UI is currently visible
+     * to the user. This hint defaults to true and is persistent across fragment instance
+     * state save and restore.
      *
-     * <p>This option is not sticky across fragment starts; after a deferred start
-     * completes this option will be set to false.</p>
+     * <p>An app may set this to false to indicate that the fragment's UI is
+     * scrolled out of visibility or is otherwise not directly visible to the user.
+     * This may be used by the system to prioritize operations such as fragment lifecycle updates
+     * or loader ordering behavior.</p>
      *
-     * @param deferResume true if this fragment can defer its resume until after others
+     * @param isVisibleToUser true if this fragment's UI is currently visible to the user (default),
+     *                        false if it is not.
      */
-    public void setStartDeferred(boolean deferResume) {
-        if (mDeferStart && !deferResume) {
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        if (!mUserVisibleHint && isVisibleToUser && mState < STARTED) {
             mFragmentManager.performPendingDeferredStart(this);
         }
-        mDeferStart = deferResume;
+        mUserVisibleHint = isVisibleToUser;
+        mDeferStart = !isVisibleToUser;
     }
 
     /**
-     * Returns true if this fragment's move to the started state has been deferred.
-     * If this returns true it will be started once other fragments' loaders
-     * have finished running.
-     *
-     * @return true if this fragment's start has been deferred.
+     * @return The current value of the user-visible hint on this fragment.
+     * @see #setUserVisibleHint(boolean)
      */
-    public boolean isStartDeferred() {
-        return mDeferStart;
+    public boolean getUserVisibleHint() {
+        return mUserVisibleHint;
     }
 
     /**
@@ -1477,7 +1481,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                 writer.print(" mMenuVisible="); writer.print(mMenuVisible);
                 writer.print(" mHasMenu="); writer.println(mHasMenu);
         writer.print(prefix); writer.print("mRetainInstance="); writer.print(mRetainInstance);
-                writer.print(" mRetaining="); writer.println(mRetaining);
+                writer.print(" mRetaining="); writer.print(mRetaining);
+                writer.print(" mUserVisibleHint="); writer.println(mUserVisibleHint);
         if (mFragmentManager != null) {
             writer.print(prefix); writer.print("mFragmentManager=");
                     writer.println(mFragmentManager);
