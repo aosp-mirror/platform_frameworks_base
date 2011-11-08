@@ -93,7 +93,7 @@ public class JavaBridgeTestBase extends ActivityInstrumentationTestCase2<WebView
                     webView.addJavascriptInterface(object, name);
                     webView.getSettings().setJavaScriptEnabled(true);
                     webView.setWebViewClient(mWebViewClient);
-                    webView.loadData("<html><head></head><body></body></html>", "text/html", null);
+                    webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
                 }
             });
             mWebViewClient.waitForOnPageFinished();
