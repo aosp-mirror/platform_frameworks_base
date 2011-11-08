@@ -212,6 +212,12 @@ Type::CreatorName() const
 }
 
 string
+Type::RpcCreatorName() const
+{
+    return "";
+}
+
+string
 Type::InstantiableName() const
 {
     return QualifiedName();
@@ -910,6 +916,12 @@ UserDataType::CreatorName() const
     return QualifiedName() + ".CREATOR";
 }
 
+string
+UserDataType::RpcCreatorName() const
+{
+    return QualifiedName() + ".RPC_CREATOR";
+}
+
 void
 UserDataType::WriteToParcel(StatementBlock* addTo, Variable* v, Variable* parcel, int flags)
 {
@@ -1221,17 +1233,32 @@ void
 GenericListType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
         Variable* data, int flags)
 {
-    addTo->Add(new MethodCall(data, "putList", 2, k, v));
+    Type* generic = GenericArgumentTypes()[0];
+    if (generic == RPC_DATA_TYPE) {
+        addTo->Add(new MethodCall(data, "putRpcDataList", 2, k, v));
+    } else if (generic->RpcCreatorName() != "") {
+        addTo->Add(new MethodCall(data, "putFlattenableList", 2, k, v));
+    } else {
+        addTo->Add(new MethodCall(data, "putList", 2, k, v));
+    }
 }
 
 void
 GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
         Variable* data, Variable** cl)
 {
-    string classArg = GenericArgumentTypes()[0]->QualifiedName();
-    classArg += ".class";
-    addTo->Add(new Assignment(v, new MethodCall(data, "getList", 2, k,
-                    new LiteralExpression(classArg))));
+    Type* generic = GenericArgumentTypes()[0];
+    if (generic == RPC_DATA_TYPE) {
+        addTo->Add(new Assignment(v, new MethodCall(data, "getRpcDataList", 2, k)));
+    } else if (generic->RpcCreatorName() != "") {
+        addTo->Add(new Assignment(v, new MethodCall(data, "getFlattenableList", 2, k, 
+                        new LiteralExpression(generic->RpcCreatorName()))));
+    } else {
+        string classArg = GenericArgumentTypes()[0]->QualifiedName();
+        classArg += ".class";
+        addTo->Add(new Assignment(v, new MethodCall(data, "getList", 2, k,
+                        new LiteralExpression(classArg))));
+    }
 }
 
 
