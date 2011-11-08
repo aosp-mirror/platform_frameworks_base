@@ -521,6 +521,9 @@ public class AudioService extends IAudioService.Stub {
         ensureValidDirection(direction);
         ensureValidStreamType(streamType);
 
+        // use stream type alias here so that streams with same alias have the same behavior,
+        // including with regard to silent mode control (e.g the use of STREAM_RING below and in
+        // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
         int streamTypeAlias = STREAM_VOLUME_ALIAS[streamType];
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
         final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
@@ -529,9 +532,8 @@ public class AudioService extends IAudioService.Stub {
         // If either the client forces allowing ringer modes for this adjustment,
         // or the stream type is one that is affected by ringer modes
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
-             (!mVoiceCapable && streamType != AudioSystem.STREAM_VOICE_CALL &&
-               streamType != AudioSystem.STREAM_BLUETOOTH_SCO) ||
-                (mVoiceCapable && streamTypeAlias == AudioSystem.STREAM_RING)) {
+                streamTypeAlias == AudioSystem.STREAM_RING ||
+                (!mVoiceCapable && streamTypeAlias == AudioSystem.STREAM_MUSIC)) {
             // do not vibrate if already in vibrate mode
             if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
                 flags &= ~AudioManager.FLAG_VIBRATE;
@@ -545,10 +547,19 @@ public class AudioService extends IAudioService.Stub {
         int index;
         if (streamState.muteCount() != 0) {
             if (adjustVolume) {
-                streamState.adjustLastAudibleIndex(direction);
-                // Post a persist volume msg
-                sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
-                        SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+                // adjust volume on all stream types sharing the same alias otherwise a query
+                // on last audible index for an alias would not give the correct value
+                int numStreamTypes = AudioSystem.getNumStreamTypes();
+                for (int i = numStreamTypes - 1; i >= 0; i--) {
+                    if (STREAM_VOLUME_ALIAS[i] == streamTypeAlias) {
+                        VolumeStreamState s = mStreamStates[i];
+
+                        s.adjustLastAudibleIndex(direction);
+                        // Post a persist volume msg
+                        sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, i,
+                                SENDMSG_REPLACE, 0, 1, s, PERSIST_DELAY);
+                    }
+                }
             }
             index = streamState.mLastAudibleIndex;
         } else {
