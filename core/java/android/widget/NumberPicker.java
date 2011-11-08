@@ -574,10 +574,7 @@ public class NumberPicker extends LinearLayout {
 
         OnClickListener onClickListener = new OnClickListener() {
             public void onClick(View v) {
-                InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
-                if (inputMethodManager != null && inputMethodManager.isActive(mInputText)) {
-                    inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
-                }
+                hideSoftInput();
                 mInputText.clearFocus();
                 if (v.getId() == R.id.increment) {
                     changeCurrentByOne(true);
@@ -589,6 +586,7 @@ public class NumberPicker extends LinearLayout {
 
         OnLongClickListener onLongClickListener = new OnLongClickListener() {
             public boolean onLongClick(View v) {
+                hideSoftInput();
                 mInputText.clearFocus();
                 if (v.getId() == R.id.increment) {
                     postChangeCurrentByOneFromLongPress(true);
@@ -769,6 +767,7 @@ public class NumberPicker extends LinearLayout {
                     }
                     mBeginEditOnUpEvent = scrollersFinished;
                     mAdjustScrollerOnUpEvent = true;
+                    hideSoftInput();
                     hideInputControls();
                     return true;
                 }
@@ -778,6 +777,7 @@ public class NumberPicker extends LinearLayout {
                 }
                 mAdjustScrollerOnUpEvent = false;
                 setSelectorWheelState(SELECTOR_WHEEL_STATE_LARGE);
+                hideSoftInput();
                 hideInputControls();
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -787,6 +787,7 @@ public class NumberPicker extends LinearLayout {
                     mBeginEditOnUpEvent = false;
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     setSelectorWheelState(SELECTOR_WHEEL_STATE_LARGE);
+                    hideSoftInput();
                     hideInputControls();
                     return true;
                 }
@@ -1042,6 +1043,16 @@ public class NumberPicker extends LinearLayout {
         updateInputTextView();
         updateIncrementAndDecrementButtonsVisibilityState();
         invalidate();
+    }
+
+    /**
+     * Hides the soft input of it is active for the input text.
+     */
+    private void hideSoftInput() {
+        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        if (inputMethodManager != null && inputMethodManager.isActive(mInputText)) {
+            inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+        }
     }
 
     /**
