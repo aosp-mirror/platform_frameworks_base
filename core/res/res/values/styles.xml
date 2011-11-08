@@ -1823,6 +1823,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBar.TabView">
+        <item name="android:background">@android:drawable/tab_indicator_holo</item>
         <item name="android:layout_width">0dip</item>
         <item name="android:layout_weight">1</item>
         <item name="android:minWidth">80dip</item>
@@ -1910,7 +1911,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.ActionBar.TabView" parent="Widget.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_holo</item>
+        <item name="android:background">@drawable/tab_indicator_ab_holo</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
     </style>
@@ -2277,6 +2278,10 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.Tab" parent="Widget.Holo.Light.ActionBar.TabView">
+        <item name="android:background">@android:drawable/tab_indicator_holo</item>
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minWidth">80dip</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionBar.TabBar" parent="Widget.Holo.ActionBar.TabBar">
