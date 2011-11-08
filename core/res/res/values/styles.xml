@@ -1798,6 +1798,7 @@ please see styles_device_defaults.xml.
         <item name="android:dropDownWidth">wrap_content</item>
         <item name="android:popupPromptView">@android:layout/simple_dropdown_hint</item>
         <item name="android:gravity">left|center_vertical</item>
+        <item name="android:disableChildrenWhenDisabled">true</item>
     </style>
 
     <style name="Widget.Holo.Spinner.DropDown">
