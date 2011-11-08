@@ -60,25 +60,25 @@ public class GsmAlphabet {
      * all combinations of header elements below will have at least one free bit
      * when padding to the nearest septet boundary.
      */
-    private static final int UDH_SEPTET_COST_LENGTH = 1;
+    public static final int UDH_SEPTET_COST_LENGTH = 1;
 
     /**
      * Using a non-default language locking shift table OR single shift table
      * requires a user data header of 3 octets, or 4 septets, plus UDH length.
      */
-    private static final int UDH_SEPTET_COST_ONE_SHIFT_TABLE = 4;
+    public static final int UDH_SEPTET_COST_ONE_SHIFT_TABLE = 4;
 
     /**
      * Using a non-default language locking shift table AND single shift table
      * requires a user data header of 6 octets, or 7 septets, plus UDH length.
      */
-    private static final int UDH_SEPTET_COST_TWO_SHIFT_TABLES = 7;
+    public static final int UDH_SEPTET_COST_TWO_SHIFT_TABLES = 7;
 
     /**
      * Multi-part messages require a user data header of 5 octets, or 6 septets,
      * plus UDH length.
      */
-    private static final int UDH_SEPTET_COST_CONCATENATED_MESSAGE = 6;
+    public static final int UDH_SEPTET_COST_CONCATENATED_MESSAGE = 6;
 
     /**
      * Converts a char to a GSM 7 bit table index.
