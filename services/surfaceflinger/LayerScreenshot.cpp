@@ -27,6 +27,7 @@
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
 
+
 namespace android {
 // ---------------------------------------------------------------------------
 
@@ -45,23 +46,64 @@ LayerScreenshot::~LayerScreenshot()
     }
 }
 
+status_t LayerScreenshot::captureLocked() {
+    GLfloat u, v;
+    status_t result = mFlinger->renderScreenToTextureLocked(0, &mTextureName, &u, &v);
+    if (result != NO_ERROR) {
+        return result;
+    }
+    initTexture(u, v);
+    return NO_ERROR;
+}
+
 status_t LayerScreenshot::capture() {
     GLfloat u, v;
     status_t result = mFlinger->renderScreenToTexture(0, &mTextureName, &u, &v);
     if (result != NO_ERROR) {
         return result;
     }
+    initTexture(u, v);
+    return NO_ERROR;
+}
 
+void LayerScreenshot::initTexture(GLfloat u, GLfloat v) {
     glBindTexture(GL_TEXTURE_2D, mTextureName);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
     mTexCoords[0] = 0;         mTexCoords[1] = v;
     mTexCoords[2] = 0;         mTexCoords[3] = 0;
     mTexCoords[4] = u;         mTexCoords[5] = 0;
     mTexCoords[6] = u;         mTexCoords[7] = v;
+}
 
-    return NO_ERROR;
+void LayerScreenshot::initStates(uint32_t w, uint32_t h, uint32_t flags) {
+    LayerBaseClient::initStates(w, h, flags);
+    if (!(flags & ISurfaceComposer::eHidden)) {
+        capture();
+    }
+}
+
+uint32_t LayerScreenshot::doTransaction(uint32_t flags)
+{
+    const Layer::State& draw(drawingState());
+    const Layer::State& curr(currentState());
+
+    if (draw.flags & ISurfaceComposer::eLayerHidden) {
+        if (!(curr.flags & ISurfaceComposer::eLayerHidden)) {
+            // we're going from hidden to visible
+            status_t err = captureLocked();
+            if (err != NO_ERROR) {
+                LOGW("createScreenshotSurface failed (%s)", strerror(-err));
+            }
+        }
+    } else if (curr.flags & ISurfaceComposer::eLayerHidden) {
+        // we're going from visible to hidden
+        if (mTextureName) {
+            glDeleteTextures(1, &mTextureName);
+            mTextureName = 0;
+        }
+    }
+    return LayerBaseClient::doTransaction(flags);
 }
 
 void LayerScreenshot::onDraw(const Region& clip) const
