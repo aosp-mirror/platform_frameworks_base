@@ -158,6 +158,10 @@ public class AudioService extends IAudioService.Stub {
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
     private static final int SOUND_EFFECT_VOLUME = 1000;
 
+    // Internally master volume is a float in the 0.0 - 1.0 range,
+    // but to support integer based AudioManager API we translate it to 0 - 100
+    private static final int MAX_MASTER_VOLUME = 100;
+
     /* Sound effect file names  */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
     private static final String[] SOUND_EFFECT_FILES = new String[] {
@@ -765,12 +769,12 @@ public class AudioService extends IAudioService.Stub {
         return (mStreamStates[streamType].getIndex(device, false  /* lastAudible */) + 5) / 10;
     }
 
-    public float getMasterVolume() {
-        return AudioSystem.getMasterVolume();
+    public int getMasterVolume() {
+        return Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
     }
 
-    public void setMasterVolume(float volume) {
-        AudioSystem.setMasterVolume(volume);
+    public void setMasterVolume(int volume, int flags) {
+        AudioSystem.setMasterVolume((float)volume / MAX_MASTER_VOLUME);
     }
 
     /** @see AudioManager#getStreamMaxVolume(int) */
@@ -779,6 +783,9 @@ public class AudioService extends IAudioService.Stub {
         return (mStreamStates[streamType].getMaxIndex() + 5) / 10;
     }
 
+    public int getMasterMaxVolume() {
+        return MAX_MASTER_VOLUME;
+    }
 
     /** Get last audible volume before stream was muted. */
     public int getLastAudibleStreamVolume(int streamType) {

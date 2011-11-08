@@ -36,6 +36,8 @@ interface IAudioService {
     void adjustMasterVolume(int direction, int flags);
 
     void setStreamVolume(int streamType, int index, int flags);
+
+    void setMasterVolume(int index, int flags);
     
     void setStreamSolo(int streamType, boolean state, IBinder cb);
    	
@@ -45,9 +47,11 @@ interface IAudioService {
 
     int getStreamVolume(int streamType);
 
-    float getMasterVolume();
+    int getMasterVolume();
 
     int getStreamMaxVolume(int streamType);
+
+    int getMasterMaxVolume();
     
     int getLastAudibleStreamVolume(int streamType);
 

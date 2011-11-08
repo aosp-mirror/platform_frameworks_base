@@ -485,7 +485,11 @@ public class AudioManager {
     public void adjustStreamVolume(int streamType, int direction, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustStreamVolume(streamType, direction, flags);
+            if (mUseMasterVolume) {
+                service.adjustMasterVolume(direction, flags);
+            } else {
+                service.adjustStreamVolume(streamType, direction, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustStreamVolume", e);
         }
@@ -511,7 +515,11 @@ public class AudioManager {
     public void adjustVolume(int direction, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustVolume(direction, flags);
+            if (mUseMasterVolume) {
+                service.adjustMasterVolume(direction, flags);
+            } else {
+                service.adjustVolume(direction, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustVolume", e);
         }
@@ -537,7 +545,11 @@ public class AudioManager {
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+            if (mUseMasterVolume) {
+                service.adjustMasterVolume(direction, flags);
+            } else {
+                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustSuggestedStreamVolume", e);
         }
@@ -603,7 +615,11 @@ public class AudioManager {
     public int getStreamMaxVolume(int streamType) {
         IAudioService service = getService();
         try {
-            return service.getStreamMaxVolume(streamType);
+            if (mUseMasterVolume) {
+                return service.getMasterMaxVolume();
+            } else {
+                return service.getStreamMaxVolume(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getStreamMaxVolume", e);
             return 0;
@@ -621,7 +637,11 @@ public class AudioManager {
     public int getStreamVolume(int streamType) {
         IAudioService service = getService();
         try {
-            return service.getStreamVolume(streamType);
+            if (mUseMasterVolume) {
+                return service.getMasterVolume();
+            } else {
+                return service.getStreamVolume(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getStreamVolume", e);
             return 0;
@@ -636,7 +656,11 @@ public class AudioManager {
     public int getLastAudibleStreamVolume(int streamType) {
         IAudioService service = getService();
         try {
-            return service.getLastAudibleStreamVolume(streamType);
+            if (mUseMasterVolume) {
+                return service.getMasterVolume();
+            } else {
+                return service.getLastAudibleStreamVolume(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getLastAudibleStreamVolume", e);
             return 0;
@@ -679,7 +703,11 @@ public class AudioManager {
     public void setStreamVolume(int streamType, int index, int flags) {
         IAudioService service = getService();
         try {
-            service.setStreamVolume(streamType, index, flags);
+            if (mUseMasterVolume) {
+                service.setMasterVolume(index, flags);
+            } else {
+                service.setStreamVolume(streamType, index, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setStreamVolume", e);
         }
