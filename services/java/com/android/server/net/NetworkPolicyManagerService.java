@@ -190,6 +190,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_METERED_IFACES_CHANGED = 2;
     private static final int MSG_FOREGROUND_ACTIVITIES_CHANGED = 3;
     private static final int MSG_PROCESS_DIED = 4;
+    private static final int MSG_LIMIT_REACHED = 5;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -422,19 +423,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // only someone like NMS should be calling us
             mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-            synchronized (mRulesLock) {
-                if (mMeteredIfaces.contains(iface) && !LIMIT_GLOBAL_ALERT.equals(limitName)) {
-                    try {
-                        // force stats update to make sure we have numbers that
-                        // caused alert to trigger.
-                        mNetworkStats.forceUpdate();
-                    } catch (RemoteException e) {
-                        // ignored; service lives in system_server
-                    }
-
-                    updateNetworkEnabledLocked();
-                    updateNotificationsLocked();
-                }
+            if (!LIMIT_GLOBAL_ALERT.equals(limitName)) {
+                mHandler.obtainMessage(MSG_LIMIT_REACHED, iface).sendToTarget();
             }
         }
     };
@@ -1475,6 +1465,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         if (pidForeground != null) {
                             pidForeground.delete(pid);
                             computeUidForegroundLocked(uid);
+                        }
+                    }
+                    return true;
+                }
+                case MSG_LIMIT_REACHED: {
+                    final String iface = (String) msg.obj;
+
+                    synchronized (mRulesLock) {
+                        if (mMeteredIfaces.contains(iface)) {
+                            try {
+                                // force stats update to make sure we have
+                                // numbers that caused alert to trigger.
+                                mNetworkStats.forceUpdate();
+                            } catch (RemoteException e) {
+                                // ignored; service lives in system_server
+                            }
+
+                            updateNetworkEnabledLocked();
+                            updateNotificationsLocked();
                         }
                     }
                     return true;
