@@ -38,6 +38,7 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         private int mIntValue;
         private long mLongValue;
         private String mStringValue;
+        private boolean mBooleanValue;
 
         public synchronized void setIntValue(int x) {
             mIntValue = x;
@@ -49,6 +50,10 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         }
         public synchronized void setStringValue(String x) {
             mStringValue = x;
+            notifyResultIsReady();
+        }
+        public synchronized void setBooleanValue(boolean x) {
+            mBooleanValue = x;
             notifyResultIsReady();
         }
 
@@ -63,6 +68,10 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         public synchronized String waitForStringValue() {
             waitForResult();
             return mStringValue;
+        }
+        public synchronized boolean waitForBooleanValue() {
+            waitForResult();
+            return mBooleanValue;
         }
     }
 
@@ -202,6 +211,23 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         assertEquals("1 arg", mTestController.waitForStringValue());
         executeJavaScript("testObject.method(42, 42)");
         assertEquals("2 args", mTestController.waitForStringValue());
+    }
+
+    public void testCallMethodWithWrongNumberOfArgumentsRaisesException() throws Throwable {
+        class Test {
+            public void run(String script) throws Throwable {
+                executeJavaScript("try {" +
+                                  script + ";" +
+                                  "  testController.setBooleanValue(false);" +
+                                  "} catch (exception) {" +
+                                  "  testController.setBooleanValue(true);" +
+                                  "}");
+                assertTrue(mTestController.waitForBooleanValue());
+            }
+        }
+        Test test = new Test();
+        test.run("testController.setIntValue()");
+        test.run("testController.setIntValue(42, 42)");
     }
 
     public void testObjectPersistsAcrossPageLoads() throws Throwable {
