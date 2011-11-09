@@ -5019,17 +5019,6 @@ public class WebView extends AbsoluteLayout
                 canProvideGamma, gamma);
     }
 
-    /**
-     * Dump the V8 counters to standard output.
-     * Note that you need a build with V8 and WEBCORE_INSTRUMENTATION set to
-     * true. Otherwise, this will do nothing.
-     *
-     * @hide debug only
-     */
-    public void dumpV8Counters() {
-        mWebViewCore.sendMessage(EventHub.DUMP_V8COUNTERS);
-    }
-
     // This is used to determine long press with the center key.  Does not
     // affect long press with the trackball/touch.
     private boolean mGotCenterDown = false;
@@ -5219,9 +5208,6 @@ public class WebView extends AbsoluteLayout
                 case KeyEvent.KEYCODE_8:
                     dumpRenderTree(keyCode == KeyEvent.KEYCODE_7);
                     break;
-                case KeyEvent.KEYCODE_9:
-                    nativeInstrumentReport();
-                    return true;
             }
         }
 
@@ -9499,7 +9485,6 @@ public class WebView extends AbsoluteLayout
     private native void     nativeHideCursor();
     private native boolean  nativeHitSelection(int x, int y);
     private native String   nativeImageURI(int x, int y);
-    private native void     nativeInstrumentReport();
     private native Rect     nativeLayerBounds(int layer);
     /* package */ native boolean nativeMoveCursorToNextTextInput();
     // return true if the page has been scrolled
