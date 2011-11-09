@@ -549,7 +549,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     public boolean getAnyDataEnabled() {
         synchronized (mDataEnabledLock) {
-            if (!(mInternalDataEnabled && mUserDataEnabled && mPolicyDataEnabled)) return false;
+            if (!(mInternalDataEnabled && mUserDataEnabled && sPolicyDataEnabled)) return false;
             for (ApnContext apnContext : mApnContexts.values()) {
                 // Make sure we dont have a context that going down
                 // and is explicitly disabled.
