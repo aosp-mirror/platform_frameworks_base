@@ -38,6 +38,7 @@
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <utils/threads.h>
+#include <utils/String8.h>
 
 #include <ScopedUtfChars.h>
 #include <ScopedLocalRef.h>
@@ -651,7 +652,8 @@ jobject newParcelFileDescriptor(JNIEnv* env, jobject fileDesc)
             gParcelFileDescriptorOffsets.mClass, gParcelFileDescriptorOffsets.mConstructor, fileDesc);
 }
 
-void signalExceptionForError(JNIEnv* env, jobject obj, status_t err)
+static void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
+        bool canThrowRemoteException = false)
 {
     switch (err) {
         case UNKNOWN_ERROR:
@@ -688,14 +690,25 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err)
             jniThrowException(env, "java/lang/RuntimeException", "Item already exists");
             break;
         case DEAD_OBJECT:
-            jniThrowException(env, "android/os/DeadObjectException", NULL);
+            // DeadObjectException is a checked exception, only throw from certain methods.
+            jniThrowException(env, canThrowRemoteException
+                    ? "android/os/DeadObjectException"
+                            : "java/lang/RuntimeException", NULL);
             break;
         case UNKNOWN_TRANSACTION:
             jniThrowException(env, "java/lang/RuntimeException", "Unknown transaction code");
             break;
         case FAILED_TRANSACTION:
             LOGE("!!! FAILED BINDER TRANSACTION !!!");
-            //jniThrowException(env, "java/lang/OutOfMemoryError", "Binder transaction too large");
+            // TransactionTooLargeException is a checked exception, only throw from certain methods.
+            // FIXME: Transaction too large is the most common reason for FAILED_TRANSACTION
+            //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
+            //        for other reasons also, such as if the transaction is malformed or
+            //        refers to an FD that has been closed.  We should change the driver
+            //        to enable us to distinguish these cases in the future.
+            jniThrowException(env, canThrowRemoteException
+                    ? "android/os/TransactionTooLargeException"
+                            : "java/lang/RuntimeException", NULL);
             break;
         case FDS_NOT_ALLOWED:
             jniThrowException(env, "java/lang/RuntimeException",
@@ -703,6 +716,12 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err)
             break;
         default:
             LOGE("Unknown binder error code. 0x%x", err);
+            String8 msg;
+            msg.appendFormat("Unknown binder error code. 0x%x", err);
+            // RemoteException is a checked exception, only throw from certain methods.
+            jniThrowException(env, canThrowRemoteException
+                    ? "android/os/RemoteException" : "java/lang/RuntimeException", msg.string());
+            break;
     }
 }
 
@@ -1036,8 +1055,7 @@ static bool should_time_binder_calls() {
 }
 
 static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
-                                                jint code, jobject dataObj,
-                                                jobject replyObj, jint flags)
+        jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
 {
     if (dataObj == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -1084,12 +1102,12 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     }
 
-    signalExceptionForError(env, obj, err);
+    signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/);
     return JNI_FALSE;
 }
 
 static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
-                                               jobject recipient, jint flags)
+        jobject recipient, jint flags) // throws RemoteException
 {
     if (recipient == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -1114,7 +1132,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
             // Failure adding the death recipient, so clear its reference
             // now.
             jdr->clearReference();
-            signalExceptionForError(env, obj, err);
+            signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/);
         }
     }
 }
