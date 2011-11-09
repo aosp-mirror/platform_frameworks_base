@@ -1202,6 +1202,9 @@ public final class Settings {
          */
         public static final String RADIO_WIFI = "wifi";
 
+        /**
+         * {@hide}
+         */
         public static final String RADIO_WIMAX = "wimax";
         /**
          * Constant for use in AIRPLANE_MODE_RADIOS to specify Cellular radio.
@@ -2920,6 +2923,9 @@ public final class Settings {
          */
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 "wifi_networks_available_notification_on";
+        /**
+         * {@hide}
+         */
         public static final String WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 "wimax_networks_available_notification_on";
 
