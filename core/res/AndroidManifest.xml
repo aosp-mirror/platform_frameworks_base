@@ -423,6 +423,7 @@
         android:description="@string/permdesc_accessWifiState"
         android:label="@string/permlab_accessWifiState" />
 
+    <!-- @hide -->
     <permission android:name="android.permission.ACCESS_WIMAX_STATE"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="normal"
@@ -989,6 +990,7 @@
         android:description="@string/permdesc_changeWifiState"
         android:label="@string/permlab_changeWifiState" />
 
+    <!-- @hide -->
     <permission android:name="android.permission.CHANGE_WIMAX_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="dangerous"
