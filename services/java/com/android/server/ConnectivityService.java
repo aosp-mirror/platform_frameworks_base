@@ -26,8 +26,10 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
@@ -51,6 +53,7 @@ import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
 import android.net.wifi.WifiStateTracker;
+import android.net.wimax.WimaxManagerConstants;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -78,10 +81,14 @@ import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
-
+import dalvik.system.DexClassLoader;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -491,6 +498,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetTrackers[netType] = BluetoothTetheringDataTracker.getInstance();
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
+            case ConnectivityManager.TYPE_WIMAX:
+                mNetTrackers[netType] = makeWimaxStateTracker();
+                if (mNetTrackers[netType != null) {
+                    mNetTrackers[netType].startMonitoring(context, mHandler);
+                }
+                break;
             case ConnectivityManager.TYPE_ETHERNET:
                 mNetTrackers[netType] = EthernetDataTracker.getInstance();
                 mNetTrackers[netType].startMonitoring(context, mHandler);
@@ -531,7 +544,81 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         loadGlobalProxy();
     }
+private NetworkStateTracker makeWimaxStateTracker() {
+        //Initialize Wimax
+        DexClassLoader wimaxClassLoader;
+        Class wimaxStateTrackerClass = null;
+        Class wimaxServiceClass = null;
+        Class wimaxManagerClass;
+        String wimaxJarLocation;
+        String wimaxLibLocation;
+        String wimaxManagerClassName;
+        String wimaxServiceClassName;
+        String wimaxStateTrackerClassName;
 
+        NetworkStateTracker wimaxStateTracker = null;
+
+        boolean isWimaxEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wimaxEnabled);
+
+        if (isWimaxEnabled) {
+            try {
+                wimaxJarLocation = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wimaxServiceJarLocation);
+                wimaxLibLocation = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wimaxNativeLibLocation);
+                wimaxManagerClassName = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wimaxManagerClassname);
+                wimaxServiceClassName = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wimaxServiceClassname);
+                wimaxStateTrackerClassName = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wimaxStateTrackerClassname);
+
+                log("wimaxJarLocation: " + wimaxJarLocation);
+                wimaxClassLoader =  new DexClassLoader(wimaxJarLocation,
+                        new ContextWrapper(mContext).getCacheDir().getAbsolutePath(),
+                        wimaxLibLocation, ClassLoader.getSystemClassLoader());
+
+                try {
+                    wimaxManagerClass = wimaxClassLoader.loadClass(wimaxManagerClassName);
+                    wimaxStateTrackerClass = wimaxClassLoader.loadClass(wimaxStateTrackerClassName);
+                    wimaxServiceClass = wimaxClassLoader.loadClass(wimaxServiceClassName);
+                } catch (ClassNotFoundException ex) {
+                    loge("Exception finding Wimax classes: " + ex.toString());
+                    return null;
+                }
+            } catch(Resources.NotFoundException ex) {
+                loge("Wimax Resources does not exist!!! ");
+                return null;
+            }
+
+            try {
+                log("Starting Wimax Service... ");
+
+                Constructor wmxStTrkrConst = wimaxStateTrackerClass.getConstructor
+                        (new Class[] {Context.class, Handler.class});
+                wimaxStateTracker = (NetworkStateTracker)wmxStTrkrConst.newInstance(mContext,
+                        mHandler);
+
+                Constructor wmxSrvConst = wimaxServiceClass.getDeclaredConstructor
+                        (new Class[] {Context.class, wimaxStateTrackerClass});
+                wmxSrvConst.setAccessible(true);
+                IBinder svcInvoker = (IBinder)wmxSrvConst.newInstance(mContext, wimaxStateTracker);
+                wmxSrvConst.setAccessible(false);
+
+                ServiceManager.addService(WimaxManagerConstants.WIMAX_SERVICE, svcInvoker);
+
+            } catch(Exception ex) {
+                loge("Exception creating Wimax classes: " + ex.toString());
+                return null;
+            }
+        } else {
+            loge("Wimax is not enabled or not added to the network attributes!!! ");
+            return null;
+        }
+
+        return wimaxStateTracker;
+    }
     /**
      * Sets the preferred network.
      * @param preference the new preference
