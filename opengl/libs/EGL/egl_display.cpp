@@ -44,6 +44,7 @@ egl_display_t::egl_display_t() :
 
 egl_display_t::~egl_display_t() {
     magic = 0;
+    egl_cache_t::get()->terminate();
 }
 
 egl_display_t* egl_display_t::get(EGLDisplay dpy) {
