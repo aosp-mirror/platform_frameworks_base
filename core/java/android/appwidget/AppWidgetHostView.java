@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,8 +42,8 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 import android.widget.RemoteViewsAdapter.RemoteAdapterConnectionCallback;
+import android.widget.TextView;
 
 /**
  * Provides the glue to show AppWidget views. This class offers automatic animation
@@ -106,7 +107,9 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
-     * Set the AppWidget that will be displayed by this view.
+     * Set the AppWidget that will be displayed by this view. This method also adds default padding
+     * to widgets, as described in {@link #getDefaultPaddingForWidget(Context, ComponentName, Rect)}
+     * and can be overridden in order to add custom padding.
      */
     public void setAppWidget(int appWidgetId, AppWidgetProviderInfo info) {
         mAppWidgetId = appWidgetId;
@@ -116,16 +119,9 @@ public class AppWidgetHostView extends FrameLayout {
         // a widget, eg. for some widgets in safe mode.
         if (info != null) {
             // We add padding to the AppWidgetHostView if necessary
-            Padding padding = getPaddingForWidget(info.provider);
+            Rect padding = getDefaultPaddingForWidget(mContext, info.provider, null);
             setPadding(padding.left, padding.top, padding.right, padding.bottom);
         }
-    }
-
-    private static class Padding {
-        int left = 0;
-        int right = 0;
-        int top = 0;
-        int bottom = 0;
     }
 
     /**
@@ -133,32 +129,47 @@ public class AppWidgetHostView extends FrameLayout {
      * ICE_CREAM_SANDWICH and higher. The new widget design guidelines strongly recommend
      * that widget developers do not add extra padding to their widgets. This will help
      * achieve consistency among widgets.
+     *
+     * Note: this method is only needed by developers of AppWidgetHosts. The method is provided in
+     * order for the AppWidgetHost to account for the automatic padding when computing the number
+     * of cells to allocate to a particular widget.
+     *
+     * @param context the current context
+     * @param component the component name of the widget
+     * @param padding Rect in which to place the output, if null, a new Rect will be allocated and
+     *                returned
+     * @return default padding for this widget
      */
-    private Padding getPaddingForWidget(ComponentName component) {
-        PackageManager packageManager = mContext.getPackageManager();
-        Padding p = new Padding();
+    public static Rect getDefaultPaddingForWidget(Context context, ComponentName component,
+            Rect padding) {
+        PackageManager packageManager = context.getPackageManager();
         ApplicationInfo appInfo;
+
+        if (padding == null) {
+            padding = new Rect(0, 0, 0, 0);
+        } else {
+            padding.set(0, 0, 0, 0);
+        }
 
         try {
             appInfo = packageManager.getApplicationInfo(component.getPackageName(), 0);
-        } catch (Exception e) {
+        } catch (NameNotFoundException e) {
             // if we can't find the package, return 0 padding
-            return p;
+            return padding;
         }
 
         if (appInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            Resources r = getResources();
-            p.left = r.getDimensionPixelSize(com.android.internal.
+            Resources r = context.getResources();
+            padding.left = r.getDimensionPixelSize(com.android.internal.
                     R.dimen.default_app_widget_padding_left);
-            p.right = r.getDimensionPixelSize(com.android.internal.
+            padding.right = r.getDimensionPixelSize(com.android.internal.
                     R.dimen.default_app_widget_padding_right);
-            p.top = r.getDimensionPixelSize(com.android.internal.
+            padding.top = r.getDimensionPixelSize(com.android.internal.
                     R.dimen.default_app_widget_padding_top);
-            p.bottom = r.getDimensionPixelSize(com.android.internal.
+            padding.bottom = r.getDimensionPixelSize(com.android.internal.
                     R.dimen.default_app_widget_padding_bottom);
         }
-
-        return p;
+        return padding;
     }
 
     public int getAppWidgetId() {
