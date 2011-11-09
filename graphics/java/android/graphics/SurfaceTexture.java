@@ -130,10 +130,17 @@ public class SurfaceTexture {
     }
 
     /**
-     * Set the size of buffers returned by requestBuffers when a width and height
-     * of zero is requested.
+     * Set the default size of the image buffers.  The image producer may override the buffer size,
+     * in which case the producer-set buffer size will be used, not the default size set by this
+     * method.  Both video and camera based image producers do override the size.  This method may
+     * be used to set the image size when producing images with {@link android.graphics.Canvas} (via
+     * {@link android.view.Surface#lockCanvas}), or OpenGL ES (via an EGLSurface).
      *
-     * @hide Pending approval by API council.
+     * The new default buffer size will take effect the next time the image producer requests a
+     * buffer to fill.  For {@link android.graphics.Canvas} this will be the next time {@link
+     * android.view.Surface#lockCanvas} is called.  For OpenGL ES, the EGLSurface should be
+     * destroyed (via eglDestroySurface), made not-current (via eglMakeCurrent), and then recreated
+     * (via eglCreateWindowSurface) to ensure that the new default size has taken effect.
      */
     public void setDefaultBufferSize(int width, int height) {
         nativeSetDefaultBufferSize(width, height);
