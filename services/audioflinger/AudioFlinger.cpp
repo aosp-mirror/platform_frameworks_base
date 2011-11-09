@@ -2066,9 +2066,14 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         // The first time a track is added we wait
         // for all its buffers to be filled before processing it
         mAudioMixer->setActiveTrack(track->name());
-        // make sure that we have enough frames to mix one full buffer
+        // make sure that we have enough frames to mix one full buffer.
+        // enforce this condition only once to enable draining the buffer in case the client
+        // app does not call stop() and relies on underrun to stop:
+        // hence the test on (track->mRetryCount >= kMaxTrackRetries) meaning the track was mixed
+        // during last round
         uint32_t minFrames = 1;
-        if (!track->isStopped() && !track->isPausing()) {
+        if (!track->isStopped() && !track->isPausing() &&
+                (track->mRetryCount >= kMaxTrackRetries)) {
             if (t->sampleRate() == (int)mSampleRate) {
                 minFrames = mFrameCount;
             } else {
