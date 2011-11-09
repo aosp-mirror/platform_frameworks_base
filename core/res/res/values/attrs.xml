@@ -3331,6 +3331,9 @@
         <attr name="popupPromptView" format="reference" />
         <!-- Gravity setting for positioning the currently selected item. -->
         <attr name="gravity" />
+        <!-- Whether this spinner should mark child views as enabled/disabled when
+             the spinner itself is enabled/disabled. -->
+        <attr name="disableChildrenWhenDisabled" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="DatePicker">
