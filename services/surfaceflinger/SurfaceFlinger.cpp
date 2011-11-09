@@ -1217,23 +1217,25 @@ void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
         sp<Client> client( static_cast<Client *>(s.client.get()) );
         transactionFlags |= setClientStateLocked(client, s.state);
     }
-    if (transactionFlags) {
-        setTransactionFlags(transactionFlags);
-    }
 
-    // if this is a synchronous transaction, wait for it to take effect before
-    // returning.
-    if (flags & eSynchronous) {
-        mTransationPending = true;
-    }
-    while (mTransationPending) {
-        status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
-        if (CC_UNLIKELY(err != NO_ERROR)) {
-            // just in case something goes wrong in SF, return to the
-            // called after a few seconds.
-            LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
-            mTransationPending = false;
-            break;
+    if (transactionFlags) {
+        // this triggers the transaction
+        setTransactionFlags(transactionFlags);
+
+        // if this is a synchronous transaction, wait for it to take effect
+        // before returning.
+        if (flags & eSynchronous) {
+            mTransationPending = true;
+        }
+        while (mTransationPending) {
+            status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
+            if (CC_UNLIKELY(err != NO_ERROR)) {
+                // just in case something goes wrong in SF, return to the
+                // called after a few seconds.
+                LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
+                mTransationPending = false;
+                break;
+            }
         }
     }
 }
