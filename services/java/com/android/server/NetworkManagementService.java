@@ -1136,12 +1136,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             final StringBuilder command = new StringBuilder();
             command.append("bandwidth removeiquota ").append(iface);
 
+            mActiveQuotaIfaces.remove(iface);
+            mActiveAlertIfaces.remove(iface);
+
             try {
                 // TODO: support quota shared across interfaces
                 mConnector.doCommand(command.toString());
-                mActiveQuotaIfaces.remove(iface);
-                mActiveAlertIfaces.remove(iface);
             } catch (NativeDaemonConnectorException e) {
+                // TODO: include current iptables state
                 throw new IllegalStateException("Error communicating to native daemon", e);
             }
         }
