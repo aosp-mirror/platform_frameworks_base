@@ -739,9 +739,16 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int newWidthMeasureSpec = makeMeasureSpec(widthMeasureSpec, mMinWidth, mMaxWidth);
-        final int newHeightMeasureSpec = makeMeasureSpec(heightMeasureSpec, mMinHeight, mMaxHeight);
+        // Try greedily to fit the max width and height.
+        final int newWidthMeasureSpec = makeMeasureSpec(widthMeasureSpec, mMaxWidth);
+        final int newHeightMeasureSpec = makeMeasureSpec(heightMeasureSpec, mMaxHeight);
         super.onMeasure(newWidthMeasureSpec, newHeightMeasureSpec);
+        // Flag if we are measured with width or height less than the respective min.
+        final int desiredWidth = Math.max(mMinWidth, getMeasuredWidth());
+        final int desiredHeight = Math.max(mMinHeight, getMeasuredHeight());
+        final int widthSize = resolveSizeAndState(desiredWidth, newWidthMeasureSpec, 0);
+        final int heightSize = resolveSizeAndState(desiredHeight, newHeightMeasureSpec, 0);
+        setMeasuredDimension(widthSize, heightSize);
     }
 
     @Override
@@ -1368,23 +1375,19 @@ public class NumberPicker extends LinearLayout {
      * Makes a measure spec that tries greedily to use the max value.
      *
      * @param measureSpec The measure spec.
-     * @param maxValue The max value for the size.
+     * @param maxSize The max value for the size.
      * @return A measure spec greedily imposing the max size.
      */
-    private int makeMeasureSpec(int measureSpec, int minValue, int maxValue) {
+    private int makeMeasureSpec(int measureSpec, int maxSize) {
         final int size = MeasureSpec.getSize(measureSpec);
-        if (size < minValue) {
-            throw new IllegalArgumentException("Available space is less than min size: "
-                    +  size + " < " + minValue);
-        }
         final int mode = MeasureSpec.getMode(measureSpec);
         switch (mode) {
             case MeasureSpec.EXACTLY:
                 return measureSpec;
             case MeasureSpec.AT_MOST:
-                return MeasureSpec.makeMeasureSpec(Math.min(size, maxValue), MeasureSpec.EXACTLY);
+                return MeasureSpec.makeMeasureSpec(Math.min(size, maxSize), MeasureSpec.EXACTLY);
             case MeasureSpec.UNSPECIFIED:
-                return MeasureSpec.makeMeasureSpec(maxValue, MeasureSpec.EXACTLY);
+                return MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.EXACTLY);
             default:
                 throw new IllegalArgumentException("Unknown measure mode: " + mode);
         }
