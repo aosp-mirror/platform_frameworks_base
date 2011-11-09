@@ -16,14 +16,9 @@
 
 package android.webkit;
 
-import com.android.internal.widget.EditableInputConnection;
-
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -60,11 +55,11 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import junit.framework.Assert;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
-import junit.framework.Assert;
 
 /**
  * WebTextView is a specialized version of EditText used by WebView
@@ -926,18 +921,23 @@ import junit.framework.Assert;
      */
     /* package */ void setRect(int x, int y, int width, int height) {
         LayoutParams lp = (LayoutParams) getLayoutParams();
+        boolean needsUpdate = false;
         if (null == lp) {
             lp = new LayoutParams(width, height, x, y);
         } else {
-            lp.x = x;
-            lp.y = y;
-            lp.width = width;
-            lp.height = height;
+            if ((lp.x != x) || (lp.y != y) || (lp.width != width)
+                    || (lp.height != height)) {
+                needsUpdate = true;
+                lp.x = x;
+                lp.y = y;
+                lp.width = width;
+                lp.height = height;
+            }
         }
         if (getParent() == null) {
             // Insert the view so that it's drawn first (at index 0)
             mWebView.addView(this, 0, lp);
-        } else {
+        } else if (needsUpdate) {
             setLayoutParams(lp);
         }
         // Set up a measure spec so a layout can always be recreated.
