@@ -91,6 +91,16 @@ class JniUtil {
         return sCacheDirectory;
     }
 
+    /**
+     * Called by JNI. Gets the application's package name.
+     * @return String The application's package name
+     */
+    private static synchronized String getPackageName() {
+        checkInitialized();
+
+        return sContext.getPackageName();
+    }
+
     private static final String ANDROID_CONTENT = "content:";
 
     /**
