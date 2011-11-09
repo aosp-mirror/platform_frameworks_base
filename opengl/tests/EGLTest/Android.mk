@@ -7,6 +7,7 @@ LOCAL_MODULE := EGL_test
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := \
+    egl_cache_test.cpp \
     EGL_test.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
@@ -21,9 +22,12 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_C_INCLUDES := \
     bionic \
+    bionic/libc/private \
     bionic/libstdc++/include \
     external/gtest/include \
     external/stlport/stlport \
+    frameworks/base/opengl/libs \
+    frameworks/base/opengl/libs/EGL \
 
 include $(BUILD_EXECUTABLE)
 
