@@ -100,7 +100,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         mOkButton.setOnClickListener(this);
 
         mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, updateMonitor,
-                lockpatternutils, callback, true);
+                lockpatternutils, callback, false);
 
         setFocusableInTouchMode(true);
     }
