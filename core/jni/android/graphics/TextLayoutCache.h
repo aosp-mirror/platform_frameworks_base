@@ -174,9 +174,6 @@ private:
     static unsigned shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* paint,
             size_t count, bool isRTL);
 
-    static HB_Script getScriptFromRun(const UChar* chars, size_t start, size_t count,
-            bool isRTL);
-
     static void deleteGlyphArrays(HB_ShaperItem& shaperItem);
 
     static void createGlyphArrays(HB_ShaperItem& shaperItem, int size);
