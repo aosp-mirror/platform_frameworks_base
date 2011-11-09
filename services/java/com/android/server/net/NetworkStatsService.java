@@ -971,8 +971,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         mLastPollUidSnapshot = uidSnapshot;
-        mLastPollOperationsSnapshot = mOperations;
-        mOperations = new NetworkStats(0L, 10);
+        mLastPollOperationsSnapshot = mOperations.clone();
     }
 
     /**
