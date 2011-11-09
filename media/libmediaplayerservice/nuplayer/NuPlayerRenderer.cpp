@@ -381,7 +381,7 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
         LOGV("rendering video at media time %.2f secs", mediaTimeUs / 1E6);
     }
 
-    entry->mNotifyConsumed->setInt32("render", true);
+    entry->mNotifyConsumed->setInt32("render", !tooLate);
     entry->mNotifyConsumed->post();
     mVideoQueue.erase(mVideoQueue.begin());
     entry = NULL;
