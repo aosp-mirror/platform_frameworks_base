@@ -415,10 +415,7 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
     FontData* data = reinterpret_cast<FontData*>(shaperItem.font->userData);
     switch(shaperItem.item.script) {
         case HB_Script_Arabic:
-            if (!gArabicTypeface) {
-                gArabicTypeface = SkTypeface::CreateFromFile(TYPEFACE_ARABIC);
-            }
-            data->typeFace = gArabicTypeface;
+            data->typeFace = getCachedTypeface(gArabicTypeface, TYPEFACE_ARABIC);
 #if DEBUG_GLYPHS
             LOGD("Using Arabic Typeface");
 #endif
@@ -430,29 +427,21 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
                     case SkTypeface::kNormal:
                     case SkTypeface::kItalic:
                     default:
-                        if (!gHebrewRegularTypeface) {
-                            gHebrewRegularTypeface = SkTypeface::CreateFromFile(
-                                    TYPE_FACE_HEBREW_REGULAR);
-                        }
-                        data->typeFace = gHebrewRegularTypeface;
+                        data->typeFace = getCachedTypeface(gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
 #if DEBUG_GLYPHS
                         LOGD("Using Hebrew Regular/Italic Typeface");
 #endif
                         break;
                     case SkTypeface::kBold:
                     case SkTypeface::kBoldItalic:
-                        if (!gHebrewBoldTypeface) {
-                            gHebrewBoldTypeface = SkTypeface::CreateFromFile(
-                                    TYPE_FACE_HEBREW_BOLD);
-                        }
-                        data->typeFace = gHebrewBoldTypeface;
+                        data->typeFace = getCachedTypeface(gHebrewBoldTypeface, TYPE_FACE_HEBREW_BOLD);
 #if DEBUG_GLYPHS
                         LOGD("Using Hebrew Bold/BoldItalic Typeface");
 #endif
                         break;
                 }
             } else {
-                data->typeFace = gHebrewRegularTypeface;
+                data->typeFace = getCachedTypeface(gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
 #if DEBUG_GLYPHS
                         LOGD("Using Hebrew Regular Typeface");
 #endif
@@ -490,6 +479,13 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
     }
 
     return result;
+}
+
+SkTypeface* TextLayoutCacheValue::getCachedTypeface(SkTypeface* typeface, const char path[]) {
+    if (!typeface) {
+        typeface = SkTypeface::CreateFromFile(path);
+    }
+    return typeface;
 }
 
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,

@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define LOG_TAG "HarfbuzzSkia"
+
 #include "HarfbuzzSkia.h"
 
 #include "SkFontHost.h"
@@ -214,6 +216,10 @@ HB_Error harfbuzzSkiaGetTable(void* voidface, const HB_Tag tag, HB_Byte* buffer,
     FontData* data = reinterpret_cast<FontData*>(voidface);
     SkTypeface* typeface = data->typeFace;
 
+    if (!typeface) {
+        LOGD("Typeface cannot be null");
+        return HB_Err_Invalid_Argument;
+    }
     const size_t tableSize = SkFontHost::GetTableSize(typeface->uniqueID(), tag);
     if (!tableSize)
         return HB_Err_Invalid_Argument;
