@@ -76,7 +76,8 @@ SoftAVC::SoftAVC(
       mPicId(0),
       mHeadersDecoded(false),
       mEOSStatus(INPUT_DATA_AVAILABLE),
-      mOutputPortSettingsChange(NONE) {
+      mOutputPortSettingsChange(NONE),
+      mSignalledError(false) {
     initPorts();
     CHECK_EQ(initDecoder(), (status_t)OK);
 }
@@ -287,7 +288,7 @@ OMX_ERRORTYPE SoftAVC::getConfig(
 }
 
 void SoftAVC::onQueueFilled(OMX_U32 portIndex) {
-    if (mOutputPortSettingsChange != NONE) {
+    if (mSignalledError || mOutputPortSettingsChange != NONE) {
         return;
     }
 
@@ -298,7 +299,6 @@ void SoftAVC::onQueueFilled(OMX_U32 portIndex) {
     List<BufferInfo *> &inQueue = getPortQueue(kInputPortIndex);
     List<BufferInfo *> &outQueue = getPortQueue(kOutputPortIndex);
     H264SwDecRet ret = H264SWDEC_PIC_RDY;
-    status_t err = OK;
     bool portSettingsChanged = false;
     while ((mEOSStatus != INPUT_DATA_AVAILABLE || !inQueue.empty())
             && outQueue.size() == kNumOutputBuffers) {
@@ -372,7 +372,12 @@ void SoftAVC::onQueueFilled(OMX_U32 portIndex) {
                 inPicture.dataLen = 0;
                 if (ret < 0) {
                     LOGE("Decoder failed: %d", ret);
-                    err = ERROR_MALFORMED;
+
+                    notify(OMX_EventError, OMX_ErrorUndefined,
+                           ERROR_MALFORMED, NULL);
+
+                    mSignalledError = true;
+                    return;
                 }
             }
         }
@@ -399,10 +404,6 @@ void SoftAVC::onQueueFilled(OMX_U32 portIndex) {
             int32_t picId = decodedPicture.picId;
             uint8_t *data = (uint8_t *) decodedPicture.pOutputPicture;
             drainOneOutputBuffer(picId, data);
-        }
-
-        if (err != OK) {
-            notify(OMX_EventError, OMX_ErrorUndefined, err, NULL);
         }
     }
 }
