@@ -466,7 +466,7 @@ public class NetworkStats implements Parcelable {
     public NetworkStats subtract(NetworkStats value) throws NonMonotonicException {
         final long deltaRealtime = this.elapsedRealtime - value.elapsedRealtime;
         if (deltaRealtime < 0) {
-            throw new IllegalArgumentException("found non-monotonic realtime");
+            throw new NonMonotonicException(this, value);
         }
 
         // result will have our rows, and elapsed time between snapshots
@@ -586,7 +586,8 @@ public class NetworkStats implements Parcelable {
         pw.print("NetworkStats: elapsedRealtime="); pw.println(elapsedRealtime);
         for (int i = 0; i < size; i++) {
             pw.print(prefix);
-            pw.print("  iface="); pw.print(iface[i]);
+            pw.print("  ["); pw.print(i); pw.print("]");
+            pw.print(" iface="); pw.print(iface[i]);
             pw.print(" uid="); pw.print(uid[i]);
             pw.print(" set="); pw.print(setToString(set[i]));
             pw.print(" tag="); pw.print(tagToString(tag[i]));
@@ -648,6 +649,10 @@ public class NetworkStats implements Parcelable {
         public final NetworkStats right;
         public final int leftIndex;
         public final int rightIndex;
+
+        public NonMonotonicException(NetworkStats left, NetworkStats right) {
+            this(left, -1, right, -1);
+        }
 
         public NonMonotonicException(
                 NetworkStats left, int leftIndex, NetworkStats right, int rightIndex) {
