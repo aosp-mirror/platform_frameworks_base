@@ -1484,7 +1484,21 @@ public class WebView extends AbsoluteLayout
     private int getVisibleTitleHeightImpl() {
         // need to restrict mScrollY due to over scroll
         return Math.max(getTitleHeight() - Math.max(0, mScrollY),
-                mFindCallback != null ? mFindCallback.getActionModeHeight() : 0);
+                getOverlappingActionModeHeight());
+    }
+
+    private int mCachedOverlappingActionModeHeight = -1;
+
+    private int getOverlappingActionModeHeight() {
+        if (mFindCallback == null) {
+            return 0;
+        }
+        if (mCachedOverlappingActionModeHeight < 0) {
+            getGlobalVisibleRect(mGlobalVisibleRect, mGlobalVisibleOffset);
+            mCachedOverlappingActionModeHeight = Math.max(0,
+                    mFindCallback.getActionModeGlobalBottom() - mGlobalVisibleRect.top);
+        }
+        return mCachedOverlappingActionModeHeight;
     }
 
     /*
@@ -3375,6 +3389,7 @@ public class WebView extends AbsoluteLayout
             // Could not start the action mode, so end Find on page
             return false;
         }
+        mCachedOverlappingActionModeHeight = -1;
         mFindCallback = callback;
         setFindIsUp(true);
         mFindCallback.setWebView(this);
@@ -3492,6 +3507,7 @@ public class WebView extends AbsoluteLayout
      */
     void notifyFindDialogDismissed() {
         mFindCallback = null;
+        mCachedOverlappingActionModeHeight = -1;
         if (mWebViewCore == null) {
             return;
         }
@@ -4341,6 +4357,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        mCachedOverlappingActionModeHeight = -1;
         if (mSelectingText && mOrientation != newConfig.orientation) {
             selectionDone();
         }
