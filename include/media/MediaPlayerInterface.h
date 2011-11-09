@@ -117,9 +117,6 @@ public:
         return INVALID_OPERATION;
     }
 
-    // pass the buffered Surface to the media player service
-    virtual status_t    setVideoSurface(const sp<Surface>& surface) = 0;
-
     // pass the buffered ISurfaceTexture to the media player service
     virtual status_t    setVideoSurfaceTexture(
                                 const sp<ISurfaceTexture>& surfaceTexture) = 0;
