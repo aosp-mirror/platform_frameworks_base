@@ -439,17 +439,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Calls back SetupFaceLock to save the temporary gallery file if this is the backup lock.
-     * This doesn't have to verify that biometric is enabled because it's only called in that case
-    */
-    void moveTempGallery() {
-        Intent intent = new Intent().setClassName("com.android.facelock",
-                "com.android.facelock.SetupFaceLock");
-        intent.putExtra("moveTempGallery", true);
-        mContext.startActivity(intent);
-    }
-
-    /**
      * Calls back SetupFaceLock to delete the temporary gallery file
      */
     public void deleteTempGallery() {
@@ -501,8 +490,7 @@ public class LockPatternUtils {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY,
                             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
-                    setBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, true);
-                    moveTempGallery();
+                    finishBiometricWeak();
                 }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
                         .size(), 0, 0, 0, 0, 0, 0);
@@ -619,8 +607,7 @@ public class LockPatternUtils {
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality));
-                    setBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, true);
-                    moveTempGallery();
+                    finishBiometricWeak();
                 }
                 if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                     int letters = 0;
@@ -1087,4 +1074,16 @@ public class LockPatternUtils {
         }
         return false;
     }
+
+    private void finishBiometricWeak() {
+        setBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, true);
+
+        // Launch intent to show final screen, this also
+        // moves the temporary gallery to the actual gallery
+        Intent intent = new Intent();
+        intent.setClassName("com.android.facelock",
+                "com.android.facelock.SetupEndScreen");
+        mContext.startActivity(intent);
+    }
+
 }
