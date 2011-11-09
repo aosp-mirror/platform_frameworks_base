@@ -1220,6 +1220,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 Thread thread = new Thread() {
                     @Override public void run() {
+                        StringBuilder dropBuilder = new StringBuilder(1024);
+                        StringBuilder logBuilder = new StringBuilder(1024);
                         try {
                             java.lang.Process proc = Runtime.getRuntime().exec(new String[] {
                                     "procrank", });
@@ -1233,16 +1235,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     break;
                                 }
                                 if (line.length() > 0) {
-                                    Slog.i(TAG, line);
+                                    logBuilder.append(line);
+                                    logBuilder.append('\n');
                                 }
+                                dropBuilder.append(line);
+                                dropBuilder.append('\n');
                             }
                             converter.close();
                         } catch (IOException e) {
                         }
                         StringWriter sw = new StringWriter();
                         PrintWriter pw = new PrintWriter(sw);
-                        dumpApplicationMemoryUsage(null, pw, "  ", new String[] { }, true);
-                        Slog.i(TAG, sw.toString());
+                        StringWriter catSw = new StringWriter();
+                        PrintWriter catPw = new PrintWriter(catSw);
+                        dumpApplicationMemoryUsage(null, pw, "  ", new String[] { }, true, catPw);
+                        String memUsage = sw.toString();
+                        dropBuilder.append('\n');
+                        dropBuilder.append(memUsage);
+                        dropBuilder.append(catSw.toString());
+                        logBuilder.append(memUsage);
+                        addErrorToDropBox("watchdog", null, "system_server", null,
+                                null, "Low on memory -- no more background processes",
+                                dropBuilder.toString(), null, null);
+                        Slog.i(TAG, logBuilder.toString());
                         synchronized (ActivityManagerService.this) {
                             long now = SystemClock.uptimeMillis();
                             if (mLastMemUsageReportTime < now) {
@@ -1394,7 +1409,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false);
+            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
         }
     }
 
@@ -3192,7 +3207,49 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 killPackageProcessesLocked(packageName, pkgUid,
-                        ProcessList.SERVICE_ADJ, false, true, true, false);
+                        ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    public void killAllBackgroundProcesses() {
+        if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: killAllBackgroundProcesses() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
+                for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
+                    final int NA = apps.size();
+                    for (int ia=0; ia<NA; ia++) {
+                        ProcessRecord app = apps.valueAt(ia);
+                        if (app.persistent) {
+                            // we don't kill persistent processes
+                            continue;
+                        }
+                        if (app.removed) {
+                            procs.add(app);
+                        } else if (app.setAdj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
+                            app.removed = true;
+                            procs.add(app);
+                        }
+                    }
+                }
+                
+                int N = procs.size();
+                for (int i=0; i<N; i++) {
+                    removeProcessLocked(procs.get(i), false, true, "kill all background");
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -3364,7 +3421,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     private final boolean killPackageProcessesLocked(String packageName, int uid,
             int minOomAdj, boolean callerWillRestart, boolean allowRestart, boolean doit,
-            boolean evenPersistent) {
+            boolean evenPersistent, String reason) {
         ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
 
         // Remove all processes this package may have touched: all with the
@@ -3399,7 +3456,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         int N = procs.size();
         for (int i=0; i<N; i++) {
-            removeProcessLocked(procs.get(i), callerWillRestart, allowRestart);
+            removeProcessLocked(procs.get(i), callerWillRestart, allowRestart, reason);
         }
         return N > 0;
     }
@@ -3430,7 +3487,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         
         boolean didSomething = killPackageProcessesLocked(name, uid, -100,
-                callerWillRestart, false, doit, evenPersistent);
+                callerWillRestart, false, doit, evenPersistent, "force stop");
         
         TaskRecord lastTask = null;
         for (i=0; i<mMainStack.mHistory.size(); i++) {
@@ -3518,11 +3575,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean removeProcessLocked(ProcessRecord app,
-            boolean callerWillRestart, boolean allowRestart) {
+            boolean callerWillRestart, boolean allowRestart, String reason) {
         final String name = app.processName;
         final int uid = app.info.uid;
         if (DEBUG_PROCESSES) Slog.d(
-            TAG, "Force removing process " + app + " (" + name
+            TAG, "Force removing proc " + app.toShortString() + " (" + name
             + "/" + uid + ")");
 
         mProcessNames.remove(name, uid);
@@ -3537,9 +3594,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
+            Slog.i(TAG, "Killing proc " + app.toShortString() + ": " + reason);
             handleAppDiedLocked(app, true, allowRestart);
             mLruProcesses.remove(app);
-            Process.killProcess(pid);
+            Process.killProcessQuiet(pid);
             
             if (app.persistent) {
                 if (!callerWillRestart) {
@@ -6846,7 +6904,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=procsToKill.size()-1; i>=0; i--) {
                     ProcessRecord proc = procsToKill.get(i);
                     Slog.i(TAG, "Removing system update proc: " + proc);
-                    removeProcessLocked(proc, true, false);
+                    removeProcessLocked(proc, true, false, "system update done");
                 }
             }
             
@@ -7042,7 +7100,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
-                removeProcessLocked(app, false, false);
+                removeProcessLocked(app, false, false, "crash");
                 mMainStack.resumeTopActivityLocked(null);
                 return false;
             }
@@ -9298,8 +9356,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
-            PrintWriter pw, String prefix, String[] args, boolean brief) {
+            PrintWriter pw, String prefix, String[] args, boolean brief,
+            PrintWriter categoryPw) {
         boolean dumpAll = false;
+        boolean oomOnly = false;
         
         int opti = 0;
         while (opti < args.length) {
@@ -9310,9 +9370,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             opti++;
             if ("-a".equals(opt)) {
                 dumpAll = true;
+            } else if ("--oom".equals(opt)) {
+                oomOnly = true;
             } else if ("-h".equals(opt)) {
-                pw.println("meminfo dump options: [-a] [process]");
+                pw.println("meminfo dump options: [-a] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
+                pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
                 return;
@@ -9438,7 +9501,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            if (!brief) {
+            if (!brief && !oomOnly) {
                 pw.println();
                 pw.println("Total PSS by process:");
                 dumpMemItems(pw, "  ", procMems, true);
@@ -9446,10 +9509,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             pw.println("Total PSS by OOM adjustment:");
             dumpMemItems(pw, "  ", oomMems, false);
-            if (!brief) {
-                pw.println();
-                pw.println("Total PSS by category:");
-                dumpMemItems(pw, "  ", catMems, true);
+            if (!oomOnly) {
+                PrintWriter out = categoryPw != null ? categoryPw : pw;
+                out.println();
+                out.println("Total PSS by category:");
+                dumpMemItems(out, "  ", catMems, true);
             }
             pw.println();
             pw.print("Total PSS: "); pw.print(totalPss); pw.println(" Kb");
