@@ -18890,7 +18890,8 @@ package android.speech.tts {
     method public int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public deprecated int setEngineByPackageName(java.lang.String);
     method public int setLanguage(java.util.Locale);
-    method public int setOnUtteranceCompletedListener(android.speech.tts.TextToSpeech.OnUtteranceCompletedListener);
+    method public deprecated int setOnUtteranceCompletedListener(android.speech.tts.TextToSpeech.OnUtteranceCompletedListener);
+    method public int setOnUtteranceProgressListener(android.speech.tts.UtteranceProgressListener);
     method public int setPitch(float);
     method public int setSpeechRate(float);
     method public void shutdown();
@@ -18961,6 +18962,13 @@ package android.speech.tts {
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract void onStop();
     method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
+  }
+
+  public abstract class UtteranceProgressListener {
+    ctor public UtteranceProgressListener();
+    method public abstract void onDone(java.lang.String);
+    method public abstract void onError(java.lang.String);
+    method public abstract void onStart(java.lang.String);
   }
 
 }
