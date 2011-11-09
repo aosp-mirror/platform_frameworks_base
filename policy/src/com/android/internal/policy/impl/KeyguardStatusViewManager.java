@@ -91,7 +91,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mUpdateMonitor;
     private Button mEmergencyCallButton;
-    private boolean mUnlockDisabledDueToSimState;
+    private boolean mEmergencyButtonEnabledBecauseSimLocked;
 
     // Shadowed text values
     private CharSequence mCarrierText;
@@ -101,9 +101,10 @@ class KeyguardStatusViewManager implements OnClickListener {
     private CharSequence mOwnerInfoText;
     private boolean mShowingStatus;
     private KeyguardScreenCallback mCallback;
-    private final boolean mShowEmergencyButtonByDefault;
+    private final boolean mEmergencyCallButtonEnabledInScreen;
     private CharSequence mPlmn;
     private CharSequence mSpn;
+    protected int mPhoneState;
 
     private class TransientTextManager {
         private TextView mTextView;
@@ -154,9 +155,17 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
     };
 
+    /**
+     *
+     * @param view the containing view of all widgets
+     * @param updateMonitor the update monitor to use
+     * @param lockPatternUtils lock pattern util object
+     * @param callback used to invoke emergency dialer
+     * @param emergencyButtonEnabledInScreen whether emergency button is enabled by default
+     */
     public KeyguardStatusViewManager(View view, KeyguardUpdateMonitor updateMonitor,
                 LockPatternUtils lockPatternUtils, KeyguardScreenCallback callback,
-                boolean showEmergencyButtonByDefault) {
+                boolean emergencyButtonEnabledInScreen) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
@@ -171,7 +180,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         mOwnerInfoView = (TextView) findViewById(R.id.propertyOf);
         mTransportView = (TransportControlView) findViewById(R.id.transport);
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
-        mShowEmergencyButtonByDefault = showEmergencyButtonByDefault;
+        mEmergencyCallButtonEnabledInScreen = emergencyButtonEnabledInScreen;
 
         // Hide transport control view until we know we need to show it.
         if (mTransportView != null) {
@@ -452,12 +461,12 @@ class KeyguardStatusViewManager implements OnClickListener {
      *
      * @param simState
      */
-    private void updateCarrierTextWithSimStatus(State simState) {
+    private void updateCarrierStateWithSimStatus(State simState) {
         if (DEBUG) Log.d(TAG, "updateCarrierTextWithSimStatus(), simState = " + simState);
 
         CharSequence carrierText = null;
         int carrierHelpTextId = 0;
-        mUnlockDisabledDueToSimState = false;
+        mEmergencyButtonEnabledBecauseSimLocked = false;
         mStatus = getStatusForIccState(simState);
         mSimState = simState;
         switch (mStatus) {
@@ -479,32 +488,35 @@ class KeyguardStatusViewManager implements OnClickListener {
             case SimPermDisabled:
                 carrierText = getContext().getText(R.string.lockscreen_missing_sim_message_short);
                 carrierHelpTextId = R.string.lockscreen_permanent_disabled_sim_instructions;
-                mUnlockDisabledDueToSimState = true;
+                mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
 
             case SimMissingLocked:
                 carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_missing_sim_message_short));
                 carrierHelpTextId = R.string.lockscreen_missing_sim_instructions;
-                mUnlockDisabledDueToSimState = true;
+                mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
 
             case SimLocked:
                 carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_sim_locked_message));
+                mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
 
             case SimPukLocked:
                 carrierText = makeCarierString(mPlmn,
                         getContext().getText(R.string.lockscreen_sim_puk_locked_message));
                 if (!mLockPatternUtils.isPukUnlockScreenEnable()) {
-                    mUnlockDisabledDueToSimState = true;
+                    // This means we're showing the PUK unlock screen
+                    mEmergencyButtonEnabledBecauseSimLocked = true;
                 }
                 break;
         }
 
         setCarrierText(carrierText);
         setCarrierHelpText(carrierHelpTextId);
+        updateEmergencyCallButtonState(mPhoneState);
     }
 
     private View findViewById(int id) {
@@ -569,9 +581,12 @@ class KeyguardStatusViewManager implements OnClickListener {
 
     private void updateEmergencyCallButtonState(int phoneState) {
         if (mEmergencyCallButton != null) {
-            boolean showIfCapable = mShowEmergencyButtonByDefault || mUnlockDisabledDueToSimState;
+            boolean enabledBecauseSimLocked =
+                    mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked()
+                    && mEmergencyButtonEnabledBecauseSimLocked;
+            boolean shown = mEmergencyCallButtonEnabledInScreen || enabledBecauseSimLocked;
             mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton,
-                    phoneState, showIfCapable);
+                    phoneState, shown);
         }
     }
 
@@ -594,7 +609,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
             mPlmn = plmn;
             mSpn = spn;
-            updateCarrierTextWithSimStatus(mSimState);
+            updateCarrierStateWithSimStatus(mSimState);
         }
 
         public void onRingerModeChanged(int state) {
@@ -602,6 +617,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
 
         public void onPhoneStateChanged(int phoneState) {
+            mPhoneState = phoneState;
             updateEmergencyCallButtonState(phoneState);
         }
 
@@ -618,7 +634,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private SimStateCallback mSimStateCallback = new SimStateCallback() {
 
         public void onSimStateChanged(State simState) {
-            updateCarrierTextWithSimStatus(simState);
+            updateCarrierStateWithSimStatus(simState);
         }
     };
 
