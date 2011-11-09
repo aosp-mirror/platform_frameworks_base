@@ -1338,12 +1338,19 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetoothAdmin">Bluetooth administration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothAdmin" product="tablet">Allows the app to configure
-      the local Bluetooth tablet, and to discover and pair with remote
+    <string name="permdesc_bluetoothAdmin" product="tablet">Allows the app to
+      configure the local Bluetooth tablet, and to discover and pair with remote
       devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
       the local Bluetooth phone, and to discover and pair with remote devices.</string>
+
+    <string name="permlab_accessWimaxState">View WiMAX state</string>
+    <string name="permdesc_accessWimaxState">Allows an application to view
+      the information about the state of WiMAX.</string>
+    <string name="permlab_changeWimaxState">Change WiMAX state</string>
+    <string name="permdesc_changeWimaxState">Allows an application to connect
+      to and disconnect from WiMAX network.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetooth">create Bluetooth connections</string>

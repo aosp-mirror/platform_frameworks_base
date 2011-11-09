@@ -256,7 +256,12 @@
     <!-- Content description of the WIFI signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_three_bars">Wi-Fi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_signal_full">Wi-Fi signal full.</string>
+    <string name="accessibility_wifi_signal_full">WiFi signal full.</string>
+    <string name="accessibility_no_wimax">No WiMAX.</string>
+    <string name="accessibility_wimax_one_bar">WiMAX one bar.</string>
+    <string name="accessibility_wimax_two_bars">WiMAX two bars.</string>
+    <string name="accessibility_wimax_three_bars">WiMAX three bars.</string>
+    <string name="accessibility_wimax_signal_full">WiMAX signal full.</string>
 
     <!-- Content description of the data connection type GPRS for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_gprs">GPRS</string>
