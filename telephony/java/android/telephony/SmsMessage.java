@@ -291,12 +291,31 @@ public class SmsMessage {
         // flexibly...
 
         int limit;
-        if (ted.msgCount > 1) {
-            limit = (ted.codeUnitSize == ENCODING_7BIT) ?
-                MAX_USER_DATA_SEPTETS_WITH_HEADER : MAX_USER_DATA_BYTES_WITH_HEADER;
+        if (ted.codeUnitSize == ENCODING_7BIT) {
+            int udhLength;
+            if (ted.languageTable != 0 && ted.languageShiftTable != 0) {
+                udhLength = GsmAlphabet.UDH_SEPTET_COST_TWO_SHIFT_TABLES;
+            } else if (ted.languageTable != 0 || ted.languageShiftTable != 0) {
+                udhLength = GsmAlphabet.UDH_SEPTET_COST_ONE_SHIFT_TABLE;
+            } else {
+                udhLength = 0;
+            }
+
+            if (ted.msgCount > 1) {
+                udhLength += GsmAlphabet.UDH_SEPTET_COST_CONCATENATED_MESSAGE;
+            }
+
+            if (udhLength != 0) {
+                udhLength += GsmAlphabet.UDH_SEPTET_COST_LENGTH;
+            }
+
+            limit = MAX_USER_DATA_SEPTETS - udhLength;
         } else {
-            limit = (ted.codeUnitSize == ENCODING_7BIT) ?
-                MAX_USER_DATA_SEPTETS : MAX_USER_DATA_BYTES;
+            if (ted.msgCount > 1) {
+                limit = MAX_USER_DATA_BYTES_WITH_HEADER;
+            } else {
+                limit = MAX_USER_DATA_BYTES;
+            }
         }
 
         int pos = 0;  // Index in code units.
