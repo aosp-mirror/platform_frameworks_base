@@ -247,13 +247,12 @@ public final class BluetoothDevice implements Parcelable {
      * has been fetched. This intent is sent only when the UUIDs of the remote
      * device are requested to be fetched using Service Discovery Protocol
      * <p> Always contains the extra field {@link #EXTRA_DEVICE}
-     * <p> Always contains the extra filed {@link #EXTRA_UUID}
+     * <p> Always contains the extra field {@link #EXTRA_UUID}
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UUID =
-            "android.bleutooth.device.action.UUID";
+            "android.bluetooth.device.action.UUID";
 
     /**
      * Broadcast Action: Indicates a failure to retrieve the name of a remote
@@ -451,7 +450,6 @@ public final class BluetoothDevice implements Parcelable {
      * Used as an extra field in {@link #ACTION_UUID} intents,
      * Contains the {@link android.os.ParcelUuid}s of the remote device which
      * is a parcelable version of {@link UUID}.
-     * @hide
      */
     public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
 
@@ -770,7 +768,18 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
-    /** @hide */
+    /**
+     * Returns the supported features (UUIDs) of the remote device.
+     *
+     * <p>This method does not start a service discovery procedure to retrieve the UUIDs
+     * from the remote device. Instead, the local cached copy of the service
+     * UUIDs are returned.
+     * <p>Use {@link #fetchUuidsWithSdp} if fresh UUIDs are desired.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     *
+     * @return the supported features (UUIDs) of the remote device,
+     *         or null on error
+     */
      public ParcelUuid[] getUuids() {
         try {
             return sService.getRemoteUuids(mAddress);
@@ -779,18 +788,19 @@ public final class BluetoothDevice implements Parcelable {
     }
 
      /**
-      *  Perform a SDP query on the remote device to get the UUIDs
-      *  supported. This API is asynchronous and an Intent is sent,
-      *  with the UUIDs supported by the remote end. If there is an error
-      *  in getting the SDP records or if the process takes a long time,
-      *  an Intent is sent with the UUIDs that is currently present in the
-      *  cache. Clients should use the {@link #getUuids} to get UUIDs
-      *  is SDP is not to be performed.
+      * Perform a service discovery on the remote device to get the UUIDs supported.
       *
-      *  @return False if the sanity check fails, True if the process
+      * <p>This API is asynchronous and {@link #ACTION_UUID} intent is sent,
+      * with the UUIDs supported by the remote end. If there is an error
+      * in getting the SDP records or if the process takes a long time,
+      * {@link #ACTION_UUID} intent is sent with the UUIDs that is currently
+      * present in the cache. Clients should use the {@link #getUuids} to get UUIDs
+      * if service discovery is not to be performed.
+      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+      *
+      * @return False if the sanity check fails, True if the process
       *               of initiating an ACL connection to the remote device
       *               was started.
-      *  @hide
       */
      public boolean fetchUuidsWithSdp() {
         try {
