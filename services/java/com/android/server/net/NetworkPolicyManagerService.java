@@ -225,8 +225,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Set of currently active {@link Notification} tags. */
     private HashSet<String> mActiveNotifs = Sets.newHashSet();
-    /** Current values from {@link #setPolicyDataEnable(int, boolean)}. */
-    private SparseBooleanArray mActiveNetworkEnabled = new SparseBooleanArray();
 
     /** Foreground at both UID and PID granularity. */
     private SparseBooleanArray mUidForeground = new SparseBooleanArray();
@@ -1519,21 +1517,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Control {@link IConnectivityManager#setPolicyDataEnable(int, boolean)},
-     * dispatching only when actually changed.
+     * Control {@link IConnectivityManager#setPolicyDataEnable(int, boolean)}.
      */
     private void setPolicyDataEnable(int networkType, boolean enabled) {
-        synchronized (mActiveNetworkEnabled) {
-            final boolean prevEnabled = mActiveNetworkEnabled.get(networkType, true);
-            if (prevEnabled == enabled) return;
-
-            try {
-                mConnManager.setPolicyDataEnable(networkType, enabled);
-            } catch (RemoteException e) {
-                // ignored; service lives in system_server
-            }
-
-            mActiveNetworkEnabled.put(networkType, enabled);
+        try {
+            mConnManager.setPolicyDataEnable(networkType, enabled);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
         }
     }
 
