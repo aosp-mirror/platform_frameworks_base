@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 public class FrameworkPerfActivity extends Activity
         implements AdapterView.OnItemSelectedListener {
     static final String TAG = "Perf";
+    static final boolean DEBUG = false;
 
     Spinner mFgSpinner;
     Spinner mBgSpinner;
@@ -67,22 +69,47 @@ public class FrameworkPerfActivity extends Activity
     TestService.Op mBgTest;
     int mCurOpIndex = 0;
     TestConnection mCurConnection;
+    boolean mConnectionBound;
 
     final ArrayList<RunResult> mResults = new ArrayList<RunResult>();
 
-    class TestConnection implements ServiceConnection {
+    class TestConnection implements ServiceConnection, IBinder.DeathRecipient {
         Messenger mService;
+        boolean mLinked;
 
         @Override public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = new Messenger(service);
-            dispatchCurOp(this);
+            try {
+                if (!(service instanceof Binder)) {
+                    // If remote, we'll be killing ye.
+                    service.linkToDeath(this, 0);
+                    mLinked = true;
+                }
+                mService = new Messenger(service);
+                dispatchCurOp(this);
+            } catch (RemoteException e) {
+                // Whoops, service has disappeared...  try starting again.
+                Log.w(TAG, "Test service died, starting again");
+                startCurOp();
+            }
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
         }
+
+        @Override public void binderDied() {
+            cleanup();
+            connectionDied(this);
+        }
+
+        void cleanup() {
+            if (mLinked) {
+                mLinked = false;
+                mService.getBinder().unlinkToDeath(this, 0);
+            }
+        }
     }
 
-    static final int MSG_CONTINUE = 1000;
+    static final int MSG_DO_NEXT_TEST = 1000;
 
     final Handler mHandler = new Handler() {
         @Override public void handleMessage(Message msg) {
@@ -93,11 +120,7 @@ public class FrameworkPerfActivity extends Activity
                     RunResult res = (RunResult)bundle.getParcelable("res");
                     completeCurOp(res);
                 } break;
-                case TestService.RES_TERMINATED: {
-                    // Give a little time for things to settle down.
-                    sendMessageDelayed(obtainMessage(MSG_CONTINUE), 500);
-                } break;
-                case MSG_CONTINUE: {
+                case MSG_DO_NEXT_TEST: {
                     startCurOp();
                 } break;
             }
@@ -235,7 +258,7 @@ public class FrameworkPerfActivity extends Activity
         try {
             conn.mService.send(msg);
         } catch (RemoteException e) {
-            Log.i(TAG, "Failure communicating with service", e);
+            Log.w(TAG, "Failure communicating with service", e);
         }
     }
 
@@ -273,29 +296,55 @@ public class FrameworkPerfActivity extends Activity
     }
 
     void disconnect() {
-        if (mCurConnection != null) {
-            unbindService(mCurConnection);
-            if (mCurConnection.mService != null) {
+        final TestConnection conn = mCurConnection;
+        if (conn != null) {
+            if (DEBUG) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Log.i(TAG, "Unbinding " + conn, here);
+            }
+            if (mConnectionBound) {
+                unbindService(conn);
+                mConnectionBound = false;
+            }
+            if (conn.mLinked) {
                 Message msg = Message.obtain(null, TestService.CMD_TERMINATE);
-                msg.replyTo = mMessenger;
                 try {
-                    mCurConnection.mService.send(msg);
+                    conn.mService.send(msg);
+                    return;
                 } catch (RemoteException e) {
-                    Log.i(TAG, "Failure communicating with service", e);
+                    Log.w(TAG, "Test service aleady died when terminating");
                 }
             }
+            conn.cleanup();
+        }
+        connectionDied(conn);
+    }
+
+    void connectionDied(TestConnection conn) {
+        if (mCurConnection == conn) {
+            // Now that we know the test process has died, we can commence
+            // the next test.  Just give a little delay to allow the activity
+            // manager to know it has died as well (not a disaster if it hasn't
+            // yet, though).
+            if (mConnectionBound) {
+                unbindService(conn);
+            }
             mCurConnection = null;
+            mHandler.sendMessageDelayed(Message.obtain(null, MSG_DO_NEXT_TEST), 100);
         }
     }
 
     void startCurOp() {
+        if (DEBUG) Log.i(TAG, "startCurOp: mCurConnection=" + mCurConnection);
         if (mCurConnection != null) {
             disconnect();
+            return;
         }
         if (mStarted) {
             mHandler.removeMessages(TestService.RES_TEST_FINISHED);
             mHandler.removeMessages(TestService.RES_TERMINATED);
-            mHandler.removeMessages(MSG_CONTINUE);
+            mHandler.removeMessages(MSG_DO_NEXT_TEST);
             mCurConnection = new TestConnection();
             Intent intent;
             if (mLocalCheckBox.isChecked()) {
@@ -303,7 +352,13 @@ public class FrameworkPerfActivity extends Activity
             } else {
                 intent = new Intent(this, TestService.class);
             }
+            if (DEBUG) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Log.i(TAG, "Binding " + mCurConnection, here);
+            }
             bindService(intent, mCurConnection, BIND_AUTO_CREATE|BIND_IMPORTANT);
+            mConnectionBound = true;
         }
     }
 
