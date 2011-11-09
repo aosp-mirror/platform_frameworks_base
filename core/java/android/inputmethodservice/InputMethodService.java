@@ -1982,7 +1982,29 @@ public class InputMethodService extends AbstractInputMethodService {
             conn.setSelection(start, end);
         }
     }
-    
+
+    /**
+     * @hide
+     */
+    public void onExtractedDeleteText(int start, int end) {
+        InputConnection conn = getCurrentInputConnection();
+        if (conn != null) {
+            conn.setSelection(start, start);
+            conn.deleteSurroundingText(0, end-start);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void onExtractedReplaceText(int start, int end, CharSequence text) {
+        InputConnection conn = getCurrentInputConnection();
+        if (conn != null) {
+            conn.setComposingRegion(start, end);
+            conn.commitText(text, 1);
+        }
+    }
+
     /**
      * This is called when the user has clicked on the extracted text view,
      * when running in fullscreen mode.  The default implementation hides
@@ -1998,7 +2020,7 @@ public class InputMethodService extends AbstractInputMethodService {
             setCandidatesViewShown(false);
         }
     }
-    
+
     /**
      * This is called when the user has performed a cursor movement in the
      * extracted text view, when it is running in fullscreen mode.  The default
