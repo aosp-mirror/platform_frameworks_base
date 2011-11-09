@@ -184,6 +184,7 @@ public class WifiStateMachine extends StateMachine {
     private WifiP2pManager mWifiP2pManager;
     //Used to initiate a connection with WifiP2pService
     private AsyncChannel mWifiP2pChannel = new AsyncChannel();
+    private AsyncChannel mWifiApConfigChannel = new AsyncChannel();
 
     // Event log tags (must be in sync with event-log-tags)
     private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
@@ -233,12 +234,16 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_STOP_AP                          = BASE + 24;
     /* Set the soft access point configuration */
     static final int CMD_SET_AP_CONFIG                    = BASE + 25;
-    /* Get the soft access point configuration */
-    static final int CMD_GET_AP_CONFIG                    = BASE + 26;
+    /* Soft access point configuration set completed */
+    static final int CMD_SET_AP_CONFIG_COMPLETED          = BASE + 26;
+    /* Request the soft access point configuration */
+    static final int CMD_REQUEST_AP_CONFIG                = BASE + 27;
+    /* Response to access point configuration request */
+    static final int CMD_RESPONSE_AP_CONFIG               = BASE + 28;
     /* Set configuration on tether interface */
-    static final int CMD_TETHER_INTERFACE                 = BASE + 27;
+    static final int CMD_TETHER_INTERFACE                 = BASE + 29;
 
-    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 28;
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 30;
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
@@ -530,6 +535,11 @@ public class WifiStateMachine extends StateMachine {
         mWpsStateMachine = new WpsStateMachine(context, this, getHandler());
         mLinkProperties = new LinkProperties();
 
+        WifiApConfigStore wifiApConfigStore = WifiApConfigStore.makeWifiApConfigStore(
+                context, getHandler());
+        wifiApConfigStore.loadApConfiguration();
+        mWifiApConfigChannel.connectSync(mContext, getHandler(), wifiApConfigStore.getMessenger());
+
         mNetworkInfo.setIsAvailable(false);
         mLinkProperties.clear();
         mLastBssid = null;
@@ -659,11 +669,11 @@ public class WifiStateMachine extends StateMachine {
     }
 
     public void setWifiApConfiguration(WifiConfiguration config) {
-        sendMessage(obtainMessage(CMD_SET_AP_CONFIG, config));
+        mWifiApConfigChannel.sendMessage(CMD_SET_AP_CONFIG, config);
     }
 
-    public WifiConfiguration syncGetWifiApConfiguration(AsyncChannel channel) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_GET_AP_CONFIG);
+    public WifiConfiguration syncGetWifiApConfiguration() {
+        Message resultMsg = mWifiApConfigChannel.sendMessageSynchronously(CMD_REQUEST_AP_CONFIG);
         WifiConfiguration ret = (WifiConfiguration) resultMsg.obj;
         resultMsg.recycle();
         return ret;
@@ -1714,25 +1724,27 @@ public class WifiStateMachine extends StateMachine {
      * TODO: Add control channel setup through hostapd that allows changing config
      * on a running daemon
      */
-    private boolean startSoftApWithConfig(WifiConfiguration config) {
-        if (config == null) {
-            config = WifiApConfigStore.getApConfiguration();
-        } else {
-            WifiApConfigStore.setApConfiguration(config);
-        }
-        try {
-            mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
-        } catch (Exception e) {
-            loge("Exception in softap start " + e);
-            try {
-                mNwService.stopAccessPoint(mInterfaceName);
-                mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
-            } catch (Exception e1) {
-                loge("Exception in softap re-start " + e1);
-                return false;
+    private void startSoftApWithConfig(final WifiConfiguration config) {
+        // start hostapd on a seperate thread
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                } catch (Exception e) {
+                    loge("Exception in softap start " + e);
+                    try {
+                        mNwService.stopAccessPoint(mInterfaceName);
+                        mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                    } catch (Exception e1) {
+                        loge("Exception in softap re-start " + e1);
+                        sendMessage(CMD_START_AP_FAILURE);
+                        return;
+                    }
+                }
+                if (DBG) log("Soft AP start successful");
+                sendMessage(CMD_START_AP_SUCCESS);
             }
-        }
-        return true;
+        }).start();
     }
 
     /********************************************************
@@ -1775,13 +1787,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_BACKGROUND_SCAN:
                     mEnableBackgroundScan = (message.arg1 == 1);
                     break;
-                case CMD_SET_AP_CONFIG:
-                    WifiApConfigStore.setApConfiguration((WifiConfiguration) message.obj);
-                    break;
-                case CMD_GET_AP_CONFIG:
-                    WifiConfiguration config = WifiApConfigStore.getApConfiguration();
-                    mReplyChannel.replyToMessage(message, message.what, config);
-                    break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
@@ -1823,6 +1828,11 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_ALL_NETWORKS:
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
+                /* Handled by WifiApConfigStore */
+                case CMD_SET_AP_CONFIG:
+                case CMD_SET_AP_CONFIG_COMPLETED:
+                case CMD_REQUEST_AP_CONFIG:
+                case CMD_RESPONSE_AP_CONFIG:
                     break;
                 case WifiMonitor.DRIVER_HUNG_EVENT:
                     setWifiEnabled(false);
@@ -1855,8 +1865,6 @@ public class WifiStateMachine extends StateMachine {
             // [7 - 0] HSM state change
             // 50021 wifi_state_changed (custom|1|5)
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-
-            WifiApConfigStore.initialize(mContext);
 
             if (WifiNative.isDriverLoaded()) {
                 transitionTo(mDriverLoadedState);
@@ -3243,21 +3251,19 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
-            final Message message = Message.obtain(getCurrentMessage());
-            final WifiConfiguration config = (WifiConfiguration) message.obj;
+            final Message message = getCurrentMessage();
+            if (message.what == CMD_START_AP) {
+                final WifiConfiguration config = (WifiConfiguration) message.obj;
 
-            // start hostapd on a seperate thread
-            new Thread(new Runnable() {
-                public void run() {
-                    if (startSoftApWithConfig(config)) {
-                        if (DBG) log("Soft AP start successful");
-                        sendMessage(CMD_START_AP_SUCCESS);
-                    } else {
-                        loge("Soft AP start failed");
-                        sendMessage(CMD_START_AP_FAILURE);
-                    }
+                if (config == null) {
+                    mWifiApConfigChannel.sendMessage(CMD_REQUEST_AP_CONFIG);
+                } else {
+                    mWifiApConfigChannel.sendMessage(CMD_SET_AP_CONFIG, config);
+                    startSoftApWithConfig(config);
                 }
-            }).start();
+            } else {
+                throw new RuntimeException("Illegal transition to SoftApStartingState: " + message);
+            }
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3281,6 +3287,15 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_TETHER_INTERFACE:
                 case WifiP2pService.P2P_ENABLE_PENDING:
                     deferMessage(message);
+                    break;
+                case WifiStateMachine.CMD_RESPONSE_AP_CONFIG:
+                    WifiConfiguration config = (WifiConfiguration) message.obj;
+                    if (config != null) {
+                        startSoftApWithConfig(config);
+                    } else {
+                        loge("Softap config is null!");
+                        sendMessage(CMD_START_AP_FAILURE);
+                    }
                     break;
                 case CMD_START_AP_SUCCESS:
                     setWifiApState(WIFI_AP_STATE_ENABLED);
