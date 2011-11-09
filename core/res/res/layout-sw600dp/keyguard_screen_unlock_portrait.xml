@@ -23,32 +23,72 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- top: status and emergency/forgot pattern buttons -->
-    <LinearLayout
+    <!-- top: status -->
+    <RelativeLayout
         android:layout_height="0dip"
         android:layout_weight="1"
         android:layout_width="match_parent"
-        android:orientation="vertical">
+        android:gravity="center">
 
-        <include layout="@layout/keyguard_screen_status_port"
-            android:layout_width="wrap_content"
+        <RelativeLayout android:id="@+id/transport_bg_protect"
+            android:layout_width="512dip"
             android:layout_height="wrap_content"
-            android:layout_marginTop="134dip"
-            android:layout_marginLeft="266dip"/>
+            android:gravity="center">
+
+            <!-- Music transport control -->
+            <include android:id="@+id/transport"
+                layout="@layout/keyguard_transport_control"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_rowSpan="3"
+                android:layout_columnSpan="1"
+                android:layout_gravity="fill"
+                android:layout_width="match_parent"
+                android:layout_height="512dip"
+                />
+
+            <include layout="@layout/keyguard_screen_status_land"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dip"
+                android:layout_marginTop="50dip"
+                android:layout_marginBottom="100dip"
+                android:layout_marginRight="64dip"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <!-- bottom: lock pattern, emergency dialer and forgot pattern button -->
+    <LinearLayout
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
+            android:layout_width="354dip"
+            android:layout_height="354dip"
+            android:layout_marginTop="50dip"/>
 
         <!-- Emergency and forgot pattern buttons. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_horizontal">
+            style="?android:attr/buttonBarStyle"
+            android:gravity="center"
+            android:weightSum="2">
 
             <Button android:id="@+id/forgotPatternButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                style="@style/Widget.Button.Transparent"
-                android:drawableLeft="@drawable/ic_emergency"
+                style="?android:attr/buttonBarButtonStyle"
+                android:drawableLeft="@drawable/lockscreen_forgot_password_button"
                 android:drawablePadding="8dip"
                 android:text="@string/lockscreen_forgot_pattern_button_text"
                 android:visibility="gone"
@@ -58,7 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                style="@style/Widget.Button.Transparent"
+                style="?android:attr/buttonBarButtonStyle"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 android:text="@string/lockscreen_emergency_call"
@@ -67,20 +107,6 @@
 
         </LinearLayout>
 
-    </LinearLayout>
-
-    <!-- right side: lock pattern -->
-    <LinearLayout
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:gravity="center"
-        >
-        <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
-            android:layout_width="354dip"
-            android:layout_height="354dip"
-            android:layout_marginTop="50dip"
-          />
     </LinearLayout>
 
 </com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient>
