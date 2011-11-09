@@ -589,12 +589,6 @@
 
         <!-- NumberPicker style. -->
         <attr name="numberPickerStyle" format="reference" />
-        <!-- NumberPicker up button style. -->
-        <attr name="numberPickerUpButtonStyle" format="reference" />
-        <!-- NumberPicker down button style. -->
-        <attr name="numberPickerDownButtonStyle" format="reference" />
-        <!-- NumberPicker input text style. -->
-        <attr name="numberPickerInputTextStyle" format="reference" />
 
         <!-- The CalendarView style. -->
         <attr name="calendarViewStyle" format="reference" />
@@ -3617,12 +3611,12 @@
     <declare-styleable name="NumberPicker">
         <!-- @hide Color for the solid color background if such for optimized rendering. -->
         <attr name="solidColor" format="color|reference" />
-        <!-- @hide Whether the number picker supports fligning. -->
-        <attr name="flingable" format="boolean" />
         <!-- @hide The divider for making the selection area. -->
         <attr name="selectionDivider" format="reference" />
         <!-- @hide The height of the selection divider. -->
         <attr name="selectionDividerHeight" format="dimension" />
+        <!-- @hide The distance between the two selection dividers. -->
+        <attr name="selectionDividersDistance" format="dimension" />
         <!-- @hide The min height of the NumberPicker. -->
         <attr name="internalMinHeight" format="dimension" />
         <!-- @hide The max height of the NumberPicker. -->
@@ -3631,6 +3625,10 @@
         <attr name="internalMinWidth" format="dimension" />
         <!-- @hide The max width of the NumberPicker. -->
         <attr name="internalMaxWidth" format="dimension" />
+        <!-- @hide The layout of the number picker. -->
+        <attr name="internalLayout" />
+        <!-- @hide The minimal move distance of a swipe to be considered a fling. -->
+       <attr name="minFlingDistance" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="TimePicker">

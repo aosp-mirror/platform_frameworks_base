@@ -3170,8 +3170,6 @@
     <string name="number_picker_increment_button">Increment</string>
     <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrement</string>
-    <!-- Description of the tap and hold action to get into scroll mode in NumberPicker. [CHAR LIMIT=NONE] -->
-    <string name="number_picker_increment_scroll_mode"><xliff:g id="value" example="3">%s</xliff:g> touch and hold.</string>
     <!-- Description of the scrolling action in NumberPicker. [CHAR LIMIT=NONE] -->
     <string name="number_picker_increment_scroll_action">Slide up to increment and down to decrement.</string>
 

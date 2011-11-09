@@ -2679,15 +2679,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return child.draw(canvas, this, drawingTime);
     }
 
-    @Override
-    public void requestLayout() {
-        if (mChildrenCount > 0 && getAccessibilityNodeProvider() != null) {
-            throw new IllegalStateException("Views with AccessibilityNodeProvider"
-                    + " can't have children.");
-        }
-        super.requestLayout();
-    }
-
     /**
      * 
      * @param enabled True if children should be drawn with layers, false otherwise.
@@ -3108,11 +3099,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     private void addViewInner(View child, int index, LayoutParams params,
             boolean preventRequestLayout) {
-
-        if (getAccessibilityNodeProvider() != null) {
-            throw new IllegalStateException("Views with AccessibilityNodeProvider"
-                    + " can't have children.");
-        }
 
         if (mTransition != null) {
             // Don't prevent other add transitions from completing, but cancel remove
