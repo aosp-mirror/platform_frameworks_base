@@ -165,6 +165,17 @@ public class NetworkStats implements Parcelable {
         dest.writeLongArray(operations);
     }
 
+    @Override
+    public NetworkStats clone() {
+        final NetworkStats clone = new NetworkStats(elapsedRealtime, size);
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < size; i++) {
+            entry = getValues(i, entry);
+            clone.addValues(entry);
+        }
+        return clone;
+    }
+
     // @VisibleForTesting
     public NetworkStats addIfaceValues(
             String iface, long rxBytes, long rxPackets, long txBytes, long txPackets) {
