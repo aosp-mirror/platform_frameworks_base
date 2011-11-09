@@ -101,10 +101,13 @@ public class PowerManagerService extends IPowerManager.Stub
     private static final int LONG_KEYLIGHT_DELAY = 6000;        // t+6 sec
     private static final int LONG_DIM_TIME = 7000;              // t+N-5 sec
 
-    // How long to wait to debounce light sensor changes.
+    // How long to wait to debounce light sensor changes in milliseconds
     private static final int LIGHT_SENSOR_DELAY = 2000;
 
-    // For debouncing the proximity sensor.
+    // light sensor events rate in microseconds
+    private static final int LIGHT_SENSOR_RATE = 1000000;
+
+    // For debouncing the proximity sensor in milliseconds
     private static final int PROXIMITY_SENSOR_DELAY = 1000;
 
     // trigger proximity if distance is less than 5 cm
@@ -3056,7 +3059,7 @@ public class PowerManagerService extends IPowerManager.Stub
             try {
                 if (enable) {
                     mSensorManager.registerListener(mLightListener, mLightSensor,
-                            SensorManager.SENSOR_DELAY_NORMAL);
+                            LIGHT_SENSOR_RATE);
                 } else {
                     mSensorManager.unregisterListener(mLightListener);
                     mHandler.removeCallbacks(mAutoBrightnessTask);
