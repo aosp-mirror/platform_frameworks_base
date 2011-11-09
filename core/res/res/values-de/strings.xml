@@ -282,7 +282,7 @@
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linux-Signale an Apps senden"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Ermöglicht der App, das Senden des gelieferten Signals an alle anhaltenden Prozesse zu fordern"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"Apps permanent ausführen"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Ermöglicht einer App, eigene Komponenten persistent zu machen, damit das System diese nicht für andere Anwendungen nutzen kann"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Ermöglicht einer App, eigene Komponenten permanent zu machen, damit das System diese nicht für andere Apps nutzen kann"</string>
     <string name="permlab_deletePackages" msgid="3343439331576348805">"Apps löschen"</string>
     <string name="permdesc_deletePackages" msgid="3634943677518723314">"Ermöglicht einer App, Android-Pakete zu löschen. Schädliche Anwendungen können so wichtige Anwendungen löschen."</string>
     <string name="permlab_clearAppUserData" msgid="2192134353540277878">"Daten anderer Apps löschen"</string>
@@ -340,11 +340,11 @@
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"Ohne das Wissen der Eigentümer Kalendertermine hinzufügen oder ändern und E-Mails an Gäste senden"</string>
     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Ermöglicht einer App das Senden von Termineinladungen als Kalendereigentümer und das Hinzufügen, Entfernen und Ändern von Terminen, die Sie auf Ihrem Gerät bearbeiten können, einschließlich der Termine von Freunden oder Kollegen. Schädliche Apps mit dieser Berechtigung können Spam-E-Mails senden, die von Kalendereigentümern zu kommen scheinen, Termine ohne das Wissen der Eigentümer ändern oder falsche Termine hinzufügen."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"Simulierte Standortquellen für Testzwecke"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Erstellt falsche Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben."</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Erstellt simulierte Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Auf zusätzliche Dienstanbieterbefehle für Standort zugreifen"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Zugriff auf zusätzliche Dienstanbieterbefehle für Standort. Schädliche Anwendungen könnten so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
-    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Erstellt falsche Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Erstellt simulierte Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Zugriff auf genaue Standortquellen wie GPS auf dem Tablet (falls verfügbar). Schädliche Anwendungen können damit bestimmen, wo Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Anwendungen können damit bestimmen, so Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
@@ -889,7 +889,7 @@
     <string name="capital_on" msgid="1544682755514494298">"AN"</string>
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Immer für diese Aktion verwenden"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Standardeinstellung zurücksetzen unter \"Einstellungen &gt; Apps &gt; Apps verwalten\""</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Aktion auswählen"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"App für das USB-Gerät auswählen"</string>

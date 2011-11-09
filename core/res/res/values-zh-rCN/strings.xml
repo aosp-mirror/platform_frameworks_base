@@ -1064,7 +1064,7 @@
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已请求权限"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"已为帐户<xliff:g id="ACCOUNT">%s</xliff:g>"\n"请求了权限"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"有程序请求获得帐户 <xliff:g id="ACCOUNT">%s</xliff:g>"\n"的访问权限"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
