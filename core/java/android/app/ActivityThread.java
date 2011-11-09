@@ -3832,11 +3832,16 @@ public final class ActivityThread {
          * Initialize the default http proxy in this process for the reasons we set the time zone.
          */
         IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
-        try {
-            ProxyProperties proxyProperties = service.getProxy();
-            Proxy.setHttpProxySystemProperty(proxyProperties);
-        } catch (RemoteException e) {}
+        if (b != null) {
+            // In pre-boot mode (doing initial launch to collect password), not
+            // all system is up.  This includes the connectivity service, so don't
+            // crash if we can't get it.
+            IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+            try {
+                ProxyProperties proxyProperties = service.getProxy();
+                Proxy.setHttpProxySystemProperty(proxyProperties);
+            } catch (RemoteException e) {}
+        }
 
         if (data.instrumentationName != null) {
             ContextImpl appContext = new ContextImpl();
