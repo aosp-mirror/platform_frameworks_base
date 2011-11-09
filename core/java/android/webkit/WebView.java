@@ -198,10 +198,10 @@ import java.util.regex.Pattern;
  *   <li>Modifying the {@link android.webkit.WebSettings}, such as
  * enabling JavaScript with {@link android.webkit.WebSettings#setJavaScriptEnabled(boolean)
  * setJavaScriptEnabled()}. </li>
- *   <li>Adding JavaScript-to-Java interfaces with the {@link
- * android.webkit.WebView#addJavascriptInterface} method.
- *       This lets you bind Java objects into the WebView so they can be
- *       controlled from the web pages JavaScript.</li>
+ *   <li>Injecting Java objects into the WebView using the
+ *       {@link android.webkit.WebView#addJavascriptInterface} method. This
+ *       method allows you to inject Java objects into a page's JavaScript
+ *       context, so that they can be accessed by JavaScript in the page.</li>
  * </ul>
  *
  * <p>Here's a more complicated example, showing error handling,
@@ -4003,34 +4003,39 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Use this function to bind an object to JavaScript so that the
-     * methods can be accessed from JavaScript.
+     * This method injects the supplied Java object into the WebView. The
+     * object is injected into the JavaScript context of the main frame, using
+     * the supplied name. This allows the Java object to be accessed from
+     * JavaScript. Note that that injected objects will not appear in
+     * JavaScript until the page is next (re)loaded. For example:
+     * <pre> webView.addJavascriptInterface(new Object(), "injectedObject");
+     * webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
+     * webView.loadUrl("javascript:alert(injectedObject.toString())");</pre>
      * <p><strong>IMPORTANT:</strong>
      * <ul>
-     * <li> Using addJavascriptInterface() allows JavaScript to control your
-     * application. This can be a very useful feature or a dangerous security
-     * issue. When the HTML in the WebView is untrustworthy (for example, part
-     * or all of the HTML is provided by some person or process), then an
-     * attacker could inject HTML that will execute your code and possibly any
-     * code of the attacker's choosing.<br>
-     * Do not use addJavascriptInterface() unless all of the HTML in this
-     * WebView was written by you.</li>
-     * <li> The Java object that is bound runs in another thread and not in
-     * the thread that it was constructed in.</li>
+     * <li> addJavascriptInterface() can be used to allow JavaScript to control
+     * the host application. This is a powerful feature, but also presents a
+     * security risk. Use of this method in a WebView containing untrusted
+     * content could allow an attacker to manipulate the host application in
+     * unintended ways, executing Java code with the permissions of the host
+     * application. Use extreme care when using this method in a WebView which
+     * could contain untrusted content.
+     * <li> JavaScript interacts with Java object on a private, background
+     * thread of the WebView. Care is therefore required to maintain thread
+     * safety.</li>
      * </ul></p>
-     * @param obj The class instance to bind to JavaScript, null instances are
-     *            ignored.
-     * @param interfaceName The name to used to expose the instance in
-     *                      JavaScript.
+     * @param object The Java object to inject into the WebView's JavaScript
+     *               context. Null values are ignored.
+     * @param name The name used to expose the instance in JavaScript.
      */
-    public void addJavascriptInterface(Object obj, String interfaceName) {
+    public void addJavascriptInterface(Object object, String name) {
         checkThread();
-        if (obj == null) {
+        if (object == null) {
             return;
         }
         WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
-        arg.mObject = obj;
-        arg.mInterfaceName = interfaceName;
+        arg.mObject = object;
+        arg.mInterfaceName = name;
         mWebViewCore.sendMessage(EventHub.ADD_JS_INTERFACE, arg);
     }
 
