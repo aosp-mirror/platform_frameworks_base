@@ -138,7 +138,10 @@ public class TestService extends Service {
 
     static final int CMD_START_TEST = 1;
     static final int CMD_TERMINATE = 2;
-    
+
+    static final int MSG_REALLY_START = 1000;
+    static final int MSG_REALLY_TERMINATE = 1001;
+
     static final int RES_TEST_FINISHED = 1;
     static final int RES_TERMINATED = 2;
 
@@ -146,6 +149,13 @@ public class TestService extends Service {
         @Override public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CMD_START_TEST: {
+                    // Give a little time for things to settle down.
+                    Message newMsg = Message.obtain(null, MSG_REALLY_START);
+                    newMsg.obj = msg.obj;
+                    newMsg.replyTo = msg.replyTo;
+                    sendMessageDelayed(newMsg, 500);
+                } break;
+                case MSG_REALLY_START: {
                     Bundle bundle = (Bundle)msg.obj;
                     bundle.setClassLoader(getClassLoader());
                     final TestArgs args = (TestArgs)bundle.getParcelable("args");
@@ -166,6 +176,13 @@ public class TestService extends Service {
                     });
                 } break;
                 case CMD_TERMINATE: {
+                    // Give a little time for things to settle down.
+                    Message newMsg = Message.obtain(null, MSG_REALLY_TERMINATE);
+                    newMsg.obj = msg.obj;
+                    newMsg.replyTo = msg.replyTo;
+                    sendMessageDelayed(newMsg, 50);
+                } break;
+                case MSG_REALLY_TERMINATE: {
                     if (msg.replyTo != null) {
                         Message reply = Message.obtain(null, RES_TERMINATED);
                         try {
@@ -174,7 +191,7 @@ public class TestService extends Service {
                         }
                     }
                     terminate();
-                }
+                } break;
             }
         }
     };
@@ -187,7 +204,7 @@ public class TestService extends Service {
     }
 
     void terminate() {
-        Process.killProcess(Process.myPid());
+        Runtime.getRuntime().exit(0);
     }
 
     enum BackgroundMode {
