@@ -494,7 +494,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         if ((mCarDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_CAR) ||
-                (mDeskDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_DESK)) {
+                (mDeskDockEnablesAccelerometer && (mDockMode == Intent.EXTRA_DOCK_STATE_DESK
+                        || mDockMode == Intent.EXTRA_DOCK_STATE_LE_DESK
+                        || mDockMode == Intent.EXTRA_DOCK_STATE_HE_DESK))) {
             // enable accelerometer if we are docked in a dock that enables accelerometer
             // orientation management,
             return true;
@@ -3153,7 +3155,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // enable 180 degree rotation while docked.
                 preferredRotation = mCarDockEnablesAccelerometer
                         ? sensorRotation : mCarDockRotation;
-            } else if (mDockMode == Intent.EXTRA_DOCK_STATE_DESK
+            } else if ((mDockMode == Intent.EXTRA_DOCK_STATE_DESK
+                    || mDockMode == Intent.EXTRA_DOCK_STATE_LE_DESK
+                    || mDockMode == Intent.EXTRA_DOCK_STATE_HE_DESK)
                     && (mDeskDockEnablesAccelerometer || mDeskDockRotation >= 0)) {
                 // Ignore sensor when in desk dock unless explicitly enabled.
                 // This case can override the behavior of NOSENSOR, and can also
