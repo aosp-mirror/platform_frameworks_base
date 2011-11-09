@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import android.util.Log;
 import android.media.AudioManager;
+import android.provider.MediaStore;
 import android.provider.Settings;
 
 import java.io.File;
@@ -225,9 +226,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                 mCallback.goToUnlockScreen();
             } else if (target == 2 || target == 3) { // 2 = alt/portrait, 3 = alt/landscape
                 if (!mCameraDisabled) {
-                    // Broadcast an intent to start the Camera
-                    Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
-                    mContext.sendOrderedBroadcast(intent, null);
+                    // Start the Camera
+                    Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
                     mCallback.goToUnlockScreen();
                 } else {
                     toggleRingMode();
