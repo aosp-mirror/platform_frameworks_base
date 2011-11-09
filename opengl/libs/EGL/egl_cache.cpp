@@ -34,6 +34,9 @@ static const size_t maxTotalSize = 64 * 1024;
 static const char* cacheFileMagic = "EGL$";
 static const size_t cacheFileHeaderSize = 8;
 
+// The time in seconds to wait before saving newly inserted cache entries.
+static const unsigned int deferredSaveDelay = 4;
+
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
@@ -128,6 +131,30 @@ void egl_cache_t::setBlob(const void* key, EGLsizei keySize, const void* value,
     if (mInitialized) {
         sp<BlobCache> bc = getBlobCacheLocked();
         bc->set(key, keySize, value, valueSize);
+
+        if (!mSavePending) {
+            class DeferredSaveThread : public Thread {
+            public:
+                DeferredSaveThread() : Thread(false) {}
+
+                virtual bool threadLoop() {
+                    sleep(deferredSaveDelay);
+                    egl_cache_t* c = egl_cache_t::get();
+                    Mutex::Autolock lock(c->mMutex);
+                    if (c->mInitialized) {
+                        c->saveBlobCacheLocked();
+                    }
+                    c->mSavePending = false;
+                    return false;
+                }
+            };
+
+            // The thread will hold a strong ref to itself until it has finished
+            // running, so there's no need to keep a ref around.
+            sp<Thread> deferredSaveThread(new DeferredSaveThread());
+            mSavePending = true;
+            deferredSaveThread->run();
+        }
     }
 }
 
