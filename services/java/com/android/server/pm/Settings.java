@@ -63,6 +63,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import libcore.io.IoUtils;
+
 /**
  * Holds information about dynamic settings.
  */
@@ -998,8 +1000,8 @@ final class Settings {
                 FileUtils.sync(fstr);
                 str.close();
                 journal.commit();
-            }
-            catch (Exception  e) {
+            } catch (Exception e) {
+                IoUtils.closeQuietly(str);
                 journal.rollback();
             }
 
