@@ -146,6 +146,13 @@ public class SpellCheckerSession {
     }
 
     /**
+     * Cancel pending and running spell check tasks
+     */
+    public void cancel() {
+        mSpellCheckerSessionListenerImpl.cancel();
+    }
+
+    /**
      * Finish this session and allow TextServicesManagerService to disconnect the bound spell
      * checker.
      */
@@ -242,6 +249,13 @@ public class SpellCheckerSession {
             }
         }
 
+        public void cancel() {
+            if (DBG) {
+                Log.w(TAG, "cancel");
+            }
+            processOrEnqueueTask(new SpellCheckerParams(TASK_CANCEL, null, 0, false));
+        }
+
         public void getSuggestionsMultiple(
                 TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
             if (DBG) {
@@ -275,8 +289,22 @@ public class SpellCheckerSession {
             if (DBG) {
                 Log.d(TAG, "process or enqueue task: " + mISpellCheckerSession);
             }
+            SpellCheckerParams closeTask = null;
             if (mISpellCheckerSession == null) {
+                if (scp.mWhat == TASK_CANCEL) {
+                    while (!mPendingTasks.isEmpty()) {
+                        final SpellCheckerParams tmp = mPendingTasks.poll();
+                        if (tmp.mWhat == TASK_CLOSE) {
+                            // Only one close task should be processed, while we need to remove all
+                            // close tasks from the queue
+                            closeTask = tmp;
+                        }
+                    }
+                }
                 mPendingTasks.offer(scp);
+                if (closeTask != null) {
+                    mPendingTasks.offer(closeTask);
+                }
             } else {
                 processTask(scp);
             }
