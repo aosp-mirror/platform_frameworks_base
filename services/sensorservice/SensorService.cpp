@@ -286,7 +286,8 @@ bool SensorService::threadLoop()
         }
     } while (count >= 0 || Thread::exitPending());
 
-    LOGW("Exiting SensorService::threadLoop!");
+    LOGW("Exiting SensorService::threadLoop => aborting...");
+    abort();
     return false;
 }
 
