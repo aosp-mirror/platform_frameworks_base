@@ -197,7 +197,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         assertEquals(42, mTestObject.waitForIntValue());
 
         executeJavaScript("testObject.setLongValue(42);");
-        assertEquals(42, mTestObject.waitForLongValue());
+        assertEquals(42L, mTestObject.waitForLongValue());
 
         executeJavaScript("testObject.setFloatValue(42);");
         assertEquals(42.0f, mTestObject.waitForFloatValue());
@@ -252,7 +252,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         assertEquals(Integer.MAX_VALUE, mTestObject.waitForIntValue());
 
         executeJavaScript("testObject.setLongValue(42.1);");
-        assertEquals(42, mTestObject.waitForLongValue());
+        assertEquals(42L, mTestObject.waitForLongValue());
         // LIVECONNECT_COMPLIANCE: Should be Long.MAX_VALUE.
         executeJavaScript("testObject.setLongValue(" + Long.MAX_VALUE + " + 42.1);");
         assertEquals(Long.MIN_VALUE, mTestObject.waitForLongValue());
@@ -296,7 +296,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         assertEquals(0, mTestObject.waitForIntValue());
 
         executeJavaScript("testObject.setLongValue(Number.NaN);");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         executeJavaScript("testObject.setFloatValue(Number.NaN);");
         assertEquals(Float.NaN, mTestObject.waitForFloatValue());
@@ -336,7 +336,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
 
         // LIVECONNECT_COMPLIANCE: Should be Long.MAX_VALUE.
         executeJavaScript("testObject.setLongValue(Infinity);");
-        assertEquals(-1, mTestObject.waitForLongValue());
+        assertEquals(-1L, mTestObject.waitForLongValue());
 
         executeJavaScript("testObject.setFloatValue(Infinity);");
         assertEquals(Float.POSITIVE_INFINITY, mTestObject.waitForFloatValue());
@@ -401,9 +401,9 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
 
         // LIVECONNECT_COMPLIANCE: Should be 1.
         executeJavaScript("testObject.setLongValue(true);");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
         executeJavaScript("testObject.setLongValue(false);");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         // LIVECONNECT_COMPLIANCE: Should be 1.0.
         executeJavaScript("testObject.setFloatValue(true);");
@@ -449,7 +449,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
 
         // LIVECONNECT_COMPLIANCE: Should use valueOf() of appropriate type.
         executeJavaScript("testObject.setLongValue(\"+042.10\");");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         // LIVECONNECT_COMPLIANCE: Should use valueOf() of appropriate type.
         executeJavaScript("testObject.setFloatValue(\"+042.10\");");
@@ -463,6 +463,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         executeJavaScript("testObject.setCharValue(\"+042.10\");");
         assertEquals('\u0000', mTestObject.waitForCharValue());
 
+        // LIVECONNECT_COMPLIANCE: Non-empty string should convert to true.
         executeJavaScript("testObject.setBooleanValue(\"+042.10\");");
         assertFalse(mTestObject.waitForBooleanValue());
 
@@ -505,7 +506,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
 
         // LIVECONNECT_COMPLIANCE: Should raise a JavaScript exception.
         executeJavaScript("testObject.setLongValue({foo: 42});");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         // LIVECONNECT_COMPLIANCE: Should raise a JavaScript exception.
         executeJavaScript("testObject.setFloatValue({foo: 42});");
@@ -560,7 +561,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
 
         // LIVECONNECT_COMPLIANCE: Should raise a JavaScript exception.
         executeJavaScript("testObject.setLongValue(testObject.getObjectInstance());");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         // LIVECONNECT_COMPLIANCE: Should raise a JavaScript exception.
         executeJavaScript("testObject.setFloatValue(testObject.getObjectInstance());");
@@ -599,7 +600,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         assertEquals(0, mTestObject.waitForIntValue());
 
         executeJavaScript("testObject.setLongValue(null);");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         executeJavaScript("testObject.setFloatValue(null);");
         assertEquals(0.0f, mTestObject.waitForFloatValue());
@@ -636,7 +637,7 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         assertEquals(0, mTestObject.waitForIntValue());
 
         executeJavaScript("testObject.setLongValue(undefined);");
-        assertEquals(0, mTestObject.waitForLongValue());
+        assertEquals(0L, mTestObject.waitForLongValue());
 
         executeJavaScript("testObject.setFloatValue(undefined);");
         assertEquals(0.0f, mTestObject.waitForFloatValue());
