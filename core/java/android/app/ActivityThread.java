@@ -45,6 +45,7 @@ import android.graphics.Canvas;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.ProxyProperties;
+import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
@@ -3714,6 +3715,24 @@ public final class ActivityThread {
         }
     }
 
+    private void setupGraphicsSupport(LoadedApk info) {
+        try {
+            int uid = Process.myUid();
+            String[] packages = getPackageManager().getPackagesForUid(uid);
+
+            // If there are several packages in this application we won't
+            // initialize the graphics disk caches 
+            if (packages.length == 1) {
+                ContextImpl appContext = new ContextImpl();
+                appContext.init(info, null, this);
+
+                HardwareRenderer.setupDiskCache(appContext.getCacheDir());
+            }
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }    
+    
     private void handleBindApplication(AppBindData data) {
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
@@ -3737,7 +3756,7 @@ public final class ActivityThread {
                 HardwareRenderer.disable(false);
             }
         }
-
+        
         if (mProfiler.profileFd != null) {
             mProfiler.startProfiling();
         }
@@ -3773,6 +3792,8 @@ public final class ActivityThread {
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
+        setupGraphicsSupport(data.info);        
+        
         /**
          * For system applications on userdebug/eng builds, log stack
          * traces of disk and network access to dropbox for analysis.

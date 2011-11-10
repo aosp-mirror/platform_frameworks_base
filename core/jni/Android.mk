@@ -53,6 +53,7 @@ LOCAL_SRC_FILES:= \
 	android_view_InputQueue.cpp \
 	android_view_KeyEvent.cpp \
 	android_view_KeyCharacterMap.cpp \
+	android_view_HardwareRenderer.cpp \
 	android_view_GLES20Canvas.cpp \
 	android_view_MotionEvent.cpp \
 	android_view_PointerIcon.cpp \
@@ -160,6 +161,7 @@ LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
 	$(LOCAL_PATH)/android/graphics \
 	$(LOCAL_PATH)/../../libs/hwui \
+	$(LOCAL_PATH)/../../opengl/libs \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
