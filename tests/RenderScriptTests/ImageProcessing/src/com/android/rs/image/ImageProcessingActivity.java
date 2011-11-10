@@ -283,6 +283,9 @@ public class ImageProcessingActivity extends Activity
         mRadius = MAX_RADIUS;
         mScript.set_radius(mRadius);
 
+        mScript.invoke_filter();
+        mRS.finish();
+
         long t = java.lang.System.currentTimeMillis();
 
         mScript.invoke_filter();
