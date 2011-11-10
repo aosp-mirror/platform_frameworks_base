@@ -1035,4 +1035,28 @@ public class ImageView extends View {
             mDrawable.setAlpha(mAlpha * mViewAlphaScale >> 8);
         }
     }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (mDrawable != null) {
+            mDrawable.setVisible(visibility == VISIBLE, false);
+        }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mDrawable != null) {
+            mDrawable.setVisible(getVisibility() == VISIBLE, false);
+        }
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mDrawable != null) {
+            mDrawable.setVisible(false, false);
+        }
+    }
 }
