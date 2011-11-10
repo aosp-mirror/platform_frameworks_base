@@ -44,6 +44,8 @@ import com.android.bandwidthtest.NetworkState;
 import com.android.bandwidthtest.NetworkState.StateTransitionDirection;
 import com.android.internal.util.AsyncChannel;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /*
@@ -257,14 +259,14 @@ public class ConnectionUtil {
         mConnectivityState[networkType].recordState(networkState);
     }
 
-   /**
-    * Set the state transition criteria
-    *
-    * @param networkType
-    * @param initState
-    * @param transitionDir
-    * @param targetState
-    */
+    /**
+     * Set the state transition criteria
+     *
+     * @param networkType
+     * @param initState
+     * @param transitionDir
+     * @param targetState
+     */
     public void setStateTransitionCriteria(int networkType, State initState,
             StateTransitionDirection transitionDir, State targetState) {
         mConnectivityState[networkType].setStateTransitionCriteria(
@@ -495,7 +497,8 @@ public class ConnectionUtil {
      * @return true if connected to a mobile network, false otherwise.
      */
     public boolean isConnectedToMobile() {
-        return (mNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo networkInfo = mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        return networkInfo.isConnected();
     }
 
     /**
@@ -503,9 +506,9 @@ public class ConnectionUtil {
      * @return true if connected to wifi, false otherwise.
      */
     public boolean isConnectedToWifi() {
-        return (mNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI);
+        NetworkInfo networkInfo = mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return networkInfo.isConnected();
     }
-
 
     /**
      * Associate the device to given SSID
@@ -680,5 +683,31 @@ public class ConnectionUtil {
             mContext.unregisterReceiver(mDownloadReceiver);
         }
         Log.v(LOG_TAG, "onDestroy, inst=" + Integer.toHexString(hashCode()));
+    }
+
+    /**
+     * Helper method used to test data connectivity by pinging a series of popular sites.
+     * @return true if device has data connectivity, false otherwise.
+     */
+    public boolean hasData() {
+        String[] hostList = {"www.google.com", "www.yahoo.com",
+                "www.bing.com", "www.facebook.com", "www.ask.com"};
+        try {
+            for (int i = 0; i < hostList.length; ++i) {
+                String host = hostList[i];
+                Process p = Runtime.getRuntime().exec("ping -c 10 -w 100 " + host);
+                int status = p.waitFor();
+                if (status == 0) {
+                    return true;
+                }
+            }
+        } catch (UnknownHostException e) {
+            Log.e(LOG_TAG, "Ping test Failed: Unknown Host");
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Ping test Failed: IOException");
+        } catch (InterruptedException e) {
+            Log.e(LOG_TAG, "Ping test Failed: InterruptedException");
+        }
+        return false;
     }
 }
