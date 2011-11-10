@@ -5815,7 +5815,87 @@ public class WindowManagerService extends IWindowManager.Stub
         return curSize;
     }
 
-    private int computeSmallestWidth(boolean rotated, int dw, int dh, float density) {
+    private int reduceConfigLayout(int curLayout, int rotation, float density,
+            int dw, int dh) {
+        // Get the app screen size at this rotation.
+        int w = mPolicy.getNonDecorDisplayWidth(dw, dh, rotation);
+        int h = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation);
+
+        // Compute the screen layout size class for this rotation.
+        int screenLayoutSize;
+        boolean screenLayoutLong;
+        boolean screenLayoutCompatNeeded;
+        int longSize = w;
+        int shortSize = h;
+        if (longSize < shortSize) {
+            int tmp = longSize;
+            longSize = shortSize;
+            shortSize = tmp;
+        }
+        longSize = (int)(longSize/density);
+        shortSize = (int)(shortSize/density);
+
+        // These semi-magic numbers define our compatibility modes for
+        // applications with different screens.  These are guarantees to
+        // app developers about the space they can expect for a particular
+        // configuration.  DO NOT CHANGE!
+        if (longSize < 470) {
+            // This is shorter than an HVGA normal density screen (which
+            // is 480 pixels on its long side).
+            screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_SMALL;
+            screenLayoutLong = false;
+            screenLayoutCompatNeeded = false;
+        } else {
+            // What size is this screen screen?
+            if (longSize >= 960 && shortSize >= 720) {
+                // 1.5xVGA or larger screens at medium density are the point
+                // at which we consider it to be an extra large screen.
+                screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_XLARGE;
+            } else if (longSize >= 640 && shortSize >= 480) {
+                // VGA or larger screens at medium density are the point
+                // at which we consider it to be a large screen.
+                screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_LARGE;
+            } else {
+                screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_NORMAL;
+            }
+
+            // If this screen is wider than normal HVGA, or taller
+            // than FWVGA, then for old apps we want to run in size
+            // compatibility mode.
+            if (shortSize > 321 || longSize > 570) {
+                screenLayoutCompatNeeded = true;
+            } else {
+                screenLayoutCompatNeeded = false;
+            }
+
+            // Is this a long screen?
+            if (((longSize*3)/5) >= (shortSize-1)) {
+                // Anything wider than WVGA (5:3) is considering to be long.
+                screenLayoutLong = true;
+            } else {
+                screenLayoutLong = false;
+            }
+        }
+
+        // Now reduce the last screenLayout to not be better than what we
+        // have found.
+        if (!screenLayoutLong) {
+            curLayout = (curLayout&~Configuration.SCREENLAYOUT_LONG_MASK)
+                    | Configuration.SCREENLAYOUT_LONG_NO;
+        }
+        if (screenLayoutCompatNeeded) {
+            curLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
+        }
+        int curSize = curLayout&Configuration.SCREENLAYOUT_SIZE_MASK;
+        if (screenLayoutSize < curSize) {
+            curLayout = (curLayout&~Configuration.SCREENLAYOUT_SIZE_MASK)
+                    | screenLayoutSize;
+        }
+        return curLayout;
+    }
+
+    private void computeSmallestWidthAndScreenLayout(boolean rotated, int dw, int dh,
+            float density, Configuration outConfig) {
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
         // width under the different possible rotations.  We need to un-rotate
@@ -5832,7 +5912,14 @@ public class WindowManagerService extends IWindowManager.Stub
         sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDh, unrotDw);
         sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw, unrotDh);
         sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDh, unrotDw);
-        return sw;
+        int sl = Configuration.SCREENLAYOUT_SIZE_XLARGE
+                | Configuration.SCREENLAYOUT_LONG_YES;
+        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
+        outConfig.smallestScreenWidthDp = sw;
+        outConfig.screenLayout = sl;
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, DisplayMetrics dm,
@@ -5930,63 +6017,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 / dm.density);
         config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation)
                 / dm.density);
-        config.smallestScreenWidthDp = computeSmallestWidth(rotated, dw, dh, dm.density);
+        computeSmallestWidthAndScreenLayout(rotated, dw, dh, dm.density, config);
 
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
         config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
-
-        // Compute the screen layout size class.
-        int screenLayout;
-        int longSize = mAppDisplayWidth;
-        int shortSize = mAppDisplayHeight;
-        if (longSize < shortSize) {
-            int tmp = longSize;
-            longSize = shortSize;
-            shortSize = tmp;
-        }
-        longSize = (int)(longSize/dm.density);
-        shortSize = (int)(shortSize/dm.density);
-
-        // These semi-magic numbers define our compatibility modes for
-        // applications with different screens.  These are guarantees to
-        // app developers about the space they can expect for a particular
-        // configuration.  DO NOT CHANGE!
-        if (longSize < 470) {
-            // This is shorter than an HVGA normal density screen (which
-            // is 480 pixels on its long side).
-            screenLayout = Configuration.SCREENLAYOUT_SIZE_SMALL
-                    | Configuration.SCREENLAYOUT_LONG_NO;
-        } else {
-            // What size is this screen screen?
-            if (longSize >= 960 && shortSize >= 720) {
-                // 1.5xVGA or larger screens at medium density are the point
-                // at which we consider it to be an extra large screen.
-                screenLayout = Configuration.SCREENLAYOUT_SIZE_XLARGE;
-            } else if (longSize >= 640 && shortSize >= 480) {
-                // VGA or larger screens at medium density are the point
-                // at which we consider it to be a large screen.
-                screenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
-            } else {
-                screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL;
-            }
-
-            // If this screen is wider than normal HVGA, or taller
-            // than FWVGA, then for old apps we want to run in size
-            // compatibility mode.
-            if (shortSize > 321 || longSize > 570) {
-                screenLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
-            }
-
-            // Is this a long screen?
-            if (((longSize*3)/5) >= (shortSize-1)) {
-                // Anything wider than WVGA (5:3) is considering to be long.
-                screenLayout |= Configuration.SCREENLAYOUT_LONG_YES;
-            } else {
-                screenLayout |= Configuration.SCREENLAYOUT_LONG_NO;
-            }
-        }
-        config.screenLayout = screenLayout;
 
         // Determine whether a hard keyboard is available and enabled.
         boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
