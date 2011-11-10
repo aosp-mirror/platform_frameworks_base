@@ -31,7 +31,7 @@ ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
 endif
 
 ifneq (,$(findstring $(TARGET_DEVICE),tuna toro maguro))
-	LOCAL_CFLAGS += -DREFRESH_RATE=48
+	LOCAL_CFLAGS += -DREFRESH_RATE=59
 endif
 
 
