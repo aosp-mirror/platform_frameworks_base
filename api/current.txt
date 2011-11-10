@@ -24830,6 +24830,7 @@ package android.view.textservice {
   }
 
   public class SpellCheckerSession {
+    method public void cancel();
     method public void close();
     method public android.view.textservice.SpellCheckerInfo getSpellChecker();
     method public void getSuggestions(android.view.textservice.TextInfo, int);
