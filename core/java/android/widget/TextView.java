@@ -6077,6 +6077,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mSavedMarqueeModeLayout = mLayout = mHintLayout = null;
 
+        mBoring = mHintBoring = null;
+
         // Since it depends on the value of mLayout
         prepareCursorControllers();
     }
