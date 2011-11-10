@@ -394,9 +394,9 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"δοκιμή υλικού"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Επιτρέπει στην εφαρμογή τον έλεγχο διαφόρων περιφερειακών για την εκτέλεση δοκιμών υλικού."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"απευθείας κλήση τηλεφωνικών αριθμών"</string>
-    <string name="permdesc_callPhone" msgid="6396463004110544744">"Επιτρέπει στην εφαρμογή την κλήση τηλεφωνικών αριθμών χωρίς την παρέμβασή σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ευθύνονται για μη αναμενόμενες κλήσεις στον λογαριασμό τηλεφώνου σας. Λάβετε υπόψη ότι αυτό δεν επιτρέπει την κλήση αριθμών έκτακτης ανάγκης."</string>
+    <string name="permdesc_callPhone" msgid="6396463004110544744">"Επιτρέπει στην εφαρμογή την κλήση τηλεφωνικών αριθμών χωρίς την παρέμβασή σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ευθύνονται για μη αναμενόμενες κλήσεις στον λογαριασμό τηλεφώνου σας. Λάβετε υπόψη ότι αυτό δεν επιτρέπει στην εφαρμογή την κλήση αριθμών έκτακτης ανάγκης."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"απευθείας κλήση τηλεφωνικών αριθμών"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Επιτρέπει στην εφαρμογή την κλήση οποιουδήποτε αριθμού τηλεφώνου, συμπεριλαμβανομένων αριθμών έκτακτης ανάγκης, χωρίς τη δική σας παρέμβαση. Τυχόν κακόβουλες εφαρμογές ενδέχεται να πραγματοποιήσουν η αναγκαίες και παράνομες κλήσεις προς υπηρεσίες έκτακτης ανάγκης."</string>
+    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Επιτρέπει στην εφαρμογή την κλήση οποιουδήποτε αριθμού τηλεφώνου, συμπεριλαμβανομένων αριθμών έκτακτης ανάγκης, χωρίς τη δική σας παρέμβαση. Τυχόν κακόβουλες εφαρμογές ενδέχεται να πραγματοποιήσουν μη αναγκαίες και παράνομες κλήσεις προς υπηρεσίες έκτακτης ανάγκης."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"άμεση έναρξη της εγκατάστασης tablet CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"άμεση έναρξη της εγκατάστασης τηλεφώνου CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Επιτρέπει στην εφαρμογή να ξεκινήσει την παροχή CDMA. Κακόβουλες εφαρμογές ενδέχεται να ξεκινήσουν την παροχή CDMA χωρίς λόγο"</string>
@@ -434,7 +434,7 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Επιτρέπει στην εφαρμογή την αλλαγή της ζώνης ώρας του tablet."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Επιτρέπει στην εφαρμογή την αλλαγή της ζώνης ώρας του τηλεφώνου."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"ενεργεί ως AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Επιτρέπει σε μια εφαρμογή την πραγματοποίηση κλήσεων σε προγράμματος ελέγχου ταυτότητας λογαριασμού (AccountAuthenticators)."</string>
+    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Επιτρέπει σε μια εφαρμογή την πραγματοποίηση κλήσεων σε προγράμματα ελέγχου ταυτότητας λογαριασμού (AccountAuthenticators)."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"ανακάλυψη γνωστών λογαριασμών"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Επιτρέπει στην εφαρμογή να λάβει τη λίστα λογαριασμών του tablet."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Επιτρέπει στην εφαρμογή να λάβει τη λίστα λογαριασμών του τηλεφώνου."</string>
@@ -449,7 +449,7 @@
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"πλήρης πρόσβαση στο Διαδίκτυο"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Επιτρέπει στην εφαρμογή τη δημιουργία υποδοχών δικτύου (sockets)."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"αλλαγή/παρεμπόδιση ρυθμίσεων δικτύου και κυκλοφορίας"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Επιτρέπει στην εφαρμογή την αλλαγή των ρυθμίσεων δικτύου και την παρεμπόδιση και επιθεώρηση ολόκληρης της επισκεψιμότητας στο δίκτυο, για παράδειγμα για την αλλαγή του διακομιστή μεσολάβησης και της θύρας οποιουδήποτε APN. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ενδέχεται να παρακολουθούν, να ανακατευθύνουν ή να τροποποιούν τα πακέτα δικτύου εν αγνοία σας."</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Επιτρέπει στην εφαρμογή την αλλαγή των ρυθμίσεων δικτύου και την παρεμπόδιση και επιθεώρηση ολόκληρης της επισκεψιμότητας στο δίκτυο, για παράδειγμα για την αλλαγή του διακομιστή μεσολάβησης και της θύρας οποιουδήποτε APN. Τυχόν κακόβουλες εφαρμογές ενδέχεται να παρακολουθούν, να ανακατευθύνουν ή να τροποποιούν τα πακέτα δικτύου εν αγνοία σας."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"αλλαγή συνδεσιμότητας δικτύου"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Επιτρέπει στην εφαρμογή την αλλαγή της κατάστασης συνδεσιμότητας δικτύου."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"αλλαγή συνδεσιμότητας μέσω σύνδεσης με κινητή συσκευή"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"διαχείριση bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Επιτρέπει στην εφαρμογή τη διαμόρφωση του τοπικού tablet Bluetooth, τον εντοπισμό και τη σύζευξη με απομακρυσμένες συσκευές."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Επιτρέπει στην εφαρμογή τη διαμόρφωση του τοπικού tablet Bluetooth, τον εντοπισμό και τη σύζευξη με απομακρυσμένες συσκευές."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"προβολή κατάστασης WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Επιτρέπει σε μια εφαρμογή την προβολή των πληροφοριών σχετικά με την κατάσταση του WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"αλλαγή κατάστασης WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Επιτρέπει σε μια εφαρμογή τη σύνδεση και αποσύνδεση από το δίκτυο WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"δημιουργία συνδέσεων Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Επιτρέπει στην εφαρμογή να προβάλει τη διαμόρφωση του τοπικού tablet Bluetooth και επίσης να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Επιτρέπει στην εφαρμογή να προβάλει τη διαμόρφωση του τοπικού τηλεφώνου Bluetooth και επίσης να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>

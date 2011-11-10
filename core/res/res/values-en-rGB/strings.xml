@@ -151,7 +151,7 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sound is OFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sound is ON"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Aiplane mode is ON"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Airplane mode is ON"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Airplane mode is OFF"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth administration"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Allows the app to configure the local Bluetooth tablet and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Allows the app to configure the local Bluetooth phone and to discover and pair with remote devices."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"view WiMAX state"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Allows an application to view the information about the state of WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"change WiMAX state"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Allows an application to connect to and disconnect from WiMAX network."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"create Bluetooth connections"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Allows the app to view the configuration of the local Bluetooth tablet, and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Allows the app to view the configuration of the local Bluetooth phone, and to make and accept connections with paired devices."</string>

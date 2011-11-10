@@ -318,8 +318,8 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ļauj lietotnei tikt startētai, tiklīdz sistēma ir pabeigusi sāknēšanu. Šādi planšetdatora startēšana var notikt ilgāk un lietotne, ja tā darbojas nepārtraukti, var palēnināt planšetdatora vispārējo darbību."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ļauj lietotnei tikt startētai, tiklīdz sistēma ir pabeigusi sāknēšanu. Šādi tālruņa startēšana var notikt ilgāk un lietotne, ja tā darbojas nepārtraukti, var palēnināt tālruņa vispārējo darbību."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sūtīt piesaistošu apraidi"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ļauj lietotnei sūtīt piesaistošās apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt planšetdatora darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ļauj lietotnei sūtīt piesaistošās apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt tālruņa darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt planšetdatora darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt tālruņa darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lasīt kontaktpersonu datus"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Ļauj lietotnei lasīt visus jūsu planšetdatorā saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietotnes to var izmantot, lai jūsu datus sūtītu citām personām."</string>
     <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Ļauj lietotnei lasīt visus jūsu tālrunī saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietotnes to var izmantot, lai jūsu datus sūtītu citām personām."</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth administrēšana"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ļauj lietotnei konfigurēt vietējo Bluetooth planšetdatoru, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ļauj lietotnei konfigurēt vietējo Bluetooth tālruni, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX statusa skatīšana"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ļauj lietojumprogrammai skatīt informāciju par WiMAX statusu."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX statusa mainīšana"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Ļauj lietojumprogrammai izveidot un pārtraukt savienojumu ar WiMAX tīklu."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"izveidot Bluetooth savienojumus"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Ļauj lietotnei skatīt vietējā Bluetooth planšetdatora konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Ļauj lietotnei skatīt vietējā Bluetooth tālruņa konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>

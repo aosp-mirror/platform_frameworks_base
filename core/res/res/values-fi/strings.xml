@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-hallinta"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"tarkastele WiMAX-verkon tilaa"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Antaa sovelluksen tarkastella WiMAX-verkon tilaa."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"vaihda WiMAX-verkon tilaa"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Antaa sovelluksen muodostaa yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"luo Bluetooth-yhteyksiä"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Antaa sovelluksen tarkastella paikallisen Bluetooth-tabletin asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Antaa sovelluksen tarkastella paikallisen Bluetooth-puhelimen asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
