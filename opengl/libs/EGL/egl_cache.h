@@ -108,6 +108,13 @@ private:
     // from disk.
     String8 mFilename;
 
+    // mSavePending indicates whether or not a deferred save operation is
+    // pending.  Each time a key/value pair is inserted into the cache via
+    // setBlob, a deferred save is initiated if one is not already pending.
+    // This will wait some amount of time and then trigger a save of the cache
+    // contents to disk.
+    bool mSavePending;
+
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables. It must be locked whenever the member variables are accessed.
     mutable Mutex mMutex;
