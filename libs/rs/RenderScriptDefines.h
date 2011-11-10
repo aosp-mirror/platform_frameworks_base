@@ -41,6 +41,7 @@ typedef void * RsFont;
 typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsMesh;
+typedef void * RsPath;
 typedef void * RsType;
 typedef void * RsObjectBase;
 
@@ -256,6 +257,11 @@ enum RsPrimitive {
     RS_PRIMITIVE_TRIANGLE,
     RS_PRIMITIVE_TRIANGLE_STRIP,
     RS_PRIMITIVE_TRIANGLE_FAN
+};
+
+enum RsPathPrimitive {
+    RS_PATH_PRIMITIVE_QUADRATIC_BEZIER,
+    RS_PATH_PRIMITIVE_CUBIC_BEZIER
 };
 
 enum RsError {

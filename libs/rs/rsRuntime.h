@@ -68,6 +68,7 @@ void rsrDrawQuad(Context *, Script *,
 void rsrDrawSpriteScreenspace(Context *, Script *,
                               float x, float y, float z, float w, float h);
 void rsrDrawRect(Context *, Script *, float x1, float y1, float x2, float y2, float z);
+void rsrDrawPath(Context *, Script *, Path *);
 void rsrDrawMesh(Context *, Script *, Mesh *);
 void rsrDrawMeshPrimitive(Context *, Script *, Mesh *, uint32_t primIndex);
 void rsrDrawMeshPrimitiveRange(Context *, Script *, Mesh *,

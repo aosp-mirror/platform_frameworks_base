@@ -25,6 +25,7 @@
 #include "rsdCore.h"
 
 #include "rsdRuntime.h"
+#include "rsdPath.h"
 
 #include <time.h>
 
@@ -202,6 +203,12 @@ static void SC_DrawSpriteScreenspace(float x, float y, float z, float w, float h
 static void SC_DrawRect(float x1, float y1, float x2, float y2, float z) {
     GET_TLS();
     rsrDrawRect(rsc, sc, x1, y1, x2, y2, z);
+}
+
+static void SC_DrawPath(Path *p) {
+    GET_TLS();
+    //rsrDrawPath(rsc, sc, p);
+    rsdPathDraw(rsc, p);
 }
 
 static void SC_DrawMesh(Mesh *m) {
@@ -533,6 +540,10 @@ static RsdSymbolTable gSyms[] = {
     { "_Z13rsClearObjectP9rs_script", (void *)&SC_ClearObject, true },
     { "_Z10rsIsObject9rs_script", (void *)&SC_IsObject, true },
 
+    { "_Z11rsSetObjectP7rs_pathS_", (void *)&SC_SetObject, true },
+    { "_Z13rsClearObjectP7rs_path", (void *)&SC_ClearObject, true },
+    { "_Z10rsIsObject7rs_path", (void *)&SC_IsObject, true },
+
     { "_Z11rsSetObjectP7rs_meshS_", (void *)&SC_SetObject, true },
     { "_Z13rsClearObjectP7rs_mesh", (void *)&SC_ClearObject, true },
     { "_Z10rsIsObject7rs_mesh", (void *)&SC_IsObject, true },
@@ -602,6 +613,8 @@ static RsdSymbolTable gSyms[] = {
     { "_Z11rsgDrawMesh7rs_meshj", (void *)&SC_DrawMeshPrimitive, false },
     { "_Z11rsgDrawMesh7rs_meshjjj", (void *)&SC_DrawMeshPrimitiveRange, false },
     { "_Z25rsgMeshComputeBoundingBox7rs_meshPfS0_S0_S0_S0_S0_", (void *)&SC_MeshComputeBoundingBox, false },
+
+    { "_Z11rsgDrawPath7rs_path", (void *)&SC_DrawPath, false },
 
     { "_Z13rsgClearColorffff", (void *)&SC_ClearColor, false },
     { "_Z13rsgClearDepthf", (void *)&SC_ClearDepth, false },

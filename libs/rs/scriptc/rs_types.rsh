@@ -138,6 +138,12 @@ typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_sc
  */
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_mesh;
 /**
+ * \brief Opaque handle to a Renderscript Path object.
+ *
+ * See: android.renderscript.Path
+ */
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_path;
+/**
  * \brief Opaque handle to a Renderscript ProgramFragment object.
  *
  * See: android.renderscript.ProgramFragment

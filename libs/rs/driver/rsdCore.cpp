@@ -18,6 +18,7 @@
 #include "rsdAllocation.h"
 #include "rsdBcc.h"
 #include "rsdGL.h"
+#include "rsdPath.h"
 #include "rsdProgramStore.h"
 #include "rsdProgramRaster.h"
 #include "rsdProgramVertex.h"
@@ -112,6 +113,13 @@ static RsdHalFunctions FunctionTable = {
         rsdMeshInit,
         rsdMeshDraw,
         rsdMeshDestroy
+    },
+
+    {
+        rsdPathInitStatic,
+        rsdPathInitDynamic,
+        rsdPathDraw,
+        rsdPathDestroy
     },
 
     {

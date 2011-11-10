@@ -581,6 +581,11 @@ public class RenderScript {
         rsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
     }
 
+    native int  rsnPathCreate(int con, int prim, boolean isStatic, int vtx, int loop, float q);
+    synchronized int nPathCreate(int prim, boolean isStatic, int vtx, int loop, float q) {
+        validate();
+        return rsnPathCreate(mContext, prim, isStatic, vtx, loop, q);
+    }
 
     int     mDev;
     int     mContext;
