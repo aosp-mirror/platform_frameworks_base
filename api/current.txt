@@ -10696,6 +10696,7 @@ package android.media {
     field public static final int METADATA_KEY_GENRE = 6; // 0x6
     field public static final int METADATA_KEY_HAS_AUDIO = 16; // 0x10
     field public static final int METADATA_KEY_HAS_VIDEO = 17; // 0x11
+    field public static final int METADATA_KEY_LOCATION = 23; // 0x17
     field public static final int METADATA_KEY_MIMETYPE = 12; // 0xc
     field public static final int METADATA_KEY_NUM_TRACKS = 10; // 0xa
     field public static final int METADATA_KEY_TITLE = 7; // 0x7
