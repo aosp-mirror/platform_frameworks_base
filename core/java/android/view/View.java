@@ -11458,8 +11458,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *        {@link SystemClock#uptimeMillis} timebase.
      */
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
-        if (verifyDrawable(who) && what != null && mAttachInfo != null) {
-            mAttachInfo.mHandler.postAtTime(what, who, when);
+        if (verifyDrawable(who) && what != null) {
+            if (mAttachInfo != null) {
+                mAttachInfo.mHandler.postAtTime(what, who, when);
+            } else {
+                ViewRootImpl.getRunQueue().postDelayed(what, when - SystemClock.uptimeMillis());
+            }
         }
     }
 
@@ -11470,8 +11474,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param what the action to cancel
      */
     public void unscheduleDrawable(Drawable who, Runnable what) {
-        if (verifyDrawable(who) && what != null && mAttachInfo != null) {
-            mAttachInfo.mHandler.removeCallbacks(what, who);
+        if (verifyDrawable(who) && what != null) {
+            if (mAttachInfo != null) {
+                mAttachInfo.mHandler.removeCallbacks(what, who);
+            } else {
+                ViewRootImpl.getRunQueue().removeCallbacks(what);
+            }
         }
     }
 
