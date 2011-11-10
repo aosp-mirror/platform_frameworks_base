@@ -82,9 +82,17 @@
           </a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
+      <li class="toggle-list">
+          <div><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
             <span class="en">Content Providers</span>
-          </a></li>
+          </a><span class="new">updated</span></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>guide/topics/providers/calendar-provider.html">
+                  <span class="en">Calendar Provider</span></a>
+                  <span class="new">new!</span>
+                </li>
+          </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
             <span class="en">Intents and Intent Filters</span>
           </a></li>
