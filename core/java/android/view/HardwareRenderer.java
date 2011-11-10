@@ -34,6 +34,8 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
+import java.io.File;
+
 import static javax.microedition.khronos.egl.EGL10.*;
 
 /**
@@ -43,6 +45,11 @@ import static javax.microedition.khronos.egl.EGL10.*;
  */
 public abstract class HardwareRenderer {
     static final String LOG_TAG = "HardwareRenderer";
+
+    /**
+     * Name of the file that holds the shaders cache.
+     */
+    private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
 
     /**
      * Turn on to only refresh the parts of the screen that need updating.
@@ -198,6 +205,18 @@ public abstract class HardwareRenderer {
      * @return the current width of the surface
      */
     abstract int getHeight();
+
+    /**
+     * Sets the directory to use as a persistent storage for hardware rendering
+     * resources.
+     * 
+     * @param cacheDir A directory the current process can write to
+     */
+    public static void setupDiskCache(File cacheDir) {
+        nSetupShadersDiskCache(new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath());
+    }
+
+    private static native void nSetupShadersDiskCache(String cacheFile);
 
     /**
      * Interface used to receive callbacks whenever a view is drawn by
