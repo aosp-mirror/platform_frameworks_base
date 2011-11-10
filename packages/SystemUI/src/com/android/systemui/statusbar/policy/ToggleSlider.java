@@ -80,10 +80,13 @@ public class ToggleSlider extends RelativeLayout
         Drawable slider;
         final Resources res = getContext().getResources();
         if (checked) {
-            thumb = res.getDrawable(R.drawable.scrubber_control_disabled_holo);
-            slider = res.getDrawable(R.drawable.status_bar_settings_slider_disabled);
+            thumb = res.getDrawable(
+                    com.android.internal.R.drawable.scrubber_control_disabled_holo);
+            slider = res.getDrawable(
+                    R.drawable.status_bar_settings_slider_disabled);
         } else {
-            thumb = res.getDrawable(R.drawable.scrubber_control_holo);
+            thumb = res.getDrawable(
+                    com.android.internal.R.drawable.scrubber_control_selector_holo);
             slider = res.getDrawable(
                     com.android.internal.R.drawable.scrubber_progress_horizontal_holo_dark);
         }
