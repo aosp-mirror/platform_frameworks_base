@@ -8733,27 +8733,6 @@ public class WebView extends AbsoluteLayout
                     isPictureAfterFirstLayout, registerPageSwapCallback);
         }
         final Point viewSize = draw.mViewSize;
-        if (isPictureAfterFirstLayout) {
-            // Reset the last sent data here since dealing with new page.
-            mLastWidthSent = 0;
-            mZoomManager.onFirstLayout(draw);
-            if (!mDrawHistory) {
-                // Do not send the scroll event for this particular
-                // scroll message.  Note that a scroll event may
-                // still be fired if the user scrolls before the
-                // message can be handled.
-                mSendScrollEvent = false;
-                setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
-                mSendScrollEvent = true;
-
-                // As we are on a new page, remove the WebTextView. This
-                // is necessary for page loads driven by webkit, and in
-                // particular when the user was on a password field, so
-                // the WebTextView was visible.
-                clearTextEntry();
-            }
-        }
-
         // We update the layout (i.e. request a layout from the
         // view system) if the last view size that we sent to
         // WebCore matches the view size of the picture we just
@@ -8766,7 +8745,25 @@ public class WebView extends AbsoluteLayout
         mSendScrollEvent = false;
         recordNewContentSize(draw.mContentSize.x,
                 draw.mContentSize.y, updateLayout);
+
+        if (isPictureAfterFirstLayout) {
+            // Reset the last sent data here since dealing with new page.
+            mLastWidthSent = 0;
+            mZoomManager.onFirstLayout(draw);
+            int scrollX = viewState.mShouldStartScrolledRight
+                    ? getContentWidth() : viewState.mScrollX;
+            int scrollY = viewState.mScrollY;
+            setContentScrollTo(scrollX, scrollY);
+            if (!mDrawHistory) {
+                // As we are on a new page, remove the WebTextView. This
+                // is necessary for page loads driven by webkit, and in
+                // particular when the user was on a password field, so
+                // the WebTextView was visible.
+                clearTextEntry();
+            }
+        }
         mSendScrollEvent = true;
+
         if (DebugFlags.WEB_VIEW) {
             Rect b = draw.mInvalRegion.getBounds();
             Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
