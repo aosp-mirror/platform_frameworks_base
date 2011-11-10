@@ -463,7 +463,7 @@ public class LockPatternView extends View {
                 result = desired;
                 break;
             case MeasureSpec.AT_MOST:
-                result = Math.min(specSize, desired);
+                result = Math.max(specSize, desired);
                 break;
             case MeasureSpec.EXACTLY:
             default:
