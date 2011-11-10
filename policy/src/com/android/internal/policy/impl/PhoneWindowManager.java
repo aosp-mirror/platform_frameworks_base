@@ -2490,7 +2490,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // keyguard, then we need to have it turn on the
                 // screen once it is shown.
                 mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(
-                        KeyEvent.KEYCODE_POWER);
+                        KeyEvent.KEYCODE_POWER, mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED);
             }
         } else {
             // Light up the keyboard if we are sliding up.
@@ -2711,7 +2711,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down && isWakeKey) {
                 if (keyguardActive) {
                     // If the keyguard is showing, let it decide what to do with the wake key.
-                    mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(keyCode);
+                    mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(keyCode,
+                            mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED);
                 } else {
                     // Otherwise, wake the device ourselves.
                     result |= ACTION_POKE_USER_ACTIVITY;
