@@ -36,7 +36,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -101,7 +100,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
-import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -8378,10 +8376,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         // When the cursor moves, the word that was typed may need spell check
                         mSpellChecker.onSelectionChanged();
                     }
-                    if (isCursorInsideEasyCorrectionSpan()) {
-                        showSuggestions();
-                    } else if (hasInsertionController()) {
-                        getInsertionController().show();
+                    if (!extractedTextModeWillBeStarted()) {
+                        if (isCursorInsideEasyCorrectionSpan()) {
+                            showSuggestions();
+                        } else if (hasInsertionController()) {
+                            getInsertionController().show();
+                        }
                     }
                 }
 
@@ -10134,25 +10134,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        final InputMethodManager imm = InputMethodManager.peekInstance();
-        boolean extractedTextModeWillBeStartedFullScreen = !(this instanceof ExtractEditText) &&
-                imm != null && imm.isFullscreenMode();
+        boolean willExtract = extractedTextModeWillBeStarted();
 
         // Do not start the action mode when extracted text will show up full screen, thus
         // immediately hiding the newly created action bar, which would be visually distracting.
-        if (!extractedTextModeWillBeStartedFullScreen) {
+        if (!willExtract) {
             ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
             mSelectionActionMode = startActionMode(actionModeCallback);
         }
-        final boolean selectionStarted = mSelectionActionMode != null ||
-                extractedTextModeWillBeStartedFullScreen;
 
-        if (selectionStarted && !mTextIsSelectable && imm != null && mSoftInputShownOnFocus) {
+        final boolean selectionStarted = mSelectionActionMode != null || willExtract;
+        if (selectionStarted && !mTextIsSelectable && mSoftInputShownOnFocus) {
             // Show the IME to be able to replace text, except when selecting non editable text.
-            imm.showSoftInput(this, 0, null);
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.showSoftInput(this, 0, null);
+            }
         }
 
         return selectionStarted;
+    }
+
+    private boolean extractedTextModeWillBeStarted() {
+        if (!(this instanceof ExtractEditText)) {
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            return  imm != null && imm.isFullscreenMode();
+        }
+        return false;
     }
 
     private void stopSelectionActionMode() {
