@@ -47,16 +47,21 @@ enum visualizer_state_e {
     VISUALIZER_STATE_ACTIVE,
 };
 
+// maximum number of reads from same buffer before resetting capture buffer. This means
+// that the framework has stopped playing audio and we must start returning silence
+#define MAX_STALL_COUNT 10
+
 struct VisualizerContext {
     const struct effect_interface_s *mItfe;
     effect_config_t mConfig;
-    uint32_t mState;
     uint32_t mCaptureIdx;
     uint32_t mCaptureSize;
-    uint32_t mCurrentBuf;
+    uint8_t mState;
+    uint8_t mCurrentBuf;
+    uint8_t mLastBuf;
+    uint8_t mStallCount;
     uint8_t mCaptureBuf[2][VISUALIZER_CAPTURE_SIZE_MAX];
 };
-
 
 //
 //--- Local functions
@@ -66,6 +71,8 @@ void Visualizer_reset(VisualizerContext *pContext)
 {
     pContext->mCaptureIdx = 0;
     pContext->mCurrentBuf = 0;
+    pContext->mLastBuf = 1;
+    pContext->mStallCount = 0;
     memset(pContext->mCaptureBuf[0], 0x80, VISUALIZER_CAPTURE_SIZE_MAX);
     memset(pContext->mCaptureBuf[1], 0x80, VISUALIZER_CAPTURE_SIZE_MAX);
 }
@@ -417,9 +424,24 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
             memcpy(pReplyData,
                    pContext->mCaptureBuf[pContext->mCurrentBuf ^ 1],
                    pContext->mCaptureSize);
+            // if audio framework has stopped playing audio although the effect is still
+            // active we must clear the capture buffer to return silence
+            if (pContext->mLastBuf == pContext->mCurrentBuf) {
+                if (pContext->mStallCount < MAX_STALL_COUNT) {
+                    if (++pContext->mStallCount == MAX_STALL_COUNT) {
+                        memset(pContext->mCaptureBuf[pContext->mCurrentBuf ^ 1],
+                                0x80,
+                                pContext->mCaptureSize);
+                    }
+                }
+            } else {
+                pContext->mStallCount = 0;
+            }
+            pContext->mLastBuf = pContext->mCurrentBuf;
         } else {
             memset(pReplyData, 0x80, pContext->mCaptureSize);
         }
+
         break;
 
     default:
