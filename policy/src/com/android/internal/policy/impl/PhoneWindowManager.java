@@ -1184,7 +1184,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation) {
-        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation);
+        // This is the same as getNonDecorDisplayHeight, unless the status bar
+        // can hide.  If the status bar can hide, we don't count that as part
+        // of the decor; however for purposes of configurations, we do want to
+        // exclude it since applications can't generally use that part of the
+        // screen.
+        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation)
+                - (mStatusBarCanHide ? mStatusBarHeight : 0);
     }
 
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
