@@ -88,6 +88,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     private void setLocale(Locale locale) {
+        closeSession();
         final TextServicesManager textServicesManager = (TextServicesManager)
                 mTextView.getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
         if (!textServicesManager.isSpellCheckerEnabled()) {
@@ -107,8 +108,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }
         mLength = 0;
 
-        // Reset the SpellParser pool: they will get re-created on demand
-        stopAllSpellParsers();
         mSpellParsers = new SpellParser[0];
 
         // This class is the global listener for locale change: warn other locale-aware objects
