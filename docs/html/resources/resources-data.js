@@ -578,7 +578,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'newfeature', 'performance', 'gamedev', 'gl'],
+    tags: ['sample', 'newfeature', 'performance', 'gamedev', 'gl', 'updated'],
     path: 'samples/RenderScript/index.html',
     title: {
       en: 'RenderScript'
