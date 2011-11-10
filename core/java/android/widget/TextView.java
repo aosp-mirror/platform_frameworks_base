@@ -133,6 +133,8 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.textservice.SpellCheckerSubtype;
+import android.view.textservice.TextServicesManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RemoteViews.RemoteView;
 
@@ -8904,21 +8906,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * This is a temporary method. Future versions may support multi-locale text.
      *
-     * @return The current locale used in this TextView, based on the current IME's locale,
-     * or the system default locale if this is not defined.
+     * @return The locale that should be used for a word iterator and a spell checker
+     * in this TextView, based on the current spell checker settings,
+     * the current IME's locale, or the system default locale.
      * @hide
      */
-    public Locale getLocale() {
+    public Locale getTextServicesLocale() {
         Locale locale = Locale.getDefault();
-        final InputMethodManager imm = InputMethodManager.peekInstance();
-        if (imm != null) {
-            final InputMethodSubtype currentInputMethodSubtype = imm.getCurrentInputMethodSubtype();
-            if (currentInputMethodSubtype != null) {
-                String localeString = currentInputMethodSubtype.getLocale();
-                if (!TextUtils.isEmpty(localeString)) {
-                    locale = new Locale(localeString);
-                }
-            }
+        final TextServicesManager textServicesManager = (TextServicesManager)
+                mContext.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
+        final SpellCheckerSubtype subtype = textServicesManager.getCurrentSpellCheckerSubtype(true);
+        if (subtype != null) {
+            locale = new Locale(subtype.getLocale());
         }
         return locale;
     }
@@ -8933,7 +8932,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public WordIterator getWordIterator() {
         if (mWordIterator == null) {
-            mWordIterator = new WordIterator(getLocale());
+            mWordIterator = new WordIterator(getTextServicesLocale());
         }
         return mWordIterator;
     }
