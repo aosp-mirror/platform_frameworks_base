@@ -133,8 +133,4 @@
     <bool name="def_dtmf_tones_enabled">true</bool>
     <!-- Default for UI touch sounds enabled -->
     <bool name="def_sound_effects_enabled">true</bool>
-
-    <!-- Default for Messaging app notifications enabled -->
-    <bool name="def_messaging_app_notifications_on">true</bool>
-
 </resources>
