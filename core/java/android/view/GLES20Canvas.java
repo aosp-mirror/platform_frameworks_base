@@ -315,6 +315,27 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nFlushCaches(int level);
 
+    /**
+     * Release all resources associated with the underlying caches. This should
+     * only be called after a full flushCaches().
+     * 
+     * @hide
+     */
+    public static void terminateCaches() {
+        nTerminateCaches();
+    }
+
+    private static native void nTerminateCaches();
+
+    /**
+     * @hide
+     */
+    public static void initCaches() {
+        nInitCaches();
+    }
+
+    private static native void nInitCaches();
+    
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
