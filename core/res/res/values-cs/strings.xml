@@ -409,7 +409,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"změna stavu telefonu"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním smí bez upozornění přepínat sítě, zapínat a vypínat bezdrátový modul telefonu a podobně."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"čtení stavu a identity telefonu"</string>
-    <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Aplikace s tímto oprávněním může zjistit telefonní číslo a sériové číslo příslušného telefonu (hovor nemusí být aktivní), číslo, ke kterému je hovor připojen a podobně."</string>
+    <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Aplikace s tímto oprávněním může zjistit telefonní číslo a sériové číslo příslušného telefonu, zda je aktivní hovor, číslo, ke kterému je hovor připojen a podobně."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránění přechodu tabletu do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zabránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"správa rozhraní Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"zobrazit stav připojení WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Umožňuje aplikaci zobrazit informace o stavu připojení WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"měnit stav připojení WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Umožňuje aplikaci připojovat se k síti WiMAX a odpojovat se od ní."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"vytvoření připojení Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Umožňuje aplikaci zobrazit konfiguraci místního tabletu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
@@ -736,16 +740,16 @@
     <string name="autofill_area" msgid="3547409050889952423">"Oblast"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirát"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Umožňuje aplikaci upravit historii Prohlížeče nebo záložky uložené v tabletu. Škodlivé aplikace mohou toto oprávnění použít k vymazání nebo úpravě dat Prohlížeče."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Umožňuje aplikaci upravit historii Prohlížeče nebo záložky uložené v telefonu. Škodlivé aplikace mohou toto oprávnění použít k vymazání nebo úpravě dat Prohlížeče."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Umožňuje aplikaci upravit historii prohlížeče nebo záložky uložené v tabletu. Škodlivé aplikace mohou toto oprávnění použít k vymazání nebo úpravě dat prohlížeče."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Umožňuje aplikaci upravit historii prohlížeče nebo záložky uložené v telefonu. Škodlivé aplikace mohou toto oprávnění použít k vymazání nebo úpravě dat prohlížeče."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"nastavit budík v budíku"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikaci nastavit budík v nainstalované aplikaci budík. Některé aplikace budík tuto funkci nemusí obsahovat."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"přidat hlasovou zprávu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Umožňuje aplikaci přidávat zprávy do hlasové schránky."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"změna oprávnění Prohlížeče poskytovat informace o zeměpisné poloze"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikaci upravit oprávnění funkce geolokace v Prohlížeči. Škodlivé aplikace toho mohou využít k odeslání údajů o poloze na libovolné webové stránky."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"změna oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikaci upravit oprávnění funkce geolokace v prohlížeči. Škodlivé aplikace toho mohou využít k odeslání údajů o poloze na libovolné webové stránky."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ověřit balíčky"</string>
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Umožňuje aplikaci ověřit, zda balíček lze nainstalovat."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"navázat na ověřovatele balíčků"</string>
@@ -890,7 +894,7 @@
     <string name="capital_off" msgid="6815870386972805832">"VYPNUTO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v části Nastavení systému &gt; Aplikace &gt; Stažené.h"</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v části Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Vyberte akci"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Vyberte aplikaci pro zařízení USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Tuto činnost nemohou provádět žádné aplikace."</string>

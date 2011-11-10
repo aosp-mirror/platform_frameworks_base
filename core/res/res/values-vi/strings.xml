@@ -465,13 +465,17 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Quản trị Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Cho phép ứng dụng định cấu hình máy tính bảng Bluetooth cục bộ cũng như phát hiện và ghép nối với các thiết bị từ xa."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Cho phép ứng dụng định cấu hình điện thoại Bluetooth cục bộ cũng như phát hiện và ghép nối với các thiết bị từ xa."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"xem trạng thái WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Cho phép ứng dụng xem thông tin về trạng thái của WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"thay đổi trạng thái WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Cho phép ứng dụng kết nối và ngắt kết nối khỏi mạng WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"tạo kết nối Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Cho phép ứng dụng xem cấu hình của máy tính bảng Bluetooth cục bộ cũng như tạo và chấp nhận các kết nối với thiết bị được ghép nối."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Cho phép ứng dụng xem cấu hình của điện thoại Bluetooth cục bộ cũng như tạo và chấp nhận các kết nối với thiết bị được ghép nối."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vô hiệu hoá khoá phím"</string>
-    <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Cho phép ứng dụng vô hiệu hóa khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ thích hợp của việc này là điện thoại vô hiệu hóa khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
+    <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Cho phép ứng dụng tắt khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ thích hợp của việc này là điện thoại tắt khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"đọc cài đặt đồng bộ hoá"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Cho phép ứng dụng đọc cài đặt đồng bộ hóa, chẳng hạn như liệu đồng bộ hóa đã được bật cho ứng dụng Liên hệ hay chưa."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"ghi cài đặt đồng bộ hoá"</string>
