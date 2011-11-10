@@ -112,7 +112,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
     mAllowSynchronousMode(allowSynchronousMode),
     mConnectedApi(NO_CONNECTED_API),
     mAbandoned(false),
-    mTexTarget(texTarget) {
+    mTexTarget(texTarget),
+    mFrameCounter(0) {
     // Choose a name using the PID and a process-unique ID.
     mName = String8::format("unnamed-%d-%d", getpid(), createProcessUniqueId());
 
@@ -260,7 +261,8 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
 
     status_t returnFlags(OK);
 
-    int found, foundSync;
+    int found = -1;
+    int foundSync = -1;
     int dequeuedCount = 0;
     bool tryAgain = true;
     while (tryAgain) {
@@ -333,9 +335,14 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                 }
             } else {
                 if (state == BufferSlot::FREE) {
-                    foundSync = i;
-                    found = i;
-                    break;
+                    /** For Asynchronous mode, we need to return the oldest of free buffers
+                    * There is only one instance when the Framecounter overflows, this logic
+                    * might return the earlier buffer to client. Which is a negligible impact
+                    **/
+                    if (found < 0 || mSlots[i].mFrameNumber < mSlots[found].mFrameNumber) {
+                        foundSync = i;
+                        found = i;
+                    }
                 }
             }
         }
@@ -527,6 +534,9 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
         mSlots[buf].mTransform = mNextTransform;
         mSlots[buf].mScalingMode = mNextScalingMode;
         mSlots[buf].mTimestamp = timestamp;
+        mFrameCounter++;
+        mSlots[buf].mFrameNumber = mFrameCounter;
+
         mDequeueCondition.signal();
 
         *outWidth = mDefaultWidth;
@@ -560,6 +570,7 @@ void SurfaceTexture::cancelBuffer(int buf) {
         return;
     }
     mSlots[buf].mBufferState = BufferSlot::FREE;
+    mSlots[buf].mFrameNumber = 0;
     mDequeueCondition.signal();
 }
 
@@ -893,6 +904,7 @@ void SurfaceTexture::setFrameAvailableListener(
 void SurfaceTexture::freeBufferLocked(int i) {
     mSlots[i].mGraphicBuffer = 0;
     mSlots[i].mBufferState = BufferSlot::FREE;
+    mSlots[i].mFrameNumber = 0;
     if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
         eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
         mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
