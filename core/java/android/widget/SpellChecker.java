@@ -82,7 +82,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mIds = new int[size];
         mSpellCheckSpans = new SpellCheckSpan[size];
 
-        setLocale(mTextView.getLocale());
+        setLocale(mTextView.getTextServicesLocale());
 
         mCookie = hashCode();
     }
@@ -178,7 +178,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     public void spellCheck(int start, int end) {
-        final Locale locale = mTextView.getLocale();
+        final Locale locale = mTextView.getTextServicesLocale();
         if (mCurrentLocale == null || (!(mCurrentLocale.equals(locale)))) {
             setLocale(locale);
             // Re-check the entire text
