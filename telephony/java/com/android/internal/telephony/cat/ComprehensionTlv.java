@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
  * {@hide}
  */
 class ComprehensionTlv {
+    private static final String LOG_TAG = "ComprehensionTlv";
     private int mTag;
     private boolean mCr;
     private int mLength;
@@ -88,8 +89,13 @@ class ComprehensionTlv {
         int endIndex = data.length;
         while (startIndex < endIndex) {
             ComprehensionTlv ctlv = ComprehensionTlv.decode(data, startIndex);
-            items.add(ctlv);
-            startIndex = ctlv.mValueIndex + ctlv.mLength;
+            if (ctlv != null) {
+                items.add(ctlv);
+                startIndex = ctlv.mValueIndex + ctlv.mLength;
+            } else {
+                CatLog.d(LOG_TAG, "decodeMany: ctlv is null, stop decoding");
+                break;
+            }
         }
 
         return items;
