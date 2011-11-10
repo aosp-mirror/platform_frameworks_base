@@ -213,7 +213,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final String NULL_IP = "0.0.0.0";
 
     // Default for the data stall alarm
-    protected static final int DATA_STALL_ALARM_DELAY_IN_MS_DEFAULT = 1000 * 60 * 3;
+    protected static final int DATA_STALL_ALARM_DELAY_IN_MS_DEFAULT = 1000 * 60 * 6;
     // If attempt is less than this value we're doing first level recovery
     protected static final int DATA_STALL_NO_RECV_POLL_LIMIT = 1;
     // Tag for tracking stale alarms
