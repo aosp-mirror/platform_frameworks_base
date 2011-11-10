@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "drmserver"
+//#define LOG_NDEBUG 0
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <grp.h>
@@ -32,7 +35,7 @@ int main(int argc, char** argv)
 {
     sp<ProcessState> proc(ProcessState::self());
     sp<IServiceManager> sm = defaultServiceManager();
-    LOGI("ServiceManager: %p", sm.get());
+    ALOGV("ServiceManager: %p", sm.get());
     DrmManagerService::instantiate();
     ProcessState::self()->startThreadPool();
     IPCThreadState::self()->joinThreadPool();
