@@ -259,7 +259,7 @@
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"የትግበራ የምስጋና የምስክር ወረቀት አደራጅ"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"መደበኛውን Z-አደራደራቸውን  በመተላለፍ፤ የራሳቸውን የምስጋና ምስክር ወረቀት ለመፍጠር እና ለማደራጀት ለመተግበሪያው ይፈቅዳሉ፡፡ለመደበኛ መተግበሪያዎች መቼም ቢሆን አያስፈልግም፡፡"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"ቁልፎች እና መቆጣጠሪያ አዝራሮች ተጫን"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"ለሌሎች መተግበሪያዎች የራሱን የግቤት ክስተቶችን( ቁልፍ መጫኖችን፣ የመሳሰሉት) ለማቅረብ ለመተግበሪያው ይፈቅዳሉ፡፡ ጡባዊ ተኮውን ለመቆጣጠር ጎጂ መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"ለሌሎች መተግበሪያዎች የራሱን የግቤት ክስተቶችን( ቁልፍ መጫኖችን፣ የመሳሰሉት) ለማቅረብ ለመተግበሪያው ይፈቅዳሉ፡፡ ጡባዊ ተኮውን ለመቆጣጠር ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"ለሌሎች መተግበሪያዎች የራሱን የግቤት ክስተቶችን( ቁልፍ መጫኖችን፣ የመሳሰሉት) ለማቅረብ ለመተግበሪያው ይፈቅዳሉ፡፡ ስልኩን ለመቆጣጠር ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"የሚተይቡትን እና የሚወስዱትን እርምጃ ይመዝግቡ"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"ከሌላ መተግበሪያ( ልክ እንደ የይለፍ ቃል መጫን) ጋር በምትገናኝበት ጊዜ እንኳን የተጫንካቸውን ቁልፎች ለማየት ለመተግበሪያው ይፈቅዳሉ፡፡ ለመደበኛ መተግበሪያዎች መቼም ቢሆን አያስፈልግም፡፡"</string>
@@ -305,7 +305,7 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"በዲያግ ቡድን ባለቤትነት ወደ አለ ማንኛውም ንብረት ለምሳሌ በ/dev ያሉ ፋይሎች ለማንበብ እና ለመፃፍ ለመተግበሪያው ይፈቅዳሉ። ይህ በመሰረቱ የስርዓት መረጋጋትን እና ደህንነትን ሊጎዳ ይችላል። ይህ ውስን የሀርድዌር-ተኮር ዲያግኖስቲክስ በአምራቹ ወይም ከዋኙ ብቻ መሆን አለበት።"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"የመተግበሪያ ምንዝሮችን አንቃ ወይም አቦዝን"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"የሌላ መተግበሪያ ክፍለ አካል እንደነቃ ወይም እንዳልነቃ መተግበሪያው እንዲለውጥ ይፈቅዳል፡፡ አስፈላጊ የጡባዊ ተኮ አቅሞችን ለማስወገድ ጎጂ መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡ ከፍቃድ ጋር ጥንቃቄ መወሰድ ይገባል፤ ልክ የማያገለግል፣ ወጥ ያልሆነ፣ ወይም ያልተረጋጋ ሁኔታ ወደ የመተግበሪያ ክፍለ አካል ማግኘት እንደሚቻል ሁሉ፡፡"</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"የሌላ መተግበሪያ ክፍለ አካል እንደነቃ ወይም እንዳልነቃ መተግበሪያው እንዲለውጥ ይፈቅዳል፡፡ አስፈላጊ የስልክ አቅሞችን ለማስወገድ ጎጂ መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡ ከፍቃድ ጋር ጥንቃቄ መወሰድ ይገባል፤ ልክ የማያገለግል፣ ወጥ ያልሆነ፣ ወይም ያልተረጋጋ ሁኔታ ወደ የመተግበሪያ ክፍለ አካል ማግኘት እንደሚቻል ሁሉ፡፡"</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"የሌላ መተግበሪያ ክፍለ አካል እንደነቃ ወይም እንዳልነቃ መተግበሪያው እንዲለውጥ ይፈቅዳል፡፡ አስፈላጊ የስልክ አቅሞችን ለማስወገድ ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡ ከፍቃድ ጋር ጥንቃቄ መወሰድ ይገባል፤ ልክ የማያገለግል፣ ወጥ ያልሆነ፣ ወይም ያልተረጋጋ ሁኔታ ወደ የመተግበሪያ ክፍለ አካል ማግኘት እንደሚቻል ሁሉ፡፡"</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ተመራጭ መተግበሪያዎች አዘጋጅ"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"ተመራጭ መተግበሪያዎችህን ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ ካንተ የግል ውሂብ ለመሰብሰብ ያሉትን መተግበሪያዎች በመላክ፤ በመሄድ ላይ ያሉ መተግበሪያዎችን  ተንኮል አዘል መተግበሪያዎች በዝምታ ሊለውጡ ይችላሉ፡፡"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"የሁሉንም ስርዓት ቅንብሮች ቀይር"</string>
@@ -315,10 +315,10 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"የGoogle አገልግሎቶች ካርታን ቀይር"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"ትግበራ የGoogle ካርታ አገልግሎቶችን ለመቀየር ይፈቅዳል።ለመደበኛ ትግበራዎች ጥቅም አይደለም።"</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"በራስ ሰር በአስነሳጀምር"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ስርዓቱ  ማስጀመር  እንደጨረሰ ወዲያውኑ እራሱን እንዲያስጀምር ለመተግበሪያው ይፈቅዳሉ፡፡ ይሄ ጡባዊ ተኮን ለማስጀመር ችዙ ጊዜ ሊፈጅ ይችላል እና ሁልጊዜ በማስኬድ ጠቅላላውን ጡባዊ ተኮን እንዲቀራፈፍ ለመተግበሪያው ይፈቅዳል፡፡"</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ስርዓቱ  ማስጀመር  እንደጨረሰ ወዲያውኑ እራሱን እንዲያስጀምር ለመተግበሪያው ይፈቅዳሉ፡፡ ይሄ ጡባዊ ተኮን ለማስጀመር ብዙ ጊዜ ሊፈጅ ይችላል እና ሁልጊዜ በማስኬድ ጠቅላላውን ጡባዊ ተኮን እንዲቀራፈፍ ለመተግበሪያው ይፈቅዳል፡፡"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"ወዲያውኑ ስርዓቱ ማስነሳት ሲጨርስ ራሱን እንዲያስጀምር ለመተግበሪያው ይፈቅዳሉ፡፡ ይሄ ስልኩን ለማስጀመር ብዙ ጊዜ እንዲወስድ ሊያደርገው ይችላል እና  ሁልጊዜ በማስኬድ ሁሉንም ስልክ ለማንቀራፈፍ ለመተግበሪያው ይፈቅዳል፡፡"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ልጥፍ ዝርዝር ላክ"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"ስርጭቱ ከተጠናቀቀ በኋላ የሚቀሩ፣ አጣባቂ ስርጭቶችን ለመላክ ለመተግበሪያው ይፈቅዳል፡፡ በጣም ብዙ ማህደረ ትውስታ  እንዲጠቀም በማድረግ ጎጂ መተግበሪያዎች ጡባዊ ተኮን እንዲቀራፈፍ ወይም ያልተረጋጋ እንዲሆን ሊያደርጉት ይችላሉ፡፡"</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"ስርጭቱ ከተጠናቀቀ በኋላ የሚቀሩ፣ አጣባቂ ስርጭቶችን ለመላክ ለመተግበሪያው ይፈቅዳል፡፡ በጣም ብዙ ማህደረ ትውስታ  እንዲጠቀም በማድረግ ተንኮል አዘል መተግበሪያዎች ጡባዊ ተኮን እንዲቀራፈፍ ወይም ያልተረጋጋ እንዲሆን ሊያደርጉት ይችላሉ፡፡"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"ስርጭቱ ከተጠናቀቀ በኋላ የሚቀሩ፣ አጣባቂ ስርጭቶችን ለመላክ ለመተግበሪያው ይፈቅዳሉ፡፡ በጣም ብዙ ማህደረ ትውስታ  እንዲጠቀም በማድረግ ጎጂ መተግበሪያዎች ስልኩን እንዲቀራፈፍ ወይም ያልተረጋጋ እንዲሆን ሊያደርጉት ይችላሉ፡፡"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"የዕውቂያ ውሂብ አንበብ"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"ጡባዊ ተኮህ ላይ የተከማቸውን ሁሉንም የእውቅያ(አድራሻ) ውሂብ ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡  ወደ ሌሎች ሰዎች ውሂብህን ለመላክ ተንኮል አዘል  መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
@@ -347,7 +347,7 @@
     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"ለሙከራ ጊዜያዊ ሥፍራ ፍጠር። ተንኮል አዘል መተግበሪያዎች ሥፍራውን ለማገድ እና/ወይም በGPS ወይም የአውታረ መረብ አቅራቢዎች የእውነተኛውን ሥፍራ ሁኔታ ይዘው ከተመለሱ ወይም ስፍራዎን ተከታትለው ለውጪ ምንጭ ሪፖርት በማድረግ መጠቀም ትችላለህ።"</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"ጥሩየ(GPS) ሥፍራ"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"በአለምአቀፍ የመሬት አቀማመጥ ስርዓት(GPS) ጥሩ የሥፍራ ምንጮችን በጡባዊ ላይ፣ያለበት ሥፍራ፣ድረስ። ተንኮል አዘል መተግበሪያዎች የት እንዳሉ ለማወቅ ይህን መጠቀም ትችላለህ፣ እና ተጨማሪ የባትሪ ኃይል ሊፈጁ ይችላሉ።"</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"በአለምአቀፍ አቀማመጥ ስርዓት ጥሩ ስፍራ ምንጮችን በስልክ ላይ፣ያለበት ቦታ ዽረስ። ተንኮል አዘል ትግበራዎች የትእንዳሉ ለማወቅ ይህን መጠቀም ትችላለህ፣ እና ተጨማሪ የባትሪ ኃይል ሊትፈጅ ትችላለህ።"</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"በአለምአቀፍ አቀማመጥ ስርዓት ጥሩ ስፍራ ምንጮችን በስልክ ላይ፣ያለበት ቦታ ድረስ። ተንኮል አዘል ትግበራዎች የት እንዳሉ ለማወቅ ይህን መጠቀም ትችላለህ፣ እና ተጨማሪ የባትሪ ኃይል  ልትፈጅ ትችላለህ።"</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"የሥፍራ ማብራሪያ(በአውታመረብ ላይ - የተመሰረተ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"የጡባዊውን ቅርብ ሥፍራ ለማወቅ እንደጡባዊ አውታረ መረብ ውሂብ ጎታ ምንጮች፣ ያሉበት ሥፍራ፣ድረስ።ተንኮል አዘል መተግበሪያዎች  የት አቅራቢያ እንዳሉ ለማወቅ ይህን መጠቀም ትችላለህ።"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"የተጠጋጋ የስልክ ሥፍራ አውታረ መረብ የውሂብ ጎታ ማወቅ የተለመዱ ሥፍራ ምንጮች፣ ያሉበት ቦታ ድረስ።ተንኮል አዘል መተግበሪያዎች የት አቅራቢያ እንዳሉ ለማወቅ ይህን መጠቀም ይችላሉ።"</string>
@@ -370,7 +370,7 @@
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"ጡባዊውን በዳግም አስነሳ ለማስገደድ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"ስልኩ በዳግም አስነሳ ለማስገደድ ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"ስርዓተፋይል ሰካ/ንቀል"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"መተግበሪያ መወገድ ለሚችል ማከማቻ ስርዓተ ፋይል ለመሰካት እና ለመንቀል ይፈቅዳል።"</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"መወገድ ለሚችል ማከማቻ ስርዓተ ፋይል ለመሰካት እና ለመንቀል ለመተግበሪያ ይፈቅዳል።"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"ውጫዊ ማከማቻ ቅረፅ"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"መወገድ የሚችል ማከማቻ ለመቅረጽ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"በውስጥ ማከማቻ ላይ መረጃ አግኝ"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"የብሉቱዝ  አስተዳደር"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"የ WiMAX ሁኔታን ዕይ"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"ትግበራ ስለWi-Fi ሁኔታ መረጃን ለማየት ይፈቅዳል።"</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"የWiMAX ሁኔታ ለውጥ"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"ትግበራ ከ WiMAX አውታረመረብ ለመያያዝ እና ለመለያየት ይፈቅዳል።"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"የብሉቱዝ ተያያዦችን ፍጠር"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"የአካባቢውን ብሉቱዝ ጡባዊ ተኮ  ውቅር ለማየት፣ እና ከተጣመረው መሣሪያ ጋር ግንኙነት ለማድረግ እና ለመቀበል ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">" የአካባቢውን ብሉቱዝ ስልክ ውቅር ለማየት፣ እና ከተጣመረው መሣሪያ ጋር ትይይዝ ለመቀበል እና ለማድረግ ለመተግበሪያው ይፈቅዳሉ።"</string>
@@ -745,7 +749,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"የድምፅ መልዕክት አክል"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ወደ ድምፅ መልዕክት የገቢ መልዕክትህ መልዕክቶች ለማከል ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"የአሳሽ ገፀ ሥፍራ ፍቃዶችን ቀይር"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"የአሳሹን የጂኦ-አካባቢ ፍቃዶችን እንዲለውጥ ለመተግበሪያው ይፈቅዳል፡፡ተንኮል አዘልመተግበሪያዎች የመላኪያ አከባቢን መረጃ ወደ አጠራጣሪ የድር ጣቢያዎች ለመፍቀድ ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"የአሳሹን የጂኦ-አካባቢ ፍቃዶችን እንዲለውጥ ለመተግበሪያው ይፈቅዳል፡፡ተንኮል አዘል መተግበሪያዎች የመላኪያ አከባቢን መረጃ ወደ አጠራጣሪ የድር ጣቢያዎች ለመፍቀድ ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ፓኬጆችን አረጋግጥ"</string>
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ፓኬጅ መጫን የሚችል መሆኑን ለማረጋገጥ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"በፓኬጅ አረጋጋጭ የተወሰነ"</string>

@@ -249,7 +249,7 @@
     <string name="permlab_backup" msgid="470013022865453920">"systeemback-up en -herstel beheren"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Hiermee kan de app het beheer van het mechanisme voor systeemback-up en -herstel beheren. Niet voor gebruik door normale apps."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"een volledige back-up- of herstelbewerking bevestigen"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Hiermee kan de app de gebruikersinterface voor bevestiging van de volledige back-up starten. Moet niet door een app worden gebruikt."</string>
+    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Hiermee kan de app de gebruikersinterface voor bevestiging van de volledige back-up starten. Mag door geen enkele app worden gebruikt."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"niet-geautoriseerde vensters weergeven"</string>
     <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"waarschuwingen op systeemniveau weergeven"</string>
@@ -270,7 +270,7 @@
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"koppelen aan een VPN-service"</string>
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Staat de houder toe verbinding te maken met de hoofdinterface van een VPN-service. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"verbinden met een achtergrond"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Hiermee wordt de houder toegestaan toe zich te verbinden met de hoofdinterface van een achtergrond. Nooit vereist voor normale apps."</string>
+    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Hiermee wordt de houder toegestaan zich te verbinden met de hoofdinterface van een achtergrond. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"verbinden met een widgetservice"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Hiermee wordt de houder toegestaan verbinding te maken met de hoofdinterface van een widgetservice. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactie met apparaatbeheer"</string>
@@ -338,7 +338,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Hiermee kan de app alle agenda-afspraken lezen die op uw tablet zijn opgeslagen, inclusief afspraken van vrienden of collega\'s. Schadelijke apps kunnen persoonlijke gegevens extraheren uit deze agenda\'s zonder medeweten van de eigenaar."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Hiermee kan de app alle agenda-afspraken lezen die op uw telefoon zijn opgeslagen, inclusief afspraken van vrienden of collega\'s. Schadelijke apps kunnen persoonlijke gegevens extraheren uit deze agenda\'s zonder medeweten van de eigenaar."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"agenda-afspraken toevoegen of wijzigen en e-mails verzenden aan gasten zonder medeweten van de eigenaren"</string>
-    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Hiermee kan de app als de agenda-eigenaar uitnodigingen verzenden en afspraken toevoegen, verwijderen en wijzigen die u op uw apparaat kunt aanpassen, inclusief afspraken van vrienden of collega\'s. Schadelijke apps kunnen spam-e-mails verzenden die afkomstig lijken te zijn van agenda-eigenaren, afspraken aanpassen zonder medeweten van de eigenaar of nepafspraken toevoegen."</string>
+    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Hiermee kan de app als agenda-eigenaar uitnodigingen verzenden en afspraken toevoegen, verwijderen en wijzigen die u op uw apparaat kunt aanpassen, inclusief afspraken van vrienden of collega\'s. Schadelijke apps kunnen spam-e-mails verzenden die afkomstig lijken te zijn van agenda-eigenaren, afspraken aanpassen zonder medeweten van de eigenaar of nepafspraken toevoegen."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"neplocatiebronnen voor test"</string>
     <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Hiermee kan de app neplocatiebronnen voor testdoeleinden maken. Schadelijke apps kunnen dit gebruiken om de locatie en/of status te overschrijven die wordt aangegeven door echte locatiebronnen zoals GPS of netwerkaanbieders."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-beheer"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-status bekijken"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Hiermee kan een app informatie over de WiMAX-status bekijken."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Hiermee kan een app verbinding maken met een WiMAX-netwerk en deze verbreken."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-verbindingen maken"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Hiermee kan de app de configuratie van een lokale Bluetooth-tablet bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Hiermee kan de app de configuratie van de lokale Bluetooth-telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
@@ -475,7 +479,7 @@
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"synchronisatie-instellingen lezen"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Hiermee kan de app uw synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van de app Personen is ingeschakeld."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"synchronisatie-instellingen schrijven"</string>
-    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Hiermee kan de app uw synchronisatie-instellingen wijzigen, bijvoorbeeld of de synchronisatie van de app Personen is ingeschakeld."</string>
+    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Hiermee kan de app uw synchronisatie-instellingen wijzigen en bijvoorbeeld de synchronisatie van de app Personen in- of uitschakelen."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"synchronisatiestatistieken lezen"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Hiermee kan de app de synchronisatiestatistieken lezen, zoals de geschiedenis van uitgevoerde synchronisaties."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"geabonneerde feeds lezen"</string>
@@ -519,7 +523,7 @@
     <string name="policylab_expirePassword" msgid="885279151847254056">"Verval wachtwoord instellen"</string>
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Beheren hoe vaak het wachtwoord voor schermvergrendeling moet worden gewijzigd"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Codering voor opslag instellen"</string>
-    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Vereisen dat opgeslagen appgegevens kunnen worden geëncrypt"</string>
+    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Vereisen dat opgeslagen appgegevens kunnen worden gecodeerd"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Camera\'s uitschakelen"</string>
     <string name="policydesc_disableCamera" msgid="5680054212889413366">"Het gebruik van alle apparaatcamera\'s voorkomen"</string>
   <string-array name="phoneTypes">
@@ -1002,7 +1006,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB-opslag uitschakelen"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Er is een probleem opgetreden tijdens het uitschakelen van de USB-opslag. Controleer of u de USB-host heeft losgekoppeld en probeer het opnieuw."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB-opslag inschakelen"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"Als u USB-opslag inschakelt, worden bepaalde apps die u gebruikt, gestopt en worden deze mogelijk pas weer beschikbaar wanneer u USB-opslag uitschakelt."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"Als u USB-opslag inschakelt, worden bepaalde apps die u gebruikt, gestopt en zijn deze mogelijk pas weer beschikbaar wanneer u USB-opslag uitschakelt."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-bewerking mislukt"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Gekoppeld als media-apparaat"</string>

@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-adminisztráció"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth-t, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth telefont, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-állapot megtekintése"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Lehetővé teszi az alkalmazás számára a WiMAX állapotinformációk megtekintését."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-állapot módosítása"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Lehetővé teszi, hogy egy alkalmazás csatlakozzon a WiMAX hálózathoz, illetve megszüntesse a kapcsolatot a hálózattal."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth kapcsolatok létrehozása"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Lehetővé teszi az alkalmazás számára a helyi Bluetooth táblagép konfigurációjának megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Lehetővé teszi az alkalmazás számára a helyi Bluetooth telefon konfigurációjának megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>

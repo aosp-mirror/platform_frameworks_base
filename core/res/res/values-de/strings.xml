@@ -189,21 +189,21 @@
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"Ausgehende Anrufe abfangen"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Ermöglicht der App, ausgehende Anrufe zu verarbeiten und die zu wählende Nummer zu ändern. Schädliche Apps können so ausgehende Anrufe überwachen, umleiten oder unterbinden."</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"SMS empfangen"</string>
-    <string name="permdesc_receiveSms" msgid="8107887121893611793">"Ermöglicht der App, SMS-Nachrichten zu empfangen und zu verarbeiten. Schädliche Apps können Ihre Nachrichten überwachen oder löschen, bevor sie angezeigt werden."</string>
+    <string name="permdesc_receiveSms" msgid="8107887121893611793">"Ermöglicht der App, SMS zu empfangen und zu verarbeiten. Schädliche Apps können Ihre Nachrichten überwachen oder löschen, bevor sie angezeigt werden."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS empfangen"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Ermöglicht der App, MMS-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Apps können so Ihre Nachrichten überwachen oder löschen, bevor sie angezeigt werden."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"Notfall-Broadcasts empfangen"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Ermöglicht der App, Notfall-Broadcasts zu empfangen und zu verarbeiten. Diese Berechtigung steht nur System-Apps zur Verfügung."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Kurznachrichten senden"</string>
-    <string name="permdesc_sendSms" msgid="906546667507626156">"Ermöglicht der App das Senden von SMS-Nachrichten. Bei schädlichen Apps können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
+    <string name="permdesc_sendSms" msgid="906546667507626156">"Ermöglicht der App das Senden von SMS. Bei schädlichen Apps können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS-Nachrichten ohne Bestätigung senden"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Ermöglicht der App das Senden von SMS-Nachrichten. Bei schädlichen Apps können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Ermöglicht der App das Senden von SMS. Bei schädlichen Apps können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS oder MMS lesen"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Ermöglicht der App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS-Nachrichten zu lesen. Schädliche Apps können so Ihre vertraulichen Nachrichten lesen."</string>
-    <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Ermöglicht der App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte SMS-Nachrichten zu lesen. Schädliche Apps können so Ihre vertraulichen Nachrichten lesen."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Ermöglicht der App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu lesen. Schädliche Apps können so Ihre vertraulichen Nachrichten lesen."</string>
+    <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Ermöglicht der App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte SMS zu lesen. Schädliche Apps können so Ihre vertraulichen Nachrichten lesen."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS oder MMS bearbeiten"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Ermöglicht der App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS-Nachrichten zu bearbeiten. Schädliche Apps können so Ihre Nachrichten löschen."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ermöglicht der App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte SMS-Nachrichten zu bearbeiten. Schädliche Apps können so Ihre Nachrichten löschen."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Ermöglicht der App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Apps können so Ihre Nachrichten löschen."</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ermöglicht der App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Apps können so Ihre Nachrichten löschen."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP-Nachrichten empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Ermöglicht der App, WAP-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Apps können so Ihre Nachrichten überwachen oder löschen, bevor sie angezeigt werden."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Aktive Apps abrufen"</string>
@@ -237,9 +237,9 @@
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Broadcast ohne Paket senden"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Ermöglicht der App, eine Benachrichtigung zu senden, dass ein App-Paket entfernt wurde. Schädliche Apps können so eine andere aktive App beenden."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"per SMS empfangenen Broadcast senden"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine SMS-Nachricht empfangen wurde. Schädliche Apps können so eingehende SMS-Nachrichten fälschen."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine SMS empfangen wurde. Schädliche Apps können so eingehende SMS fälschen."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"von WAP-PUSH empfangenen Broadcast senden"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine WAP PUSH-Nachricht empfangen wurde. Schädliche Apps können so den Empfang von MMS-Nachrichten vortäuschen oder unbemerkt den Inhalt einer beliebigen Webseite durch schädliche Inhalte ersetzen."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine WAP PUSH-Nachricht empfangen wurde. Schädliche Apps können so den Empfang von MMS vortäuschen oder unbemerkt den Inhalt einer beliebigen Webseite durch schädliche Inhalte ersetzen."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"Anzahl der laufenden Prozesse beschränken"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ermöglicht der App, die maximale Anzahl an aktiven Prozessen zu steuern. Wird nie für normale Apps benötigt."</string>
     <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"Alle Apps im Hintergrund schließen"</string>
@@ -255,9 +255,9 @@
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"Warnungen auf Systemebene anzeigen"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Ermöglicht der App, Fenster mit Systemwarnungen anzuzeigen. Schädliche Apps können so den gesamten Bildschirm einnehmen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"Allgemeine Animationsgeschwindigkeit einstellen"</string>
-    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Ermöglicht einer App, die allgemeine Animationsgeschwindigkeit (schnellere oder langsamere Animationen) jederzeit anzupassen"</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"App-Tokens verwalten"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Ermöglicht der App, ihre eigenen Tokens zu erstellen und zu verwalten. Hierbei wird die normale Z-Reihenfolge umgangen. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Ermöglicht einer App, die allgemeine Animationsgeschwindigkeit (langsamere oder schnellere Animationen) jederzeit anzupassen"</string>
+    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"App-Token verwalten"</string>
+    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Ermöglicht der App, ihre eigenen Token zu erstellen und zu verwalten. Hierbei wird die normale Z-Reihenfolge umgangen. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"Tasten und Steuerungstasten drücken"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Ermöglicht der App, ihre eigenen Eingabeaktionen, zum Beispiel das Drücken von Tasten, an andere Apps weiterzugeben. Schädliche Apps können so die Kontrolle über Ihr Tablet übernehmen."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Ermöglicht der App, ihre eigenen Eingabeaktionen, zum Beispiel das Drücken von Tasten, an andere Apps weiterzugeben. Schädliche Apps können so die Kontrolle über Ihr Telefon übernehmen."</string>
@@ -282,7 +282,7 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Linux-Signale an Apps senden"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Ermöglicht der App, das Senden des gelieferten Signals an alle andauernden Prozesse zu fordern"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"App permanent ausführen"</string>
-    <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Ermöglicht der App, eigene Komponenten persistent zu machen, damit das System diese nicht für andere Apps nutzen kann"</string>
+    <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Ermöglicht der App, eigene Komponenten permanent zu machen, damit das System diese nicht für andere Apps nutzen kann"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"Apps löschen"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Ermöglicht der App, Android-Pakete zu löschen. Schädliche Apps können so wichtige Apps löschen."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"Daten anderer Apps löschen"</string>
@@ -318,8 +318,8 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ermöglicht der App, sich selbst zu starten, sobald das System gebootet wurde. Dadurch kann es länger dauern, bis das Tablet gestartet wird, und durch die ständige Aktivität der App wird die gesamte Leistung des Tablets beeinträchtigt."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ermöglicht der App, sich selbst zu starten, sobald das System gebootet wurde. Dadurch kann es länger dauern, bis das Telefon gestartet wird, und durch die ständige Aktivität der App wird die gesamte Leistung des Telefons beeinträchtigt."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"dauerhaften Broadcast senden"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach dem Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Tablet langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach dem Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Telefon langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Tablet langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Telefon langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"Kontaktdaten lesen"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Ermöglicht der App, alle auf Ihrem Tablet gespeicherten Kontaktdaten (Adressen) zu lesen. Schädliche Apps können so Ihre Daten an andere senden."</string>
     <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Ermöglicht der App, alle auf Ihrem Telefon gespeicherten Kontaktdaten (Adressen) zu lesen. Schädliche Apps können so Ihre Daten an andere senden."</string>
@@ -329,7 +329,7 @@
     <string name="permlab_readProfile" msgid="6824681438529842282">"Ihre Profildaten lesen"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profilinformationen zu lesen, darunter Ihren Namen und Ihre Kontaktdaten. Die App kann Sie somit identifizieren und Ihre Profilinformationen an andere senden."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"In Ihre Profildaten schreiben"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profilinformationen zu ändern, darunter Ihren Namen und Ihre Kontaktdaten, sowie Informationen hinzuzufügen. Andere Apps können Sie somit identifizieren und Ihre Profilinformationen an andere senden."</string>
+    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profilinformationen zu ändern, darunter Ihren Namen und Ihre Kontaktdaten, sowie Informationen hinzuzufügen. Andere Apps können Sie so identifizieren und Ihre Profilinformationen an andere senden."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"In sozialem Stream lesen"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Ermöglicht der App, auf soziale Updates von Ihnen und Ihren Freunden zuzugreifen und diese zu synchronisieren. Schädliche Apps können so private Kommunikationen zwischen Ihnen und Ihren Freunden in sozialen Netzwerken lesen."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"In sozialem Stream schreiben"</string>
@@ -340,11 +340,11 @@
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"Ohne das Wissen der Eigentümer Kalendertermine hinzufügen oder ändern und E-Mails an Gäste senden"</string>
     <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Ermöglicht der App das Senden von Termineinladungen im Namen des Kalendereigentümers und das Hinzufügen, Entfernen und Ändern von Terminen, die Sie auf Ihrem Gerät bearbeiten können, einschließlich der Termine von Freunden oder Kollegen. Schädliche Apps können Spam-E-Mails senden, die scheinbar von Kalendereigentümern stammen, Termine ohne Wissen der Eigentümer ändern oder falsche Termine hinzufügen."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"Simulierte Standortquellen für Testzwecke"</string>
-    <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Ermöglicht der App, falsche Standortquellen für Testzwecke zu erstellen. Schädliche Apps können so den von echten Standortquellen wie GPS oder Netzwerkanbietern zurückgegebenen Standort und/oder Status überschreiben."</string>
+    <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Ermöglicht der App, simulierte Standortquellen für Testzwecke zu erstellen. Schädliche Apps können so den von echten Standortquellen wie GPS oder Netzwerkanbietern zurückgegebenen Standort und/oder Status überschreiben."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Auf zusätzliche Dienstanbieterbefehle für Standort zugreifen"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6737736970602176133">"Ermöglicht der App, auf zusätzliche Standortanbieterbefehle zuzugreifen. Schädliche Apps können so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
-    <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Erstellt falsche Standortquellen für Testzwecke. Schädliche Apps können so den von echten Standortquellen wie GPS oder Netzwerkanbietern zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
+    <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Erstellt simulierte Standortquellen für Testzwecke. Schädliche Apps können so den von echten Standortquellen wie GPS oder Netzwerkanbietern zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Ermöglicht Zugriff auf genaue Standortquellen wie GPS auf dem Tablet (falls verfügbar). Schädliche Apps können damit bestimmen, wo Sie sich befinden, und so Ihren Akku zusätzlich belasten."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Ermöglicht Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Apps können damit bestimmen, wo Sie sich befinden, und so Ihren Akku zusätzlich belasten."</string>
@@ -378,7 +378,7 @@
     <string name="permlab_asec_create" msgid="6414757234789336327">"Internen Speicher erstellen"</string>
     <string name="permdesc_asec_create" msgid="4558869273585856876">"Ermöglicht der App, internen Speicher zu erstellen"</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"Internen Speicher vernichten"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Ermöglicht der App, den internen Speicher zu vernichten"</string>
+    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Ermöglicht der App, den internen Speicher zu löschen"</string>
     <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"Internen Speicher bereitstellen/trennen"</string>
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Ermöglicht der App, internen Speicher bereitzustellen bzw. zu trennen"</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"Internen Speicher umbenennen"</string>
@@ -443,7 +443,7 @@
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"Kontoliste verwalten"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Ermöglicht der App, Konten hinzuzufügen und zu entfernen oder deren Passwörter zu löschen"</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"Authentifizierungsinformationen eines Kontos verwenden"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Ermöglicht der App, Authentifizierungs-Tokens anzufordern"</string>
+    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Ermöglicht der App, Authentifizierungs-Token anzufordern"</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"Netzwerkstatus anzeigen"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Ermöglicht der App, den Status aller Netzwerke anzuzeigen"</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"Uneingeschränkter Internetzugriff"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-Verwaltung"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ermöglicht der App, das lokale Bluetooth-Tablet zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ermöglicht der App, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-Status anzeigen"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ermöglicht einer App, die Informationen zum WiMAX-Status einzusehen"</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-Status ändern"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Ermöglicht einer App, eine Verbindung mit dem WiMAX-Netzwerk herzustellen bzw. zu trennen"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-Verbindungen herstellen"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Ermöglicht der App, die Konfiguration des lokalen Bluetooth-Tablets einzusehen und Verbindungen zu Partnergeräten herzustellen und zu akzeptieren"</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Ermöglicht der App, die Konfiguration des lokalen Bluetooth-Telefons einzusehen und Verbindungen mit Partnergeräten herzustellen und zu akzeptieren"</string>
@@ -481,7 +485,7 @@
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abonnierte Feeds lesen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ermöglicht der App, Details zu den zurzeit synchronisierten Feeds abzurufen"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abonnierte Feeds schreiben"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Ermöglicht der App, Änderungen an den kürzlich synchronisierten Feeds vorzunehmen. Schädliche Apps können so Ihre synchronisierten Feeds ändern."</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Ermöglicht der App, Änderungen an kürzlich synchronisierten Feeds vorzunehmen. Schädliche Apps können so Ihre synchronisierten Feeds ändern."</string>
     <string name="permlab_readDictionary" msgid="8410247960433376352">"Benutzerdefiniertes Wörterbuch lesen"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Ermöglicht der App, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"In benutzerdefiniertes Wörterbuch schreiben"</string>
@@ -663,8 +667,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Keine SIM-Karte im Tablet"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Keine SIM-Karte im Telefon"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Legen Sie eine SIM-Karte ein."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-Karte fehlt oder ist nicht lesbar. Legen Sie eine SIM-Karte ein."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ihre SIM-Karte wurde dauerhaft deaktiviert."\n" Wenden Sie sich an Ihren Mobilfunkbetreiber, um eine andere SIM-Karte zu erhalten."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-Karte fehlt oder ist nicht lesbar. Bitte legen Sie eine SIM-Karte ein."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ihre SIM-Karte wurde dauerhaft deaktiviert."\n" Wenden Sie sich an Ihren Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Schaltfläche für vorherigen Track"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Schaltfläche für nächsten Track"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Schaltfläche für Pause"</string>
@@ -676,11 +680,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Weitere Informationen erhalten Sie im Nutzerhandbuch oder beim Kundendienst."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Bitte PIN eingeben"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-Karte wird entsperrt..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben."\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben."\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe Ihrer Google-Anmeldeinformationen zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe Ihrer Google-Anmeldeinformationen zu entsperren."\n\n"Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Bitte versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden noch einmal."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben."\n\n"Bitte versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden noch einmal."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben."\n\n"Bitte versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden noch einmal."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe Ihrer Google-Anmeldeinformationen zu entsperren."\n\n" Bitte versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden noch einmal."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe Ihrer Google-Anmeldeinformationen zu entsperren."\n\n"Bitte versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden noch einmal."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g> Mal erfolglos versucht, das Tablet zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird das Tablet auf die Werkseinstellungen zurückgesetzt und alle Nutzerdaten gehen verloren."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g> Mal erfolglos versucht, das Telefon zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird das Telefon auf die Werkseinstellungen zurückgesetzt und alle Nutzerdaten gehen verloren."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Das Tablet wird nun auf die Werkseinstellungen zurückgesetzt."</string>
@@ -889,7 +893,7 @@
     <string name="capital_on" msgid="1544682755514494298">"AN"</string>
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Immer für diese Aktion verwenden"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Das Löschen der Standardeinstellungen ist in den Systemeinstellungen unter \"Apps &gt; Heruntergeladen\" möglich."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Aktion auswählen"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"App für USB-Gerät auswählen"</string>
@@ -969,7 +973,7 @@
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Unbekannte App"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"Es wird eine große Anzahl an Kurznachrichten versendet. Tippen Sie zum Fortfahren auf \"OK\" oder tippen Sie auf \"Abbrechen\", um den Sendevorgang zu beenden."</string>
+    <string name="sms_control_message" msgid="4073755190243093924">"Es wird eine große Anzahl an SMS versendet. Tippen Sie zum Fortfahren auf \"OK\" oder tippen Sie auf \"Abbrechen\", um den Sendevorgang zu beenden."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Abbrechen"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>

@@ -237,9 +237,9 @@
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar difusão de pacote removido"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Permite que a aplicação difunda uma notificação de que foi removido um pacote de aplicações. As aplicações maliciosas podem utilizar isto para eliminar qualquer outra aplicação em execução."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"enviar difusão recebida por SMS"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite que a aplicação difunda uma notificação de que foi recebida uma mensagem SMS. As aplicações maliciosas podem utilizar esta opção para falsificar as mensagens SMS recebidas."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Permite que a aplicação difunda uma notificação de que foi recebida uma mensagem SMS. As aplicações maliciosas podem utilizar este recurso para forjar mensagens SMS recebidas."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"enviar difusão recebida através de PUSH WAP"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite que a aplicação difunda uma notificação de que foi recebida uma mensagens PUSH WAP. As aplicações maliciosas podem utilizar isto para falsificar um recibo de mensagem MMS ou substituir, de forma silenciosa, o conteúdo de qualquer página Web por variantes maliciosas."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite que a aplicação difunda uma notificação de que foi recebida uma mensagens PUSH WAP. As aplicações maliciosas podem utilizar isto para forjar um recibo de mensagem MMS ou substituir, de forma silenciosa, o conteúdo de qualquer página Web por variantes maliciosas."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"número limite de processos em execução"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite a uma aplicação controlar o número máximo de processos que será executado. Nunca é necessário para aplicações normais."</string>
     <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"fechar todas as aplicações em segundo plano"</string>
@@ -307,7 +307,7 @@
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite que a aplicação mude a opção de ativar ou não um componente de outra aplicação. As aplicações maliciosas podem utilizar isto para desativar funcionalidades importantes do tablet. É necessário ter cuidado com esta autorização, uma vez que é possível colocar alguns componentes de aplicações num estado inutilizável, inconsistente ou instável."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite que a aplicação mude a opção de ativar ou não um componente de outra aplicação. As aplicações maliciosas podem utilizar isto para desativar funcionalidades importantes do telemóvel. É necessário ter cuidado com esta autorização, uma vez que é possível colocar alguns componentes de aplicações num estado inutilizável, inconsistente ou instável."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"definir aplicações preferidas"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite à aplicativo modificar as suas aplicações preferidas. As aplicações maliciosas podem alterar sem aviso as aplicações que são executadas, falsificando as aplicações existentes para recolher os seus dados privados."</string>
+    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite ao aplicativo modificar as suas aplicações preferidas. As aplicações maliciosas podem alterar sem aviso as aplicações que são executadas, espiando as aplicações existentes para recolher os seus dados privados."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificar definições globais do sistema"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Permite à aplicação modificar os dados das definições do sistema. As aplicações maliciosas podem corromper a configuração do seu sistema."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"modificar definições seguras do sistema"</string>
@@ -347,10 +347,10 @@
     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Criar origens de localização simuladas para testes. As aplicações maliciosas podem utilizar esta situação para substituir a localização e/ou o estado devolvido por origens de localização reais, tais como fornecedores de rede ou GPS, ou monitorizar e indicar a sua localização a uma fonte externa."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"localização exacta (GPS)"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Aceder a fontes de localização específicas, tais como o Sistema de Posicionamento Global (GPS), no tablet, se disponível. As aplicações maliciosas podem utilizar isto para determinar a localização do utilizador e podem consumir energia adicional da bateria."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Aceder a fontes de localização específicas, tais como o Sistema de Posicionamento Global (GPS), no telemóvel, se disponível. As aplicações maliciosas podem utilizar isto para determinar a localização do utilizador e pode consumir energia adicional da bateria."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Aceder, no telemóvel, a fontes de localização precisa, como o Sistema de Posicionamento Global (GPS), se disponíveis. As aplicações maliciosas podem utilizar isto para determinar a localização do utilizador. Também pode consumir energia adicional da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"localização aproximada (baseada na rede)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Aceda a fontes de localização aproximadas, tais como a base de dados da rede celular, para determinar uma localização aproximada do tablet, se disponível. As aplicações maliciosas podem utilizar isto para determinar aproximadamente onde o utilizador se encontra."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Aceder a fontes de localização aproximadas, tais como a base de dados da rede celular, para determinar uma localização aproximada do telemóvel, se disponível. As aplicações maliciosas podem utilizar este item para determinar aproximadamente onde o utilizador se encontra."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Aceda a fontes de localização aproximadas, tais como a base de dados da rede celular, para determinar uma localização aproximada do tablet, se disponível. As aplicações maliciosas podem utilizar isto para determinar, aproximadamente, o local onde o utilizador se encontra."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Aceder a fontes de localização aproximadas, tais como a base de dados da rede celular, para determinar uma localização aproximada do telemóvel, se disponível. As aplicações maliciosas podem utilizar este item para determinar, aproximadamente, o local onde o utilizador se encontra."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"aceder a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite à aplicação utilizar funcionalidades de SurfaceFlinger de nível inferior."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler memória intermédia de fotogramas"</string>
@@ -409,7 +409,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificar estado do telefone"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite que a aplicação controle as funcionalidades de telefone do aparelho. Uma aplicação com esta permissão pode alternar entre redes, ligar/desligar o rádio do telefone e outras coisas semelhantes sem sequer o notificar."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"ler identidade e estado do telefone"</string>
-    <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Permite que a aplicação aceda às funcionalidades do aparelho. Uma aplicação com esta autorização pode determinar o número deste telemóvel assim como o número de série do mesmo, se existe uma chamada ativa, o número a que a essa chamada está ligada, etc."</string>
+    <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Permite que a aplicação aceda às funcionalidades do aparelho. Uma aplicação com esta autorização pode obter o número deste telemóvel assim como o número de série do mesmo, se existe uma chamada ativa, o número a que a essa chamada está ligada, etc."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir que o tablet entre em inactividade"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inactividade do telefone"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que a aplicação impeça o tablet de entrar no modo de suspensão."</string>
@@ -451,9 +451,9 @@
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"alterar/intercetar definições e tráfego de rede"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permite à aplicação alterar as definições de rede e intercetar e inspecionar todo o tráfego de rede, por exemplo, para mudar o proxy e a porta de qualquer APN. As aplicações maliciosas podem monitorizar, redirecionar ou modificar pacotes de rede sem o seu conhecimento."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"mudar conectividade de rede"</string>
-    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permite que a aplicação altere o estado de conetividade da rede."</string>
+    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permite que a aplicação altere o estado de conectividade da rede."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"alterar conectividade associada"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite que a aplicação altere o estado de conetividade da rede ligada."</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite que a aplicação altere o estado de conectividade da rede ligada."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"mudar definição de utilização de dados de segundo plano"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permite à aplicação mudar a definição de utilização de dados em segundo plano."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"ver estado de Wi-Fi"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administração de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite à aplicação configurar o tablet Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que a aplicação configure o telemóvel Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"ver estado do WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite a uma aplicação ver as informações acerca do estado do Wi-Fi."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"alterar estado do WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite a uma aplicação ligar-se e desligar-se da rede WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"criar ligações Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permite que a aplicação veja a configuração do tablet Bluetooth local, bem como efetuar e aceitar ligações com dispositivos emparelhados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permite que a aplicação veja a configuração do telefone Bluetooth local, bem como efetuar e aceitar ligações com dispositivos emparelhados."</string>
@@ -632,7 +636,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Irmã"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Cônjuge"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizado"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Página inicial"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Residência"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Emprego"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Outro"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Escreva o código PIN"</string>

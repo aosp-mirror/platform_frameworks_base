@@ -278,16 +278,16 @@
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modificare orientare ecran"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite aplicaţiei să modifice rotaţia ecranului în orice moment. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"modifică viteza indicatorului"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Permite aplicaţiei să modifice oricând viteza indicatorului mouse-lui sau trackpadului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
+    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Permite aplicaţiei să modifice oricând viteza indicatorului mouse-ului sau al trackpadului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"trimitere semnale Linux către aplicaţii"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Permite aplicaţiei să solicite trimiterea semnalului furnizat către toate procesele persistente."</string>
-    <string name="permlab_persistentActivity" msgid="8841113627955563938">"rulare întotdeauna a aplicaţiei"</string>
+    <string name="permlab_persistentActivity" msgid="8841113627955563938">"rulare continuă a aplicaţiei"</string>
     <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Permite aplicaţiei să declare persistente anumite părţi ale sale, astfel încât sistemul să nu le poată utiliza pentru alte aplicaţii."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"ştergere aplicaţii"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Permite aplicaţiei să şteargă pachete Android. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a şterge aplicaţii importante."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"ştergere date ale altor aplicaţii"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Permite aplicaţiei să şteargă datele utilizatorului."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ştergere date stocate în cache ale altor aplicaţii"</string>
+    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ştergere date stocate în memoria cache a altor aplicaţii"</string>
     <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Permite aplicaţiei să şteargă fişierele din cache."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"măsurare spaţiu de stocare al aplicaţiei"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Permite aplicaţiei să preia dimensiunile codului, ale datelor şi ale memoriei cache"</string>
@@ -304,8 +304,8 @@
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite aplicaţiei să modifice starea (activată sau dezactivată) a unei componente a altei aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a dezactiva funcţii importante ale tabletei. Este necesar să utilizaţi cu atenţie această permisiune, deoarece este posibil să aduceţi componentele aplicaţiei într-o stare inutilizabilă, inconsecventă sau instabilă."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite aplicaţiei să modifice starea (activată sau dezactivată) a unei componente a altei aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a dezactiva funcţii importante ale telefonului. Este necesar să utilizaţi cu atenţie această permisiune, deoarece este posibil să aduceţi componentele aplicaţiei într-o stare inutilizabilă, inconsecventă sau instabilă."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite aplicaţiei să modifice starea activată sau dezactivată a unei componente a altei aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a dezactiva funcţii importante ale tabletei. Este necesar să utilizaţi cu atenţie această permisiune, deoarece este posibil să aduceţi componentele aplicaţiei într-o stare inutilizabilă, inconsecventă sau instabilă."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite aplicaţiei să modifice starea activată sau dezactivată a unei componente a altei aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a dezactiva funcţii importante ale telefonului. Este necesar să utilizaţi cu atenţie această permisiune, deoarece este posibil să aduceţi componentele aplicaţiei într-o stare inutilizabilă, inconsecventă sau instabilă."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"setare aplicaţii preferate"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite aplicaţiei să modifice aplicaţiile dvs. preferate. Aplicaţiile rău intenţionate pot să modifice fără a vă înştiinţa aplicaţiile care rulează, păcălind aplicaţiile existente să colecteze date private de la dvs."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificare setări sistem globale"</string>
@@ -335,10 +335,10 @@
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"scrie în fluxul social"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3496277176955721451">"Permite aplicaţiei să afişeze actualizări sociale de la prietenii dvs. Aplicaţiile rău intenţionate se pot folosi de această permisiune pentru a simula un prieten, cu scopul de a vă păcăli să oferiţi parole sau alte informaţii confidenţiale."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"citirea evenimentelor din calendar şi a informaţiilor confidenţiale"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Permite aplicaţiei să citească toate evenimentele din calendar stocate pe tabletă, inclusiv pe cele ale prietenilor sau colegilor. Aplicaţiile rău intenţionate pot extrage informaţii cu caracter personal din aceste calendare fără ştirea proprietarului."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Permite aplicaţiei să citească toate evenimentele din calendar stocate pe telefon, inclusiv pe cele ale prietenilor sau colegilor. Aplicaţiile rău intenţionate pot extrage informaţii cu caracter personal din aceste calendare fără ştirea proprietarului."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Permite aplicaţiei să citească toate evenimentele din calendar stocate pe tabletă, inclusiv pe cele ale prietenilor sau ale colegilor. Aplicaţiile rău intenţionate pot extrage informaţii cu un caracter personal din aceste calendare fără ştirea proprietarului."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Permite aplicaţiei să citească toate evenimentele din calendar stocate pe telefon, inclusiv pe cele ale prietenilor sau ale colegilor. Aplicaţiile rău intenţionate pot extrage informaţii cu un caracter personal din aceste calendare fără ştirea proprietarului."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"adăugarea sau modificarea evenimentelor din calendar şi trimiterea de e-mailuri invitaţilor fără ştirea proprietarului"</string>
-    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Permite aplicaţiei să trimită invitaţii la evenimente în calitate de proprietar al calendarului şi să adauge, elimine, modifice evenimentele pe care dvs. le puteţi modifica pe dispozitiv, inclusiv pe cele ale prietenilor sau colegilor. Aplicaţiile rău intenţionate pot să trimită e-mailuri spam care par să provină de la proprietarii calendarelor, să modifice evenimente fără ştirea proprietarilor sau să adauge evenimente false."</string>
+    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Permite aplicaţiei să trimită invitaţii la evenimente în calitate de proprietar al calendarului şi să adauge, elimine, modifice evenimentele pe care dvs. le puteţi modifica pe dispozitiv, inclusiv pe cele ale prietenilor sau ale colegilor. Aplicaţiile rău intenţionate pot să trimită e-mailuri spam care par să provină de la proprietarii calendarelor, să modifice evenimente fără ştirea proprietarilor sau să adauge evenimente false."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"surse de locaţii pentru testare"</string>
     <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Permite aplicaţiei să creeze surse de locaţii pentru testare. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a înlocui locaţia şi/sau starea returnată de sursele de locaţii reale, cum ar fi cele ale furnizorilor GPS sau de reţea."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesare comenzi suplimentare ale furnizorului locaţiei"</string>
@@ -405,7 +405,7 @@
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"accesare proprietăţi checkin"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Permite aplicaţiei acces de citire/scriere la proprietăţile încărcate de serviciul de înregistrare. Nu se utilizează de aplicaţiile obişnuite."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"alegere obiecte widget"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Permite aplicaţiei să indice sistemului ce aplicaţii pot utiliza anumite obiecte widget. Cu ajutorul acestei permisiuni, aplicaţiile pot să acorde altor aplicaţii accesul la datele personale. Nu se utilizează de aplicaţiile obişnuite."</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Permite aplicaţiei să indice sistemului ce aplicaţii pot utiliza anumite widgeturi. Cu ajutorul acestei permisiuni, aplicaţiile pot să acorde altor aplicaţii accesul la datele personale. Nu se utilizează de aplicaţiile obişnuite."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificare stare telefon"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite aplicaţiei să controleze funcţiile de telefon ale dispozitivului. O aplicaţie cu această permisiune poate să schimbe reţeaua, să închidă şi să deschidă radioul şi să efectueze alte acţiuni similare, fără să vă înştiinţeze."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"citire stare şi identitate telefon"</string>
@@ -453,7 +453,7 @@
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"modificare conectivitate în reţea"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permite aplicaţiei să modifice starea de conectivitate la reţea."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"modificare conectivitate tethering"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite aplicaţiei să modifice starea de conectivitate de tethering la reţea."</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite aplicaţiei să modifice starea de conectivitate prin tethering la reţea."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"modificare setare pentru utilizarea datelor din fundal"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permite aplicaţiei să modifice setarea pentru utilizarea datelor de fundal."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"vizualizare stare Wi-Fi"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"administrare Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite aplicaţiei să configureze tableta Bluetooth locală, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite aplicaţiei să configureze telefonul Bluetooth local, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"vizualizaţi starea WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite unei aplicaţii să vizualizeze informaţiile despre starea WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"schimbaţi starea WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite unei aplicaţii să se conecteze şi să se deconecteze de la reţeaua WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"creare conexiuni Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permite aplicaţiei să vizualizeze configuraţia tabletei Bluetooth locale, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permite aplicaţiei să vizualizeze configuraţia telefonului Bluetooth local, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
@@ -488,7 +492,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite aplicaţiei să scrie cuvinte noi în dicţionarul utilizatorului."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modificare/ştergere a conţinutului stocării USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificare/ştergere conţinut card SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Perm. apl. scr. în stoc. USB."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite scriere în stoc. USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite aplicaţiei să scrie pe cardul SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./şterg. conţinutul media stocat intern"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permite aplicaţiei să modifice conţinutul stocării media interne."</string>
@@ -676,11 +680,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consultaţi Ghidul de utilizare sau contactaţi Serviciul de relaţii cu clienţii."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Cardul SIM este blocat."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Se deblochează cardul SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> (de) ori. "\n\n"Încercaţi din nou în <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Aţi introdus incorect parola de <xliff:g id="NUMBER_0">%d</xliff:g> (de) ori. "\n\n"Încercaţi din nou în <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Aţi introdus incorect codul PIN de <xliff:g id="NUMBER_0">%d</xliff:g> (de) ori."\n\n"Încercaţi din nou în <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> (de) ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> (de) încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul datelor de conectare la Google."\n\n" Încercaţi din nou în <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> (de) ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> (de) încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul datelor de conectare la Google."\n\n" Încercaţi din nou în <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. "\n\n"Încercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Aţi introdus incorect parola de <xliff:g id="NUMBER_0">%d</xliff:g> ori. "\n\n"Încercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Aţi introdus incorect codul PIN de <xliff:g id="NUMBER_0">%d</xliff:g> ori."\n\n"Încercaţi din nou peste <xliff:g id="NUMBER_1">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul datelor de conectare la Google."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul datelor de conectare la Google."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Aţi efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, aceasta va fi resetată la setările prestabilite din fabrică, iar toate datele de utilizator vor fi pierdute."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Aţi efectuat <xliff:g id="NUMBER_0">%d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, acesta va fi resetat la setările prestabilite din fabrică, iar toate datele de utilizator vor fi pierdute."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Aţi efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Tableta va fi acum resetată la setările prestabilite din fabrică."</string>
@@ -1018,7 +1022,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depanarea USB este conectată"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeţi pentru a dezactiva depanarea USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Alegeţi metoda de introducere"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Config. metode de introducere"</string>
+    <string name="configure_input_methods" msgid="9091652157722495116">"Configurare metode introducere"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidaţi"</u></string>
@@ -1050,7 +1054,7 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Permite aplicaţiei să modifice statisticile colectate despre utilizarea componentelor. Nu se utilizează de aplicaţiile obişnuite."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"copiere conţinut"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Permite aplicaţiei să invoce serviciul containerului prestabilit pentru a copia conţinutul. Nu se utilizează de aplicaţiile obişnuite."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a controla mărirea/micşorarea"</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a mări/micşora"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Eroare la extragerea obiectului widget"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Accesaţi"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Căutaţi"</string>
@@ -1212,7 +1216,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Amprentă SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Afişaţi-le pe toate"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Alegeţi activitatea"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Distribuiţi cu"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Distribuiţi pentru"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispozitiv blocat."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
 </resources>

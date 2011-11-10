@@ -170,7 +170,17 @@
     <skip />
     <!-- no translation found for accessibility_wifi_three_bars (928322805193265041) -->
     <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (4826278754383492058) -->
+    <!-- no translation found for accessibility_wifi_signal_full (1275764416228473932) -->
+    <skip />
+    <!-- no translation found for accessibility_no_wimax (4329180129727630368) -->
+    <skip />
+    <!-- no translation found for accessibility_wimax_one_bar (4170994299011863648) -->
+    <skip />
+    <!-- no translation found for accessibility_wimax_two_bars (9176236858336502288) -->
+    <skip />
+    <!-- no translation found for accessibility_wimax_three_bars (6116551636752103927) -->
+    <skip />
+    <!-- no translation found for accessibility_wimax_signal_full (2768089986795579558) -->
     <skip />
     <!-- no translation found for accessibility_data_connection_gprs (1606477224486747751) -->
     <skip />
@@ -233,5 +243,7 @@
     <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
     <skip />
     <!-- no translation found for accessibility_clear_all (5235938559247164925) -->
+    <skip />
+    <!-- no translation found for dreams_dock_launcher (3541196417659166245) -->
     <skip />
 </resources>

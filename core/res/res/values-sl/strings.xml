@@ -223,7 +223,7 @@
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"vsiljena zaustavitev drugih programov"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Omogoča, da program na silo zaustavi druge programe."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"vsiljeno zapiranje programa"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Programu omogoča, da vsili zaprtje dejavnosti v ospredju. Tega nikoli ni treba uporabiti za navadne programe."</string>
+    <string name="permdesc_forceBack" msgid="3892295830419513623">"Programu omogoča, da vsili zaprtje dejavnosti v ospredju. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"pridobivanje notranjega stanja sistema"</string>
     <string name="permdesc_dump" msgid="1778299088692290329">"Programu omogoča prejemanje notranjega stanja sistema. Zlonamerni programi lahko na ta način dobijo različne zasebne in varnostne podatke, ki jih običajno ne potrebujejo."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"prenos vsebine zaslona"</string>
@@ -233,7 +233,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"preprečevanje preklopa programov"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Uporabniku preprečuje preklop v drug program."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"spremljanje in nadzor vseh zagonov programov"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Programu omogoča spremljanje in nadziranje načina, kako sistem zažene dejavnosti. Zlonamerni programi lahko v celoti ogrozijo varnost sistema. To dovoljenje je potrebno samo za razvoj, vendar ne za običajno uporabo."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Programu omogoča spremljanje in nadziranje načina, kako sistem zažene dejavnosti. Zlonamerni programi lahko v celoti ogrozijo varnost sistema. To dovoljenje je potrebno samo za razvoj, vendar nikoli za običajno uporabo."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"pošiljanje oddaje brez paketa"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Programu omogoča oddajanje obvestila, da je paket programa odstranjen. Zlonamerni programi lahko to uporabijo za zaustavitev drugih programov, ki se izvajajo."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"pošiljanje oddaje, prejete prek SMS-a"</string>
@@ -243,7 +243,7 @@
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"omejevanje števila izvajajočih se procesov"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Programu omogoča nadzor največjega števila postopkov, ki se bodo izvajali. Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"zapiranje vseh programov v ozadju"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Programu omogoča, da nadzoruje, ali so dejavnosti zaključene takoj, ko so premaknjene v ozadje. Tega nikoli ni treba uporabiti za navadne programe."</string>
+    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Programu omogoča, da nadzoruje, ali so dejavnosti zaključene takoj, ko so premaknjene v ozadje. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"spreminjanje statističnih podatkov o bateriji"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Programu omogoča spreminjanje zbranih statističnih podatkov o bateriji. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_backup" msgid="470013022865453920">"nadzor varnostnega kopiranja sistema in obnovitev"</string>
@@ -257,7 +257,7 @@
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"spreminjanje splošne hitrosti animacij"</string>
     <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Programu omogoča, da kadar koli spremeni splošno hitrost animacije (hitrejše ali počasnejše animacije)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"upravljanje žetonov programa"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Programu omogoča, da ustvari in upravlja svoje žetone ter obide navadno razvrščanje Z. Tega nikoli ni treba uporabiti za navadne programe."</string>
+    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Programu omogoča, da ustvari in upravlja svoje žetone ter obide navadno razvrščanje Z. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pritiskanje tipk in gumbov za nadzor"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Programu omogoča, da svoje dogodke vnosa (pritiske tipk ipd.) dostavi drugim programom. Zlonamerni programi lahko s tem prevzamejo nadzor nad tabličnim računalnikom."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Programu omogoča, da svoje dogodke vnosa (pritiske tipk ipd.) dostavi drugim programom. Zlonamerni programi lahko s tem prevzamejo nadzor nad telefonom."</string>
@@ -272,15 +272,15 @@
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"povezovanje z ozadjem"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Imetniku omogoča povezavo z vmesnikom ozadja najvišje ravni. Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"poveži s storitvijo pripomočka"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lastniku omogoča povezovanje z vmesnikom storitve pripomočka najvišje ravni. Tega nikoli ni treba uporabiti za navadne programe."</string>
+    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lastniku omogoča povezovanje z vmesnikom storitve pripomočka najvišje ravni. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s skrbnikom naprave"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Omogoča lastniku, da pošlje namere skrbniku naprave. Nikoli se ne uporablja za navadne programe."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"spreminjanje usmerjenosti zaslona"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Programu omogoča, da kadar koli zasuka zaslon. Ne uporabljajte za navadne programe."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"spreminjanje hitrosti kazalca"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Programu omogoča spreminjanje hitrosti kazalca miške ali sledilne ploščice. Tega nikoli ni treba uporabiti za navadne programe."</string>
+    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Programu omogoča spreminjanje hitrosti kazalca miške ali sledilne ploščice. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"pošiljanje signalov Linuxa programom"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Programu omogoča, da zahteva, da je posredovan signal poslan vsem trajnim procesom."</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Programu omogoča, da zahteva, da je posredovani signal poslan vsem trajnim procesom."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"neprekinjeno izvajanje programov"</string>
     <string name="permdesc_persistentActivity" msgid="4909910271316074418">"Programu omogoča, da nekatere svoje dele naredi trajne, tako da jih sistem ne more uporabiti za druge programe."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"brisanje programov"</string>
@@ -297,7 +297,7 @@
     <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"Programu omogoča sproščanje pomnilnika tabličnega računalnika z brisanjem datotek v imeniku predpomnilnika telefona. Dostop je zelo omejen, navadno le na sistemske procese."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"Programu omogoča sproščanje pomnilnika telefona z brisanjem datotek v imeniku predpomnilnika telefona. Dostop je zelo omejen, navadno le na sistemske procese."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"premikanje sredstev programa"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Programu omogoča premikanje sredstev programa iz notrajih medijev v zunanje in obratno."</string>
+    <string name="permdesc_movePackage" msgid="319562217778244524">"Programu omogoča premikanje sredstev programa iz notranjih medijev v zunanje in obratno."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"branje občutljivih dnevniških podatkov"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Programu omogoča branje različnih sistemskih dnevniških datotek. To mu omogoča dostop do splošnih podatkov v tabličnem računalniku, lahko tudi do osebnih podatkov."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Programu omogoča branje različnih sistemskih dnevniških datotek. To mu omogoča dostop do splošnih podatkov v telefonu, lahko tudi do osebnih podatkov."</string>
@@ -316,9 +316,9 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Programu omogoča spreminjanje zemljevidov Googlovih storitev. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"samodejni začetek pri zagonu"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Programu omogoča, da se samodejno zažene po zagonu sistema. To lahko povzroči daljši zagon tabličnega računalnika in programu omogoči, da s stalnim izvajanjem upočasni delovanje tabličnega računalnika."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Programu omogoča, da se zažene takoj, ko sistem dokonča zagon. Zaradi tega lahko zagon telefona traja nekoliko dlje, program pa lahko upočasni splošno delovanje telefona, ker se vedno izvaja."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Programu omogoča, da se zažene takoj, ko sistem dokonča zagon. Zato lahko zagon telefona traja nekoliko dlje, program pa lahko upočasni splošno delovanje telefona, ker se vedno izvaja."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"pošiljanje fiksne oddaje"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je delovanje tabličnega računalnika lahko počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je lahko delovanje tabličnega računalnika počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je delovanje telefona lahko počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"branje podatkov stika"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Programu omogoča branje vseh podatkov stikov (naslov), ki so shranjeni v tabličnem računalniku. Zlonamerni programi lahko to uporabijo za pošiljanje podatkov drugim."</string>
@@ -327,9 +327,9 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Programu omogoča spreminjanje podatkov stikov (naslov), shranjenih v tabličnem računalniku. Zlonamerni programi lahko to uporabijo za brisanje ali spreminjanje podatkov stika."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Programu omogoča spreminjanje podatkov stikov (naslov), shranjenih v telefonu. Zlonamerni programi lahko to uporabijo za brisanje ali spreminjanje podatkov stika."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"branje podatkov v profilu"</string>
-    <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Programu omogoča branje osebnih podatkov v profilu, kot so ime in podatki za stik. To pomeni, da vas lahko program prepozna in vaše podatke o profolu pošlje drugim."</string>
+    <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Programu omogoča branje osebnih podatkov v profilu, kot so ime in podatki za stik. To pomeni, da vas lahko program prepozna in vaše podatke o profilu pošlje drugim."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje v podatke v profilu"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Programu omogoča spreminjanje ali dodajanje osebnih podatkov v profilu, kot so ime in podatki za stik. To pomeni, da vas lahko drugi programi prepoznajo in vaše podatke o profolu pošljejo drugim."</string>
+    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Programu omogoča spreminjanje ali dodajanje osebnih podatkov v profilu, kot so ime in podatki za stik. To pomeni, da vas lahko drugi programi prepoznajo in vaše podatke o profilu pošljejo drugim."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"preberite svoj družabni tok"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Programu omogoča dostop do družabnih posodobitev vas in vaših prijateljev. Zlonamerni programi lahko to uporabijo za branje zasebne komunikacije med vami in prijatelji v družabnih omrežjih."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pišite v svoj družabni tok"</string>
@@ -338,7 +338,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Programu omogoča branje vseh dogodkov v koledarju, ki so shranjeni v tabličnem računalniku, vključno z dogodki prijateljev in sodelavcev. Zlonamerni programi lahko iz teh koledarjev dobijo osebne podatke brez vednosti lastnikov."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5693933067751827753">"Programu omogoča branje vseh dogodkov v koledarju, ki so shranjeni v telefonu, vključno z dogodki prijateljev in sodelavcev. Zlonamerni programi lahko iz teh koledarjev dobijo osebne podatke brez vednosti lastnikov."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"dodajanje ali spreminjanje dogodkov v koledarju in pošiljanje e-pošte gostom brez vedenja lastnikov"</string>
-    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Programu omogoča pošiljanje povabil na dogodke kot lastnik koledarja in dodajanje, odstranjevanje ter spreminjanje dogodkov, ki jih je mogoče spreminjati v napravi, med drugim dogodkov prijateljev in sodelavcev. Zlonamerni programi lahko pošiljajo vsiljeno pošto, za katero se zdi, da jo pošilja lastnik koledarja, spreminjajo dogodke brez vednosti lastnika koledarja ali dodajajo lažne dogodke."</string>
+    <string name="permdesc_writeCalendar" msgid="2243771395254848873">"Programu omogoča, da pošilja povabila na dogodke kot lastnik koledarja ter dodaja, odstranjuje in spreminja dogodke, ki jih je mogoče spreminjati v napravi, med drugim dogodke prijateljev in sodelavcev. Zlonamerni programi lahko pošiljajo vsiljeno pošto, za katero se zdi, da jo pošilja lastnik koledarja, spreminjajo dogodke brez vednosti lastnika koledarja ali dodajajo lažne dogodke."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulirani viri lokacije za preverjanje"</string>
     <string name="permdesc_accessMockLocation" msgid="7577931556422993949">"Programu omogoča ustvarjanje simuliranih virov lokacije za preverjanje. Zlonamerni programi lahko s tem preglasijo lokacijo in/ali stanje, ki so ga vrnili pravi viri lokacije, kot so GPS ali ponudniki omrežja."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"dostopanje do ukazov ponudnika dodatnih lokacij"</string>
@@ -347,10 +347,10 @@
     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Ustvarjanje simuliranih virov lokacije za preskušanje. Zlonamerni programi lahko to uporabijo za preglasitev lokacije in/ali stanja, ki ga vrnejo pravi viri lokacije, na primer GPS ali ponudniki omrežja, ali za spremljanje in pošiljanje vaše lokacije zunanjemu viru."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"natančna lokacija (GPS)"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Dostop do virov natančne lokacije, kot je sistem GPS, v tabličnem računalniku. Zlonamerni programi lahko s tem dovoljenjem ugotovijo vašo lokacijo in dodatno porabljajo baterijo."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Dostopa do podrobnih virov lokacije, kot je sistem GPS v telefonu, kjer so na voljo. Zlonamerni programi lahko s tem dovoljenjem določijo, kje ste, in še dodatno porabijo baterijo."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Dostopa do podrobnih virov lokacije, kot je sistem GPS v telefonu, v katerem so na voljo. Zlonamerni programi lahko s tem dovoljenjem določijo, kje ste, in še dodatno porabijo baterijo."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"groba ocena lokacije (temelječa na omrežju)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Dostop do virov grobe lokacije, kot je zbirka podatkov brezžičnega omrežja, s katerimi je mogoče določiti približno lokacijo tabličnega računalnika. Zlonamerni programi lahko s tem dovoljenjem določijo vašo približno lokacijo."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Dostop do grobih virov lokacij, kot je zbirka podatkov brezžičnega omrežja, s katerimi je mogoče določiti približno lokacijo telefona, kjer je na voljo. Zlonamerni programi lahko s tem določijo, kje približno ste."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Dostop do grobih virov lokacij, kot je zbirka podatkov brezžičnega omrežja, s katerimi je mogoče določiti približno lokacijo telefona, v katerem je na voljo. Zlonamerni programi lahko s tem določijo, kje približno ste."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"dostop do storitve SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Programu omogoča uporabo funkcij nizke ravni SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"branje grafičnega/slikovnega medpomnilnika"</string>
@@ -394,14 +394,14 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"preskušanje strojne opreme"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Programu omogoča nadzor različnih zunanjih naprav za preskušanje strojne opreme."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"neposredno klicanje telefonskih številk"</string>
-    <string name="permdesc_callPhone" msgid="6396463004110544744">"Programu omogoča, da brez vašega posredovanja kliče telefonske številke. Zaradi zlonamernih programov so na vašem telefonskem računu lahko nepričakovani klici. Programu to ne dovoljuje opravljanja klicev v sili."</string>
+    <string name="permdesc_callPhone" msgid="6396463004110544744">"Programu omogoča, da brez vašega posredovanja kliče telefonske številke. Zaradi zlonamernih programov so lahko na vašem telefonskem računu nepričakovani klici. To programu ne dovoljuje opravljanja klicev v sili."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"neposredno klicanje poljubnih telefonskih številk"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Programu omogoča, da brez vas pokliče katero koli telefonsko številko, tudi klic v sili. Zlonamerni programi lahko brez potrebe in nezakonito kličejo intervencijske službe."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"neposredni zagon namestitve tabličnega računalnika CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"neposredni zagon nastavitve telefona CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Programu omogoča zagon omogočanja uporabe CDMA. Zlonamerni programi lahko po nepotrebnem zaženejo omogočanje uporabe CDMA."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"nadzor obvestil o posodobitvi lokacije"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Programu dovoljuje omogočanje ali onemogočanje onvestil o posodobitvi lokacije radia. Ni za uporabo z navadnimi programi."</string>
+    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Programu dovoljuje omogočanje ali onemogočanje obvestil o posodobitvi lokacije radia. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"dostop do lastnosti sprostitve"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Programu omogoča dostop za branje/pisanje do lastnosti, prenesenih s storitvijo za sprostitev. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"izbiranje pripomočkov"</string>
@@ -449,13 +449,13 @@
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"poln dostop do interneta"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Omogoča, da program ustvari vtičnice omrežja."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"spreminjanje/prestrezanje omrežnih nastavitev in prometa"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Programu omogoča spreminjanje omrežnih nastavitev in prestrezanje ter nadziranje omrežnega prometa, na primer spreminjanje proxyja in vrat katerega koli imena dostopne točke. Zlonamerni programi lahko nadziorajo, preusmerjajo ali spreminjajo omrežne pakete brez vaše vednosti."</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Programu omogoča spreminjanje omrežnih nastavitev ter prestrezanje in nadziranje omrežnega prometa, na primer spreminjanje proxyja in vrat katerega koli imena dostopne točke. Zlonamerni programi lahko nadziorajo, preusmerjajo ali spreminjajo omrežne pakete brez vaše vednosti."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"spreminjanje povezljivosti omrežja"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Programu omogoča spreminjanje stanja povezljivosti omrežja."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Spreminjanje posredniške povezljivosti"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Programu dovoljuje spreminjanje stanja povezljivosti posredniškega omrežja."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"spreminjanje nastavitev porabe podatkov ozadja"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Programu omoogoča spreminjanje nastavitev uporabe podatkov ozadja."</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Programu omogoča spreminjanje nastavitev uporabe podatkov ozadja."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"ogled stanja brezžičnega omrežja"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Programu omogoča ogled podatkov o stanju omrežja Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"spreminjanje stanja brezžičnega omrežja"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"skrbništvo storitve Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Programu omogoča konfiguriranje lokalnega tabličnega računalnika Bluetooth ter zaznavanje oddaljenih naprav in združevanje z njimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Programu omogoča konfiguriranje lokalnega telefona s tehnologijo Bluetooth ter odkrivanje oddaljenih naprav in povezovanje z njimi."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"prikaz stanja omrežja WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Programu omogoča prikaz podatkov o stanju omrežja WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"sprememba stanja omrežja WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Programu omogoča povezovanje v omrežje WiMAX in prekinitev povezave."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"ustvarjanje povezav Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Programu omogoča ogled konfiguracije lokalnega tabličnega računalnika Bluetooth ter vzpostavljanje in sprejemanje povezave z združenimi napravami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Programom omogoča ogled konfiguracije lokalnega telefona Bluetooth ter ustvarjanje in sprejemanje povezave s povezanimi napravami."</string>
@@ -473,9 +477,9 @@
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"onemogočanje zaklepa tipkovnice"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Programu omogoča, da onemogoči zaklep tipk in morebitno povezano varnostno geslo. Legitimen primer je onemogočenje zaklepa tipkovnice pri dohodnem klicu ter vnovičnem omogočanju zaklepa, ko je klic dokončan."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
-    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Programu omogoča branje nastavitev sinhronizacije, na primer, ali je omogočena za program Ljudje."</string>
+    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Programu omogoča branje nastavitev sinhronizacije, na primer nastavitev, ali je sinhronizacija omogočena za program Ljudje."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"pisanje nastavitev za sinhronizacijo"</string>
-    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Programu omogoča spremembo nastavitev sinhronizacije, na primer, ali je omogočena za program Ljudje."</string>
+    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Programu omogoča spremembo nastavitev sinhronizacije, na primer nastavitev, ali je sinhronizacija omogočena za program Ljudje."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"branje statističnih podatkov sinhronizacije"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Programu omogoča branje statističnih podatkov o sinhronizaciji, na primer o zgodovini sinhronizacij, ki so bile izvedene."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"branje naročenih virov"</string>

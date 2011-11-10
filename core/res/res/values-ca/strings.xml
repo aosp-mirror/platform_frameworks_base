@@ -346,7 +346,7 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permís per instal·lar un proveïdor d\'ubicacions"</string>
     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Crea orígens d\'ubicacions ficticis per fer proves. Les aplicacions malicioses poden utilitzar aquesta funció per substituir la ubicació i/o l\'estat retornats per orígens d\'ubicacions reals, com ara els proveïdors de xarxa o GPS, o per supervisar i informar de la teva ubicació a un origen extern."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"ubicació exacta (GPS)"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Accedeix a fonts d\'ubicació precises, com ara el Sistema de Posicionament Global (GPS) a la tauleta, si estan disponibles. Les aplicacions malicioses poden utilitzar aquesta funció per determinar on ets, i és possible que es consumeixi potència addicional."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Accedeix a fonts d\'ubicació precises, com ara el Sistema de posicionament global (GPS) a la tauleta, si estan disponibles. Les aplicacions malicioses poden utilitzar aquesta funció per determinar on ets, i és possible que es consumeixi potència addicional."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Accedeix a orígens d\'ubicacions exactes, com ara el Servei de posicionament global (GPS) al telèfon, si estan disponibles. Les aplicacions malicioses poden utilitzar-ho per determinar on ets i poden consumir energia addicional de la bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"ubicació aproximada (basada en xarxa)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Accedeix a fonts d\'ubicació completes, com ara la base de dades de la xarxa mòbil, per determinar una ubicació aproximada de la tauleta, si està disponible. Les aplicacions malicioses poden utilitzar aquesta funció per determinar la teva ubicació aproximada."</string>
@@ -462,9 +462,13 @@
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Permet que l\'aplicació es connecti i es desconnecti de punts d\'accés Wi-Fi i que faci canvis a les xarxes Wi-Fi configurades."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permetre la recepció de multidifusió Wi-fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Permet que l\'aplicació rebi paquets que no estiguin adreçats directament al teu dispositiu. Pot ser útil en detectar els serveis que s\'ofereixen a prop. Consumeix més energia que el mode que no utilitza la multidestinació."</string>
-    <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"administració de Bluetooth"</string>
+    <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administració de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que cerqui i emparelli dispositius remots."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que cerqui i emparelli dispositius remots."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"visualitza l\'estat de WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet que una aplicació visualitzi la informació sobre l\'estat de WiMAX."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"canvia l\'estat de WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet que una aplicació es connecti i es desconnecti d\'una xarxa WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear connexions Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permet que l\'aplicació mostri la configuració de la tauleta Bluetooth local i que estableixi i accepti connexions amb dispositius emparellats."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permet que una aplicació visualitzi la configuració del telèfon Bluetooth local i que estableixi i accepti connexions amb els dispositius emparellats."</string>

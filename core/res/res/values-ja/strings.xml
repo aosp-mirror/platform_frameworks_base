@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetoothの管理"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ローカルのBluetoothタブレットを設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetooth携帯端末を設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX状態の表示"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"WiMAX状態に関する情報の表示をアプリケーションに許可します。"</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"WiMAXネットワークへの接続と接続解除をアプリケーションに許可します。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth接続の作成"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"ローカルのBluetoothタブレットの設定を表示することと、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"ローカルのBluetooth携帯端末の設定を表示することと、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
@@ -473,9 +477,9 @@
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"キーロックを無効にする"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。この許可の正当な使用例としては、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にするというケースが挙げられます。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
-    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"ユーザーアプリの同期の有効/無効など、同期設定の読み取りをアプリに許可します。"</string>
+    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Peopleアプリの同期の有効/無効など、同期設定の読み取りをアプリに許可します。"</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"同期設定の書き込み"</string>
-    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"ユーザーアプリの同期の有効/無効など、同期設定の変更をアプリに許可します。"</string>
+    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Peopleアプリの同期の有効/無効など、同期設定の変更をアプリに許可します。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"同期統計の読み取り"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"同期に関する統計情報（同期履歴など）の読み取りをアプリに許可します。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
@@ -1163,7 +1167,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"アプリの選択"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"共有"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>と共有"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"スライダーハンドルです。タップして押し続けます。"</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"スライダーハンドルです。押し続けます。"</string>
     <string name="description_direction_up" msgid="1983114130441878529">"上は<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>です。"</string>
     <string name="description_direction_down" msgid="4294993639091088240">"下は<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>です。"</string>
     <string name="description_direction_left" msgid="6814008463839915747">"左は<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>です。"</string>

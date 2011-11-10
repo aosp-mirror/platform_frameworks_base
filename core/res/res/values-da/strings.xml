@@ -307,7 +307,7 @@
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Tillader, at appen kan ændre, om en komponent i en anden app er aktiveret eller ej. Ondsindede apps kan bruge dette til at deaktivere vigtige tabletfunktioner. Man skal være forsigtig med denne tilladelse, da det er muligt at bringe appkomponenter ind i en ubrugelig, inkonsekvent eller ustabil tilstand."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Tillader, at appen kan ændre, om en komponent i en anden app er aktiveret eller ej. Ondsindede apps kan bruge dette til at deaktivere vigtige funktioner på telefonen. Denne tilladelse skal anvendes med forsigtighed, da det kan forårsage ubrugelige eller ustabile appkomponenter."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"angive foretrukne apps"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Tillader, at appen kan ændre dine foretrukne apps. Ondsindede apps kan ubemærket ændre kørende apps  derved udgive sig for at være dine eksisterende apps og på den måde indsamle private data fra dig."</string>
+    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Tillader, at appen kan ændre dine foretrukne apps. Ondsindede apps kan ubemærket ændre kørende apps derved udgive sig for at være dine eksisterende apps og på den måde indsamle private data fra dig."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"rediger globale systemindstillinger"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Tillader, at appen kan ændre systemets indstillingsdata. Ondsindede apps kan ødelægge din systemkonfiguration."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"rediger sikre systemindstillinger"</string>
@@ -316,7 +316,7 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Tillader, at appen kan ændre kortet over Google-tjenester. Anvendes ikke af almindelige apps."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"start automatisk ved opstart"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Tillader, at appen kan starte af sig selv, så snart systemet er færdig med at starte. Dette kan gøre tablettens opstartstid længere og give appen tilladelse til at gøre tabletten langsommere ved altid at lade appen køre."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Tillader, at appen kan åbne sig selv, når systemet er færdig med at starte op. Dette kan gøre opstarten af telefonen langsommere og generelt gøre systemet langsommerem når appen altid kører."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Tillader, at appen kan åbne sig selv, når systemet er færdig med at starte op. Dette kan gøre opstarten af telefonen langsommere og generelt gøre systemet langsommere, når appen altid kører."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"send klæbende udsendelse"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Tillader, at appen kan sende klæbende udsendelser, der efterlades, selvom udsendelsen er slut. Ondsindede apps kan gøre din tablet langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Tillader, at appen kan sende klæbende udsendelser, der efterlades, når udsendelsen er slut. Ondsindede apps kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
@@ -380,7 +380,7 @@
     <string name="permlab_asec_destroy" msgid="526928328301618022">"ødelægge internt lager"</string>
     <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Tillader, at appen kan ødelægge det interne lager."</string>
     <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"montere/demontere det interne lager"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Tillader, at appen kan montere/demontere det internte lager."</string>
+    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Tillader, at appen kan montere/demontere det interne lager."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"omdøbe internt lager"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Tillader, at appen kan omdøbe det interne lager."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontroller vibrator"</string>
@@ -465,6 +465,10 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administration af Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillader, at appen kan konfigurere den lokale Bluetooth-tablet samt finde og parre med fjerne enheder."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillader, at appen kan konfigurere den lokale Bluetooth-telefon samt finde og parre med eksterne enheder."</string>
+    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"vise WiMAX-tilstand"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Tillader, at en applikation viser oplysninger om WiMAX-tilstanden."</string>
+    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"skifte WiMAX-tilstand"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Tillader, at en applikation opretter og afbryder forbindelsen til WiMAX-netværk."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opret Bluetooth-forbindelser"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Tillader, at appen kan se konfigurationen af ​​den lokale Bluetooth-tablet og oprette og acceptere forbindelser med parrede enheder."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Tillader, at appen kan få vist konfigurationen af den lokale Bluetooth-telefon samt oprette og acceptere forbindelser med parrede enheder."</string>
@@ -488,7 +492,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillader, at appen kan skrive nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"rette/slette i USB-lager"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Tillader, at appen skriver til USB."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Lader appen skrive til USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Tillader, at appen kan skrive til SD-kortet."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Rediger/slet internt medielagringsindhold"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Tillader, appen kan ændre indholdet af det interne medielager."</string>
@@ -1010,7 +1014,7 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilsluttet som et installationsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tilsluttet et USB-ekstraudstyr"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Tryk for at se andre valgmuligheder for USB-tilslutning"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatere USB-lager?"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater USB-lager?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vil du formatere SD-kortet?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer, der er gemt på dit USB-lager, slettes. Denne handling kan ikke fortrydes!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Du mister alle data på kortet."</string>
