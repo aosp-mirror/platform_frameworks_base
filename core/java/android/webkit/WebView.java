@@ -3254,6 +3254,26 @@ public class WebView extends AbsoluteLayout
             if (mHTML5VideoViewProxy != null) {
                 mHTML5VideoViewProxy.pauseAndDispatch();
             }
+            if (mNativeClass != 0) {
+                nativeSetPauseDrawing(mNativeClass, true);
+            }
+        }
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        updateDrawingState();
+    }
+
+    void updateDrawingState() {
+        if (mNativeClass == 0 || mIsPaused) return;
+        if (getWindowVisibility() != VISIBLE) {
+            nativeSetPauseDrawing(mNativeClass, true);
+        } else if (getVisibility() != VISIBLE) {
+            nativeSetPauseDrawing(mNativeClass, true);
+        } else {
+            nativeSetPauseDrawing(mNativeClass, false);
         }
     }
 
@@ -3265,6 +3285,9 @@ public class WebView extends AbsoluteLayout
         if (mIsPaused) {
             mIsPaused = false;
             mWebViewCore.sendMessage(EventHub.ON_RESUME);
+            if (mNativeClass != 0) {
+                nativeSetPauseDrawing(mNativeClass, false);
+            }
         }
     }
 
@@ -5604,6 +5627,7 @@ public class WebView extends AbsoluteLayout
         if (visibility != View.VISIBLE && mZoomManager != null) {
             mZoomManager.dismissZoomPicker();
         }
+        updateDrawingState();
     }
 
     /**
@@ -8408,6 +8432,9 @@ public class WebView extends AbsoluteLayout
                         setNewPicture(mDelaySetPicture, true);
                         mDelaySetPicture = null;
                     }
+                    if (mIsPaused) {
+                        nativeSetPauseDrawing(mNativeClass, true);
+                    }
                     break;
                 case UPDATE_TEXTFIELD_TEXT_MSG_ID:
                     // Make sure that the textfield is currently focused
@@ -9586,4 +9613,5 @@ public class WebView extends AbsoluteLayout
      * See {@link ComponentCallbacks2} for the trim levels and descriptions
      */
     private static native void     nativeOnTrimMemory(int level);
+    private static native void nativeSetPauseDrawing(int instance, boolean pause);
 }
