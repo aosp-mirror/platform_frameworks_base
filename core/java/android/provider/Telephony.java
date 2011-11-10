@@ -1838,15 +1838,5 @@ public final class Telephony {
         public static final String EXTRA_PLMN       = "plmn";
         public static final String EXTRA_SHOW_SPN   = "showSpn";
         public static final String EXTRA_SPN        = "spn";
-
-        /**
-         * Activity Action: Shows a dialog to turn off Messaging app notification.
-         * <p>Input: Nothing.
-         * <p>Output: Nothing.
-         */
-        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-        public static final String ACTION_MESSAGING_APP_NOTIFICATIONS =
-            "android.provider.Telephony.MESSAGING_APP_NOTIFICATIONS";
-
     }
 }
