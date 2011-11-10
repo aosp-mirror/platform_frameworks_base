@@ -166,7 +166,11 @@ status_t SensorDevice::initCheck() const {
 
 ssize_t SensorDevice::poll(sensors_event_t* buffer, size_t count) {
     if (!mSensorDevice) return NO_INIT;
-    return mSensorDevice->poll(mSensorDevice, buffer, count);
+    ssize_t c;
+    do {
+        c = mSensorDevice->poll(mSensorDevice, buffer, count);
+    } while (c == -EINTR);
+    return c;
 }
 
 status_t SensorDevice::activate(void* ident, int handle, int enabled)
