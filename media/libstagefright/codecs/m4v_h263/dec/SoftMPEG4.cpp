@@ -421,8 +421,13 @@ void SoftMPEG4::onQueueFilled(OMX_U32 portIndex) {
 
         int32_t bufferSize = inHeader->nFilledLen;
 
+        // The PV decoder is lying to us, sometimes it'll claim to only have
+        // consumed a subset of the buffer when it clearly consumed all of it.
+        // ignore whatever it says...
+        int32_t tmp = bufferSize;
+
         if (PVDecodeVideoFrame(
-                    mHandle, &bitstream, &timestamp, &bufferSize,
+                    mHandle, &bitstream, &timestamp, &tmp,
                     &useExtTimestamp,
                     outHeader->pBuffer) != PV_TRUE) {
             LOGE("failed to decode video frame.");
