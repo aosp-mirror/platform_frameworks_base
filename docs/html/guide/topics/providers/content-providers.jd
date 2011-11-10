@@ -19,6 +19,11 @@ page.title=Content Providers
 <li>{@link android.content.ContentResolver}</li>
 <li>{@link android.database.Cursor}</li>
 </ol>
+
+<h2>See also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar Provider</a></li>
+</ol>
 </div>
 </div>
 
@@ -36,6 +41,10 @@ package.  You can query these providers for the data they contain (although,
 for some, you must acquire the proper permission to read the data).
 </p>   
 
+<p class="note"><strong>Note:</strong> Android 4.0 introduces the Calendar
+Provider. For more information, see <a
+href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar
+Provider</a>.</p>
 <p>
 If you want to make your own data public, you have two options:  You can 
 create your own content provider (a {@link android.content.ContentProvider} 
