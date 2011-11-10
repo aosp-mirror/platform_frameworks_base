@@ -25,14 +25,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
 import android.os.FileObserver;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.security.KeyStore;
@@ -41,7 +38,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -968,6 +964,11 @@ public class LockPatternUtils {
                 com.android.internal.R.bool.config_enable_puk_unlock_screen);
     }
 
+    public boolean isEmergencyCallEnabledWhileSimLocked() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enable_emergency_call_while_sim_locked);
+    }
+
     /**
      * @return A formatted string of the next alarm (for showing on the lock screen),
      *   or null if there is no next alarm.
@@ -1031,12 +1032,10 @@ public class LockPatternUtils {
      *  {@link TelephonyManager#CALL_STATE_IDLE}
      *  {@link TelephonyManager#CALL_STATE_RINGING}
      *  {@link TelephonyManager#CALL_STATE_OFFHOOK}
-     * @param showIfCapable indicates whether the button should be shown if emergency calls are
-     *                      possible on the device
+     * @param shown indicates whether the given screen wants the emergency button to show at all
      */
-    public void updateEmergencyCallButtonState(Button button, int  phoneState,
-            boolean showIfCapable) {
-        if (isEmergencyCallCapable() && showIfCapable) {
+    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown) {
+        if (isEmergencyCallCapable() && shown) {
             button.setVisibility(View.VISIBLE);
         } else {
             button.setVisibility(View.GONE);
