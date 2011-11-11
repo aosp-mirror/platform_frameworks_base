@@ -464,6 +464,19 @@ public class NetworkStats implements Parcelable {
      * time, and that none of them have disappeared.
      */
     public NetworkStats subtract(NetworkStats value) throws NonMonotonicException {
+        return subtract(value, false);
+    }
+
+    /**
+     * Subtract the given {@link NetworkStats}, effectively leaving the delta
+     * between two snapshots in time. Assumes that statistics rows collect over
+     * time, and that none of them have disappeared.
+     *
+     * @param clampNonMonotonic When non-monotonic stats are found, just clamp
+     *            to 0 instead of throwing {@link NonMonotonicException}.
+     */
+    public NetworkStats subtract(NetworkStats value, boolean clampNonMonotonic)
+            throws NonMonotonicException {
         final long deltaRealtime = this.elapsedRealtime - value.elapsedRealtime;
         if (deltaRealtime < 0) {
             throw new NonMonotonicException(this, value);
@@ -497,7 +510,15 @@ public class NetworkStats implements Parcelable {
 
                 if (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0
                         || entry.txPackets < 0 || entry.operations < 0) {
-                    throw new NonMonotonicException(this, i, value, j);
+                    if (clampNonMonotonic) {
+                        entry.rxBytes = Math.max(entry.rxBytes, 0);
+                        entry.rxPackets = Math.max(entry.rxPackets, 0);
+                        entry.txBytes = Math.max(entry.txBytes, 0);
+                        entry.txPackets = Math.max(entry.txPackets, 0);
+                        entry.operations = Math.max(entry.operations, 0);
+                    } else {
+                        throw new NonMonotonicException(this, i, value, j);
+                    }
                 }
             }
 
