@@ -2861,8 +2861,8 @@ public class WebView extends AbsoluteLayout
     }
 
     // Used to avoid sending many visible rect messages.
-    private Rect mLastVisibleRectSent;
-    private Rect mLastGlobalRect;
+    private Rect mLastVisibleRectSent = new Rect();
+    private Rect mLastGlobalRect = new Rect();
     private Rect mVisibleRect = new Rect();
     private Rect mGlobalVisibleRect = new Rect();
     private Point mScrollOffset = new Point();
@@ -2878,7 +2878,7 @@ public class WebView extends AbsoluteLayout
                 mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
                         nativeMoveGeneration(), mSendScrollEvent ? 1 : 0, mScrollOffset);
             }
-            mLastVisibleRectSent = mVisibleRect;
+            mLastVisibleRectSent.set(mVisibleRect);
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         }
         if (getGlobalVisibleRect(mGlobalVisibleRect)
@@ -2894,7 +2894,7 @@ public class WebView extends AbsoluteLayout
             if (!mBlockWebkitViewMessages) {
                 mWebViewCore.sendMessage(EventHub.SET_GLOBAL_BOUNDS, mGlobalVisibleRect);
             }
-            mLastGlobalRect = mGlobalVisibleRect;
+            mLastGlobalRect.set(mGlobalVisibleRect);
         }
         return mVisibleRect;
     }
