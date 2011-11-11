@@ -90,7 +90,7 @@ interface IBluetooth
 
     boolean connectHeadset(String address);
     boolean disconnectHeadset(String address);
-    boolean notifyIncomingConnection(String address);
+    boolean notifyIncomingConnection(String address, boolean rejected);
 
     // HID profile APIs
     boolean connectInputDevice(in BluetoothDevice device);
