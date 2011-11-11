@@ -418,6 +418,7 @@ void StagefrightMetadataRetriever::parseMetaData() {
         { kKeyYear, METADATA_KEY_YEAR },
         { kKeyWriter, METADATA_KEY_WRITER },
         { kKeyCompilation, METADATA_KEY_COMPILATION },
+        { kKeyLocation, METADATA_KEY_LOCATION },
     };
     static const size_t kNumMapEntries = sizeof(kMap) / sizeof(kMap[0]);
 
