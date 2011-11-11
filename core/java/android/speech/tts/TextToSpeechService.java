@@ -306,6 +306,7 @@ public abstract class TextToSpeechService extends Service {
          */
         public int enqueueSpeechItem(int queueMode, final SpeechItem speechItem) {
             if (!speechItem.isValid()) {
+                speechItem.dispatchOnError();
                 return TextToSpeech.ERROR;
             }
 
@@ -332,6 +333,7 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.SUCCESS;
             } else {
                 Log.w(TAG, "SynthThread has quit");
+                speechItem.dispatchOnError();
                 return TextToSpeech.ERROR;
             }
         }
@@ -381,14 +383,16 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    interface UtteranceCompletedDispatcher {
-        public void dispatchUtteranceCompleted();
+    interface UtteranceProgressDispatcher {
+        public void dispatchOnDone();
+        public void dispatchOnStart();
+        public void dispatchOnError();
     }
 
     /**
      * An item in the synth thread queue.
      */
-    private abstract class SpeechItem implements UtteranceCompletedDispatcher {
+    private abstract class SpeechItem implements UtteranceProgressDispatcher {
         private final String mCallingApp;
         protected final Bundle mParams;
         private boolean mStarted = false;
@@ -443,10 +447,27 @@ public abstract class TextToSpeechService extends Service {
             stopImpl();
         }
 
-        public void dispatchUtteranceCompleted() {
+        @Override
+        public void dispatchOnDone() {
             final String utteranceId = getUtteranceId();
             if (!TextUtils.isEmpty(utteranceId)) {
-                mCallbacks.dispatchUtteranceCompleted(getCallingApp(), utteranceId);
+                mCallbacks.dispatchOnDone(getCallingApp(), utteranceId);
+            }
+        }
+
+        @Override
+        public void dispatchOnStart() {
+            final String utteranceId = getUtteranceId();
+            if (!TextUtils.isEmpty(utteranceId)) {
+                mCallbacks.dispatchOnStart(getCallingApp(), utteranceId);
+            }
+        }
+
+        @Override
+        public void dispatchOnError() {
+            final String utteranceId = getUtteranceId();
+            if (!TextUtils.isEmpty(utteranceId)) {
+                mCallbacks.dispatchOnError(getCallingApp(), utteranceId);
             }
         }
 
@@ -617,9 +638,12 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
+            dispatchOnStart();
             int status = super.playImpl();
             if (status == TextToSpeech.SUCCESS) {
-                dispatchUtteranceCompleted();
+                dispatchOnDone();
+            } else {
+                dispatchOnError();
             }
             return status;
         }
@@ -856,16 +880,34 @@ public abstract class TextToSpeechService extends Service {
             }
         }
 
-        public void dispatchUtteranceCompleted(String packageName, String utteranceId) {
-            ITextToSpeechCallback cb;
-            synchronized (mAppToCallback) {
-                cb = mAppToCallback.get(packageName);
-            }
+        public void dispatchOnDone(String packageName, String utteranceId) {
+            ITextToSpeechCallback cb = getCallbackFor(packageName);
             if (cb == null) return;
             try {
-                cb.utteranceCompleted(utteranceId);
+                cb.onDone(utteranceId);
             } catch (RemoteException e) {
-                Log.e(TAG, "Callback failed: " + e);
+                Log.e(TAG, "Callback onDone failed: " + e);
+            }
+        }
+
+        public void dispatchOnStart(String packageName, String utteranceId) {
+            ITextToSpeechCallback cb = getCallbackFor(packageName);
+            if (cb == null) return;
+            try {
+                cb.onStart(utteranceId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Callback onStart failed: " + e);
+            }
+
+        }
+
+        public void dispatchOnError(String packageName, String utteranceId) {
+            ITextToSpeechCallback cb = getCallbackFor(packageName);
+            if (cb == null) return;
+            try {
+                cb.onError(utteranceId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Callback onError failed: " + e);
             }
         }
 
@@ -884,6 +926,15 @@ public abstract class TextToSpeechService extends Service {
                 mAppToCallback.clear();
                 super.kill();
             }
+        }
+
+        private ITextToSpeechCallback getCallbackFor(String packageName) {
+            ITextToSpeechCallback cb;
+            synchronized (mAppToCallback) {
+                cb = mAppToCallback.get(packageName);
+            }
+
+            return cb;
         }
 
     }
