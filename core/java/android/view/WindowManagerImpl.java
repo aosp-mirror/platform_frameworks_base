@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.app.ActivityManager;
+import android.content.ComponentCallbacks2;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -409,7 +411,30 @@ public class WindowManagerImpl implements WindowManager {
      */
     public void trimMemory(int level) {
         if (HardwareRenderer.isAvailable()) {
-            HardwareRenderer.trimMemory(level);
+            switch (level) {
+                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                    // On low and medium end gfx devices
+                    if (!ActivityManager.isHighEndGfx(getDefaultDisplay())) {
+                        // Force a full memory flush
+                        HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+                        // Destroy all hardware surfaces and resources associated to
+                        // known windows
+                        synchronized (this) {
+                            if (mViews == null) return;
+                            int count = mViews.length;
+                            for (int i = 0; i < count; i++) {
+                                mRoots[i].destroyHardwareResources();
+                            }
+                        }
+                        // Terminate the hardware renderer to free all resources
+                        HardwareRenderer.terminate();                        
+                        break;
+                    }
+                    // high end gfx devices fall through to next case
+                default:
+                    HardwareRenderer.trimMemory(level);
+            }
         }
     }
 

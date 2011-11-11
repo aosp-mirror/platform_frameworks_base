@@ -25,6 +25,7 @@ import android.opengl.GLUtils;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
+import com.google.android.gles_jni.EGLImpl;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGL11;
@@ -344,6 +345,15 @@ public abstract class HardwareRenderer {
     }
 
     /**
+     * Invoke this method when the system needs to clean up all resources
+     * associated with hardware rendering.
+     */
+    static void terminate() {
+        Log.d(LOG_TAG, "Terminating hardware rendering");
+        Gl20Renderer.terminate();
+    }    
+    
+    /**
      * Indicates whether hardware acceleration is currently enabled.
      * 
      * @return True if hardware acceleration is in use, false otherwise.
@@ -651,6 +661,8 @@ public abstract class HardwareRenderer {
                 throw new Surface.OutOfResourcesException("eglMakeCurrent failed "
                         + GLUtils.getEGLErrorString(sEgl.eglGetError()));
             }
+            
+            initCaches();
 
             // If mDirtyRegions is set, this means we have an EGL configuration
             // with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set
@@ -670,6 +682,8 @@ public abstract class HardwareRenderer {
 
             return mEglContext.getGL();
         }
+
+        abstract void initCaches();
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
             int[] attribs = { EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
@@ -914,6 +928,11 @@ public abstract class HardwareRenderer {
                     EGL_NONE
             };
         }
+        
+        @Override
+        void initCaches() {
+            GLES20Canvas.initCaches();
+        }
 
         @Override
         boolean canDraw() {
@@ -1006,16 +1025,7 @@ public abstract class HardwareRenderer {
             if (eglContext == null) {
                 return;
             } else {
-                synchronized (sPbufferLock) {
-                    // Create a temporary 1x1 pbuffer so we have a context
-                    // to clear our OpenGL objects
-                    if (sPbuffer == null) {
-                        sPbuffer = sEgl.eglCreatePbufferSurface(sEglDisplay, sEglConfig, new int[] {
-                                EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE
-                        });
-                    }
-                }
-                sEgl.eglMakeCurrent(sEglDisplay, sPbuffer, sPbuffer, eglContext);
+                usePbufferSurface(eglContext);
             }
 
             switch (level) {
@@ -1027,6 +1037,47 @@ public abstract class HardwareRenderer {
                 case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                     GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
                     break;
+            }
+        }
+
+        private static void usePbufferSurface(EGLContext eglContext) {
+            synchronized (sPbufferLock) {
+                // Create a temporary 1x1 pbuffer so we have a context
+                // to clear our OpenGL objects
+                if (sPbuffer == null) {
+                    sPbuffer = sEgl.eglCreatePbufferSurface(sEglDisplay, sEglConfig, new int[] {
+                            EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE
+                    });
+                }
+            }
+            sEgl.eglMakeCurrent(sEglDisplay, sPbuffer, sPbuffer, eglContext);
+        }
+
+        static void terminate() {
+            synchronized (sEglLock) {
+                if (sEgl == null) return;
+    
+                if (EGLImpl.getInitCount(sEglDisplay) == 1) {
+                    EGLContext eglContext = sEglContextStorage.get();
+                    if (eglContext == null) return;
+
+                    usePbufferSurface(eglContext);
+                    GLES20Canvas.terminateCaches();
+
+                    sEgl.eglDestroyContext(sEglDisplay, eglContext);
+                    sEglContextStorage.remove();
+        
+                    sEgl.eglDestroySurface(sEglDisplay, sPbuffer);
+                    sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+                    sEgl.eglReleaseThread();
+                    sEgl.eglTerminate(sEglDisplay);
+                    
+                    sEgl = null;
+                    sEglDisplay = null;
+                    sEglConfig = null;
+                    sPbuffer = null;
+                }
             }
         }
     }

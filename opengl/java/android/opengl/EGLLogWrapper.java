@@ -314,6 +314,16 @@ class EGLLogWrapper implements EGL11 {
         checkError();
         return result;
     }
+    
+    /** @hide **/
+    public boolean eglReleaseThread() {
+        begin("eglReleaseThread");
+        end();
+        boolean result = mEgl10.eglReleaseThread();
+        returns(result);
+        checkError();
+        return result;
+    }
 
     public boolean eglSwapBuffers(EGLDisplay display, EGLSurface surface) {
         begin("eglInitialize");
