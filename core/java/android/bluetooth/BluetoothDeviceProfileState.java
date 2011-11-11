@@ -86,7 +86,7 @@ public final class BluetoothDeviceProfileState extends StateMachine {
     private static final int CONNECTION_ACCESS_REQUEST_REPLY = 104;
     private static final int CONNECTION_ACCESS_REQUEST_EXPIRY = 105;
 
-    private static final int CONNECT_OTHER_PROFILES_DELAY = 4000; // 4 secs
+    public static final int CONNECT_OTHER_PROFILES_DELAY = 4000; // 4 secs
     private static final int CONNECTION_ACCESS_REQUEST_EXPIRY_TIMEOUT = 7000; // 7 secs
     private static final int CONNECTION_ACCESS_UNDEFINED = -1;
     private static final long INIT_INCOMING_REJECT_TIMER = 1000; // 1 sec
