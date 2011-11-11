@@ -32,7 +32,7 @@ import android.nfc.INfcTag;
 interface INfcAdapter
 {
     INfcTag getNfcTagInterface();
-    INfcAdapterExtras getNfcAdapterExtrasInterface();
+    INfcAdapterExtras getNfcAdapterExtrasInterface(in String pkg);
 
     int getState();
     boolean disable();

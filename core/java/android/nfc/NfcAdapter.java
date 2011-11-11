@@ -16,6 +16,8 @@
 
 package android.nfc;
 
+import java.util.HashMap;
+
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
@@ -197,15 +199,21 @@ public final class NfcAdapter {
     static INfcTag sTagService;
 
     /**
-     * NfcAdapter is currently a singleton, and does not require a context.
-     * However all the public API's are future-proofed to require a context.
-     * If we start using that then we'll need to keep a HashMap of
-     * Context.getApplicationContext() -> NfcAdapter, such that NfcAdapter
-     * is a singleton within each application context.
+     * The NfcAdapter object for each application context.
+     * There is a 1-1 relationship between application context and
+     * NfcAdapter object.
      */
-    static NfcAdapter sSingleton;  // protected by NfcAdapter.class
+    static HashMap<Context, NfcAdapter> sNfcAdapters = new HashMap(); //guard by NfcAdapter.class
+
+    /**
+     * NfcAdapter used with a null context. This ctor was deprecated but we have
+     * to support it for backwards compatibility. New methods that require context
+     * might throw when called on the null-context NfcAdapter.
+     */
+    static NfcAdapter sNullContextNfcAdapter;  // protected by NfcAdapter.class
 
     final NfcActivityManager mNfcActivityManager;
+    final Context mContext;
 
     /**
      * A callback to be invoked when the system successfully delivers your {@link NdefMessage}
@@ -280,12 +288,12 @@ public final class NfcAdapter {
     }
 
     /**
-     * Returns the singleton, or throws if NFC is not available.
+     * Returns the NfcAdapter for application context,
+     * or throws if NFC is not available.
+     * @hide
      */
-    static synchronized NfcAdapter getSingleton() {
+    public static synchronized NfcAdapter getNfcAdapter(Context context) {
         if (!sIsInitialized) {
-            sIsInitialized = true;
-
             /* is this device meant to have NFC */
             if (!hasNfcFeature()) {
                 Log.v(TAG, "this device does not have NFC support");
@@ -303,12 +311,21 @@ public final class NfcAdapter {
                 Log.e(TAG, "could not retrieve NFC Tag service");
                 throw new UnsupportedOperationException();
             }
-            sSingleton = new NfcAdapter();
+
+            sIsInitialized = true;
         }
-        if (sSingleton == null) {
-            throw new UnsupportedOperationException();
+        if (context == null) {
+            if (sNullContextNfcAdapter == null) {
+                sNullContextNfcAdapter = new NfcAdapter(null);
+            }
+            return sNullContextNfcAdapter;
         }
-        return sSingleton;
+        NfcAdapter adapter = sNfcAdapters.get(context);
+        if (adapter == null) {
+            adapter = new NfcAdapter(context);
+            sNfcAdapters.put(context, adapter);
+        }
+        return adapter;
     }
 
     /** get handle to NFC service interface */
@@ -336,6 +353,10 @@ public final class NfcAdapter {
      * @return the default NFC adapter, or null if no NFC adapter exists
      */
     public static NfcAdapter getDefaultAdapter(Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("context cannot be null");
+        }
+        context = context.getApplicationContext();
         /* use getSystemService() instead of just instantiating to take
          * advantage of the context's cached NfcManager & NfcAdapter */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
@@ -343,25 +364,30 @@ public final class NfcAdapter {
     }
 
     /**
-     * Get a handle to the default NFC Adapter on this Android device.
-     * <p>
-     * Most Android devices will only have one NFC Adapter (NFC Controller).
-     *
-     * @return the default NFC adapter, or null if no NFC adapter exists
+     * Legacy NfcAdapter getter, always use {@link #getDefaultAdapter(Context)} instead.<p>
+     * This method was deprecated at API level 10 (Gingerbread MR1) because a context is required
+     * for many NFC API methods. Those methods will fail when called on an NfcAdapter
+     * object created from this method.<p>
      * @deprecated use {@link #getDefaultAdapter(Context)}
      */
     @Deprecated
     public static NfcAdapter getDefaultAdapter() {
         Log.w(TAG, "WARNING: NfcAdapter.getDefaultAdapter() is deprecated, use " +
                 "NfcAdapter.getDefaultAdapter(Context) instead", new Exception());
-        return getSingleton();
+
+        return NfcAdapter.getNfcAdapter(null);
+    }
+
+    NfcAdapter(Context context) {
+        mContext = context;
+        mNfcActivityManager = new NfcActivityManager(this);
     }
 
     /**
-     * Does not currently need a context.
+     * @hide
      */
-    NfcAdapter() {
-        mNfcActivityManager = new NfcActivityManager(this);
+    public Context getContext() {
+        return mContext;
     }
 
     /**
@@ -875,8 +901,12 @@ public final class NfcAdapter {
      * @hide
      */
     public INfcAdapterExtras getNfcAdapterExtrasInterface() {
+        if (mContext == null) {
+            throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
+                    + " NFC extras APIs");
+        }
         try {
-            return sService.getNfcAdapterExtrasInterface();
+            return sService.getNfcAdapterExtrasInterface(mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return null;
