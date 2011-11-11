@@ -463,8 +463,17 @@ struct MyHandler : public AHandler {
                                 mBaseURL = tmp;
                             }
 
-                            CHECK_GT(mSessionDesc->countTracks(), 1u);
-                            setupTrack(1);
+                            if (mSessionDesc->countTracks() < 2) {
+                                // There's no actual tracks in this session.
+                                // The first "track" is merely session meta
+                                // data.
+
+                                LOGW("Session doesn't contain any playable "
+                                     "tracks. Aborting.");
+                                result = ERROR_UNSUPPORTED;
+                            } else {
+                                setupTrack(1);
+                            }
                         }
                     }
                 }
@@ -783,9 +792,13 @@ struct MyHandler : public AHandler {
                 }
 
                 if (mNumAccessUnitsReceived == 0) {
+#if 0
                     LOGI("stream ended? aborting.");
                     (new AMessage('abor', id()))->post();
                     break;
+#else
+                    LOGI("haven't seen an AU in a looong time.");
+#endif
                 }
 
                 mNumAccessUnitsReceived = 0;
