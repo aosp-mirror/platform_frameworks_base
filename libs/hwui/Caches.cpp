@@ -46,22 +46,16 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
-        lastDstMode(GL_ZERO), currentProgram(NULL) {
+Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
     GLint maxTextureUnits;
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
     if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
         LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
     }
 
-    glGenBuffers(1, &meshBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
-
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 
-    mCurrentBuffer = meshBuffer;
-    mRegionMesh = NULL;
+    init();
 
     mDebugLevel = readDebugLevel();
     LOGD("Enabling debug mode %d", mDebugLevel);
@@ -71,8 +65,40 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
 #endif
 }
 
-Caches::~Caches() {
+void Caches::init() {
+    if (mInitialized) return;
+
+    glGenBuffers(1, &meshBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
+
+    mCurrentBuffer = meshBuffer;
+    mRegionMesh = NULL;
+
+    blend = false;
+    lastSrcMode = GL_ZERO;
+    lastDstMode = GL_ZERO;
+    currentProgram = NULL;
+
+    mInitialized = true;
+}
+
+void Caches::terminate() {
+    if (!mInitialized) return;
+
+    glDeleteBuffers(1, &meshBuffer);
+    mCurrentBuffer = 0;
+
+    glDeleteBuffers(1, &mRegionMeshIndices);
     delete[] mRegionMesh;
+    mRegionMesh = NULL;
+
+    fboCache.clear();
+
+    programCache.clear();
+    currentProgram = NULL;
+
+    mInitialized = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
