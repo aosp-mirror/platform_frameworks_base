@@ -1136,6 +1136,41 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             break;
         }
 
+        // @xyz
+        case FOURCC('\xA9', 'x', 'y', 'z'):
+        {
+            // Best case the total data length inside "@xyz" box
+            // would be 8, for instance "@xyz" + "\x00\x04\x15\xc7" + "0+0/",
+            // where "\x00\x04" is the text string length with value = 4,
+            // "\0x15\xc7" is the language code = en, and "0+0" is a
+            // location (string) value with longitude = 0 and latitude = 0.
+            if (chunk_data_size < 8) {
+                return ERROR_MALFORMED;
+            }
+
+            // Worst case the location string length would be 18,
+            // for instance +90.0000-180.0000, without the trailing "/" and
+            // the string length + language code.
+            char buffer[18];
+
+            // Substracting 5 from the data size is because the text string length +
+            // language code takes 4 bytes, and the trailing slash "/" takes 1 byte.
+            off64_t location_length = chunk_data_size - 5;
+            if (location_length >= (off64_t) sizeof(buffer)) {
+                return ERROR_MALFORMED;
+            }
+
+            if (mDataSource->readAt(
+                        data_offset + 4, buffer, location_length) < location_length) {
+                return ERROR_IO;
+            }
+
+            buffer[location_length] = '\0';
+            mFileMetaData->setCString(kKeyLocation, buffer);
+            *offset += chunk_size;
+            break;
+        }
+
         case FOURCC('e', 's', 'd', 's'):
         {
             if (chunk_data_size < 4) {

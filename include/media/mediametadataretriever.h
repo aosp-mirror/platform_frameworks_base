@@ -54,6 +54,7 @@ enum {
     METADATA_KEY_BITRATE         = 20,
     METADATA_KEY_TIMED_TEXT_LANGUAGES      = 21,
     METADATA_KEY_IS_DRM          = 22,
+    METADATA_KEY_LOCATION        = 23,
 
     // Add more here...
 };
