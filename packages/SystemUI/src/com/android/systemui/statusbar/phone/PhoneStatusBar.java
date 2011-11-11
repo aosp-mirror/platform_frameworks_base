@@ -350,11 +350,11 @@ public class PhoneStatusBar extends StatusBar {
                 (SignalClusterView)sb.findViewById(R.id.signal_cluster);
         mNetworkController.addSignalCluster(signalCluster);
         signalCluster.setNetworkController(mNetworkController);
-	final ImageView wimaxRSSI = 
-                (ImageView)sb.findViewById(R.id.wimax_signal);
-        if (wimaxRSSI != null) {
-            mNetworkController.addWimaxIconView(wimaxRSSI);
-        }
+//        final ImageView wimaxRSSI = 
+//                (ImageView)sb.findViewById(R.id.wimax_signal);
+//        if (wimaxRSSI != null) {
+//            mNetworkController.addWimaxIconView(wimaxRSSI);
+//        }
         // Recents Panel
         mRecentTasksLoader = new RecentTasksLoader(context);
         updateRecentsPanel();
