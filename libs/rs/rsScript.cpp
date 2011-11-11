@@ -15,6 +15,7 @@
  */
 
 #include "rsContext.h"
+#include <time.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -89,8 +90,22 @@ void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint3
 }
 
 void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, size_t length) {
-    Script *s = static_cast<Script *>(vs);
-    s->mEnviroment.mTimeZone = timeZone;
+    // We unfortunately need to make a new copy of the string, since it is
+    // not NULL-terminated. We then use setenv(), which properly handles
+    // freeing/duplicating the actual string for the environment.
+    char *tz = (char *) malloc(length + 1);
+    if (!tz) {
+        LOGE("Couldn't allocate memory for timezone buffer");
+        return;
+    }
+    strncpy(tz, timeZone, length);
+    tz[length] = '\0';
+    if (setenv("TZ", tz, 1) == 0) {
+        tzset();
+    } else {
+        LOGE("Error setting timezone");
+    }
+    free(tz);
 }
 
 void rsi_ScriptForEach(Context *rsc, RsScript vs, uint32_t slot,

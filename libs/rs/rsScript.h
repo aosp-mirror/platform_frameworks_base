@@ -59,7 +59,6 @@ public:
     struct Enviroment_t {
         int64_t mStartTimeMillis;
         int64_t mLastDtTime;
-        const char* mTimeZone;
 
         ObjectBaseRef<ProgramVertex> mVertex;
         ObjectBaseRef<ProgramFragment> mFragment;
