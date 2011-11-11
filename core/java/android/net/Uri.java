@@ -1645,6 +1645,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     /**
      * Searches the query string for the first value with the given key.
      *
+     * <p><strong>Warning:</strong> Prior to Ice Cream Sandwich, this decoded
+     * the '+' character as '+' rather than ' '.
+     *
      * @param key which will be encoded
      * @throws UnsupportedOperationException if this isn't a hierarchical URI
      * @throws NullPointerException if key is null
