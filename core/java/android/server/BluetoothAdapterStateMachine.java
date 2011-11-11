@@ -62,6 +62,17 @@ import java.io.PrintWriter;
  * m1 = TURN_HOT
  * m2 = Transition to HotOff when number of process wanting BT on is 0.
  *      POWER_STATE_CHANGED will make the transition.
+ * Note:
+ * The diagram above shows all the states and messages that trigger normal state changes.
+ * The diagram above does not capture everything:
+ *   The diagram does not capture following messages.
+ *   - messages that do not trigger state changes
+ *     For example, PER_PROCESS_TURN_ON received in BluetoothOn state
+ *   - unhandled messages
+ *     For example, USER_TURN_ON received in BluetoothOn state
+ *   - timeout messages
+ *   The diagram does not capture error conditions and state recoveries.
+ *   - For example POWER_STATE_CHANGED received in BluetoothOn state
  */
 final class BluetoothAdapterStateMachine extends StateMachine {
     private static final String TAG = "BluetoothAdapterStateMachine";
