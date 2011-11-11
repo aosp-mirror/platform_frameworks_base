@@ -1336,8 +1336,9 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
 
             uint32_t type = ntohl(buffer);
             // For the 3GPP file format, the handler-type within the 'hdlr' box
-            // shall be 'text'
-            if (type == FOURCC('t', 'e', 'x', 't')) {
+            // shall be 'text'. We also want to support 'sbtl' handler type
+            // for a practical reason as various MPEG4 containers use it.
+            if (type == FOURCC('t', 'e', 'x', 't') || type == FOURCC('s', 'b', 't', 'l')) {
                 mLastTrack->meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_TEXT_3GPP);
             }
 
