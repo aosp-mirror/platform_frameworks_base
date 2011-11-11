@@ -34,8 +34,8 @@ PathCache::PathCache(): ShapeCache<PathCacheEntry>("path",
 
 void PathCache::remove(SkPath* path) {
     // TODO: Linear search...
-    Vector<uint32_t> pathsToRemove;
-    for (uint32_t i = 0; i < mCache.size(); i++) {
+    Vector<size_t> pathsToRemove;
+    for (size_t i = 0; i < mCache.size(); i++) {
         if (mCache.getKeyAt(i).path == path) {
             pathsToRemove.push(i);
             removeTexture(mCache.getValueAt(i));
