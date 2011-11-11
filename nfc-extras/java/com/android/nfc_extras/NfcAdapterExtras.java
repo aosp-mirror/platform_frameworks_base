@@ -16,8 +16,7 @@
 
 package com.android.nfc_extras;
 
-import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
@@ -60,10 +59,14 @@ public final class NfcAdapterExtras {
     // best effort recovery
     private static NfcAdapter sAdapter;
     private static INfcAdapterExtras sService;
-    private static NfcAdapterExtras sSingleton;
-    private static NfcExecutionEnvironment sEmbeddedEe;
-    private static CardEmulationRoute sRouteOff;
-    private static CardEmulationRoute sRouteOnWhenScreenOn;
+    private static final CardEmulationRoute ROUTE_OFF =
+            new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
+
+    private final NfcExecutionEnvironment mEmbeddedEe;
+    private final CardEmulationRoute mRouteOnWhenScreenOn;
+
+    final Context mContext;
+    final String mPackageName;
 
     /** get service handles */
     private static void initService() {
@@ -84,31 +87,35 @@ public final class NfcAdapterExtras {
      * @return the {@link NfcAdapterExtras} object for the given {@link NfcAdapter}
      */
     public static NfcAdapterExtras get(NfcAdapter adapter) {
-        synchronized(NfcAdapterExtras.class) {
-            if (sSingleton == null) {
+        Context context = adapter.getContext();
+        if (context == null) {
+            throw new UnsupportedOperationException(
+                    "You must pass a context to your NfcAdapter to use the NFC extras APIs");
+        }
+
+        synchronized (NfcAdapterExtras.class) {
+            if (sService == null) {
                 try {
                     sAdapter = adapter;
-                    sSingleton = new NfcAdapterExtras();
-                    sEmbeddedEe = new NfcExecutionEnvironment(sSingleton);
-                    sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
-                    sRouteOnWhenScreenOn = new CardEmulationRoute(
-                            CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON, sEmbeddedEe);
                     initService();
                 } finally {
                     if (sService == null) {
-                        sRouteOnWhenScreenOn = null;
-                        sRouteOff = null;
-                        sEmbeddedEe = null;
-                        sSingleton = null;
                         sAdapter = null;
                     }
                 }
             }
-            return sSingleton;
         }
+
+        return new NfcAdapterExtras(context);
     }
 
-    private NfcAdapterExtras() {}
+    private NfcAdapterExtras(Context context) {
+        mContext = context.getApplicationContext();
+        mPackageName = context.getPackageName();
+        mEmbeddedEe = new NfcExecutionEnvironment(this);
+        mRouteOnWhenScreenOn = new CardEmulationRoute(CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON,
+                mEmbeddedEe);
+    }
 
     /**
      * Immutable data class that describes a card emulation route.
@@ -166,18 +173,16 @@ public final class NfcAdapterExtras {
      *
      * <p class="note">
      * Requires the {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission.
-     *
-     * @return
      */
     public CardEmulationRoute getCardEmulationRoute() {
         try {
-            int route = sService.getCardEmulationRoute();
+            int route = sService.getCardEmulationRoute(mPackageName);
             return route == CardEmulationRoute.ROUTE_OFF ?
-                    sRouteOff :
-                    sRouteOnWhenScreenOn;
+                    ROUTE_OFF :
+                    mRouteOnWhenScreenOn;
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
-            return sRouteOff;
+            return ROUTE_OFF;
         }
     }
 
@@ -189,11 +194,11 @@ public final class NfcAdapterExtras {
      * <p class="note">
      * Requires the {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission.
      *
-     * @param route a {@link #CardEmulationRoute}
+     * @param route a {@link CardEmulationRoute}
      */
     public void setCardEmulationRoute(CardEmulationRoute route) {
         try {
-            sService.setCardEmulationRoute(route.route);
+            sService.setCardEmulationRoute(mPackageName, route.route);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
@@ -201,7 +206,7 @@ public final class NfcAdapterExtras {
 
     /**
      * Get the {@link NfcExecutionEnvironment} that is embedded with the
-     * {@link NFcAdapter}.
+     * {@link NfcAdapter}.
      *
      * <p class="note">
      * Requires the {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission.
@@ -209,7 +214,7 @@ public final class NfcAdapterExtras {
      * @return a {@link NfcExecutionEnvironment}, or null if there is no embedded NFC-EE
      */
     public NfcExecutionEnvironment getEmbeddedExecutionEnvironment() {
-        return sEmbeddedEe;
+        return mEmbeddedEe;
     }
 
     /**
@@ -218,12 +223,12 @@ public final class NfcAdapterExtras {
      * Some implementations of NFC Adapter Extras may require applications
      * to authenticate with a token, before using other methods.
      *
-     * @param a implementation specific token
-     * @throws a {@link java.lang.SecurityException} if authentication failed
+     * @param token a implementation specific token
+     * @throws java.lang.SecurityException if authentication failed
      */
     public void authenticate(byte[] token) {
         try {
-            sService.authenticate(token);
+            sService.authenticate(mPackageName, token);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
