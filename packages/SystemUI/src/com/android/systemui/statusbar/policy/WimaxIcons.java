@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,13 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.statusbar.policy.TelephonyIcons;
 import com.android.systemui.R;
 
 class WimaxIcons {
-    static final int[][] WIMAX_SIGNAL_STRENGTH = {
-	{ R.drawable.stat_sys_data_wimax_signal_0,
-            R.drawable.stat_sys_data_wimax_signal_1,
-            R.drawable.stat_sys_data_wimax_signal_2,
-            R.drawable.stat_sys_data_wimax_signal_3 },
-          { R.drawable.stat_sys_data_wimax_signal_0_fully,
-            R.drawable.stat_sys_data_wimax_signal_1_fully,
-            R.drawable.stat_sys_data_wimax_signal_2_fully,
-            R.drawable.stat_sys_data_wimax_signal_3_fully }
-        };
+    static final int[][] WIMAX_SIGNAL_STRENGTH = TelephonyIcons.DATA_SIGNAL_STRENGTH;
 
-    static final int WIMAX_DISCONNECTED =
-            R.drawable.stat_sys_data_wimax_signal_disconnected;
-    static final int WIMAX_IDLE = R.drawable.stat_sys_data_wimax_signal_idle;
-    static final int WIFI_LEVEL_COUNT = WIMAX_SIGNAL_STRENGTH[0].length;
+    static final int WIMAX_DISCONNECTED = WIMAX_SIGNAL_STRENGTH[0][0];
+
+    static final int WIMAX_IDLE = WIMAX_DISCONNECTED; // XXX: unclear if we need a different icon
 }
