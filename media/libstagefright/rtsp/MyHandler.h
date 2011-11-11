@@ -792,7 +792,7 @@ struct MyHandler : public AHandler {
                 }
 
                 if (mNumAccessUnitsReceived == 0) {
-#if 0
+#if 1
                     LOGI("stream ended? aborting.");
                     (new AMessage('abor', id()))->post();
                     break;
