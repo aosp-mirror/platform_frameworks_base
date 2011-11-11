@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -449,18 +450,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super(context, attrs, defStyle);
         mText = "";
 
+        final Resources res = getResources();
+        final CompatibilityInfo compat = res.getCompatibilityInfo();
+
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.density = getResources().getDisplayMetrics().density;
-        mTextPaint.setCompatibilityScaling(
-                getResources().getCompatibilityInfo().applicationScale);
+        mTextPaint.density = res.getDisplayMetrics().density;
+        mTextPaint.setCompatibilityScaling(compat.applicationScale);
 
         // If we get the paint from the skin, we should set it to left, since
         // the layout always wants it to be left.
         // mTextPaint.setTextAlign(Paint.Align.LEFT);
 
         mHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mHighlightPaint.setCompatibilityScaling(
-                getResources().getCompatibilityInfo().applicationScale);
+        mHighlightPaint.setCompatibilityScaling(compat.applicationScale);
 
         mMovement = getDefaultMovementMethod();
         mTransformation = null;
