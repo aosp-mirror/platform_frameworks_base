@@ -567,7 +567,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    private void destroyHardwareResources() {
+    void destroyHardwareResources() {
         if (mAttachInfo.mHardwareRenderer != null) {
             if (mAttachInfo.mHardwareRenderer.isEnabled()) {
                 mAttachInfo.mHardwareRenderer.destroyLayers(mView);
@@ -880,12 +880,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 || mNewSurfaceNeeded;
 
         WindowManager.LayoutParams params = null;
-        int windowAttributesChanges = 0;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
             surfaceChanged = true;
             params = lp;
-            windowAttributesChanges = mWindowAttributesChangesFlag;
         }
         CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {

@@ -806,9 +806,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats networkDevSnapshot;
         try {
             // collect any tethering stats
-            final String[] tetheredIfacePairs = mConnManager.getTetheredIfacePairs();
-            final NetworkStats tetherSnapshot = mNetworkManager.getNetworkStatsTethering(
-                    tetheredIfacePairs);
+            final NetworkStats tetherSnapshot = getNetworkStatsTethering();
 
             // record uid stats, folding in tethering stats
             uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
@@ -1505,7 +1503,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             NetworkStats before, NetworkStats current, boolean collectStale, String type) {
         if (before != null) {
             try {
-                return current.subtract(before);
+                return current.subtract(before, false);
             } catch (NonMonotonicException e) {
                 Log.w(TAG, "found non-monotonic values; saving to dropbox");
 
@@ -1517,8 +1515,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 builder.append("right=").append(e.right).append('\n');
                 mDropBox.addText(TAG_NETSTATS_ERROR, builder.toString());
 
-                // return empty delta to avoid recording broken stats
-                return new NetworkStats(0L, 10);
+                try {
+                    // return clamped delta to help recover
+                    return current.subtract(before, true);
+                } catch (NonMonotonicException e1) {
+                    Log.wtf(TAG, "found non-monotonic values; returning empty delta", e1);
+                    return new NetworkStats(0L, 10);
+                }
             }
         } else if (collectStale) {
             // caller is okay collecting stale stats for first call.
@@ -1526,6 +1529,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } else {
             // this is first snapshot; to prevent from double-counting we only
             // observe traffic occuring between known snapshots.
+            return new NetworkStats(0L, 10);
+        }
+    }
+
+    /**
+     * Return snapshot of current tethering statistics. Will return empty
+     * {@link NetworkStats} if any problems are encountered.
+     */
+    private NetworkStats getNetworkStatsTethering() throws RemoteException {
+        try {
+            final String[] tetheredIfacePairs = mConnManager.getTetheredIfacePairs();
+            return mNetworkManager.getNetworkStatsTethering(tetheredIfacePairs);
+        } catch (IllegalStateException e) {
+            Log.wtf(TAG, "problem reading network stats", e);
             return new NetworkStats(0L, 10);
         }
     }
