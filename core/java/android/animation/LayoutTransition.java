@@ -657,6 +657,15 @@ public class LayoutTransition {
      */
     private void setupChangeAnimation(final ViewGroup parent, final int changeReason,
             Animator baseAnimator, final long duration, final View child) {
+
+        // If we already have a listener for this child, then we've already set up the
+        // changing animation we need. Multiple calls for a child may occur when several
+        // add/remove operations are run at once on a container; each one will trigger
+        // changes for the existing children in the container.
+        if (layoutChangeListenerMap.get(child) != null) {
+            return;
+        }
+
         // Make a copy of the appropriate animation
         final Animator anim = baseAnimator.clone();
 
