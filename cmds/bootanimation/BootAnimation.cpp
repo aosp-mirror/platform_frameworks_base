@@ -42,6 +42,7 @@
 #include <surfaceflinger/ISurfaceComposerClient.h>
 
 #include <core/SkBitmap.h>
+#include <core/SkStream.h>
 #include <images/SkImageDecoder.h>
 
 #include <GLES/gl.h>
@@ -150,9 +151,15 @@ status_t BootAnimation::initTexture(void* buffer, size_t len)
     //StopWatch watch("blah");
 
     SkBitmap bitmap;
-    SkImageDecoder::DecodeMemory(buffer, len,
-            &bitmap, SkBitmap::kRGB_565_Config,
-            SkImageDecoder::kDecodePixels_Mode);
+    SkMemoryStream  stream(buffer, len);
+    SkImageDecoder* codec = SkImageDecoder::Factory(&stream);
+    codec->setDitherImage(false);
+    if (codec) {
+        codec->decode(&stream, &bitmap,
+                SkBitmap::kRGB_565_Config,
+                SkImageDecoder::kDecodePixels_Mode);
+        delete codec;
+    }
 
     // ensure we can call getPixels(). No need to call unlock, since the
     // bitmap will go out of scope when we return from this method.
