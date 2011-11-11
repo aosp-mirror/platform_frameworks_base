@@ -360,6 +360,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mResettingSystemUiFlags = 0;
     // Bits that we are currently always keeping cleared.
     int mForceClearedSystemUiFlags = 0;
+    // What we last reported to system UI about whether the compatibility
+    // menu needs to be displayed.
+    boolean mLastFocusNeedsMenu = false;
 
     FakeWindow mHideNavFakeWindow = null;
 
@@ -370,8 +373,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpNavigationFrame = new Rect();
     
     WindowState mTopFullscreenOpaqueWindowState;
-    WindowState mTopAppWindowState;
-    WindowState mLastTopAppWindowState;
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
     boolean mHideLockScreen;
@@ -2250,7 +2251,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void beginAnimationLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
-        mTopAppWindowState = null;
         mForceStatusBar = false;
         
         mHideLockScreen = false;
@@ -2286,12 +2286,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                     mAllowLockscreenWhenOn = true;
                 }
-            }
-        }
-        if (mTopAppWindowState == null && win.isVisibleOrBehindKeyguardLw()) {
-            if (attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type <= LAST_APPLICATION_WINDOW) {
-                mTopAppWindowState = win;
             }
         }
     }
@@ -2348,35 +2342,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mTopIsFullscreen = topIsFullscreen;
-
-        if (mTopAppWindowState != null && mTopAppWindowState != mLastTopAppWindowState) {
-            mLastTopAppWindowState = mTopAppWindowState;
-
-            final boolean topNeedsMenu = (mTopAppWindowState.getAttrs().flags
-                    & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
-
-            mHandler.post(new Runnable() {
-                    public void run() {
-                        if (mStatusBarService == null) {
-                            // This is the one that can not go away, but it doesn't come up
-                            // before the window manager does, so don't fail if it doesn't
-                            // exist. This works as long as no fullscreen windows come up
-                            // before the status bar service does.
-                            mStatusBarService = IStatusBarService.Stub.asInterface(
-                                    ServiceManager.getService("statusbar"));
-                        }
-                        final IStatusBarService sbs = mStatusBarService;
-                        if (mStatusBarService != null) {
-                            try {
-                                sbs.topAppWindowChanged(topNeedsMenu);
-                            } catch (RemoteException e) {
-                                // This should be impossible because we're in the same process.
-                                mStatusBarService = null;
-                            }
-                        }
-                    }
-                });
-        }
 
         // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
         // when the screen is locked
@@ -3710,10 +3675,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;
         int diff = visibility ^ mLastSystemUiFlags;
-        if (diff == 0) {
+        final boolean needsMenu = (mFocusedWindow.getAttrs().flags
+                & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+        if (diff == 0 && mLastFocusNeedsMenu == needsMenu) {
             return 0;
         }
         mLastSystemUiFlags = visibility;
+        mLastFocusNeedsMenu = needsMenu;
         mHandler.post(new Runnable() {
                 public void run() {
                     if (mStatusBarService == null) {
@@ -3723,6 +3691,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mStatusBarService != null) {
                         try {
                             mStatusBarService.setSystemUiVisibility(visibility);
+                            mStatusBarService.topAppWindowChanged(needsMenu);
                         } catch (RemoteException e) {
                             // not much to be done
                             mStatusBarService = null;
@@ -3754,6 +3723,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pw.print(Integer.toHexString(mResettingSystemUiFlags));
                     pw.print(" mForceClearedSystemUiFlags=0x");
                     pw.println(Integer.toHexString(mForceClearedSystemUiFlags));
+        }
+        if (mLastFocusNeedsMenu) {
+            pw.print(prefix); pw.print("mLastFocusNeedsMenu=");
+                    pw.println(mLastFocusNeedsMenu);
         }
         pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
                 pw.print(" mDockMode="); pw.print(mDockMode);
