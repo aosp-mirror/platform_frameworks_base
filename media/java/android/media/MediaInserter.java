@@ -32,7 +32,7 @@ import java.util.List;
  * {@hide}
  */
 public class MediaInserter {
-    private HashMap<Uri, List<ContentValues>> mRowMap =
+    private final HashMap<Uri, List<ContentValues>> mRowMap =
             new HashMap<Uri, List<ContentValues>>();
 
     private IContentProvider mProvider;

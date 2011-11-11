@@ -161,7 +161,7 @@ public class AudioRecord
     /**
      * Lock to make sure mRecordingState updates are reflecting the actual state of the object.
      */
-    private Object mRecordingStateLock = new Object();
+    private final Object mRecordingStateLock = new Object();
     /**
      * The listener the AudioRecord notifies when the record position reaches a marker
      * or for periodic updates during the progression of the record head.

@@ -1509,7 +1509,7 @@ public class AudioManager {
      * Map to convert focus event listener IDs, as used in the AudioService audio focus stack,
      * to actual listener objects.
      */
-    private HashMap<String, OnAudioFocusChangeListener> mAudioFocusIdListenerMap =
+    private final HashMap<String, OnAudioFocusChangeListener> mAudioFocusIdListenerMap =
             new HashMap<String, OnAudioFocusChangeListener>();
     /**
      * Lock to prevent concurrent changes to the list of focus listeners for this AudioManager
@@ -1524,7 +1524,7 @@ public class AudioManager {
     /**
      * Handler for audio focus events coming from the audio service.
      */
-    private FocusEventHandlerDelegate mAudioFocusEventHandlerDelegate =
+    private final FocusEventHandlerDelegate mAudioFocusEventHandlerDelegate =
             new FocusEventHandlerDelegate();
 
     /**
@@ -1563,7 +1563,7 @@ public class AudioManager {
         }
     }
 
-    private IAudioFocusDispatcher mAudioFocusDispatcher = new IAudioFocusDispatcher.Stub() {
+    private final IAudioFocusDispatcher mAudioFocusDispatcher = new IAudioFocusDispatcher.Stub() {
 
         public void dispatchAudioFocusChange(int focusChange, String id) {
             Message m = mAudioFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
@@ -1955,7 +1955,7 @@ public class AudioManager {
      /**
       * {@hide}
       */
-     private IBinder mICallBack = new Binder();
+     private final IBinder mICallBack = new Binder();
 
     /**
      * Checks whether the phone is in silent mode, with or without vibrate.

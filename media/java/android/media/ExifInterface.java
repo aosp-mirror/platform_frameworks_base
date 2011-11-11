@@ -111,7 +111,7 @@ public class ExifInterface {
     // there can only be one user at a time for the native functions (and
     // they cannot keep state in the native code across function calls). We
     // use sLock to serialize the accesses.
-    private static Object sLock = new Object();
+    private static final Object sLock = new Object();
 
     /**
      * Reads Exif tags from the specified JPEG file.

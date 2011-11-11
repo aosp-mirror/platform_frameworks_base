@@ -151,7 +151,7 @@ public class AudioService extends IAudioService.Stub {
     private boolean mMediaServerOk;
 
     private SoundPool mSoundPool;
-    private Object mSoundEffectsLock = new Object();
+    private final Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
     private static final int SOUND_EFFECT_VOLUME = 1000;
 
@@ -168,7 +168,7 @@ public class AudioService extends IAudioService.Stub {
     /* Sound effect file name mapping sound effect id (AudioManager.FX_xxx) to
      * file index in SOUND_EFFECT_FILES[] (first column) and indicating if effect
      * uses soundpool (second column) */
-    private int[][] SOUND_EFFECT_FILES_MAP = new int[][] {
+    private final int[][] SOUND_EFFECT_FILES_MAP = new int[][] {
         {0, -1},  // FX_KEY_CLICK
         {0, -1},  // FX_FOCUS_NAVIGATION_UP
         {0, -1},  // FX_FOCUS_NAVIGATION_DOWN
@@ -181,7 +181,7 @@ public class AudioService extends IAudioService.Stub {
     };
 
    /** @hide Maximum volume index values for audio streams */
-    private int[] MAX_STREAM_VOLUME = new int[] {
+    private final int[] MAX_STREAM_VOLUME = new int[] {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
@@ -197,7 +197,7 @@ public class AudioService extends IAudioService.Stub {
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
      * NOTE: do not create loops in aliases! */
-    private int[] STREAM_VOLUME_ALIAS = new int[] {
+    private final int[] STREAM_VOLUME_ALIAS = new int[] {
         AudioSystem.STREAM_VOICE_CALL,  // STREAM_VOICE_CALL
         AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM
         AudioSystem.STREAM_RING,  // STREAM_RING
@@ -210,7 +210,7 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_MUSIC  // STREAM_TTS
     };
 
-    private AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
+    private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
@@ -270,17 +270,17 @@ public class AudioService extends IAudioService.Stub {
     private boolean mIsRinging = false;
 
     // Devices currently connected
-    private HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
+    private final HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
 
     // Forced device usage for communications
     private int mForcedUseForComm;
 
     // List of binder death handlers for setMode() client processes.
     // The last process to have called setMode() is at the top of the list.
-    private ArrayList <SetModeDeathHandler> mSetModeDeathHandlers = new ArrayList <SetModeDeathHandler>();
+    private final ArrayList <SetModeDeathHandler> mSetModeDeathHandlers = new ArrayList <SetModeDeathHandler>();
 
     // List of clients having issued a SCO start request
-    private ArrayList <ScoClient> mScoClients = new ArrayList <ScoClient>();
+    private final ArrayList <ScoClient> mScoClients = new ArrayList <ScoClient>();
 
     // BluetoothHeadset API to control SCO connection
     private BluetoothHeadset mBluetoothHeadset;
@@ -2945,7 +2945,7 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private Stack<FocusStackEntry> mFocusStack = new Stack<FocusStackEntry>();
+    private final Stack<FocusStackEntry> mFocusStack = new Stack<FocusStackEntry>();
 
     /**
      * Helper function:
@@ -3322,7 +3322,7 @@ public class AudioService extends IAudioService.Stub {
      *  synchronized on mRCStack, but also BEFORE on mFocusLock as any change in either
      *  stack, audio focus or RC, can lead to a change in the remote control display
      */
-    private Stack<RemoteControlStackEntry> mRCStack = new Stack<RemoteControlStackEntry>();
+    private final Stack<RemoteControlStackEntry> mRCStack = new Stack<RemoteControlStackEntry>();
 
     /**
      * Helper function:

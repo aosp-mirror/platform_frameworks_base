@@ -345,7 +345,7 @@ public class MediaScanner
     // this should be set when scanning files on a case insensitive file system.
     private boolean mCaseInsensitivePaths;
 
-    private BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
+    private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
     private static class FileCacheEntry {
         long mRowId;
@@ -401,7 +401,7 @@ public class MediaScanner
                 + Settings.System.ALARM_ALERT);
     }
 
-    private MyMediaScannerClient mClient = new MyMediaScannerClient();
+    private final MyMediaScannerClient mClient = new MyMediaScannerClient();
 
     private boolean isDrmEnabled() {
         String prop = SystemProperties.get("drm.service.enabled");
