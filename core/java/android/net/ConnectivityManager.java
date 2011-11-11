@@ -360,6 +360,11 @@ public class ConnectivityManager {
         }
     }
 
+    /**
+     * Gets you info about the current data network.
+     * Call {@link NetworkInfo#isConnected()} on the returned {@link NetworkInfo}
+     * to check if the device has a data connection.
+    */
     public NetworkInfo getActiveNetworkInfo() {
         try {
             return mService.getActiveNetworkInfo();

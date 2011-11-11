@@ -22,8 +22,9 @@ import android.os.Parcel;
 import java.util.EnumMap;
 
 /**
- * Describes the status of a network interface of a given type
- * (currently either Mobile or Wifi).
+ * Describes the status of a network interface.
+ * <p>Use {@link ConnectivityManager#getActiveNetworkInfo()} to get an instance that represents
+ * the current network connection.
  */
 public class NetworkInfo implements Parcelable {
 
@@ -38,7 +39,7 @@ public class NetworkInfo implements Parcelable {
      * <tr><td><code>SCANNING</code></td><td><code>CONNECTING</code></td></tr>
      * <tr><td><code>CONNECTING</code></td><td><code>CONNECTING</code></td></tr>
      * <tr><td><code>AUTHENTICATING</code></td><td><code>CONNECTING</code></td></tr>
-     * <tr><td><code>CONNECTED</code></td><td<code>CONNECTED</code></td></tr>
+     * <tr><td><code>CONNECTED</code></td><td><code>CONNECTED</code></td></tr>
      * <tr><td><code>DISCONNECTING</code></td><td><code>DISCONNECTING</code></td></tr>
      * <tr><td><code>DISCONNECTED</code></td><td><code>DISCONNECTED</code></td></tr>
      * <tr><td><code>UNAVAILABLE</code></td><td><code>DISCONNECTED</code></td></tr>
@@ -159,9 +160,12 @@ public class NetworkInfo implements Parcelable {
     }
 
     /**
-     * Reports the type of network (currently mobile or Wi-Fi) to which the
-     * info in this object pertains.
-     * @return the network type
+     * Reports the type of network to which the
+     * info in this {@code NetworkInfo} pertains.
+     * @return one of {@link ConnectivityManager#TYPE_MOBILE}, {@link
+     * ConnectivityManager#TYPE_WIFI}, {@link ConnectivityManager#TYPE_WIMAX}, {@link
+     * ConnectivityManager#TYPE_ETHERNET},  {@link ConnectivityManager#TYPE_BLUETOOTH}, or other
+     * types defined by {@link ConnectivityManager}
      */
     public int getType() {
         synchronized (this) {
@@ -226,6 +230,7 @@ public class NetworkInfo implements Parcelable {
     /**
      * Indicates whether network connectivity exists and it is possible to establish
      * connections and pass data.
+     * <p>Always call this before attempting to perform data transactions.
      * @return {@code true} if network connectivity exists, {@code false} otherwise.
      */
     public boolean isConnected() {
