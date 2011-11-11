@@ -312,10 +312,11 @@ class AudioPlaybackHandler {
     private void handleSilence(MessageParams msg) {
         if (DBG) Log.d(TAG, "handleSilence()");
         SilenceMessageParams params = (SilenceMessageParams) msg;
+        params.getDispatcher().dispatchOnStart();
         if (params.getSilenceDurationMs() > 0) {
             params.getConditionVariable().block(params.getSilenceDurationMs());
         }
-        params.getDispatcher().dispatchUtteranceCompleted();
+        params.getDispatcher().dispatchOnDone();
         if (DBG) Log.d(TAG, "handleSilence() done.");
     }
 
@@ -323,11 +324,12 @@ class AudioPlaybackHandler {
     private void handleAudio(MessageParams msg) {
         if (DBG) Log.d(TAG, "handleAudio()");
         AudioMessageParams params = (AudioMessageParams) msg;
+        params.getDispatcher().dispatchOnStart();
         // Note that the BlockingMediaPlayer spawns a separate thread.
         //
         // TODO: This can be avoided.
         params.getPlayer().startAndWait();
-        params.getDispatcher().dispatchUtteranceCompleted();
+        params.getDispatcher().dispatchOnDone();
         if (DBG) Log.d(TAG, "handleAudio() done.");
     }
 
@@ -361,6 +363,7 @@ class AudioPlaybackHandler {
         if (DBG) Log.d(TAG, "Created audio track [" + audioTrack.hashCode() + "]");
 
         param.setAudioTrack(audioTrack);
+        msg.getDispatcher().dispatchOnStart();
     }
 
     // More data available to be flushed to the audio track.
@@ -411,6 +414,7 @@ class AudioPlaybackHandler {
         final AudioTrack audioTrack = params.getAudioTrack();
 
         if (audioTrack == null) {
+            params.getDispatcher().dispatchOnError();
             return;
         }
 
@@ -439,7 +443,7 @@ class AudioPlaybackHandler {
             audioTrack.release();
             params.setAudioTrack(null);
         }
-        params.getDispatcher().dispatchUtteranceCompleted();
+        params.getDispatcher().dispatchOnDone();
         mLastSynthesisRequest = null;
         params.mLogger.onWriteData();
     }

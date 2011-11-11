@@ -15,12 +15,12 @@
  */
 package android.speech.tts;
 
-import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
+import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 
 class AudioMessageParams extends MessageParams {
     private final BlockingMediaPlayer mPlayer;
 
-    AudioMessageParams(UtteranceCompletedDispatcher dispatcher,
+    AudioMessageParams(UtteranceProgressDispatcher dispatcher,
             String callingApp, BlockingMediaPlayer player) {
         super(dispatcher, callingApp);
         mPlayer = player;
