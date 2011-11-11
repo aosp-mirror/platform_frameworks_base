@@ -187,10 +187,13 @@ bool ARTSPConnection::ParseURL(
     return true;
 }
 
-static void MakeSocketBlocking(int s, bool blocking) {
+static status_t MakeSocketBlocking(int s, bool blocking) {
     // Make socket non-blocking.
     int flags = fcntl(s, F_GETFL, 0);
-    CHECK_NE(flags, -1);
+
+    if (flags == -1) {
+        return UNKNOWN_ERROR;
+    }
 
     if (blocking) {
         flags &= ~O_NONBLOCK;
@@ -198,7 +201,9 @@ static void MakeSocketBlocking(int s, bool blocking) {
         flags |= O_NONBLOCK;
     }
 
-    CHECK_NE(fcntl(s, F_SETFL, flags), -1);
+    flags = fcntl(s, F_SETFL, flags);
+
+    return flags == -1 ? UNKNOWN_ERROR : OK;
 }
 
 void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
@@ -302,27 +307,32 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     reply->post();
 }
 
+void ARTSPConnection::performDisconnect() {
+    if (mUIDValid) {
+        HTTPBase::UnRegisterSocketUserTag(mSocket);
+    }
+    close(mSocket);
+    mSocket = -1;
+
+    flushPendingRequests();
+
+    mUser.clear();
+    mPass.clear();
+    mAuthType = NONE;
+    mNonce.clear();
+
+    mState = DISCONNECTED;
+}
+
 void ARTSPConnection::onDisconnect(const sp<AMessage> &msg) {
     if (mState == CONNECTED || mState == CONNECTING) {
-        if (mUIDValid) {
-            HTTPBase::UnRegisterSocketUserTag(mSocket);
-        }
-        close(mSocket);
-        mSocket = -1;
-
-        flushPendingRequests();
+        performDisconnect();
     }
 
     sp<AMessage> reply;
     CHECK(msg->findMessage("reply", &reply));
 
     reply->setInt32("result", OK);
-    mState = DISCONNECTED;
-
-    mUser.clear();
-    mPass.clear();
-    mAuthType = NONE;
-    mNonce.clear();
 
     reply->post();
 }
@@ -427,21 +437,25 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
             send(mSocket, request.c_str() + numBytesSent,
                  request.size() - numBytesSent, 0);
 
-        if (n == 0) {
-            // Server closed the connection.
-            LOGE("Server unexpectedly closed the connection.");
+        if (n < 0 && errno == EINTR) {
+            continue;
+        }
 
-            reply->setInt32("result", ERROR_IO);
-            reply->post();
-            return;
-        } else if (n < 0) {
-            if (errno == EINTR) {
-                continue;
+        if (n <= 0) {
+            performDisconnect();
+
+            if (n == 0) {
+                // Server closed the connection.
+                LOGE("Server unexpectedly closed the connection.");
+
+                reply->setInt32("result", ERROR_IO);
+                reply->post();
+            } else {
+                LOGE("Error sending rtsp request. (%s)", strerror(errno));
+                reply->setInt32("result", -errno);
+                reply->post();
             }
 
-            LOGE("Error sending rtsp request.");
-            reply->setInt32("result", -errno);
-            reply->post();
             return;
         }
 
@@ -512,17 +526,22 @@ status_t ARTSPConnection::receive(void *data, size_t size) {
     size_t offset = 0;
     while (offset < size) {
         ssize_t n = recv(mSocket, (uint8_t *)data + offset, size - offset, 0);
-        if (n == 0) {
-            // Server closed the connection.
-            LOGE("Server unexpectedly closed the connection.");
-            return ERROR_IO;
-        } else if (n < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
 
-            LOGE("Error reading rtsp response.");
-            return -errno;
+        if (n < 0 && errno == EINTR) {
+            continue;
+        }
+
+        if (n <= 0) {
+            performDisconnect();
+
+            if (n == 0) {
+                // Server closed the connection.
+                LOGE("Server unexpectedly closed the connection.");
+                return ERROR_IO;
+            } else {
+                LOGE("Error reading rtsp response. (%s)", strerror(errno));
+                return -errno;
+            }
         }
 
         offset += (size_t)n;
@@ -681,24 +700,8 @@ bool ARTSPConnection::receiveRTSPReponse() {
     if (contentLength > 0) {
         response->mContent = new ABuffer(contentLength);
 
-        size_t numBytesRead = 0;
-        while (numBytesRead < contentLength) {
-            ssize_t n = recv(
-                    mSocket, response->mContent->data() + numBytesRead,
-                    contentLength - numBytesRead, 0);
-
-            if (n == 0) {
-                // Server closed the connection.
-                TRESPASS();
-            } else if (n < 0) {
-                if (errno == EINTR) {
-                    continue;
-                }
-
-                TRESPASS();
-            }
-
-            numBytesRead += (size_t)n;
+        if (receive(response->mContent->data(), contentLength) != OK) {
+            return false;
         }
     }
 
@@ -765,17 +768,20 @@ bool ARTSPConnection::handleServerRequest(const sp<ARTSPResponse> &request) {
             send(mSocket, response.c_str() + numBytesSent,
                  response.size() - numBytesSent, 0);
 
-        if (n == 0) {
-            // Server closed the connection.
-            LOGE("Server unexpectedly closed the connection.");
+        if (n < 0 && errno == EINTR) {
+            continue;
+        }
 
-            return false;
-        } else if (n < 0) {
-            if (errno == EINTR) {
-                continue;
+        if (n <= 0) {
+            if (n == 0) {
+                // Server closed the connection.
+                LOGE("Server unexpectedly closed the connection.");
+            } else {
+                LOGE("Error sending rtsp response (%s).", strerror(errno));
             }
 
-            LOGE("Error sending rtsp response.");
+            performDisconnect();
+
             return false;
         }
 
