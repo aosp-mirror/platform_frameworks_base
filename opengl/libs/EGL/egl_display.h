@@ -91,6 +91,8 @@ public:
     inline bool isValid() const { return magic == '_dpy'; }
     inline bool isAlive() const { return isValid(); }
 
+    inline uint32_t getRefsCount() const { return refs; }
+
     struct strings_t {
         char const * vendor;
         char const * version;
