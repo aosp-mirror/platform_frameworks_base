@@ -63,6 +63,7 @@ static void dumpstate() {
 
     printf("\n");
     printf("Build: %s\n", build);
+    printf("Build fingerprint: '%s'\n", fingerprint); /* format is important for other tools */
     printf("Bootloader: %s\n", bootloader);
     printf("Radio: %s\n", radio);
     printf("Network: %s\n", network);
