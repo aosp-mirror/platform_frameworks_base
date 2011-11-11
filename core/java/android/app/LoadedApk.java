@@ -901,6 +901,7 @@ public final class LoadedApk {
         private RuntimeException mUnbindLocation;
 
         private boolean mDied;
+        private boolean mForgotten;
 
         private static class ConnectionInfo {
             IBinder binder;
@@ -959,6 +960,7 @@ public final class LoadedApk {
                     ci.binder.unlinkToDeath(ci.deathMonitor, 0);
                 }
                 mActiveConnections.clear();
+                mForgotten = true;
             }
         }
 
@@ -1020,6 +1022,11 @@ public final class LoadedApk {
             ServiceDispatcher.ConnectionInfo info;
 
             synchronized (this) {
+                if (mForgotten) {
+                    // We unbound before receiving the connection; ignore
+                    // any connection received.
+                    return;
+                }
                 old = mActiveConnections.get(name);
                 if (old != null && old.binder == service) {
                     // Huh, already have this one.  Oh well!
