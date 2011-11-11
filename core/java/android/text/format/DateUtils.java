@@ -136,12 +136,12 @@ public class DateUtils
     private static java.text.DateFormat sStatusTimeFormat;
     private static String sElapsedFormatMMSS;
     private static String sElapsedFormatHMMSS;
-    
+
     private static final String FAST_FORMAT_HMMSS = "%1$d:%2$02d:%3$02d";
     private static final String FAST_FORMAT_MMSS = "%1$02d:%2$02d";
     private static final char TIME_PADDING = '0';
     private static final char TIME_SEPARATOR = ':';
-    
+
 
     public static final long SECOND_IN_MILLIS = 1000;
     public static final long MINUTE_IN_MILLIS = SECOND_IN_MILLIS * 60;
@@ -201,7 +201,7 @@ public class DateUtils
     public static final String YEAR_FORMAT_TWO_DIGITS = "%g";
     public static final String WEEKDAY_FORMAT = "%A";
     public static final String ABBREV_WEEKDAY_FORMAT = "%a";
-    
+
     // This table is used to lookup the resource string id of a format string
     // used for formatting a start and end date that fall in the same year.
     // The index is constructed from a bit-wise OR of the boolean values:
@@ -227,7 +227,7 @@ public class DateUtils
         com.android.internal.R.string.numeric_mdy1_time1_mdy2_time2,
         com.android.internal.R.string.numeric_wday1_mdy1_time1_wday2_mdy2_time2,
     };
-    
+
     // This table is used to lookup the resource string id of a format string
     // used for formatting a start and end date that fall in the same month.
     // The index is constructed from a bit-wise OR of the boolean values:
@@ -256,7 +256,7 @@ public class DateUtils
     /**
      * Request the full spelled-out name. For use with the 'abbrev' parameter of
      * {@link #getDayOfWeekString} and {@link #getMonthString}.
-     * 
+     *
      * @more <p>
      *       e.g. "Sunday" or "January"
      */
@@ -265,7 +265,7 @@ public class DateUtils
     /**
      * Request an abbreviated version of the name. For use with the 'abbrev'
      * parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
-     * 
+     *
      * @more <p>
      *       e.g. "Sun" or "Jan"
      */
@@ -347,7 +347,7 @@ public class DateUtils
      * @return Localized month of the year.
      */
     public static String getMonthString(int month, int abbrev) {
-        // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER. 
+        // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER.
         // This is a shortcut to not spam the translators with too many variations
         // of the same string.  If we find that in a language the distinction
         // is necessary, we can can add more without changing this API.
@@ -380,7 +380,7 @@ public class DateUtils
      * @hide Pending API council approval
      */
     public static String getStandaloneMonthString(int month, int abbrev) {
-        // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER. 
+        // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER.
         // This is a shortcut to not spam the translators with too many variations
         // of the same string.  If we find that in a language the distinction
         // is necessary, we can can add more without changing this API.
@@ -434,7 +434,7 @@ public class DateUtils
      * <p>
      * Can use {@link #FORMAT_ABBREV_RELATIVE} flag to use abbreviated relative
      * times, like "42 mins ago".
-     * 
+     *
      * @param time the time to describe, in milliseconds
      * @param now the current time in milliseconds
      * @param minResolution the minimum timespan to report. For example, a time
@@ -450,7 +450,7 @@ public class DateUtils
             int flags) {
         Resources r = Resources.getSystem();
         boolean abbrevRelative = (flags & (FORMAT_ABBREV_RELATIVE | FORMAT_ABBREV_ALL)) != 0;
-        
+
         boolean past = (now >= time);
         long duration = Math.abs(now - time);
 
@@ -525,7 +525,7 @@ public class DateUtils
         String format = r.getQuantityString(resId, (int) count);
         return String.format(format, count);
     }
-    
+
     /**
      * Returns the number of days passed between two dates.
      *
@@ -555,7 +555,7 @@ public class DateUtils
      * <li>Dec 12, 4:12 AM</li>
      * <li>11/14/2007, 8:20 AM</li>
      * </ul>
-     * 
+     *
      * @param time some time in the past.
      * @param minResolution the minimum elapsed time (in milliseconds) to report
      *            when showing relative times. For example, a time 3 seconds in
@@ -584,7 +584,7 @@ public class DateUtils
         }
 
         CharSequence timeClause = formatDateRange(c, time, time, FORMAT_SHOW_TIME);
-        
+
         String result;
         if (duration < transitionResolution) {
             CharSequence relativeClause = getRelativeTimeSpanString(time, now, minResolution, flags);
@@ -601,7 +601,7 @@ public class DateUtils
      * Returns a string describing a day relative to the current day. For example if the day is
      * today this function returns "Today", if the day was a week ago it returns "7 days ago", and
      * if the day is in 2 weeks it returns "in 14 days".
-     * 
+     *
      * @param r the resources to get the strings from
      * @param day the relative day to describe in UTC milliseconds
      * @param today the current time in UTC milliseconds
@@ -618,7 +618,7 @@ public class DateUtils
 
         int days = Math.abs(currentDay - startDay);
         boolean past = (today > day);
-        
+
         if (days == 1) {
             if (past) {
                 return r.getString(com.android.internal.R.string.yesterday);
@@ -635,7 +635,7 @@ public class DateUtils
         } else {
             resId = com.android.internal.R.plurals.in_num_days;
         }
-        
+
         String format = r.getQuantityString(resId, days);
         return String.format(format, days);
     }
@@ -677,11 +677,11 @@ public class DateUtils
     public static String formatElapsedTime(long elapsedSeconds) {
         return formatElapsedTime(null, elapsedSeconds);
     }
-    
+
     /**
      * Formats an elapsed time in the form "MM:SS" or "H:MM:SS"
      * for display on the call-in-progress screen.
-     * 
+     *
      * @param recycle {@link StringBuilder} to recycle, if possible
      * @param elapsedSeconds the elapsed time in seconds.
      */
@@ -724,7 +724,7 @@ public class DateUtils
             }
             sb.append(hours);
             sb.append(TIME_SEPARATOR);
-            if (minutes < 10) { 
+            if (minutes < 10) {
                 sb.append(TIME_PADDING);
             } else {
                 sb.append(toDigitChar(minutes / 10));
@@ -755,7 +755,7 @@ public class DateUtils
             } else {
                 sb.setLength(0);
             }
-            if (minutes < 10) { 
+            if (minutes < 10) {
                 sb.append(TIME_PADDING);
             } else {
                 sb.append(toDigitChar(minutes / 10));
@@ -777,11 +777,11 @@ public class DateUtils
     private static char toDigitChar(long digit) {
         return (char) (digit + '0');
     }
-    
+
     /**
      * Format a date / time such that if the then is on the same day as now, it shows
      * just the time and if it's a different day, it shows just the date.
-     * 
+     *
      * <p>The parameters dateFormat and timeFormat should each be one of
      * {@link java.text.DateFormat#DEFAULT},
      * {@link java.text.DateFormat#FULL},
@@ -833,14 +833,14 @@ public class DateUtils
     public static boolean isToday(long when) {
         Time time = new Time();
         time.set(when);
-        
+
         int thenYear = time.year;
         int thenMonth = time.month;
         int thenMonthDay = time.monthDay;
 
         time.set(System.currentTimeMillis());
         return (thenYear == time.year)
-                && (thenMonth == time.month) 
+                && (thenMonth == time.month)
                 && (thenMonthDay == time.monthDay);
     }
 
@@ -914,7 +914,7 @@ public class DateUtils
     public static String writeDateTime(Calendar cal, StringBuilder sb)
     {
         int n;
-       
+
         n = cal.get(Calendar.YEAR);
         sb.setCharAt(3, (char)('0'+n%10));
         n /= 10;
@@ -1015,7 +1015,7 @@ public class DateUtils
 
     /**
      * Formats a date or a time range according to the local conventions.
-     * 
+     *
      * <p>
      * Example output strings (date formats in these examples are shown using
      * the US date format convention but that may change depending on the
@@ -1036,10 +1036,10 @@ public class DateUtils
      *   <li>Oct 9, 8:00am - Oct 10, 5:00pm</li>
      *   <li>12/31/2007 - 01/01/2008</li>
      * </ul>
-     * 
+     *
      * <p>
      * The flags argument is a bitmask of options from the following list:
-     * 
+     *
      * <ul>
      *   <li>FORMAT_SHOW_TIME</li>
      *   <li>FORMAT_SHOW_WEEKDAY</li>
@@ -1061,15 +1061,15 @@ public class DateUtils
      *   <li>FORMAT_ABBREV_ALL</li>
      *   <li>FORMAT_NUMERIC_DATE</li>
      * </ul>
-     * 
+     *
      * <p>
      * If FORMAT_SHOW_TIME is set, the time is shown as part of the date range.
      * If the start and end time are the same, then just the start time is
      * shown.
-     * 
+     *
      * <p>
      * If FORMAT_SHOW_WEEKDAY is set, then the weekday is shown.
-     * 
+     *
      * <p>
      * If FORMAT_SHOW_YEAR is set, then the year is always shown.
      * If FORMAT_NO_YEAR is set, then the year is not shown.
@@ -1082,80 +1082,91 @@ public class DateUtils
      * Normally the date is shown unless the start and end day are the same.
      * If FORMAT_SHOW_DATE is set, then the date is always shown, even for
      * same day ranges.
-     * 
+     *
      * <p>
      * If FORMAT_NO_MONTH_DAY is set, then if the date is shown, just the
      * month name will be shown, not the day of the month.  For example,
      * "January, 2008" instead of "January 6 - 12, 2008".
-     * 
+     *
      * <p>
      * If FORMAT_CAP_AMPM is set and 12-hour time is used, then the "AM"
      * and "PM" are capitalized.  You should not use this flag
      * because in some locales these terms cannot be capitalized, and in
      * many others it doesn't make sense to do so even though it is possible.
-     * 
+     *
      * <p>
      * If FORMAT_NO_NOON is set and 12-hour time is used, then "12pm" is
      * shown instead of "noon".
-     * 
+     *
      * <p>
      * If FORMAT_CAP_NOON is set and 12-hour time is used, then "Noon" is
      * shown instead of "noon".  You should probably not use this flag
      * because in many locales it will not make sense to capitalize
      * the term.
-     * 
+     *
      * <p>
      * If FORMAT_NO_MIDNIGHT is set and 12-hour time is used, then "12am" is
      * shown instead of "midnight".
-     * 
+     *
      * <p>
      * If FORMAT_CAP_MIDNIGHT is set and 12-hour time is used, then "Midnight"
      * is shown instead of "midnight".  You should probably not use this
      * flag because in many locales it will not make sense to capitalize
      * the term.
-     * 
+     *
      * <p>
      * If FORMAT_12HOUR is set and the time is shown, then the time is
      * shown in the 12-hour time format. You should not normally set this.
      * Instead, let the time format be chosen automatically according to the
      * system settings. If both FORMAT_12HOUR and FORMAT_24HOUR are set, then
      * FORMAT_24HOUR takes precedence.
-     * 
+     *
      * <p>
      * If FORMAT_24HOUR is set and the time is shown, then the time is
      * shown in the 24-hour time format. You should not normally set this.
      * Instead, let the time format be chosen automatically according to the
      * system settings. If both FORMAT_12HOUR and FORMAT_24HOUR are set, then
      * FORMAT_24HOUR takes precedence.
-     * 
+     *
      * <p>
      * If FORMAT_UTC is set, then the UTC time zone is used for the start
      * and end milliseconds unless a time zone is specified. If a time zone
      * is specified it will be used regardless of the FORMAT_UTC flag.
-     * 
+     *
      * <p>
      * If FORMAT_ABBREV_TIME is set and 12-hour time format is used, then the
      * start and end times (if shown) are abbreviated by not showing the minutes
      * if they are zero.  For example, instead of "3:00pm" the time would be
      * abbreviated to "3pm".
-     * 
+     *
      * <p>
      * If FORMAT_ABBREV_WEEKDAY is set, then the weekday (if shown) is
      * abbreviated to a 3-letter string.
-     * 
+     *
      * <p>
      * If FORMAT_ABBREV_MONTH is set, then the month (if shown) is abbreviated
      * to a 3-letter string.
-     * 
+     *
      * <p>
      * If FORMAT_ABBREV_ALL is set, then the weekday and the month (if shown)
      * are abbreviated to 3-letter strings.
-     * 
+     *
      * <p>
      * If FORMAT_NUMERIC_DATE is set, then the date is shown in numeric format
      * instead of using the name of the month.  For example, "12/31/2008"
      * instead of "December 31, 2008".
-     * 
+     *
+     * <p>
+     * If the end date ends at 12:00am at the beginning of a day, it is
+     * formatted as the end of the previous day in two scenarios:
+     * <ul>
+     *   <li>For single day events. This results in "8pm - midnight" instead of
+     *       "Nov 10, 8pm - Nov 11, 12am".</li>
+     *   <li>When the time is not displayed. This results in "Nov 10 - 11" for
+     *       an event with a start date of Nov 10 and an end date of Nov 12 at
+     *       00:00.</li>
+     * </ul>
+     *
      * @param context the context is required only if the time is shown
      * @param formatter the Formatter used for formatting the date range.
      * Note: be sure to call setLength(0) on StringBuilder passed to
@@ -1165,7 +1176,7 @@ public class DateUtils
      * @param flags a bit mask of options
      * @param timeZone the time zone to compute the string in. Use null for local
      * or if the FORMAT_UTC flag is being used.
-     *  
+     *
      * @return the formatter with the formatted date/time range appended to the string buffer.
      */
     public static Formatter formatDateRange(Context context, Formatter formatter, long startMillis,
@@ -1215,20 +1226,6 @@ public class DateUtils
             dayDistance = endJulianDay - startJulianDay;
         }
 
-        // If the end date ends at 12am at the beginning of a day,
-        // then modify it to make it look like it ends at midnight on
-        // the previous day.  This will allow us to display "8pm - midnight",
-        // for example, instead of "Nov 10, 8pm - Nov 11, 12am". But we only do
-        // this if it is midnight of the same day as the start date because
-        // for multiple-day events, an end time of "midnight on Nov 11" is
-        // ambiguous and confusing (is that midnight the start of Nov 11, or
-        // the end of Nov 11?).
-        // If we are not showing the time then also adjust the end date
-        // for multiple-day events.  This is to allow us to display, for
-        // example, "Nov 10 -11" for an event with a start date of Nov 10
-        // and an end date of Nov 12 at 00:00.
-        // If the start and end time are the same, then skip this and don't
-        // adjust the date.
         if (!isInstant
             && (endDate.hour | endDate.minute | endDate.second) == 0
             && (!showTime || dayDistance <= 1)) {
@@ -1592,7 +1589,7 @@ public class DateUtils
      *   <li>Wed, October 31</li>
      *   <li>10/31/2007</li>
      * </ul>
-     * 
+     *
      * @param context the context is required only if the time is shown
      * @param millis a point in time in UTC milliseconds
      * @param flags a bit mask of formatting options
@@ -1607,13 +1604,13 @@ public class DateUtils
      * are counted starting at midnight, which means that assuming that the current
      * time is March 31st, 0:30:
      * <ul>
-     *   <li>"millis=0:10 today" will be displayed as "0:10"</li> 
+     *   <li>"millis=0:10 today" will be displayed as "0:10"</li>
      *   <li>"millis=11:30pm the day before" will be displayed as "Mar 30"</li>
      * </ul>
      * If the given millis is in a different year, then the full date is
      * returned in numeric format (e.g., "10/12/2008").
-     * 
-     * @param withPreposition If true, the string returned will include the correct 
+     *
+     * @param withPreposition If true, the string returned will include the correct
      * preposition ("at 9:20am", "on 10/12/2008" or "on May 29").
      */
     public static CharSequence getRelativeTimeSpanString(Context c, long millis,
@@ -1661,9 +1658,9 @@ public class DateUtils
         }
         return result;
     }
-    
+
     /**
-     * Convenience function to return relative time string without preposition. 
+     * Convenience function to return relative time string without preposition.
      * @param c context for resources
      * @param millis time in milliseconds
      * @return {@link CharSequence} containing relative time.
@@ -1672,7 +1669,7 @@ public class DateUtils
     public static CharSequence getRelativeTimeSpanString(Context c, long millis) {
         return getRelativeTimeSpanString(c, millis, false /* no preposition */);
     }
-    
+
     private static Time sNowTime;
     private static Time sThenTime;
 }
