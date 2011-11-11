@@ -81,7 +81,7 @@ public:
     /**
      * Get the size of the Cache key.
      */
-    size_t getSize();
+    size_t getSize() const;
 
     static int compare(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs);
 
@@ -133,7 +133,7 @@ public:
     /**
      * Get the size of the Cache entry
      */
-    size_t getSize();
+    size_t getSize() const;
 
 private:
     /**
@@ -211,21 +211,6 @@ public:
      */
     void clear();
 
-    /**
-     * Sets the maximum size of the cache in bytes
-     */
-    void setMaxSize(uint32_t maxSize);
-
-    /**
-     * Returns the maximum size of the cache in bytes
-     */
-    uint32_t getMaxSize();
-
-    /**
-     * Returns the current size of the cache in bytes
-     */
-    uint32_t getSize();
-
 private:
     Mutex mLock;
     bool mInitialized;
@@ -247,11 +232,6 @@ private:
      * Class initialization
      */
     void init();
-
-    /**
-     * Remove oldest entries until we are having enough space
-     */
-    void removeOldests();
 
     /**
      * Dump Cache statistics
