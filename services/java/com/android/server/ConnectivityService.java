@@ -1597,6 +1597,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 if (checkType == prevNetType) continue;
                 if (mNetConfigs[checkType] == null) continue;
                 if (!mNetConfigs[checkType].isDefault()) continue;
+                if (mNetTrackers[checkType] == null) continue;
 
 // Enabling the isAvailable() optimization caused mobile to not get
 // selected if it was in the middle of error handling. Specifically
