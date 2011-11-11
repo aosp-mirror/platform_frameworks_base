@@ -458,5 +458,13 @@ public class MediaMetadataRetriever
      * @hide
      */
     public static final int METADATA_KEY_IS_DRM          = 22;
+    /**
+     * This key retrieves the location information, if available.
+     * The location should be specified according to ISO-6709 standard, under
+     * a mp4/3gp box "@xyz". Location with longitude of -90 degrees and latitude
+     * of 180 degrees will be retrieved as "-90.0000+180.0000", for instance.
+     * @hide
+     */
+    public static final int METADATA_KEY_LOCATION        = 23;
     // Add more here...
 }
