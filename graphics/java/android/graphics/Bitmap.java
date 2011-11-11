@@ -604,10 +604,13 @@ public final class Bitmap implements Parcelable {
         }
         Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
         if (config == Config.ARGB_8888 && !hasAlpha) {
-            bm.eraseColor(0xff000000);
+            nativeErase(bm.mNativeBitmap, 0xff000000);
             nativeSetHasAlpha(bm.mNativeBitmap, hasAlpha);
         } else {
-            bm.eraseColor(0);
+            // No need to initialize it to zeroes; it is backed by a VM byte array
+            // which is by definition preinitialized to all zeroes.
+            //
+            //nativeErase(bm.mNativeBitmap, 0);
         }
         return bm;
     }
