@@ -91,6 +91,8 @@ private:
 
     AString mUserAgent;
 
+    void performDisconnect();
+
     void onConnect(const sp<AMessage> &msg);
     void onDisconnect(const sp<AMessage> &msg);
     void onCompleteConnection(const sp<AMessage> &msg);
