@@ -365,7 +365,7 @@ test project, the tested project is also cleaned.</dd>
   <dd>Builds a test project and the tested project, installs both <code>.apk</code> files, and
   runs the tests.</dd>
 
-  <dt><code>ant emma debug installt test</code></dt>
+  <dt><code>ant emma debug install test</code></dt>
   <dd>Builds a test project and the tested project, installs both <code>.apk</code> files, and
   runs the tests with code coverage enabled.</dd>
 
