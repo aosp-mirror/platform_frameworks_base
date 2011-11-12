@@ -24,14 +24,14 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.PerformanceCollector;
-import android.os.RemoteException;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.MessageQueue;
+import android.os.PerformanceCollector;
 import android.os.Process;
-import android.os.SystemClock;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -40,7 +40,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -834,16 +833,16 @@ public class Instrumentation {
             return;
         }
         KeyCharacterMap keyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
-        
+
         KeyEvent[] events = keyCharacterMap.getEvents(text.toCharArray());
-        
+
         if (events != null) {
             for (int i = 0; i < events.length; i++) {
-                sendKeySync(events[i]);
+                sendKeySync(KeyEvent.changeTimeRepeat(events[i], SystemClock.uptimeMillis(), 0));
             }
-        }        
+        }
     }
-    
+
     /**
      * Send a key event to the currently focused window/view and wait for it to
      * be processed.  Finished at some point after the recipient has returned
